@@ -77,7 +77,8 @@ type Trait = JobId | AbilityId | CompanionId | ScarId;
 /** Whether a job, ability, scar, or held companion currently applies to the seat's character. */
 export function has(world: World, seat: SeatId, trait: Trait): boolean {
 	const character = characterOf(world, seat);
-	if (character.job === trait && !character.jobCovered) return true;
+	if (character.job === trait && !character.jobScar) return true;
+	if (character.jobScar === trait) return true;
 	if (character.slots.some(slot => slot?.id === trait)) return true;
 	return player(world.game!, seat).hand.some(id => {
 		const card = world.campaign.playerCards[id];

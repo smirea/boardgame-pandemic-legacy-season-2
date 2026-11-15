@@ -1,6 +1,6 @@
 # Engine coverage
 
-How `packages/game` covers the 170 interactions in [interactions.md](interactions.md). Anything not listed here is built as the catalogue describes it. Numbers refer to that file.
+How `packages/game` covers the 170 interactions in [interactions.md](interactions.md). Numbers refer to that file. Anything not listed below is implemented to the catalogue, but not every interaction has its own test: `rules.test.ts` checks 22 scenarios directly, and `campaign.test.ts` plays full campaigns with a random bot that never wins, so it proves the game cannot get stuck or corrupt its state, not that every rule is right. An independent review found six rule bugs after the first pass, all fixed with regression tests. Expect more of that kind.
 
 Content is authored for this project where the sources had no data: 12 events, 9 companions, 10 abilities, 5 scars, search results per city, and the Legacy deck as 24 functional cards (two per month) that unlock each mechanic in the month the sources report.
 

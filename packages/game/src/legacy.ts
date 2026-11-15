@@ -136,7 +136,7 @@ export function createCharacter(
 		id,
 		name: input.name,
 		job: input.job,
-		jobCovered: false,
+		jobScar: null,
 		home: input.home,
 		slots: Array.from({ length: numbers.characterSlots }, () => null),
 		exposureTrack: input.worker ? [] : exposureTrack(campaign),
@@ -291,6 +291,10 @@ export function resolveGameEnd(world: World) {
 	const { campaign, game } = world as { campaign: Campaign; game: NonNullable<World['game']> };
 	const won = game.outcome?.won ?? false;
 	const changes: { city: CityId; delta: number }[] = [];
+	if (campaign.month === 0) {
+		game.upkeep = { units: 0, populationChanges: [] };
+		return;
+	}
 	for (const city of pack.cities) {
 		const location = game.locations[city.id]!;
 		const record = campaign.locations[city.id]!;
@@ -448,13 +452,25 @@ export function applyPurchase(world: World, purchase: Purchase) {
 export function closeGame(world: World) {
 	const { campaign, game } = world as { campaign: Campaign; game: NonNullable<World['game']> };
 	const won = game.outcome?.won ?? false;
-	campaign.results.push({
+	const result = {
 		month: campaign.month,
 		attempt: campaign.attempt,
 		won,
 		gridCities: gridCityCount(campaign),
 		rationing: campaign.rationing,
-	});
+	};
+	if (game.prologueRestore) {
+		// Nothing a prologue game does is permanent: scars, deaths, drawn lines and used cards all roll back.
+		world.campaign = {
+			...game.prologueRestore,
+			rng: campaign.rng,
+			nextCardId: campaign.nextCardId,
+			results: [...campaign.results, result],
+		};
+		world.game = null;
+		return;
+	}
+	campaign.results.push(result);
 	campaign.carriedProgress = {};
 	if (campaign.month > 0) campaign.rationing = Math.max(0, Math.min(10, campaign.rationing + (won ? -2 : 2)));
 	if (campaign.month === 0) {

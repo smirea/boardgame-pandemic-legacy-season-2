@@ -1,3 +1,4 @@
+import { current, isDraft } from 'immer';
 import { pack } from './content/pack';
 import type { ObjectiveId } from './content/types';
 import { drawBottom, drawPiled, drawTop, newDeck, newPiledDeck, stackOnTop } from './decks';
@@ -105,6 +106,7 @@ export function createGame(world: World, seating: { seat: SeatId; character: Cha
 		log: [],
 		nextSeq: 1,
 		upkeep: null,
+		prologueRestore: campaign.month === 0 ? (isDraft(campaign) ? current(campaign) : structuredClone(campaign)) : null,
 	};
 }
 
@@ -205,7 +207,7 @@ export function canTakeScar(world: World, character: Character): boolean {
 /** Slot indexes a scar may cover, plus `job` when the job is still showing. A scar never covers a scar. */
 export function scarTargets(character: Character): (number | 'job')[] {
 	const targets: (number | 'job')[] = character.slots.flatMap((slot, index) => (slot?.kind === 'scar' ? [] : [index]));
-	if (character.job && !character.jobCovered) targets.push('job');
+	if (character.job && !character.jobScar) targets.push('job');
 	return targets;
 }
 

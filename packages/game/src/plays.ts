@@ -61,7 +61,11 @@ export function checkPlay(world: World, seat: SeatId, card: CardId, play: Play):
 					return game.infectionDiscard.includes(target) && infection?.kind === 'city' ? infection.city : null;
 				}),
 			);
-			return play.cards.length >= 1 && play.cards.length <= 2 && cities.size === 1 && !cities.has(null)
+			return play.cards.length >= 1 &&
+				play.cards.length <= 2 &&
+				new Set(play.cards).size === play.cards.length &&
+				cities.size === 1 &&
+				!cities.has(null)
 				? ok
 				: 'Pick 1 or 2 discarded Infection cards of one city';
 		}
@@ -299,7 +303,7 @@ export function applyDecide(world: World, decide: Decide) {
 	switch (decide.d) {
 		case 'scar': {
 			const character = characterOf(world, seat);
-			if (decide.target === 'job') character.jobCovered = true;
+			if (decide.target === 'job') character.jobScar = decide.scar;
 			else character.slots[decide.target] = { kind: 'scar', id: decide.scar };
 			return;
 		}

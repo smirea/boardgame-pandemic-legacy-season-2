@@ -32,7 +32,7 @@
 				<span class="pawn"></span>
 				<span class="who">
 					<strong>{character.name}</strong>
-					<small class:covered={character.jobCovered} title={job?.text}
+					<small class:covered={character.jobScar !== null} title={job?.text}
 						>{character.worker ? 'Haven worker' : (job?.name ?? '')}</small
 					>
 				</span>
@@ -64,8 +64,12 @@
 					>
 				{/if}
 			</div>
-			{#if character.slots.some(slot => slot)}
+			{#if character.jobScar || character.slots.some(slot => slot)}
 				<div class="traits">
+					{#if character.jobScar}
+						{@const scar = pack.scars.find(candidate => candidate.id === character.jobScar)}
+						<span class="scar" title={scar?.text}>{scar?.name}</span>
+					{/if}
 					{#each character.slots as slot, index (index)}
 						{#if slot}
 							{@const def =

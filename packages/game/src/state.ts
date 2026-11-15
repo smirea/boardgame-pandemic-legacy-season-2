@@ -41,7 +41,8 @@ export type Character = {
 	id: CharacterId;
 	name: string;
 	job: JobId | null;
-	jobCovered: boolean;
+	/** The scar covering the job, which switches the job off and applies the scar. */
+	jobScar: ScarId | null;
 	home: CityId;
 	slots: Slot[];
 	/** The hidden scratch-off layout. Peers only ever see the first `exposure` boxes. */
@@ -201,6 +202,8 @@ export type Game = {
 	nextSeq: number;
 	/** Game-end bookkeeping the upkeep screen works through. */
 	upkeep: { units: number; populationChanges: { city: CityId; delta: number }[] } | null;
+	/** The campaign as it stood before a prologue game, put back when that game closes. */
+	prologueRestore: Campaign | null;
 };
 
 export type World = { campaign: Campaign; game: Game | null };

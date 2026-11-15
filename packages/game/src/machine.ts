@@ -146,7 +146,10 @@ export function reject(world: World, phase: Phase, command: Command): string | n
 			if (command.seat !== game?.active) return 'Not your turn';
 			return blocked(world) ? 'Resolve the pending choice first' : inPhase('playing.actions');
 		case 'DRAW':
-			return blocked(world) || game!.drawsLeft === 0 ? 'Resolve the pending choice first' : inPhase('playing.draw');
+			// The hand limit waits until both cards are drawn, so only a pending choice holds up the second draw.
+			return game!.pending.length > 0 || game!.drawsLeft === 0
+				? 'Resolve the pending choice first'
+				: inPhase('playing.draw');
 		case 'INFECT':
 			return blocked(world) || game!.infectionsLeft === 0
 				? 'Resolve the pending choice first'

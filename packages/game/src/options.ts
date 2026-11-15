@@ -135,11 +135,11 @@ export function legalActions(world: World, seat: SeatId): Action[] {
 	}
 	for (const id of [...game.playerDiscard, ...game.infectionDiscard])
 		candidates.push({ a: 'inoculate', card: id }, { a: 'destroyInfection', card: id });
-	if (held[0])
-		for (const take of cityCards(world, game.playerDiscard).slice(0, 6))
-			candidates.push({ a: 'broker', card: held[0].id, take: take.id });
-	if (hand.length >= 2 && game.playerDiscard[0])
-		candidates.push({ a: 'salvage', discard: hand.slice(0, 2), take: game.playerDiscard.at(-1)! });
+	for (const card of held)
+		for (const take of cityCards(world, game.playerDiscard))
+			candidates.push({ a: 'broker', card: card.id, take: take.id });
+	if (hand.length >= 2)
+		for (const take of game.playerDiscard) candidates.push({ a: 'salvage', discard: hand.slice(0, 2), take });
 
 	return candidates.filter(action => checkAction(world, seat, action) === null);
 }

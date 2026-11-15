@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import type { Action } from './actions';
 import { pack } from './content/pack';
-import { grid } from './helpers';
+import { grid, handLimit } from './helpers';
 import type { CardId, CityId, SeatId } from './ids';
 import { score } from './legacy';
 import type { Command, GameActor, Phase } from './machine';
@@ -416,5 +416,106 @@ describe('between games', () => {
 			forsaken: -5,
 			total: 233,
 		});
+	});
+});
+
+describe('review regressions', () => {
+	test('a prologue game leaves no permanent mark on the campaign', () => {
+		const actor = createGameActor({ seed: 7 }).start();
+		const havens = pack.cities.filter(candidate => candidate.kind === 'haven' && !candidate.lost);
+		actor.send({ type: 'CREATE_CHARACTER', name: 'Ada', job: 'farmer', home: havens[0]!.id });
+		actor.send({ type: 'CREATE_CHARACTER', name: 'Bo', job: 'instructor', home: havens[0]!.id });
+		const before = structuredClone(worldOf(actor).campaign);
+		send(actor, {
+			type: 'START_GAME',
+			seating: Object.values(before.characters).map((character, index) => ({
+				seat: [A, B][index]!,
+				character: character.id,
+			})),
+		});
+		for (const type of ['AUTO_SUPPLY', 'CONFIRM_SUPPLY', 'CONFIRM_EVENTS'] as const) send(actor, { type });
+		// A JSON round trip, as a save does: structuredClone would keep the restore copy aliased to the live campaign.
+		const world = JSON.parse(JSON.stringify(worldOf(actor))) as World;
+		world.game!.locations[city('london')]!.plague = 2;
+		world.game!.outcome = { won: false, reason: 'test' };
+		Object.values(world.campaign.characters)[0]!.exposure = 3;
+		const ended = createGameActor({ seed: 1, save: { v: 1, phase: 'over', world } }).start();
+		send(ended, { type: 'CONTINUE' });
+		expect(gameOf(ended).upkeep).toEqual({ units: 0, populationChanges: [] });
+		send(ended, { type: 'FINISH_UPKEEP' });
+		const after = worldOf(ended).campaign;
+		expect(after.locations).toEqual(before.locations);
+		expect(after.characters).toEqual(before.characters);
+		expect(after).toMatchObject({ month: 0, rationing: before.rationing });
+		expect(after.results).toHaveLength(1);
+	});
+
+	test('Resilience refuses the same card twice', () => {
+		const actor = january((world, game) => {
+			const id = 'resilience#901' as CardId;
+			world.campaign.playerCards[id] = { id, kind: 'event', event: 'resilience', mode: 'rationed' };
+			game.players[A]!.hand.push(id);
+			game.infectionDiscard = game.infectionDeck.order.splice(0, 2);
+			game.infectionDeck.strata = [game.infectionDeck.order.toSorted()];
+		});
+		const target = gameOf(actor).infectionDiscard[0]!;
+		const play = (cards: CardId[]): Command => ({
+			type: 'PLAY',
+			seat: A,
+			card: 'resilience#901' as CardId,
+			play: { e: 'resilience', cards },
+		});
+		expect(reject(worldOf(actor), 'playing.actions', play([target, target]))).not.toBeNull();
+		send(actor, play([target]));
+		expect(gameOf(actor).infectionDiscard).toHaveLength(1);
+		expect(gameOf(actor).gameEndArea).toEqual([target]);
+	});
+
+	test('both cards are drawn before the hand limit applies', () => {
+		const actor = january((world, game) => {
+			const cards = game.playerDeck.order.filter(card => world.campaign.playerCards[card]!.kind === 'city');
+			give(world, A, cards.slice(0, 7 - game.players[A]!.hand.length));
+			game.playerDeck.order = [
+				...cards.slice(10, 12),
+				...game.playerDeck.order.filter(card => !cards.slice(10, 12).includes(card)),
+			];
+			game.playerDeck.piles = [{ size: game.playerDeck.order.length, epidemics: 5 }];
+			game.drawsLeft = 2;
+		}, 'playing.draw');
+		expect(gameOf(actor).players[A]!.hand).toHaveLength(7);
+		send(actor, { type: 'DRAW' });
+		send(actor, { type: 'DRAW' });
+		expect(gameOf(actor).players[A]!.hand).toHaveLength(9);
+		expect(phaseOf(actor.getSnapshot())).toBe('playing.draw');
+		expect(reject(worldOf(actor), 'playing.draw', { type: 'INFECT' })).not.toBeNull();
+	});
+
+	test('Hollow Men turned in the early October attempt still count in the late one', () => {
+		const actor = january((world, game) => {
+			const { campaign } = world;
+			campaign.actions.push('broadcast');
+			campaign.objectives = ['defect'];
+			campaign.required = 1;
+			campaign.carriedProgress = { defect: 2 };
+			game.progress = { defect: 2 };
+			game.players[A]!.location = city('cairo');
+			game.locations[city('cairo')]!.tower = true;
+			game.locations[city('istanbul')]!.hollow = 1;
+		});
+		act(actor, { a: 'broadcast', from: city('istanbul'), to: city('haven-mediterranean') });
+		expect(gameOf(actor).outcome).toMatchObject({ won: true });
+	});
+
+	test('a scar placed over the job switches the job off and still applies', () => {
+		const actor = january((world, game) => {
+			world.campaign.scars = ['smallHand'];
+			game.pending = [{ t: 'scar', seat: A }];
+			game.stockpile = 4;
+		});
+		send(actor, { type: 'DECIDE', decide: { d: 'scar', scar: 'smallHand', target: 'job' } });
+		expect(handLimit(worldOf(actor), A)).toBe(6);
+		act(actor, { a: 'makeSupplies' });
+		act(actor, { a: 'deliver', count: 1 });
+		expect(gameOf(actor).actionsLeft).toBe(2);
 	});
 });

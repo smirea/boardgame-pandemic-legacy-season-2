@@ -6,6 +6,9 @@ import { grid } from './helpers';
 import { gameMachine, phaseOf, reject } from './machine';
 import type { World } from './state';
 
+/** Supply cubes only ever move between pools, so each game's total is fixed at setup. Keyed by game number. */
+let cubeTotals = new Map<number, number>();
+
 /** Rules that must hold after every single command, whatever the bot did. */
 function violations(world: World): string[] {
 	const { campaign, game } = world;
@@ -42,6 +45,10 @@ function violations(world: World): string[] {
 		problems.push('infection strata drifted from the deck');
 	if (game.playerDeck.piles.reduce((sum, pile) => sum + pile.size, 0) !== game.playerDeck.order.length)
 		problems.push('player piles drifted from the deck');
+	const total = game.stockpile + game.reserve + cubes;
+	const expected = cubeTotals.get(campaign.results.length) ?? total;
+	cubeTotals.set(campaign.results.length, expected);
+	if (total !== expected) problems.push(`cubes leaked: ${total} in play, ${expected} at setup`);
 	const onGrid = grid(campaign);
 	for (const player of Object.values(game.players)) {
 		if (!campaign.locations[player.location]?.revealed) problems.push(`a pawn stands on unrevealed ${player.location}`);
@@ -53,6 +60,7 @@ function violations(world: World): string[] {
 }
 
 function playCampaign(seed: number, seats: number) {
+	cubeTotals = new Map();
 	const actor = createActor(gameMachine, { input: { seed } }).start();
 	const rng = { seed: seed * 7919 + 1 };
 	let commands = 0;

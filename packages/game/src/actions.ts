@@ -521,7 +521,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 			const inHavens = pack.cities
 				.filter(city => city.kind === 'haven')
 				.reduce((sum, city) => sum + ctx.game.locations[city.id]!.hollow, 0);
-			setProgress(ctx.world, 'defect', inHavens);
+			setProgress(ctx.world, 'defect', (ctx.campaign.carriedProgress.defect ?? 0) + inHavens);
 		},
 	},
 	buildShelter: {
