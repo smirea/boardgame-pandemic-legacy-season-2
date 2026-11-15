@@ -60,7 +60,7 @@
 						class="claim"
 						class:on={mine.includes(seat)}
 						onclick={() => onclaim(seat)}
-						title="Mark this seat as yours">{mine.includes(seat) ? 'me' : 'claim'}</button
+						title="Mark this seat as yours">{mine.includes(seat) ? 'me' : `play ${character.name}`}</button
 					>
 				{/if}
 			</div>

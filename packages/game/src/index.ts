@@ -3,7 +3,7 @@ export * from './state';
 export * from './content/types';
 export { pack } from './content/pack';
 export type { Action } from './actions';
-export { actionCost, checkAction, checkEdge } from './actions';
+export { actionCost, checkAction, checkEdge, routeCost } from './actions';
 export type { Decide, Play } from './plays';
 export type { Purchase } from './legacy';
 export { productionUnits, purchaseCost, score } from './legacy';

@@ -1,5 +1,5 @@
-import { cityDef, pack } from '@repo/game';
-import type { Action, CardId, CityId, Decide, Play, Purchase, SeatId, World } from '@repo/game';
+import { cityDef, pack, routeCost } from '@repo/game';
+import type { Action, CardId, CityId, Decide, Decision, Play, Purchase, SeatId, World } from '@repo/game';
 
 export const MONTHS = [
 	'Prologue',
@@ -106,6 +106,11 @@ export function actionDetail(world: World, action: Action): string {
 	switch (action.a) {
 		case 'drive':
 			return action.card ? `discard ${cardName(world, action.card)}` : '';
+		case 'establishLine':
+		case 'chartLane': {
+			const cost = routeCost(world, world.game!.active, action.a === 'establishLine' ? 'land' : 'sea');
+			return cost === 0 ? 'free' : cubes(cost);
+		}
 		case 'sail':
 		case 'charter':
 		case 'captainSail':
@@ -202,7 +207,7 @@ export function decideLabel(world: World, decide: Decide): string {
 	}
 }
 
-export const DECISION_TITLES: Record<string, string> = {
+const DECISION_TITLES: Record<Decision['t'], string> = {
 	discard: 'Discard a card',
 	scar: 'A scar: choose it and where it goes',
 	replace: 'Choose who steps in',
@@ -211,8 +216,18 @@ export const DECISION_TITLES: Record<string, string> = {
 	removeHollow: 'Remove Hollow Men',
 	quarantineCard: 'Set an Infection card aside until game end',
 	shield: 'Discard a matching card to keep the cube?',
-	cordon: 'Discard a card to stop the rest of this Infect step?',
+	cordon: 'Discard any card to stop the rest of this Infect step?',
 };
+
+/** The prompt for a pending choice, naming who and where it concerns. */
+export function decisionTitle(world: World, pending: Decision): string {
+	if (pending.t === 'shield')
+		return `${cityName(pending.city)} just lost a cube. Discard a ${pending.color} City card to put it back?`;
+	if (pending.t === 'scar' && !pending.seat)
+		return 'A scar is owed. Choose who takes it, which scar, and where it goes';
+	const who = 'seat' in pending && pending.seat ? `${seatName(world, pending.seat)}: ` : '';
+	return who + DECISION_TITLES[pending.t];
+}
 
 export function purchaseLabel(world: World, purchase: Purchase): string {
 	switch (purchase.t) {

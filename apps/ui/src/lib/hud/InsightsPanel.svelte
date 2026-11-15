@@ -95,9 +95,21 @@
 	</nav>
 
 	{#if tab === 'threats'}
-		<p class="hint">Next Infect step flips {info.infection.rate}. Incidents left: {info.incidentsLeft}.</p>
+		<p class="hint">
+			{#if info.infection.opening}
+				The opening infection flips {info.infection.rate} cards{world.campaign.rules.includes('hollowSetup')
+					? ', then 3 more that place Hollow Men'
+					: ''}. A city with no cubes takes a plague cube.
+			{:else}
+				Next Infect step flips {info.infection.rate}. Incidents left: {info.incidentsLeft}.
+			{/if}
+		</p>
 		{#if info.infection.atRisk.length === 0}
-			<p class="calm">No unsupplied city can be hit next turn.</p>
+			<p class="calm">
+				{info.infection.opening
+					? 'Every city that can be hit holds a cube.'
+					: 'No unsupplied city can be hit next turn.'}
+			</p>
 		{/if}
 		<ul>
 			{#each info.infection.atRisk.slice(0, 9) as risk (risk.city)}

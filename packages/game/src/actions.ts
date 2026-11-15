@@ -763,3 +763,6 @@ export function applyAction(world: World, seat: SeatId, action: Action) {
 	if (action.a === 'deliver') ctx.me.used = ctx.me.used.filter(key => key !== 'farmerReady');
 	log(ctx.game, { t: 'action', seat, action: action.a, detail: '' });
 }
+
+/** Cubes the seat's character would pay to draw a supply line or sea lane right now. */
+export const routeCost = (world: World, seat: SeatId, kind: EdgeKind) => edgeCost(context(world, seat), kind);

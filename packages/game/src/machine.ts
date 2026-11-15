@@ -17,7 +17,7 @@ import {
 	startDrawStep,
 	startInfectStep,
 } from './flow';
-import { grid, overLimit } from './helpers';
+import { grid, isForsaken, overLimit } from './helpers';
 import type { CardId, CharacterId, CityId, SeatId } from './ids';
 import type { Purchase } from './legacy';
 import {
@@ -211,14 +211,28 @@ const change =
 		undo: [],
 	});
 
+/** Cubes go where infection can strike: cities in proportion to how many Infection cards name them. Havens get none. */
 function autoSupply(world: World) {
 	const game = world.game!;
-	const targets = [...grid(world.campaign)].sort(
-		(a, b) => world.campaign.locations[b]!.population - world.campaign.locations[a]!.population || a.localeCompare(b),
-	);
-	for (let index = 0; game.stockpile > 0; index++) {
-		game.locations[targets[index % targets.length]!]!.supplies += 1;
-		game.stockpile -= 1;
+	const onGrid = grid(world.campaign);
+	const stored = new Set(world.campaign.stored.infection);
+	const weight = new Map<CityId, number>();
+	for (const card of Object.values(world.campaign.infectionCards)) {
+		if (card.kind === 'city' && onGrid.has(card.city) && !stored.has(card.id) && !isForsaken(world.campaign, card.city))
+			weight.set(card.city, (weight.get(card.city) ?? 0) + 1);
+	}
+	// With every city forsaken nothing can be infected, and the cubes still have to go somewhere.
+	if (weight.size === 0) for (const location of onGrid) weight.set(location, 1);
+	const targets = [...weight.keys()].sort((a, b) => weight.get(b)! - weight.get(a)! || a.localeCompare(b));
+	// Each pass gives a cube to every city still below its share, so the first cube everywhere comes before any second.
+	for (let level = 1; game.stockpile > 0; level++) {
+		for (const city of targets) {
+			if (game.stockpile === 0) break;
+			if (game.locations[city]!.supplies < Math.min(level, weight.get(city)! + level - 1)) {
+				game.locations[city]!.supplies += 1;
+				game.stockpile -= 1;
+			}
+		}
 	}
 }
 

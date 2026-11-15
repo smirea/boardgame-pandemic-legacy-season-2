@@ -30,6 +30,8 @@ export type Insights = {
 		byKind: Record<string, number>;
 	};
 	infection: {
+		/** True during setup, when the odds describe the opening infection, not a turn's Infect step. */
+		opening: boolean;
 		rate: number;
 		nextRate: number;
 		deck: number;
@@ -63,10 +65,19 @@ export function insights(world: World): Insights | null {
 	const game = world.game;
 	if (!game) return null;
 	const rates = pack.numbers.infectionRates;
-	const rate = rates[game.rateIndex]!;
+	// Before the opening infection the deck is not built yet, but its contents are known: every card of a city on the grid.
+	const opening = game.infectionDeck.order.length === 0 && game.infectionDiscard.length === 0 && game.turn === 0;
+	const onGridNow = grid(world.campaign);
+	const stored = new Set(world.campaign.stored.infection);
+	const openingDeck = Object.values(world.campaign.infectionCards)
+		.filter(card => card.kind === 'city' && onGridNow.has(card.city) && !stored.has(card.id))
+		.map(card => card.id);
+	const strata = opening ? [openingDeck] : game.infectionDeck.strata;
+	const hollowSetup = world.campaign.rules.includes('hollowSetup');
+	const rate = opening ? pack.numbers.setupInfections - (hollowSetup ? 3 : 0) : rates[game.rateIndex]!;
 	const keyOf = (card: CardId) => cityOfInfection(world, card);
-	const odds = Object.fromEntries(drawOdds(game.infectionDeck.strata, rate, keyOf)) as Record<CityId, number>;
-	const expected = Object.fromEntries(expectedDraws(game.infectionDeck.strata, rate, keyOf)) as Record<CityId, number>;
+	const odds = Object.fromEntries(drawOdds(strata, rate, keyOf)) as Record<CityId, number>;
+	const expected = Object.fromEntries(expectedDraws(strata, rate, keyOf)) as Record<CityId, number>;
 	const byKind: Record<string, number> = {};
 	for (const id of game.playerDeck.order) {
 		const card = world.campaign.playerCards[id];
@@ -93,12 +104,13 @@ export function insights(world: World): Insights | null {
 			byKind,
 		},
 		infection: {
+			opening,
 			rate,
 			nextRate: rates[Math.min(game.rateIndex + 1, rates.length - 1)]!,
 			deck: game.infectionDeck.order.length,
 			odds,
 			expected,
-			strata: game.infectionDeck.strata.map(stratum => ({ size: stratum.length, cities: countCities(world, stratum) })),
+			strata: strata.map(stratum => ({ size: stratum.length, cities: countCities(world, stratum) })),
 			discard: countCities(world, game.infectionDiscard),
 			atRisk,
 		},

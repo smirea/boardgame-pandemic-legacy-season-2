@@ -51,10 +51,33 @@
 	const plays = $derived(playing ? legalPlays(world) : []);
 	const decides = $derived(playing ? legalDecides(world) : []);
 
-	type Option = { label: string; detail: string; run: () => void };
+	type Option = { label: string; detail: string; run: () => void; city?: CityId };
+	type Chooser = {
+		title: string;
+		options: Option[];
+		multi?: { max: number; verb: string; confirm: (picked: Option[]) => void };
+	};
+	const byLabel = (a: Option, b: Option) => a.label.localeCompare(b.label);
 	let selected = $state<CityId | null>(null);
 	let targeting = $state.raw<{ label: string; cities: Map<CityId, Option[]> } | null>(null);
-	let chooser = $state.raw<{ title: string; options: Option[] } | null>(null);
+	let chooser = $state.raw<Chooser | null>(null);
+	let filter = $state('');
+	let picked = $state.raw<Option[]>([]);
+	$effect(() => {
+		void chooser;
+		filter = '';
+		picked = [];
+	});
+	const shown = $derived(
+		chooser?.options.filter(option =>
+			`${option.label} ${option.detail}`.toLowerCase().includes(filter.trim().toLowerCase()),
+		) ?? [],
+	);
+	function pick(option: Option) {
+		if (!chooser?.multi) return option.run();
+		if (picked.includes(option)) picked = picked.filter(other => other !== option);
+		else if (picked.length < chooser.multi.max) picked = [...picked, option];
+	}
 	let menu = $state(false);
 	let resetView = $state(0);
 
@@ -107,11 +130,13 @@
 			// The same destinations as a list, for anyone who would sooner read names than hunt for a city.
 			chooser = {
 				title: ACTION_NAMES[name],
-				options: aimed.map(action => ({
-					label: cityName(actionTarget(world, action)!),
-					detail: actionDetail(world, action),
-					run: () => act(action),
-				})),
+				options: aimed
+					.map(action => ({
+						label: cityName(actionTarget(world, action)!),
+						detail: actionDetail(world, action),
+						run: () => act(action),
+					}))
+					.sort(byLabel),
 			};
 		} else {
 			choose(ACTION_NAMES[name], variants.map(actionOption));
@@ -132,13 +157,36 @@
 			targeting = { label: `${label}: pick a location on the map or from the list`, cities };
 			chooser = {
 				title: label,
-				options: subset.map(option => ({
-					label: cityName(playTarget(option.play)!),
-					detail: '',
-					run: run(option.play),
-				})),
+				options: subset
+					.map(option => ({
+						label: cityName(playTarget(option.play)!),
+						detail: '',
+						run: run(option.play),
+					}))
+					.sort(byLabel),
 			};
 		};
+		const held = world.campaign.playerCards[card];
+		if (held?.kind === 'event' && held.event === 'safeHouses') {
+			// The card places up to three shelters at once, so its cities are ticked off a list and confirmed together.
+			const cities = [...new Set(variants.map(option => playTarget(option.play)!))];
+			targeting = null;
+			chooser = {
+				title: 'Safe Houses',
+				options: cities
+					.map(target => ({ label: cityName(target), detail: '', run: () => {}, city: target }))
+					.sort(byLabel),
+				multi: {
+					max: Math.min(3, game!.pieces.shelter),
+					verb: 'Place shelters',
+					confirm: chosen => {
+						send({ type: 'PLAY', seat, card, play: { e: 'safeHouses', cities: chosen.map(option => option.city!) } });
+						chooser = null;
+					},
+				},
+			};
+			return;
+		}
 		const groups = [...new Set(variants.map(option => playGroup(world, option.play)))];
 		const aimed = variants.every(option => playTarget(option.play));
 		if (variants.length === 1) return run(variants[0]!.play)();
@@ -222,7 +270,7 @@
 
 	const boardView = $derived.by((): BoardView => {
 		const targets = new Set((targeting?.cities ?? cityOptions).keys());
-		const showOdds = playing && info !== null;
+		const showOdds = (playing || snap.phase === 'setup.supply') && info !== null;
 		const cities = Object.fromEntries(
 			pack.cities.map((city): [CityId, CityView] => {
 				const record = campaign.locations[city.id]!;
@@ -364,9 +412,29 @@
 		{#if chooser}
 			<div class="chooser" transition:fly={{ y: 16, duration: 180 }} data-testid="chooser">
 				<header>{chooser.title}<button onclick={() => (chooser = null)} aria-label="Close">×</button></header>
-				{#each chooser.options as option, index (index)}
-					<button onclick={option.run}><strong>{option.label}</strong><span>{option.detail}</span></button>
-				{/each}
+				{#if chooser.options.length > 8}
+					<input bind:value={filter} placeholder="Type to filter" aria-label="Filter the list" />
+				{/if}
+				<div class="rows">
+					{#each shown as option (option)}
+						<button class:picked={picked.includes(option)} onclick={() => pick(option)}
+							><strong>{option.label}</strong><span>{option.detail}</span></button
+						>
+					{:else}
+						<p>Nothing matches.</p>
+					{/each}
+				</div>
+				{#if chooser.multi}
+					{@const multi = chooser.multi}
+					<button
+						class="primary"
+						disabled={picked.length === 0}
+						onclick={() => multi.confirm(picked)}
+						data-testid="chooser-confirm"
+					>
+						{multi.verb}: {picked.length} of up to {multi.max}
+					</button>
+				{/if}
 			</div>
 		{/if}
 
@@ -539,13 +607,13 @@
 	.chooser {
 		position: absolute;
 		left: 50%;
-		bottom: 3.2rem;
+		bottom: 0.8rem;
 		z-index: 40;
 		display: flex;
 		flex-direction: column;
-		gap: 0.25rem;
+		gap: 0.4rem;
 		width: 22rem;
-		max-height: 60%;
+		max-height: min(72%, 28rem);
 		padding: 0.6rem;
 		border: 1px solid var(--line);
 		border-radius: 0.7rem;
@@ -553,7 +621,6 @@
 		backdrop-filter: blur(12px);
 		box-shadow: 0 1rem 3rem rgb(0 0 0 / 0.5);
 		transform: translateX(-50%);
-		overflow: auto;
 	}
 
 	.chooser header {
@@ -565,10 +632,36 @@
 		text-transform: uppercase;
 	}
 
-	.chooser > button {
+	.chooser input {
+		padding: 0.35rem 0.55rem;
+		border: 1px solid var(--line);
+		border-radius: 0.4rem;
+		background: rgb(255 255 255 / 0.05);
+		color: var(--ink);
+		font: inherit;
+		font-size: 0.78rem;
+	}
+
+	.rows {
 		display: flex;
 		flex-direction: column;
-		padding: 0.4rem 0.6rem;
+		gap: 0.25rem;
+		min-height: 0;
+		overflow: auto;
+	}
+
+	.rows p {
+		margin: 0;
+		color: var(--muted);
+		font-size: 0.75rem;
+	}
+
+	.rows button {
+		display: flex;
+		flex: none;
+		align-items: baseline;
+		gap: 0.6rem;
+		padding: 0.35rem 0.6rem;
 		border: 1px solid var(--line);
 		border-radius: 0.4rem;
 		background: rgb(255 255 255 / 0.04);
@@ -579,13 +672,20 @@
 		cursor: pointer;
 	}
 
-	.chooser > button:hover {
+	.rows button:hover,
+	.rows button.picked {
 		border-color: var(--accent);
 	}
 
-	.chooser span {
+	.rows button.picked {
+		background: rgb(125 252 192 / 0.12);
+	}
+
+	.rows span {
+		margin-left: auto;
 		color: var(--muted);
 		font-size: 0.7rem;
+		text-align: right;
 	}
 
 	.toasts {

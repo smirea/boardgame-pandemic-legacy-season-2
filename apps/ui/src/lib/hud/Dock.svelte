@@ -1,9 +1,18 @@
 <script lang="ts">
-	import { handLimit, pack } from '@repo/game';
+	import { actionCost, checkAction, handLimit, pack } from '@repo/game';
 	import type { Action, CardId, Command, Decide, Play, PublicState, SeatId } from '@repo/game';
 	import { flip } from 'svelte/animate';
 	import { fly } from 'svelte/transition';
-	import { ACTION_NAMES, DECISION_TITLES, decideLabel, seatName, SEAT_COLORS } from './labels.svelte.ts';
+	import {
+		ACTION_NAMES,
+		actionDetail,
+		actionTarget,
+		cityName,
+		decideLabel,
+		decisionTitle,
+		seatName,
+		SEAT_COLORS,
+	} from './labels.svelte.ts';
 	import InfectionCard from '#lib/cards/InfectionCard.svelte';
 	import PlayerCard from './PlayerCard.svelte';
 
@@ -29,7 +38,27 @@
 	const handCards = $derived((game.players[seat]?.hand ?? []).flatMap(id => world.campaign.playerCards[id] ?? []));
 	const mustDiscard = $derived(decides.some(decide => decide.d === 'discard' && decide.seat === seat));
 	const playable = $derived(new Set(plays.filter(option => option.seat === seat).map(option => option.card)));
-	const groups = $derived([...new Set(actions.map(action => action.a))]);
+	const FREE = new Set(['pickUp', 'transfer', 'inoculate', 'salvage', 'destroyInfection']);
+	// One chip per kind of action. A chip with a single variant says exactly what it will do, so nothing fires blind.
+	const chips = $derived(
+		[...new Set(actions.map(action => action.a))].map(name => {
+			const variants = actions.filter(action => action.a === name);
+			const only = variants.length === 1 ? variants[0]! : null;
+			const target = only ? actionTarget(world, only) : null;
+			return {
+				name,
+				label: ACTION_NAMES[name] + (target ? ` to ${cityName(target)}` : ''),
+				detail: only ? actionDetail(world, only) : '',
+				count: variants.length,
+				free: only !== null && !FREE.has(name) && actionCost(world, game.active, only) === 0,
+			};
+		}),
+	);
+	const noSupplies = $derived(
+		canAct && snap.phase === 'playing.actions' && !actions.some(action => action.a === 'makeSupplies')
+			? checkAction(world, game.active, { a: 'makeSupplies' })
+			: null,
+	);
 	const choices = $derived(decides.filter(decide => decide.d !== 'discard'));
 	const overLimit = $derived(game.seats.filter(other => game.players[other]!.hand.length > handLimit(world, other)));
 	const blocked = $derived(pending !== undefined || overLimit.length > 0);
@@ -72,8 +101,12 @@
 	{#if snap.phase === 'setup.supply'}
 		<div class="setup">
 			<div>
-				<strong>{game.stockpile}</strong> supply cubes to place. Click a city to add one. Every cube must go out before infection
-				begins.
+				{#if game.stockpile > 0}
+					<strong>{game.stockpile}</strong> supply cubes to place. Click a city to add one. The opening infection then flips
+					9 cards. The panel on the right shows where it is most likely to land.
+				{:else}
+					<strong>All cubes placed.</strong> The opening infection flips 9 cards next.
+				{/if}
 			</div>
 			<button onclick={() => send({ type: 'AUTO_SUPPLY' })} data-testid="auto-supply">Spread the rest evenly</button>
 			<button
@@ -88,12 +121,14 @@
 			<div>Pick <strong>{eventsNeeded}</strong> Rationed Events for the deck ({picked.length} chosen).</div>
 			<div class="events">
 				{#each rationed as card (card.id)}
-					<PlayerCard
-						{card}
-						small
-						tone={picked.includes(card.id) ? 'play' : null}
-						onclick={() => toggleEvent(card.id)}
-					/>
+					<span class:unpicked={!picked.includes(card.id)}
+						><PlayerCard
+							{card}
+							small
+							tone={picked.includes(card.id) ? 'play' : null}
+							onclick={() => toggleEvent(card.id)}
+						/></span
+					>
 				{/each}
 			</div>
 			<button
@@ -150,7 +185,7 @@
 				</p>
 			{:else if pending}
 				<p class="prompt">
-					{'seat' in pending && pending.seat ? `${seatName(world, pending.seat)}: ` : ''}{DECISION_TITLES[pending.t]}
+					{decisionTitle(world, pending)}
 				</p>
 				<div class="chips">
 					{#each choices.slice(0, 24) as decide, index (index)}
@@ -160,14 +195,17 @@
 			{:else if snap.phase === 'playing.actions'}
 				{#if canAct}
 					<div class="chips" data-testid="actions">
-						{#each groups as name (name)}
-							<button onclick={() => ongroup(name)}>
-								{ACTION_NAMES[name]}
-								{#if actions.filter(action => action.a === name).length > 1}<small
-										>{actions.filter(action => action.a === name).length}</small
-									>{/if}
+						{#each chips as chip (chip.name)}
+							<button onclick={() => ongroup(chip.name)}>
+								{chip.label}
+								{#if chip.detail}<small>{chip.detail}</small>{/if}
+								{#if chip.free}<small class="free">free</small>{/if}
+								{#if chip.count > 1}<small class="count">{chip.count}</small>{/if}
 							</button>
 						{/each}
+						{#if noSupplies}
+							<button disabled title={noSupplies}>Make supplies<small>{noSupplies}</small></button>
+						{/if}
 					</div>
 				{:else}
 					<p class="prompt">{seatName(world, game.active)} is taking actions.</p>
@@ -367,8 +405,23 @@
 	}
 
 	.chips small {
-		margin-left: 0.3rem;
+		margin-left: 0.35rem;
 		color: var(--muted);
+		font-size: 0.66rem;
+	}
+
+	.chips small.free {
+		color: var(--accent);
+	}
+
+	.chips small.count {
+		padding: 0 0.3rem;
+		border-radius: 999px;
+		background: rgb(255 255 255 / 0.1);
+	}
+
+	.unpicked {
+		opacity: 0.45;
 	}
 
 	.turn {

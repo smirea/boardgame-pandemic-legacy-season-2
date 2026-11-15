@@ -137,8 +137,8 @@
 		display: flex;
 		align-items: center;
 		gap: 0.35rem;
-		min-width: 0;
-		flex: 1 1 0;
+		min-width: 9rem;
+		flex: 1 1 auto;
 		overflow: hidden;
 	}
 
@@ -151,9 +151,10 @@
 	}
 
 	.objective {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.3rem;
+		flex: 0 1 auto;
+		min-width: 3.5rem;
+		overflow: hidden;
+		text-overflow: ellipsis;
 		padding: 0.15rem 0.5rem;
 		border: 1px solid var(--line);
 		border-radius: 999px;
@@ -161,6 +162,9 @@
 	}
 
 	.objective i {
+		display: inline-block;
+		margin-right: 0.3rem;
+		vertical-align: middle;
 		width: 0.35rem;
 		height: 0.35rem;
 		border-radius: 50%;
@@ -168,6 +172,7 @@
 	}
 
 	.objective b {
+		margin-left: 0.3rem;
 		color: var(--muted);
 		font-weight: 600;
 	}
