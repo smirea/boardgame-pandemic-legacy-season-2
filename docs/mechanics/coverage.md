@@ -22,7 +22,7 @@ Content is authored for this project where the sources had no data: 12 events, 9
 | 104 | Impossible objectives   | The group marks an objective impossible by clicking it. The remaining objectives then decide the win. The engine does not judge impossibility itself.                                                                                                                                 |
 | 115 | Triangulate reward      | Completing it removes the objective. The frequency hint is not modelled.                                                                                                                                                                                                              |
 | 121 | Shelters at game end    | A shelter cancels the population loss from Plague cubes as well as from Hollow Men. The prose catalogue (L-9.7, L-11) says Hollow Men only. The photographed rule sticker in `data/legacy-timeline.json` (unlock 27) says both steps are skipped, and the engine follows the sticker. |
-| 126 | October turning point   | Folded into the Defect objective, which opens its reward the moment 3 Hollow Men stand in havens.                                                                                                                                                                                     |
+| 126 | October turning point   | Folded into the Defect objective, which opens its reward the moment a Hollow Man stands in each of 3 different havens.                                                                                                                                                                |
 | 96  | Haven worker exposure   | The worker returns to its home haven at once, instead of choosing any haven at its next turn.                                                                                                                                                                                         |
 
 ## Partly built
@@ -39,6 +39,16 @@ Nothing from the catalogue is left unbuilt. Two things rest on thin sources and 
 
 - **The Jade lab's gentler Epidemic.** One campaign log reports it. Finding the lab makes an Epidemic remove 1 cube from the struck city instead of all of them.
 - **Seven abilities the sources name.** Investigator and Supplier have described effects, and the two effects that logs describe without a name are given to Facilitator and Runner. Foreman, Outrider and Soldier are named in logs with no effect recorded, so their effects are authored here: a cheaper supply line, no exposure when leaving Hollow Men, and removing a Hollow Man from your own location.
+
+## Known gaps from the campaign review
+
+A month-by-month review of the content pack against the research (November 2026) found sixteen differences. Ten are fixed and tested in `mechanics.test.ts` under "parity gaps found by the static review". These are left as they are:
+
+- **Lima's printed route to the eastern Pacific haven** (one source). The haven is found by a sea search at Los Angeles or San Francisco, or by the May perimeter report.
+- **Extra permanent supply center stickers in May.** The count is not recorded. The limit stays at 6.
+- **A forced region can leave a city off the grid.** Utopia joins only through Shanghai and Jakarta only through Kolkata. If the players never connected those, the forced city is revealed but still needs a supply line.
+- **August's free ability units in the UI.** The engine and the playtest lab let the group spend them at setup, as the research says. The game screen still offers them at game end only.
+- **The losing-streak turning point** would count prologue losses. The prologue never records a result, so this cannot happen in play.
 
 ## UI simplifications
 

@@ -7,7 +7,7 @@ import type { CardId, CityId, SeatId } from './ids';
 import { score } from './legacy';
 import type { Command, GameActor, Phase } from './machine';
 import { createGameActor, phaseOf, reject } from './machine';
-import { decemberSave } from './scenarios';
+import { decemberSave, octoberSave } from './scenarios';
 import type { Game, World } from './state';
 
 const A = 'seat-1' as SeatId;
@@ -492,20 +492,24 @@ describe('review regressions', () => {
 		expect(reject(worldOf(actor), 'playing.draw', { type: 'INFECT' })).not.toBeNull();
 	});
 
-	test('Hollow Men turned in the early October attempt still count in the late one', () => {
-		const actor = january((world, game) => {
-			const { campaign } = world;
-			campaign.actions.push('broadcast');
-			campaign.objectives = ['defect'];
-			campaign.required = 1;
-			campaign.carriedProgress = { defect: 2 };
-			game.progress = { defect: 2 };
-			game.players[A]!.location = city('cairo');
-			game.locations[city('cairo')]!.tower = true;
-			game.locations[city('istanbul')]!.hollow = 1;
-		});
-		act(actor, { a: 'broadcast', from: city('istanbul'), to: city('haven-mediterranean') });
-		expect(gameOf(actor).outcome).toMatchObject({ won: true });
+	test('an objective completed in a lost early attempt starts the late attempt complete, and partial progress does not carry', () => {
+		const seats = [A, B, 'seat-3' as SeatId];
+		const start = (carried: World['campaign']['carriedProgress']) => {
+			const save = octoberSave();
+			save.world.campaign.attempt = 2;
+			save.world.campaign.carriedProgress = carried;
+			const actor = createGameActor({ seed: 3, save }).start();
+			actor.send({
+				type: 'START_GAME',
+				seating: Object.values(worldOf(actor).campaign.characters)
+					.slice(0, 3)
+					.map((entry, index) => ({ seat: seats[index]!, character: entry.id })),
+			});
+			return actor;
+		};
+		expect(worldOf(start({})).campaign.objectives).toContain('defect');
+		expect(gameOf(start({ defect: 3 })).completed).toEqual(['defect']);
+		expect(gameOf(start({})).completed).toEqual([]);
 	});
 
 	test('a scar placed over the job switches the job off and still applies', () => {

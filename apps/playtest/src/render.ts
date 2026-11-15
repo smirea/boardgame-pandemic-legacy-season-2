@@ -189,7 +189,13 @@ function renderSetup(state: PublicState): string[] {
 	const game = world.game!;
 	if (phase === 'setup.supply') {
 		const found = insights(world);
+		const free = campaign.freeAbilityUnits;
 		const lines = [
+			...(free
+				? [
+						`FREE ABILITY UNITS: ${free} to spend on character abilities right now (\`options buy\`). They cover this game.`,
+					]
+				: []),
 			`Supply setup: ${game.stockpile} cubes left to place. Cities with no cubes take a Plague cube when infected.`,
 			'Use `supply <city-id> <count>` to place by hand, `do autosupply` to spread the rest, then `do confirm-supply`.',
 			'Grid cities (cubes now, population, chance to be hit in the opening infection):',

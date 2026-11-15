@@ -2,11 +2,12 @@ import { describe, expect, test } from 'bun:test';
 import { checkEdge } from './actions';
 import { pack } from './content/pack';
 import type { EventId, SearchResult } from './content/types';
-import { epidemicCount } from './flow';
+import { epidemicCount, placeHollow, setupInfection } from './flow';
 import { grid, handLimit, hasEdge } from './helpers';
 import type { CardId, CityId } from './ids';
 import { createGameActor, parseSave, reject } from './machine';
 import { legalPlays } from './options';
+import { applyUnlock, closeGame, score } from './legacy';
 import { decemberSave, octoberSave } from './scenarios';
 import type { World } from './state';
 import {
@@ -420,19 +421,30 @@ describe('exploring', () => {
 });
 
 describe('Hollow Men and forsaken cities', () => {
-	test('Broadcast moves Hollow Men next door, and three in havens completes the October objective', () => {
-		const actor = late((world, game) => {
+	const defectScene = (havens: string[]) =>
+		late((world, game) => {
 			world.campaign.objectives = ['defect'];
 			world.campaign.required = 1;
 			game.players[A]!.location = city('tripoli');
 			game.locations[city('tripoli')]!.tower = true;
 			game.locations[city('istanbul')]!.hollow = 3;
+			for (const haven of havens) game.locations[city(haven)]!.hollow = 1;
 		});
+
+	test('Broadcast moves Hollow Men next door, and three stacked in one haven do not complete the October objective', () => {
+		const actor = defectScene([]);
 		expect(refuses(actor, { a: 'broadcast', from: city('lagos'), to: city('haven-south-atlantic') })).toContain(
 			'colour',
 		);
 		for (let i = 0; i < 3; i++) act(actor, { a: 'broadcast', from: city('istanbul'), to: city('haven-mediterranean') });
 		expect(gameOf(actor).locations[city('haven-mediterranean')]!.hollow).toBe(3);
+		expect(gameOf(actor).progress.defect).toBe(1);
+		expect(gameOf(actor).outcome).toBeNull();
+	});
+
+	test('a Hollow Man in each of three different havens completes the October objective', () => {
+		const actor = defectScene(['haven-north-atlantic', 'haven-south-atlantic']);
+		act(actor, { a: 'broadcast', from: city('istanbul'), to: city('haven-mediterranean') });
 		expect(gameOf(actor).outcome).toMatchObject({ won: true });
 		expect(worldOf(actor).campaign.opened as string[]).toContain('defection');
 	});
@@ -1210,5 +1222,135 @@ describe('event timing found by the campaign playtest', () => {
 			expect(gameOf(actor).players[A]!.hand).toContain(card);
 			expect(gameOf(actor).actionsLeft).toBe(0);
 		}
+	});
+});
+
+describe('parity gaps found by the static review', () => {
+	const mutable = (actor: ReturnType<typeof late>) => JSON.parse(JSON.stringify(worldOf(actor))) as World;
+
+	test('Lake Baikal can only be joined to the grid from Utopia', () => {
+		const partners = pack.candidateEdges
+			.filter(edge => edge.a === pack.sampleFrom || edge.b === pack.sampleFrom)
+			.map(edge => (edge.a === pack.sampleFrom ? edge.b : edge.a));
+		expect(partners as string[]).toEqual(['utopia']);
+	});
+
+	test('only the North America recon completes the January objective', () => {
+		const counting = pack.reconRoutes.filter(route => route.counts.includes('reconRegion')).map(route => route.id);
+		expect(counting).toEqual(['north-america']);
+	});
+
+	test('a stockpile bonus found during a game lands in that game, out of the reserve', () => {
+		const world = mutable(late());
+		const game = world.game!;
+		const before = { stockpile: game.stockpile, reserve: game.reserve, bonus: world.campaign.stockpileBonus };
+		applyUnlock(world, { t: 'stockpileBonus', amount: 15 });
+		expect(game.stockpile).toBe(before.stockpile + 15);
+		expect(game.reserve).toBe(before.reserve - 15);
+		expect(world.campaign.stockpileBonus).toBe(before.bonus + 15);
+	});
+
+	test('a shelter stops the population loss from a fourth Hollow Man', () => {
+		for (const shelter of [true, false]) {
+			const world = mutable(late());
+			const location = world.game!.locations[city('cairo')]!;
+			Object.assign(location, { hollow: 3, shelter });
+			const population = world.campaign.locations[city('cairo')]!.population;
+			placeHollow(world, city('cairo'), infectionCards(world, 'cairo')[0]!);
+			expect(world.campaign.locations[city('cairo')]!.population).toBe(shelter ? population : population - 1);
+		}
+	});
+
+	test('running out of Hollow Men figures loses the game only once the September rule is in', () => {
+		for (const withRule of [false, true]) {
+			const world = mutable(late());
+			world.campaign.rules = world.campaign.rules.filter(rule => rule !== 'hollowSetup');
+			if (withRule) world.campaign.rules.push('hollowSetup');
+			world.game!.pieces.hollow = 0;
+			placeHollow(world, city('cairo'), infectionCards(world, 'cairo')[0]!);
+			expect(world.game!.outcome?.won).toBe(withRule ? false : undefined);
+		}
+	});
+
+	test('the final score counts population on the grid only', () => {
+		const { campaign } = mutable(late());
+		const onGrid = grid(campaign);
+		const expected = [...onGrid].reduce((sum, id) => sum + campaign.locations[id]!.population, 0);
+		expect(score(campaign).population).toBe(expected);
+		const off = pack.cities.find(entry => !onGrid.has(entry.id))!;
+		Object.assign(campaign.locations[off.id]!, { revealed: true, population: 5 });
+		expect(score(campaign).population).toBe(expected);
+	});
+
+	test('free ability units are spent at setup, and nothing else can be bought then', () => {
+		const save = octoberSave();
+		save.world.campaign.freeAbilityUnits = 2;
+		save.world.campaign.abilitiesForSale = ['helmsman'];
+		const actor = createGameActor({ seed: 3, save }).start();
+		const cast = Object.values(worldOf(actor).campaign.characters).slice(0, 3);
+		actor.send({
+			type: 'START_GAME',
+			seating: cast.map((entry, index) => ({ seat: [A, B, C][index]!, character: entry.id })),
+		});
+		expect(phase(actor)).toBe('setup.supply');
+		const onGrid = [...grid(worldOf(actor).campaign)];
+		expect(
+			reject(worldOf(actor), phase(actor), {
+				type: 'PURCHASE',
+				purchase: { t: 'population', city: onGrid[5]!, steps: 1 },
+			}),
+		).toBe('Not in the spending step');
+		send(actor, { type: 'PURCHASE', purchase: { t: 'ability', ability: 'helmsman', character: cast[2]!.id, slot: 3 } });
+		expect(worldOf(actor).campaign.characters[cast[2]!.id]!.slots[3]).toEqual({ kind: 'ability', id: 'helmsman' });
+		expect(worldOf(actor).campaign.freeAbilityUnits).toBe(0);
+	});
+
+	test('Utopia forced open at December setup puts its Infection cards in the discard pile', () => {
+		const world = mutable(late());
+		world.campaign.forced.push('utopia' as never);
+		world.campaign.attempt = 1;
+		setupInfection(world);
+		const cards = infectionCards(world, 'utopia', 9);
+		expect(cards.length).toBeGreaterThan(0);
+		for (const card of cards) {
+			expect(world.game!.infectionDeck.order).not.toContain(card);
+			expect(world.game!.infectionDiscard).toContain(card);
+		}
+	});
+
+	test('Triangulate needs towers in blue, yellow and black, and a red tower does not stand in', () => {
+		const scene = (third: string) =>
+			late((world, game) => {
+				world.campaign.objectives = ['triangulate'];
+				world.campaign.required = 1;
+				for (const location of Object.values(game.locations)) location.tower = false;
+				game.locations[city('london')]!.tower = true;
+				game.locations[city('lagos')]!.tower = true;
+				game.players[A]!.location = city(third);
+				game.players[A]!.supplies = 2;
+			});
+		const red = scene('shanghai');
+		act(red, { a: 'buildTower' });
+		expect(gameOf(red).progress.triangulate).toBe(2);
+		expect(gameOf(red).outcome).toBeNull();
+		const black = scene('cairo');
+		act(black, { a: 'buildTower' });
+		expect(gameOf(black).completed).toContain('triangulate');
+		expect(worldOf(black).campaign.opened as string[]).toContain('signal-hint');
+	});
+
+	test('a lost early attempt carries completed objectives and Plan steps, not partial progress', () => {
+		const world = mutable(late());
+		const { campaign } = world;
+		const game = world.game!;
+		campaign.month = 10;
+		campaign.attempt = 1;
+		game.outcome = { won: false, reason: 'test' };
+		game.upkeep = { units: 0, populationChanges: [] };
+		game.completed = ['reconEastAsia'];
+		game.progress = { reconEastAsia: 1, defect: 2, plan: 2 };
+		closeGame(world);
+		expect(campaign.attempt as number).toBe(2);
+		expect(campaign.carriedProgress).toEqual({ reconEastAsia: 1, plan: 2 });
 	});
 });

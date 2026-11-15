@@ -1,7 +1,7 @@
 import { pack } from './content/pack';
 import type { ActionId, CityDef, CompanionId, EdgeKind, RuleId, SearchResult } from './content/types';
 import { drawPiled } from './decks';
-import { bump, kill, movePawn, setProgress, settleGrid } from './flow';
+import { bump, havensWithHollow, kill, movePawn, setProgress, settleGrid, towerColours } from './flow';
 import {
 	cardValue,
 	characterOf,
@@ -481,11 +481,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 			ctx.game.pieces.tower -= 1;
 			ctx.loc.tower = true;
 			log(ctx.game, { t: 'structure', city: ctx.here, structure: 'tower' });
-			setProgress(
-				ctx.world,
-				'triangulate',
-				new Set(structureCities(ctx.game, 'tower').map(city => cityDef(city).color)).size,
-			);
+			setProgress(ctx.world, 'triangulate', towerColours(ctx.game));
 		},
 	},
 	transmit: {
@@ -538,10 +534,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 		apply(ctx, { from, to }) {
 			ctx.game.locations[from]!.hollow -= 1;
 			ctx.game.locations[to]!.hollow += 1;
-			const inHavens = pack.cities
-				.filter(city => city.kind === 'haven')
-				.reduce((sum, city) => sum + ctx.game.locations[city.id]!.hollow, 0);
-			setProgress(ctx.world, 'defect', (ctx.campaign.carriedProgress.defect ?? 0) + inHavens);
+			setProgress(ctx.world, 'defect', havensWithHollow(ctx.game));
 		},
 	},
 	buildShelter: {

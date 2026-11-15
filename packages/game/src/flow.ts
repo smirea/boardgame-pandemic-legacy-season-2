@@ -3,7 +3,7 @@ import { pack } from './content/pack';
 import type { ObjectiveId } from './content/types';
 import { drawBottom, drawPiled, drawTop, newDeck, newPiledDeck, stackOnTop } from './decks';
 import { characterOf, cityDef, grid, has, hasRule, isForsaken, isHaven, log, neighbours, player } from './helpers';
-import type { CardId, CharacterId, CityId, SeatId } from './ids';
+import type { BundleId, CardId, CharacterId, CityId, RegionId, SeatId } from './ids';
 import { openBundle } from './legacy';
 import { nextInt, shuffle } from './rng';
 import type { Character, Game, GameLocation, World } from './state';
@@ -19,6 +19,23 @@ export function setOutcome(world: World, won: boolean, reason: string) {
 }
 
 export const isOver = (world: World) => world.game?.outcome != null;
+
+const UTOPIA = 'utopia' as BundleId;
+const UTOPIA_REGION = 'utopia' as RegionId;
+const SIGNAL_COLOURS = new Set(['blue', 'yellow', 'black']);
+
+/** How many of the three signal colours have a tower standing, permanent towers included. */
+export function towerColours(game: Game): number {
+	const colours = (Object.keys(game.locations) as CityId[])
+		.filter(id => game.locations[id]!.tower)
+		.map(id => cityDef(id).color);
+	return new Set(colours.filter(colour => colour && SIGNAL_COLOURS.has(colour))).size;
+}
+
+/** How many havens hold at least one Hollow Man. */
+export function havensWithHollow(game: Game): number {
+	return pack.cities.filter(city => city.kind === 'haven' && game.locations[city.id]!.hollow > 0).length;
+}
 
 export function checkWin(world: World) {
 	const { campaign, game } = world as { campaign: World['campaign']; game: Game };
@@ -97,7 +114,10 @@ export function createGame(world: World, seating: { seat: SeatId; character: Cha
 		incidents: 0,
 		epidemics: 0,
 		progress: { ...campaign.carriedProgress },
-		completed: [],
+		completed: pack.objectives
+			.filter(objective => campaign.objectives.includes(objective.id))
+			.filter(objective => (campaign.carriedProgress[objective.id] ?? 0) >= objective.target)
+			.map(objective => objective.id),
 		waived: [],
 		pending: [],
 		skipInfection: false,
@@ -131,8 +151,17 @@ function onGridCards(world: World) {
 export function setupInfection(world: World) {
 	const { campaign, game } = world as { campaign: World['campaign']; game: Game };
 	const cards = onGridCards(world);
-	game.infectionDeck = newDeck(campaign.rng, cards.infection);
-	game.infectionDiscard = [...cards.hollowCards];
+	// Utopia forced open at December setup arrives through the discard pile, so its cards wait for the first epidemic.
+	const forcedLate = campaign.month === 12 && campaign.attempt === 1 && campaign.forced.includes(UTOPIA);
+	const late = cards.infection.filter(id => {
+		const card = campaign.infectionCards[id]!;
+		return forcedLate && card.kind === 'city' && cityDef(card.city).region === UTOPIA_REGION;
+	});
+	game.infectionDeck = newDeck(
+		campaign.rng,
+		cards.infection.filter(id => !late.includes(id)),
+	);
+	game.infectionDiscard = [...cards.hollowCards, ...late];
 	const hollowFrom = hasRule(campaign, 'hollowSetup') ? numbers.setupInfections - 3 : numbers.setupInfections;
 	for (let flipped = 0; flipped < numbers.setupInfections && !isOver(world); flipped++) {
 		const card = drawInfectionCard(world, 'top');
@@ -165,6 +194,7 @@ export function setupPlayerDeck(world: World) {
 	game.playerDeck = newPiledDeck(campaign.rng, deck, epidemicCards);
 	game.active = game.seats[nextInt(campaign.rng, game.seats.length)]!;
 	for (; campaign.owedScars > 0; campaign.owedScars--) game.pending.push({ t: 'scar', seat: null });
+	setProgress(world, 'triangulate', towerColours(game));
 	beginTurn(world);
 }
 
@@ -372,10 +402,14 @@ export function placeHollow(world: World, city: CityId, cardId: CardId) {
 	log(game, { t: 'infect', city, card: cardId, effect: 'hollow' });
 	if (location.hollow >= numbers.maxHollowPerCity) {
 		const record = campaign.locations[city]!;
-		record.population = Math.max(0, record.population - 1);
+		if (!location.shelter) record.population = Math.max(0, record.population - 1);
 		return;
 	}
-	if (game.pieces.hollow === 0) return setOutcome(world, false, 'No Hollow Men figures are left to place');
+	if (game.pieces.hollow === 0) {
+		// Running out of figures only becomes a loss with the September rule.
+		if (hasRule(campaign, 'hollowSetup')) setOutcome(world, false, 'No Hollow Men figures are left to place');
+		return;
+	}
 	game.pieces.hollow -= 1;
 	location.hollow += 1;
 }

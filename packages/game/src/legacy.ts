@@ -236,6 +236,12 @@ export function applyUnlock(world: World, unlock: Unlock) {
 			return;
 		case 'stockpileBonus':
 			campaign.stockpileBonus += unlock.amount;
+			// The bonus also lands in the game it is found in. The cubes come out of the box, which is the reserve.
+			if (world.game) {
+				const now = Math.min(unlock.amount, world.game.reserve);
+				world.game.reserve -= now;
+				world.game.stockpile += now;
+			}
 			return;
 		case 'freeAbilityUnits':
 			campaign.freeAbilityUnits += unlock.amount;
@@ -363,9 +369,11 @@ export function purchaseCost(purchase: Purchase): number {
 
 export function checkPurchase(world: World, purchase: Purchase): string | null {
 	const { campaign, game } = world;
-	if (!game?.upkeep) return 'Not in the spending step';
+	// Free ability units are spent the moment they arrive, which is during setup, as well as at game end.
+	const freeNow = purchase.t === 'ability' && campaign.freeAbilityUnits > 0;
+	if (!game || (!game.upkeep && !freeNow)) return 'Not in the spending step';
 	const cost = purchaseCost(purchase);
-	const budget = game.upkeep.units + (purchase.t === 'ability' ? campaign.freeAbilityUnits : 0);
+	const budget = (game.upkeep?.units ?? 0) + (purchase.t === 'ability' ? campaign.freeAbilityUnits : 0);
 	if (cost > budget) return 'Not enough production units';
 	const onGrid = grid(campaign);
 	switch (purchase.t) {
@@ -426,7 +434,7 @@ export function applyPurchase(world: World, purchase: Purchase) {
 		campaign.freeAbilityUnits -= free;
 		cost -= free;
 	}
-	game.upkeep!.units -= cost;
+	if (game.upkeep) game.upkeep.units -= cost;
 	switch (purchase.t) {
 		case 'ability':
 			campaign.characters[purchase.character]!.slots[purchase.slot] = { kind: 'ability', id: purchase.ability };
@@ -486,7 +494,8 @@ export function closeGame(world: World) {
 	} else {
 		campaign.attempt = 2;
 		for (const objective of pack.objectives) {
-			if (objective.carriesOver && game.progress[objective.id])
+			const kept = objective.stepsCarry || game.completed.includes(objective.id);
+			if (objective.carriesOver && kept && game.progress[objective.id])
 				campaign.carriedProgress[objective.id] = game.progress[objective.id];
 		}
 	}
@@ -500,7 +509,8 @@ export function score(campaign: Campaign) {
 	const months = campaign.results.filter(result => result.month >= 1 && result.won);
 	const early = months.filter(result => result.attempt === 1).length;
 	const late = months.filter(result => result.attempt === 2).length;
-	const revealed = pack.cities.filter(city => campaign.locations[city.id]!.revealed);
+	const onGrid = grid(campaign);
+	const revealed = pack.cities.filter(city => onGrid.has(city.id));
 	const population = revealed.reduce((sum, city) => sum + campaign.locations[city.id]!.population, 0);
 	const labs = Object.values(campaign.locations).filter(record => record.lab).length;
 	const forsaken = revealed.filter(

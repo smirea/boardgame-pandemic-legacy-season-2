@@ -35,3 +35,23 @@ Each game below has the result, the story, the parity verdict against the resear
 | Search, Supply Line and Shuttle were not offered                                                        | Not a bug   | They unlock later (Search and Supply Line with the first region). Guide corrected.                                            |
 | Cities at no risk showed no percentage                                                                  | Lab gap     | Shows 0%.                                                                                                                     |
 | New region's City cards appeared in the discard pile                                                    | Not a bug   | The research rule: new cards enter through the discard piles.                                                                 |
+
+## Static review, run alongside January
+
+While the players were in January, a reviewer (`claudeAgent/claude-opus-5-5`) compared the content pack with the research month by month and ranked sixteen differences. None had been declared in `docs/mechanics/coverage.md`.
+
+| Finding                                                                                                            | Month it would bite | Fix                                                                                                   |
+| ------------------------------------------------------------------------------------------------------------------ | ------------------- | ----------------------------------------------------------------------------------------------------- |
+| Lake Baikal could be joined to the grid from eight cities, so the Plan and Utopia did not gate the final objective | December            | Only Utopia may link to it. Geometry regenerated.                                                     |
+| Recon East Asia completed in a lost first game could not be completed again                                        | September           | Completion carries to the second attempt.                                                             |
+| Defect counted figures, so three stacked in one haven won                                                          | October             | Needs a Hollow Man in each of 3 different havens. Completion carries over, partial progress does not. |
+| Final score counted revealed locations, not the grid                                                               | Campaign end        | Population and forsaken penalties count grid locations only.                                          |
+| A stockpile bonus found mid-game did not arrive until the next game                                                | April onward        | It lands at once, taken from the reserve.                                                             |
+| "Recon a region" in January accepted any region                                                                    | January             | Only the North America recon counts.                                                                  |
+| Utopia forced open in December shuffled its Infection cards into the deck                                          | December            | They start in the discard pile.                                                                       |
+| August's free ability units could only be spent after the game                                                     | August              | Spendable at setup.                                                                                   |
+| Running out of Hollow Men figures lost the game before September                                                   | Before September    | The loss applies once the September rule is in.                                                       |
+| Triangulate accepted any three colours                                                                             | July                | Needs blue, yellow and black. Permanent towers count from setup.                                      |
+| A shelter did not stop the population loss from a fourth Hollow Man                                                | October onward      | It does.                                                                                              |
+
+Five smaller differences are declared in `docs/mechanics/coverage.md` under "Known gaps from the campaign review" and left alone.

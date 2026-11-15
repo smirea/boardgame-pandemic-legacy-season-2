@@ -174,8 +174,10 @@ export type ObjectiveDef = {
 	rule: string;
 	target: number;
 	mandatory: boolean;
-	/** Progress survives from the early attempt to the late attempt. */
+	/** Completed in a lost early attempt, it stays complete in the late attempt. */
 	carriesOver: boolean;
+	/** Each step is permanent, so partial progress carries over too. */
+	stepsCarry?: boolean;
 	/** Opened once, the first time the objective completes. */
 	reward?: BundleId;
 	destroyOnComplete?: boolean;

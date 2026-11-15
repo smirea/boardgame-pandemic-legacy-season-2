@@ -193,7 +193,7 @@ export function reject(world: World, phase: Phase, command: Command): string | n
 		case 'CONTINUE':
 			return inPhase('over');
 		case 'PURCHASE':
-			return inPhase('upkeep') ?? checkPurchase(world, command.purchase);
+			return inPhase('upkeep', 'setup.supply') ?? checkPurchase(world, command.purchase);
 		case 'FINISH_UPKEEP':
 			return inPhase('upkeep');
 	}
@@ -375,6 +375,7 @@ export const gameMachine = setup({
 					on: {
 						PLACE_SUPPLY: { guard: { type: 'legal', params: 'setup.supply' }, actions: 'placeSupply' },
 						AUTO_SUPPLY: { guard: { type: 'legal', params: 'setup.supply' }, actions: 'autoSupply' },
+						PURCHASE: { guard: { type: 'legal', params: 'setup.supply' }, actions: 'purchase' },
 						CONFIRM_SUPPLY: {
 							guard: { type: 'legal', params: 'setup.supply' },
 							target: 'events',

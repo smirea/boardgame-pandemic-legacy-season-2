@@ -83,7 +83,7 @@ export function optionsFor(state: PublicState, who: Who, seating: (CharacterId |
 		add('confirm-events', 'setup', 'deal hands and begin', { type: 'CONFIRM_EVENTS' });
 		add('continue', 'flow', 'go to the game-end step', { type: 'CONTINUE' });
 		add('finish-upkeep', 'flow', 'end the game-end step; unspent units are lost', { type: 'FINISH_UPKEEP' });
-		if (phase === 'upkeep') {
+		if (phase === 'upkeep' || phase === 'setup.supply') {
 			for (const purchase of legalPurchases(world))
 				add(
 					keyOf(`buy:${purchase.t}`, purchase, 't'),

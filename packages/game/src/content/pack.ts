@@ -32,10 +32,10 @@ function route(
 
 const reconRoutes: ReconRoute[] = [
 	route('north-america', 'washington', 'blue', 3, false, 'north-america', ['reconRegion', 'reconNewArea']),
-	route('south-america', 'sao-paulo', 'yellow', 4, false, 'south-america', ['reconRegion', 'reconNewArea']),
-	route('europe', 'london', 'blue', 4, true, 'europe', ['reconRegion', 'reconNewArea']),
-	route('africa', 'lagos', 'yellow', 5, true, 'africa', ['reconRegion', 'reconNewArea']),
-	route('middle-east', 'cairo', 'black', 4, true, 'middle-east', ['reconRegion', 'reconNewArea']),
+	route('south-america', 'sao-paulo', 'yellow', 4, false, 'south-america', ['reconNewArea']),
+	route('europe', 'london', 'blue', 4, true, 'europe', ['reconNewArea']),
+	route('africa', 'lagos', 'yellow', 5, true, 'africa', ['reconNewArea']),
+	route('middle-east', 'cairo', 'black', 4, true, 'middle-east', ['reconNewArea']),
 	// Hidden until a Monitor frequency or the October perimeter report reveals it.
 	route('hidden:east-asia', 'kolkata', 'black', 3, true, 'east-asia', ['reconNewArea', 'reconEastAsia']),
 	route('coral-sea', 'jakarta', 'red', 2, false, 'coral-sea', ['reconNewArea']),
@@ -702,7 +702,7 @@ export const pack: ContentPack = {
 		{
 			id: 'triangulate',
 			name: 'Triangulate signals',
-			rule: 'Have towers in 3 cities of different colours.',
+			rule: 'Have towers in a blue city, a yellow city and a black city at the same time.',
 			target: 3,
 			mandatory: false,
 			carriesOver: false,
@@ -714,12 +714,12 @@ export const pack: ContentPack = {
 			rule: 'Recon East Asia from Kolkata.',
 			target: 1,
 			mandatory: true,
-			carriesOver: false,
+			carriesOver: true,
 		},
 		{
 			id: 'defect',
 			name: 'Turn the Hollow Men',
-			rule: 'Have 3 Hollow Men in havens.',
+			rule: 'Have a Hollow Man in each of 3 different havens at the same time.',
 			target: 3,
 			mandatory: true,
 			carriesOver: true,
@@ -732,6 +732,7 @@ export const pack: ContentPack = {
 			target: 4,
 			mandatory: true,
 			carriesOver: true,
+			stepsCarry: true,
 			reward: bundleId('utopia'),
 		},
 		{
