@@ -12,7 +12,7 @@
 </script>
 
 <script lang="ts">
-	import type { RouteDef } from '@repo/game';
+	import type { EdgeDef } from '@repo/game';
 	import { T } from '@threlte/core';
 	import { untrack } from 'svelte';
 	import { cubicInOut } from 'svelte/easing';
@@ -21,46 +21,41 @@
 	import type { BoardPoint } from './projection';
 	import { routeCurve } from './routes';
 
-	type Props = { route: RouteDef; from: BoardPoint; to: BoardPoint; established: boolean };
+	type Props = { route: EdgeDef; from: BoardPoint; to: BoardPoint; ghost?: boolean; animate?: boolean };
 
-	let { route, from, to, established }: Props = $props();
+	let { route, from, to, ghost = false, animate = false }: Props = $props();
 
 	const RADIAL = 6;
 	const curve = $derived(routeCurve(route, from, to));
 	const segments = $derived(Math.max(16, Math.round(curve.getLength() * 2)));
-	const solid = $derived(new TubeGeometry(curve, segments, route.kind === 'sea' ? 0.13 : 0.19, RADIAL));
-	const ghost = $derived(new TubeGeometry(curve, segments, 0.07, RADIAL));
+	const tube = $derived(new TubeGeometry(curve, segments, ghost ? 0.08 : route.kind === 'sea' ? 0.14 : 0.2, RADIAL));
 	const dashes = $derived(dashTexture(Math.max(3, Math.round(curve.getLength() / 1.6))));
 
+	// A route that appears mid-game draws itself from its first city to its second.
 	const drawn = new Tween(
-		untrack(() => (established ? 1 : 0)),
-		{ duration: 1100, easing: cubicInOut },
+		untrack(() => (animate ? 0 : 1)),
+		{ duration: 1400, easing: cubicInOut },
 	);
 	$effect(() => {
-		drawn.target = established ? 1 : 0;
+		drawn.target = 1;
 	});
 	$effect(() => {
-		solid.setDrawRange(0, Math.round(drawn.current * segments) * RADIAL * 6);
+		tube.setDrawRange(0, Math.round(drawn.current * segments) * RADIAL * 6);
 	});
 </script>
 
-{#if drawn.current < 1}
-	<T.Mesh geometry={ghost}>
-		<T.MeshBasicMaterial color="#e8eef2" alphaMap={dashes} alphaTest={0.5} transparent opacity={0.45} />
-	</T.Mesh>
-{/if}
-{#if drawn.current > 0}
-	<T.Mesh geometry={solid} castShadow>
-		{#if route.kind === 'sea'}
-			<T.MeshStandardMaterial
-				color="#9ad7f5"
-				emissive="#2a7fa8"
-				emissiveIntensity={0.6}
-				alphaMap={dashes}
-				alphaTest={0.5}
-			/>
-		{:else}
-			<T.MeshStandardMaterial color="#f2c178" emissive="#8a5a1c" emissiveIntensity={0.35} roughness={0.5} />
-		{/if}
-	</T.Mesh>
-{/if}
+<T.Mesh geometry={tube} castShadow={!ghost}>
+	{#if ghost}
+		<T.MeshBasicMaterial color="#e8eef2" alphaMap={dashes} alphaTest={0.5} transparent opacity={0.4} />
+	{:else if route.kind === 'sea'}
+		<T.MeshStandardMaterial
+			color="#9ad7f5"
+			emissive="#2a7fa8"
+			emissiveIntensity={0.6}
+			alphaMap={dashes}
+			alphaTest={0.5}
+		/>
+	{:else}
+		<T.MeshStandardMaterial color="#f2c178" emissive="#8a5a1c" emissiveIntensity={0.35} roughness={0.5} />
+	{/if}
+</T.Mesh>

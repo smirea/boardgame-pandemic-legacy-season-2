@@ -1,10 +1,11 @@
 <script lang="ts" module>
-	import type { Affiliation } from '@repo/game';
+	import type { Color } from '@repo/game';
 
-	export const AFFILIATION_COLOR: Record<Affiliation | 'haven', string> = {
+	export const CITY_COLOR: Record<Color | 'haven', string> = {
 		blue: '#3d8bf2',
 		yellow: '#e9b21c',
-		black: '#3a4250',
+		black: '#4a5362',
+		red: '#e0483e',
 		haven: '#19b9a5',
 	};
 </script>
@@ -23,29 +24,29 @@
 
 	let { city, at, state, labelBelow, onselect }: Props = $props();
 
-	const color = $derived(AFFILIATION_COLOR[city.affiliation ?? 'haven']);
+	const color = $derived(state.forsaken ? '#6b6f76' : CITY_COLOR[city.color ?? 'haven']);
 	const { hovering, onPointerEnter, onPointerLeave } = useCursor();
 	const scale = new Spring(1, { stiffness: 0.2, damping: 0.5 });
 	$effect(() => {
-		scale.target = $hovering ? 1.18 : 1;
+		scale.target = $hovering ? 1.18 : state.highlight === 'target' ? 1.08 : 1;
 	});
 
-	const cubeSlots = $derived.by(() => {
-		const slots: { x: number; y: number; z: number; plague: boolean }[] = [];
-		const total = state.supplies + state.plague;
-		for (let i = 0; i < total; i++) {
-			const column = i % 3;
-			const layer = Math.floor(i / 9);
-			const row = Math.floor(i / 3) % 3;
-			slots.push({
-				x: CITY_RADIUS + 0.7 + column * 0.85,
-				y: 0.36 + layer * 0.8,
-				z: -0.85 + row * 0.85,
-				plague: i >= state.supplies,
-			});
-		}
-		return slots;
+	const SLOT = 0.85;
+	const cubes = $derived.by(() => {
+		const kinds = [
+			...Array<'supply'>(Math.min(state.supplies, 18)).fill('supply'),
+			...Array<'plague'>(state.plague).fill('plague'),
+		];
+		return kinds.map((kind, index) => ({
+			kind,
+			x: CITY_RADIUS + 0.7 + (index % 3) * SLOT,
+			y: 0.36 + Math.floor(index / 9) * 0.8,
+			z: -SLOT + (Math.floor(index / 3) % 3) * SLOT,
+		}));
 	});
+	const figures = $derived(
+		Array.from({ length: state.hollow }, (_, index) => ({ x: -0.9 + index * 0.9, z: CITY_RADIUS + 0.8 })),
+	);
 </script>
 
 <T.Group position={[at.x, LAND_HEIGHT, at.z]}>
@@ -68,13 +69,17 @@
 				{color}
 				roughness={0.45}
 				metalness={0.2}
-				opacity={state.onGrid ? 1 : 0.45}
+				opacity={state.onGrid ? 1 : 0.5}
 				transparent={!state.onGrid}
 			/>
 		</T.Mesh>
 		<T.Mesh position.y={CITY_TOP - LAND_HEIGHT + 0.02} rotation.x={-Math.PI / 2}>
 			<T.RingGeometry args={[CITY_RADIUS * 0.62, CITY_RADIUS * 0.8, city.kind === 'haven' ? 6 : 32]} />
-			<T.MeshBasicMaterial color="#f4f1e8" transparent opacity={state.onGrid ? 0.95 : 0.4} />
+			<T.MeshBasicMaterial
+				color={state.infested ? '#c79bff' : '#f4f1e8'}
+				transparent
+				opacity={state.onGrid ? 0.95 : 0.45}
+			/>
 		</T.Mesh>
 		{#if state.highlight}
 			<T.Mesh position.y={0.06} rotation.x={-Math.PI / 2}>
@@ -84,40 +89,66 @@
 		{/if}
 	</T.Group>
 
-	{#each cubeSlots as slot, index (index)}
-		<T.Mesh position={[slot.x, slot.y, slot.z]} castShadow>
+	{#each cubes as cube, index (index)}
+		<T.Mesh position={[cube.x, cube.y, cube.z]} castShadow>
 			<T.BoxGeometry args={[0.7, 0.7, 0.7]} />
 			<T.MeshStandardMaterial
-				color={slot.plague ? '#63d417' : '#f2ecd8'}
-				emissive={slot.plague ? '#2f7a00' : '#000000'}
-				emissiveIntensity={slot.plague ? 0.8 : 0}
+				color={cube.kind === 'plague' ? '#63d417' : '#f2ecd8'}
+				emissive={cube.kind === 'plague' ? '#2f7a00' : '#000000'}
+				emissiveIntensity={cube.kind === 'plague' ? 0.8 : 0}
 				roughness={0.4}
 			/>
 		</T.Mesh>
 	{/each}
 
-	{#if state.supplyCenter}
+	{#each figures as figure, index (index)}
+		<T.Mesh position={[figure.x, 0.6, figure.z]} castShadow>
+			<T.ConeGeometry args={[0.36, 1.2, 5]} />
+			<T.MeshStandardMaterial color="#5b3f8f" emissive="#3b1d6e" emissiveIntensity={0.6} roughness={0.5} />
+		</T.Mesh>
+	{/each}
+
+	{#if state.center}
 		<T.Group position={[-CITY_RADIUS - 0.9, 0, 0]}>
 			<T.Mesh position.y={0.5} castShadow>
-				<T.BoxGeometry args={[1.1, 1, 1.1]} />
+				<T.BoxGeometry args={[1.2, 1, 1.2]} />
 				<T.MeshStandardMaterial color="#e8e2d0" roughness={0.6} />
 			</T.Mesh>
 			<T.Mesh position.y={1.3} rotation.y={Math.PI / 4} castShadow>
-				<T.ConeGeometry args={[0.95, 0.65, 4]} />
+				<T.ConeGeometry args={[1.02, 0.65, 4]} />
 				<T.MeshStandardMaterial color="#c2552d" roughness={0.6} />
 			</T.Mesh>
 		</T.Group>
 	{/if}
+	{#if state.tower}
+		<T.Group position={[-CITY_RADIUS - 0.6, 0, -1.5]}>
+			<T.Mesh position.y={1.3} castShadow>
+				<T.CylinderGeometry args={[0.08, 0.2, 2.6, 8]} />
+				<T.MeshStandardMaterial color="#cfd6dd" metalness={0.6} roughness={0.3} />
+			</T.Mesh>
+			<T.Mesh position.y={2.7}>
+				<T.SphereGeometry args={[0.24, 12, 10]} />
+				<T.MeshStandardMaterial color="#6fd3ff" emissive="#2aa8e6" emissiveIntensity={1.2} />
+			</T.Mesh>
+		</T.Group>
+	{/if}
+	{#if state.shelter}
+		<T.Mesh position={[-CITY_RADIUS - 0.6, 0, 1.5]} castShadow>
+			<T.SphereGeometry args={[0.75, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2]} />
+			<T.MeshStandardMaterial color="#7fb38a" roughness={0.7} />
+		</T.Mesh>
+	{/if}
 
 	<HTML position.y={CITY_TOP - LAND_HEIGHT + 0.2} center pointerEvents="none" zIndexRange={[10, 0]}>
-		<div class="label" class:off-grid={!state.onGrid} class:below={labelBelow}>
+		<div class="label" class:off-grid={!state.onGrid} class:below={labelBelow} class:forsaken={state.forsaken}>
 			<span class="name">{city.name}</span>
-			{#if state.supplies || state.plague}
-				<span class="counts">
-					{#if state.supplies}<span class="supplies">{state.supplies}</span>{/if}
-					{#if state.plague}<span class="plague">{state.plague}</span>{/if}
-				</span>
-			{/if}
+			<span class="population" title="Population">{state.population}</span>
+			{#if state.supplies}<span class="supplies">{state.supplies}</span>{/if}
+			{#if state.plague}<span class="plague">{state.plague}</span>{/if}
+			{#if state.hollow}<span class="hollow">{state.hollow}</span>{/if}
+			{#if state.lab}<span class="lab">LAB</span>{/if}
+			{#if state.odds !== null}<span class="odds" class:hot={state.supplies === 0}>{Math.round(state.odds * 100)}%</span
+				>{/if}
 		</div>
 	</HTML>
 </T.Group>
@@ -125,15 +156,15 @@
 <style>
 	.label {
 		display: flex;
-		gap: 0.35rem;
+		gap: 0.25rem;
 		align-items: center;
-		transform: translateY(-1.7rem);
-		padding: 0.1rem 0.45rem;
+		transform: translateY(-1.6rem);
+		padding: 0.05rem 0.4rem;
 		border-radius: 999px;
-		background: rgb(10 15 20 / 0.78);
+		background: rgb(10 15 20 / 0.8);
 		color: #f1ede2;
 		font:
-			600 0.7rem/1.4 system-ui,
+			600 0.66rem/1.45 system-ui,
 			sans-serif;
 		letter-spacing: 0.02em;
 		white-space: nowrap;
@@ -141,22 +172,30 @@
 	}
 
 	.label.below {
-		transform: translateY(1.7rem);
+		transform: translateY(1.6rem);
 	}
 
 	.label.off-grid {
 		opacity: 0.6;
 	}
 
-	.counts {
-		display: flex;
-		gap: 0.2rem;
+	.label.forsaken .name {
+		text-decoration: line-through;
+		color: #9aa0a8;
+	}
+
+	.population {
+		color: #9fb0bf;
+		font-weight: 500;
 	}
 
 	.supplies,
-	.plague {
-		min-width: 1rem;
-		padding: 0 0.25rem;
+	.plague,
+	.hollow,
+	.lab,
+	.odds {
+		min-width: 0.95rem;
+		padding: 0 0.22rem;
 		border-radius: 0.2rem;
 		text-align: center;
 		color: #10161c;
@@ -168,5 +207,24 @@
 
 	.plague {
 		background: #7be02a;
+	}
+
+	.hollow {
+		background: #b48cff;
+	}
+
+	.lab {
+		background: #6fd3ff;
+		font-size: 0.55rem;
+	}
+
+	.odds {
+		background: transparent;
+		color: #ffd166;
+		padding: 0;
+	}
+
+	.odds.hot {
+		color: #ff7a7a;
 	}
 </style>

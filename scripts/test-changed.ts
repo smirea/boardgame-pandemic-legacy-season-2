@@ -37,12 +37,13 @@ function resolveImport(from: string, specifier: string): string | null {
 	}
 }
 
-const transpiler = new Bun.Transpiler({ loader: 'tsx' });
+// A .ts file parsed as tsx reads a generic arrow function `<T>(value: T) => ...` as a JSX tag and fails.
+const transpilers = { ts: new Bun.Transpiler({ loader: 'ts' }), tsx: new Bun.Transpiler({ loader: 'tsx' }) };
 const importers = new Map<string, Set<string>>();
 for (const file of walk(root, [])) {
 	// scanImports rejects a shebang line, which executable scripts start with.
 	const source = readFileSync(file, 'utf8').replace(/^#!.*/, '');
-	for (const { path } of transpiler.scanImports(source)) {
+	for (const { path } of transpilers[file.endsWith('.tsx') ? 'tsx' : 'ts'].scanImports(source)) {
 		const target = resolveImport(file, path);
 		if (target) importers.set(target, (importers.get(target) ?? new Set()).add(file));
 	}

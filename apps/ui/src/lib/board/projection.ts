@@ -1,4 +1,3 @@
-import type { CityId, MapDef } from '@repo/game';
 import { geoNaturalEarth1, geoStream } from 'd3-geo';
 import type { GeoPermissibleObjects } from 'd3-geo';
 
@@ -55,14 +54,21 @@ export function projectPolygons(geometry: GeoPermissibleObjects): Ring[][] {
 
 const MIN_CITY_SPACING = 7.5;
 
+export function unproject(point: BoardPoint): { lat: number; lon: number } {
+	const [lon, lat] = projection.invert!([point.x, point.z])!;
+	return { lat, lon };
+}
+
 /**
  * Real coordinates put dense areas on top of each other at board scale, so cities are nudged apart
  * while staying anchored to where they really are.
  */
-export function layoutCities(map: MapDef): Map<CityId, BoardPoint> {
-	const anchors = map.cities.map(city => project(city.lat, city.lon));
+export function layoutCities<Id extends string>(
+	cities: readonly { id: Id; lat: number; lon: number }[],
+): Record<Id, BoardPoint> {
+	const anchors = cities.map(city => project(city.lat, city.lon));
 	const points = anchors.map(point => ({ ...point }));
-	for (let pass = 0; pass < 200; pass++) {
+	for (let pass = 0; pass < 400; pass++) {
 		let moved = false;
 		for (let i = 0; i < points.length; i++) {
 			for (let j = i + 1; j < points.length; j++) {
@@ -91,5 +97,8 @@ export function layoutCities(map: MapDef): Map<CityId, BoardPoint> {
 		}
 		if (!moved) break;
 	}
-	return new Map(map.cities.map((city, index) => [city.id, points[index]!]));
+	const round = (value: number) => Math.round(value * 100) / 100;
+	return Object.fromEntries(
+		cities.map((city, index) => [city.id, { x: round(points[index]!.x), z: round(points[index]!.z) }]),
+	) as Record<Id, BoardPoint>;
 }

@@ -1,17 +1,19 @@
 <script lang="ts">
+	import { edgeKey, pack } from '@repo/game';
 	import type { CityId } from '@repo/game';
 	import { T, useThrelte } from '@threlte/core';
 	import { interactivity, OrbitControls } from '@threlte/extras';
+	import { untrack } from 'svelte';
 	import { MOUSE } from 'three';
 	import type { PerspectiveCamera } from 'three';
 	import type { OrbitControls as OrbitControlsImpl } from 'three/examples/jsm/controls/OrbitControls.js';
 	import CityMarker from './CityMarker.svelte';
-	import { fitBoard } from './fit';
 	import Cloud from './Cloud.svelte';
+	import { fitBoard } from './fit';
 	import { buildLandGeometry } from './land';
 	import Pawn from './Pawn.svelte';
-	import { layoutCities } from './projection';
 	import type { BoardBounds, BoardPoint } from './projection';
+	import Pulse from './Pulse.svelte';
 	import RemoteCursor from './RemoteCursor.svelte';
 	import RouteTube from './RouteTube.svelte';
 	import type { BoardView } from './types';
@@ -30,10 +32,27 @@
 
 	const FOV = 30;
 	const { size } = useThrelte();
+	const layout = pack.positions;
+	const landGeometry = buildLandGeometry();
+	const bounds: BoardBounds = (() => {
+		const land = landGeometry.boundingBox!;
+		const points = Object.values(layout);
+		const margin = 4;
+		return {
+			minX: Math.min(land.min.x, ...points.map(point => point.x)) - margin,
+			maxX: Math.max(land.max.x, ...points.map(point => point.x)) + margin,
+			minZ: Math.min(land.min.z, ...points.map(point => point.z)) - margin,
+			maxZ: Math.max(land.max.z, ...points.map(point => point.z)) + margin,
+		};
+	})();
+	const boardSize = { width: bounds.maxX - bounds.minX, depth: bounds.maxZ - bounds.minZ };
+	const boardCentre = { x: (bounds.minX + bounds.maxX) / 2, z: (bounds.minZ + bounds.maxZ) / 2 };
+
 	let camera = $state<PerspectiveCamera>();
 	let controls = $state<OrbitControlsImpl>();
 	let userMoved = $state(false);
 	let lastReset = 0;
+	const fit = $derived(fitBoard(bounds, size.current.width / Math.max(1, size.current.height), FOV));
 	$effect(() => {
 		if (resetView !== lastReset) {
 			lastReset = resetView;
@@ -45,39 +64,21 @@
 		controls.update();
 	});
 
-	const landGeometry = buildLandGeometry();
-	const layout = $derived(layoutCities(view.map));
-	const bounds = $derived.by((): BoardBounds => {
-		const land = landGeometry.boundingBox!;
-		const points = [...layout.values()];
-		const margin = 4;
-		return {
-			minX: Math.min(land.min.x, ...points.map(point => point.x)) - margin,
-			maxX: Math.max(land.max.x, ...points.map(point => point.x)) + margin,
-			minZ: Math.min(land.min.z, ...points.map(point => point.z)) - margin,
-			maxZ: Math.max(land.max.z, ...points.map(point => point.z)) + margin,
-		};
-	});
-	const fit = $derived(fitBoard(bounds, size.current.width / Math.max(1, size.current.height), FOV));
-	const boardSize = $derived({ width: bounds.maxX - bounds.minX, depth: bounds.maxZ - bounds.minZ });
-	const boardCentre = $derived({ x: (bounds.minX + bounds.maxX) / 2, z: (bounds.minZ + bounds.maxZ) / 2 });
-	const cityById = $derived(new Map(view.map.cities.map(city => [city.id, city])));
-	const visibleCities = $derived(view.map.cities.filter(city => view.explored.has(city.region)));
-	const foggedCities = $derived(view.map.cities.filter(city => !view.explored.has(city.region)));
-	const visibleRoutes = $derived(
-		view.map.routes.filter(
-			route => view.explored.has(cityById.get(route.a)!.region) && view.explored.has(cityById.get(route.b)!.region),
-		),
-	);
+	// Edges present at first render are part of the board. Anything that shows up later draws itself in.
+	const routeKey = (route: { a: CityId; b: CityId; kind: string }) => `${route.kind}:${edgeKey(route.a, route.b)}`;
+	const initialEdges = new Set(untrack(() => view.edges.map(routeKey)));
+
+	const visibleCities = $derived(pack.cities.filter(city => view.cities[city.id]!.revealed));
+	const hiddenCities = $derived(pack.cities.filter(city => !view.cities[city.id]!.revealed && !city.lost));
 	// A city whose closest neighbour sits just north of it hangs its label below, so the two labels part instead of stacking.
 	const labelsBelow = $derived.by(() => {
 		const below = new Set<CityId>();
 		for (const city of visibleCities) {
-			const at = layout.get(city.id)!;
+			const at = layout[city.id]!;
 			let nearest: { dz: number; distance: number } | null = null;
 			for (const other of visibleCities) {
 				if (other.id === city.id) continue;
-				const point = layout.get(other.id)!;
+				const point = layout[other.id]!;
 				const distance = Math.hypot(point.x - at.x, point.z - at.z);
 				if (distance < 13 && (!nearest || distance < nearest.distance)) nearest = { dz: point.z - at.z, distance };
 			}
@@ -90,7 +91,7 @@
 		return view.pawns.map(pawn => {
 			const slot = perCity.get(pawn.city) ?? 0;
 			perCity.set(pawn.city, slot + 1);
-			return { pawn, slot, at: layout.get(pawn.city)! };
+			return { pawn, slot, at: layout[pawn.city]! };
 		});
 	});
 </script>
@@ -127,7 +128,7 @@
 
 <T.Mesh position={[boardCentre.x, -1.6, boardCentre.z]} receiveShadow>
 	<T.BoxGeometry args={[boardSize.width + 3, 3, boardSize.depth + 3]} />
-	<T.MeshStandardMaterial color="#1a1f25" roughness={0.9} />
+	<T.MeshStandardMaterial color="#141a20" roughness={0.9} />
 </T.Mesh>
 
 <T.Mesh
@@ -137,34 +138,33 @@
 	onpointermove={event => onpointer?.({ x: event.point.x, z: event.point.z })}
 >
 	<T.PlaneGeometry args={[boardSize.width, boardSize.depth]} />
-	<T.MeshStandardMaterial color="#17425c" roughness={0.35} metalness={0.15} />
+	<T.MeshStandardMaterial color="#143a52" roughness={0.35} metalness={0.15} />
 </T.Mesh>
 
 <T.Mesh geometry={landGeometry} receiveShadow castShadow>
-	<T.MeshStandardMaterial color="#b9b08f" roughness={0.95} flatShading />
+	<T.MeshStandardMaterial color="#b3ab8c" roughness={0.95} flatShading />
 </T.Mesh>
 
-{#each visibleRoutes as route (route.id)}
-	<RouteTube
-		{route}
-		from={layout.get(route.a)!}
-		to={layout.get(route.b)!}
-		established={view.established.has(route.id)}
-	/>
+{#each view.ghostEdges as route (`ghost:${routeKey(route)}`)}
+	<RouteTube {route} from={layout[route.a]!} to={layout[route.b]!} ghost />
+{/each}
+
+{#each view.edges as route (routeKey(route))}
+	<RouteTube {route} from={layout[route.a]!} to={layout[route.b]!} animate={!initialEdges.has(routeKey(route))} />
 {/each}
 
 {#each visibleCities as city (city.id)}
 	<CityMarker
 		{city}
-		at={layout.get(city.id)!}
+		at={layout[city.id]!}
 		state={view.cities[city.id]!}
 		labelBelow={labelsBelow.has(city.id)}
 		onselect={() => oncity?.(city.id)}
 	/>
 {/each}
 
-{#each foggedCities as city, index (city.id)}
-	<Cloud at={layout.get(city.id)!} seed={index} />
+{#each hiddenCities as city, index (city.id)}
+	<Cloud at={layout[city.id]!} seed={index} />
 {/each}
 
 {#each pawnSlots as { pawn, slot, at } (pawn.id)}
@@ -173,4 +173,8 @@
 
 {#each view.cursors as cursor (cursor.id)}
 	<RemoteCursor {cursor} />
+{/each}
+
+{#each view.fx as fx (fx.id)}
+	<Pulse at={layout[fx.city]!} kind={fx.kind} delay={fx.delay} />
 {/each}

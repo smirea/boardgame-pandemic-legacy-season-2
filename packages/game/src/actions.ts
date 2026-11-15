@@ -1,0 +1,751 @@
+import { pack } from './content/pack';
+import type { ActionId, CityDef, CompanionId, EdgeKind, SearchResult } from './content/types';
+import { drawPiled } from './decks';
+import { bump, kill, movePawn, setProgress, settleGrid } from './flow';
+import {
+	cardValue,
+	characterOf,
+	cityDef,
+	crossesSupplyLine,
+	discardFromHand,
+	grid,
+	has,
+	hasEdge,
+	hasRule,
+	isCandidate,
+	isForsaken,
+	log,
+	neighbours,
+	overLimit,
+	player,
+	removeFromHand,
+	seaRoute,
+} from './helpers';
+import type { CardId, CityId, SeatId } from './ids';
+import { openBundle } from './legacy';
+import type { Campaign, Game, GameLocation, Player, World } from './state';
+
+export type Action =
+	| { a: 'drive'; to: CityId; card?: CardId }
+	| { a: 'sail'; card: CardId }
+	| { a: 'charter'; card: CardId; to: CityId }
+	| { a: 'captainSail'; card: CardId; to: CityId }
+	| { a: 'makeSupplies' }
+	| { a: 'produce'; card: CardId; mode: 'local' | 'system' }
+	| { a: 'deliver'; count: number; to?: CityId }
+	| { a: 'share'; card: CardId; with: SeatId; give: boolean }
+	| { a: 'buildCenter'; cards: CardId[]; laborer?: boolean; moveFrom?: CityId }
+	| { a: 'recon'; route: string; cards: CardId[] }
+	| { a: 'establishLine'; to: CityId }
+	| { a: 'chartLane'; to: CityId }
+	| { a: 'search'; card: CardId; box: number }
+	| { a: 'shuttle'; to: CityId }
+	| { a: 'buildTower' }
+	| { a: 'transmit'; card: CardId; to: SeatId }
+	| { a: 'monitor'; frequency: number }
+	| { a: 'broadcast'; from: CityId; to: CityId }
+	| { a: 'buildShelter'; card?: CardId }
+	| { a: 'administratorMove'; pawn: SeatId; to: SeatId }
+	| { a: 'sabotage'; card: CardId; city: CityId }
+	| { a: 'broker'; card: CardId; take: CardId }
+	| { a: 'selfInject' }
+	| { a: 'pickUp'; count: number }
+	| { a: 'transfer'; with: SeatId; count: number; give: boolean }
+	| { a: 'inoculate'; card: CardId }
+	| { a: 'salvage'; discard: CardId[]; take: CardId }
+	| { a: 'destroyInfection'; card: CardId };
+
+type Ctx = {
+	world: World;
+	campaign: Campaign;
+	game: Game;
+	seat: SeatId;
+	me: Player;
+	here: CityId;
+	loc: GameLocation;
+	def: CityDef;
+};
+
+type Spec<A> = {
+	/** Actions granted by a job or ability are available without a campaign unlock. */
+	trait?: Parameters<typeof has>[2];
+	free?: boolean;
+	/** Reveals hidden information, so the turn's undo history ends here. */
+	reveals?: boolean;
+	cost?: (ctx: Ctx, action: A) => number;
+	check: (ctx: Ctx, action: A) => string | null;
+	apply: (ctx: Ctx, action: A) => void;
+};
+
+const numbers = pack.numbers;
+const ok = null;
+
+function cityCard(ctx: Ctx, id: CardId, where: 'hand' | 'discard' = 'hand') {
+	const pile = where === 'hand' ? ctx.me.hand : ctx.game.playerDiscard;
+	const card = ctx.campaign.playerCards[id];
+	return pile.includes(id) && card?.kind === 'city' ? card : null;
+}
+
+const distinct = (ids: CardId[]) => new Set(ids).size === ids.length;
+const useOnce = (ctx: Ctx, key: string) => ctx.me.used.push(key);
+const unused = (ctx: Ctx, key: string) => !ctx.me.used.includes(key);
+const trait = (ctx: Ctx, id: Parameters<typeof has>[2]) => has(ctx.world, ctx.seat, id);
+
+function spendCubes(ctx: Ctx, amount: number) {
+	ctx.me.supplies -= amount;
+	ctx.game.stockpile += amount;
+}
+
+function structureCities(game: Game, kind: 'center' | 'tower' | 'shelter'): CityId[] {
+	return (Object.keys(game.locations) as CityId[]).filter(id => game.locations[id]![kind]);
+}
+
+function fillTargets(ctx: Ctx, mode: 'local' | 'system'): CityId[] {
+	if (mode === 'local') return [ctx.here];
+	const onGrid = grid(ctx.campaign);
+	const others = pack.cities
+		.filter(
+			city =>
+				onGrid.has(city.id) && city.id !== ctx.here && (city.kind === 'haven' || ctx.game.locations[city.id]!.center),
+		)
+		.map(city => city.id);
+	return [ctx.here, ...others];
+}
+
+const shortfall = (ctx: Ctx, city: CityId) =>
+	Math.max(0, ctx.campaign.locations[city]!.population - ctx.game.locations[city]!.supplies);
+
+function centerCost(ctx: Ctx, laborer: boolean) {
+	return (
+		(laborer ? numbers.costs.center - 1 : numbers.costs.center) -
+		(trait(ctx, 'architect') ? 1 : 0) -
+		(trait(ctx, 'builder') ? 1 : 0)
+	);
+}
+
+function edgeCost(ctx: Ctx, kind: EdgeKind) {
+	if (kind === 'land')
+		return Math.max(0, numbers.costs.line + (trait(ctx, 'lineExtraCube') ? 1 : 0) - (trait(ctx, 'lineman') ? 1 : 0));
+	if (trait(ctx, 'navigator') && unused(ctx, 'navigator')) return 0;
+	return numbers.costs.lane + (trait(ctx, 'laneExtraCube') ? 1 : 0);
+}
+
+export function checkEdge(
+	campaign: Campaign,
+	from: CityId,
+	to: CityId,
+	kind: EdgeKind,
+	ignoreRegions = false,
+): string | null {
+	const target = cityDef(to);
+	const origin = cityDef(from);
+	if (from === to || !campaign.locations[to]?.revealed) return 'Pick a revealed location';
+	if (hasEdge(campaign, from, to)) return 'Those are already joined';
+	if (!grid(campaign).has(from)) return 'Start from a location on the grid';
+	if (kind === 'land') {
+		if (origin.kind !== 'city' || target.kind !== 'city') return 'Supply lines join cities';
+		if (!isCandidate(from, to, 'land')) return 'No land route between them';
+		return crossesSupplyLine(campaign, from, to) ? 'It would cross another supply line' : ok;
+	}
+	if (!origin.port || !target.port) return 'Sea lanes join ports';
+	if (!isCandidate(from, to, 'sea')) return 'No sea route between them';
+	const regions = pack.regions.find(region => region.id === origin.region)!;
+	const near = origin.region === target.region || regions.neighbours.includes(target.region);
+	return near || ignoreRegions ? ok : 'A sea lane may cross only one region boundary';
+}
+
+export function addEdge(world: World, a: CityId, b: CityId, kind: EdgeKind, countsForObjective: boolean) {
+	const before = grid(world.campaign);
+	world.campaign.edges.push({ a, b, kind });
+	log(world.game!, { t: 'edge', a, b, kind });
+	settleGrid(world, before, countsForObjective);
+}
+
+function giveCompanion(ctx: Ctx, companion: CompanionId) {
+	const id = `${companion}#${ctx.campaign.nextCardId++}` as CardId;
+	ctx.campaign.playerCards[id] = { id, kind: 'companion', companion };
+	ctx.me.hand.push(id);
+}
+
+function resolveSearch(ctx: Ctx, result: SearchResult) {
+	const { game, campaign } = ctx;
+	switch (result.t) {
+		case 'supplies': {
+			const amount = Math.min(result.amount, game[result.from]);
+			game[result.from] -= amount;
+			ctx.loc.supplies += amount;
+			return;
+		}
+		case 'stockpile': {
+			const amount = Math.min(result.amount, game.reserve);
+			game.reserve -= amount;
+			game.stockpile += amount;
+			return;
+		}
+		case 'actions':
+			game.actionsLeft += result.amount;
+			return;
+		case 'retrieve':
+			if (game.playerDiscard.some(id => campaign.playerCards[id]?.kind !== 'epidemic'))
+				game.pending.push({ t: 'retrieve', seat: ctx.seat, filter: 'any' });
+			return;
+		case 'quarantineCard':
+			if (game.infectionDiscard.some(id => campaign.infectionCards[id]?.kind === 'city'))
+				game.pending.push({ t: 'quarantineCard', seat: ctx.seat });
+			return;
+		case 'removeHollow':
+			if (Object.values(game.locations).some(location => location.hollow > 0))
+				game.pending.push({ t: 'removeHollow', seat: ctx.seat, amount: result.amount });
+			return;
+		case 'freeEdge':
+			game.pending.push({ t: 'freeEdge', seat: ctx.seat, kind: result.kind, ignoreRegions: false });
+			return;
+		case 'discover':
+			if (campaign.opened.includes(result.bundle)) game.actionsLeft += 1;
+			else openBundle(ctx.world, result.bundle, false);
+			return;
+		case 'companion':
+			return giveCompanion(ctx, result.companion);
+		case 'infest':
+			campaign.locations[ctx.here]!.infested = true;
+			return;
+		case 'nothing':
+			return;
+	}
+}
+
+const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
+	drive: {
+		cost: ctx => (trait(ctx, 'helmsman') && unused(ctx, 'helmsman') ? 0 : 1),
+		check(ctx, { to, card }) {
+			if (!neighbours(ctx.campaign, ctx.here).includes(to)) return 'Not adjacent';
+			if (!characterOf(ctx.world, ctx.seat).carrier || cityDef(to).kind === 'haven') return ok;
+			const paid = card ? cityCard(ctx, card) : null;
+			return paid && cityDef(paid.city).color === cityDef(to).color
+				? ok
+				: "The carrier must discard a card of the destination's colour";
+		},
+		apply(ctx, { to, card }) {
+			if (trait(ctx, 'helmsman') && unused(ctx, 'helmsman')) useOnce(ctx, 'helmsman');
+			if (card && characterOf(ctx.world, ctx.seat).carrier && cityDef(to).kind === 'city')
+				discardFromHand(ctx.game, ctx.seat, card);
+			movePawn(ctx.world, ctx.seat, to, 'drive');
+		},
+	},
+	sail: {
+		check(ctx, { card }) {
+			const paid = cityCard(ctx, card);
+			if (!paid) return 'Pick a City card from your hand';
+			if (!ctx.def.port || !cityDef(paid.city).port) return 'Both ends must be ports';
+			return seaRoute(ctx.campaign, ctx.here).has(paid.city) ? ok : 'No sea route reaches that city';
+		},
+		apply(ctx, { card }) {
+			const target = cityCard(ctx, card)!.city;
+			discardFromHand(ctx.game, ctx.seat, card);
+			movePawn(ctx.world, ctx.seat, target, 'sail');
+		},
+	},
+	charter: {
+		check(ctx, { card, to }) {
+			if (cityCard(ctx, card)?.city !== ctx.here) return "Discard the card of the city you're in";
+			return seaRoute(ctx.campaign, ctx.here).has(to) ? ok : 'No sea route reaches that port';
+		},
+		apply(ctx, { card, to }) {
+			discardFromHand(ctx.game, ctx.seat, card);
+			movePawn(ctx.world, ctx.seat, to, 'charter');
+		},
+	},
+	captainSail: {
+		trait: 'captain',
+		check(ctx, { card, to }) {
+			if (!cityCard(ctx, card)) return 'Pick a City card from your hand';
+			return seaRoute(ctx.campaign, ctx.here).has(to) ? ok : 'No sea route reaches that port';
+		},
+		apply(ctx, { card, to }) {
+			discardFromHand(ctx.game, ctx.seat, card);
+			movePawn(ctx.world, ctx.seat, to, 'sail');
+		},
+	},
+	makeSupplies: {
+		check: ctx => (ctx.game[trait(ctx, 'immunologist') ? 'reserve' : 'stockpile'] > 0 ? ok : 'No cubes left to take'),
+		apply(ctx) {
+			ctx.game[trait(ctx, 'immunologist') ? 'reserve' : 'stockpile'] -= 1;
+			ctx.me.supplies += 1;
+			useOnce(ctx, 'farmerReady');
+		},
+	},
+	produce: {
+		check(ctx, { card, mode }) {
+			if (!ctx.me.hand.includes(card) || ctx.campaign.playerCards[card]?.kind !== 'produce')
+				return 'Pick a Produce Supplies card';
+			if (ctx.def.kind !== 'haven' && !ctx.loc.center) return 'Stand in a haven or a supply center city';
+			if (mode === 'system' && ctx.campaign.month === 0)
+				return 'System-wide production is not available in the prologue';
+			const needed = fillTargets(ctx, mode).reduce((sum, city) => sum + shortfall(ctx, city), 0);
+			return needed > 0 && ctx.game.stockpile > 0 ? ok : 'Nothing would be produced';
+		},
+		apply(ctx, { card, mode }) {
+			for (const city of fillTargets(ctx, mode)) {
+				const amount = Math.min(shortfall(ctx, city), ctx.game.stockpile);
+				ctx.game.stockpile -= amount;
+				ctx.game.locations[city]!.supplies += amount;
+			}
+			removeFromHand(ctx.game, ctx.seat, card);
+			const produce = ctx.campaign.playerCards[card]!;
+			if (mode === 'system' && produce.kind === 'produce' && --produce.boxesLeft <= 0)
+				delete ctx.campaign.playerCards[card];
+			else ctx.game.playerDiscard.push(card);
+		},
+	},
+	deliver: {
+		cost: ctx => (trait(ctx, 'farmer') && ctx.me.used.at(-1) === 'farmerReady' && unused(ctx, 'farmer') ? 0 : 1),
+		check(ctx, { count, to }) {
+			if (!Number.isInteger(count) || count < 1 || count > ctx.me.supplies) return 'You do not hold that many cubes';
+			if (!to || to === ctx.here) return ok;
+			return trait(ctx, 'courier') && neighbours(ctx.campaign, ctx.here).includes(to)
+				? ok
+				: 'Deliver to your own location';
+		},
+		apply(ctx, { count, to }) {
+			if (trait(ctx, 'farmer') && ctx.me.used.at(-1) === 'farmerReady' && unused(ctx, 'farmer')) useOnce(ctx, 'farmer');
+			ctx.me.supplies -= count;
+			ctx.game.locations[to ?? ctx.here]!.supplies += count;
+		},
+	},
+	share: {
+		check(ctx, action) {
+			const other = ctx.game.players[action.with];
+			if (!other || action.with === ctx.seat || other.location !== ctx.here)
+				return 'Both pawns must be in the same location';
+			const giver = action.give ? ctx.seat : action.with;
+			if (!player(ctx.game, giver).hand.includes(action.card)) return 'The giver does not hold that card';
+			if (has(ctx.world, giver, 'instructor')) return ok;
+			const card = ctx.campaign.playerCards[action.card];
+			return card?.kind === 'city' && card.city === ctx.here ? ok : "Only this city's card can be shared here";
+		},
+		apply(ctx, action) {
+			const [giver, receiver] = action.give ? [ctx.seat, action.with] : [action.with, ctx.seat];
+			removeFromHand(ctx.game, giver, action.card);
+			player(ctx.game, receiver).hand.push(action.card);
+		},
+	},
+	buildCenter: {
+		check(ctx, { cards, laborer = false, moveFrom }) {
+			const color = ctx.def.color;
+			if (ctx.def.kind !== 'city' || !color) return 'Supply centers go in cities';
+			if (ctx.loc.center) return 'This city already has a supply center';
+			if (laborer && (!trait(ctx, 'laborer') || ctx.me.supplies < 2))
+				return 'The laborer option needs the job and 2 cubes';
+			if (!distinct(cards) || !cards.every(card => ctx.me.hand.includes(card))) return 'Pick cards from your hand';
+			const values = cards.map(card => cardValue(ctx.campaign, card, color, 'build'));
+			const total = values.reduce((sum, value) => sum + value, 0);
+			const needed = centerCost(ctx, laborer);
+			if (values.includes(0) || total < needed) return `Needs ${needed} ${color} cards`;
+			if (total - Math.min(...values) >= needed) return 'That is more cards than needed';
+			if (ctx.game.pieces.center > 0) return ok;
+			if (!moveFrom || !ctx.game.locations[moveFrom]?.center) return 'Every supply center is placed: pick one to move';
+			return ctx.campaign.locations[moveFrom]!.permanent.includes('center')
+				? 'A permanent supply center cannot move'
+				: ok;
+		},
+		apply(ctx, { cards, laborer = false, moveFrom }) {
+			for (const card of cards) discardFromHand(ctx.game, ctx.seat, card);
+			if (laborer) spendCubes(ctx, 2);
+			const isNew = ctx.game.pieces.center > 0;
+			if (isNew) {
+				ctx.game.pieces.center -= 1;
+				ctx.game.centersBuilt += 1;
+			} else {
+				ctx.game.locations[moveFrom!]!.center = false;
+			}
+			ctx.loc.center = true;
+			log(ctx.game, { t: 'structure', city: ctx.here, structure: 'center' });
+			if (isNew) {
+				bump(ctx.world, 'buildCenters');
+				bump(ctx.world, 'prologueCenters');
+			}
+		},
+	},
+	recon: {
+		reveals: true,
+		check(ctx, { route: routeId, cards }) {
+			const route = pack.reconRoutes.find(candidate => candidate.id === routeId);
+			if (!route || !ctx.campaign.routes.includes(routeId)) return 'That recon route is not known';
+			if (ctx.campaign.month === 0) return 'Recon is not available in the prologue';
+			if (ctx.campaign.opened.includes(route.opens)) return 'Already reconned';
+			if (route.city !== ctx.here) return "Stand in the route's city";
+			if (route.needsCenter && !ctx.loc.center && !trait(ctx, 'scout')) return 'The city needs a supply center';
+			const needed = Math.max(
+				1,
+				route.count + (trait(ctx, 'reconExtraCard') ? 1 : 0) - (trait(ctx, 'surveyor') ? 1 : 0),
+			);
+			if (cards.length !== needed || !distinct(cards)) return `Needs ${needed} ${route.color} cards`;
+			const paid = cards.map(card => cityCard(ctx, card));
+			if (paid.some((card, index) => !card || cardValue(ctx.campaign, cards[index]!, route.color, 'recon') === 0))
+				return `Needs ${needed} ${route.color} cards`;
+			if (route.unique && new Set(paid.map(card => card!.city)).size !== paid.length)
+				return 'Each card must name a different city';
+			return ok;
+		},
+		apply(ctx, { route: routeId, cards }) {
+			const route = pack.reconRoutes.find(candidate => candidate.id === routeId)!;
+			for (const card of cards) discardFromHand(ctx.game, ctx.seat, card);
+			const connectedBefore = ctx.game.connectedThisGame.length;
+			openBundle(ctx.world, route.opens, false);
+			for (const objective of route.counts) bump(ctx.world, objective);
+			const joined = ctx.game.connectedThisGame
+				.slice(connectedBefore)
+				.filter(city => cityDef(city).kind === 'city').length;
+			if (joined) bump(ctx.world, 'connectCities', joined);
+		},
+	},
+	establishLine: {
+		check(ctx, { to }) {
+			const cost = edgeCost(ctx, 'land');
+			return (
+				checkEdge(ctx.campaign, ctx.here, to, 'land') ??
+				(ctx.me.supplies >= cost ? ok : `Needs ${cost} cubes on your character`)
+			);
+		},
+		apply(ctx, { to }) {
+			spendCubes(ctx, edgeCost(ctx, 'land'));
+			addEdge(ctx.world, ctx.here, to, 'land', true);
+		},
+	},
+	chartLane: {
+		check(ctx, { to }) {
+			const cost = edgeCost(ctx, 'sea');
+			return (
+				checkEdge(ctx.campaign, ctx.here, to, 'sea') ??
+				(ctx.me.supplies >= cost ? ok : `Needs ${cost} cubes on your character`)
+			);
+		},
+		apply(ctx, { to }) {
+			const cost = edgeCost(ctx, 'sea');
+			if (trait(ctx, 'navigator') && unused(ctx, 'navigator')) useOnce(ctx, 'navigator');
+			spendCubes(ctx, cost);
+			addEdge(ctx.world, ctx.here, to, 'sea', true);
+		},
+	},
+	search: {
+		reveals: true,
+		cost: ctx => (trait(ctx, 'tracker') ? 0 : 1),
+		check(ctx, { card, box }) {
+			const held = cityCard(ctx, card) ?? (trait(ctx, 'lookout') ? cityCard(ctx, card, 'discard') : null);
+			if (held?.city !== ctx.here) return "Hold this city's card to search here";
+			return held.search[box] && !held.search[box].scratched ? ok : 'That search box is used up';
+		},
+		apply(ctx, { card, box }) {
+			const held = ctx.campaign.playerCards[card]!;
+			if (held.kind !== 'city') return;
+			const target = held.search[box]!;
+			target.scratched = true;
+			ctx.game.searches += 1;
+			log(ctx.game, { t: 'search', seat: ctx.seat, city: ctx.here, result: target.result.t });
+			resolveSearch(ctx, target.result);
+			bump(ctx.world, 'searches');
+			if (trait(ctx, 'searchDiscard') && ctx.me.hand.length > 0)
+				ctx.game.pending.push({ t: 'discard', seat: ctx.seat, count: 1 });
+		},
+	},
+	shuttle: {
+		check(ctx, { to }) {
+			const usable = (city: CityId) =>
+				(cityDef(city).kind === 'haven' || ctx.game.locations[city]!.center) && !isForsaken(ctx.campaign, city);
+			if (to === ctx.here || !usable(ctx.here) || !usable(to)) return 'Shuttles fly between havens and supply centers';
+			return grid(ctx.campaign).has(to) ? ok : 'That location is not on the grid';
+		},
+		apply: (ctx, { to }) => void movePawn(ctx.world, ctx.seat, to, 'shuttle'),
+	},
+	buildTower: {
+		check(ctx) {
+			if (ctx.def.kind !== 'city' || ctx.loc.tower) return 'Pick a city without a tower';
+			if (ctx.game.pieces.tower === 0) return 'No tower pieces left';
+			const cost = Math.max(0, numbers.costs.tower - (trait(ctx, 'rigger') ? 1 : 0));
+			return ctx.me.supplies >= cost ? ok : `Needs ${cost} cubes on your character`;
+		},
+		apply(ctx) {
+			spendCubes(ctx, Math.max(0, numbers.costs.tower - (trait(ctx, 'rigger') ? 1 : 0)));
+			ctx.game.pieces.tower -= 1;
+			ctx.loc.tower = true;
+			log(ctx.game, { t: 'structure', city: ctx.here, structure: 'tower' });
+			setProgress(
+				ctx.world,
+				'triangulate',
+				new Set(structureCities(ctx.game, 'tower').map(city => cityDef(city).color)).size,
+			);
+		},
+	},
+	transmit: {
+		check(ctx, { card, to }) {
+			if (!ctx.loc.tower) return 'Stand in a city with a tower';
+			if (!ctx.game.players[to] || to === ctx.seat) return 'Pick another player';
+			const held = cityCard(ctx, card);
+			return held && cityDef(held.city).color === ctx.def.color ? ok : "Send a City card of the tower city's colour";
+		},
+		apply(ctx, { card, to }) {
+			removeFromHand(ctx.game, ctx.seat, card);
+			player(ctx.game, to).hand.push(card);
+		},
+	},
+	monitor: {
+		reveals: true,
+		check(ctx, { frequency }) {
+			if (!ctx.loc.tower) return 'Stand in a city with a tower';
+			const valid = Number.isInteger(frequency) && frequency >= 0 && frequency < pack.frequencies.length;
+			return valid && !ctx.campaign.frequenciesUsed.includes(frequency) ? ok : 'That frequency is used up';
+		},
+		apply(ctx, { frequency }) {
+			for (let i = 0; i < 4 && ctx.game.playerDeck.order.length > 0; i++) {
+				ctx.game.playerDiscard.push(
+					drawPiled(ctx.game.playerDeck, card => ctx.campaign.playerCards[card]!.kind === 'epidemic')!,
+				);
+			}
+			ctx.campaign.frequenciesUsed.push(frequency);
+			const bundle = pack.frequencies[frequency];
+			if (bundle) openBundle(ctx.world, bundle, false);
+		},
+	},
+	broadcast: {
+		check(ctx, { from, to }) {
+			if (!ctx.loc.tower) return 'Stand in a city with a tower';
+			const source = ctx.game.locations[from];
+			if (!source || source.hollow === 0 || cityDef(from).color !== ctx.def.color)
+				return "Pick Hollow Men in a city of the tower city's colour";
+			if (!neighbours(ctx.campaign, from).includes(to)) return 'Move them to an adjacent location';
+			return ctx.game.locations[to]!.hollow < numbers.maxHollowPerCity ? ok : 'That location is full';
+		},
+		apply(ctx, { from, to }) {
+			ctx.game.locations[from]!.hollow -= 1;
+			ctx.game.locations[to]!.hollow += 1;
+			const inHavens = pack.cities
+				.filter(city => city.kind === 'haven')
+				.reduce((sum, city) => sum + ctx.game.locations[city.id]!.hollow, 0);
+			setProgress(ctx.world, 'defect', inHavens);
+		},
+	},
+	buildShelter: {
+		check(ctx, { card }) {
+			if (ctx.loc.shelter) return 'There is already a shelter here';
+			if (ctx.game.pieces.shelter === 0) return 'No shelter pieces left';
+			if (trait(ctx, 'vectorControl')) return ok;
+			const held = card ? cityCard(ctx, card) : null;
+			return ctx.def.kind === 'city' && held && cityDef(held.city).color === ctx.def.color
+				? ok
+				: "Discard a City card of this city's colour";
+		},
+		apply(ctx, { card }) {
+			if (card && !trait(ctx, 'vectorControl')) discardFromHand(ctx.game, ctx.seat, card);
+			ctx.game.pieces.shelter -= 1;
+			ctx.loc.shelter = true;
+			log(ctx.game, { t: 'structure', city: ctx.here, structure: 'shelter' });
+		},
+	},
+	administratorMove: {
+		trait: 'administrator',
+		check(ctx, { pawn, to }) {
+			const moved = ctx.game.players[pawn];
+			const target = ctx.game.players[to];
+			if (!unused(ctx, 'administrator')) return 'Once per turn';
+			if (!moved || !target || moved.location === target.location) return 'Pick two pawns in different locations';
+			return characterOf(ctx.world, pawn).carrier ? 'The carrier cannot be moved' : ok;
+		},
+		apply(ctx, { pawn, to }) {
+			useOnce(ctx, 'administrator');
+			movePawn(ctx.world, pawn, player(ctx.game, to).location, 'administrator');
+		},
+	},
+	sabotage: {
+		trait: 'saboteur',
+		check(ctx, { card, city }) {
+			const held = cityCard(ctx, card);
+			if (!held) return 'Pick a City card from your hand';
+			const target = ctx.game.locations[city];
+			return target && target.hollow > 0 && cityDef(city).color === cityDef(held.city).color
+				? ok
+				: "Pick Hollow Men in a city of the card's colour";
+		},
+		apply(ctx, { card, city }) {
+			discardFromHand(ctx.game, ctx.seat, card);
+			ctx.game.locations[city]!.hollow -= 1;
+			ctx.game.pieces.hollow += 1;
+		},
+	},
+	broker: {
+		trait: 'broker',
+		check(ctx, { card, take }) {
+			const paid = cityCard(ctx, card);
+			const wanted = cityCard(ctx, take, 'discard');
+			return paid && wanted && cityDef(paid.city).color === cityDef(wanted.city).color
+				? ok
+				: 'Trade for a City card of the same colour';
+		},
+		apply(ctx, { card, take }) {
+			ctx.game.playerDiscard.splice(ctx.game.playerDiscard.indexOf(take), 1);
+			discardFromHand(ctx.game, ctx.seat, card);
+			ctx.me.hand.push(take);
+		},
+	},
+	selfInject: {
+		reveals: true,
+		check(ctx) {
+			const character = characterOf(ctx.world, ctx.seat);
+			if (!hasRule(ctx.campaign, 'carrier') || ctx.here !== pack.sampleFrom) return 'The sample is not here';
+			return character.worker || character.carrier ? 'This character cannot carry the sample' : ok;
+		},
+		apply(ctx) {
+			const character = characterOf(ctx.world, ctx.seat);
+			for (;;) {
+				const box = character.exposureTrack[character.exposure] ?? 'skull';
+				character.exposure += 1;
+				log(ctx.game, { t: 'exposure', seat: ctx.seat, result: box });
+				if (box === 'skull') return kill(ctx.world, ctx.seat);
+				if (box !== 'scar') continue;
+				character.carrier = true;
+				let covered = 0;
+				character.slots = character.slots.map(slot =>
+					slot?.kind !== 'scar' && covered++ < 2 ? { kind: 'scar', id: 'carrier' } : slot,
+				);
+				return;
+			}
+		},
+	},
+	pickUp: {
+		free: true,
+		check: (ctx, { count }) =>
+			Number.isInteger(count) && count >= 1 && count <= ctx.loc.supplies ? ok : 'Not that many cubes here',
+		apply(ctx, { count }) {
+			ctx.loc.supplies -= count;
+			ctx.me.supplies += count;
+		},
+	},
+	transfer: {
+		free: true,
+		check(ctx, action) {
+			const other = ctx.game.players[action.with];
+			if (!other || action.with === ctx.seat) return 'Pick another player';
+			const remote = trait(ctx, 'radioOperator') || has(ctx.world, action.with, 'radioOperator');
+			if (other.location !== ctx.here && !remote) return 'Both pawns must be in the same location';
+			const giver = action.give ? ctx.me : other;
+			return Number.isInteger(action.count) && action.count >= 1 && action.count <= giver.supplies
+				? ok
+				: 'The giver does not hold that many cubes';
+		},
+		apply(ctx, action) {
+			const other = player(ctx.game, action.with);
+			const [giver, receiver] = action.give ? [ctx.me, other] : [other, ctx.me];
+			giver.supplies -= action.count;
+			receiver.supplies += action.count;
+		},
+	},
+	inoculate: {
+		free: true,
+		check(ctx, { card }) {
+			const asPlayer = ctx.campaign.playerCards[card];
+			const asInfection = ctx.campaign.infectionCards[card];
+			if (ctx.game.playerDiscard.includes(card) && asPlayer?.kind === 'city' && asPlayer.city === ctx.here) {
+				return ctx.campaign.stored.player.length < numbers.storageCap ? ok : 'Storage is full';
+			}
+			if (ctx.game.infectionDiscard.includes(card) && asInfection?.kind === 'city' && asInfection.city === ctx.here) {
+				return ctx.campaign.stored.infection.length < numbers.storageCap ? ok : 'Storage is full';
+			}
+			return "Pick this city's card from a discard pile";
+		},
+		apply(ctx, { card }) {
+			const pile = ctx.game.playerDiscard.includes(card) ? 'player' : 'infection';
+			const discard = pile === 'player' ? ctx.game.playerDiscard : ctx.game.infectionDiscard;
+			discard.splice(discard.indexOf(card), 1);
+			ctx.campaign.stored[pile].push(card);
+		},
+	},
+	salvage: {
+		trait: 'sanitationOfficer',
+		free: true,
+		check(ctx, { discard, take }) {
+			if (discard.length !== 2 || !distinct(discard) || !discard.every(card => ctx.me.hand.includes(card)))
+				return 'Discard 2 cards from your hand';
+			const wanted = ctx.campaign.playerCards[take];
+			return ctx.game.playerDiscard.includes(take) && (wanted?.kind === 'city' || wanted?.kind === 'produce')
+				? ok
+				: 'Take a City or Produce Supplies card from the discard pile';
+		},
+		apply(ctx, { discard, take }) {
+			ctx.game.playerDiscard.splice(ctx.game.playerDiscard.indexOf(take), 1);
+			for (const card of discard) discardFromHand(ctx.game, ctx.seat, card);
+			ctx.me.hand.push(take);
+		},
+	},
+	destroyInfection: {
+		trait: 'scientist',
+		free: true,
+		check(ctx, { card }) {
+			const target = ctx.campaign.infectionCards[card];
+			if (!unused(ctx, 'scientist')) return 'Once per turn';
+			return ctx.game.infectionDiscard.includes(card) && target?.kind === 'city' && target.city === ctx.here
+				? ok
+				: "Pick this city's Infection card from the discard pile";
+		},
+		apply(ctx, { card }) {
+			useOnce(ctx, 'scientist');
+			ctx.game.infectionDiscard.splice(ctx.game.infectionDiscard.indexOf(card), 1);
+			delete ctx.campaign.infectionCards[card];
+		},
+	},
+};
+
+function context(world: World, seat: SeatId): Ctx {
+	const game = world.game!;
+	const me = player(game, seat);
+	return {
+		world,
+		campaign: world.campaign,
+		game,
+		seat,
+		me,
+		here: me.location,
+		loc: game.locations[me.location]!,
+		def: cityDef(me.location),
+	};
+}
+
+type AnySpec = Spec<Action>;
+const specFor = (action: Action) => specs[action.a] as unknown as AnySpec;
+
+export const actionReveals = (action: Action) => specFor(action).reveals ?? false;
+
+export function actionCost(world: World, seat: SeatId, action: Action): number {
+	const spec = specFor(action);
+	return spec.free ? 0 : (spec.cost?.(context(world, seat), action) ?? 1);
+}
+
+const MOVES = new Set<ActionId>(['sail', 'charter', 'captainSail', 'shuttle']);
+
+/** Null when the action is legal for the active player right now, otherwise the reason it is not. */
+export function checkAction(world: World, seat: SeatId, action: Action): string | null {
+	const game = world.game;
+	if (!game || game.outcome) return 'No game in progress';
+	if (seat !== game.active) return 'Not your turn';
+	if (game.pending.length || overLimit(world).length) return 'Resolve the pending choice first';
+	const spec = specFor(action);
+	if (!spec) return 'Unknown action';
+	const ctx = context(world, seat);
+	if (characterOf(world, seat).dead) return 'Choose a new character first';
+	if (spec.trait ? !trait(ctx, spec.trait) : !world.campaign.actions.includes(action.a))
+		return 'That action is not available';
+	if (isForsaken(world.campaign, ctx.here) && action.a !== 'drive')
+		return 'Only Drive or Ferry works in a forsaken city';
+	if (characterOf(world, seat).carrier && MOVES.has(action.a)) return 'The carrier moves only by Drive or Ferry';
+	if (actionCost(world, seat, action) > game.actionsLeft) return 'No actions left';
+	return spec.check(ctx, action);
+}
+
+export function applyAction(world: World, seat: SeatId, action: Action) {
+	const ctx = context(world, seat);
+	const cost = actionCost(world, seat, action);
+	ctx.game.actionsLeft -= cost;
+	if (action.a !== 'makeSupplies')
+		ctx.me.used = ctx.me.used.filter(key => key !== 'farmerReady' || action.a === 'deliver');
+	specFor(action).apply(ctx, action);
+	if (action.a === 'deliver') ctx.me.used = ctx.me.used.filter(key => key !== 'farmerReady');
+	log(ctx.game, { t: 'action', seat, action: action.a, detail: '' });
+}

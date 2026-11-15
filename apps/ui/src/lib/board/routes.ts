@@ -1,4 +1,5 @@
-import type { RouteDef } from '@repo/game';
+import type { EdgeDef } from '@repo/game';
+import { edgeKey } from '@repo/game';
 import { CatmullRomCurve3, Vector3 } from 'three';
 import type { BoardPoint } from './projection';
 import { LAND_HEIGHT } from './projection';
@@ -16,13 +17,13 @@ function hash(text: string) {
  * A route leaves each city at its rim, bows sideways by a per-route amount so parallel routes fan out,
  * and arcs above the board so it never cuts through land.
  */
-export function routeCurve(route: RouteDef, a: BoardPoint, b: BoardPoint) {
+export function routeCurve(route: EdgeDef, a: BoardPoint, b: BoardPoint) {
 	const dx = b.x - a.x;
 	const dz = b.z - a.z;
 	const length = Math.hypot(dx, dz);
 	const ux = dx / length;
 	const uz = dz / length;
-	const bow = (hash(route.id) - 0.5) * length * (route.kind === 'sea' ? 0.3 : 0.14);
+	const bow = (hash(edgeKey(route.a, route.b)) - 0.5) * length * (route.kind === 'sea' ? 0.3 : 0.14);
 	const peak = Math.min(4.5, 0.5 + length * (route.kind === 'sea' ? 0.07 : 0.035));
 	const inset = Math.min(CITY_RADIUS, length / 3);
 	const span = length - inset * 2;
