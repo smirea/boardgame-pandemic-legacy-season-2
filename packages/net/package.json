@@ -1,0 +1,17 @@
+{
+	"name": "@repo/net",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts",
+		"./signal-protocol": "./src/signal-protocol.ts",
+		"./package.json": "./package.json"
+	},
+	"scripts": {
+		"demo": "bun demo/serve.ts",
+		"e2e": "./e2e/run.ts"
+	},
+	"devDependencies": {
+		"playwright": "1.65.1"
+	}
+}

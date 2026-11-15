@@ -25,6 +25,7 @@
 		"**/generated",
 		"**/*.generated.ts",
 		"**/*.gen.ts",
-		"packages/shared/src/env.ts"
+		"packages/shared/src/env.ts",
+		"apps/signal/worker-configuration.d.ts"
 	]
 }
