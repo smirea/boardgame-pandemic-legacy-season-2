@@ -8,7 +8,17 @@ import {
 	purchaseCost,
 	reject,
 } from '@repo/game';
-import type { CardId, CharacterId, CityId, Command, JobId, ObjectiveId, PublicState, SeatId } from '@repo/game';
+import type {
+	CardId,
+	CharacterId,
+	CityId,
+	Command,
+	JobId,
+	ObjectiveId,
+	PublicState,
+	Purchase,
+	SeatId,
+} from '@repo/game';
 import { enc, human, isCity } from './names.ts';
 
 /** One player at the table, as the lab sees them. Seats follow the order of the config. */
@@ -78,7 +88,7 @@ export function optionsFor(state: PublicState, who: Who, seating: (CharacterId |
 				add(
 					keyOf(`buy:${purchase.t}`, purchase, 't'),
 					`buy ${purchase.t}`,
-					describe(state, purchase, 't'),
+					`${describe(state, purchase, 't')} · ${purchaseText(purchase)}`,
 					{ type: 'PURCHASE', purchase },
 					purchaseCost(purchase),
 				);
@@ -102,14 +112,20 @@ export function optionsFor(state: PublicState, who: Who, seating: (CharacterId |
 		add('infect', 'flow', 'flip one Infection card', { type: 'INFECT' });
 		if (state.canUndo) add('undo', 'flow', 'take back your last action', { type: 'UNDO' });
 	}
-	for (const { seat, card, play } of legalPlays(world)) {
+	for (const { seat, card, play } of legalPlays(world, phase)) {
 		if (seat !== who.seat) continue;
-		add(keyOf(`play:${enc(card)}`, play, 'e'), `play ${play.e}`, describe(state, play, 'e') || 'no target', {
-			type: 'PLAY',
-			seat,
-			card,
-			play,
-		});
+		const text = [...pack.events, ...pack.companions].find(entry => entry.id === play.e)?.text ?? '';
+		add(
+			keyOf(`play:${enc(card)}`, play, 'e'),
+			`play ${play.e}`,
+			[describe(state, play, 'e'), text].filter(Boolean).join(' · '),
+			{
+				type: 'PLAY',
+				seat,
+				card,
+				play,
+			},
+		);
 	}
 	for (const decide of legalDecides(world)) {
 		const named = 'seat' in decide && decide.seat !== undefined;
@@ -127,6 +143,23 @@ export function optionsFor(state: PublicState, who: Who, seating: (CharacterId |
 	for (const id of game.infectionDiscard)
 		add(`lockdown:${enc(id)}`, 'lockdown', `destroy ${human(world, id)}`, { type: 'LOCKDOWN', card: id });
 	return options;
+}
+
+function purchaseText(purchase: Purchase): string {
+	switch (purchase.t) {
+		case 'ability':
+			return pack.abilities.find(ability => ability.id === purchase.ability)!.text;
+		case 'cityImprovement':
+			return pack.cityImprovements.find(item => item.id === purchase.improvement)!.text;
+		case 'infectionImprovement':
+			return pack.infectionImprovements.find(item => item.id === purchase.improvement)!.text;
+		case 'population':
+			return 'Raise the population by 1.';
+		case 'restore':
+			return 'Bring a forsaken city back to population 1.';
+		case 'permanent':
+			return `This ${purchase.structure} starts every later game already built.`;
+	}
 }
 
 export type Verb =

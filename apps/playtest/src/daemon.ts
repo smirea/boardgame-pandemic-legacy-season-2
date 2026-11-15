@@ -7,8 +7,8 @@
 import { appendFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { newCampaign, parseSave, reject, scenarios } from '@repo/game';
-import type { CharacterId, Command, PublicState, Save } from '@repo/game';
+import { newCampaign, overLimit, parseSave, reject, scenarios } from '@repo/game';
+import type { CharacterId, Command, PublicState, Save, SeatId } from '@repo/game';
 import { newAudit, observe, renderParity, untouched } from './audit.ts';
 import type { Audit, Issue } from './audit.ts';
 import { writeBriefs } from './brief.ts';
@@ -331,6 +331,21 @@ function needs(state: PublicState, who: Who): string[] {
 	return out;
 }
 
+/** Why the game cannot move on, when the reason is another player's to clear. */
+function blockedBy(state: PublicState, who: Who): string | null {
+	const { world } = state;
+	const game = world.game;
+	if (!game || !state.phase.startsWith('playing')) return null;
+	const name = (seat: SeatId) => world.campaign.characters[game.players[seat]!.character]?.name ?? seat;
+	const pending = game.pending[0];
+	if (pending && 'seat' in pending && pending.seat && pending.seat !== who.seat)
+		return `the game waits on ${name(pending.seat)} to answer a choice (${pending.t}). Nothing else can happen until they do.`;
+	const over = overLimit(world).filter(seat => seat !== who.seat);
+	if (over.length)
+		return `${over.map(name).join(' and ')} must discard down to the hand limit before the turn can go on. Tell them with \`say\`. Do not undo.`;
+	return null;
+}
+
 function digest(state: PublicState, who: Who): string[] {
 	const lines: string[] = [];
 	const from = lab.chatSeen[who.id] ?? 0;
@@ -348,6 +363,8 @@ function digest(state: PublicState, who: Who): string[] {
 	}
 	const list = needs(state, who);
 	lines.push(list.length ? 'NEEDS YOU:' : 'Nothing needs you right now.', ...list.map(text => `  ${text}`));
+	const holdup = blockedBy(state, who);
+	if (holdup) lines.push(`HELD UP: ${holdup}`);
 	return lines;
 }
 
@@ -383,7 +400,7 @@ async function send(who: Who, command: Command): Promise<string | null> {
 		await Bun.sleep(100);
 	}
 	journal({ kind: 'no-change', agent: who.id, command });
-	return 'it was sent, but the host state did not change within 5 seconds';
+	return 'it was sent and nothing changed, which usually means it was already so';
 }
 
 async function doKeys(who: Who, keys: string[]): Promise<string> {

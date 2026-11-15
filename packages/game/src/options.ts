@@ -7,6 +7,7 @@ import { cardValue, characterOf, cityDef, grid, handLimit, neighbours, player, s
 import type { CardId, CityId, SeatId } from './ids';
 import type { Purchase } from './legacy';
 import { checkPurchase } from './legacy';
+import type { Phase } from './machine';
 import type { Decide, Play } from './plays';
 import { checkDecide, checkPlay } from './plays';
 import type { World } from './state';
@@ -155,7 +156,7 @@ export function legalActions(world: World, seat: SeatId): Action[] {
 	return candidates.filter(action => checkAction(world, seat, action) === null);
 }
 
-export function legalPlays(world: World): { seat: SeatId; card: CardId; play: Play }[] {
+export function legalPlays(world: World, phase: Phase): { seat: SeatId; card: CardId; play: Play }[] {
 	const { campaign, game } = world;
 	if (!game || game.outcome) return [];
 	const onGrid = [...grid(campaign)];
@@ -211,7 +212,8 @@ export function legalPlays(world: World): { seat: SeatId; card: CardId; play: Pl
 				default:
 					break;
 			}
-			for (const play of plays) if (checkPlay(world, seat, card, play) === null) result.push({ seat, card, play });
+			for (const play of plays)
+				if (checkPlay(world, seat, card, play, phase) === null) result.push({ seat, card, play });
 		}
 	}
 	return result;

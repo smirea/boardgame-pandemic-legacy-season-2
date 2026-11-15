@@ -11,7 +11,7 @@ Runs AI players through the real game, each in its own browser tab, and keeps a 
 ./apps/playtest/lab stop
 ```
 
-`start --fresh` discards the run's save, chat and audit. `start --no-build` skips the app build.
+`start --fresh` begins the run again and moves the old run folder aside with a timestamp. `lab watch` blocks until something needs an operator: the session ends, a player or the lab reports a problem, play stalls, or the lab dies. `start --no-build` skips the app build.
 
 Then start one agent per player with the task "Read `apps/playtest/runs/<run>/briefs/<id>.md` and follow it". Each agent plays one game, writes a report, rewrites its memory file, and stops. Run `lab brief` again for the next game. The lab resumes where it stopped, so it can be restarted between games to pick up a fix.
 

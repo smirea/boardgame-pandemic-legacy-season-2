@@ -168,7 +168,7 @@ export function reject(world: World, phase: Phase, command: Command): string | n
 		case 'PLAY':
 			return (
 				inPhase('playing.actions', 'playing.draw', 'playing.infect') ??
-				checkPlay(world, command.seat, command.card, command.play)
+				checkPlay(world, command.seat, command.card, command.play, phase)
 			);
 		case 'DECIDE':
 			return inPhase('playing.actions', 'playing.draw', 'playing.infect') ?? checkDecide(world, command.decide);
@@ -235,6 +235,15 @@ function autoSupply(world: World) {
 		}
 	}
 }
+
+/** Commands open in every step of a turn. Each step passes its own phase, because a few of them depend on it. */
+const anyStep = (phase: Phase) =>
+	({
+		PLAY: { guard: { type: 'legal', params: phase }, actions: 'play' },
+		DECIDE: { guard: { type: 'legal', params: phase }, actions: 'decide' },
+		LOCKDOWN: { guard: { type: 'legal', params: phase }, actions: 'lockdown' },
+		WAIVE_OBJECTIVE: { guard: { type: 'legal', params: phase }, actions: 'waive' },
+	}) as const;
 
 export const gameMachine = setup({
 	types: {
@@ -388,15 +397,10 @@ export const gameMachine = setup({
 		playing: {
 			initial: 'actions',
 			always: { guard: 'over', target: 'over' },
-			on: {
-				PLAY: { guard: { type: 'legal', params: 'playing.actions' }, actions: 'play' },
-				DECIDE: { guard: { type: 'legal', params: 'playing.actions' }, actions: 'decide' },
-				LOCKDOWN: { guard: { type: 'legal', params: 'playing.actions' }, actions: 'lockdown' },
-				WAIVE_OBJECTIVE: { guard: { type: 'legal', params: 'playing.actions' }, actions: 'waive' },
-			},
 			states: {
 				actions: {
 					on: {
+						...anyStep('playing.actions'),
 						ACTION: { guard: { type: 'legal', params: 'playing.actions' }, actions: 'act' },
 						UNDO: { guard: 'canUndo', actions: 'undo' },
 						END_ACTIONS: { guard: { type: 'legal', params: 'playing.actions' }, target: 'draw', actions: 'startDraw' },
@@ -404,11 +408,17 @@ export const gameMachine = setup({
 				},
 				draw: {
 					always: { guard: 'drawsDone', target: 'infect', actions: 'startInfect' },
-					on: { DRAW: { guard: { type: 'legal', params: 'playing.draw' }, actions: 'draw' } },
+					on: {
+						...anyStep('playing.draw'),
+						DRAW: { guard: { type: 'legal', params: 'playing.draw' }, actions: 'draw' },
+					},
 				},
 				infect: {
 					always: { guard: 'infectionsDone', target: 'actions', actions: 'endTurn' },
-					on: { INFECT: { guard: { type: 'legal', params: 'playing.infect' }, actions: 'infect' } },
+					on: {
+						...anyStep('playing.infect'),
+						INFECT: { guard: { type: 'legal', params: 'playing.infect' }, actions: 'infect' },
+					},
 				},
 			},
 		},

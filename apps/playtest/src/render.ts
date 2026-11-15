@@ -261,10 +261,15 @@ export function renderStatus(state: PublicState, who: Who | null): string {
 	if (found && phase.startsWith('playing')) {
 		const deck = found.playerDeck;
 		lines.push(
-			`Threat: incidents ${game.incidents}/${pack.numbers.incidentLimit} · infection rate ${found.infection.rate} (next ${found.infection.nextRate}) · epidemics ${deck.epidemicsDrawn} drawn, ${deck.epidemicsLeft} left · ${pct(deck.epidemicNextDraw)} chance of one in the next draw`,
+			`Threat: incidents ${game.incidents}/${pack.numbers.incidentLimit} · infection rate ${found.infection.rate} (track ${pack.numbers.infectionRates.map((rate, index) => (index === game.rateIndex ? `[${rate}]` : rate)).join(' ')}; each epidemic moves one step right) · epidemics ${deck.epidemicsDrawn} drawn, ${deck.epidemicsLeft} left · ${pct(deck.epidemicNextDraw)} chance of one in the next draw`,
 			`Decks: Player deck ${deck.cards} cards (${deck.turnsLeft} turns; the game is lost when it cannot be drawn) · Infection deck ${found.infection.deck}, discard ${game.infectionDiscard.length} · stockpile ${game.stockpile} cubes, reserve ${game.reserve}`,
 			`Pieces left: supply centers ${game.pieces.center}, towers ${game.pieces.tower}, shelters ${game.pieces.shelter}, Hollow Men ${game.pieces.hollow}`,
 		);
+		const pile = game.playerDeck.piles.find(entry => entry.size > 0);
+		if (pile)
+			lines.push(
+				`Epidemics: the Player deck is stacked in equal piles with one epidemic shuffled into each. The pile being drawn has ${pile.size} card(s) left and ${pile.epidemics ? 'still holds its epidemic' : 'has already given up its epidemic'}.`,
+			);
 		const active = seatName(world, game.active);
 		const step =
 			phase === 'playing.actions'
@@ -320,7 +325,9 @@ export function renderBoard(world: World): string {
 				location?.hollow ? `hollow men ${location.hollow}` : null,
 				...structures,
 				pawns.has(city.id) ? `pawns: ${pawns.get(city.id)!.join(', ')}` : null,
-				found?.infection.odds[city.id] ? `${pct(found.infection.odds[city.id]!)} next infect` : null,
+				found && onGrid.has(city.id) && city.kind === 'city'
+					? `${pct(found.infection.odds[city.id] ?? 0)} next infect`
+					: null,
 				...routes.map(
 					route =>
 						`RECON here: ${route.count} ${route.color} cards${route.unique ? ' of different cities' : ''}${route.needsCenter ? ', needs a supply center' : ''}`,
@@ -353,8 +360,12 @@ export function renderOptions(options: Option[], filter?: string): string {
 	const lines: string[] = [];
 	for (const [group, list] of groups) {
 		const cost = list[0]!.cost;
-		lines.push(`${group}${cost === undefined ? '' : ` (cost ${cost})`}:`);
-		for (const option of list) lines.push(`  ${option.key}${option.desc ? `   # ${option.desc}` : ''}`);
+		const uniform = list.every(option => option.cost === cost);
+		lines.push(`${group}${cost === undefined || !uniform ? '' : ` (cost ${cost})`}:`);
+		for (const option of list) {
+			const price = uniform || option.cost === undefined ? '' : `cost ${option.cost} · `;
+			lines.push(`  ${option.key}${option.desc || price ? `   # ${price}${option.desc}` : ''}`);
+		}
 	}
 	return lines.join('\n');
 }

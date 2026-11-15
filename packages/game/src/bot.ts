@@ -62,7 +62,7 @@ export function botCommand(world: World, phase: Phase, rng: RngState, seats = 2)
 			if (game!.pending[0]?.t === 'replace')
 				return { type: 'DECIDE', decide: { d: 'replace', character: freeCharacters(world)[0]?.id ?? null } };
 			if (nextFloat(rng) < 0.04) {
-				const plays = legalPlays(world);
+				const plays = legalPlays(world, phase);
 				if (plays.length) return { type: 'PLAY', ...pick(rng, plays) };
 			}
 			if (phase === 'playing.draw') return { type: 'DRAW' };

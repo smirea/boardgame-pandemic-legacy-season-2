@@ -6,6 +6,7 @@ import { canTakeScar, freeCharacters, movePawn, scarTargets } from './flow';
 import { characterOf, cityDef, discardFromHand, grid, handLimit, log, player, removeFromHand } from './helpers';
 import type { CardId, CharacterId, CityId, SeatId } from './ids';
 import { createCharacter } from './legacy';
+import type { Phase } from './machine';
 import type { Game, World } from './state';
 
 /** Event and companion cards, playable by anyone at any time during a game. */
@@ -36,7 +37,8 @@ function removePlague(game: Game, city: CityId, amount: number) {
 	location.plague -= Math.min(amount, location.plague);
 }
 
-export function checkPlay(world: World, seat: SeatId, card: CardId, play: Play): string | null {
+/** `phase` is the step of the turn the card would be played in, which a few events depend on. */
+export function checkPlay(world: World, seat: SeatId, card: CardId, play: Play, phase: Phase): string | null {
 	const { campaign, game } = world;
 	if (!game || game.outcome) return 'No game in progress';
 	const held = campaign.playerCards[card];
@@ -72,7 +74,7 @@ export function checkPlay(world: World, seat: SeatId, card: CardId, play: Play):
 		case 'supplyDrop':
 			return onGrid.has(play.city) && game.reserve > 0 ? ok : 'Pick a location on the grid';
 		case 'secondWind':
-			return ok;
+			return phase === 'playing.actions' ? ok : 'Second Wind is played during the action step';
 		case 'scavenge':
 			return game.playerDeck.order.length > 0 ? ok : 'The Player deck is empty';
 		case 'openWaters':
@@ -130,7 +132,10 @@ export function applyPlay(world: World, seat: SeatId, card: CardId, play: Play) 
 			movePawn(world, play.pawn, play.to, 'airlift');
 			return;
 		case 'quietNight':
-			game.skipInfection = true;
+			// Played before the first flip of an Infect step, it skips that step. Any other time it waits for the next one.
+			if (game.infectionsLeft > 0 && game.infectionsLeft === pack.numbers.infectionRates[game.rateIndex])
+				game.infectionsLeft = 0;
+			else game.skipInfection = true;
 			return;
 		case 'resilience':
 			for (const target of play.cards) {

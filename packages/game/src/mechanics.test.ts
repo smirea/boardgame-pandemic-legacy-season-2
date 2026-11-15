@@ -5,7 +5,7 @@ import type { EventId, SearchResult } from './content/types';
 import { epidemicCount } from './flow';
 import { grid, handLimit, hasEdge } from './helpers';
 import type { CardId, CityId } from './ids';
-import { createGameActor, parseSave } from './machine';
+import { createGameActor, parseSave, reject } from './machine';
 import { legalPlays } from './options';
 import { decemberSave, octoberSave } from './scenarios';
 import type { World } from './state';
@@ -716,7 +716,7 @@ describe('events and companions', () => {
 			});
 			const before = worldOf(actor);
 			const card = gameOf(actor).players[A]!.hand.at(-1)!;
-			const play = legalPlays(before).find(option => option.card === card);
+			const play = legalPlays(before, 'playing.actions').find(option => option.card === card);
 			expect(play).toBeDefined();
 			send(actor, { type: 'PLAY', ...play! });
 			checks[event.id as EventId]!(before, worldOf(actor));
@@ -732,7 +732,7 @@ describe('events and companions', () => {
 			});
 			const before = worldOf(actor);
 			const card = gameOf(actor).players[A]!.hand.at(-1)!;
-			const play = legalPlays(before).find(option => option.card === card);
+			const play = legalPlays(before, 'playing.actions').find(option => option.card === card);
 			expect(play).toBeDefined();
 			send(actor, { type: 'PLAY', ...play! });
 			checks[companion.id]!(before, worldOf(actor));
@@ -1160,5 +1160,55 @@ describe('the remaining abilities and the Jade lab', () => {
 		]);
 		const offered = new Set(unlocks.flatMap(unlock => (unlock.t === 'ability' ? [unlock.ability] : [])));
 		expect([...offered].toSorted()).toEqual(pack.abilities.map(ability => ability.id).toSorted());
+	});
+});
+
+describe('event timing found by the campaign playtest', () => {
+	const inInfectStep = (edit?: (world: World) => void) =>
+		late((world, game) => {
+			game.actionsLeft = 0;
+			game.drawsLeft = 0;
+			game.infectionsLeft = pack.numbers.infectionRates[game.rateIndex]!;
+			stackInfection(world, ['cairo', 'lagos', 'london']);
+			edit?.(world);
+		}, 'playing.infect');
+
+	test('Quiet Night played before the first flip skips the Infect step it is played in', () => {
+		let card = '' as CardId;
+		const actor = inInfectStep(world => (card = conjure(world, B, { kind: 'event', event: 'quietNight' })));
+		const cubes = gameOf(actor).locations[city('cairo')]!.supplies;
+		send(actor, { type: 'PLAY', seat: B, card, play: { e: 'quietNight' } });
+		expect(phase(actor)).toBe('playing.actions');
+		expect(gameOf(actor).active).toBe(B);
+		expect(gameOf(actor).locations[city('cairo')]!.supplies).toBe(cubes);
+		expect(gameOf(actor).skipInfection).toBe(false);
+	});
+
+	test('Quiet Night played after a flip leaves this step alone and skips the next one', () => {
+		let card = '' as CardId;
+		const actor = inInfectStep(world => (card = conjure(world, B, { kind: 'event', event: 'quietNight' })));
+		send(actor, { type: 'INFECT' });
+		const left = gameOf(actor).infectionsLeft;
+		send(actor, { type: 'PLAY', seat: B, card, play: { e: 'quietNight' } });
+		expect(phase(actor)).toBe('playing.infect');
+		expect(gameOf(actor).infectionsLeft).toBe(left);
+		expect(gameOf(actor).skipInfection).toBe(true);
+	});
+
+	test('Second Wind is refused once the action step is over, and the card stays in hand', () => {
+		for (const at of ['playing.draw', 'playing.infect'] as const) {
+			let card = '' as CardId;
+			const actor = late((world, game) => {
+				game.actionsLeft = 0;
+				game.drawsLeft = at === 'playing.draw' ? 2 : 0;
+				game.infectionsLeft = at === 'playing.infect' ? 2 : 0;
+				card = conjure(world, A, { kind: 'event', event: 'secondWind' });
+			}, at);
+			const command = { type: 'PLAY', seat: A, card, play: { e: 'secondWind' } } as const;
+			expect(reject(worldOf(actor), phase(actor), command)).toContain('action step');
+			actor.send(command);
+			expect(gameOf(actor).players[A]!.hand).toContain(card);
+			expect(gameOf(actor).actionsLeft).toBe(0);
+		}
 	});
 });

@@ -51,7 +51,7 @@
 	});
 
 	const actions = $derived(game && snap.phase === 'playing.actions' && canAct ? legalActions(world, game.active) : []);
-	const plays = $derived(playing ? legalPlays(world) : []);
+	const plays = $derived(playing ? legalPlays(world, snap.phase) : []);
 	const decides = $derived(playing ? legalDecides(world) : []);
 	$effect(() => {
 		// When one of this client's characters has to discard, the dock turns to that hand.

@@ -278,7 +278,6 @@ function universe(world: World): { key: string; live: boolean }[] {
 		'buildCenter',
 		'pickUp',
 		'transfer',
-		'establishLine',
 	]);
 	return [
 		...actionIds.map(id => ({ key: `action:${id}`, live: baseActions.has(id) || unlockedAction(id) })),

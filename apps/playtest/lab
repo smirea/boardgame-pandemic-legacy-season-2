@@ -3,7 +3,7 @@
  * Runs the playtest lab. `start` launches the daemon in the background and waits until it answers.
  * Everything else is forwarded to the running daemon as the `lab` operator.
  */
-import { closeSync, existsSync, mkdirSync, openSync, readdirSync, readFileSync, rmSync } from 'node:fs';
+import { closeSync, existsSync, mkdirSync, openSync, readdirSync, readFileSync, renameSync, rmSync, statSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { loadConfig } from './src/config.ts';
 
@@ -24,6 +24,11 @@ if (verb === 'start') {
 			if ((error as NodeJS.ErrnoException).code !== 'ESRCH') throw error;
 			rmSync(pidFile);
 		}
+	}
+	if (rest.includes('--fresh') && existsSync(join(config.runDir, 'journal.jsonl'))) {
+		// A fresh run keeps the old one beside it, so nothing a past run recorded is lost.
+		renameSync(config.runDir, `${config.runDir}-${new Date().toISOString().replaceAll(/[:.]/g, '-')}`);
+		mkdirSync(config.runDir, { recursive: true });
 	}
 	const logFile = join(config.runDir, 'daemon.log');
 	const log = openSync(logFile, 'a');
@@ -67,6 +72,54 @@ if (verb === 'stop') {
 	}
 	for (const run of existsSync(runs) ? readdirSync(runs) : []) rmSync(join(runs, run, 'daemon.json'), { force: true });
 	console.log(pids.length ? 'Stopped.' : 'Nothing was running.');
+	process.exit(0);
+}
+
+if (verb === 'watch') {
+	// Blocks until something an operator would act on: the session ends, a player or the lab reports a problem, play stalls, or the lab dies.
+	const numbers = rest.filter(arg => !arg.startsWith('--')).map(Number);
+	const seconds = numbers[0] || 540;
+	const stallAfter = numbers[1] || 600;
+	const runs = join(import.meta.dir, 'runs');
+	const live = (existsSync(runs) ? readdirSync(runs) : []).map(run => join(runs, run)).find(dir => existsSync(join(dir, 'daemon.json')));
+	if (!live) {
+		console.log('EVENT lab-down: nothing is running');
+		process.exit(0);
+	}
+	const journal = join(live, 'journal.jsonl');
+	let offset = existsSync(journal) ? statSync(journal).size : 0;
+	const session = () => Bun.spawnSync(['bun', join(import.meta.dir, 'play'), 'lab', 'session'], { stdio: ['ignore', 'pipe', 'ignore'] });
+	for (const deadline = Date.now() + seconds * 1000; ; ) {
+		const answer = session();
+		const text = answer.stdout.toString().trim();
+		if (answer.exitCode !== 0) {
+			console.log('EVENT lab-down: the lab is not answering');
+			break;
+		}
+		if (text.includes('"done":true')) {
+			console.log(`EVENT session-complete: ${text}`);
+			break;
+		}
+		const size = statSync(journal).size;
+		const fresh = readFileSync(journal).subarray(offset).toString('utf8').split('\n').filter(Boolean);
+		offset = size;
+		const kinds = rest.includes('--quiet') ? 'tab-error|lab-error|tab-reload' : 'issue|tab-error|lab-error|no-change|tab-rejected|tab-reload';
+		const alarms = fresh.filter(line => new RegExp(`"kind":"(${kinds})"`).test(line));
+		if (alarms.length) {
+			for (const line of alarms) console.log(`EVENT ${line.slice(0, 600)}`);
+			break;
+		}
+		const idle = Math.round((Date.now() - statSync(journal).mtimeMs) / 1000);
+		if (idle > stallAfter) {
+			console.log(`EVENT stall: no command or chat for ${idle} seconds. ${text}`);
+			break;
+		}
+		if (Date.now() > deadline) {
+			console.log(`still playing: ${text}`);
+			break;
+		}
+		await Bun.sleep(5000);
+	}
 	process.exit(0);
 }
 
