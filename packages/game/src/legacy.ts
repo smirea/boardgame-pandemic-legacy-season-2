@@ -294,7 +294,7 @@ export function resolveGameEnd(world: World) {
 	for (const city of pack.cities) {
 		const location = game.locations[city.id]!;
 		const record = campaign.locations[city.id]!;
-		const loss = location.plague > 0 || (location.hollow > 0 && !location.shelter) ? 1 : 0;
+		const loss = (location.plague > 0 || location.hollow > 0) && !location.shelter ? 1 : 0;
 		const gain = location.center && city.kind === 'city' ? 1 : 0;
 		const next = Math.max(0, Math.min(8, record.population - loss + gain));
 		if (next !== record.population) changes.push({ city: city.id, delta: next - record.population });

@@ -26,7 +26,8 @@
 
 	const color = $derived(state.forsaken ? '#6b6f76' : CITY_COLOR[city.color ?? 'haven']);
 	const { hovering, onPointerEnter, onPointerLeave } = useCursor();
-	const scale = new Spring(1, { stiffness: 0.2, damping: 0.5 });
+	// Starting small makes a city rise out of the board when its region is revealed.
+	const scale = new Spring(0.05, { stiffness: 0.12, damping: 0.42 });
 	$effect(() => {
 		scale.target = $hovering ? 1.18 : state.highlight === 'target' ? 1.08 : 1;
 	});

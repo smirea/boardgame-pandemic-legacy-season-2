@@ -28,7 +28,7 @@
 	const RADIAL = 6;
 	const curve = $derived(routeCurve(route, from, to));
 	const segments = $derived(Math.max(16, Math.round(curve.getLength() * 2)));
-	const tube = $derived(new TubeGeometry(curve, segments, ghost ? 0.08 : route.kind === 'sea' ? 0.14 : 0.2, RADIAL));
+	const tube = $derived(new TubeGeometry(curve, segments, ghost ? 0.1 : route.kind === 'sea' ? 0.2 : 0.28, RADIAL));
 	const dashes = $derived(dashTexture(Math.max(3, Math.round(curve.getLength() / 1.6))));
 
 	// A route that appears mid-game draws itself from its first city to its second.

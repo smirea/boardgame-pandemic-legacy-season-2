@@ -84,7 +84,7 @@
 	<div class="right">
 		{#if !solo}
 			<span class="link" class:down={status !== 'connected'} title="Connection to the host"
-				>{status === 'connected' ? `${players} online` : status}</span
+				>{status === 'connected' ? `${Math.max(1, players)} online` : status}</span
 			>
 		{/if}
 		<button onclick={onreset} title="Show the whole map">Fit map</button>

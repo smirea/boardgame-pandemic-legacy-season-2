@@ -70,7 +70,7 @@
 	const initialEdges = new Set(untrack(() => view.edges.map(routeKey)));
 
 	const visibleCities = $derived(pack.cities.filter(city => view.cities[city.id]!.revealed));
-	const hiddenCities = $derived(pack.cities.filter(city => !view.cities[city.id]!.revealed && !city.lost));
+	const cloudCities = pack.cities.filter(city => !city.lost);
 	// A city whose closest neighbour sits just north of it hangs its label below, so the two labels part instead of stacking.
 	const labelsBelow = $derived.by(() => {
 		const below = new Set<CityId>();
@@ -169,8 +169,8 @@
 	/>
 {/each}
 
-{#each hiddenCities as city, index (city.id)}
-	<Cloud at={layout[city.id]!} seed={index} />
+{#each cloudCities as city, index (city.id)}
+	<Cloud at={layout[city.id]!} seed={index} hidden={!view.cities[city.id]!.revealed} />
 {/each}
 
 {#each pawnSlots as { pawn, slot, at } (pawn.id)}
