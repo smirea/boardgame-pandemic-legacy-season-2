@@ -20,3 +20,6 @@ build
 
 # other
 .DS_Store
+
+# agent working files
+.audit/*.todo.md
