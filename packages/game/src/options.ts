@@ -140,6 +140,15 @@ export function legalActions(world: World, seat: SeatId): Action[] {
 			candidates.push({ a: 'broker', card: card.id, take: take.id });
 	if (hand.length >= 2)
 		for (const take of game.playerDiscard) candidates.push({ a: 'salvage', discard: hand.slice(0, 2), take });
+	candidates.push({ a: 'strike' });
+	for (const card of held) {
+		candidates.push({ a: 'supply', card: card.id });
+		for (const take of cityCards(world, game.playerDiscard))
+			candidates.push({ a: 'investigate', card: card.id, take: take.id });
+	}
+	if (held[0]) for (const to of grid(campaign)) candidates.push({ a: 'run', card: held[0].id, to });
+	for (const other of others)
+		for (const card of player(game, other).hand) candidates.push({ a: 'facilitate', with: other, card });
 
 	return candidates.filter(action => checkAction(world, seat, action) === null);
 }

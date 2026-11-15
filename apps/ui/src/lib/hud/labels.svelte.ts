@@ -48,6 +48,11 @@ export const ACTION_NAMES: Record<Action['a'], string> = {
 	inoculate: 'Inoculate',
 	salvage: 'Salvage',
 	destroyInfection: 'Destroy card',
+	investigate: 'Investigate',
+	supply: 'Supply a city',
+	facilitate: 'Take a card',
+	run: 'Run',
+	strike: 'Remove Hollow Man',
 };
 
 /** Names the group gave to havens. Reactive, so every label that reads `cityName` follows a rename. */
@@ -90,6 +95,12 @@ export function actionTarget(world: World, action: Action): CityId | null {
 		case 'establishLine':
 		case 'chartLane':
 			return action.to;
+		case 'run':
+			return action.to;
+		case 'supply': {
+			const card = world.campaign.playerCards[action.card];
+			return card?.kind === 'city' ? card.city : null;
+		}
 		case 'sail': {
 			const card = world.campaign.playerCards[action.card];
 			return card?.kind === 'city' ? card.city : null;
@@ -153,6 +164,14 @@ export function actionDetail(world: World, action: Action): string {
 			return `${cityName(action.city)}, discard ${cardName(world, action.card)}`;
 		case 'broker':
 			return `${cardName(world, action.card)} for ${cardName(world, action.take)}`;
+		case 'investigate':
+			return `${cardName(world, action.card)} for ${cardName(world, action.take)}`;
+		case 'facilitate':
+			return `${cardName(world, action.card)} from ${seatName(world, action.with)}`;
+		case 'run':
+			return `discard ${cardName(world, action.card)}`;
+		case 'supply':
+			return '1 cube from the reserve';
 		case 'inoculate':
 		case 'destroyInfection':
 			return cardName(world, action.card);

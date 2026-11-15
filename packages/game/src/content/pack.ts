@@ -206,6 +206,7 @@ const bundles: BundleDef[] = [
 		unlocks: [
 			{ t: 'lab', city: city('johannesburg') },
 			{ t: 'job', job: 'scientist', home: city('haven-south-atlantic') },
+			{ t: 'rule', rule: 'gentleEpidemic' },
 		],
 	},
 	{ id: bundleId('arrive-pearl'), name: 'Pearl lab reached', unlocks: [{ t: 'lab', city: city('lake-baikal') }] },
@@ -230,7 +231,14 @@ const bundles: BundleDef[] = [
 		unlocks: [{ t: 'cityImprovement', improvement: 'wild' }],
 	},
 	{ id: bundleId('frequency-training'), name: 'New training', unlocks: [{ t: 'ability', ability: 'lookout' }] },
-	{ id: bundleId('defection'), name: 'The Hollow Men defect', unlocks: [{ t: 'ability', ability: 'saboteur' }] },
+	{
+		id: bundleId('defection'),
+		name: 'The Hollow Men defect',
+		unlocks: [
+			{ t: 'ability', ability: 'saboteur' },
+			{ t: 'ability', ability: 'soldier' },
+		],
+	},
 	{ id: bundleId('plan-red'), name: 'Plan step: red', unlocks: [] },
 	{ id: bundleId('plan-black'), name: 'Plan step: black', unlocks: [] },
 	{ id: bundleId('plan-yellow'), name: 'Plan step: yellow', unlocks: [] },
@@ -331,6 +339,7 @@ const legacyDeck: LegacyCardDef[] = [
 			{ t: 'scar', scar: 'reconExtraCard' },
 			{ t: 'scar', scar: 'lineExtraCube' },
 			{ t: 'scar', scar: 'laneExtraCube' },
+			{ t: 'ability', ability: 'foreman' },
 		],
 	),
 	card(4, 1, 'pause', 'April', 'Perimeter report on South America.', [perimeter('south-america')]),
@@ -351,6 +360,8 @@ const legacyDeck: LegacyCardDef[] = [
 		{ t: 'job', job: 'sanitationOfficer', home: city('haven-mediterranean') },
 		{ t: 'event', event: 'openWaters', mode: 'rationed' },
 		{ t: 'event', event: 'secondWind', mode: 'rationed' },
+		{ t: 'ability', ability: 'facilitator' },
+		{ t: 'ability', ability: 'runner' },
 	]),
 	card(7, 1, 'pause', 'July', 'Perimeter report on Africa. New objective: towers in 3 cities of different colours.', [
 		perimeter('africa'),
@@ -371,6 +382,8 @@ const legacyDeck: LegacyCardDef[] = [
 		{ t: 'ability', ability: 'surveyor' },
 		{ t: 'ability', ability: 'navigator' },
 		{ t: 'ability', ability: 'broker' },
+		{ t: 'ability', ability: 'investigator' },
+		{ t: 'ability', ability: 'supplier' },
 	]),
 	card(
 		9,
@@ -386,7 +399,7 @@ const legacyDeck: LegacyCardDef[] = [
 			{ t: 'event', event: 'scavenge', mode: 'rationed' },
 		],
 	),
-	card(9, 2, 'stop', 'Closing in', 'Nothing new this month.', []),
+	card(9, 2, 'stop', 'Closing in', 'A new ability is for sale.', [{ t: 'ability', ability: 'outrider' }]),
 	card(
 		10,
 		1,
@@ -519,6 +532,33 @@ export const pack: ContentPack = {
 			text: 'As an action, discard a City card to remove 1 Hollow Man from a city of that colour.',
 			cost: 2,
 		},
+		{
+			id: 'investigator',
+			name: 'Investigator',
+			text: 'As an action, swap a City card in your hand for any City card in the discard pile.',
+			cost: 2,
+		},
+		{
+			id: 'supplier',
+			name: 'Supplier',
+			text: 'As an action, place 1 cube from the reserve on a city whose card you hold.',
+			cost: 2,
+		},
+		{
+			id: 'facilitator',
+			name: 'Facilitator',
+			text: 'As an action, take any card from a player in your location.',
+			cost: 1,
+		},
+		{
+			id: 'runner',
+			name: 'Runner',
+			text: 'As an action, discard any City card to move from a haven or supply center to anywhere on the grid.',
+			cost: 2,
+		},
+		{ id: 'foreman', name: 'Foreman', text: 'Supply lines cost 1 cube fewer.', cost: 1 },
+		{ id: 'outrider', name: 'Outrider', text: 'No exposure when leaving a location that holds Hollow Men.', cost: 2 },
+		{ id: 'soldier', name: 'Soldier', text: 'As an action, remove 1 Hollow Man from your location.', cost: 2 },
 	],
 	scars: [
 		{ id: 'reconExtraCard', name: 'Shaken', text: 'Recon needs 1 extra card.', slots: 1 },

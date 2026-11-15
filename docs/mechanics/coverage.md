@@ -9,7 +9,7 @@ How `packages/game` covers the 170 interactions in [interactions.md](interaction
 - `apps/ui/e2e/october.ts` plays a whole October game through the built UI in a headless browser: lobby, setup, every turn, the game-end spending step, and the next game's setup.
 - An independent review and a three-player playtest each found rule or UI bugs after earlier passes. Those are fixed and have regression tests. Expect more of that kind.
 
-Content is authored for this project where the sources had no data: 12 events, 9 companions, 10 abilities, 5 scars, 4 Infection card improvements, search results per city, the ten Monitor rewards, and the Legacy deck as 24 functional cards (two per month) that unlock each mechanic in the month the sources report.
+Content is authored for this project where the sources had no data: 12 events, 9 companions, 17 abilities, 5 scars, 4 Infection card improvements, search results per city, the ten Monitor rewards, and the Legacy deck as 24 functional cards (two per month) that unlock each mechanic in the month the sources report.
 
 ## Built differently
 
@@ -35,10 +35,10 @@ Content is authored for this project where the sources had no data: 12 events, 9
 
 ## Not built
 
-| #   | Interaction                                                                                                        |
-| --- | ------------------------------------------------------------------------------------------------------------------ |
-| n/a | The Jade lab's gentler Epidemic step (one source)                                                                  |
-| n/a | Abilities named in logs but not described: Runner, Facilitator, Foreman, Outrider, Soldier, Investigator, Supplier |
+Nothing from the catalogue is left unbuilt. Two things rest on thin sources and are this project's reading:
+
+- **The Jade lab's gentler Epidemic.** One campaign log reports it. Finding the lab makes an Epidemic remove 1 cube from the struck city instead of all of them.
+- **Seven abilities the sources name.** Investigator and Supplier have described effects, and the two effects that logs describe without a name are given to Facilitator and Runner. Foreman, Outrider and Soldier are named in logs with no effect recorded, so their effects are authored here: a cheaper supply line, no exposure when leaving Hollow Men, and removing a Hollow Man from your own location.
 
 ## UI simplifications
 

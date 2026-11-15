@@ -4,7 +4,7 @@ import { pack } from './content/pack';
 import type { EventId, SearchResult } from './content/types';
 import { epidemicCount } from './flow';
 import { grid, handLimit, hasEdge } from './helpers';
-import type { CardId } from './ids';
+import type { CardId, CityId } from './ids';
 import { createGameActor, parseSave } from './machine';
 import { legalPlays } from './options';
 import { decemberSave, octoberSave } from './scenarios';
@@ -538,6 +538,7 @@ describe('storage and shields', () => {
 
 	test('from September an Epidemic strikes a stored Infection card before the bottom of the deck', () => {
 		const actor = late((world, game) => {
+			world.campaign.rules = world.campaign.rules.filter(rule => rule !== 'gentleEpidemic');
 			const epidemic = Object.values(world.campaign.playerCards).find(card => card.kind === 'epidemic')!.id;
 			game.playerDeck.order = [epidemic, ...game.playerDeck.order.filter(card => card !== epidemic)];
 			game.playerDeck.piles = [{ size: game.playerDeck.order.length, epidemics: 10 }];
@@ -1039,4 +1040,125 @@ test('a save written before a field existed still loads and plays', () => {
 	act(actor, { a: 'makeSupplies' });
 	send(actor, { type: 'END_ACTIONS', seat: A });
 	expect(phase(actor)).toBe('playing.draw');
+});
+
+describe('the remaining abilities and the Jade lab', () => {
+	const withAbility = (ability: string, edit?: (world: World) => void) =>
+		late(world => {
+			character(world, A).slots[1] = { kind: 'ability', id: ability } as never;
+			edit?.(world);
+		});
+
+	test('the Investigator swaps a City card for any City card in the discard pile', () => {
+		const actor = withAbility('investigator', world => {
+			give(world, A, cityCards(world, 'cairo'));
+			world.game!.playerDiscard.push(...cityCards(world, 'london'));
+		});
+		const london = cityCards(worldOf(actor), 'london')[0]!;
+		act(actor, { a: 'investigate', card: gameOf(actor).players[A]!.hand[0]!, take: london });
+		expect(gameOf(actor).players[A]!.hand).toEqual([london]);
+		expect(gameOf(actor).playerDiscard).toContain(cityCards(worldOf(actor), 'cairo')[0]!);
+	});
+
+	test('the Supplier places a reserve cube on a city whose card they hold', () => {
+		const actor = withAbility('supplier', world => give(world, A, cityCards(world, 'tokyo')));
+		const reserve = gameOf(actor).reserve;
+		act(actor, { a: 'supply', card: gameOf(actor).players[A]!.hand[0]! });
+		expect(gameOf(actor).locations[city('tokyo')]!.supplies).toBe(3);
+		expect(gameOf(actor).reserve).toBe(reserve - 1);
+		expect(gameOf(actor).players[A]!.hand).toHaveLength(1);
+	});
+
+	test('the Facilitator takes any card from a player in the same location', () => {
+		const actor = withAbility('facilitator', world => {
+			world.game!.players[B]!.location = world.game!.players[A]!.location;
+			give(world, B, cityCards(world, 'tokyo'));
+			give(world, C, cityCards(world, 'osaka'));
+		});
+		const tokyo = cityCards(worldOf(actor), 'tokyo')[0]!;
+		expect(refuses(actor, { a: 'facilitate', with: C, card: cityCards(worldOf(actor), 'osaka')[0]! })).toContain(
+			'same location',
+		);
+		act(actor, { a: 'facilitate', with: B, card: tokyo });
+		expect(gameOf(actor).players[A]!.hand).toEqual([tokyo]);
+	});
+
+	test('the Runner discards a City card to go anywhere on the grid from a haven or supply center', () => {
+		const actor = withAbility('runner', world => give(world, A, cityCards(world, 'cairo')));
+		const card = gameOf(actor).players[A]!.hand[0]!;
+		act(actor, { a: 'run', card, to: city('denver') });
+		expect(gameOf(actor).players[A]!.location).toBe(city('denver'));
+		const stranded = withAbility('runner', world => {
+			world.game!.players[A]!.location = city('denver');
+			give(world, A, cityCards(world, 'cairo'));
+		});
+		expect(refuses(stranded, { a: 'run', card, to: city('cairo') })).toContain('haven or a supply center');
+	});
+
+	test('the Foreman builds supply lines for 1 cube fewer', () => {
+		const find = (world: World) =>
+			pack.candidateEdges.find(
+				edge =>
+					edge.kind === 'land' &&
+					!hasEdge(world.campaign, edge.a, edge.b) &&
+					checkEdge(world.campaign, edge.a, edge.b, 'land') === null,
+			)!;
+		const actor = withAbility('foreman', world => {
+			world.game!.players[A]!.location = find(world).a;
+			world.game!.players[A]!.supplies = 1;
+		});
+		const edge = find(worldOf(actor));
+		act(actor, { a: 'establishLine', to: edge.b });
+		expect(hasEdge(worldOf(actor).campaign, edge.a, edge.b)).toBe(true);
+		expect(gameOf(actor).players[A]!.supplies).toBe(0);
+	});
+
+	test('the Outrider leaves Hollow Men behind without exposure', () => {
+		const actor = withAbility('outrider', world => {
+			world.game!.players[A]!.location = city('cairo');
+			world.game!.locations[city('cairo')]!.hollow = 2;
+		});
+		act(actor, { a: 'drive', to: city('tripoli') });
+		expect(character(worldOf(actor), A).exposure).toBe(0);
+	});
+
+	test('the Soldier removes a Hollow Man from their own location', () => {
+		const actor = withAbility('soldier', world => {
+			world.game!.players[A]!.location = city('cairo');
+			world.game!.locations[city('cairo')]!.hollow = 2;
+		});
+		const figures = gameOf(actor).pieces.hollow;
+		act(actor, { a: 'strike' });
+		expect(gameOf(actor).locations[city('cairo')]!.hollow).toBe(1);
+		expect(gameOf(actor).pieces.hollow).toBe(figures + 1);
+		expect(refuses(withAbility('soldier'), { a: 'strike' })).toBe('No Hollow Men here');
+	});
+
+	test('with the Jade lab found, an Epidemic removes 1 cube from the struck city instead of all', () => {
+		const actor = late((world, game) => {
+			world.campaign.rules = world.campaign.rules.filter(rule => rule !== 'epidemicFromStorage');
+			const epidemic = Object.values(world.campaign.playerCards).find(card => card.kind === 'epidemic')!.id;
+			game.playerDeck.order = [epidemic, ...game.playerDeck.order.filter(card => card !== epidemic)];
+			game.playerDeck.piles = [{ size: game.playerDeck.order.length, epidemics: 10 }];
+			stackInfection(world, []);
+			const bottom = world.campaign.infectionCards[game.infectionDeck.order.at(-1)!] as unknown as { city: CityId };
+			game.locations[bottom.city]!.supplies = 3;
+			game.drawsLeft = 2;
+		}, 'playing.draw');
+		expect(worldOf(actor).campaign.rules).toContain('gentleEpidemic');
+		const struck = (
+			worldOf(actor).campaign.infectionCards[gameOf(actor).infectionDeck.order.at(-1)!] as unknown as { city: CityId }
+		).city;
+		send(actor, { type: 'DRAW' });
+		expect(gameOf(actor).locations[struck]!.supplies).toBe(2);
+	});
+
+	test('every ability the game defines is unlocked by a Legacy card or a bundle', () => {
+		const unlocks = [...pack.legacyDeck, ...pack.bundles].flatMap(source => [
+			...source.unlocks,
+			...('reward' in source ? (source.reward ?? []) : []),
+		]);
+		const offered = new Set(unlocks.flatMap(unlock => (unlock.t === 'ability' ? [unlock.ability] : [])));
+		expect([...offered].toSorted()).toEqual(pack.abilities.map(ability => ability.id).toSorted());
+	});
 });

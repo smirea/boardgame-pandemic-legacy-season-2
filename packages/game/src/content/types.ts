@@ -62,7 +62,14 @@ export type AbilityId =
 	| 'surveyor'
 	| 'lookout'
 	| 'navigator'
-	| 'saboteur';
+	| 'saboteur'
+	| 'investigator'
+	| 'supplier'
+	| 'facilitator'
+	| 'runner'
+	| 'foreman'
+	| 'outrider'
+	| 'soldier';
 
 export type ScarId = 'reconExtraCard' | 'lineExtraCube' | 'laneExtraCube' | 'searchDiscard' | 'smallHand' | 'carrier';
 
@@ -124,7 +131,12 @@ export type ActionId =
 	| 'inoculate'
 	| 'salvage'
 	| 'destroyInfection'
-	| 'broker';
+	| 'broker'
+	| 'investigate'
+	| 'supply'
+	| 'facilitate'
+	| 'run'
+	| 'strike';
 
 export type RuleId =
 	/** Population 0 makes a city forsaken and infested. */
@@ -138,7 +150,9 @@ export type RuleId =
 	/** Any player may discard a matching-colour City card to cancel one cube removal. */
 	| 'topazShield'
 	| 'storage'
-	| 'carrier';
+	| 'carrier'
+	/** An Epidemic's Infect step removes 1 cube instead of all of them. */
+	| 'gentleEpidemic';
 
 export type ObjectiveId =
 	| 'prologueCenters'

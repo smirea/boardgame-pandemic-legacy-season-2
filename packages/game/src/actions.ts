@@ -49,6 +49,11 @@ export type Action =
 	| { a: 'administratorMove'; pawn: SeatId; to: SeatId }
 	| { a: 'sabotage'; card: CardId; city: CityId }
 	| { a: 'broker'; card: CardId; take: CardId }
+	| { a: 'investigate'; card: CardId; take: CardId }
+	| { a: 'supply'; card: CardId }
+	| { a: 'facilitate'; with: SeatId; card: CardId }
+	| { a: 'run'; card: CardId; to: CityId }
+	| { a: 'strike' }
 	| { a: 'selfInject' }
 	| { a: 'pickUp'; count: number }
 	| { a: 'transfer'; with: SeatId; count: number; give: boolean }
@@ -126,7 +131,13 @@ function centerCost(ctx: Ctx, laborer: boolean) {
 
 function edgeCost(ctx: Ctx, kind: EdgeKind) {
 	if (kind === 'land')
-		return Math.max(0, numbers.costs.line + (trait(ctx, 'lineExtraCube') ? 1 : 0) - (trait(ctx, 'lineman') ? 1 : 0));
+		return Math.max(
+			0,
+			numbers.costs.line +
+				(trait(ctx, 'lineExtraCube') ? 1 : 0) -
+				(trait(ctx, 'lineman') ? 1 : 0) -
+				(trait(ctx, 'foreman') ? 1 : 0),
+		);
 	if (trait(ctx, 'navigator') && unused(ctx, 'navigator')) return 0;
 	return numbers.costs.lane + (trait(ctx, 'laneExtraCube') ? 1 : 0);
 }
@@ -595,6 +606,64 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 			ctx.me.hand.push(take);
 		},
 	},
+	investigate: {
+		trait: 'investigator',
+		check(ctx, { card, take }) {
+			return cityCard(ctx, card) && cityCard(ctx, take, 'discard')
+				? ok
+				: 'Swap a City card in hand for a City card in the discard pile';
+		},
+		apply(ctx, { card, take }) {
+			ctx.game.playerDiscard.splice(ctx.game.playerDiscard.indexOf(take), 1);
+			discardFromHand(ctx.game, ctx.seat, card);
+			ctx.me.hand.push(take);
+		},
+	},
+	supply: {
+		trait: 'supplier',
+		check(ctx, { card }) {
+			const held = cityCard(ctx, card);
+			if (!held || !grid(ctx.campaign).has(held.city)) return 'Hold the card of a city on the grid';
+			return ctx.game.reserve > 0 ? ok : 'The reserve is empty';
+		},
+		apply(ctx, { card }) {
+			ctx.game.reserve -= 1;
+			ctx.game.locations[cityCard(ctx, card)!.city]!.supplies += 1;
+		},
+	},
+	facilitate: {
+		trait: 'facilitator',
+		check(ctx, action) {
+			const other = ctx.game.players[action.with];
+			if (!other || action.with === ctx.seat || other.location !== ctx.here)
+				return 'Both pawns must be in the same location';
+			return other.hand.includes(action.card) ? ok : 'They do not hold that card';
+		},
+		apply(ctx, action) {
+			removeFromHand(ctx.game, action.with, action.card);
+			ctx.me.hand.push(action.card);
+		},
+	},
+	run: {
+		trait: 'runner',
+		check(ctx, { card, to }) {
+			if (!cityCard(ctx, card)) return 'Pick a City card from your hand';
+			if (ctx.def.kind !== 'haven' && !ctx.loc.center) return 'Start from a haven or a supply center';
+			return to !== ctx.here && grid(ctx.campaign).has(to) ? ok : 'Pick another location on the grid';
+		},
+		apply(ctx, { card, to }) {
+			discardFromHand(ctx.game, ctx.seat, card);
+			movePawn(ctx.world, ctx.seat, to, 'run');
+		},
+	},
+	strike: {
+		trait: 'soldier',
+		check: ctx => (ctx.loc.hollow > 0 ? ok : 'No Hollow Men here'),
+		apply(ctx) {
+			ctx.loc.hollow -= 1;
+			ctx.game.pieces.hollow += 1;
+		},
+	},
 	selfInject: {
 		rule: 'carrier',
 		reveals: true,
@@ -729,7 +798,7 @@ export function actionCost(world: World, seat: SeatId, action: Action): number {
 	return spec.free ? 0 : (spec.cost?.(context(world, seat), action) ?? 1);
 }
 
-const MOVES = new Set<ActionId>(['sail', 'charter', 'captainSail', 'shuttle']);
+const MOVES = new Set<ActionId>(['sail', 'charter', 'captainSail', 'shuttle', 'run']);
 
 /** Null when the action is legal for the active player right now, otherwise the reason it is not. */
 export function checkAction(world: World, seat: SeatId, action: Action): string | null {
