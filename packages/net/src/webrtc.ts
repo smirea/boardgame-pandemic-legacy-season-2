@@ -233,8 +233,10 @@ function wireConnection(pc: RTCPeerConnection, remoteId: PeerId) {
 	reliable.onbufferedamountlow = () => {
 		while (backlog.length > 0 && reliable.bufferedAmount < RELIABLE_HIGH_WATER) reliable.send(backlog.shift()!);
 	};
+	// Chrome reports `disconnected` about 5 s after a remote dies without closing and `failed` 10 s after that.
+	// Rebuilding a link takes a few hundred ms, so reconnecting on a transient blip beats a 15 s frozen game.
 	pc.onconnectionstatechange = () => {
-		if (pc.connectionState === 'failed' || pc.connectionState === 'closed') lost();
+		if (['disconnected', 'failed', 'closed'].includes(pc.connectionState)) lost();
 	};
 
 	const link: Link = {
