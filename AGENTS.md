@@ -34,6 +34,7 @@
 - TanStack Query is configured in `apps/ui/src/routes/+layout.svelte`.
 - Imports inside `apps/ui` use the `#lib/*` alias (SvelteKit 3 removed `$lib`), with the file extension for `.ts` files.
 - All browser storage goes through `LS` in `apps/ui/src/lib/storage.ts`, which is namespaced by `?DEBUG_ID=`. Never touch `localStorage` directly.
+- Card faces are generated, never drawn by hand: `apps/ui/src/lib/cards/mapArt.ts` builds the map-and-pin art for any city, used by `PlayerCard.svelte` and `cards/InfectionCard.svelte`. Check changes at `/debug/cards`.
 - `/debug/game` runs the real machine and screen on one client. `window.DEBUG` exposes `getState`, `saveState`, `loadState` and `setState`.
 
 - Local web host: boardgame-pandemic-legacy-season-2.localhost -> 6190; browser API calls use the /api proxy.

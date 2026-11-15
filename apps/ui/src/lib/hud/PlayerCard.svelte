@@ -2,10 +2,13 @@
 	import { cityDef, pack } from '@repo/game';
 	import type { PlayerCard } from '@repo/game';
 	import { CITY_COLOR } from '#lib/board/CityMarker.svelte';
+	import MapArt from '#lib/cards/MapArt.svelte';
 
 	type Props = { card: PlayerCard; onclick?: () => void; tone?: 'play' | 'discard' | null; small?: boolean };
 
 	let { card, onclick, tone = null, small = false }: Props = $props();
+
+	const GLYPH = { event: '✦', companion: '☻', produce: '▦', epidemic: '☣' } as const;
 
 	const face = $derived.by(() => {
 		switch (card.kind) {
@@ -14,9 +17,10 @@
 				const improvement = pack.cityImprovements.find(item => item.id === card.improvement);
 				return {
 					title: city.name,
-					kicker: city.port ? 'Port city' : 'City',
+					kicker: city.port ? 'Port' : 'City',
 					color: CITY_COLOR[city.color ?? 'haven'],
 					text: improvement?.text ?? '',
+					badge: improvement?.name,
 				};
 			}
 			case 'event': {
@@ -40,13 +44,18 @@
 					text: 'At a haven or supply center: fill it, or every one, up to population.',
 				};
 			case 'epidemic':
-				return { title: 'Epidemic', kicker: '', color: '#ff3b6b', text: '' };
+				return {
+					title: 'Epidemic',
+					kicker: 'Increase, infect, intensify',
+					color: '#ff3b6b',
+					text: 'Raise the rate. Strip the bottom city. Restack the discards.',
+				};
 		}
 	});
 </script>
 
 <button
-	class="card"
+	class="card {card.kind}"
 	class:small
 	class:play={tone === 'play'}
 	class:discard={tone === 'discard'}
@@ -55,18 +64,28 @@
 	{onclick}
 	title={face.text}
 >
-	<span class="band"></span>
-	<span class="kicker">{face.kicker}</span>
-	<span class="title">{face.title}</span>
-	{#if !small && face.text}<span class="text">{face.text}</span>{/if}
-	{#if card.kind === 'city' && card.search.length}
-		<span class="boxes">
-			{#each card.search as box, index (index)}
-				<span class="box" class:used={box.scratched} title={`${box.scope} search`}
-					>{box.scope === 'sea' ? '≈' : '⌕'}</span
-				>
-			{/each}
-		</span>
+	<span class="head">
+		<span class="kicker">{face.kicker}</span>
+		<span class="title">{face.title}</span>
+	</span>
+	{#if !small}
+		{#if card.kind === 'city'}
+			<span class="art"><MapArt city={card.city} accent={face.color} /></span>
+			<span class="foot">
+				<span class="pips" title="Population when the campaign began">
+					{#each { length: cityDef(card.city).population } as _, index (index)}<i></i>{/each}
+				</span>
+				{#if face.badge}<span class="badge" title={face.text}>{face.badge}</span>{/if}
+				{#each card.search as box, index (index)}
+					<span class="box" class:used={box.scratched} title={`${box.scope} search${box.scratched ? ', used' : ''}`}
+						>{box.scope === 'sea' ? '≈' : '⌕'}</span
+					>
+				{/each}
+			</span>
+		{:else}
+			<span class="glyph">{GLYPH[card.kind]}</span>
+			<span class="text">{face.text}</span>
+		{/if}
 	{/if}
 </button>
 
@@ -75,15 +94,15 @@
 		position: relative;
 		display: flex;
 		flex-direction: column;
-		gap: 0.15rem;
-		width: 6rem;
-		height: 7.1rem;
+		width: 8.2em;
+		height: 9.7em;
 		flex: none;
-		padding: 0.9rem 0.5rem 0.45rem;
-		border: 1px solid rgb(255 255 255 / 0.12);
-		border-radius: 0.5rem;
+		padding: 0;
+		border: 1px solid rgb(255 255 255 / 0.14);
+		border-radius: 0.6em;
 		background: linear-gradient(170deg, #1d2732, #121920);
-		color: var(--ink);
+		color: var(--ink, #e9e6dc);
+		font-size: var(--card-size, 0.73rem);
 		text-align: left;
 		overflow: hidden;
 		transition:
@@ -93,9 +112,8 @@
 	}
 
 	.card.small {
-		width: 5.6rem;
-		height: 3.1rem;
-		padding-top: 0.7rem;
+		width: 7.6em;
+		height: 3em;
 	}
 
 	.card:not(:disabled) {
@@ -108,68 +126,116 @@
 	}
 
 	.card.play {
-		border-color: var(--accent);
+		border-color: var(--accent, #7dfcc0);
+		box-shadow: 0 0 0 1px var(--accent, #7dfcc0);
 	}
 
 	.card.discard {
-		border-color: var(--danger);
+		border-color: var(--danger, #ff6b6b);
+		box-shadow: 0 0 0 1px var(--danger, #ff6b6b);
 	}
 
-	.band {
-		position: absolute;
-		inset: 0 0 auto 0;
-		height: 0.45rem;
-		background: var(--band);
+	.head {
+		display: flex;
+		flex-direction: column;
+		padding: 0.55em 0.6em 0.4em;
+		border-top: 0.42em solid var(--band);
 	}
 
 	.kicker {
-		color: var(--muted);
-		font-size: 0.56rem;
-		font-weight: 600;
-		letter-spacing: 0.06em;
+		color: var(--muted, #8a9aa8);
+		font-size: 0.6em;
+		font-weight: 700;
+		letter-spacing: 0.1em;
 		text-transform: uppercase;
 	}
 
 	.title {
-		font-size: 0.82rem;
-		font-weight: 650;
-		line-height: 1.15;
-	}
-
-	.text {
-		margin-top: auto;
-		color: var(--muted);
-		font-size: 0.58rem;
-		line-height: 1.3;
-		display: -webkit-box;
-		-webkit-line-clamp: 3;
-		line-clamp: 3;
-		-webkit-box-orient: vertical;
+		font-size: 1.02em;
+		font-weight: 700;
+		line-height: 1.12;
+		white-space: nowrap;
 		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 
-	.boxes {
-		position: absolute;
-		right: 0.4rem;
-		top: 0.75rem;
+	.art {
+		flex: 1;
+		min-height: 0;
+		border-block: 1px solid rgb(255 255 255 / 0.1);
+	}
+
+	.foot {
 		display: flex;
-		gap: 0.15rem;
+		align-items: center;
+		gap: 0.3em;
+		height: 1.7em;
+		padding: 0 0.5em;
+	}
+
+	.pips {
+		display: flex;
+		gap: 0.16em;
+		margin-right: auto;
+	}
+
+	.pips i {
+		width: 0.42em;
+		height: 0.42em;
+		border-radius: 50%;
+		background: var(--band);
+	}
+
+	.badge {
+		padding: 0 0.4em;
+		border-radius: 0.3em;
+		background: var(--band);
+		color: #10161c;
+		font-size: 0.58em;
+		font-weight: 700;
 	}
 
 	.box {
 		display: grid;
 		place-items: center;
-		width: 0.95rem;
-		height: 0.95rem;
-		border: 1px solid var(--warn);
-		border-radius: 0.2rem;
-		color: var(--warn);
-		font-size: 0.6rem;
+		width: 1.15em;
+		height: 1.15em;
+		border: 1px solid var(--warn, #ffd166);
+		border-radius: 0.25em;
+		color: var(--warn, #ffd166);
+		font-size: 0.72em;
 	}
 
 	.box.used {
-		border-color: var(--muted);
-		color: var(--muted);
+		border-color: var(--muted, #8a9aa8);
+		color: var(--muted, #8a9aa8);
 		opacity: 0.5;
+	}
+
+	.glyph {
+		display: grid;
+		place-items: center;
+		flex: 1;
+		min-height: 0;
+		background: radial-gradient(circle, color-mix(in srgb, var(--band) 24%, transparent), transparent 70%);
+		color: var(--band);
+		font-size: 2.3em;
+		line-height: 1;
+	}
+
+	.text {
+		padding: 0.3em 0.6em 0.55em;
+		color: var(--muted, #8a9aa8);
+		font-size: 0.6em;
+		line-height: 1.3;
+		display: -webkit-box;
+		-webkit-line-clamp: 4;
+		line-clamp: 4;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+
+	.epidemic {
+		background: linear-gradient(170deg, #3a1020, #1a0810);
 	}
 </style>

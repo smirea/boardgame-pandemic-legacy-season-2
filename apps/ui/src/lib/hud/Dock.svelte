@@ -4,6 +4,7 @@
 	import { flip } from 'svelte/animate';
 	import { fly } from 'svelte/transition';
 	import { ACTION_NAMES, DECISION_TITLES, decideLabel, seatName, SEAT_COLORS } from './labels';
+	import InfectionCard from '#lib/cards/InfectionCard.svelte';
 	import PlayerCard from './PlayerCard.svelte';
 
 	type Props = {
@@ -35,6 +36,24 @@
 	const rationed = $derived(
 		Object.values(world.campaign.playerCards).filter(card => card.kind === 'event' && card.mode === 'rationed'),
 	);
+	const EFFECT = {
+		supply: 'cube lost',
+		plague: 'plague',
+		outbreak: 'outbreak',
+		hollow: 'Hollow Men',
+		skipped: 'forsaken',
+		blocked: 'held',
+	} as const;
+	// The Infection cards flipped since this turn began, newest first, each with what it did.
+	const flipped = $derived.by(() => {
+		const sinceTurn = game.log.slice(game.log.findLastIndex(entry => entry.t === 'turn') + 1);
+		return sinceTurn
+			.flatMap(entry => {
+				const card = entry.t === 'infect' ? world.campaign.infectionCards[entry.card] : undefined;
+				return entry.t === 'infect' && card ? [{ seq: entry.seq, card, note: EFFECT[entry.effect] }] : [];
+			})
+			.reverse();
+	});
 	const eventsNeeded = $derived(Math.min(world.campaign.rationing, rationed.length));
 
 	// The engine only accepts a full pick, so a swap in progress lives here until it is complete again.
@@ -157,6 +176,13 @@
 				<p class="prompt">{seatName(world, game.active)} draws 2 Player cards.</p>
 			{:else}
 				<p class="prompt">Infect cities: {game.infectionsLeft} card{game.infectionsLeft === 1 ? '' : 's'} to flip.</p>
+				<div class="flipped" data-testid="flipped">
+					{#each flipped as entry (entry.seq)}
+						<div animate:flip={{ duration: 300 }} in:fly={{ x: 80, duration: 380 }}>
+							<InfectionCard card={entry.card} note={entry.note} />
+						</div>
+					{/each}
+				</div>
 			{/if}
 		</div>
 
@@ -282,7 +308,7 @@
 
 	.hand > div {
 		min-width: 2.6rem;
-		flex: 0 1 6rem;
+		flex: 0 1 6.1rem;
 	}
 
 	.empty,
@@ -302,6 +328,13 @@
 
 	.prompt {
 		color: var(--ink);
+	}
+
+	.flipped {
+		display: flex;
+		gap: 0.35rem;
+		--card-size: 0.62rem;
+		overflow: hidden;
 	}
 
 	.chips {
