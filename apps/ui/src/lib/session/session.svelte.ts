@@ -1,5 +1,14 @@
-import { createGameActor, parseSave, publicState, reject } from '@repo/game';
-import type { Command, GameActor, PublicState, Save } from '@repo/game';
+import {
+	createGameActor,
+	gameIndexOf,
+	parseRecord,
+	parseSave,
+	publicState,
+	recordStep,
+	reject,
+	startRecord,
+} from '@repo/game';
+import type { Command, GameActor, GameRecord, PublicState, Save } from '@repo/game';
 import { createHost, createMemoryTransport, createPeerId, createWebRtcTransport, joinHost, peerId } from '@repo/net';
 import type { ConnectionStatus, PeerInfo, Session } from '@repo/net';
 import { LS } from '../storage';
@@ -21,6 +30,18 @@ function storedSave(): Save | null {
 	return raw ? parseSave(raw) : null;
 }
 
+/** The recording kept from an earlier page load, if it is of the game the save is in. */
+function storedRecord(save: Save | null): GameRecord | null {
+	const raw = LS.get('record');
+	if (!raw || !save) return null;
+	try {
+		const record = parseRecord(raw);
+		return gameIndexOf(record.initial) === save.world.campaign.results.length ? record : null;
+	} catch {
+		return null;
+	}
+}
+
 type DebugApi = {
 	getState: () => PublicState | null;
 	saveState: () => void;
@@ -35,7 +56,25 @@ type DebugApi = {
 		notice: string | null;
 		fatal: string | null;
 	};
+	getRecord: () => GameRecord | null;
 };
+
+/** What the game screen needs from a session. A replay supplies the same shape with nothing behind it. */
+export type SessionView = Pick<
+	GameSession,
+	| 'state'
+	| 'status'
+	| 'peers'
+	| 'cursors'
+	| 'notice'
+	| 'mode'
+	| 'send'
+	| 'pointer'
+	| 'exportSave'
+	| 'importSave'
+	| 'newCampaign'
+	| 'exportRecord'
+>;
 
 declare global {
 	interface Window {
@@ -58,10 +97,15 @@ export class GameSession {
 	readonly mode: Mode;
 	readonly selfId;
 	readonly #net: Session<Msg, Presence>;
+	readonly #name: string;
 	readonly #actor: GameActor | null = null;
+	/** The game in progress, recorded step by step. Only the host keeps one. */
+	#record: GameRecord | null = null;
+	#sender: { command: Command; by: string | null } | null = null;
 
 	constructor(options: { mode: Mode; name: string; secret: string }) {
 		this.mode = options.mode;
+		this.#name = options.name;
 		this.selfId = storedId();
 		const transport =
 			options.mode === 'solo'
@@ -89,16 +133,20 @@ export class GameSession {
 			if (msg.t === 'state' && !this.#actor) this.state = msg.state;
 			if (msg.t === 'rejected') this.#say(msg.reason);
 			if (msg.t === 'command' && this.#actor) {
-				const reason = this.#apply(msg.command);
+				const reason = this.#apply(msg.command, this.peers.find(peer => peer.id === from)?.name ?? null);
 				if (reason) this.#net.send({ t: 'rejected', reason }, from);
 			}
 		});
 		this.status = this.#net.status;
 
 		if (options.mode !== 'join') {
-			this.#actor = createGameActor({ seed: Math.floor(Math.random() * 2 ** 31), save: storedSave() });
+			const save = storedSave();
+			this.#record = storedRecord(save);
+			this.#actor = createGameActor({ seed: Math.floor(Math.random() * 2 ** 31), save });
 			this.#actor.subscribe(snapshot => {
+				const before = this.state;
 				this.state = publicState(snapshot);
+				if (before) this.#remember(before, this.state);
 				LS.set({ save: this.#save() });
 				if (this.#net.status !== 'closed') this.#net.send({ t: 'state', state: this.state });
 			});
@@ -114,7 +162,17 @@ export class GameSession {
 		this.notice = { text, at: Date.now() };
 	}
 
-	#apply(command: Command): string | null {
+	/** Adds the change to the recording of the game it belongs to, starting a new recording when a new game begins. */
+	#remember(before: PublicState, after: PublicState) {
+		if (!this.#record || gameIndexOf(this.#record.initial) !== gameIndexOf(before))
+			this.#record = startRecord(before, Date.now());
+		const sender = this.#sender;
+		this.#sender = null;
+		const entry = { at: Date.now(), by: sender?.by ?? null, command: sender?.command ?? null };
+		if (recordStep(this.#record, before, after, entry)) LS.set({ record: this.#record });
+	}
+
+	#apply(command: Command, by: string | null = this.mode === 'solo' ? null : this.#name): string | null {
 		const snapshot = this.#actor!.getSnapshot();
 		const current = publicState(snapshot);
 		const reason =
@@ -123,7 +181,11 @@ export class GameSession {
 					? null
 					: 'Nothing to undo'
 				: reject(snapshot.context.world, current.phase, command);
-		if (!reason) this.#actor!.send(command);
+		if (!reason) {
+			this.#sender = { command, by };
+			this.#actor!.send(command);
+			this.#sender = null;
+		}
 		return reason;
 	}
 
@@ -157,15 +219,22 @@ export class GameSession {
 		return JSON.stringify(this.#save());
 	}
 
+	/** The recording of the game in progress, or of the last one until the next begins. Only the host has it. */
+	exportRecord(): string | null {
+		return this.#record ? JSON.stringify(this.#record) : null;
+	}
+
 	/** Replaces the campaign with a save. The page reloads so the actor restarts from it. */
 	importSave(raw: unknown) {
 		if (!this.#actor) throw new Error('Only the host can load a campaign');
+		LS.delete('record');
 		LS.set({ save: parseSave(typeof raw === 'string' ? JSON.parse(raw) : raw) });
 		location.reload();
 	}
 
 	newCampaign() {
 		LS.delete('save');
+		LS.delete('record');
 		location.reload();
 	}
 
@@ -188,6 +257,7 @@ export class GameSession {
 				notice: this.notice?.text ?? null,
 				fatal: this.fatal,
 			}),
+			getRecord: () => this.#record,
 		};
 	}
 

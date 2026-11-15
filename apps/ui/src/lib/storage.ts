@@ -16,6 +16,8 @@ export const LS = new LocalStorage<{
 	/** The host's campaign save: plain `{ phase, world }` JSON. */
 	save: unknown;
 	debugSnapshot: unknown;
+	/** The host's recording of the game in progress, played back at `/replay`. */
+	record: unknown;
 }>({
 	namespace,
 	getDefaults: () => ({
@@ -26,5 +28,6 @@ export const LS = new LocalStorage<{
 		mySeats: [],
 		save: null,
 		debugSnapshot: null,
+		record: null,
 	}),
 });

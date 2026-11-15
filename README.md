@@ -40,6 +40,7 @@ To try several players in one browser, give each tab its own identity with `?DEB
 - **Scenarios.** The menu loads a campaign that stands in the October or December lobby with every region explored (`packages/game/src/scenarios.ts`), for testing late mechanics without playing nine months.
 - **Checking the whole game.** `apps/ui/e2e/october.ts` builds the app and plays a full October game through the UI in a headless browser. Add `--shots` to keep screenshots in `apps/ui/e2e/shots`.
 - **Playing a whole campaign with AI players.** `apps/playtest/README.md` covers the lab: configs, saves, player memories, and the parity report.
+- **Replaying a game.** The host records every game as it is played. The menu saves the recording to a file, and `/replay` plays one back on the real game screen, step by step. `apps/ui/e2e/replay.ts` checks it end to end.
 - **Checking the network.** `packages/net/e2e/run.ts` drives three real browser pages through the local signaling Worker.
 
 `AGENTS.md` lists the stack, conventions and product principles.

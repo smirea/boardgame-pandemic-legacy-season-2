@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { CardId, CityId, Insights, World } from '@repo/game';
-	import { cityName, seatName } from './labels.svelte.ts';
+	import { cityName, logLine } from './labels.svelte.ts';
 
 	type Props = { world: World; info: Insights; onfocus: (city: CityId) => void; onlockdown: (card: CardId) => void };
 
@@ -23,67 +23,10 @@
 		game.log
 			.slice(-60)
 			.reverse()
-			.map(entry => {
-				switch (entry.t) {
-					case 'turn':
-						return { seq: entry.seq, tone: 'head', text: `${seatName(world, entry.seat)}'s turn` };
-					case 'move':
-						return { seq: entry.seq, tone: '', text: `${seatName(world, entry.seat)} to ${cityName(entry.to)}` };
-					case 'draw':
-						return { seq: entry.seq, tone: '', text: `${seatName(world, entry.seat)} draws a card` };
-					case 'epidemic':
-						return {
-							seq: entry.seq,
-							tone: 'bad',
-							text: `Epidemic${entry.city ? ` in ${cityName(entry.city)}, ${entry.removed} cubes lost` : ''}. Rate ${entry.rate}`,
-						};
-					case 'infect':
-						return {
-							seq: entry.seq,
-							tone: entry.effect === 'supply' || entry.effect === 'blocked' ? '' : 'bad',
-							text: `${cityName(entry.city)}: ${{ supply: 'lost a cube', plague: 'plague cube', outbreak: 'outbreak', hollow: 'Hollow Men arrive', skipped: 'forsaken, skipped', blocked: 'held firm' }[entry.effect]}`,
-						};
-					case 'incident':
-						return { seq: entry.seq, tone: 'bad', text: `Incident ${entry.total} in ${cityName(entry.city)}` };
-					case 'exposure':
-						return {
-							seq: entry.seq,
-							tone: entry.result === 'empty' ? '' : 'bad',
-							text: `${seatName(world, entry.seat)} is exposed: ${{ empty: 'nothing', scar: 'a scar', skull: 'death', worker: 'sent home' }[entry.result]}`,
-						};
-					case 'connected':
-						return { seq: entry.seq, tone: 'good', text: `${cityName(entry.city)} joins the grid` };
-					case 'structure':
-						return {
-							seq: entry.seq,
-							tone: 'good',
-							text: `${{ center: 'Supply center', tower: 'Tower', shelter: 'Shelter' }[entry.structure]} in ${cityName(entry.city)}`,
-						};
-					case 'objective':
-						return { seq: entry.seq, tone: 'good', text: 'Objective complete' };
-					case 'unlock':
-						return {
-							seq: entry.seq,
-							tone: 'good',
-							text: `New content opened${entry.forced ? ' by a perimeter report' : ''}`,
-						};
-					case 'search':
-						return {
-							seq: entry.seq,
-							tone: '',
-							text: `${seatName(world, entry.seat)} searches ${cityName(entry.city)}`,
-						};
-					case 'end':
-						return {
-							seq: entry.seq,
-							tone: entry.won ? 'good' : 'bad',
-							text: entry.won ? 'Victory' : `Defeat: ${entry.reason}`,
-						};
-					default:
-						return null;
-				}
-			})
-			.filter(line => line !== null),
+			.flatMap(entry => {
+				const line = logLine(world, entry);
+				return line ? [{ seq: entry.seq, ...line }] : [];
+			}),
 	);
 </script>
 

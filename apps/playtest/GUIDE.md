@@ -16,8 +16,8 @@ The loop is short:
 
 1. `wait` blocks until the game needs you or someone speaks. Run it again whenever it says it is still waiting. Never stop because you are waiting.
 2. `status` shows the whole table. `options` lists every command you may send, by exact key. `board` shows the map.
-3. `do <key> <key> ...` sends commands in order and stops at the first that fails. Copy keys exactly from `options`. Card ids look like `paris.12`.
-4. `say <text>` talks to the other players. Keep it short and useful: plans, requests for a card, warnings.
+3. `do <key> <key> ... why: <one sentence>` sends commands in order and stops at the first that fails. Copy keys exactly from `options`. Card ids look like `paris.12`. **End every `do` with `why:` and your reason**, such as `do drive:london deliver:2 why: London is at 0 cubes and 46% to be hit`. The whole game is recorded and replayed later, and your reason is shown beside the moves it explains. A `do` with no reason leaves a hole in the record.
+4. `say <text>` talks to the other players. Keep it short and useful: plans, requests for a card, warnings. Table talk is recorded with the game too.
 5. `report <bug|rules|ux|idea> <text>` records anything that looks wrong, confusing, or missing. Report the moment you see it.
 
 One player is the lead for each game. Only the lead sends setup and game-end commands. Your brief says whether that is you.

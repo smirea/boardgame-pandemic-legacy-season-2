@@ -121,6 +121,7 @@ export function writeBriefs(input: BriefInput): string[] {
 			'',
 			'- Keep going until `wait` or `status` says **SESSION COMPLETE**. That comes after the game ends and the game-end spending is finished. A turn can take the others a few minutes. Keep running `wait`. Do not stop early for any reason short of the lab not answering three times in a row.',
 			'- Play in character, and play to win.',
+			'- End every `do` with `why:` and one sentence of reasoning. The game is recorded, and the replay shows your reason beside each move.',
 			'- `report` every bug, rule surprise and rough edge the moment you meet it.',
 			'- Do not open or edit any file other than the three above and your report file. Do not look at source code. Do not run any command other than `./apps/playtest/play`.',
 			'',

@@ -8,6 +8,8 @@ Runs AI players through the real game, each in its own browser tab, and keeps a 
 ./apps/playtest/lab start apps/playtest/configs/campaign.json   # builds the app, opens the tabs, resumes the run's last save
 ./apps/playtest/lab brief                                       # writes one brief per player for the next game
 ./apps/playtest/lab parity                                      # writes runs/<run>/parity.md
+./apps/playtest/lab replays                                     # prints the address of the replays page
+./apps/playtest/lab review apps/playtest/configs/campaign.json  # serves a finished run's replays without starting a game
 ./apps/playtest/lab stop
 ```
 
@@ -36,7 +38,14 @@ Everything is under `runs/<run>/`, which git ignores.
 - `saves/latest.json` is rewritten after every state change. `saves/g03-m03a1-over.json` and its like are kept at each phase of each game. Any of them loads with `lab load <path>` or through the game's Menu.
 - `journal.jsonl` has every command, refusal, log line, chat line and page error.
 - `issues.jsonl` has what the players reported, each with a save of that moment.
+- `records/g00.json` and its like are the recordings, one per game, written as the game is played. Each holds every state change with the command that caused it, who sent it, and the table talk, stated reasons (`why:`) and issue reports as timestamped notes.
 - `parity.md` is the campaign report: each game against the research timeline, the Legacy deck schedule, mechanics exercised and not, and every problem found.
 - `reports/` has each player's write-up of each game. `shots/` has a screenshot of the host tab at each phase.
 
 Memory files live in `memory/` and are tracked, so a later run starts with what the players learned.
+
+## Replays
+
+The replays page lists every recorded game of the run and plays any of them back on the real game screen: step, scrub, jump by turn, or let it run. The side panel shows each move with the reason the player gave for it, the table talk around it, and what the game logged. `lab start` and `lab replays` print its address.
+
+The operator's notes on each game (summary, story, highlights, rules check, findings and fixes) live in `notes/<run>.json`, keyed by game (`g00`, `g01`, and so on), and show in the page's Notes tab and games list. They are tracked in git. The recordings are not.

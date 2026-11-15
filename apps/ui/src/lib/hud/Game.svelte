@@ -3,7 +3,7 @@
 	import type { Action, CardId, CityId, Command, EdgeDef, Play, SeatId } from '@repo/game';
 	import Board from '#lib/board/Board.svelte';
 	import type { BoardView, CityView, Fx, FxKind } from '#lib/board/types.ts';
-	import type { GameSession } from '#lib/session/session.svelte.ts';
+	import type { SessionView } from '#lib/session/session.svelte.ts';
 	import { LS } from '#lib/storage.ts';
 	import { untrack } from 'svelte';
 	import { backOut } from 'svelte/easing';
@@ -28,7 +28,8 @@
 	import TopBar from './TopBar.svelte';
 	import Upkeep from './Upkeep.svelte';
 
-	let { session }: { session: GameSession } = $props();
+	// A spectator owns no seat, whatever this browser claimed in a live game. Replays use it.
+	let { session, spectator = false }: { session: SessionView; spectator?: boolean } = $props();
 
 	const snap = $derived(session.state!);
 	const world = $derived(snap.world);
@@ -41,7 +42,7 @@
 
 	let mine = $state<SeatId[]>(LS.get('mySeats', []));
 	const solo = $derived(session.mode === 'solo');
-	const owns = (seat: SeatId) => solo || mine.includes(seat);
+	const owns = (seat: SeatId) => !spectator && (solo || mine.includes(seat));
 	const canAct = $derived(game !== null && owns(game.active));
 	let viewing = $state<SeatId | null>(null);
 	$effect(() => {
@@ -233,7 +234,11 @@
 		};
 	}
 
+	// A spectator cannot acknowledge a briefing for the table, so closing it is theirs alone.
+	let briefingRead = $state('');
+
 	function claim(seat: SeatId) {
+		if (spectator) return;
 		mine = mine.includes(seat) ? mine.filter(other => other !== seat) : [...mine, seat];
 		LS.set({ mySeats: mine });
 	}
@@ -402,6 +407,16 @@
 		else if (snap.phase === 'playing.infect') send({ type: 'INFECT' });
 	}
 
+	function downloadRecord() {
+		const record = session.exportRecord();
+		if (!record) return;
+		const link = document.createElement('a');
+		link.href = URL.createObjectURL(new Blob([record], { type: 'application/json' }));
+		link.download = `recording-${(JSON.parse(record) as { id: string }).id}.json`;
+		link.click();
+		URL.revokeObjectURL(link.href);
+	}
+
 	let fileInput = $state<HTMLInputElement>();
 	function download() {
 		const link = document.createElement('a');
@@ -414,13 +429,13 @@
 
 <svelte:window onkeydown={onkey} />
 
-<div class="game">
+<div class="game" class:spectator>
 	<TopBar
 		{snap}
 		{info}
 		status={session.status}
 		players={session.peers.filter(peer => peer.connected).length}
-		solo={session.mode === 'solo'}
+		solo={session.mode === 'solo' || spectator}
 		onreset={() => resetView++}
 		onmenu={() => (menu = !menu)}
 	/>
@@ -546,15 +561,17 @@
 			</div>
 		{/if}
 
-		{#if campaign.briefing.length}
+		{#if campaign.briefing.length && briefingRead !== campaign.briefing.join('|')}
 			<div class="scrim" transition:fade={{ duration: 200 }}>
 				<div class="briefing" in:fly={{ y: 24, duration: 300 }}>
 					<h2>New this game</h2>
 					<ul>
 						{#each campaign.briefing as line, index (index)}<li>{line}</li>{/each}
 					</ul>
-					<button class="primary" onclick={() => send({ type: 'ACK_BRIEFING' })} data-testid="ack-briefing"
-						>Got it</button
+					<button
+						class="primary"
+						onclick={() => (spectator ? (briefingRead = campaign.briefing.join('|')) : send({ type: 'ACK_BRIEFING' }))}
+						data-testid="ack-briefing">Got it</button
 					>
 				</div>
 			</div>
@@ -567,6 +584,10 @@
 		{#if menu}
 			<div class="menu" transition:fly={{ y: -10, duration: 160 }}>
 				<button onclick={download}>Export campaign save</button>
+				{#if session.mode !== 'join' && !spectator}
+					<button onclick={downloadRecord} data-testid="save-recording">Save this game's recording</button>
+					<a href="/replay?src=local" target="_blank" data-testid="open-replay">Replay this game</a>
+				{/if}
 				{#if session.mode !== 'join'}
 					<button onclick={() => fileInput?.click()}>Import campaign save</button>
 					<button onclick={() => session.importSave(scenarios.october())} data-testid="scenario-october"
@@ -621,7 +642,8 @@
 		--panel: rgb(14 20 27 / 0.82);
 		--panel-solid: #0e141b;
 		position: fixed;
-		inset: 0;
+		/* A page that hosts the game beside something else, such as the replay viewer, sets the inset. */
+		inset: var(--game-inset, 0);
 		display: grid;
 		grid-template-rows: auto minmax(0, 1fr) auto;
 		grid-template-columns: minmax(0, 1fr);
@@ -630,6 +652,12 @@
 		font-family: 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
 		font-variant-numeric: tabular-nums;
 		overflow: hidden;
+	}
+
+	/* A spectator watches: the buttons that move the game on are not theirs to press. */
+	.game.spectator :global(footer .turn button),
+	.game.spectator :global(footer .setup button) {
+		display: none;
 	}
 
 	.stage {
@@ -991,7 +1019,8 @@
 		font-size: 0.8rem;
 	}
 
-	.menu button {
+	.menu button,
+	.menu a {
 		padding: 0.35rem 0.7rem;
 		border: 1px solid var(--line);
 		border-radius: 0.35rem;
@@ -999,6 +1028,7 @@
 		color: var(--ink);
 		font: inherit;
 		text-align: left;
+		text-decoration: none;
 		cursor: pointer;
 	}
 

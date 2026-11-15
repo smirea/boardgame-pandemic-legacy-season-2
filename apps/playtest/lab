@@ -50,6 +50,17 @@ if (verb === 'start') {
 	process.exit(0);
 }
 
+if (verb === 'review') {
+	// Serves a run's recordings and the replay page without starting a game, for looking back at a finished run.
+	const file = rest.find(arg => !arg.startsWith('--'));
+	if (!file) throw new Error('usage: lab review <config.json>');
+	const config = loadConfig(resolve(file));
+	const { servePages, replaysUrl } = await import('./src/replays.ts');
+	const server = servePages(config);
+	console.log(`Replays for ${config.run}: ${replaysUrl(server.port!)}\nCtrl+C to stop.`);
+	await new Promise(() => {});
+}
+
 const alive = (pid: number) => {
 	try {
 		process.kill(pid, 0);

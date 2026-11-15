@@ -7,14 +7,26 @@
 import { appendFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { newCampaign, overLimit, parseSave, reject, scenarios } from '@repo/game';
-import type { CharacterId, Command, PublicState, Save, SeatId } from '@repo/game';
+import {
+	gameIndexOf,
+	newCampaign,
+	overLimit,
+	parseRecord,
+	parseSave,
+	recordStep,
+	reject,
+	scenarios,
+	startRecord,
+} from '@repo/game';
+import type { CharacterId, Command, GameRecord, PublicState, RecordNote, Save, SeatId } from '@repo/game';
 import { newAudit, observe, renderParity, untouched } from './audit.ts';
 import type { Audit, Issue } from './audit.ts';
 import { writeBriefs } from './brief.ts';
 import { mayRaw, optionsFor, parseVerb, seatOf } from './commands.ts';
 import type { Who } from './commands.ts';
 import { loadConfig, repoRoot } from './config.ts';
+import { recordFile, replaysUrl, servePages } from './replays.ts';
+import type { RecordMeta } from './replays.ts';
 import { isCity, monthName } from './names.ts';
 import {
 	renderBoard,
@@ -51,6 +63,7 @@ const dirs = {
 	shots: join(runDir, 'shots'),
 	briefs: join(runDir, 'briefs'),
 	reports: join(runDir, 'reports'),
+	records: join(runDir, 'records'),
 };
 for (const dir of Object.values(dirs)) mkdirSync(dir, { recursive: true });
 
@@ -124,16 +137,7 @@ if (built !== `http://127.0.0.1:${config.signalPort}`)
 		`the app is built for the signaling server at ${built}, but this run wants port ${config.signalPort}`,
 	);
 
-const buildDir = join(uiDir, 'build');
-const pages = Bun.serve({
-	hostname: '127.0.0.1',
-	port: config.port,
-	async fetch(request) {
-		const path = new URL(request.url).pathname;
-		const file = Bun.file(join(buildDir, path));
-		return new Response(path !== '/' && (await file.exists()) ? file : Bun.file(join(buildDir, 'index.html')));
-	},
-});
+const pages = servePages(config);
 
 const wranglerLog: string[] = [];
 const wrangler = Bun.spawn(
@@ -205,11 +209,67 @@ const gameIndex = (state: PublicState) => state.world.campaign.results.length;
 const tag = (state: PublicState) =>
 	`g${String(gameIndex(state)).padStart(2, '0')}-m${String(state.world.campaign.month).padStart(2, '0')}a${state.world.campaign.attempt}`;
 
+const metaFile = join(dirs.records, 'meta.json');
+const recordMeta = readJson<Record<string, RecordMeta>>(metaFile, {});
+let recording: GameRecord | null = null;
+/** Notes made before the game they belong to has its first step. */
+let earlyNotes: RecordNote[] = [];
+
+function saveRecording() {
+	if (!recording) return;
+	const index = gameIndexOf(recording.initial);
+	const key = recordFile(index).slice(0, -5);
+	writeFileSync(join(dirs.records, recordFile(index)), JSON.stringify(recording));
+	const game = current?.world.game;
+	const players =
+		game && current && gameIndex(current) === index
+			? game.seats.map((seat, at) => {
+					const character = current!.world.campaign.characters[game.players[seat]!.character];
+					return {
+						name: config.players[at]?.name ?? seat,
+						character: character?.name ?? seat,
+						job: character?.job ?? 'none',
+					};
+				})
+			: (recordMeta[key]?.players ?? []);
+	recordMeta[key] = {
+		id: recording.id,
+		steps: recording.steps.length,
+		startedAt: recording.startedAt,
+		endedAt: recording.steps.at(-1)?.at ?? recording.startedAt,
+		players,
+	};
+	writeFileSync(metaFile, JSON.stringify(recordMeta));
+}
+
+/** Adds one state change to the recording of the game it belongs to. A restarted lab picks its recording back up. */
+function remember(previous: PublicState, next: PublicState, command: Command | null, by: string | null) {
+	const index = gameIndex(previous);
+	if (!recording || gameIndexOf(recording.initial) !== index) {
+		const file = join(dirs.records, recordFile(index));
+		recording = existsSync(file)
+			? parseRecord(JSON.parse(readFileSync(file, 'utf8')))
+			: startRecord(previous, Date.now());
+		recording.notes.push(...earlyNotes);
+		earlyNotes = [];
+	}
+	if (recordStep(recording, previous, next, { at: Date.now(), by, command })) saveRecording();
+}
+
+function note(kind: RecordNote['kind'], by: string, text: string) {
+	const entry: RecordNote = { at: Date.now(), by, kind, text };
+	if (recording && current && gameIndexOf(recording.initial) === gameIndex(current)) {
+		recording.notes.push(entry);
+		saveRecording();
+	} else earlyNotes.push(entry);
+}
+
 async function ingest(next: PublicState, raw: string, command: Command | null, agent: string | null) {
 	const previous = current;
 	current = next;
 	currentRaw = raw;
 	observe(audit, previous, next, command);
+	if (previous) remember(previous, next, command, config.players.find(player => player.id === agent)?.name ?? null);
 	const save: Save = { v: 1, phase: next.phase, world: next.world };
 	writeFileSync(files.latest, JSON.stringify(save));
 	if (command) journal({ kind: 'command', agent, phase: previous?.phase, command });
@@ -447,6 +507,7 @@ function report(who: Who | null, agent: string, severity: string, text: string):
 		save: saved,
 	};
 	appendFileSync(files.issues, `${JSON.stringify(issue)}\n`);
+	note('issue', issue.agent, `[${severity}] ${text}`);
 	journal({ kind: 'issue', ...issue });
 	return `Recorded issue ${count} with a save of this moment.`;
 }
@@ -455,7 +516,8 @@ const HELP = `Commands (run as: ./play <you> <command>):
   status              the whole situation, table talk, and what needs you
   wait [seconds]      block until something needs you or someone speaks (default 45)
   options [filter]    every command you may send right now, by exact key
-  do <key> [<key>..]  send commands in order; stops at the first one that fails
+  do <key> [<key>..] why: <reason>   send commands in order; stops at the first that fails.
+                      End every do with why: and one sentence on why you chose it
   board               every revealed location, by region, with links
   city <id>           one location in detail
   decks               discard piles and the known layers of the Infection deck
@@ -494,6 +556,8 @@ async function handle(agent: string, words: string[]): Promise<string> {
 				});
 				return paths.join('\n');
 			}
+			case 'replays':
+				return replaysUrl(pages.port!);
 			case 'parity':
 				writeFileSync(files.parity, renderParity(audit, state.world, issues()));
 				return files.parity;
@@ -538,7 +602,7 @@ async function handle(agent: string, words: string[]): Promise<string> {
 				setTimeout(() => void shutdown(), 50);
 				return 'Stopping.';
 			default:
-				return 'lab commands: brief · parity · untouched · save <name> · load <path> · tabs · errors · shot [agent] [name] · session · status · board · stop';
+				return 'lab commands: brief · replays · parity · untouched · save <name> · load <path> · tabs · errors · shot [agent] [name] · session · status · board · stop';
 		}
 	}
 
@@ -618,6 +682,7 @@ async function handle(agent: string, words: string[]): Promise<string> {
 			const text = rest.join(' ').trim();
 			if (!text) return 'usage: say <text>';
 			lab.chat.push({ at: new Date().toISOString(), from: who.name, text });
+			note('chat', who.name, text);
 			lab.chatSeen[who.id] = lab.chat.length;
 			journal({ kind: 'chat', agent: who.id, text });
 			persist();
@@ -630,8 +695,20 @@ async function handle(agent: string, words: string[]): Promise<string> {
 		}
 		case 'do':
 			if (harness === 'ui') return 'You play through the screen this run. Use look, click, tap, type and key.';
-			if (!rest.length) return 'usage: do <key> [<key> ...]';
-			return locked(() => doKeys(who, rest));
+			if (!rest.length) return 'usage: do <key> [<key> ...] why: <one sentence>';
+			return locked(() => {
+				// Everything after `why:` is the player's reason, kept with the recording beside the step it explains.
+				const at = rest.findIndex(word => word.toLowerCase() === 'why:');
+				const reason =
+					at < 0
+						? ''
+						: rest
+								.slice(at + 1)
+								.join(' ')
+								.trim();
+				if (reason) note('why', who.name, reason);
+				return doKeys(who, at < 0 ? rest : rest.slice(0, at));
+			});
 		case 'look':
 			return look(tab);
 		case 'click':
@@ -722,5 +799,5 @@ writeFileSync(
 );
 const ready = current as PublicState | null;
 console.log(
-	`lab ready: run ${config.run} · ${ready ? `${monthName(ready.world.campaign.month)} ${ready.phase}` : 'no state'} · control ${control.port} · watch at ${tabUrl('spectator')}`,
+	`lab ready: run ${config.run} · ${ready ? `${monthName(ready.world.campaign.month)} ${ready.phase}` : 'no state'} · control ${control.port} · watch at ${tabUrl('spectator')} · replays at ${replaysUrl(pages.port!)}`,
 );

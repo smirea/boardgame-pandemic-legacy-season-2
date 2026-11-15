@@ -1,5 +1,5 @@
 import { cityDef, handLimit, pack, routeCost } from '@repo/game';
-import type { Action, CardId, CityId, Decide, Decision, Play, Purchase, SeatId, World } from '@repo/game';
+import type { Action, CardId, CityId, Decide, Decision, LogEntry, Play, Purchase, SeatId, World } from '@repo/game';
 
 export const MONTHS = [
 	'Prologue',
@@ -266,5 +266,60 @@ export function purchaseLabel(world: World, purchase: Purchase): string {
 			return cityName(purchase.city);
 		case 'permanent':
 			return cityName(purchase.city);
+	}
+}
+
+/** One log entry as a short line, or null for entries that only repeat another line. */
+export function logLine(world: World, entry: LogEntry): { tone: '' | 'head' | 'good' | 'bad'; text: string } | null {
+	switch (entry.t) {
+		case 'turn':
+			return { tone: 'head', text: `${seatName(world, entry.seat)}'s turn` };
+		case 'move':
+			return { tone: '', text: `${seatName(world, entry.seat)} to ${cityName(entry.to)}` };
+		case 'draw':
+			return { tone: '', text: `${seatName(world, entry.seat)} draws ${cardName(world, entry.card)}` };
+		case 'epidemic':
+			return {
+				tone: 'bad',
+				text: `Epidemic${entry.city ? ` in ${cityName(entry.city)}, ${entry.removed} cubes lost` : ''}. Rate ${entry.rate}`,
+			};
+		case 'infect':
+			return {
+				tone: entry.effect === 'supply' || entry.effect === 'blocked' ? '' : 'bad',
+				text: `${cityName(entry.city)}: ${{ supply: 'lost a cube', plague: 'plague cube', outbreak: 'outbreak', hollow: 'Hollow Men arrive', skipped: 'forsaken, skipped', blocked: 'held firm' }[entry.effect]}`,
+			};
+		case 'incident':
+			return { tone: 'bad', text: `Incident ${entry.total} in ${cityName(entry.city)}` };
+		case 'exposure':
+			return {
+				tone: entry.result === 'empty' ? '' : 'bad',
+				text: `${seatName(world, entry.seat)} is exposed: ${{ empty: 'nothing', scar: 'a scar', skull: 'death', worker: 'sent home' }[entry.result]}`,
+			};
+		case 'connected':
+			return { tone: 'good', text: `${cityName(entry.city)} joins the grid` };
+		case 'structure':
+			return {
+				tone: 'good',
+				text: `${{ center: 'Supply center', tower: 'Tower', shelter: 'Shelter' }[entry.structure]} in ${cityName(entry.city)}`,
+			};
+		case 'objective':
+			return { tone: 'good', text: 'Objective complete' };
+		case 'unlock':
+			return {
+				tone: 'good',
+				text: `New content opened${entry.forced ? ' by a perimeter report' : ''}`,
+			};
+		case 'search':
+			return {
+				tone: '',
+				text: `${seatName(world, entry.seat)} searches ${cityName(entry.city)}`,
+			};
+		case 'end':
+			return {
+				tone: entry.won ? 'good' : 'bad',
+				text: entry.won ? 'Victory' : `Defeat: ${entry.reason}`,
+			};
+		default:
+			return null;
 	}
 }

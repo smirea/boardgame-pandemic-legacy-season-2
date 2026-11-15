@@ -57,7 +57,7 @@
 				title="Player deck. Turns left before it runs out, and the chance the next draw holds an epidemic."
 			>
 				<span class="caption">Player deck</span>
-				<strong>{info.playerDeck.cards}</strong>
+				<strong data-testid="deck-count">{info.playerDeck.cards}</strong>
 				<span>{info.playerDeck.turnsLeft} turns</span>
 				<span class="warn" class:hot={info.playerDeck.epidemicNextDraw > 0.5}
 					>epidemic {percent(info.playerDeck.epidemicNextDraw)}</span

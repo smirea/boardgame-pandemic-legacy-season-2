@@ -1,4 +1,6 @@
-# Campaign 1: three Grok players, January to December
+# Campaign 1: three Grok players, stopped after January
+
+This run was stopped during February to add game recording and replay. The campaign restarted from January as `campaign-2`, whose games and notes are on the replays page (`./apps/playtest/lab replays`) and in `apps/playtest/notes/campaign-2.json`. What follows is what the two January games of this run found.
 
 The record of the first full playtest campaign. Run `campaign-1`, seed 20261115, config `apps/playtest/configs/campaign.json`. Players: Vex (high-risk, ruthless), Sol (safe, risk-averse), Kit (opportunistic), all `grok-4.7-build-fast` at medium effort, each in a browser tab, one game per session, with a memory file carried between games.
 
