@@ -50,7 +50,14 @@ export const ACTION_NAMES: Record<Action['a'], string> = {
 	destroyInfection: 'Destroy card',
 };
 
-export const cityName = (id: CityId) => cityDef(id).name;
+/** Names the group gave to havens. Reactive, so every label that reads `cityName` follows a rename. */
+const renamed = $state<{ names: Partial<Record<CityId, string>> }>({ names: {} });
+
+export function setNames(names: Partial<Record<CityId, string>>) {
+	renamed.names = names;
+}
+
+export const cityName = (id: CityId) => renamed.names[id] ?? cityDef(id).name;
 
 export function seatName(world: World, seat: SeatId): string {
 	const player = world.game?.players[seat];
@@ -171,8 +178,11 @@ export function decideLabel(world: World, decide: Decide): string {
 			return `Discard ${cards(world, decide.cards)}`;
 		case 'scar': {
 			const scar = pack.scars.find(candidate => candidate.id === decide.scar)!;
-			return `${scar.name} (${scar.text}) ${decide.target === 'job' ? 'over the job' : `in slot ${decide.target + 1}`}`;
+			const who = decide.seat ? `${seatName(world, decide.seat)}: ` : '';
+			return `${who}${scar.name} (${scar.text}) ${decide.target === 'job' ? 'over the job' : `in slot ${decide.target + 1}`}`;
 		}
+		case 'cordon':
+			return `${seatName(world, decide.seat)} discards ${cardName(world, decide.card)}`;
 		case 'replace':
 			return decide.character
 				? `Continue as ${world.campaign.characters[decide.character]!.name}`
@@ -201,6 +211,7 @@ export const DECISION_TITLES: Record<string, string> = {
 	removeHollow: 'Remove Hollow Men',
 	quarantineCard: 'Set an Infection card aside until game end',
 	shield: 'Discard a matching card to keep the cube?',
+	cordon: 'Discard a card to stop the rest of this Infect step?',
 };
 
 export function purchaseLabel(world: World, purchase: Purchase): string {

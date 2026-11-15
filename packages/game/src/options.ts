@@ -222,9 +222,12 @@ export function legalDecides(world: World): Decide[] {
 		candidates.push({ d: 'skip' });
 		switch (pending.t) {
 			case 'scar':
-				for (const scar of campaign.scars)
-					for (const target of scarTargets(characterOf(world, pending.seat)))
-						candidates.push({ d: 'scar', scar, target });
+				for (const seat of pending.seat ? [pending.seat] : game.seats) {
+					for (const scar of campaign.scars) {
+						for (const target of scarTargets(characterOf(world, seat)))
+							candidates.push({ d: 'scar', scar, target, ...(pending.seat ? {} : { seat }) });
+					}
+				}
 				break;
 			case 'replace':
 				candidates.push({ d: 'replace', character: null });
@@ -251,6 +254,10 @@ export function legalDecides(world: World): Decide[] {
 			case 'shield':
 				for (const seat of game.seats)
 					for (const card of player(game, seat).hand) candidates.push({ d: 'shield', seat, card });
+				break;
+			case 'cordon':
+				for (const seat of game.seats)
+					for (const card of player(game, seat).hand) candidates.push({ d: 'cordon', seat, card });
 				break;
 			case 'discard':
 				break;

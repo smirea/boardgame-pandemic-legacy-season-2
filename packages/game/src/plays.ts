@@ -204,16 +204,18 @@ export function applyPlay(world: World, seat: SeatId, card: CardId, play: Play) 
 /** Answers to the choice at the front of the pending queue, or a hand-limit discard. */
 export type Decide =
 	| { d: 'discard'; seat: SeatId; cards: CardId[] }
-	| { d: 'scar'; scar: ScarId; target: number | 'job' }
+	/** `seat` names the character when the group is choosing who takes the scar. */
+	| { d: 'scar'; scar: ScarId; target: number | 'job'; seat?: SeatId }
 	| { d: 'replace'; character: CharacterId | null }
 	| { d: 'retrieve'; card: CardId }
 	| { d: 'freeEdge'; to: CityId }
 	| { d: 'removeHollow'; cities: CityId[] }
 	| { d: 'quarantineCard'; card: CardId }
 	| { d: 'shield'; seat: SeatId; card: CardId }
+	| { d: 'cordon'; seat: SeatId; card: CardId }
 	| { d: 'skip' };
 
-const OPTIONAL = new Set(['retrieve', 'freeEdge', 'removeHollow', 'quarantineCard', 'shield']);
+const OPTIONAL = new Set(['retrieve', 'freeEdge', 'removeHollow', 'quarantineCard', 'shield', 'cordon']);
 
 export function checkDecide(world: World, decide: Decide): string | null {
 	const { campaign, game } = world;
@@ -237,7 +239,9 @@ export function checkDecide(world: World, decide: Decide): string | null {
 	if (decide.d !== pending.t) return 'A different choice is pending';
 	switch (decide.d) {
 		case 'scar': {
-			const character = characterOf(world, (pending as { seat: SeatId }).seat);
+			const seat = (pending as { seat: SeatId | null }).seat ?? decide.seat;
+			if (!seat || !game.players[seat]) return 'Pick who takes the scar';
+			const character = characterOf(world, seat);
 			if (!campaign.scars.includes(decide.scar) || decide.scar === 'carrier') return 'That scar is not available';
 			return scarTargets(character).includes(decide.target) ? ok : 'A scar cannot go there';
 		}
@@ -274,6 +278,8 @@ export function checkDecide(world: World, decide: Decide): string | null {
 			return game.infectionDiscard.includes(decide.card) && campaign.infectionCards[decide.card]?.kind === 'city'
 				? ok
 				: 'Pick a City card from the Infection discard pile';
+		case 'cordon':
+			return game.players[decide.seat]?.hand.includes(decide.card) ? ok : 'Discard a card from a hand';
 		case 'shield': {
 			const card = campaign.playerCards[decide.card];
 			const color = (pending as { color: string }).color;
@@ -299,7 +305,7 @@ export function applyDecide(world: World, decide: Decide) {
 	}
 	game.pending.shift();
 	if (decide.d === 'skip' || !pending) return;
-	const seat = 'seat' in pending ? pending.seat : game.active;
+	const seat = ('seat' in pending ? pending.seat : null) ?? ('seat' in decide ? decide.seat : null) ?? game.active;
 	switch (decide.d) {
 		case 'scar': {
 			const character = characterOf(world, seat);
@@ -338,6 +344,10 @@ export function applyDecide(world: World, decide: Decide) {
 			game.infectionDiscard.splice(game.infectionDiscard.indexOf(decide.card), 1);
 			game.gameEndArea.push(decide.card);
 			return;
+		case 'cordon':
+			discardFromHand(game, decide.seat, decide.card);
+			game.infectionsLeft = 0;
+			return;
 		case 'shield': {
 			const city = (pending as { city: CityId }).city;
 			discardFromHand(game, decide.seat, decide.card);
@@ -355,7 +365,9 @@ export function autoResolve(world: World) {
 	for (;;) {
 		const pending = game.pending[0];
 		if (!pending) return;
-		if (pending.t === 'scar' && !canTakeScar(world, characterOf(world, pending.seat))) game.pending.shift();
+		const scarFor = pending.t === 'scar' ? (pending.seat ? [pending.seat] : game.seats) : [];
+		if (pending.t === 'scar' && !scarFor.some(seat => canTakeScar(world, characterOf(world, seat))))
+			game.pending.shift();
 		else if (pending.t === 'discard' && player(game, pending.seat).hand.length === 0) game.pending.shift();
 		else return;
 	}

@@ -1,5 +1,5 @@
 import { pack } from './content/pack';
-import type { ActionId, CityDef, CompanionId, EdgeKind, SearchResult } from './content/types';
+import type { ActionId, CityDef, CompanionId, EdgeKind, RuleId, SearchResult } from './content/types';
 import { drawPiled } from './decks';
 import { bump, kill, movePawn, setProgress, settleGrid } from './flow';
 import {
@@ -31,7 +31,8 @@ export type Action =
 	| { a: 'charter'; card: CardId; to: CityId }
 	| { a: 'captainSail'; card: CardId; to: CityId }
 	| { a: 'makeSupplies' }
-	| { a: 'produce'; card: CardId; mode: 'local' | 'system' }
+	/** `first` lists where cubes go first when the stockpile cannot fill everything. */
+	| { a: 'produce'; card: CardId; mode: 'local' | 'system'; first?: CityId[] }
 	| { a: 'deliver'; count: number; to?: CityId }
 	| { a: 'share'; card: CardId; with: SeatId; give: boolean }
 	| { a: 'buildCenter'; cards: CardId[]; laborer?: boolean; moveFrom?: CityId }
@@ -69,6 +70,8 @@ type Ctx = {
 type Spec<A> = {
 	/** Actions granted by a job or ability are available without a campaign unlock. */
 	trait?: Parameters<typeof has>[2];
+	/** Actions that a campaign rule switches on, with no action sticker of their own. */
+	rule?: RuleId;
 	free?: boolean;
 	/** Reveals hidden information, so the turn's undo history ends here. */
 	reveals?: boolean;
@@ -100,16 +103,14 @@ function structureCities(game: Game, kind: 'center' | 'tower' | 'shelter'): City
 	return (Object.keys(game.locations) as CityId[]).filter(id => game.locations[id]![kind]);
 }
 
-function fillTargets(ctx: Ctx, mode: 'local' | 'system'): CityId[] {
+function fillTargets(ctx: Ctx, mode: 'local' | 'system', first: CityId[] = []): CityId[] {
 	if (mode === 'local') return [ctx.here];
 	const onGrid = grid(ctx.campaign);
-	const others = pack.cities
-		.filter(
-			city =>
-				onGrid.has(city.id) && city.id !== ctx.here && (city.kind === 'haven' || ctx.game.locations[city.id]!.center),
-		)
+	const sites = pack.cities
+		.filter(city => onGrid.has(city.id) && (city.kind === 'haven' || ctx.game.locations[city.id]!.center))
 		.map(city => city.id);
-	return [ctx.here, ...others];
+	const chosen = first.filter(city => sites.includes(city));
+	return [...new Set([...chosen, ctx.here, ...sites])];
 }
 
 const shortfall = (ctx: Ctx, city: CityId) =>
@@ -284,8 +285,8 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 			const needed = fillTargets(ctx, mode).reduce((sum, city) => sum + shortfall(ctx, city), 0);
 			return needed > 0 && ctx.game.stockpile > 0 ? ok : 'Nothing would be produced';
 		},
-		apply(ctx, { card, mode }) {
-			for (const city of fillTargets(ctx, mode)) {
+		apply(ctx, { card, mode, first }) {
+			for (const city of fillTargets(ctx, mode, first)) {
 				const amount = Math.min(shortfall(ctx, city), ctx.game.stockpile);
 				ctx.game.stockpile -= amount;
 				ctx.game.locations[city]!.supplies += amount;
@@ -502,8 +503,16 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 				);
 			}
 			ctx.campaign.frequenciesUsed.push(frequency);
-			const bundle = pack.frequencies[frequency];
-			if (bundle) openBundle(ctx.world, bundle, false);
+			const reward = pack.frequencies[frequency];
+			if (reward && 'bundle' in reward) openBundle(ctx.world, reward.bundle, false);
+			if (reward && 'take' in reward) {
+				// The cards kept are the newest non-Epidemic discards, which are the ones Monitor just revealed.
+				for (let kept = 0, index = ctx.game.playerDiscard.length - 1; index >= 0 && kept < reward.take; index--) {
+					if (ctx.campaign.playerCards[ctx.game.playerDiscard[index]!]?.kind === 'epidemic') continue;
+					ctx.me.hand.push(...ctx.game.playerDiscard.splice(index, 1));
+					kept++;
+				}
+			}
 		},
 	},
 	broadcast: {
@@ -587,6 +596,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 		},
 	},
 	selfInject: {
+		rule: 'carrier',
 		reveals: true,
 		check(ctx) {
 			const character = characterOf(ctx.world, ctx.seat);
@@ -730,8 +740,12 @@ export function checkAction(world: World, seat: SeatId, action: Action): string 
 	if (!spec) return 'Unknown action';
 	const ctx = context(world, seat);
 	if (characterOf(world, seat).dead) return 'Choose a new character first';
-	if (spec.trait ? !trait(ctx, spec.trait) : !world.campaign.actions.includes(action.a))
-		return 'That action is not available';
+	const available = spec.trait
+		? trait(ctx, spec.trait)
+		: spec.rule
+			? hasRule(world.campaign, spec.rule)
+			: world.campaign.actions.includes(action.a);
+	if (!available) return 'That action is not available';
 	if (isForsaken(world.campaign, ctx.here) && action.a !== 'drive')
 		return 'Only Drive or Ferry works in a forsaken city';
 	if (characterOf(world, seat).carrier && MOVES.has(action.a)) return 'The carrier moves only by Drive or Ferry';

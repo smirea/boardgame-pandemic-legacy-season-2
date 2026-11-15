@@ -4,8 +4,9 @@ import type { SnapshotFrom } from 'xstate';
 import type { Action } from './actions';
 import { actionReveals, applyAction, checkAction } from './actions';
 import { pack } from './content/pack';
-import type { JobId } from './content/types';
+import type { JobId, ObjectiveId } from './content/types';
 import {
+	checkWin,
 	createGame,
 	drawPlayerCard,
 	endTurn,
@@ -37,6 +38,7 @@ export type Seating = { seat: SeatId; character: CharacterId | null };
 export type Command =
 	| { type: 'CREATE_CHARACTER'; name: string; job: JobId; home: CityId }
 	| { type: 'SET_RATIONING'; value: number }
+	| { type: 'RENAME_HAVEN'; city: CityId; name: string }
 	/** Leaves the prologue, which may be played any number of times, and starts January. */
 	| { type: 'BEGIN_CAMPAIGN' }
 	| { type: 'START_GAME'; seating: Seating[] }
@@ -53,6 +55,8 @@ export type Command =
 	| { type: 'PLAY'; seat: SeatId; card: CardId; play: Play }
 	| { type: 'DECIDE'; decide: Decide }
 	| { type: 'LOCKDOWN'; card: CardId }
+	/** The group's call that an objective cannot be completed any more, so the rest decide the game. */
+	| { type: 'WAIVE_OBJECTIVE'; objective: ObjectiveId }
 	| { type: 'UNDO' }
 	| { type: 'CONTINUE' }
 	| { type: 'PURCHASE'; purchase: Purchase }
@@ -102,6 +106,13 @@ export function reject(world: World, phase: Phase, command: Command): string | n
 			return Number.isInteger(command.value) && command.value >= 0 && command.value <= 10
 				? inPhase('lobby')
 				: 'Rationing runs from 0 to 10';
+		case 'RENAME_HAVEN': {
+			const haven = pack.cities.find(candidate => candidate.id === command.city);
+			if (haven?.kind !== 'haven' || !campaign.locations[command.city]?.revealed) return 'Pick a haven on the board';
+			return command.name.trim().length > 0 && command.name.length <= 24
+				? inPhase('lobby')
+				: 'Names run from 1 to 24 characters';
+		}
 		case 'BEGIN_CAMPAIGN':
 			return campaign.month === 0 ? inPhase('lobby') : 'The campaign has already begun';
 		case 'START_GAME': {
@@ -167,6 +178,16 @@ export function reject(world: World, phase: Phase, command: Command): string | n
 				game?.infectionDiscard.includes(command.card) && card?.kind === 'city' && card.improvement === 'lockdown';
 			return armed ? inPhase('playing.actions', 'playing.draw', 'playing.infect') : 'That card cannot be destroyed';
 		}
+		case 'WAIVE_OBJECTIVE': {
+			const live =
+				campaign.objectives.includes(command.objective) &&
+				!game?.completed.includes(command.objective) &&
+				!game?.waived.includes(command.objective);
+			if (!live) return 'That objective is not open';
+			return campaign.objectives.length - game!.waived.length > 1
+				? inPhase('playing.actions', 'playing.draw', 'playing.infect')
+				: 'The last objective cannot be waived';
+		}
 		case 'UNDO':
 			return inPhase('playing.actions');
 		case 'CONTINUE':
@@ -226,6 +247,12 @@ export const gameMachine = setup({
 		),
 		setRationing: assign(
 			change((world, event) => void (world.campaign.rationing = (event as Of<'SET_RATIONING'>).value)),
+		),
+		renameHaven: assign(
+			change((world, event) => {
+				const { city, name } = event as Of<'RENAME_HAVEN'>;
+				world.campaign.names[city] = name.trim();
+			}),
 		),
 		beginCampaign: assign(change(world => void (world.campaign.month = 1))),
 		ackBriefing: assign(({ context }: Args) => ({
@@ -289,6 +316,12 @@ export const gameMachine = setup({
 				delete world.campaign.infectionCards[card];
 			}),
 		),
+		waive: assign(
+			change((world, event) => {
+				world.game!.waived.push((event as Of<'WAIVE_OBJECTIVE'>).objective);
+				checkWin(world);
+			}),
+		),
 		resolveGameEnd: assign(change(resolveGameEnd)),
 		purchase: assign(change((world, event) => applyPurchase(world, (event as Of<'PURCHASE'>).purchase))),
 		closeGame: assign(change(closeGame)),
@@ -307,6 +340,7 @@ export const gameMachine = setup({
 				CREATE_CHARACTER: { guard: { type: 'legal', params: 'lobby' }, actions: 'createCharacter' },
 				SET_RATIONING: { guard: { type: 'legal', params: 'lobby' }, actions: 'setRationing' },
 				BEGIN_CAMPAIGN: { guard: { type: 'legal', params: 'lobby' }, actions: 'beginCampaign' },
+				RENAME_HAVEN: { guard: { type: 'legal', params: 'lobby' }, actions: 'renameHaven' },
 				START_GAME: { guard: { type: 'legal', params: 'lobby' }, target: 'setup', actions: 'startGame' },
 			},
 		},
@@ -344,6 +378,7 @@ export const gameMachine = setup({
 				PLAY: { guard: { type: 'legal', params: 'playing.actions' }, actions: 'play' },
 				DECIDE: { guard: { type: 'legal', params: 'playing.actions' }, actions: 'decide' },
 				LOCKDOWN: { guard: { type: 'legal', params: 'playing.actions' }, actions: 'lockdown' },
+				WAIVE_OBJECTIVE: { guard: { type: 'legal', params: 'playing.actions' }, actions: 'waive' },
 			},
 			states: {
 				actions: {

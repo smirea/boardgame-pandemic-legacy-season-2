@@ -84,6 +84,8 @@ export type Campaign = {
 	regions: RegionId[];
 	locations: Record<CityId, CampaignLocation>;
 	edges: EdgeDef[];
+	/** Names the group gave to havens, over the defaults. */
+	names: Partial<Record<CityId, string>>;
 	characters: Record<CharacterId, Character>;
 	playerCards: Record<CardId, PlayerCard>;
 	infectionCards: Record<CardId, InfectionCard>;
@@ -104,6 +106,7 @@ export type Campaign = {
 	planRecons: string[];
 	sampleDelivered: boolean;
 	losingStreakBonusGames: number;
+	owedScars: number;
 	nextCardId: number;
 };
 
@@ -128,12 +131,15 @@ export type Player = {
 
 export type Decision =
 	| { t: 'discard'; seat: SeatId; count: number }
-	| { t: 'scar'; seat: SeatId }
+	/** A null seat means the group chooses which character takes it. */
+	| { t: 'scar'; seat: SeatId | null }
 	| { t: 'replace'; seat: SeatId }
 	| { t: 'retrieve'; seat: SeatId; filter: 'any' | 'city' }
 	| { t: 'freeEdge'; seat: SeatId; kind: 'land' | 'sea'; ignoreRegions: boolean }
 	| { t: 'removeHollow'; seat: SeatId; amount: number }
 	| { t: 'quarantineCard'; seat: SeatId }
+	/** Any player may discard a card to end the Infect step early. */
+	| { t: 'cordon' }
 	/** Any player may discard a card of this colour to stop the pending cube removal. */
 	| { t: 'shield'; city: CityId; color: Color };
 
@@ -191,6 +197,8 @@ export type Game = {
 	epidemics: number;
 	progress: Partial<Record<ObjectiveId, number>>;
 	completed: ObjectiveId[];
+	/** Objectives the group has judged impossible this game. They no longer count toward the win. */
+	waived: ObjectiveId[];
 	pending: Decision[];
 	skipInfection: boolean;
 	pickedEvents: CardId[];

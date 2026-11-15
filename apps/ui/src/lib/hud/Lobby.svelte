@@ -2,7 +2,7 @@
 	import { pack, score } from '@repo/game';
 	import type { CharacterId, CityId, Command, JobId, PublicState, SeatId } from '@repo/game';
 	import { untrack } from 'svelte';
-	import { cityName, MONTHS } from './labels';
+	import { cityName, MONTHS } from './labels.svelte.ts';
 
 	type Props = { snap: PublicState; send: (command: Command) => void };
 
@@ -143,6 +143,32 @@
 						<button onclick={() => send({ type: 'BEGIN_CAMPAIGN' })} data-testid="begin-campaign">Begin January</button>
 					{/if}
 				</div>
+				<h2>Rationing</h2>
+				<div
+					class="rationing"
+					title="How many Rationed Events go in the deck. It moves by 2 after each game. Change it only to correct a rules mistake."
+				>
+					<button
+						onclick={() => send({ type: 'SET_RATIONING', value: campaign.rationing - 1 })}
+						disabled={campaign.rationing <= 0}>−</button
+					>
+					<strong data-testid="rationing">{campaign.rationing}</strong>
+					<button
+						onclick={() => send({ type: 'SET_RATIONING', value: campaign.rationing + 1 })}
+						disabled={campaign.rationing >= 10}>+</button
+					>
+				</div>
+				<h2>Haven names</h2>
+				{#each pack.cities.filter(entry => entry.kind === 'haven' && campaign.locations[entry.id]?.revealed) as haven (haven.id)}
+					<input
+						class="haven"
+						value={cityName(haven.id)}
+						maxlength="24"
+						onchange={event =>
+							event.currentTarget.value.trim() &&
+							send({ type: 'RENAME_HAVEN', city: haven.id, name: event.currentTarget.value })}
+					/>
+				{/each}
 				{#if campaign.results.length}
 					<h2>Record</h2>
 					<p class="record">
@@ -292,6 +318,24 @@
 		background: var(--accent);
 		color: #06120c;
 		font-weight: 700;
+	}
+
+	.rationing {
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
+		margin-bottom: 1rem;
+	}
+
+	.rationing strong {
+		min-width: 1.5rem;
+		text-align: center;
+	}
+
+	.haven {
+		display: block;
+		width: 100%;
+		margin-bottom: 0.3rem;
 	}
 
 	.record {

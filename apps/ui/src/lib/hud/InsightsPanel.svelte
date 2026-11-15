@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { CityId, Insights, World } from '@repo/game';
-	import { cityName, seatName } from './labels';
+	import type { CardId, CityId, Insights, World } from '@repo/game';
+	import { cityName, seatName } from './labels.svelte.ts';
 
-	type Props = { world: World; info: Insights; onfocus: (city: CityId) => void };
+	type Props = { world: World; info: Insights; onfocus: (city: CityId) => void; onlockdown: (card: CardId) => void };
 
-	let { world, info, onfocus }: Props = $props();
+	let { world, info, onfocus, onlockdown }: Props = $props();
 
 	let tab = $state<'threats' | 'decks' | 'log'>('threats');
 	const percent = (value: number) => `${Math.round(value * 100)}%`;
@@ -12,6 +12,12 @@
 		Object.entries(record).sort((a, b) => b[1] - a[1]) as [CityId | 'hollow', number][];
 	const label = (city: CityId | 'hollow') => (city === 'hollow' ? 'Hollow Men' : cityName(city));
 	const game = $derived(world.game!);
+	const lockable = $derived(
+		game.infectionDiscard.flatMap(id => {
+			const card = world.campaign.infectionCards[id];
+			return card?.kind === 'city' && card.improvement === 'lockdown' ? [{ id, city: card.city }] : [];
+		}),
+	);
 
 	const lines = $derived(
 		game.log
@@ -127,6 +133,13 @@
 				{/each}
 			</span>
 		</div>
+		{#each lockable as card (card.id)}
+			<button
+				class="lockdown"
+				onclick={() => onlockdown(card.id)}
+				title="Lockdown: destroy this Infection card for good">Destroy {cityName(card.city)}</button
+			>
+		{/each}
 		<p class="hint">Player deck, {info.playerDeck.cards} cards</p>
 		<div class="stratum">
 			<span class="cards">
@@ -243,6 +256,16 @@
 		font-size: 0.6rem;
 		font-style: normal;
 		text-transform: uppercase;
+	}
+
+	.lockdown {
+		padding: 0.2rem 0.5rem;
+		border: 1px solid var(--warn);
+		border-radius: 0.3rem;
+		background: none;
+		color: var(--warn);
+		font: inherit;
+		cursor: pointer;
 	}
 
 	.stratum {

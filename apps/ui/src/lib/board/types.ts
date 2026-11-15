@@ -3,6 +3,7 @@ import type { CityId, EdgeDef } from '@repo/game';
 export type CityHighlight = 'target' | 'selected' | null;
 
 export type CityView = {
+	name: string;
 	revealed: boolean;
 	onGrid: boolean;
 	supplies: number;

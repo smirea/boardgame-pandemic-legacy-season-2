@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { pack } from '@repo/game';
-	import type { Insights, PublicState } from '@repo/game';
-	import { MONTHS } from './labels';
+	import type { Insights, ObjectiveId, PublicState } from '@repo/game';
+	import { MONTHS } from './labels.svelte.ts';
 
 	type Props = {
 		snap: PublicState;
@@ -9,11 +9,12 @@
 		status: string;
 		players: number;
 		solo: boolean;
+		onwaive: (objective: ObjectiveId) => void;
 		onreset: () => void;
 		onmenu: () => void;
 	};
 
-	let { snap, info, status, players, solo, onreset, onmenu }: Props = $props();
+	let { snap, info, status, players, solo, onwaive, onreset, onmenu }: Props = $props();
 
 	const campaign = $derived(snap.world.campaign);
 	const game = $derived(snap.world.game);
@@ -38,11 +39,19 @@
 		<span class="need">{game ? game.completed.length : 0}/{Math.min(campaign.required, objectives.length)}</span>
 		{#each objectives as objective (objective.id)}
 			{@const progress = game?.progress[objective.id] ?? 0}
-			<span class="objective" class:done={game?.completed.includes(objective.id)} title={objective.rule}>
+			{@const waived = game?.waived.includes(objective.id) ?? false}
+			<button
+				class="objective"
+				class:done={game?.completed.includes(objective.id)}
+				class:waived
+				disabled={!game || waived || game.completed.includes(objective.id)}
+				title={`${objective.rule} Click to mark it impossible this game.`}
+				onclick={() => onwaive(objective.id)}
+			>
 				{#if objective.mandatory}<i></i>{/if}
 				{objective.name}
 				{#if objective.target > 1}<b>{progress}/{objective.target}</b>{/if}
-			</span>
+			</button>
 		{/each}
 	</div>
 
@@ -161,6 +170,21 @@
 	.objective b {
 		color: var(--muted);
 		font-weight: 600;
+	}
+
+	button.objective {
+		background: none;
+		font: inherit;
+		cursor: pointer;
+	}
+
+	button.objective:disabled {
+		cursor: default;
+	}
+
+	.objective.waived {
+		opacity: 0.45;
+		text-decoration: line-through;
 	}
 
 	.objective.done {

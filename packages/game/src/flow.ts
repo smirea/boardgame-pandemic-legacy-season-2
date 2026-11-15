@@ -22,7 +22,9 @@ export const isOver = (world: World) => world.game?.outcome != null;
 
 export function checkWin(world: World) {
 	const { campaign, game } = world as { campaign: World['campaign']; game: Game };
-	const active = pack.objectives.filter(objective => campaign.objectives.includes(objective.id));
+	const active = pack.objectives.filter(
+		objective => campaign.objectives.includes(objective.id) && !game.waived.includes(objective.id),
+	);
 	const mandatoryDone = active
 		.filter(objective => objective.mandatory)
 		.every(objective => game.completed.includes(objective.id));
@@ -96,6 +98,7 @@ export function createGame(world: World, seating: { seat: SeatId; character: Cha
 		epidemics: 0,
 		progress: { ...campaign.carriedProgress },
 		completed: [],
+		waived: [],
 		pending: [],
 		skipInfection: false,
 		pickedEvents: [],
@@ -161,6 +164,7 @@ export function setupPlayerDeck(world: World) {
 		.map(card => card.id);
 	game.playerDeck = newPiledDeck(campaign.rng, deck, epidemicCards);
 	game.active = game.seats[nextInt(campaign.rng, game.seats.length)]!;
+	for (; campaign.owedScars > 0; campaign.owedScars--) game.pending.push({ t: 'scar', seat: null });
 	beginTurn(world);
 }
 
@@ -385,6 +389,10 @@ export function infectStep(world: World) {
 	if (drawn.gathers > 0) placeHollow(world, drawn.city, drawn.id);
 	else infectCity(world, drawn.city, drawn.id);
 	game.infectionDiscard.push(drawn.id);
+	const card = world.campaign.infectionCards[drawn.id];
+	const anyCards = game.seats.some(seat => player(game, seat).hand.length > 0);
+	if (card?.kind === 'city' && card.improvement === 'cordon' && game.infectionsLeft > 0 && anyCards && !isOver(world))
+		game.pending.push({ t: 'cordon' });
 }
 
 export function epidemic(world: World) {

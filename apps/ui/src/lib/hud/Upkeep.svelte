@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onGrid, pack, purchaseCost, reject } from '@repo/game';
 	import type { CardId, Command, PublicState, Purchase } from '@repo/game';
-	import { cityName, purchaseLabel } from './labels';
+	import { cityName, purchaseLabel } from './labels.svelte.ts';
 
 	type Props = { snap: PublicState; send: (command: Command) => void };
 

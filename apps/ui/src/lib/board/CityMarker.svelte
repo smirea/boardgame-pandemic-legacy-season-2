@@ -142,7 +142,7 @@
 
 	<HTML position.y={CITY_TOP - LAND_HEIGHT + 0.2} center pointerEvents="none" zIndexRange={[10, 0]}>
 		<div class="label" class:off-grid={!state.onGrid} class:below={labelBelow} class:forsaken={state.forsaken}>
-			<span class="name">{city.name}</span>
+			<span class="name">{state.name}</span>
 			<span class="population" title="Population">{state.population}</span>
 			{#if state.supplies}<span class="supplies">{state.supplies}</span>{/if}
 			{#if state.plague}<span class="plague">{state.plague}</span>{/if}

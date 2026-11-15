@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { handLimit, pack } from '@repo/game';
 	import type { SeatId, World } from '@repo/game';
-	import { cityName, SEAT_COLORS } from './labels';
+	import { cityName, SEAT_COLORS } from './labels.svelte.ts';
 
 	type Props = {
 		world: World;

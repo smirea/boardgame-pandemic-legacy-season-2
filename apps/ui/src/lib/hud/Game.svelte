@@ -19,7 +19,8 @@
 		playTarget,
 		seatName,
 		SEAT_COLORS,
-	} from './labels';
+		setNames,
+	} from './labels.svelte.ts';
 	import Lobby from './Lobby.svelte';
 	import PlayersPanel from './PlayersPanel.svelte';
 	import TopBar from './TopBar.svelte';
@@ -34,6 +35,7 @@
 	const info = $derived(insights(world));
 	const gridSet = $derived(new Set(onGrid(world)));
 	const playing = $derived(snap.phase.startsWith('playing'));
+	$effect.pre(() => setNames(campaign.names));
 
 	let mine = $state<SeatId[]>(LS.get('mySeats', []));
 	const solo = $derived(session.mode === 'solo');
@@ -229,6 +231,7 @@
 				return [
 					city.id,
 					{
+						name: cityName(city.id),
 						revealed: record.revealed,
 						onGrid: gridSet.has(city.id),
 						supplies: location?.supplies ?? 0,
@@ -309,6 +312,9 @@
 		status={session.status}
 		players={session.peers.filter(peer => peer.connected).length}
 		solo={session.mode === 'solo'}
+		onwaive={objective =>
+			confirm('Mark this objective impossible for this game? The remaining objectives then decide the win.') &&
+			send({ type: 'WAIVE_OBJECTIVE', objective })}
 		onreset={() => resetView++}
 		onmenu={() => (menu = !menu)}
 	/>
@@ -323,7 +329,12 @@
 		{/if}
 		{#if game && info && snap.phase !== 'upkeep'}
 			<aside class="right">
-				<InsightsPanel {world} {info} onfocus={city => (selected = city)} />
+				<InsightsPanel
+					{world}
+					{info}
+					onfocus={city => (selected = city)}
+					onlockdown={card => send({ type: 'LOCKDOWN', card })}
+				/>
 			</aside>
 		{/if}
 

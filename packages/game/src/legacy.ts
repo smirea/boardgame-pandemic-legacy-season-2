@@ -55,6 +55,7 @@ export function newCampaign(seed: number): Campaign {
 		regions: pack.regions.filter(region => region.startsRevealed).map(region => region.id),
 		locations: {} as Campaign['locations'],
 		edges: pack.edges.map(edge => ({ ...edge })),
+		names: {},
 		characters: {},
 		playerCards: {},
 		infectionCards: {},
@@ -75,6 +76,7 @@ export function newCampaign(seed: number): Campaign {
 		planRecons: [],
 		sampleDelivered: false,
 		losingStreakBonusGames: 0,
+		owedScars: 0,
 		nextCardId: 1,
 	};
 	const revealedRegions = new Set(campaign.regions);
@@ -247,6 +249,9 @@ export function applyUnlock(world: World, unlock: Unlock) {
 		case 'forsake':
 			campaign.locations[unlock.city]!.population = 0;
 			campaign.locations[unlock.city]!.infested = true;
+			return;
+		case 'owedScar':
+			campaign.owedScars += 1;
 			return;
 		case 'open':
 			return openBundle(world, unlock.bundle, false);

@@ -92,7 +92,7 @@ export type EventId =
 	| 'surplus';
 
 export type CityImprovementId = 'double' | 'triple' | 'wild' | 'redWild';
-export type InfectionImprovementId = 'wellStocked' | 'lockdown' | 'rebirth';
+export type InfectionImprovementId = 'wellStocked' | 'lockdown' | 'rebirth' | 'cordon';
 
 export type StructureKind = 'center' | 'tower' | 'shelter';
 
@@ -182,6 +182,9 @@ export type SearchResult =
 
 export type SearchBoxDef = { scope: 'land' | 'sea'; result: SearchResult };
 
+/** What a Monitor frequency gives: a bundle to open, or cards kept from the top of the Player discard pile. */
+export type FrequencyReward = { bundle: BundleId } | { take: number } | null;
+
 export type TurningPointId = 'firstForsaken' | 'losingStreak';
 
 export type PurchaseId =
@@ -216,6 +219,8 @@ export type Unlock =
 	| { t: 'lab'; city: CityId }
 	| { t: 'infest'; city: CityId }
 	| { t: 'forsake'; city: CityId }
+	/** A scar the group must place on a character of its choice when the next game begins. */
+	| { t: 'owedScar' }
 	| { t: 'open'; bundle: BundleId }
 	/** Forced opening: the explorer's reward is lost and the recon does not count toward an objective. */
 	| { t: 'perimeter'; bundle: BundleId; penalty?: Unlock[] };
@@ -269,7 +274,7 @@ export type ContentPack = {
 	bundles: BundleDef[];
 	legacyDeck: LegacyCardDef[];
 	/** What each of the ten Monitor frequencies opens. */
-	frequencies: (BundleId | null)[];
+	frequencies: FrequencyReward[];
 	startingEvents: EventId[];
 	sampleFrom: CityId;
 	sampleTo: CityId;

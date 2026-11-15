@@ -3,7 +3,7 @@
 	import type { Action, CardId, Command, Decide, Play, PublicState, SeatId } from '@repo/game';
 	import { flip } from 'svelte/animate';
 	import { fly } from 'svelte/transition';
-	import { ACTION_NAMES, DECISION_TITLES, decideLabel, seatName, SEAT_COLORS } from './labels';
+	import { ACTION_NAMES, DECISION_TITLES, decideLabel, seatName, SEAT_COLORS } from './labels.svelte.ts';
 	import InfectionCard from '#lib/cards/InfectionCard.svelte';
 	import PlayerCard from './PlayerCard.svelte';
 
@@ -150,7 +150,7 @@
 				</p>
 			{:else if pending}
 				<p class="prompt">
-					{'seat' in pending ? `${seatName(world, pending.seat)}: ` : ''}{DECISION_TITLES[pending.t]}
+					{'seat' in pending && pending.seat ? `${seatName(world, pending.seat)}: ` : ''}{DECISION_TITLES[pending.t]}
 				</p>
 				<div class="chips">
 					{#each choices.slice(0, 24) as decide, index (index)}
