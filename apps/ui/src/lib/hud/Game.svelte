@@ -476,6 +476,9 @@
 				<button onclick={download}>Export campaign save</button>
 				{#if session.mode !== 'join'}
 					<button onclick={() => fileInput?.click()}>Import campaign save</button>
+					<button onclick={() => session.importSave(scenarios.october())} data-testid="scenario-october"
+						>Load scenario: October</button
+					>
 					<button onclick={() => session.importSave(scenarios.december())} data-testid="scenario-december"
 						>Load scenario: December</button
 					>

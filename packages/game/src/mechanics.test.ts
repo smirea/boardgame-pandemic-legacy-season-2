@@ -7,7 +7,7 @@ import { grid, handLimit, hasEdge } from './helpers';
 import type { CardId } from './ids';
 import { createGameActor } from './machine';
 import { legalPlays } from './options';
-import { decemberSave } from './scenarios';
+import { decemberSave, octoberSave } from './scenarios';
 import type { World } from './state';
 import {
 	A,
@@ -213,7 +213,8 @@ describe('building', () => {
 		expect(refuses(actor, { a: 'transmit', card: lagos!, to: C })).toContain('tower');
 		act(actor, { a: 'buildTower' });
 		expect(gameOf(actor).players[A]!.supplies).toBe(0);
-		expect(gameOf(actor).progress.triangulate).toBe(1);
+		// Tripoli's permanent tower is black and Lagos is yellow: two colours so far.
+		expect(gameOf(actor).progress.triangulate).toBe(2);
 		expect(refuses(actor, { a: 'transmit', card: london!, to: C })).toContain('colour');
 		act(actor, { a: 'transmit', card: lagos!, to: C });
 		expect(gameOf(actor).players[C]!.hand).toEqual([lagos!]);
@@ -998,4 +999,26 @@ describe('late additions', () => {
 		expect(character(worldOf(owed), B).slots[2]).toEqual({ kind: 'scar', id: 'smallHand' });
 		expect(worldOf(owed).campaign.owedScars).toBe(0);
 	});
+});
+
+test('the October scenario sets up with Hollow Men, the defection objective, and permanent shelters for sale', () => {
+	const actor = createGameActor({ seed: 6, save: octoberSave() }).start();
+	const characters = Object.values(worldOf(actor).campaign.characters);
+	send(actor, {
+		type: 'START_GAME',
+		seating: [A, B, C].map((seat, index) => ({ seat, character: characters[index]!.id })),
+	});
+	const { campaign } = worldOf(actor);
+	expect(campaign).toMatchObject({ month: 10, required: 2 });
+	expect(campaign.objectives).toEqual(['buildCenters', 'defect']);
+	expect(campaign.actions).toEqual(
+		expect.arrayContaining(['broadcast', 'buildTower', 'buildShelter', 'monitor', 'chartLane', 'shuttle']),
+	);
+	expect(campaign.permanentForSale).toEqual(expect.arrayContaining(['center', 'tower', 'shelter']));
+	expect(campaign.forced).toEqual([]);
+	expect(gameOf(actor).stockpile).toBe(8 + 30);
+	send(actor, { type: 'AUTO_SUPPLY' });
+	send(actor, { type: 'CONFIRM_SUPPLY' });
+	expect(Object.values(gameOf(actor).locations).reduce((sum, location) => sum + location.hollow, 0)).toBe(3);
+	expect(gameOf(actor).locations[city('tripoli')]!.tower).toBe(true);
 });
