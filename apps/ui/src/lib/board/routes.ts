@@ -3,7 +3,7 @@ import { CatmullRomCurve3, Vector3 } from 'three';
 import type { BoardPoint } from './projection';
 import { LAND_HEIGHT } from './projection';
 
-export const CITY_RADIUS = 1.5;
+export const CITY_RADIUS = 1.9;
 export const CITY_TOP = LAND_HEIGHT + 0.5;
 
 function hash(text: string) {

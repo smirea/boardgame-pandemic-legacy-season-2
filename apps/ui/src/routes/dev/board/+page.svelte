@@ -13,6 +13,7 @@
 	);
 	let selected = $state<CityId | null>(null);
 	let pawnCity = $state(worldMap.cities[0]!.id);
+	let resetView = $state(0);
 	let pointer = $state<{ x: number; z: number } | null>(null);
 
 	const view = $derived<BoardView>({
@@ -42,14 +43,17 @@
 	});
 </script>
 
-<Board
-	{view}
-	oncity={city => {
-		selected = city;
-		pawnCity = city;
-	}}
-	onpointer={point => (pointer = point)}
-/>
+<div class="stage">
+	<Board
+		{view}
+		{resetView}
+		oncity={city => {
+			selected = city;
+			pawnCity = city;
+		}}
+		onpointer={point => (pointer = point)}
+	/>
+</div>
 
 <div class="panel">
 	<button data-testid="explore" onclick={() => worldMap.regions.forEach(region => explored.add(region.id))}
@@ -62,10 +66,16 @@
 			if (next) established.add(next.id);
 		}}>Establish next route</button
 	>
+	<button data-testid="reset" onclick={() => resetView++}>Reset view</button>
 	<span data-testid="selected">{selected ?? 'none'}</span>
 </div>
 
 <style>
+	.stage {
+		position: fixed;
+		inset: 3rem 0 9rem 0;
+	}
+
 	.panel {
 		position: absolute;
 		top: 1rem;

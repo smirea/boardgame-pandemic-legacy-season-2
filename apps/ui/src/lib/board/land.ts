@@ -55,5 +55,6 @@ export function buildLandGeometry() {
 		curveSegments: 1,
 	});
 	geometry.rotateX(-Math.PI / 2);
+	geometry.computeBoundingBox();
 	return geometry;
 }

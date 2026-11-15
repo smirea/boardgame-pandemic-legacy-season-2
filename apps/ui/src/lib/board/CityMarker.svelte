@@ -19,9 +19,9 @@
 	import { CITY_RADIUS, CITY_TOP } from './routes';
 	import type { CityView } from './types';
 
-	type Props = { city: CityDef; at: BoardPoint; state: CityView; onselect: () => void };
+	type Props = { city: CityDef; at: BoardPoint; state: CityView; labelBelow: boolean; onselect: () => void };
 
-	let { city, at, state, onselect }: Props = $props();
+	let { city, at, state, labelBelow, onselect }: Props = $props();
 
 	const color = $derived(AFFILIATION_COLOR[city.affiliation ?? 'haven']);
 	const { hovering, onPointerEnter, onPointerLeave } = useCursor();
@@ -38,9 +38,9 @@
 			const layer = Math.floor(i / 9);
 			const row = Math.floor(i / 3) % 3;
 			slots.push({
-				x: CITY_RADIUS + 0.55 + column * 0.62,
-				y: 0.28 + layer * 0.58,
-				z: -0.62 + row * 0.62,
+				x: CITY_RADIUS + 0.7 + column * 0.85,
+				y: 0.36 + layer * 0.8,
+				z: -0.85 + row * 0.85,
 				plague: i >= state.supplies,
 			});
 		}
@@ -86,7 +86,7 @@
 
 	{#each cubeSlots as slot, index (index)}
 		<T.Mesh position={[slot.x, slot.y, slot.z]} castShadow>
-			<T.BoxGeometry args={[0.5, 0.5, 0.5]} />
+			<T.BoxGeometry args={[0.7, 0.7, 0.7]} />
 			<T.MeshStandardMaterial
 				color={slot.plague ? '#63d417' : '#f2ecd8'}
 				emissive={slot.plague ? '#2f7a00' : '#000000'}
@@ -110,7 +110,7 @@
 	{/if}
 
 	<HTML position.y={CITY_TOP - LAND_HEIGHT + 0.2} center pointerEvents="none" zIndexRange={[10, 0]}>
-		<div class="label" class:off-grid={!state.onGrid}>
+		<div class="label" class:off-grid={!state.onGrid} class:below={labelBelow}>
 			<span class="name">{city.name}</span>
 			{#if state.supplies || state.plague}
 				<span class="counts">
@@ -138,6 +138,10 @@
 		letter-spacing: 0.02em;
 		white-space: nowrap;
 		user-select: none;
+	}
+
+	.label.below {
+		transform: translateY(1.7rem);
 	}
 
 	.label.off-grid {

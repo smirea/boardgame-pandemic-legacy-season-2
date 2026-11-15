@@ -30,6 +30,15 @@
 
 - Local web host: boardgame-pandemic-legacy-season-2.localhost -> 6190; browser API calls use the /api proxy.
 
+# Product principles
+
+- The game has the mechanics of Pandemic Legacy: Season 2 on a real world map with the same cities. Geography and art are generic and original. There is no story or flavor text. The legacy deck unlocks the same mechanics at the same points in the campaign.
+- Laptop screens only, no mobile. The entire map is visible by default, and all the main UI fits on one screen with no page scroll.
+- The UI is sleek, modern, and concise. Take layout cues from the physical game's table (tracks and decks along the edges, board in the middle).
+- Motion matters: state changes animate smoothly, and multi-step events (an epidemic, a route being built, a region revealed, a card played) get compound, sequenced animations instead of a snap.
+- Quality of life is a core value: track epidemics, count decks, show draw probabilities, and add similar aids wherever players would otherwise count by hand.
+- There is no server during play. The host's browser owns the game state (an XState actor in `packages/game`) and peers sync over WebRTC through `packages/net`.
+
 # README
 
 - `README.md` starts as the scaffold's placeholder. Once the project takes shape, rewrite it for this project and keep it short.

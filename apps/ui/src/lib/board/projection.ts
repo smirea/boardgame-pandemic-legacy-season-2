@@ -2,23 +2,25 @@ import type { CityId, MapDef } from '@repo/game';
 import { geoNaturalEarth1, geoStream } from 'd3-geo';
 import type { GeoPermissibleObjects } from 'd3-geo';
 
-export const BOARD_WIDTH = 220;
-export const BOARD_HEIGHT = 118;
+const PROJECTION_WIDTH = 220;
 export const LAND_HEIGHT = 0.55;
-const SOUTH_CUTOFF_LAT = -58;
+const SOUTH_CUTOFF_LAT = -57;
+const NORTH_CUTOFF_LAT = 76;
 
 const projection = (() => {
-	const fitted = geoNaturalEarth1().rotate([-11, 0]).fitWidth(BOARD_WIDTH, { type: 'Sphere' });
+	const fitted = geoNaturalEarth1().rotate([-11, 0]).fitWidth(PROJECTION_WIDTH, { type: 'Sphere' });
 	const [, southY] = fitted([0, SOUTH_CUTOFF_LAT])!;
-	const [, northY] = fitted([0, 90])!;
+	const [, northY] = fitted([0, NORTH_CUTOFF_LAT])!;
 	const midY = (southY + northY) / 2;
-	return fitted.translate([fitted.translate()[0] - BOARD_WIDTH / 2, fitted.translate()[1] - midY]).clipExtent([
-		[-BOARD_WIDTH / 2, northY - midY - 1],
-		[BOARD_WIDTH / 2, southY - midY],
+	return fitted.translate([fitted.translate()[0] - PROJECTION_WIDTH / 2, fitted.translate()[1] - midY]).clipExtent([
+		[-PROJECTION_WIDTH / 2, northY - midY],
+		[PROJECTION_WIDTH / 2, southY - midY],
 	]);
 })();
 
 export type BoardPoint = { x: number; z: number };
+
+export type BoardBounds = { minX: number; maxX: number; minZ: number; maxZ: number };
 
 /** Board space: x east, z south, matching three.js ground-plane axes. */
 export function project(lat: number, lon: number): BoardPoint {
@@ -51,7 +53,7 @@ export function projectPolygons(geometry: GeoPermissibleObjects): Ring[][] {
 	return polygons;
 }
 
-const MIN_CITY_SPACING = 6.2;
+const MIN_CITY_SPACING = 7.5;
 
 /**
  * Real coordinates put dense areas on top of each other at board scale, so cities are nudged apart
