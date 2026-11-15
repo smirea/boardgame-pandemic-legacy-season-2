@@ -46,7 +46,9 @@ function toTry(audit: Audit, state: PublicState): string[] {
 		lines.push(
 			`Recon still open: ${unopened.map(route => `${route.city} (${route.count} ${route.color} cards)`).join(', ')}.`,
 		);
-	const other = live.filter(key => /^(command|decide):/.test(key)).map(key => key.split(':')[1]);
+	const other = live
+		.filter(key => /^(command|decide):/.test(key) && !key.endsWith('WAIVE_OBJECTIVE'))
+		.map(key => key.split(':')[1]);
 	if (other.length) lines.push(`Never happened yet: ${other.join(', ')}. Use them if a real chance comes up.`);
 	return lines;
 }
