@@ -26,6 +26,15 @@ type DebugApi = {
 	saveState: () => void;
 	loadState: (state?: unknown) => void;
 	setState: (state: unknown) => void;
+	/** Sends a command the way a click would. Returns why this client would refuse it, or null once it is sent. */
+	send: (command: Command) => string | null;
+	connection: () => {
+		mode: Mode;
+		status: ConnectionStatus;
+		peers: number;
+		notice: string | null;
+		fatal: string | null;
+	};
 };
 
 declare global {
@@ -167,6 +176,18 @@ export class GameSession {
 			saveState: () => LS.set({ debugSnapshot: this.#save() }),
 			loadState: state => this.importSave(state ?? LS.get('debugSnapshot')),
 			setState: state => this.importSave(state),
+			send: command => {
+				const reason = this.explain(command);
+				if (!reason) this.send(command);
+				return reason;
+			},
+			connection: () => ({
+				mode: this.mode,
+				status: this.status,
+				peers: this.peers.filter(peer => peer.connected).length,
+				notice: this.notice?.text ?? null,
+				fatal: this.fatal,
+			}),
 		};
 	}
 

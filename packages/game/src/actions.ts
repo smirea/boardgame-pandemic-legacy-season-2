@@ -793,6 +793,8 @@ const specFor = (action: Action) => specs[action.a] as unknown as AnySpec;
 
 export const actionReveals = (action: Action) => specFor(action).reveals ?? false;
 
+export const actionIds = Object.keys(specs) as Action['a'][];
+
 export function actionCost(world: World, seat: SeatId, action: Action): number {
 	const spec = specFor(action);
 	return spec.free ? 0 : (spec.cost?.(context(world, seat), action) ?? 1);

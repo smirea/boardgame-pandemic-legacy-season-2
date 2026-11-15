@@ -3,13 +3,14 @@ export * from './state';
 export * from './content/types';
 export { pack } from './content/pack';
 export type { Action } from './actions';
-export { actionCost, checkAction, checkEdge, routeCost } from './actions';
+export { actionCost, actionIds, checkAction, checkEdge, routeCost } from './actions';
 export type { Decide, Play } from './plays';
 export type { Purchase } from './legacy';
-export { productionUnits, purchaseCost, score } from './legacy';
+export { newCampaign, productionUnits, purchaseCost, score } from './legacy';
 export type { Command, GameActor, GameSnapshot, Phase, Save, Seating } from './machine';
 export { createGameActor, gameMachine, parseSave, phaseOf, reject } from './machine';
-export { legalActions, legalDecides, legalPlays, payColor } from './options';
+export { legalActions, legalDecides, legalPlays, legalPurchases, payColor } from './options';
+export { violations } from './invariants';
 export type { Insights, PublicState } from './view';
 export { insights, onGrid, publicState } from './view';
 export {

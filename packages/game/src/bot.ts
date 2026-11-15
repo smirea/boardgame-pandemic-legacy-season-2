@@ -1,38 +1,11 @@
 import { pack } from './content/pack';
 import { freeCharacters } from './flow';
-import { grid } from './helpers';
-import type { CardId, CharacterId, SeatId } from './ids';
-import type { Purchase } from './legacy';
-import { checkPurchase } from './legacy';
+import type { CharacterId, SeatId } from './ids';
 import type { Command, Phase } from './machine';
-import { legalActions, legalDecides, legalPlays } from './options';
+import { legalActions, legalDecides, legalPlays, legalPurchases } from './options';
 import type { RngState } from './rng';
 import { nextFloat, pick } from './rng';
 import type { World } from './state';
-
-function purchases(world: World): Purchase[] {
-	const { campaign } = world;
-	const onGrid = [...grid(campaign)];
-	const candidates: Purchase[] = [];
-	for (const character of Object.values(campaign.characters)) {
-		for (const ability of campaign.abilitiesForSale) {
-			character.slots.forEach((_, slot) => candidates.push({ t: 'ability', ability, character: character.id, slot }));
-		}
-	}
-	for (const improvement of campaign.cityImprovementsForSale) {
-		for (const card of Object.keys(campaign.playerCards) as CardId[])
-			candidates.push({ t: 'cityImprovement', improvement, card });
-	}
-	for (const improvement of campaign.infectionImprovementsForSale) {
-		for (const card of Object.keys(campaign.infectionCards) as CardId[])
-			candidates.push({ t: 'infectionImprovement', improvement, card });
-	}
-	for (const city of onGrid) {
-		candidates.push({ t: 'population', city, steps: 1 }, { t: 'restore', city });
-		for (const structure of campaign.permanentForSale) candidates.push({ t: 'permanent', structure, city });
-	}
-	return candidates.filter(purchase => checkPurchase(world, purchase) === null);
-}
 
 const PROGRESS = new Set([
 	'recon',
@@ -111,7 +84,7 @@ export function botCommand(world: World, phase: Phase, rng: RngState, seats = 2)
 		case 'over':
 			return { type: 'CONTINUE' };
 		case 'upkeep': {
-			const options = purchases(world);
+			const options = legalPurchases(world);
 			return options.length && nextFloat(rng) < 0.9
 				? { type: 'PURCHASE', purchase: pick(rng, options) }
 				: { type: 'FINISH_UPKEEP' };

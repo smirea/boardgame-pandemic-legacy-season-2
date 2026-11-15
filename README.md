@@ -26,6 +26,7 @@ To try several players in one browser, give each tab its own identity with `?DEB
 - `packages/game`: the rules. An XState machine owns the phases, pure functions own the rules, and `content/` holds the map, cards and the Legacy deck. No browser APIs.
 - `packages/net`: the P2P library. A host, peers, a reliable lane for game messages and a lossy lane for cursors.
 - `apps/signal`: the Cloudflare Worker used only to connect players.
+- `apps/playtest`: the playtest lab, where AI players run the campaign in real browser tabs.
 - `apps/ui`: the SvelteKit SPA. `lib/board` is the 3D board, `lib/hud` the screen around it, `lib/session` the bridge between the actor and the network.
 - `docs/mechanics`: the rules catalogue the engine was built from, and `coverage.md`, which lists what is built, partly built, or missing.
 
@@ -38,6 +39,7 @@ To try several players in one browser, give each tab its own identity with `?DEB
 - **Console helpers.** `window.DEBUG.getState()`, `saveState()`, `loadState()` and `setState(save)` are available while a game is open.
 - **Scenarios.** The menu loads a campaign that stands in the October or December lobby with every region explored (`packages/game/src/scenarios.ts`), for testing late mechanics without playing nine months.
 - **Checking the whole game.** `apps/ui/e2e/october.ts` builds the app and plays a full October game through the UI in a headless browser. Add `--shots` to keep screenshots in `apps/ui/e2e/shots`.
+- **Playing a whole campaign with AI players.** `apps/playtest/README.md` covers the lab: configs, saves, player memories, and the parity report.
 - **Checking the network.** `packages/net/e2e/run.ts` drives three real browser pages through the local signaling Worker.
 
 `AGENTS.md` lists the stack, conventions and product principles.

@@ -1,0 +1,77 @@
+#!/usr/bin/env bun
+/**
+ * Runs the playtest lab. `start` launches the daemon in the background and waits until it answers.
+ * Everything else is forwarded to the running daemon as the `lab` operator.
+ */
+import { closeSync, existsSync, mkdirSync, openSync, readdirSync, readFileSync, rmSync } from 'node:fs';
+import { join, resolve } from 'node:path';
+import { loadConfig } from './src/config.ts';
+
+const [verb, ...rest] = process.argv.slice(2);
+
+if (verb === 'start') {
+	const file = rest.find(arg => !arg.startsWith('--'));
+	if (!file) throw new Error('usage: lab start <config.json> [--fresh] [--no-build]');
+	const config = loadConfig(resolve(file));
+	mkdirSync(config.runDir, { recursive: true });
+	const pidFile = join(config.runDir, 'daemon.json');
+	if (existsSync(pidFile)) {
+		const { pid } = JSON.parse(readFileSync(pidFile, 'utf8')) as { pid: number };
+		try {
+			process.kill(pid, 0);
+			throw new Error(`run ${config.run} is already live as pid ${pid}. Stop it with: lab stop`);
+		} catch (error) {
+			if ((error as NodeJS.ErrnoException).code !== 'ESRCH') throw error;
+			rmSync(pidFile);
+		}
+	}
+	const logFile = join(config.runDir, 'daemon.log');
+	const log = openSync(logFile, 'a');
+	const child = Bun.spawn(['bun', join(import.meta.dir, 'src/daemon.ts'), config.file, ...rest.filter(arg => arg.startsWith('--'))], {
+		cwd: import.meta.dir,
+		stdio: ['ignore', log, log],
+	});
+	child.unref();
+	closeSync(log);
+	for (const deadline = Date.now() + 240_000; ; ) {
+		if (existsSync(pidFile)) break;
+		if (child.exitCode !== null || Date.now() > deadline) {
+			console.error(readFileSync(logFile, 'utf8').split('\n').slice(-30).join('\n'));
+			throw new Error('the lab did not start');
+		}
+		await Bun.sleep(300);
+	}
+	console.log(readFileSync(logFile, 'utf8').trim().split('\n').at(-1));
+	process.exit(0);
+}
+
+const alive = (pid: number) => {
+	try {
+		process.kill(pid, 0);
+		return true;
+	} catch {
+		return false;
+	}
+};
+
+if (verb === 'stop') {
+	const runs = join(import.meta.dir, 'runs');
+	const pids = (existsSync(runs) ? readdirSync(runs) : [])
+		.map(run => join(runs, run, 'daemon.json'))
+		.filter(file => existsSync(file))
+		.map(file => (JSON.parse(readFileSync(file, 'utf8')) as { pid: number }).pid);
+	Bun.spawnSync(['bun', join(import.meta.dir, 'play'), 'lab', 'stop'], { stdio: ['ignore', 'ignore', 'ignore'] });
+	for (const pid of pids) {
+		for (const deadline = Date.now() + 15_000; alive(pid) && Date.now() < deadline; ) await Bun.sleep(100);
+		if (alive(pid)) process.kill(pid, 'SIGKILL');
+	}
+	for (const run of existsSync(runs) ? readdirSync(runs) : []) rmSync(join(runs, run, 'daemon.json'), { force: true });
+	console.log(pids.length ? 'Stopped.' : 'Nothing was running.');
+	process.exit(0);
+}
+
+const proc = Bun.spawnSync(['bun', join(import.meta.dir, 'play'), 'lab', ...(verb ? [verb, ...rest] : ['help'])], {
+	stdio: ['ignore', 'inherit', 'inherit'],
+	env: process.env,
+});
+process.exit(proc.exitCode ?? 1);

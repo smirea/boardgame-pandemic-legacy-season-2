@@ -5,6 +5,8 @@ import type { Color } from './content/types';
 import { freeCharacters, scarTargets } from './flow';
 import { cardValue, characterOf, cityDef, grid, handLimit, neighbours, player, seaRoute } from './helpers';
 import type { CardId, CityId, SeatId } from './ids';
+import type { Purchase } from './legacy';
+import { checkPurchase } from './legacy';
 import type { Decide, Play } from './plays';
 import { checkDecide, checkPlay } from './plays';
 import type { World } from './state';
@@ -273,4 +275,29 @@ export function legalDecides(world: World): Decide[] {
 		}
 	}
 	return candidates.filter(decide => checkDecide(world, decide) === null);
+}
+
+/** Everything the group could buy right now in the game-end step. */
+export function legalPurchases(world: World): Purchase[] {
+	const { campaign } = world;
+	const onGrid = [...grid(campaign)];
+	const candidates: Purchase[] = [];
+	for (const character of Object.values(campaign.characters)) {
+		for (const ability of campaign.abilitiesForSale) {
+			character.slots.forEach((_, slot) => candidates.push({ t: 'ability', ability, character: character.id, slot }));
+		}
+	}
+	for (const improvement of campaign.cityImprovementsForSale) {
+		for (const card of Object.keys(campaign.playerCards) as CardId[])
+			candidates.push({ t: 'cityImprovement', improvement, card });
+	}
+	for (const improvement of campaign.infectionImprovementsForSale) {
+		for (const card of Object.keys(campaign.infectionCards) as CardId[])
+			candidates.push({ t: 'infectionImprovement', improvement, card });
+	}
+	for (const city of onGrid) {
+		candidates.push({ t: 'population', city, steps: 1 }, { t: 'restore', city });
+		for (const structure of campaign.permanentForSale) candidates.push({ t: 'permanent', structure, city });
+	}
+	return candidates.filter(purchase => checkPurchase(world, purchase) === null);
 }

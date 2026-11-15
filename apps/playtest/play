@@ -1,0 +1,31 @@
+#!/usr/bin/env bun
+/** A player's command line. It forwards one command to the running lab and prints the answer. */
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
+import { join } from 'node:path';
+
+const [agent, ...words] = process.argv.slice(2);
+if (!agent) {
+	console.error('usage: play <your-id> <command> [arguments]   (try: play <your-id> help)');
+	process.exit(2);
+}
+const runs = join(import.meta.dir, 'runs');
+const live = (existsSync(runs) ? readdirSync(runs) : [])
+	.map(run => join(runs, run, 'daemon.json'))
+	.filter(file => existsSync(file))
+	.sort((a, b) => statSync(b).mtimeMs - statSync(a).mtimeMs);
+const wanted = process.env.PLAYTEST_RUN ? join(runs, process.env.PLAYTEST_RUN, 'daemon.json') : live[0];
+if (!wanted || !existsSync(wanted)) {
+	console.error('The lab is not running. Start it with: ./apps/playtest/lab start <config>');
+	process.exit(1);
+}
+const { control } = JSON.parse(readFileSync(wanted, 'utf8')) as { control: number };
+const response = await fetch(`http://127.0.0.1:${control}/rpc`, {
+	method: 'POST',
+	body: JSON.stringify({ agent, words }),
+}).catch(() => null);
+if (!response) {
+	console.error('The lab is not answering. It may have stopped: ./apps/playtest/lab start <config>');
+	process.exit(1);
+}
+console.log(await response.text());
+process.exit(response.ok ? 0 : 1);
