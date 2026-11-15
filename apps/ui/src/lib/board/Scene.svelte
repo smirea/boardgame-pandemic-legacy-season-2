@@ -10,6 +10,7 @@
 	import CityMarker from './CityMarker.svelte';
 	import Cloud from './Cloud.svelte';
 	import { fitBoard } from './fit';
+	import { layoutLabels } from './labels';
 	import { buildLandGeometry } from './land';
 	import Pawn from './Pawn.svelte';
 	import type { BoardBounds, BoardPoint } from './projection';
@@ -24,9 +25,11 @@
 		onpointer?: (point: BoardPoint | null) => void;
 		/** Bump to return the camera to the whole-board view. */
 		resetView?: number;
+		/** Screen rectangles, in pixels from the canvas corner, that HUD panels cover. Labels keep out of them. */
+		covered?: { x: number; y: number; width: number; height: number }[];
 	};
 
-	let { view, oncity, onpointer, resetView = 0 }: Props = $props();
+	let { view, oncity, onpointer, resetView = 0, covered = [] }: Props = $props();
 
 	interactivity();
 
@@ -53,7 +56,8 @@
 	let userMoved = $state(false);
 	let dragging = false;
 	let lastReset = 0;
-	const fit = $derived(fitBoard(bounds, size.current.width / Math.max(1, size.current.height), FOV));
+	// `$size` subscribes to the store. Reading `size.current` would not rerun when the canvas is resized.
+	const fit = $derived(fitBoard(bounds, $size.width / Math.max(1, $size.height), FOV));
 	$effect(() => {
 		if (resetView !== lastReset) {
 			lastReset = resetView;
@@ -71,22 +75,21 @@
 
 	const visibleCities = $derived(pack.cities.filter(city => view.cities[city.id]!.revealed));
 	const cloudCities = pack.cities.filter(city => !city.lost);
-	// A city whose closest neighbour sits just north of it hangs its label below, so the two labels part instead of stacking.
-	const labelsBelow = $derived.by(() => {
-		const below = new Set<CityId>();
-		for (const city of visibleCities) {
-			const at = layout[city.id]!;
-			let nearest: { dz: number; distance: number } | null = null;
-			for (const other of visibleCities) {
-				if (other.id === city.id) continue;
-				const point = layout[other.id]!;
-				const distance = Math.hypot(point.x - at.x, point.z - at.z);
-				if (distance < 13 && (!nearest || distance < nearest.distance)) nearest = { dz: point.z - at.z, distance };
-			}
-			if (nearest && nearest.dz < 0) below.add(city.id);
-		}
-		return below;
-	});
+	// Board units covered by one screen pixel at the whole-board view, the zoom at which labels are most crowded.
+	const unitsPerPixel = $derived((2 * fit.distance * Math.tan((FOV * Math.PI) / 360)) / Math.max(1, $size.height));
+	const anchors = $derived(
+		layoutLabels(
+			visibleCities.map(city => ({ id: city.id, name: view.cities[city.id]!.name, at: layout[city.id]! })),
+			unitsPerPixel,
+			// Screen to board is close to a plain scale at the whole-board view, which is all the label layout needs.
+			covered.map(rect => ({
+				x: fit.target.x + (rect.x + rect.width / 2 - $size.width / 2) * unitsPerPixel,
+				z: fit.target.z + (rect.y + rect.height / 2 - $size.height / 2) * unitsPerPixel,
+				halfWidth: (rect.width / 2) * unitsPerPixel,
+				halfHeight: (rect.height / 2) * unitsPerPixel,
+			})),
+		),
+	);
 	const pawnSlots = $derived.by(() => {
 		const perCity = new Map<CityId, number>();
 		return view.pawns.map(pawn => {
@@ -164,7 +167,7 @@
 		{city}
 		at={layout[city.id]!}
 		state={view.cities[city.id]!}
-		labelBelow={labelsBelow.has(city.id)}
+		anchor={anchors.get(city.id) ?? 'n'}
 		onselect={() => oncity?.(city.id)}
 	/>
 {/each}

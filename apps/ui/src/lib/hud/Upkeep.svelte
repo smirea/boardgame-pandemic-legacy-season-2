@@ -77,6 +77,7 @@
 	});
 	const groups = $derived([...new Set(offers.map(offer => offer.group))]);
 	let group = $state('');
+	let bought = $state.raw<string[]>([]);
 	$effect(() => {
 		if (!groups.includes(group)) group = groups[0] ?? '';
 	});
@@ -108,25 +109,45 @@
 		</h2>
 		{#if groups.length}
 			<div class="shop">
-				<select bind:value={group} data-testid="purchase-group">
-					{#each groups as option (option)}<option>{option}</option>{/each}
-				</select>
-				<p>{inGroup[0]?.text}</p>
-				<div class="targets">
-					{#each inGroup as offer, index (index)}
-						<button
-							onclick={() => send({ type: 'PURCHASE', purchase: offer.purchase })}
-							title={`${purchaseCost(offer.purchase)} units`}
-						>
-							{purchaseLabel(world, offer.purchase)}
+				<div class="groups" data-testid="purchase-group">
+					{#each groups as option (option)}
+						{@const cost = option.match(/\((\d+)\)$/)?.[1]}
+						<button class:on={option === group} onclick={() => (group = option)}>
+							<strong>{option.replace(/ \(\d+\)$/, '')}</strong>
+							<small>{cost} unit{cost === '1' ? '' : 's'}</small>
 						</button>
 					{/each}
+				</div>
+				<div class="detail">
+					<p>{inGroup[0]?.text}</p>
+					<div class="targets">
+						{#each inGroup as offer, index (index)}
+							<button
+								onclick={() => {
+									bought = [...bought, `${group.replace(/ \(\d+\)$/, '')}: ${purchaseLabel(world, offer.purchase)}`];
+									send({ type: 'PURCHASE', purchase: offer.purchase });
+								}}
+								title={`${purchaseCost(offer.purchase)} units`}
+							>
+								{purchaseLabel(world, offer.purchase)}
+							</button>
+						{/each}
+					</div>
 				</div>
 			</div>
 		{:else}
 			<p class="none">Nothing left to buy.</p>
 		{/if}
 	</section>
+
+	{#if bought.length}
+		<section>
+			<h2>Bought</h2>
+			<p class="changes">
+				{#each bought as line, index (index)}<span class="up">{line}</span>{/each}
+			</p>
+		</section>
+	{/if}
 
 	<button class="primary" onclick={() => send({ type: 'FINISH_UPKEEP' })} data-testid="finish-upkeep"
 		>Done. Unspent units are lost.</button
@@ -194,14 +215,47 @@
 		font-size: 0.8rem;
 	}
 
-	.shop p {
-		margin: 0.4rem 0;
+	.shop {
+		display: grid;
+		grid-template-columns: 15rem minmax(0, 1fr);
+		gap: 0.9rem;
+		min-height: 0;
+	}
+
+	.groups {
+		display: flex;
+		flex-direction: column;
+		gap: 0.2rem;
+		max-height: 15rem;
+		overflow: auto;
+	}
+
+	.groups button {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 0.5rem;
+		text-align: left;
+	}
+
+	.groups button.on {
+		border-color: var(--accent);
+		background: rgb(125 252 192 / 0.1);
+	}
+
+	.groups small {
+		color: var(--muted);
+		white-space: nowrap;
+	}
+
+	.detail p {
+		margin: 0 0 0.5rem;
 		color: var(--muted);
 		font-size: 0.75rem;
 	}
 
 	.targets {
-		max-height: 9rem;
+		max-height: 12rem;
 		overflow: auto;
 	}
 

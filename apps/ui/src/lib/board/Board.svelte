@@ -10,14 +10,15 @@
 		oncity?: (city: CityId) => void;
 		onpointer?: (point: BoardPoint | null) => void;
 		resetView?: number;
+		covered?: { x: number; y: number; width: number; height: number }[];
 	};
 
-	let { view, oncity, onpointer, resetView }: Props = $props();
+	let { view, oncity, onpointer, resetView, covered }: Props = $props();
 </script>
 
 <div class="board" role="presentation" onpointerleave={() => onpointer?.(null)}>
 	<Canvas>
-		<Scene {view} {oncity} {onpointer} {resetView} />
+		<Scene {view} {oncity} {onpointer} {resetView} {covered} />
 	</Canvas>
 </div>
 

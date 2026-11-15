@@ -15,14 +15,19 @@
 	import { T } from '@threlte/core';
 	import { HTML, useCursor } from '@threlte/extras';
 	import { Spring } from 'svelte/motion';
+	import { anchorOffset, labelWidth } from './labels';
+	import type { Anchor } from './labels';
 	import { LAND_HEIGHT } from './projection';
+	import Pop from './Pop.svelte';
 	import type { BoardPoint } from './projection';
 	import { CITY_RADIUS, CITY_TOP } from './routes';
 	import type { CityView } from './types';
 
-	type Props = { city: CityDef; at: BoardPoint; state: CityView; labelBelow: boolean; onselect: () => void };
+	type Props = { city: CityDef; at: BoardPoint; state: CityView; anchor: Anchor; onselect: () => void };
 
-	let { city, at, state, labelBelow, onselect }: Props = $props();
+	let { city, at, state, anchor, onselect }: Props = $props();
+
+	const offset = $derived(anchorOffset(anchor, labelWidth(state.name)));
 
 	const color = $derived(state.forsaken ? '#6b6f76' : CITY_COLOR[city.color ?? 'haven']);
 	const { hovering, onPointerEnter, onPointerLeave } = useCursor();
@@ -90,27 +95,31 @@
 		{/if}
 	</T.Group>
 
-	{#each cubes as cube, index (index)}
-		<T.Mesh position={[cube.x, cube.y, cube.z]} castShadow>
-			<T.BoxGeometry args={[0.7, 0.7, 0.7]} />
-			<T.MeshStandardMaterial
-				color={cube.kind === 'plague' ? '#63d417' : '#f2ecd8'}
-				emissive={cube.kind === 'plague' ? '#2f7a00' : '#000000'}
-				emissiveIntensity={cube.kind === 'plague' ? 0.8 : 0}
-				roughness={0.4}
-			/>
-		</T.Mesh>
+	{#each cubes as cube, index (`${cube.kind}${index}`)}
+		<Pop position={[cube.x, cube.y, cube.z]} delay={Math.min(index, 8) * 35}>
+			<T.Mesh castShadow>
+				<T.BoxGeometry args={[0.7, 0.7, 0.7]} />
+				<T.MeshStandardMaterial
+					color={cube.kind === 'plague' ? '#63d417' : '#f2ecd8'}
+					emissive={cube.kind === 'plague' ? '#2f7a00' : '#000000'}
+					emissiveIntensity={cube.kind === 'plague' ? 0.8 : 0}
+					roughness={0.4}
+				/>
+			</T.Mesh>
+		</Pop>
 	{/each}
 
 	{#each figures as figure, index (index)}
-		<T.Mesh position={[figure.x, 0.6, figure.z]} castShadow>
-			<T.ConeGeometry args={[0.36, 1.2, 5]} />
-			<T.MeshStandardMaterial color="#5b3f8f" emissive="#3b1d6e" emissiveIntensity={0.6} roughness={0.5} />
-		</T.Mesh>
+		<Pop position={[figure.x, 0.6, figure.z]}>
+			<T.Mesh castShadow>
+				<T.ConeGeometry args={[0.36, 1.2, 5]} />
+				<T.MeshStandardMaterial color="#5b3f8f" emissive="#3b1d6e" emissiveIntensity={0.6} roughness={0.5} />
+			</T.Mesh>
+		</Pop>
 	{/each}
 
 	{#if state.center}
-		<T.Group position={[-CITY_RADIUS - 0.9, 0, 0]}>
+		<Pop position={[-CITY_RADIUS - 0.9, 0, 0]}>
 			<T.Mesh position.y={0.5} castShadow>
 				<T.BoxGeometry args={[1.2, 1, 1.2]} />
 				<T.MeshStandardMaterial color="#e8e2d0" roughness={0.6} />
@@ -119,10 +128,10 @@
 				<T.ConeGeometry args={[1.02, 0.65, 4]} />
 				<T.MeshStandardMaterial color="#c2552d" roughness={0.6} />
 			</T.Mesh>
-		</T.Group>
+		</Pop>
 	{/if}
 	{#if state.tower}
-		<T.Group position={[-CITY_RADIUS - 0.6, 0, -1.5]}>
+		<Pop position={[-CITY_RADIUS - 0.6, 0, -1.5]}>
 			<T.Mesh position.y={1.3} castShadow>
 				<T.CylinderGeometry args={[0.08, 0.2, 2.6, 8]} />
 				<T.MeshStandardMaterial color="#cfd6dd" metalness={0.6} roughness={0.3} />
@@ -131,17 +140,33 @@
 				<T.SphereGeometry args={[0.24, 12, 10]} />
 				<T.MeshStandardMaterial color="#6fd3ff" emissive="#2aa8e6" emissiveIntensity={1.2} />
 			</T.Mesh>
-		</T.Group>
+		</Pop>
 	{/if}
 	{#if state.shelter}
-		<T.Mesh position={[-CITY_RADIUS - 0.6, 0, 1.5]} castShadow>
-			<T.SphereGeometry args={[0.75, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2]} />
-			<T.MeshStandardMaterial color="#7fb38a" roughness={0.7} />
-		</T.Mesh>
+		<Pop position={[-CITY_RADIUS - 0.6, 0, 1.5]}>
+			<T.Mesh castShadow>
+				<T.SphereGeometry args={[0.75, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2]} />
+				<T.MeshStandardMaterial color="#7fb38a" roughness={0.7} />
+			</T.Mesh>
+		</Pop>
 	{/if}
 
-	<HTML position.y={CITY_TOP - LAND_HEIGHT + 0.2} center pointerEvents="none" zIndexRange={[10, 0]}>
-		<div class="label" class:off-grid={!state.onGrid} class:below={labelBelow} class:forsaken={state.forsaken}>
+	<HTML
+		position.y={CITY_TOP - LAND_HEIGHT + 0.2}
+		center
+		pointerEvents="none"
+		style="pointer-events: none"
+		zIndexRange={[10, 0]}
+	>
+		<div
+			class="label"
+			class:off-grid={!state.onGrid}
+			class:forsaken={state.forsaken}
+			style:--dx={`${offset.x}px`}
+			style:--dy={`${offset.y}px`}
+			style:--w={`${labelWidth(state.name)}px`}
+			data-city={city.id}
+		>
 			<span class="name">{state.name}</span>
 			<span class="population" title="Population">{state.population}</span>
 			{#if state.supplies}<span class="supplies">{state.supplies}</span>{/if}
@@ -159,7 +184,11 @@
 		display: flex;
 		gap: 0.25rem;
 		align-items: center;
-		transform: translateY(-1.6rem);
+		justify-content: center;
+		min-width: 0;
+		max-width: var(--w);
+		transform: translate(var(--dx), var(--dy));
+		transition: transform 300ms ease;
 		padding: 0.05rem 0.4rem;
 		border-radius: 999px;
 		background: rgb(10 15 20 / 0.8);
@@ -170,10 +199,6 @@
 		letter-spacing: 0.02em;
 		white-space: nowrap;
 		user-select: none;
-	}
-
-	.label.below {
-		transform: translateY(1.6rem);
 	}
 
 	.label.off-grid {

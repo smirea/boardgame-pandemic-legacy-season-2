@@ -6,7 +6,8 @@
 	import type { GameSession } from '#lib/session/session.svelte.ts';
 	import { LS } from '#lib/storage.ts';
 	import { untrack } from 'svelte';
-	import { fade, fly } from 'svelte/transition';
+	import { backOut } from 'svelte/easing';
+	import { fade, fly, scale } from 'svelte/transition';
 	import Dock from './Dock.svelte';
 	import InsightsPanel from './InsightsPanel.svelte';
 	import {
@@ -22,6 +23,7 @@
 		setNames,
 	} from './labels.svelte.ts';
 	import Lobby from './Lobby.svelte';
+	import Objectives from './Objectives.svelte';
 	import PlayersPanel from './PlayersPanel.svelte';
 	import TopBar from './TopBar.svelte';
 	import Upkeep from './Upkeep.svelte';
@@ -39,7 +41,8 @@
 
 	let mine = $state<SeatId[]>(LS.get('mySeats', []));
 	const solo = $derived(session.mode === 'solo');
-	const canAct = $derived(game !== null && (solo || mine.includes(game.active)));
+	const owns = (seat: SeatId) => solo || mine.includes(seat);
+	const canAct = $derived(game !== null && owns(game.active));
 	let viewing = $state<SeatId | null>(null);
 	$effect(() => {
 		// The dock follows whoever's turn it is, until the player picks a hand to look at.
@@ -50,6 +53,11 @@
 	const actions = $derived(game && snap.phase === 'playing.actions' && canAct ? legalActions(world, game.active) : []);
 	const plays = $derived(playing ? legalPlays(world) : []);
 	const decides = $derived(playing ? legalDecides(world) : []);
+	$effect(() => {
+		// When one of this client's characters has to discard, the dock turns to that hand.
+		const owed = decides.find(decide => decide.d === 'discard' && owns(decide.seat));
+		if (owed?.d === 'discard') viewing = owed.seat;
+	});
 
 	type Option = { label: string; detail: string; run: () => void; city?: CityId };
 	type Chooser = {
@@ -79,6 +87,26 @@
 		else if (picked.length < chooser.multi.max) picked = [...picked, option];
 	}
 	let menu = $state(false);
+	let stage = $state<HTMLElement>();
+	let leftPanel = $state<HTMLElement>();
+	let rightPanel = $state<HTMLElement>();
+	// Where the corner panels sit, so the board can keep city labels out from under them.
+	let covered = $state.raw<{ x: number; y: number; width: number; height: number }[]>([]);
+	$effect(() => {
+		const panels = [leftPanel, rightPanel].filter(panel => panel !== undefined);
+		if (!stage || panels.length === 0) return void (covered = []);
+		const measure = () => {
+			const origin = stage!.getBoundingClientRect();
+			covered = panels.map(panel => {
+				const box = panel.getBoundingClientRect();
+				return { x: box.x - origin.x, y: box.y - origin.y, width: box.width, height: box.height };
+			});
+		};
+		const observer = new ResizeObserver(measure);
+		for (const panel of [stage, ...panels]) observer.observe(panel);
+		measure();
+		return () => observer.disconnect();
+	});
 	let resetView = $state(0);
 
 	const send = (command: Command) => session.send(command);
@@ -212,6 +240,7 @@
 	let fx = $state.raw<Fx[]>([]);
 	let toasts = $state.raw<{ id: number; text: string; tone: string }[]>([]);
 	let banner = $state.raw<{ id: number; title: string; text: string } | null>(null);
+	let turnBanner = $state.raw<{ id: number; name: string; color: string } | null>(null);
 	let lastSeq = untrack(() => game?.log.at(-1)?.seq ?? 0);
 	let nextFx = 1;
 
@@ -248,6 +277,14 @@
 						: `Infection rate ${entry.rate}.`,
 				};
 				setTimeout(() => banner?.id === id && (banner = null), 3400);
+			} else if (entry.t === 'turn') {
+				const id = nextFx++;
+				turnBanner = {
+					id,
+					name: seatName(world, entry.seat),
+					color: SEAT_COLORS[game!.seats.indexOf(entry.seat)] ?? '#fff',
+				};
+				setTimeout(() => turnBanner?.id === id && (turnBanner = null), 1900);
 			} else if (entry.t === 'objective') toast('Objective complete', 'good');
 			else if (entry.t === 'unlock')
 				toast(`Opened: ${pack.bundles.find(bundle => bundle.id === entry.bundle)?.name}`, 'good');
@@ -255,6 +292,7 @@
 				toast(`${campaign.characters[entry.character]?.name} died in ${cityName(entry.at)}`, 'bad');
 			else if (entry.t === 'exposure' && entry.result === 'scar')
 				toast(`${seatName(world, entry.seat)} takes a scar`, 'bad');
+			else if (entry.t === 'note') toast(entry.text, 'good');
 		}
 		untrack(() => {
 			fx = [...fx, ...added];
@@ -270,7 +308,7 @@
 
 	const boardView = $derived.by((): BoardView => {
 		const targets = new Set((targeting?.cities ?? cityOptions).keys());
-		const showOdds = (playing || snap.phase === 'setup.supply') && info !== null;
+		const showOdds = playing && info !== null;
 		const cities = Object.fromEntries(
 			pack.cities.map((city): [CityId, CityView] => {
 				const record = campaign.locations[city.id]!;
@@ -360,23 +398,20 @@
 		status={session.status}
 		players={session.peers.filter(peer => peer.connected).length}
 		solo={session.mode === 'solo'}
-		onwaive={objective =>
-			confirm('Mark this objective impossible for this game? The remaining objectives then decide the win.') &&
-			send({ type: 'WAIVE_OBJECTIVE', objective })}
 		onreset={() => resetView++}
 		onmenu={() => (menu = !menu)}
 	/>
 
-	<main class="stage">
-		<Board view={boardView} oncity={clickCity} onpointer={point => session.pointer(point)} {resetView} />
+	<main class="stage" bind:this={stage}>
+		<Board view={boardView} oncity={clickCity} onpointer={point => session.pointer(point)} {resetView} {covered} />
 
 		{#if game && snap.phase !== 'upkeep'}
-			<aside class="left">
+			<aside class="left" bind:this={leftPanel}>
 				<PlayersPanel {world} {mine} {solo} {viewing} onview={seat => (viewing = seat)} onclaim={claim} />
 			</aside>
 		{/if}
 		{#if game && info && snap.phase !== 'upkeep'}
-			<aside class="right">
+			<aside class="right" bind:this={rightPanel}>
 				<InsightsPanel
 					{world}
 					{info}
@@ -384,6 +419,17 @@
 					onlockdown={card => send({ type: 'LOCKDOWN', card })}
 				/>
 			</aside>
+		{/if}
+
+		{#if game && snap.phase !== 'upkeep'}
+			<div class="goals">
+				<Objectives
+					{snap}
+					onwaive={objective =>
+						confirm('Mark this objective impossible for this game? The remaining objectives then decide the win.') &&
+						send({ type: 'WAIVE_OBJECTIVE', objective })}
+				/>
+			</div>
 		{/if}
 
 		{#if selected && campaign.locations[selected]?.revealed}
@@ -453,6 +499,30 @@
 			{/key}
 		{/if}
 
+		{#if turnBanner && !banner}
+			{#key turnBanner.id}
+				<div
+					class="turn-banner"
+					style:--seat={turnBanner.color}
+					in:fly={{ y: -24, duration: 320 }}
+					out:fade={{ duration: 450 }}
+				>
+					<i></i>{turnBanner.name}'s turn
+				</div>
+			{/key}
+		{/if}
+
+		{#if banner}
+			{#key banner.id}<div class="flash" out:fade={{ duration: 200 }}></div>{/key}
+		{/if}
+
+		{#if game?.outcome && snap.phase === 'over'}
+			<div class="outcome" class:won={game.outcome.won} in:scale={{ start: 0.7, duration: 600, easing: backOut }}>
+				<strong>{game.outcome.won ? 'Victory' : 'Defeat'}</strong>
+				<span>{game.outcome.reason}</span>
+			</div>
+		{/if}
+
 		{#if campaign.briefing.length}
 			<div class="scrim" transition:fade={{ duration: 200 }}>
 				<div class="briefing" in:fly={{ y: 24, duration: 300 }}>
@@ -504,6 +574,7 @@
 		<Dock
 			{snap}
 			{canAct}
+			{owns}
 			{viewing}
 			{actions}
 			{plays}
@@ -551,14 +622,22 @@
 
 	.left {
 		left: 0.7rem;
-		width: 15rem;
+		width: 12.5rem;
 	}
 
 	.right {
 		right: 0.7rem;
-		width: 15.5rem;
+		width: 13rem;
 		max-height: calc(100% - 1.4rem);
 		display: flex;
+	}
+
+	.goals {
+		position: absolute;
+		top: 0.6rem;
+		left: 50%;
+		z-index: 30;
+		transform: translateX(-50%);
 	}
 
 	.cityinfo,
@@ -592,7 +671,7 @@
 	}
 
 	.targeting {
-		top: 0.7rem;
+		top: 3.2rem;
 		border-color: var(--accent);
 		color: var(--accent);
 	}
@@ -693,7 +772,7 @@
 
 	.toasts {
 		position: absolute;
-		top: 3.2rem;
+		top: 5.6rem;
 		left: 50%;
 		z-index: 50;
 		display: flex;
@@ -748,6 +827,87 @@
 		font-size: 2.2rem;
 		letter-spacing: 0.3em;
 		text-transform: uppercase;
+	}
+
+	.turn-banner {
+		position: absolute;
+		top: 3.3rem;
+		left: 50%;
+		z-index: 44;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.35rem 1rem;
+		border: 1px solid var(--seat);
+		border-radius: 999px;
+		background: var(--panel-solid);
+		font-size: 0.95rem;
+		font-weight: 650;
+		transform: translateX(-50%);
+		pointer-events: none;
+	}
+
+	.turn-banner i {
+		width: 0.6rem;
+		height: 0.6rem;
+		border-radius: 50%;
+		background: var(--seat);
+	}
+
+	.flash {
+		position: absolute;
+		inset: 0;
+		z-index: 43;
+		box-shadow: inset 0 0 9rem 2rem rgb(255 59 107 / 0.55);
+		animation: flash 1.6s ease-out forwards;
+		pointer-events: none;
+	}
+
+	@keyframes flash {
+		0% {
+			opacity: 0;
+		}
+		12% {
+			opacity: 1;
+		}
+		100% {
+			opacity: 0;
+		}
+	}
+
+	.outcome {
+		position: absolute;
+		top: 30%;
+		left: 50%;
+		z-index: 46;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.3rem;
+		padding: 1.4rem 3.5rem;
+		border: 1px solid var(--danger);
+		border-radius: 1rem;
+		background: rgb(10 14 19 / 0.88);
+		backdrop-filter: blur(10px);
+		color: var(--danger);
+		translate: -50% 0;
+		pointer-events: none;
+	}
+
+	.outcome.won {
+		border-color: var(--accent);
+		color: var(--accent);
+	}
+
+	.outcome strong {
+		font-size: 3.2rem;
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+	}
+
+	.outcome span {
+		color: var(--ink);
+		font-size: 0.95rem;
 	}
 
 	.scrim {

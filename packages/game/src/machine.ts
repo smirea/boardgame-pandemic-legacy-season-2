@@ -455,9 +455,43 @@ export function createGameActor(options: { seed: number; save?: Save | null }) {
 
 export type GameActor = ReturnType<typeof createGameActor>;
 
+const GAME_DEFAULTS = {
+	waived: [],
+	pending: [],
+	pickedEvents: [],
+	connectedThisGame: [],
+	gameEndArea: [],
+	centersBuilt: 0,
+	searches: 0,
+	skipInfection: false,
+	upkeep: null,
+	prologueRestore: null,
+} satisfies Partial<NonNullable<World['game']>>;
+
+/**
+ * Reads a save and fills in whatever the game has gained since it was written, so a campaign begun
+ * on an older build keeps loading. A field the save lacks takes the value a new campaign starts with.
+ */
 export function parseSave(raw: unknown): Save {
 	const save = raw as Partial<Save> | null;
 	if (save?.v !== 1 || typeof save.phase !== 'string' || !save.world?.campaign)
 		throw new Error('That is not a campaign save');
-	return save as Save;
+	const fresh = newCampaign(0);
+	const campaign = { ...fresh, ...save.world.campaign };
+	campaign.locations = { ...fresh.locations, ...campaign.locations };
+	campaign.characters = Object.fromEntries(
+		Object.entries(campaign.characters).map(([id, character]) => [id, Object.assign({ jobScar: null }, character)]),
+	);
+	const saved = save.world.game;
+	const game = saved ? { ...GAME_DEFAULTS, ...saved, locations: { ...blankLocations(), ...saved.locations } } : null;
+	return { v: 1, phase: save.phase, world: { campaign, game } };
+}
+
+function blankLocations() {
+	return Object.fromEntries(
+		pack.cities.map(city => [
+			city.id,
+			{ supplies: 0, plague: 0, hollow: 0, center: false, tower: false, shelter: false },
+		]),
+	);
 }

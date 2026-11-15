@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { pack } from '@repo/game';
-	import type { Insights, ObjectiveId, PublicState } from '@repo/game';
+	import type { Insights, PublicState } from '@repo/game';
 	import { MONTHS } from './labels.svelte.ts';
 
 	type Props = {
@@ -9,16 +9,14 @@
 		status: string;
 		players: number;
 		solo: boolean;
-		onwaive: (objective: ObjectiveId) => void;
 		onreset: () => void;
 		onmenu: () => void;
 	};
 
-	let { snap, info, status, players, solo, onwaive, onreset, onmenu }: Props = $props();
+	let { snap, info, status, players, solo, onreset, onmenu }: Props = $props();
 
 	const campaign = $derived(snap.world.campaign);
 	const game = $derived(snap.world.game);
-	const objectives = $derived(pack.objectives.filter(objective => campaign.objectives.includes(objective.id)));
 	const rates = pack.numbers.infectionRates;
 	const percent = (value: number) => `${Math.round(value * 100)}%`;
 </script>
@@ -35,25 +33,7 @@
 		>
 	</div>
 
-	<div class="objectives" title="Objectives. A dot marks a mandatory one.">
-		<span class="need">{game ? game.completed.length : 0}/{Math.min(campaign.required, objectives.length)}</span>
-		{#each objectives as objective (objective.id)}
-			{@const progress = game?.progress[objective.id] ?? 0}
-			{@const waived = game?.waived.includes(objective.id) ?? false}
-			<button
-				class="objective"
-				class:done={game?.completed.includes(objective.id)}
-				class:waived
-				disabled={!game || waived || game.completed.includes(objective.id)}
-				title={`${objective.rule} Click to mark it impossible this game.`}
-				onclick={() => onwaive(objective.id)}
-			>
-				{#if objective.mandatory}<i></i>{/if}
-				{objective.name}
-				{#if objective.target > 1}<b>{progress}/{objective.target}</b>{/if}
-			</button>
-		{/each}
-	</div>
+	<div class="spacer"></div>
 
 	{#if game && info}
 		<div class="track" title="Infection rate: cards flipped at the end of every turn">
@@ -71,18 +51,20 @@
 			{/each}
 		</div>
 
-		<div
-			class="stat"
-			title="Player deck. Turns left before it runs out, and the chance the next draw holds an epidemic."
-		>
-			<span class="caption">Player deck</span>
-			<strong>{info.playerDeck.cards}</strong>
-			<span>{info.playerDeck.turnsLeft} turns</span>
-			<span class="warn" class:hot={info.playerDeck.epidemicNextDraw > 0.5}
-				>epidemic {percent(info.playerDeck.epidemicNextDraw)}</span
+		{#if info.playerDeck.cards > 0}
+			<div
+				class="stat"
+				title="Player deck. Turns left before it runs out, and the chance the next draw holds an epidemic."
 			>
-			<span>{info.playerDeck.epidemicsDrawn}/{info.playerDeck.epidemicsDrawn + info.playerDeck.epidemicsLeft}</span>
-		</div>
+				<span class="caption">Player deck</span>
+				<strong>{info.playerDeck.cards}</strong>
+				<span>{info.playerDeck.turnsLeft} turns</span>
+				<span class="warn" class:hot={info.playerDeck.epidemicNextDraw > 0.5}
+					>epidemic {percent(info.playerDeck.epidemicNextDraw)}</span
+				>
+				<span>{info.playerDeck.epidemicsDrawn}/{info.playerDeck.epidemicsDrawn + info.playerDeck.epidemicsLeft}</span>
+			</div>
+		{/if}
 
 		<div class="stat" title="Supply cubes left in the stockpile">
 			<span class="caption">Stockpile</span>
@@ -133,68 +115,8 @@
 		text-transform: uppercase;
 	}
 
-	.objectives {
-		display: flex;
-		align-items: center;
-		gap: 0.35rem;
-		min-width: 9rem;
-		flex: 1 1 auto;
-		overflow: hidden;
-	}
-
-	.need {
-		padding: 0.1rem 0.4rem;
-		border-radius: 0.3rem;
-		background: var(--accent);
-		color: #06120c;
-		font-weight: 700;
-	}
-
-	.objective {
-		flex: 0 1 auto;
-		min-width: 3.5rem;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		padding: 0.15rem 0.5rem;
-		border: 1px solid var(--line);
-		border-radius: 999px;
-		color: var(--ink);
-	}
-
-	.objective i {
-		display: inline-block;
-		margin-right: 0.3rem;
-		vertical-align: middle;
-		width: 0.35rem;
-		height: 0.35rem;
-		border-radius: 50%;
-		background: var(--warn);
-	}
-
-	.objective b {
-		margin-left: 0.3rem;
-		color: var(--muted);
-		font-weight: 600;
-	}
-
-	button.objective {
-		background: none;
-		font: inherit;
-		cursor: pointer;
-	}
-
-	button.objective:disabled {
-		cursor: default;
-	}
-
-	.objective.waived {
-		opacity: 0.45;
-		text-decoration: line-through;
-	}
-
-	.objective.done {
-		border-color: var(--accent);
-		color: var(--accent);
+	.spacer {
+		flex: 1;
 	}
 
 	.track,

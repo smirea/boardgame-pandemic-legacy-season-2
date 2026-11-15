@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Crash from '#lib/hud/Crash.svelte';
 	import Game from '#lib/hud/Game.svelte';
 	import { GameSession } from '#lib/session/session.svelte.ts';
 	import { onDestroy } from 'svelte';
@@ -17,5 +18,10 @@
 </svelte:head>
 
 {#if session.state}
-	<Game {session} />
+	<svelte:boundary>
+		<Game {session} />
+		{#snippet failed(error)}
+			<Crash {error} {session} />
+		{/snippet}
+	</svelte:boundary>
 {/if}

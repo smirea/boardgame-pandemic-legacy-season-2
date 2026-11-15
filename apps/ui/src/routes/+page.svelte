@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Crash from '#lib/hud/Crash.svelte';
 	import Game from '#lib/hud/Game.svelte';
 	import { GameSession } from '#lib/session/session.svelte.ts';
 	import type { Mode } from '#lib/session/session.svelte.ts';
@@ -53,7 +54,12 @@
 		</section>
 	</main>
 {:else if session?.state}
-	<Game {session} />
+	<svelte:boundary>
+		<Game {session} />
+		{#snippet failed(error)}
+			<Crash {error} session={session!} />
+		{/snippet}
+	</svelte:boundary>
 {:else if session}
 	<main class="landing">
 		<section>

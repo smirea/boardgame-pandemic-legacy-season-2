@@ -19,6 +19,8 @@
 	type Props = {
 		snap: PublicState;
 		canAct: boolean;
+		/** Whether this client plays the seat. Prompts and discards are offered only to whoever they belong to. */
+		owns: (seat: SeatId) => boolean;
 		viewing: SeatId | null;
 		actions: Action[];
 		plays: { seat: SeatId; card: CardId; play: Play }[];
@@ -29,14 +31,14 @@
 		onplaycard: (seat: SeatId, card: CardId) => void;
 	};
 
-	let { snap, canAct, viewing, actions, plays, decides, send, onview, ongroup, onplaycard }: Props = $props();
+	let { snap, canAct, owns, viewing, actions, plays, decides, send, onview, ongroup, onplaycard }: Props = $props();
 
 	const world = $derived(snap.world);
 	const game = $derived(world.game!);
 	const pending = $derived(game.pending[0]);
 	const seat = $derived(viewing ?? game.active);
 	const handCards = $derived((game.players[seat]?.hand ?? []).flatMap(id => world.campaign.playerCards[id] ?? []));
-	const mustDiscard = $derived(decides.some(decide => decide.d === 'discard' && decide.seat === seat));
+	const mustDiscard = $derived(owns(seat) && decides.some(decide => decide.d === 'discard' && decide.seat === seat));
 	const playable = $derived(new Set(plays.filter(option => option.seat === seat).map(option => option.card)));
 	const FREE = new Set(['pickUp', 'transfer', 'inoculate', 'salvage', 'destroyInfection']);
 	// One chip per kind of action. A chip with a single variant says exactly what it will do, so nothing fires blind.
@@ -59,7 +61,15 @@
 			? checkAction(world, game.active, { a: 'makeSupplies' })
 			: null,
 	);
-	const choices = $derived(decides.filter(decide => decide.d !== 'discard'));
+	const decider = $derived(pending && 'seat' in pending && pending.seat ? pending.seat : game.active);
+	// A shared prompt shows each player only their own cards, and the player whose turn it is may pass on it.
+	const choices = $derived(
+		decides.filter(decide => {
+			if (decide.d === 'discard') return false;
+			if (decide.d === 'shield' || decide.d === 'cordon') return owns(decide.seat);
+			return owns(decider);
+		}),
+	);
 	const overLimit = $derived(game.seats.filter(other => game.players[other]!.hand.length > handLimit(world, other)));
 	const blocked = $derived(pending !== undefined || overLimit.length > 0);
 	const rationed = $derived(
@@ -187,11 +197,15 @@
 				<p class="prompt">
 					{decisionTitle(world, pending)}
 				</p>
-				<div class="chips">
-					{#each choices.slice(0, 24) as decide, index (index)}
-						<button onclick={() => send({ type: 'DECIDE', decide })}>{decideLabel(world, decide)}</button>
-					{/each}
-				</div>
+				{#if choices.length}
+					<div class="chips">
+						{#each choices.slice(0, 24) as decide, index (index)}
+							<button onclick={() => send({ type: 'DECIDE', decide })}>{decideLabel(world, decide)}</button>
+						{/each}
+					</div>
+				{:else}
+					<p class="waiting">Waiting for {seatName(world, decider)}.</p>
+				{/if}
 			{:else if snap.phase === 'playing.actions'}
 				{#if canAct}
 					<div class="chips" data-testid="actions">
@@ -216,7 +230,7 @@
 				<p class="prompt">Infect cities: {game.infectionsLeft} card{game.infectionsLeft === 1 ? '' : 's'} to flip.</p>
 				<div class="flipped" data-testid="flipped">
 					{#each flipped as entry (entry.seq)}
-						<div animate:flip={{ duration: 300 }} in:fly={{ x: 80, duration: 380 }}>
+						<div class="flipcard" animate:flip={{ duration: 300 }}>
 							<InfectionCard card={entry.card} note={entry.note} />
 						</div>
 					{/each}
@@ -366,6 +380,28 @@
 
 	.prompt {
 		color: var(--ink);
+	}
+
+	.waiting {
+		margin: 0;
+		color: var(--muted);
+		font-size: 0.78rem;
+	}
+
+	.flipcard {
+		animation: turn-over 520ms cubic-bezier(0.2, 0.9, 0.3, 1.15) backwards;
+		transform-origin: left center;
+	}
+
+	@keyframes turn-over {
+		from {
+			opacity: 0;
+			transform: perspective(40rem) rotateY(-95deg) translateX(1.5rem);
+		}
+		to {
+			opacity: 1;
+			transform: perspective(40rem) rotateY(0) translateX(0);
+		}
 	}
 
 	.flipped {

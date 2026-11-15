@@ -22,7 +22,7 @@
 		<T.ConeGeometry args={[0.45, 1.5, 12]} />
 		<T.MeshBasicMaterial color={cursor.color} />
 	</T.Mesh>
-	<HTML position.y={2.6} center pointerEvents="none" zIndexRange={[20, 11]}>
+	<HTML position.y={2.6} center pointerEvents="none" style="pointer-events: none" zIndexRange={[20, 11]}>
 		<span class="tag" style:background={cursor.color}>{cursor.name}</span>
 	</HTML>
 </T.Group>

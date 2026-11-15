@@ -612,6 +612,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 				if (box === 'skull') return kill(ctx.world, ctx.seat);
 				if (box !== 'scar') continue;
 				character.carrier = true;
+				log(ctx.game, { t: 'note', text: `${character.name} now carries the sample` });
 				let covered = 0;
 				character.slots = character.slots.map(slot =>
 					slot?.kind !== 'scar' && covered++ < 2 ? { kind: 'scar', id: 'carrier' } : slot,

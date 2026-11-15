@@ -155,6 +155,9 @@
 
 	.where {
 		margin-left: auto;
+		max-width: 5.5rem;
+		overflow: hidden;
+		text-overflow: ellipsis;
 		color: var(--muted);
 		font-size: 0.68rem;
 		white-space: nowrap;

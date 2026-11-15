@@ -5,7 +5,7 @@ import type { EventId, SearchResult } from './content/types';
 import { epidemicCount } from './flow';
 import { grid, handLimit, hasEdge } from './helpers';
 import type { CardId } from './ids';
-import { createGameActor } from './machine';
+import { createGameActor, parseSave } from './machine';
 import { legalPlays } from './options';
 import { decemberSave, octoberSave } from './scenarios';
 import type { World } from './state';
@@ -1021,4 +1021,22 @@ test('the October scenario sets up with Hollow Men, the defection objective, and
 	send(actor, { type: 'CONFIRM_SUPPLY' });
 	expect(Object.values(gameOf(actor).locations).reduce((sum, location) => sum + location.hollow, 0)).toBe(3);
 	expect(gameOf(actor).locations[city('tripoli')]!.tower).toBe(true);
+});
+
+test('a save written before a field existed still loads and plays', () => {
+	const old = JSON.parse(JSON.stringify(worldOf(late()))) as {
+		campaign: Record<string, unknown>;
+		game: Record<string, unknown>;
+	};
+	for (const field of ['names', 'owedScars', 'losingStreakBonusGames']) delete old.campaign[field];
+	for (const field of ['waived', 'prologueRestore']) delete old.game[field];
+	for (const entry of Object.values(old.campaign['characters'] as Record<string, Record<string, unknown>>))
+		delete entry['jobScar'];
+	const actor = createGameActor({ seed: 1, save: parseSave({ v: 1, phase: 'playing.actions', world: old }) }).start();
+	expect(worldOf(actor).campaign).toMatchObject({ names: {}, owedScars: 0 });
+	expect(gameOf(actor).waived).toEqual([]);
+	expect(character(worldOf(actor), A).jobScar).toBeNull();
+	act(actor, { a: 'makeSupplies' });
+	send(actor, { type: 'END_ACTIONS', seat: A });
+	expect(phase(actor)).toBe('playing.draw');
 });
