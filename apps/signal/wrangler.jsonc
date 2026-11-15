@@ -1,0 +1,12 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "net-signal",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-11-15",
+	"secrets": { "required": ["SIGNAL_SECRET"] },
+	"durable_objects": {
+		"bindings": [{ "name": "SIGNAL_ROOM", "class_name": "SignalRoom" }],
+	},
+	"migrations": [{ "tag": "v1", "new_sqlite_classes": ["SignalRoom"] }],
+	"observability": { "enabled": true, "traces": { "enabled": true } },
+}
