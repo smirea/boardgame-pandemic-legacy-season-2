@@ -9,24 +9,12 @@ import type { World } from './state';
 export type PublicState = { phase: Phase; world: World; canUndo: boolean };
 
 /**
- * What peers receive and what every screen renders, the host's included. Deck order, the random seed,
- * unscratched exposure boxes, and unscratched search results are stripped. Decks keep their contents
- * as a sorted list, which is what a player could work out by counting cards.
+ * What every screen renders and what the host broadcasts. It is the whole state: this is a game for
+ * a trusted group, so hidden information (deck order, unscratched boxes) is hidden by the UI, and
+ * every player holds enough to export a save.
  */
 export function publicState(snapshot: GameSnapshot): PublicState {
-	const world = structuredClone(snapshot.context.world);
-	world.campaign.rng = { seed: 0 };
-	for (const character of Object.values(world.campaign.characters))
-		character.exposureTrack = character.exposureTrack.slice(0, character.exposure);
-	for (const card of Object.values(world.campaign.playerCards)) {
-		if (card.kind !== 'city') continue;
-		for (const box of card.search) if (!box.scratched) box.result = { t: 'nothing' };
-	}
-	if (world.game) {
-		world.game.playerDeck.order.sort();
-		world.game.infectionDeck.order.sort();
-	}
-	return { phase: phaseOf(snapshot), world, canUndo: snapshot.context.undo.length > 0 };
+	return { phase: phaseOf(snapshot), world: snapshot.context.world, canUndo: snapshot.context.undo.length > 0 };
 }
 
 export type Insights = {

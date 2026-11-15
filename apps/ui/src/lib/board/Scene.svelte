@@ -51,6 +51,7 @@
 	let camera = $state<PerspectiveCamera>();
 	let controls = $state<OrbitControlsImpl>();
 	let userMoved = $state(false);
+	let dragging = false;
 	let lastReset = 0;
 	const fit = $derived(fitBoard(bounds, size.current.width / Math.max(1, size.current.height), FOV));
 	$effect(() => {
@@ -108,7 +109,12 @@
 		screenSpacePanning={false}
 		zoomToCursor
 		mouseButtons={{ LEFT: MOUSE.PAN, MIDDLE: MOUSE.DOLLY, RIGHT: MOUSE.ROTATE }}
-		onstart={() => (userMoved = true)}
+		onstart={() => (dragging = true)}
+		onend={() => (dragging = false)}
+		onchange={() => {
+			// A plain click on a city also starts a controls gesture. Only a gesture that moves the camera counts.
+			if (dragging) userMoved = true;
+		}}
 	/>
 </T.PerspectiveCamera>
 

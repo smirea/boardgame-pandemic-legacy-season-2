@@ -1,5 +1,5 @@
 import { produce } from 'immer';
-import { assign, setup } from 'xstate';
+import { assign, createActor, setup } from 'xstate';
 import type { SnapshotFrom } from 'xstate';
 import type { Action } from './actions';
 import { actionReveals, applyAction, checkAction } from './actions';
@@ -381,4 +381,31 @@ export function phaseOf(snapshot: GameSnapshot): Phase {
 	if (typeof value === 'string') return value as Phase;
 	const [parent, child] = Object.entries(value)[0]!;
 	return `${parent}.${child as string}` as Phase;
+}
+
+export type Save = { v: 1; phase: Phase; world: World };
+
+function phaseValue(phase: Phase) {
+	const [parent, child] = phase.split('.');
+	return child ? { [parent!]: child } : parent!;
+}
+
+/** Starts a new campaign from a seed, or resumes one from a plain `{ phase, world }` save. */
+export function createGameActor(options: { seed: number; save?: Save | null }) {
+	const input = { seed: options.seed };
+	if (!options.save) return createActor(gameMachine, { input });
+	const snapshot = gameMachine.resolveState({
+		value: phaseValue(options.save.phase) as never,
+		context: { world: options.save.world, undo: [] },
+	});
+	return createActor(gameMachine, { snapshot, input });
+}
+
+export type GameActor = ReturnType<typeof createGameActor>;
+
+export function parseSave(raw: unknown): Save {
+	const save = raw as Partial<Save> | null;
+	if (save?.v !== 1 || typeof save.phase !== 'string' || !save.world?.campaign)
+		throw new Error('That is not a campaign save');
+	return save as Save;
 }

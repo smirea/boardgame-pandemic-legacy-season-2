@@ -32,9 +32,9 @@ type CityRow = [
 
 const cityRows: Record<string, CityRow[]> = {
 	atlantic: [
-		['haven-north-atlantic', 'North Atlantic Haven', 45, -40, 'haven', 3, 0, 'pg'],
-		['haven-mediterranean', 'Mediterranean Haven', 38.5, 4, 'haven', 3, 0, 'pg'],
-		['haven-south-atlantic', 'South Atlantic Haven', 3, -25, 'haven', 3, 0, 'pg'],
+		['haven-north-atlantic', 'Northwatch', 45, -40, 'haven', 3, 0, 'pg'],
+		['haven-mediterranean', 'Midsea', 38.5, 4, 'haven', 3, 0, 'pg'],
+		['haven-south-atlantic', 'Southreach', 3, -25, 'haven', 3, 0, 'pg'],
 		['new-york', 'New York', 40.71, -74.01, 'blue', 3, 4, 'pg'],
 		['washington', 'Washington', 38.91, -77.04, 'blue', 3, 4, 'pg'],
 		['jacksonville', 'Jacksonville', 30.33, -81.66, 'yellow', 3, 4, 'pg'],
@@ -91,10 +91,10 @@ const cityRows: Record<string, CityRow[]> = {
 		['tokyo', 'Tokyo', 35.68, 139.69, 'red', 1, 2, 'pi'],
 		['osaka', 'Osaka', 34.69, 135.5, 'red', 1, 2, 'pi'],
 	],
-	'coral-sea': [['haven-coral-sea', 'Coral Sea Haven', -18, 155, 'haven', 2, 0, 'pl']],
+	'coral-sea': [['haven-coral-sea', 'Coralhold', -18, 155, 'haven', 2, 0, 'pl']],
 	'new-zealand': [['wellington', 'Wellington', -41.29, 174.78, 'blue', 2, 2, 'p']],
-	'eastern-pacific': [['haven-eastern-pacific', 'Eastern Pacific Haven', -2, -92, 'haven', 2, 0, 'pl']],
-	'indian-ocean': [['haven-indian-ocean', 'Indian Ocean Haven', -5, 55, 'haven', 2, 0, 'pl']],
+	'eastern-pacific': [['haven-eastern-pacific', 'Farwater', -2, -92, 'haven', 2, 0, 'pl']],
+	'indian-ocean': [['haven-indian-ocean', 'Monsoon Rest', -5, 55, 'haven', 2, 0, 'pl']],
 	utopia: [
 		['utopia', 'Utopia', 40, 103, 'red', 8, 2, 'i'],
 		['lake-baikal', 'Lake Baikal', 53.5, 108, 'black', 1, 1, 'l'],

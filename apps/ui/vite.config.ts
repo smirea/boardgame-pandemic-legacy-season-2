@@ -18,6 +18,9 @@ export default defineConfig({
 			},
 		}),
 	],
+	define: {
+		__SIGNAL_URL__: JSON.stringify(env.SIGNAL_URL),
+	},
 	clearScreen: false,
 	optimizeDeps: {
 		exclude: ['@tanstack/svelte-query'],
