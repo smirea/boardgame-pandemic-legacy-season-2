@@ -40,7 +40,6 @@ export function createReassembler() {
 	let parts: Uint8Array[] = [];
 	let size = 0;
 	return {
-		/** Returns the decoded message once its last frame arrives, otherwise undefined. */
 		push(frame: Uint8Array): ReliableWire | undefined {
 			parts.push(frame.subarray(1));
 			size += frame.length - 1;
