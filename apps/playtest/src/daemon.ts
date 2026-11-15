@@ -391,6 +391,17 @@ function needs(state: PublicState, who: Who): string[] {
 	return out;
 }
 
+/** Unlocked actions with nothing legal right now, so a player can tell locked from not-possible-here. */
+function idleActions(state: PublicState, who: Who): string[] {
+	const listed = new Set(optionsFor(state, who, lab.picks).map(option => option.group));
+	const idle = state.world.campaign.actions.filter(action => !listed.has(action));
+	return idle.length
+		? [
+				`Unlocked, but not possible where you stand with what you hold: ${idle.join(', ')}. (A supply line or tower costs 2 cubes from your character. A sea lane costs 2. A supply center costs 5 cards of the city's colour.)`,
+			]
+		: [];
+}
+
 /** Why the game cannot move on, when the reason is another player's to clear. */
 function blockedBy(state: PublicState, who: Who): string | null {
 	const { world } = state;
@@ -428,6 +439,8 @@ function digest(state: PublicState, who: Who): string[] {
 	return lines;
 }
 
+const NO_CHANGE = 'nothing changed, which means it was already so';
+
 async function reconnect(tab: Tab) {
 	await tab.page.reload();
 	await tab.page.waitForFunction('Boolean(window.DEBUG && window.DEBUG.getState())', null, { timeout: 30_000 });
@@ -460,7 +473,7 @@ async function send(who: Who, command: Command): Promise<string | null> {
 		await Bun.sleep(100);
 	}
 	journal({ kind: 'no-change', agent: who.id, command });
-	return 'it was sent and nothing changed, which usually means it was already so';
+	return NO_CHANGE;
 }
 
 async function doKeys(who: Who, keys: string[]): Promise<string> {
@@ -648,15 +661,17 @@ async function handle(agent: string, words: string[]): Promise<string> {
 			return renderOptions(
 				optionsFor(state, who, lab.picks),
 				rest[0],
-				state.phase === 'lobby'
-					? [
-							'Also available in the lobby, typed as commands of their own: `create <job> <haven-id> <name>`, `pick <character-id>`, `rename <haven-id> <name>`. `chars` lists characters, open jobs and havens.',
-						]
-					: state.phase === 'setup.supply'
-						? ['Also: `supply <city-id> <count>` places cubes by hand.']
-						: state.phase === 'setup.events'
-							? ['Also: `events <card> <card> ...` chooses the Rationed Events.']
-							: [],
+				state.phase === 'playing.actions' && state.world.game?.active === who.seat
+					? idleActions(state, who)
+					: state.phase === 'lobby'
+						? [
+								'Also available in the lobby, typed as commands of their own: `create <job> <haven-id> <name>`, `pick <character-id>`, `rename <haven-id> <name>`. `chars` lists characters, open jobs and havens.',
+							]
+						: state.phase === 'setup.supply'
+							? ['Also: `supply <city-id> <count>` places cubes by hand.']
+							: state.phase === 'setup.events'
+								? ['Also: `events <card> <card> ...` chooses the Rationed Events.']
+								: [],
 			);
 		case 'board':
 			return renderBoard(state.world);
@@ -743,7 +758,7 @@ async function handle(agent: string, words: string[]): Promise<string> {
 			return locked(async () => {
 				const reason = await send(who, parsed.command);
 				const lines = [
-					reason ? `REFUSED: ${reason}` : `ok ${verb}`,
+					reason === NO_CHANGE ? `ok ${verb}: ${NO_CHANGE}` : reason ? `REFUSED: ${reason}` : `ok ${verb}`,
 					'',
 					renderHeader(current!),
 					...digest(current!, who),

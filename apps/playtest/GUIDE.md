@@ -26,6 +26,8 @@ One player is the lead for each game. Only the lead sends setup and game-end com
 
 **Winning and losing.** A game is won the moment the required number of objectives is complete, with every objective marked `*` among them. An objective that can no longer be completed (a region already revealed in an earlier game) is dropped automatically and shows as `[-]`. Then the rest decide the win, even if that is fewer than the required number. Supply centers do not survive into the next game unless they were made permanent. It is lost at 8 incidents, or when the Player deck cannot supply a full draw, or later in the year when the Hollow Men figures run out. Losing is normal. A lost month is replayed once, then the year moves on.
 
+**New cities.** When a city joins the grid during a game, its City cards go to the Player discard pile and its Infection cards wait in the Game End area until the next game (`decks` shows both). So a new city cannot be infected in the game it joins.
+
 **The board.** Havens are safe platforms at sea. Cities sit on the mainland. A location is on the grid when a chain of supply lines and sea lanes joins it to a haven. Only grid cities are in the decks.
 
 **A turn** has three steps.
@@ -56,7 +58,7 @@ Each costs 1 action unless `options` shows another cost. `options` is the truth 
 - `shuttle:<location>`: fly between havens and supply center cities on the grid. Unlocks later in the year.
 - `makeSupplies`: take 1 cube from the stockpile onto your character.
 - `deliver:<count>`: put cubes from your character on your location.
-- `pickUp:<count>` and `transfer:...`: move cubes between the location, you, and a player who is with you. Both are free actions: they cost nothing, any number of times, on your own turn.
+- `pickUp:<count>` and `transfer:...`: move cubes between the location, you, and a player who is with you. A transfer with the Radio Operator works at any distance. Both are free actions: they cost nothing, any number of times, on your own turn.
 - `produce:<card>:<mode>`: discard a Produce Supplies card. Both modes need you to stand in a haven or a supply center city. `local` fills your location up to its population from the stockpile. `system` fills every haven and supply center city and scratches one of the card's two boxes. Either way the card goes to the discard pile for the rest of this game and comes back next game. The boxes last all year: when both are scratched the card is destroyed for good.
 - `share:<card>:<seat>:<true|false>`: give (`true`) or take (`false`) the card of the city you both stand in. An Instructor may give any card, so `options` lists more when one is involved.
 - `buildCenter:<cards>`: discard 5 City cards of the city's colour to build a supply center there. Three new ones in a game is the standing objective.
@@ -70,7 +72,7 @@ Event cards and companions in your hand are played with `play:...` keys at any t
 
 ## Between games
 
-After a game ends the lead opens the game-end step. Cities change population. The group gets production units to spend on upgrades that last all year: abilities for characters, improved cards, more population, permanent structures. `options buy` lists what is for sale. Tell the lead what you want and why.
+After a game ends the lead opens the game-end step. Cities change population. The group gets production units to spend on upgrades that last all year: abilities for characters, improved cards, more population, and later in the year permanent structures. `options buy` lists what is for sale. Tell the lead what you want and why.
 
 ## What we need from you
 

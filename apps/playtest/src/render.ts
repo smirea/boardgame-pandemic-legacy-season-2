@@ -408,7 +408,13 @@ export function renderCity(world: World, id: CityId): string {
 			? `cubes ${location.supplies} · plague ${location.plague} · hollow men ${location.hollow} · center ${location.center} · tower ${location.tower} · shelter ${location.shelter}`
 			: '',
 		`links: ${neighbours(campaign, id).join(', ') || 'none'}`,
-		`possible new links: ${pack.candidateEdges.flatMap(edge => (edge.a === id ? [`${edge.b}(${edge.kind})`] : edge.b === id ? [`${edge.a}(${edge.kind})`] : [])).join(', ') || 'none'}`,
+		`possible new links: ${
+			pack.candidateEdges
+				.flatMap(edge => (edge.a === id ? [edge] : edge.b === id ? [{ ...edge, b: edge.a }] : []))
+				.filter(edge => !neighbours(campaign, id).includes(edge.b) && campaign.locations[edge.b]?.revealed)
+				.map(edge => `${edge.b}(${edge.kind})`)
+				.join(', ') || 'none'
+		}`,
 		`Player cards: ${cards.map(card => `${enc(card.id)} in ${where(card.id)}${card.kind === 'city' && card.improvement ? ` +${card.improvement}` : ''}`).join(', ') || 'none'}`,
 		`Infection cards: ${infection.length} (${infection.filter(card => game?.infectionDiscard.includes(card.id)).length} in the discard pile)`,
 	]
@@ -424,6 +430,7 @@ export function renderDecks(world: World): string {
 		`Player deck: ${found.playerDeck.cards} cards · by kind ${JSON.stringify(found.playerDeck.byKind)}`,
 		`Player discard (${game.playerDiscard.length}): ${game.playerDiscard.map(id => `${enc(id)} [${cardName(world, id)}]`).join(', ') || 'empty'}`,
 		`Infection discard (${game.infectionDiscard.length}): ${game.infectionDiscard.map(id => `${enc(id)} [${cardName(world, id)}]`).join(', ') || 'empty'}`,
+		`Game End area (${game.gameEndArea.length}; Infection cards of cities that joined the grid this game wait here and enter the deck next game): ${game.gameEndArea.map(id => cardName(world, id)).join(', ') || 'empty'}`,
 		'Infection deck layers, top first (cards known to be in each layer):',
 	];
 	for (const layer of found.infection.strata)

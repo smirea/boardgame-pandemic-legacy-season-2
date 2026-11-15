@@ -1,1 +1,56 @@
-{}
+{
+	"g00": {
+		"summary": "Won on turn 18 with two incidents: three supply centers and the North America recon.",
+		"story": "Vex led as Knox, a Laborer out of Southreach. Sol played Hale, a Radio Operator, and Kit played Sable, an Instructor. Four cubes went on each of the nine cities. Hale spent the opening restocking the cities the Infection deck pointed at and moved cubes to Knox from across the map. Knox built Jacksonville and Washington as a Laborer, with Sable feeding him blue cards, and reconned North America from Washington, which put Chicago on the grid. Sable drew the year's first supply line, Washington to Atlanta, and Hale drew Lagos to Istanbul. The third center went up in Istanbul and ended the game.",
+		"highlights": [
+			"First win of the year, a month ahead of North America's forced opening.",
+			"Three jobs working as a chain: the Radio Operator moved cubes at range, the Instructor passed any card, the Laborer built with four cards and two cubes.",
+			"Quiet Night skipped an Infect step at the right moment. This was the event that misfired in the first run.",
+			"Two supply lines drawn in the game the action unlocked: Washington to Atlanta and Lagos to Istanbul.",
+			"Game end: 5 production units bought a Triple improvement on a Washington card, Helmsman for Knox, and Well Stocked on a Washington Infection card."
+		],
+		"parity": "All four checks against the research passed: 2 objectives required, Build 3 supply centers (mandatory) and Recon North America in play, 36 cubes. Legacy card 01-01 was read at setup and 01-02 at game end, both in January. The recon opened North America and unlocked Supply Line and Search, as scheduled. Atlanta and Chicago's Infection cards went to the Game End area, which is the research rule for a city that joins mid-game.",
+		"findings": [
+			{
+				"finding": "Deliver, Pick Up and Transfer offered only one cube or the whole stack. A player who wanted 3 of 5 cubes had to take all 5.",
+				"kind": "Engine gap",
+				"fix": "Every count is offered. Test added."
+			},
+			{
+				"finding": "A Laborer holding five blue cards was offered one 4-card build, so the game chose which card he kept.",
+				"kind": "Engine gap",
+				"fix": "Every set of cards that wastes none is offered for supply centers and recons. Test added."
+			},
+			{
+				"finding": "Supply Line was unlocked but invisible while the player held 1 cube, so it looked locked.",
+				"kind": "Lab gap",
+				"fix": "The options list now names unlocked actions that are not possible right now, with their costs."
+			},
+			{
+				"finding": "Re-sending the event picks that were already chosen answered REFUSED.",
+				"kind": "Lab wording",
+				"fix": "It answers ok and says nothing changed."
+			},
+			{
+				"finding": "The city view listed a link that already existed as a possible new link.",
+				"kind": "Lab bug",
+				"fix": "Existing links and unrevealed cities are left out."
+			},
+			{
+				"finding": "A new city's Player cards were in the discard pile and its Infection cards were nowhere to be seen.",
+				"kind": "Not a bug",
+				"fix": "The research rule. The decks view now shows the Game End area where those Infection cards wait."
+			},
+			{
+				"finding": "The Laborer could transfer cubes to the Radio Operator at range on his own turn.",
+				"kind": "Reading of a thin rule",
+				"fix": "Kept. The research says only that Transfer works between locations for the Radio Operator. The guide now says so."
+			},
+			{
+				"finding": "No permanent structures for sale after a win.",
+				"kind": "Not a bug",
+				"fix": "They unlock in February. Guide corrected."
+			}
+		]
+	}
+}

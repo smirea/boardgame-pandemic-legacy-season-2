@@ -6,7 +6,8 @@ import { bump, epidemicCount, placeHollow, setupInfection } from './flow';
 import { grid, handLimit, hasEdge } from './helpers';
 import type { CardId, CityId } from './ids';
 import { createGameActor, parseSave, reject } from './machine';
-import { legalPlays } from './options';
+import type { Action } from './actions';
+import { legalActions, legalPlays } from './options';
 import { applyUnlock, closeGame, score } from './legacy';
 import { decemberSave, octoberSave } from './scenarios';
 import type { World } from './state';
@@ -1419,5 +1420,48 @@ describe('found in the replayed January', () => {
 		send(actor, { type: 'DECIDE', decide: { d: 'skip' } });
 		expect(gameOf(actor).infectionDiscard).toEqual([]);
 		expect(gameOf(actor).infectionDeck.order.slice(0, 3).toSorted()).toEqual(waiting.toSorted());
+	});
+});
+
+describe('choices the January players asked for', () => {
+	test('cubes can be delivered, picked up and transferred in any number, not only one or all', () => {
+		const actor = late((_, game) => {
+			game.players[A]!.supplies = 3;
+			game.players[B]!.supplies = 2;
+			game.players[B]!.location = game.players[A]!.location;
+			game.locations[game.players[A]!.location]!.supplies = 3;
+		});
+		const offered = legalActions(worldOf(actor), A);
+		const counts = (pick: (action: Action) => number | null) =>
+			offered.flatMap(action => pick(action) ?? []).toSorted();
+		expect(counts(action => (action.a === 'deliver' && !action.to ? action.count : null))).toEqual([1, 2, 3]);
+		expect(counts(action => (action.a === 'pickUp' ? action.count : null))).toEqual([1, 2, 3]);
+		expect(
+			counts(action => (action.a === 'transfer' && action.give && action.with === B ? action.count : null)),
+		).toEqual([1, 2, 3]);
+		expect(
+			counts(action => (action.a === 'transfer' && !action.give && action.with === B ? action.count : null)),
+		).toEqual([1, 2]);
+	});
+
+	test('a supply center build offers each set of cards that wastes none, so the player picks what to keep', () => {
+		const actor = late((world, game) => {
+			game.players[A]!.location = city('cairo');
+			game.locations[city('cairo')]!.center = false;
+			give(world, A, [
+				...cityCards(world, 'cairo', 2),
+				...cityCards(world, 'tripoli', 2),
+				...cityCards(world, 'istanbul', 2),
+			]);
+		});
+		const builds = legalActions(worldOf(actor), A).filter(action => action.a === 'buildCenter');
+		const kept = builds.map(action => {
+			const paid = new Set(action.a === 'buildCenter' ? action.cards : []);
+			const left = gameOf(actor).players[A]!.hand.find(card => !paid.has(card))!;
+			const card = worldOf(actor).campaign.playerCards[left]!;
+			return card.kind === 'city' ? card.city : '';
+		});
+		expect(kept.toSorted() as string[]).toEqual(['cairo', 'istanbul', 'tripoli']);
+		for (const build of builds) expect(refuses(actor, build)).toBeNull();
 	});
 });

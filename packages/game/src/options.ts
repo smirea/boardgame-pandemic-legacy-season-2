@@ -46,7 +46,45 @@ export function payColor(
 	return total >= needed ? picked : null;
 }
 
-/** Concrete legal actions for the seat. Card-paying actions offer one sensible payment, not every combination. */
+/**
+ * Every way to pay a colour cost with no card wasted: leaving any card out would fall short. Copies
+ * of a card that differ in nothing a player could care about count as one way.
+ */
+export function payments(
+	world: World,
+	hand: CardId[],
+	color: Color,
+	needed: number,
+	purpose: 'build' | 'recon',
+	unique = false,
+): CardId[][] {
+	const valued = hand.flatMap(id => {
+		const card = world.campaign.playerCards[id]!;
+		const value = cardValue(world.campaign, id, color, purpose);
+		if (card.kind !== 'city' || value === 0) return [];
+		const kind = `${card.city}:${card.improvement ?? ''}:${card.search.map(box => (box.scratched ? 'x' : 'o')).join('')}`;
+		return [{ id, value, city: card.city, kind }];
+	});
+	const found = new Map<string, CardId[]>();
+	for (let mask = 1; mask < 1 << valued.length; mask++) {
+		const picked = valued.filter((_, index) => mask & (1 << index));
+		const total = picked.reduce((sum, entry) => sum + entry.value, 0);
+		if (total < needed || picked.some(entry => total - entry.value >= needed)) continue;
+		if (unique && new Set(picked.map(entry => entry.city)).size !== picked.length) continue;
+		const key = picked
+			.map(entry => entry.kind)
+			.toSorted()
+			.join('|');
+		if (!found.has(key))
+			found.set(
+				key,
+				picked.map(entry => entry.id),
+			);
+	}
+	return [...found.values()];
+}
+
+/** Concrete legal actions for the seat. Card-paying actions offer every payment that wastes no card. */
 export function legalActions(world: World, seat: SeatId): Action[] {
 	const { campaign, game } = world;
 	if (!game || game.outcome) return [];
@@ -74,16 +112,16 @@ export function legalActions(world: World, seat: SeatId): Action[] {
 		candidates.push({ a: 'produce', card: id, mode: 'local' }, { a: 'produce', card: id, mode: 'system' });
 	}
 	if (me.supplies > 0) {
-		candidates.push({ a: 'deliver', count: me.supplies });
-		if (me.supplies > 1) candidates.push({ a: 'deliver', count: 1 });
+		for (let count = me.supplies; count >= 1; count--) candidates.push({ a: 'deliver', count });
 		for (const to of neighbours(campaign, here)) candidates.push({ a: 'deliver', count: me.supplies, to });
 	}
 	const cubesHere = game.locations[here]!.supplies;
-	if (cubesHere > 0) candidates.push({ a: 'pickUp', count: cubesHere }, { a: 'pickUp', count: 1 });
+	for (let count = cubesHere; count >= 1; count--) candidates.push({ a: 'pickUp', count });
 	for (const other of others) {
-		if (me.supplies > 0) candidates.push({ a: 'transfer', with: other, count: me.supplies, give: true });
-		const theirs = player(game, other).supplies;
-		if (theirs > 0) candidates.push({ a: 'transfer', with: other, count: theirs, give: false });
+		for (let count = me.supplies; count >= 1; count--)
+			candidates.push({ a: 'transfer', with: other, count, give: true });
+		for (let count = player(game, other).supplies; count >= 1; count--)
+			candidates.push({ a: 'transfer', with: other, count, give: false });
 		for (const card of hand)
 			candidates.push({ a: 'share', card, with: other, give: true }, { a: 'transmit', card, to: other });
 		for (const card of player(game, other).hand) candidates.push({ a: 'share', card, with: other, give: false });
@@ -96,18 +134,17 @@ export function legalActions(world: World, seat: SeatId): Action[] {
 	}
 	if (def.color) {
 		for (const laborer of [false, true]) {
+			const moveFrom = (Object.keys(game.locations) as CityId[]).find(
+				id => game.locations[id]!.center && !campaign.locations[id]!.permanent.includes('center'),
+			);
 			for (let needed = pack.numbers.costs.center; needed >= 2; needed--) {
-				const cards = payColor(world, hand, def.color, needed, 'build');
-				if (!cards) continue;
-				const moveFrom = (Object.keys(game.locations) as CityId[]).find(
-					id => game.locations[id]!.center && !campaign.locations[id]!.permanent.includes('center'),
-				);
-				candidates.push({
-					a: 'buildCenter',
-					cards,
-					laborer,
-					...(game.pieces.center === 0 && moveFrom ? { moveFrom } : {}),
-				});
+				for (const cards of payments(world, hand, def.color, needed, 'build'))
+					candidates.push({
+						a: 'buildCenter',
+						cards,
+						laborer,
+						...(game.pieces.center === 0 && moveFrom ? { moveFrom } : {}),
+					});
 			}
 		}
 		const shelterCard = held.find(card => cityDef(card.city).color === def.color);
@@ -116,10 +153,9 @@ export function legalActions(world: World, seat: SeatId): Action[] {
 	candidates.push({ a: 'buildShelter' });
 	for (const route of pack.reconRoutes) {
 		if (route.city !== here || !campaign.routes.includes(route.id)) continue;
-		for (const count of [route.count - 1, route.count, route.count + 1]) {
-			const cards = payColor(world, hand, route.color, count, 'recon', route.unique);
-			if (cards?.length === count) candidates.push({ a: 'recon', route: route.id, cards });
-		}
+		for (const count of [route.count - 1, route.count, route.count + 1])
+			for (const cards of payments(world, hand, route.color, count, 'recon', route.unique))
+				candidates.push({ a: 'recon', route: route.id, cards });
 	}
 	for (const edge of pack.candidateEdges) {
 		const to = edge.a === here ? edge.b : edge.b === here ? edge.a : null;
