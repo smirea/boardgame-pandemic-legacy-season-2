@@ -306,6 +306,11 @@ try {
 	await click('continue');
 	snap = await state();
 	assert(snap.phase === 'upkeep', 'the game-end screen did not open');
+	if (snap.world.campaign.briefing.length) {
+		ok('game end: the Legacy deck is read on', snap.world.campaign.briefing.map(line => line.split(':')[0]).join(', '));
+		await click('ack-briefing');
+	}
+	await page.locator('.upkeep').waitFor();
 	const units = snap.world.game!.upkeep!.units;
 	const campaignBefore = snap.world.campaign;
 	await shot('6-upkeep');

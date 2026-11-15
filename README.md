@@ -36,6 +36,8 @@ To try several players in one browser, give each tab its own identity with `?DEB
 - **Checking the rules.** `bun test` runs the rule tests and plays full campaigns with a random bot, checking invariants after every command. `CAMPAIGNS=200 bun test packages/game/src/campaign.test.ts` runs more.
 - **Cards.** City cards have no hand-made art. `apps/ui/src/lib/cards/mapArt.ts` draws each one from the map data: a crop around the city with a pin on it. `/debug/cards` shows every generated Player and Infection card.
 - **Console helpers.** `window.DEBUG.getState()`, `saveState()`, `loadState()` and `setState(save)` are available while a game is open.
+- **Scenarios.** The menu loads a campaign that stands in the October or December lobby with every region explored (`packages/game/src/scenarios.ts`), for testing late mechanics without playing nine months.
+- **Checking the whole game.** `apps/ui/e2e/october.ts` builds the app and plays a full October game through the UI in a headless browser. Add `--shots` to keep screenshots in `apps/ui/e2e/shots`.
 - **Checking the network.** `packages/net/e2e/run.ts` drives three real browser pages through the local signaling Worker.
 
 `AGENTS.md` lists the stack, conventions and product principles.

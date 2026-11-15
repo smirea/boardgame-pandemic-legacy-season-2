@@ -150,7 +150,9 @@
 		</div>
 	{:else if snap.phase === 'over'}
 		<div class="setup">
-			<div><strong>{game.outcome?.won ? 'Victory' : 'Defeat'}</strong>: {game.outcome?.reason}</div>
+			<div class:lost={!game.outcome?.won}>
+				<strong>{game.outcome?.won ? 'Victory' : 'Defeat'}</strong>: {game.outcome?.reason}
+			</div>
 			<button class="primary" onclick={() => send({ type: 'CONTINUE' })} data-testid="continue">Go to game end</button>
 		</div>
 	{:else}
@@ -168,23 +170,25 @@
 					</button>
 				{/each}
 			</nav>
-			<div class="hand" data-testid="hand">
-				{#each handCards as card (card.id)}
-					<div animate:flip={{ duration: 300 }} in:fly={{ y: -60, duration: 350 }} out:fly={{ y: 50, duration: 220 }}>
-						<PlayerCard
-							{card}
-							tone={mustDiscard ? 'discard' : playable.has(card.id) ? 'play' : null}
-							onclick={mustDiscard
-								? () => send({ type: 'DECIDE', decide: { d: 'discard', seat, cards: [card.id] } })
-								: playable.has(card.id)
-									? () => onplaycard(seat, card.id)
-									: undefined}
-						/>
-					</div>
-				{:else}
-					<p class="empty">No cards in hand.</p>
-				{/each}
-			</div>
+			{#key seat}
+				<div class="hand" data-testid="hand">
+					{#each handCards as card (card.id)}
+						<div animate:flip={{ duration: 300 }} in:fly={{ y: -60, duration: 350 }} out:fly={{ y: 50, duration: 220 }}>
+							<PlayerCard
+								{card}
+								tone={mustDiscard ? 'discard' : playable.has(card.id) ? 'play' : null}
+								onclick={mustDiscard
+									? () => send({ type: 'DECIDE', decide: { d: 'discard', seat, cards: [card.id] } })
+									: playable.has(card.id)
+										? () => onplaycard(seat, card.id)
+										: undefined}
+							/>
+						</div>
+					{:else}
+						<p class="empty">No cards in hand.</p>
+					{/each}
+				</div>
+			{/key}
 		</div>
 
 		<div class="middle">
@@ -250,22 +254,28 @@
 					disabled={!canAct || blocked}
 					onclick={() => send({ type: 'END_ACTIONS', seat: game.active })}
 					data-testid="end-actions"
+					title="Space"
 				>
 					{game.actionsLeft > 0 ? 'End actions' : 'Draw cards'}
 				</button>
-				<button disabled={!snap.canUndo || !canAct} onclick={() => send({ type: 'UNDO' })} data-testid="undo"
+				<button disabled={!snap.canUndo || !canAct} onclick={() => send({ type: 'UNDO' })} data-testid="undo" title="Z"
 					>Undo</button
 				>
 			{:else if snap.phase === 'playing.draw'}
-				<button class="primary" disabled={!canAct || blocked} onclick={() => send({ type: 'DRAW' })} data-testid="draw"
-					>Draw card ({game.drawsLeft})</button
+				<button
+					class="primary"
+					disabled={!canAct || blocked}
+					onclick={() => send({ type: 'DRAW' })}
+					data-testid="draw"
+					title="Space">Draw card ({game.drawsLeft})</button
 				>
 			{:else}
 				<button
 					class="primary"
 					disabled={!canAct || blocked}
 					onclick={() => send({ type: 'INFECT' })}
-					data-testid="infect">Flip infection ({game.infectionsLeft})</button
+					data-testid="infect"
+					title="Space">Flip infection ({game.infectionsLeft})</button
 				>
 			{/if}
 		</div>
@@ -295,6 +305,10 @@
 	.setup strong {
 		color: var(--accent);
 		font-size: 1.2rem;
+	}
+
+	.setup .lost strong {
+		color: var(--danger);
 	}
 
 	.events {

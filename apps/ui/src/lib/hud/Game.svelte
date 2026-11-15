@@ -87,13 +87,14 @@
 		else if (picked.length < chooser.multi.max) picked = [...picked, option];
 	}
 	let menu = $state(false);
-	let stage = $state<HTMLElement>();
-	let leftPanel = $state<HTMLElement>();
-	let rightPanel = $state<HTMLElement>();
+	let stage = $state<HTMLElement | null>();
+	let leftPanel = $state<HTMLElement | null>();
+	let rightPanel = $state<HTMLElement | null>();
 	// Where the corner panels sit, so the board can keep city labels out from under them.
 	let covered = $state.raw<{ x: number; y: number; width: number; height: number }[]>([]);
 	$effect(() => {
-		const panels = [leftPanel, rightPanel].filter(panel => panel !== undefined);
+		// `bind:this` hands back null, not undefined, once a panel leaves the screen.
+		const panels = [leftPanel, rightPanel].filter((panel): panel is HTMLElement => panel instanceof HTMLElement);
 		if (!stage || panels.length === 0) return void (covered = []);
 		const measure = () => {
 			const origin = stage!.getBoundingClientRect();
@@ -136,8 +137,8 @@
 	}
 
 	function clickCity(city: CityId) {
-		selected = city;
 		if (snap.phase === 'setup.supply') return send({ type: 'PLACE_SUPPLY', city, count: 1 });
+		selected = city;
 		const options = (targeting?.cities ?? cityOptions).get(city) ?? [];
 		if (targeting && options.length === 0) return;
 		chooser = null;
@@ -379,6 +380,28 @@
 		};
 	});
 
+	/** Space advances the turn, Z undoes, F fits the map, Escape closes whatever is open. */
+	function onkey(event: KeyboardEvent) {
+		const typing =
+			event.target instanceof HTMLInputElement ||
+			event.target instanceof HTMLSelectElement ||
+			event.target instanceof HTMLButtonElement;
+		if (event.key === 'Escape') {
+			targeting = null;
+			chooser = null;
+			menu = false;
+		}
+		if (typing || event.metaKey || event.ctrlKey || !game) return;
+		const key = event.key.toLowerCase();
+		if (key === 'f') resetView++;
+		if (key === 'z' && snap.canUndo && canAct) send({ type: 'UNDO' });
+		if (key !== ' ' || !canAct) return;
+		event.preventDefault();
+		if (snap.phase === 'playing.actions') send({ type: 'END_ACTIONS', seat: game.active });
+		else if (snap.phase === 'playing.draw') send({ type: 'DRAW' });
+		else if (snap.phase === 'playing.infect') send({ type: 'INFECT' });
+	}
+
 	let fileInput = $state<HTMLInputElement>();
 	function download() {
 		const link = document.createElement('a');
@@ -389,7 +412,7 @@
 	}
 </script>
 
-<svelte:window onkeydown={event => event.key === 'Escape' && ((targeting = null), (chooser = null), (menu = false))} />
+<svelte:window onkeydown={onkey} />
 
 <div class="game">
 	<TopBar
