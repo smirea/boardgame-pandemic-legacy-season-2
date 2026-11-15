@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { insights, isForsaken, legalActions, legalDecides, legalPlays, onGrid, pack } from '@repo/game';
+	import { insights, isForsaken, legalActions, legalDecides, legalPlays, onGrid, pack, scenarios } from '@repo/game';
 	import type { Action, CardId, CityId, Command, EdgeDef, Play, SeatId } from '@repo/game';
 	import Board from '#lib/board/Board.svelte';
 	import type { BoardView, CityView, Fx, FxKind } from '#lib/board/types.ts';
@@ -101,8 +101,16 @@
 				const target = actionTarget(world, action)!;
 				cities.set(target, [...(cities.get(target) ?? []), actionOption(action)]);
 			}
-			targeting = { label: `${ACTION_NAMES[name]}: pick a destination on the map`, cities };
-			chooser = null;
+			targeting = { label: `${ACTION_NAMES[name]}: pick a destination on the map or from the list`, cities };
+			// The same destinations as a list, for anyone who would sooner read names than hunt for a city.
+			chooser = {
+				title: ACTION_NAMES[name],
+				options: aimed.map(action => ({
+					label: cityName(actionTarget(world, action)!),
+					detail: actionDetail(world, action),
+					run: () => act(action),
+				})),
+			};
 		} else {
 			choose(ACTION_NAMES[name], variants.map(actionOption));
 		}
@@ -119,8 +127,15 @@
 			const cities = new Map<CityId, Option[]>();
 			for (const option of subset)
 				cities.set(playTarget(option.play)!, [{ label: cardName(world, card), detail: '', run: run(option.play) }]);
-			targeting = { label: `${label}: pick a location on the map`, cities };
-			chooser = null;
+			targeting = { label: `${label}: pick a location on the map or from the list`, cities };
+			chooser = {
+				title: label,
+				options: subset.map(option => ({
+					label: cityName(playTarget(option.play)!),
+					detail: '',
+					run: run(option.play),
+				})),
+			};
 		};
 		const groups = [...new Set(variants.map(option => playGroup(world, option.play)))];
 		const aimed = variants.every(option => playTarget(option.play));
@@ -382,6 +397,9 @@
 				<button onclick={download}>Export campaign save</button>
 				{#if session.mode !== 'join'}
 					<button onclick={() => fileInput?.click()}>Import campaign save</button>
+					<button onclick={() => session.importSave(scenarios.december())} data-testid="scenario-december"
+						>Load scenario: December</button
+					>
 					<button
 						class="danger"
 						onclick={() =>

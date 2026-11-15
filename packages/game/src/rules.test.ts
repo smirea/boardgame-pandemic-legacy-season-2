@@ -1,11 +1,13 @@
 import { describe, expect, test } from 'bun:test';
 import type { Action } from './actions';
+import { botCommand } from './bot';
 import { pack } from './content/pack';
 import { grid, handLimit } from './helpers';
 import type { CardId, CityId, SeatId } from './ids';
 import { score } from './legacy';
 import type { Command, GameActor, Phase } from './machine';
 import { createGameActor, phaseOf, reject } from './machine';
+import { decemberSave } from './scenarios';
 import type { Game, World } from './state';
 
 const A = 'seat-1' as SeatId;
@@ -518,4 +520,28 @@ describe('review regressions', () => {
 		act(actor, { a: 'deliver', count: 1 });
 		expect(gameOf(actor).actionsLeft).toBe(2);
 	});
+});
+
+test('the December scenario starts with three players and plays to the end of the campaign', () => {
+	const actor = createGameActor({ seed: 3, save: decemberSave() }).start();
+	const { campaign } = worldOf(actor);
+	expect(campaign).toMatchObject({ month: 12, stockpileBonus: 30 });
+	expect(grid(campaign).has(city('utopia'))).toBe(true);
+	expect(grid(campaign).has(city('johannesburg'))).toBe(true);
+	const seats = ['seat-1', 'seat-2', 'seat-3'] as SeatId[];
+	send(actor, {
+		type: 'START_GAME',
+		seating: Object.values(campaign.characters)
+			.slice(0, 3)
+			.map((character, index) => ({ seat: seats[index]!, character: character.id })),
+	});
+	expect(worldOf(actor).campaign.objectives).toEqual(['deliverSample']);
+	expect(worldOf(actor).campaign.locations[city('lake-baikal')]!.revealed).toBe(true);
+	expect(gameOf(actor).stockpile).toBe(30);
+	const rng = { seed: 9 };
+	for (let i = 0; i < 20_000 && phaseOf(actor.getSnapshot()) !== 'finished'; i++) {
+		actor.send(botCommand(worldOf(actor), phaseOf(actor.getSnapshot()), rng, 3));
+	}
+	expect(phaseOf(actor.getSnapshot())).toBe('finished');
+	expect(worldOf(actor).campaign.results.at(-1)!.month).toBe(12);
 });

@@ -26,3 +26,4 @@ export {
 } from './helpers';
 export { freeCharacters, scarTargets } from './flow';
 export { botCommand } from './bot';
+export { scenarios } from './scenarios';
