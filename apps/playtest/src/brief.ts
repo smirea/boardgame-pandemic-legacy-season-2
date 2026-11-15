@@ -26,7 +26,9 @@ function toTry(audit: Audit, state: PublicState): string[] {
 	if (actions.length) lines.push(`Actions nobody has used yet: ${actions.join(', ')}.`);
 	const events = live.filter(key => key.startsWith('play:')).map(key => key.slice(5));
 	if (events.length)
-		lines.push(`Event cards nobody has played yet: ${events.join(', ')}. The lead can pick them at setup.`);
+		lines.push(
+			`Event cards nobody has played yet: ${events.join(', ')}. Rationed ones are in the reserve for the lead to pick at setup. Unrationed ones are always in the deck.`,
+		);
 	const jobs = live.filter(key => key.startsWith('job:')).map(key => key.slice(4));
 	if (jobs.length)
 		lines.push(`Jobs nobody has played yet: ${jobs.join(', ')}. Create a character with one, or switch to one.`);

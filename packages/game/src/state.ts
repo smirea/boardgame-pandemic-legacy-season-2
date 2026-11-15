@@ -140,6 +140,8 @@ export type Decision =
 	| { t: 'quarantineCard'; seat: SeatId }
 	/** Any player may discard a card to end the Infect step early. */
 	| { t: 'cordon' }
+	/** An Epidemic has struck and its discard pile is about to go back on the deck. Held open for a player with Resilience. */
+	| { t: 'intensify' }
 	/** Any player may discard a card of this colour to stop the pending cube removal. */
 	| { t: 'shield'; city: CityId; color: Color };
 

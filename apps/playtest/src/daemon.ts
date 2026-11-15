@@ -581,7 +581,19 @@ async function handle(agent: string, words: string[]): Promise<string> {
 			}
 		}
 		case 'options':
-			return renderOptions(optionsFor(state, who, lab.picks), rest[0]);
+			return renderOptions(
+				optionsFor(state, who, lab.picks),
+				rest[0],
+				state.phase === 'lobby'
+					? [
+							'Also available in the lobby, typed as commands of their own: `create <job> <haven-id> <name>`, `pick <character-id>`, `rename <haven-id> <name>`. `chars` lists characters, open jobs and havens.',
+						]
+					: state.phase === 'setup.supply'
+						? ['Also: `supply <city-id> <count>` places cubes by hand.']
+						: state.phase === 'setup.events'
+							? ['Also: `events <card> <card> ...` chooses the Rationed Events.']
+							: [],
+			);
 		case 'board':
 			return renderBoard(state.world);
 		case 'city':

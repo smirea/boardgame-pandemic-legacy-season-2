@@ -240,6 +240,7 @@ const DECISION_TITLES: Record<Decision['t'], string> = {
 	quarantineCard: 'Set an Infection card aside until game end',
 	shield: 'Discard a matching card to keep the cube?',
 	cordon: 'Discard any card to stop the rest of this Infect step?',
+	intensify: 'An Epidemic struck. Play Resilience now, or pass to reshuffle the discard pile',
 };
 
 /** The prompt for a pending choice, naming who and where it concerns. */

@@ -22,6 +22,21 @@ export const isOver = (world: World) => world.game?.outcome != null;
 
 const UTOPIA = 'utopia' as BundleId;
 const UTOPIA_REGION = 'utopia' as RegionId;
+/**
+ * Recon objectives that no recon is left to complete, such as January's replayed after its region
+ * was opened in the lost first game. They stop counting, so the remaining objectives decide the win.
+ */
+function impossibleObjectives(campaign: World['campaign']): ObjectiveId[] {
+	return pack.objectives
+		.filter(objective => campaign.objectives.includes(objective.id) && !objective.stepsCarry)
+		.filter(objective => (campaign.carriedProgress[objective.id] ?? 0) < objective.target)
+		.filter(objective => {
+			const routes = pack.reconRoutes.filter(route => route.counts.includes(objective.id));
+			return routes.length > 0 && routes.every(route => campaign.opened.includes(route.opens));
+		})
+		.map(objective => objective.id);
+}
+
 const SIGNAL_COLOURS = new Set(['blue', 'yellow', 'black']);
 
 /** How many of the three signal colours have a tower standing, permanent towers included. */
@@ -118,7 +133,7 @@ export function createGame(world: World, seating: { seat: SeatId; character: Cha
 			.filter(objective => campaign.objectives.includes(objective.id))
 			.filter(objective => (campaign.carriedProgress[objective.id] ?? 0) >= objective.target)
 			.map(objective => objective.id),
-		waived: [],
+		waived: impossibleObjectives(campaign),
 		pending: [],
 		skipInfection: false,
 		pickedEvents: [],
@@ -454,6 +469,20 @@ export function epidemic(world: World) {
 		game.infectionDiscard.push(struck.id);
 	}
 	log(game, { t: 'epidemic', city: struck?.city ?? null, rate: numbers.infectionRates[game.rateIndex]!, removed });
+	const resilient = game.seats.some(seat =>
+		player(game, seat).hand.some(id => {
+			const card = campaign.playerCards[id];
+			return card?.kind === 'event' && card.event === 'resilience';
+		}),
+	);
+	// Resilience is at its best between the strike and the reshuffle, so a holder gets the chance to play it there.
+	if (resilient && game.infectionDiscard.length > 0) game.pending.push({ t: 'intensify' });
+	else intensify(world);
+}
+
+/** The last step of an Epidemic: the Infection discard pile goes back on top of the deck, shuffled. */
+export function intensify(world: World) {
+	const { campaign, game } = world as { campaign: World['campaign']; game: Game };
 	stackOnTop(game.infectionDeck, campaign.rng, game.infectionDiscard.splice(0));
 }
 

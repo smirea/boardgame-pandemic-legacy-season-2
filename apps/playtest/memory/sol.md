@@ -1,69 +1,53 @@
 # Memory
 
-Reed, Farmer, home Midsea. Exposure 0/7. January was lost at 8 incidents. Retry is the next session. Hazard (Instructor, Northwatch) has Helmsman and exposure 1/7, a blank scratch. Joss (Laborer, Southreach) is clean.
+February is next. Rationing 8. January lost twice, so the year moved on. I am Holt, administrator, Midsea, exposure 0/7, no ability. Flint (Vex, radio, Northwatch) has record keeper, hand limit 8, exposure 0. Joss (Kit, laborer, Southreach) is exposure 0. Reed and Hazard did not play. Hazard still has helmsman and exposure 1.
+
+## Check the board first
+
+Do not trust these until `board` confirms them. Centers should still be in Washington, Lagos, and Chicago. cairo.52 counts as 2 black cards when building. Jacksonville population is 2 after a loss and our buy. The end summary also dropped London and Tripoli by 1 and raised Lagos and Chicago by 1. Washington did not change. I think a new center grants 1 and a plague city loses 1, and Washington had both.
+
+Plague was still on the cities when the game ended: Washington 2, Jacksonville 2, London 2, Tripoli 1. I do not know if plague clears between games. Off the grid at the end: San Francisco, Denver, Atlanta, Los Angeles, Mexico City. Chicago is on the grid. Do not connect a new city until it can be cubed the same turn.
 
 ## Rules that change how I play
 
-Farmer: Make Supplies, then Deliver, and the deliver is free, even with 0 actions left. Do the makes in the city I am stocking, not before the walk.
+Administrator: one action, move any pawn onto another pawn. I used it to put Joss in London for a share. Do not pull anyone onto a plague city.
 
-Produce only appears in a haven or a supply center. Local fills that location to population. One action, several cubes. Better than two makes.
+Radio transfer is free and only between characters, at any distance. It does not put cubes on a city. Flint has it.
 
-Search never appeared, in Jacksonville or São Paulo, while I held the city card. Do not spend a turn walking somewhere only to search.
+Share is only the card of the city you are both standing in. One card per action. Card Swap's menu only offers the first city card of each hand. Do not plan on it. Passing a card means standing in that city.
 
-Share is only reliable for the card of the city you are both standing in. Options also lists other cards from a neighbour's hand. I do not take those. Instructor can give any card while sharing a city. That is how London cards moved in Istanbul.
+Laborer build is 4 cards of the city's colour plus 2 carried cubes. The cubes on the city do not pay it. Confirmed on Washington, Lagos, and Chicago. The spent cubes return to the stockpile. So does every cube an infection removes. You still have to be holding them.
 
-pickUp and transfer are listed at cost 0 and transfer actually resolved at 0 actions. I will not strip a city with a free pickUp. A free transfer of a cube I am already carrying is fine.
+Quiet Night skips the next infect if it is played before the first flip. It worked. Hold it for the epidemic infect, after the strip.
 
-Quiet Night did not skip infections. Do not plan as if it will.
+Purge removes a plague cube. It cleared New York. Resilience sets aside discarded infection cards and would not play once an epidemic had shuffled the discard onto the deck. Do not count on it in that window.
 
-Second Wind had no text and no effect. Do not count on it.
+Produce system fills havens and supply centers, and havens are population 3 and never infect. It also ate the whole card, both boxes, same as local. Treat a Produce as one shot. Do not spend it before a center exists.
 
-Hand limit is 7. Drawing over it offers `decide:discard`. Receiving a card over 7 did not prompt, and it locked the other player's menu until I discarded. Discard before the table is stuck. Never discard the cards for the next center.
+Search works on a card that shows a search box, in that city, even before a recon. The box scratches, the card stays. Chicago's box gave 2 cubes. Cards with no box do not offer it.
 
-Exposure is only at the start of a turn in a city with plague. Ending there is safe for this turn and fatal for the next. Do not end on plague unless the alternative is an outbreak. First exposure was a blank.
+establishLine is also available before a recon. It spends the cubes you are carrying. Do not draw a line to a city that is already on the grid.
 
-Infection rate held 2 for two epidemics, then 3 for two. `2 (next 3)` means the next epidemic raises it.
+Recon was not offered on the Washington center while Flint held exactly 3 blues there. The board still advertised it. `do recon` was rejected. Lagos recon wants 5 yellows of different cities, and only three yellow cities are on the grid. If a recon is required, read `options` on the center before spending the blues anywhere else.
 
-Supply Drop adds 4 reserve cubes to one city. It saved London from 0. Hold the next one for a city at 0 that is about to be drawn.
+An epidemic strip of an empty city adds no plague. The infect after it does. A second plague cube on the same city is another incident. London's double hit was incidents 6 and 8.
 
-An epidemic on an empty city removes nothing and still reshuffles the discard onto the top. That is how Tripoli ended us.
+Exposure is starting a turn on plague, not walking in. Do not end a turn there. Rate track this game was 2, 2, 2, 3, 3, 4. Read the track. February may differ.
 
-## What worked
+Hand limit is 7, except Flint at 8. Discard as soon as the prompt appears. Drawing the second card while over the limit was allowed. Keep the build cards.
 
-Cheapest recon was Washington: a center, then 3 blue. Joss built it as laborer for 4 blue plus 2 cubes. I passed the fourth blue in Washington.
-
-Second center was 5 yellow in São Paulo, built by me. Gathering onto the laborer is cheaper (4 plus 2 cubes) when they can be in the city with the cubes.
-
-Padding a city to equal the number of its cards in the top of the infection deck stops a same-turn plague. One short of that does not.
-
-## What failed
-
-We built two centers and reconned, then lost. The third center was four black cards. Joss had two Tripolis and 2 cubes in Cairo. I still had both Cairos in Jacksonville. Walk earlier.
-
-Incidents came in a clump once several cities sat at 0. Cairo at 2 plague with its card on top is an outbreak. Charter plus a carried cube is the only fast deliver. Walking four drives does not also deliver.
+Setup can place cubes above population. Produce cannot. Pad a city that has more infection cards than its population.
 
 ## The other two
 
-Vex leads, states a plan, then sometimes does the next thing instead. They will refuse a population buy. They play Quiet Night and events. Push once with the odds, then let the lead spend.
+Vex states a plan, then changes it, and is often right when the clock is short. They will refuse a population buy. They play the events. Push once, then buy.
 
-Kit takes the laborer build seriously and will sail or charter to save an action. They walked the wrong way once. Name the route as drives, not a destination.
-
-## Campaign
-
-Population 2: Jacksonville, Istanbul, Tripoli, Cairo. Washington and São Paulo stayed at 3. Chicago is on the grid at population 2 with 0 cubes. Its infection cards were not in the deck layers. Off the grid: San Francisco, Denver, Atlanta, Los Angeles, Mexico City. Do not connect Atlanta or the others until cubes are ready. A new grid city at 0 is a free incident.
-
-I do not know if the two centers, the plague, or the North America reveal are still on the retry board. Check `board` before assuming.
-
-Rationing is 6. Four new events are in the reserve. Shop words had no definitions. Helmsman cost 2, not 1.
-
-Open jobs: administrator, radioOperator.
+Kit will walk a route if it is named as drives. They will search a boxed card. They will not end a turn on plague if warned. They built all three centers.
 
 ## Next game
 
-Play Reed again unless a retry rule forces a change. Farmer is the right job while cities are this thin.
+Read objectives and the board before assuming January's goal is still open. Win condition last game was both the 3 centers and a recon. The centers are done. The recon may still be broken.
 
-Win the retry by cubing any city at 0 that is in the top of the infection deck before the build. The third center comes after that, not instead of it.
+Cube any city at 0 that is in the top of the infection deck before chasing a build. Sail on a duplicate only. The spare Lagos got me to Lagos. The other Lagos was the build card.
 
-Try charter myself, on a duplicate. Try produce the turn a center exists. Try establishLine only when the new city can be cubed the same turn.
-
-If I am the one holding the build cards, I walk to the builder. I do not wait to be fetched.
+If recon is on the objectives, stand on a center with the cards and look at `options` the turn the center goes up.

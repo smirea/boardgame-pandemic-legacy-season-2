@@ -2,7 +2,7 @@ import { addEdge, checkEdge } from './actions';
 import { pack } from './content/pack';
 import type { ScarId } from './content/types';
 import { drawPiled } from './decks';
-import { canTakeScar, freeCharacters, movePawn, scarTargets } from './flow';
+import { canTakeScar, freeCharacters, intensify, movePawn, scarTargets } from './flow';
 import { characterOf, cityDef, discardFromHand, grid, handLimit, log, player, removeFromHand } from './helpers';
 import type { CardId, CharacterId, CityId, SeatId } from './ids';
 import { createCharacter } from './legacy';
@@ -142,6 +142,10 @@ export function applyPlay(world: World, seat: SeatId, card: CardId, play: Play) 
 				game.infectionDiscard.splice(game.infectionDiscard.indexOf(target), 1);
 				game.gameEndArea.push(target);
 			}
+			if (game.pending[0]?.t === 'intensify') {
+				game.pending.shift();
+				intensify(world);
+			}
 			return;
 		case 'supplyDrop': {
 			const amount = Math.min(SUPPLY_DROP, game.reserve);
@@ -220,7 +224,7 @@ export type Decide =
 	| { d: 'cordon'; seat: SeatId; card: CardId }
 	| { d: 'skip' };
 
-const OPTIONAL = new Set(['retrieve', 'freeEdge', 'removeHollow', 'quarantineCard', 'shield', 'cordon']);
+const OPTIONAL = new Set(['retrieve', 'freeEdge', 'removeHollow', 'quarantineCard', 'shield', 'cordon', 'intensify']);
 
 export function checkDecide(world: World, decide: Decide): string | null {
 	const { campaign, game } = world;
@@ -309,6 +313,7 @@ export function applyDecide(world: World, decide: Decide) {
 		return;
 	}
 	game.pending.shift();
+	if (decide.d === 'skip' && pending?.t === 'intensify') intensify(world);
 	if (decide.d === 'skip' || !pending) return;
 	const seat = ('seat' in pending ? pending.seat : null) ?? ('seat' in decide ? decide.seat : null) ?? game.active;
 	switch (decide.d) {

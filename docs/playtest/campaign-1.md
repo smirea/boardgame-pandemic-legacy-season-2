@@ -36,6 +36,40 @@ Each game below has the result, the story, the parity verdict against the resear
 | Cities at no risk showed no percentage                                                                  | Lab gap     | Shows 0%.                                                                                                                     |
 | New region's City cards appeared in the discard pile                                                    | Not a bug   | The research rule: new cards enter through the discard piles.                                                                 |
 
+## January, second attempt: lost (it should have been a win)
+
+**Table.** Sol as Holt (Administrator, Midsea, new), lead. Vex as Flint (Radio Operator, Northwatch, new). Kit as Joss (Laborer).
+
+**Story.** With rationing at 6 the table carried six events and armoured the cities the Infection deck pointed at. Holt used the Administrator's pawn move to bring Joss to the cards, and Joss built three supply centers as a Laborer: Washington, Lagos, then Chicago on the last full builder turn. That completed the mandatory objective on turn 20. The second objective, the recon, was dead: North America had already been revealed in the lost first game, so Washington offered no recon however many blue cards stood on its center. The table kept playing for an objective nobody could complete, and three plague hits on London and Jacksonville filled the incident track on turn 24.
+
+**Highlights.**
+
+- Three new jobs at the table: Radio Operator moving cubes across the map, Administrator pulling pawns, Laborer building cheap.
+- First Supply Line (Washington to Chicago) and first Search (Chicago, which found 2 cubes), both unlocked by January's recon and kept for the replay.
+- Quiet Night, fixed after the first game, skipped the Infect step it was meant to.
+- Game end: 3 units bought +1 population in Jacksonville, Record Keeper for Flint, and a Double improvement on a Cairo card.
+
+**Parity.** All four timeline checks passed. No Legacy card was due (both January cards were read in the first game), and none was read.
+
+**Findings and fixes.** 38 reports.
+
+| Finding                                                                                                                             | Kind                              | Fix                                                                                                                                                                                                                               |
+| ----------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The recon objective could not be completed in the replay, so three supply centers did not win the game                              | Engine gap, and it cost the month | A recon objective with no recon left is dropped at setup and the remaining objectives decide the win, as the research rule on impossible objectives says. The lab had also hidden the manual waiver from the players. Test added. |
+| Card Swap offered only the first card in each hand                                                                                  | Engine bug                        | Every pair of cards is offered. Test added.                                                                                                                                                                                       |
+| Resilience could not be played on the city an Epidemic had just struck, because the discard pile was reshuffled in the same instant | Engine gap                        | An Epidemic now pauses before the reshuffle when a player holds Resilience. Tests added.                                                                                                                                          |
+| The board still printed "RECON here" on Washington after its region was revealed                                                    | Lab bug                           | Only unopened routes are marked.                                                                                                                                                                                                  |
+| "Production units: 0" shown before the game-end step opened, then 3                                                                 | Lab bug                           | The view says the lead must open the step first.                                                                                                                                                                                  |
+| `create` and `pick` worked but `options` did not list them                                                                          | Lab gap                           | The lobby, supply and event screens list their typed commands.                                                                                                                                                                    |
+| The brief told the lead to pick Purge, which is an always-in-deck event                                                             | Lab wording                       | The brief separates rationed from unrationed events.                                                                                                                                                                              |
+| `raw` with a malformed payload said only the lead may send it                                                                       | Lab wording                       | Says what a whole command looks like.                                                                                                                                                                                             |
+| Spent cubes and infected cubes returned to the stockpile                                                                            | Not a bug                         | The research rule. Guide now says so.                                                                                                                                                                                             |
+| Produce Supplies left the hand after one use                                                                                        | Not a bug                         | The card is discarded for the game either way. Boxes last all year. Guide corrected.                                                                                                                                              |
+| Supply centers from the lost game were gone                                                                                         | Not a bug                         | Only permanent ones persist. Guide now says so.                                                                                                                                                                                   |
+| Supply Line and Search were available before any recon                                                                              | Not a bug                         | Unlocked for the year by the first game's recon.                                                                                                                                                                                  |
+
+The result stands as played. Under the corrected rule the game would have been won on turn 20.
+
 ## Static review, run alongside January
 
 While the players were in January, a reviewer (`claudeAgent/claude-opus-5-5`) compared the content pack with the research month by month and ranked sixteen differences. None had been declared in `docs/mechanics/coverage.md`.

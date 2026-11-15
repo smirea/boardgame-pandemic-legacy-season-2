@@ -24,7 +24,7 @@ One player is the lead for each game. Only the lead sends setup and game-end com
 
 ## The game
 
-**Winning and losing.** A game is won the moment the required number of objectives is complete, with every objective marked `*` among them. It is lost at 8 incidents, or when the Player deck cannot supply a full draw, or later in the year when the Hollow Men figures run out. Losing is normal. A lost month is replayed once, then the year moves on.
+**Winning and losing.** A game is won the moment the required number of objectives is complete, with every objective marked `*` among them. An objective that can no longer be completed (a region already revealed in an earlier game) is dropped automatically and shows as `[-]`. Then the rest decide the win, even if that is fewer than the required number. Supply centers do not survive into the next game unless they were made permanent. It is lost at 8 incidents, or when the Player deck cannot supply a full draw, or later in the year when the Hollow Men figures run out. Losing is normal. A lost month is replayed once, then the year moves on.
 
 **The board.** Havens are safe platforms at sea. Cities sit on the mainland. A location is on the grid when a chain of supply lines and sea lanes joins it to a haven. Only grid cities are in the decks.
 
@@ -34,13 +34,15 @@ One player is the lead for each game. Only the lead sends setup and game-end com
 2. Draw 2 Player cards. An EPIDEMIC moves the infection rate one step along its track (the track starts 2, 2, 2, 3, so the number does not rise every time), strips every cube from one city, and puts the Infection discard pile back on top of its deck, so the same cities come up again.
 3. Flip Infection cards equal to the infection rate. Each one hits a city. If the city has supply cubes it loses one. If it has none it takes a Plague cube, which is an incident. A city with 3 Plague cubes outbreaks into its neighbours.
 
+Cubes never leave the game. A cube an infection removes goes back to the stockpile, and so does every cube you spend on a supply line, a tower or a Laborer's build. `makeSupplies` takes them out again.
+
 So supply cubes are armour. Your main job between objectives is keeping cubes on the cities most likely to be hit. `status` lists the trouble spots with their odds.
 
 **Hand limit** is 7. Over it, you must discard, and the game waits until you do, even on another player's turn. `wait` tells you when that is you.
 
 **Epidemic odds.** The Player deck is stacked in equal piles with one epidemic in each. The chance in `status` follows the pile being drawn, so it is not simply epidemics divided by cards.
 
-**Event timing.** Quiet Night skips the next Infect step. Played before the first flip of an Infect step, that is the step it skips. Second Wind can only be played during the action step.
+**Event timing.** Quiet Night skips the next Infect step. Played before the first flip of an Infect step, that is the step it skips. Second Wind can only be played during the action step. When an Epidemic strikes while someone holds Resilience, the game pauses before the reshuffle so it can be played on the city that was just hit.
 
 **Exposure.** Starting your turn in a city with Plague cubes exposes your character. So does leaving a location that holds Hollow Men. A shelter in the location prevents both. Each exposure scratches one box on your character: nothing, a scar (a permanent penalty), or death. A dead character is gone for the rest of the campaign and you pick or make another.
 
@@ -55,13 +57,13 @@ Each costs 1 action unless `options` shows another cost. `options` is the truth 
 - `makeSupplies`: take 1 cube from the stockpile onto your character.
 - `deliver:<count>`: put cubes from your character on your location.
 - `pickUp:<count>` and `transfer:...`: move cubes between the location, you, and a player who is with you. Both are free actions: they cost nothing, any number of times, on your own turn.
-- `produce:<card>:<mode>`: discard a Produce Supplies card. Both modes need you to stand in a haven or a supply center city. `local` fills your location up to its population from the stockpile. `system` fills every haven and supply center city and uses up one of the card's two boxes.
+- `produce:<card>:<mode>`: discard a Produce Supplies card. Both modes need you to stand in a haven or a supply center city. `local` fills your location up to its population from the stockpile. `system` fills every haven and supply center city and scratches one of the card's two boxes. Either way the card goes to the discard pile for the rest of this game and comes back next game. The boxes last all year: when both are scratched the card is destroyed for good.
 - `share:<card>:<seat>:<true|false>`: give (`true`) or take (`false`) the card of the city you both stand in. An Instructor may give any card, so `options` lists more when one is involved.
 - `buildCenter:<cards>`: discard 5 City cards of the city's colour to build a supply center there. Three new ones in a game is the standing objective.
-- `establishLine:<city>`: unlocks with the first region you reveal. Spend cubes from your character to draw a supply line to a neighbouring revealed city. That joins it to the grid.
+- `establishLine:<city>`: unlocks with the first region you reveal and stays unlocked for the rest of the year. Spend cubes from your character to draw a supply line to a neighbouring revealed city. That joins it to the grid.
 - `chartLane:<port>`: the same over water, once it is unlocked.
 - `recon:<route>:<cards>`: at a marked city with a supply center, discard the listed cards to reveal a whole new region. `board` marks where recon is possible and what it costs.
-- `search:<card>:<box>`: unlocks with the first region you reveal. Holding a city's card while standing in that city, scratch one of the card's search boxes. Only some City cards have boxes. A card that has them shows `(2 search boxes)` after its name, and `options` then lists the search. Finds range from supplies to new places to nothing.
+- `search:<card>:<box>`: unlocks with the first region you reveal and stays unlocked. Holding a city's card while standing in that city, scratch one of the card's search boxes. Only some City cards have boxes. A card that has them shows `(2 search boxes)` after its name, and `options` then lists the search. Finds range from supplies to new places to nothing.
 - `buildShelter`, `buildTower`, and others appear in `options` as the year unlocks them. The Legacy briefing at the start of a game says what is new.
 
 Event cards and companions in your hand are played with `play:...` keys at any time, even on another player's turn. They cost no action.

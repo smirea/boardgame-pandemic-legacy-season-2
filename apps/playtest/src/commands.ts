@@ -211,7 +211,14 @@ export function parseVerb(state: PublicState, words: string[]): Verb | null {
 			return { v: 'command', command: { type: 'WAIVE_OBJECTIVE', objective: rest[0] as ObjectiveId } };
 		case 'raw':
 			try {
-				return { v: 'command', command: JSON.parse(rest.join(' ')) as Command };
+				const command = JSON.parse(rest.join(' ')) as Command;
+				if (typeof command?.type !== 'string')
+					return {
+						v: 'error',
+						message:
+							'raw needs a whole command, such as {"type":"ACTION","seat":"seat-1","action":{"a":"drive","to":"london"}}',
+					};
+				return { v: 'command', command };
 			} catch {
 				return { v: 'error', message: 'raw needs one JSON command, quoted for the shell' };
 			}

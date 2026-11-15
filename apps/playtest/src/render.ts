@@ -40,6 +40,8 @@ function pendingLine(world: World, pending: Decision): string {
 			return `${who} may remove up to ${pending.amount} Hollow Men`;
 		case 'quarantineCard':
 			return `${who} may set aside an Infection card from the discard pile`;
+		case 'intensify':
+			return 'An Epidemic just struck and its discard pile is about to be reshuffled onto the deck. A player holding Resilience may play it now. Otherwise the active player passes with `do decide:skip`';
 		case 'cordon':
 			return 'Cordon: any player may discard a card to end this Infect step now, or the active player skips';
 		case 'shield':
@@ -227,10 +229,16 @@ function renderUpkeep(state: PublicState): string[] {
 	const { world } = state;
 	const game = world.game!;
 	const upkeep = game.upkeep;
-	const lines = [
-		`Game end: ${game.outcome?.won ? 'WON' : 'LOST'} (${game.outcome?.reason ?? ''}).`,
-		`Production units to spend: ${upkeep?.units ?? 0}${world.campaign.freeAbilityUnits ? ` (+${world.campaign.freeAbilityUnits} free units for abilities)` : ''}. Unspent units are lost.`,
-	];
+	const lines = [`Game end: ${game.outcome?.won ? 'WON' : 'LOST'} (${game.outcome?.reason ?? ''}).`];
+	if (!upkeep) {
+		lines.push(
+			'The lead opens the game-end step with `do continue`. Population changes and production units are worked out then.',
+		);
+		return lines;
+	}
+	lines.push(
+		`Production units to spend: ${upkeep.units}${world.campaign.freeAbilityUnits ? ` (+${world.campaign.freeAbilityUnits} free units for abilities)` : ''}. Unspent units are lost.`,
+	);
 	if (upkeep?.populationChanges.length)
 		lines.push(
 			`Population changes: ${upkeep.populationChanges.map(change => `${cityName(world, change.city)} ${change.delta > 0 ? '+' : ''}${change.delta}`).join(', ')}`,
@@ -319,7 +327,9 @@ export function renderBoard(world: World): string {
 				location?.shelter ? 'shelter' : null,
 				record.lab ? 'lab' : null,
 			].filter(Boolean);
-			const routes = pack.reconRoutes.filter(route => route.city === city.id && campaign.routes.includes(route.id));
+			const routes = pack.reconRoutes.filter(
+				route => route.city === city.id && campaign.routes.includes(route.id) && !campaign.opened.includes(route.opens),
+			);
 			const parts = [
 				city.kind === 'haven' ? 'haven' : `${city.color} pop ${record.population}`,
 				city.port ? 'port' : null,
@@ -356,11 +366,12 @@ export function renderBoard(world: World): string {
 	return lines.join('\n');
 }
 
-export function renderOptions(options: Option[], filter?: string): string {
+export function renderOptions(options: Option[], filter?: string, hints: string[] = []): string {
 	const shown = filter
 		? options.filter(option => option.key.includes(filter) || option.group.includes(filter))
 		: options;
-	if (!shown.length) return filter ? `No option matches "${filter}".` : 'Nothing for you to do right now.';
+	if (!shown.length)
+		return [filter ? `No option matches "${filter}".` : 'Nothing to send with `do` right now.', ...hints].join('\n');
 	const groups = new Map<string, Option[]>();
 	for (const option of shown) groups.set(option.group, [...(groups.get(option.group) ?? []), option]);
 	const lines: string[] = [];
@@ -373,7 +384,7 @@ export function renderOptions(options: Option[], filter?: string): string {
 			lines.push(`  ${option.key}${option.desc || price ? `   # ${price}${option.desc}` : ''}`);
 		}
 	}
-	return lines.join('\n');
+	return [...lines, ...hints].join('\n');
 }
 
 export function renderCity(world: World, id: CityId): string {

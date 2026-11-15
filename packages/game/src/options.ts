@@ -193,11 +193,11 @@ export function legalPlays(world: World, phase: Phase): { seat: SeatId; card: Ca
 					for (const city of allCities) plays.push({ e: id, city });
 					break;
 				case 'cardSwap':
-					for (const a of game.seats) {
-						for (const b of game.seats) {
-							const cardA = player(game, a).hand.find(other => other !== card);
-							const cardB = player(game, b).hand.find(other => other !== card);
-							if (a !== b && cardA && cardB) plays.push({ e: 'cardSwap', a, cardA, b, cardB });
+					for (const [index, a] of game.seats.entries()) {
+						for (const b of game.seats.slice(index + 1)) {
+							for (const cardA of player(game, a).hand)
+								for (const cardB of player(game, b).hand)
+									if (cardA !== card && cardB !== card) plays.push({ e: 'cardSwap', a, cardA, b, cardB });
 						}
 					}
 					break;

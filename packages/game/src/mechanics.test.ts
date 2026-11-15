@@ -2,7 +2,7 @@ import { describe, expect, test } from 'bun:test';
 import { checkEdge } from './actions';
 import { pack } from './content/pack';
 import type { EventId, SearchResult } from './content/types';
-import { epidemicCount, placeHollow, setupInfection } from './flow';
+import { bump, epidemicCount, placeHollow, setupInfection } from './flow';
 import { grid, handLimit, hasEdge } from './helpers';
 import type { CardId, CityId } from './ids';
 import { createGameActor, parseSave, reject } from './machine';
@@ -1352,5 +1352,72 @@ describe('parity gaps found by the static review', () => {
 		closeGame(world);
 		expect(campaign.attempt as number).toBe(2);
 		expect(campaign.carriedProgress).toEqual({ reconEastAsia: 1, plan: 2 });
+	});
+});
+
+describe('found in the replayed January', () => {
+	test('a recon objective with no recon left is dropped, and the rest decide the win', () => {
+		const save = octoberSave();
+		const { campaign } = save.world;
+		campaign.objectives = ['buildCenters', 'reconRegion'];
+		campaign.required = 2;
+		expect(campaign.opened as string[]).toContain('north-america');
+		const actor = createGameActor({ seed: 3, save }).start();
+		const cast = Object.values(worldOf(actor).campaign.characters).slice(0, 3);
+		actor.send({
+			type: 'START_GAME',
+			seating: cast.map((entry, index) => ({ seat: [A, B, C][index]!, character: entry.id })),
+		});
+		expect(gameOf(actor).waived).toEqual(['reconRegion']);
+		const world = JSON.parse(JSON.stringify(worldOf(actor))) as World;
+		world.campaign.objectives = ['buildCenters', 'reconRegion'];
+		world.game!.progress.buildCenters = 2;
+		bump(world, 'buildCenters');
+		expect(world.game!.outcome).toMatchObject({ won: true });
+	});
+
+	test('Card Swap offers every pair of cards, not only the first in each hand', () => {
+		const actor = late(world => {
+			give(world, A, cityCards(world, 'cairo', 2));
+			give(world, B, [...cityCards(world, 'lagos', 2), ...cityCards(world, 'london')]);
+			conjure(world, A, { kind: 'event', event: 'cardSwap' });
+		});
+		const swaps = legalPlays(worldOf(actor), 'playing.actions').filter(option => option.play.e === 'cardSwap');
+		expect(swaps).toHaveLength(2 * 3);
+	});
+
+	test('an Epidemic waits for a Resilience holder before the discard pile is reshuffled', () => {
+		let card = '' as CardId;
+		const actor = late((world, game) => {
+			card = conjure(world, B, { kind: 'event', event: 'resilience' });
+			const epidemic = Object.values(world.campaign.playerCards).find(entry => entry.kind === 'epidemic')!.id;
+			give(world, A, [epidemic]);
+			game.players[A]!.hand = game.players[A]!.hand.filter(id => id !== epidemic);
+			game.playerDeck.order.unshift(epidemic);
+			game.playerDeck.piles = [{ size: game.playerDeck.order.length, epidemics: 1 }];
+			game.drawsLeft = 2;
+		}, 'playing.draw');
+		send(actor, { type: 'DRAW' });
+		const struck = gameOf(actor).infectionDiscard.at(-1)!;
+		expect(gameOf(actor).pending[0]).toEqual({ t: 'intensify' });
+		expect(reject(worldOf(actor), phase(actor), { type: 'DRAW' })).not.toBeNull();
+		send(actor, { type: 'PLAY', seat: B, card, play: { e: 'resilience', cards: [struck] } });
+		expect(gameOf(actor).pending).toEqual([]);
+		expect(gameOf(actor).infectionDiscard).toEqual([]);
+		expect(gameOf(actor).gameEndArea).toContain(struck);
+		expect(gameOf(actor).infectionDeck.order).not.toContain(struck);
+	});
+
+	test('passing on that pause reshuffles the discard pile onto the deck', () => {
+		const actor = late((world, game) => {
+			conjure(world, B, { kind: 'event', event: 'resilience' });
+			game.infectionDiscard = game.infectionDeck.order.splice(0, 3);
+			game.infectionDeck.strata = [game.infectionDeck.order.toSorted()];
+			game.pending = [{ t: 'intensify' }];
+		});
+		const waiting = [...gameOf(actor).infectionDiscard];
+		send(actor, { type: 'DECIDE', decide: { d: 'skip' } });
+		expect(gameOf(actor).infectionDiscard).toEqual([]);
+		expect(gameOf(actor).infectionDeck.order.slice(0, 3).toSorted()).toEqual(waiting.toSorted());
 	});
 });

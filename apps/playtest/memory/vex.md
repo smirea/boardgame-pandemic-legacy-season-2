@@ -1,39 +1,43 @@
 # Memory
 
-January lost, 8 incidents. Second attempt is next. Rationing is 6. I am Hazard, Instructor plus helmsman, home Northwatch, exposure 1/7 (the scratch was blank). Reed is the Farmer. Joss is the Laborer. Open jobs: administrator, radioOperator.
+January replay lost at 8 incidents. February is next. Rationing is 8. I am Flint, Radio Operator, home Northwatch, exposure 0/7, recordKeeper. Holt is the Administrator at Midsea. Joss is the Laborer at Southreach. Hazard still has helmsman and one scratch.
 
-## Rules that changed play
+## Rules that change how I play
 
-Cubes are armor, including on a plague city. A hit with no cubes adds one plague and one incident. We never saw the outbreak the guide puts at 3 plague.
+Radio transfer moves cubes to or from any character, anywhere. It is free and only on my turn. It does not put cubes on a city. Give the cube to the person who can deliver it before the next infect.
 
-An epidemic strips every cube and does not add plague. The rate number stays flat across several epidemics, then steps. Do not expect a raise every card.
+A laborer build is 4 cards of that city's color plus 2 cubes on the laborer, standing in the city. Cubes on the city do not pay the build. A normal build is 5 cards and no cubes.
 
-Produce local only works in a haven or a supply center, and only up to population. Use it the turn a center exists and is below population. System produce also fills empty havens, which do not infect. That is usually a waste.
+Share only the card of the city you are both in. Card Swap showed the first card of each hand and would not offer the yellows we needed. Do not plan on it until the key names the real card.
 
-Instructor: I can give any card I hold to someone in my city. Everyone else passes a city card only in that city. A give onto a hand of 7 locks me to undo until they discard. Tell them the discard before the give. Never discard a card the build needs.
+Produce local and system both discard the whole card, even when it says 2 uses. System also fills every haven to population 3. Havens do not infect, and those cubes can be picked up. That is the only reason to spend a Produce. Local is a bad trade.
 
-Exposure is checked at the start of your turn if you are in plague. Step off the city on the turn you arrive. My first scratch was blank. Six left.
+Supply Drop is 4 reserve cubes on any grid city, playable on someone else's turn. Use it after an epidemic strips a city, before the flip. Make them name the city and wait. Quiet Night, played before the first flip, skips that infect and leaves the stripped city empty. The cards stay on top.
 
-Quiet Night, played once the infect step has started, does not skip those flips. It skipped the next player's infect instead. Second Wind played after actions did nothing.
+An epidemic strips every cube and adds no plague. A city already at 0 stays at 0. The infect after that is what plagues it. The rate stayed 2 across two epidemics, moved to 3 on the third, and to 4 on the fifth.
 
-Sail discards that port's card and moves there. Charter discards the card of the city you are standing in and sails to any listed port. Both are one action. Do not spend a card the build still needs.
+Exposure is only at the start of a turn in a plague city. Do not end a turn there. Walking in during a turn is safe.
 
-Helmsman cost 2, not the listed 1. Check the unit balance after every buy. The shop does not define helmsman, recordKeeper, double, triple, wellStocked, or lockdown. One Cairo infection card is well-stocked. Watch the first Cairo infect next game and learn both.
+Search needs a card that shows a box, while I stand in that city. The Chicago card had 1 box, not 2. It put 2 cubes on the city and the card stayed. Purge removes one plague cube. It was drawn even though it was not in the rationed list at setup.
 
-## What is on the board
+Washington recon was printed and not offered, to Joss with 4 blues and to me with 3, on a live center. `do recon` was rejected. North America is already revealed. Treat that marker as spent until a February turn proves otherwise.
 
-Washington and São Paulo have supply centers. Chicago is on the grid, blue, population 2, and started with no cubes. Its player cards were already in the discard after recon. Other North America cities are off the grid. Establish Line was never offered.
+The first loss deleted the centers and kept the population hits. Confirm Washington, Lagos, and Chicago still have centers before February counts on them.
 
-Population fell by 1 in Jacksonville, Istanbul, Tripoli, and Cairo. They are the cities that took plague. Tripoli's second plague cube was the loss.
+## Board
 
-## How to win the replay
+We built centers in Washington, Lagos, and Chicago. Washington ended on 2 plague. São Paulo, London, and Cairo have no center. Lagos recon wants 5 different yellow cities, and only Jacksonville, São Paulo, and Lagos are on the grid. São Paulo recon is 4 yellow once a center is there. London is 4 different blues. Cairo is 4 different blacks.
 
-The loss was incidents, not the deck. Once the count is 4 or worse, a plague city in the top of the infection deck gets a cube before anyone chases cards.
+Jacksonville fell to 1 and we bought population there. London and Tripoli fell by 1. Lagos and Chicago rose by 1. Check the numbers at setup.
 
-Build on the laborer when they can stand in the city: 4 cards and 2 cubes. A normal build is 5 cards and no cubes. Reed did that in São Paulo because the yellows were already there. Funnel one color early. Do not split the same cards across a build and a recon without counting what is left.
+Double is on cairo.52. Sol said that card counts as two at a build. Record keeper is on me. I do not know what it does. Read it before the first action.
 
-Sol cubes the city the deck is about to hit and is right about the layers. Kit will detour, then correct. Say the mismatch in one line.
+Chicago is linked straight to Washington. Atlanta, Denver, San Francisco, Los Angeles, and Mexico City are off the grid. Do not connect one until it can be cubed the same turn. Establish Line spends the cubes I am carrying, and they return to the stockpile.
 
-Discard Produce when the hand is over 7. Keep Quiet Night for a rate-3 stack only if I can play it before the infect step.
+## February
 
-Next game I try helmsman on the first turn so we learn it, and I armor Chicago before its cards cycle back.
+Both objectives are required. Three centers with no recon is a loss. Put a center on a city we can still recon. Do not spend the recon cards on a different build.
+
+At rate 3 or 4, a city at 0 is an incident. We died because London was empty on the last flip. Cube the zeros before the deck thins.
+
+I push cubes. Joss builds. Holt pulls a pawn onto the build city. Discard down before handing cards over, and name the discard key. Hand limit is 7.
