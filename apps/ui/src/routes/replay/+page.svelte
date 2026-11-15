@@ -124,6 +124,11 @@
 		void tick().then(() => list?.querySelector('.now')?.scrollIntoView({ block: 'center', behavior: 'smooth' }));
 	});
 
+	$effect(() => {
+		// Notes and the games list start at their top, wherever the timeline had scrolled to.
+		if (tab !== 'timeline' && list) list.scrollTop = 0;
+	});
+
 	function onkey(event: KeyboardEvent) {
 		if (!loaded || event.target instanceof HTMLInputElement) return;
 		if (event.key === 'ArrowRight') go(frame + 1);
