@@ -1,4 +1,4 @@
-import { cityDef, pack, routeCost } from '@repo/game';
+import { cityDef, handLimit, pack, routeCost } from '@repo/game';
 import type { Action, CardId, CityId, Decide, Decision, Play, Purchase, SeatId, World } from '@repo/game';
 
 export const MONTHS = [
@@ -118,13 +118,17 @@ export function actionDetail(world: World, action: Action): string {
 		case 'produce':
 			return action.mode === 'local' ? 'here only' : 'every haven and supply center';
 		case 'deliver':
-			return cubes(action.count) + (action.to ? ` to ${cityName(action.to)}` : '');
+			return `${cubes(action.count)} ${action.to ? `to ${cityName(action.to)}` : 'here'}`;
 		case 'pickUp':
 			return cubes(action.count);
 		case 'transfer':
 			return `${action.give ? 'give' : 'take'} ${cubes(action.count)} ${action.give ? 'to' : 'from'} ${seatName(world, action.with)}`;
-		case 'share':
-			return `${action.give ? 'give' : 'take'} ${cardName(world, action.card)} ${action.give ? 'to' : 'from'} ${seatName(world, action.with)}`;
+		case 'share': {
+			const receiver = action.give ? action.with : world.game!.active;
+			const full = world.game!.players[receiver]!.hand.length >= handLimit(world, receiver);
+			const text = `${action.give ? 'give' : 'take'} ${cardName(world, action.card)} ${action.give ? 'to' : 'from'} ${seatName(world, action.with)}`;
+			return full ? `${text}, who must then discard` : text;
+		}
 		case 'buildCenter':
 			return `${action.laborer ? '2 cubes and ' : ''}${cards(world, action.cards)}${action.moveFrom ? `, moved from ${cityName(action.moveFrom)}` : ''}`;
 		case 'recon': {

@@ -315,11 +315,21 @@ try {
 	const campaignBefore = snap.world.campaign;
 	await shot('6-upkeep');
 	const bought: string[] = [];
-	const groups = page.locator('.upkeep .groups button');
-	for (let index = 0; index < (await groups.count()); index++) {
-		const group = groups.nth(index);
-		const name = (await group.locator('strong').innerText()).trim();
-		await group.click();
+	// One of each kind of upgrade while the units last: structures and population first, then cards, then abilities.
+	const KINDS = [/^Permanent/, /^Population/, /^Infection card/, /^City card/, /^Restore/, /./];
+	const groupNames = await page.locator('.upkeep .groups button strong').allInnerTexts();
+	const wanted = KINDS.flatMap(
+		kind =>
+			groupNames.find(
+				name => kind.test(name) && !KINDS.slice(0, KINDS.indexOf(kind)).some(earlier => earlier.test(name)),
+			) ?? [],
+	);
+	for (const name of new Set(wanted)) {
+		const group = page.locator('.upkeep .groups button', {
+			has: page.locator('strong', { hasText: new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`) }),
+		});
+		if ((await group.count()) === 0) continue;
+		await group.first().click();
 		const target = page.locator('.upkeep .targets button').first();
 		if ((await target.count()) === 0) continue;
 		bought.push(`${name}: ${await target.innerText()}`);

@@ -12,6 +12,7 @@
 		decisionTitle,
 		seatName,
 		SEAT_COLORS,
+		cardName,
 	} from './labels.svelte.ts';
 	import InfectionCard from '#lib/cards/InfectionCard.svelte';
 	import PlayerCard from './PlayerCard.svelte';
@@ -57,7 +58,10 @@
 		}),
 	);
 	const noSupplies = $derived(
-		canAct && snap.phase === 'playing.actions' && !actions.some(action => action.a === 'makeSupplies')
+		canAct &&
+			snap.phase === 'playing.actions' &&
+			game.actionsLeft > 0 &&
+			!actions.some(action => action.a === 'makeSupplies')
 			? checkAction(world, game.active, { a: 'makeSupplies' })
 			: null,
 	);
@@ -93,6 +97,15 @@
 			})
 			.reverse();
 	});
+	// What this turn's draw step turned up, kept on screen through the Infect step so an Epidemic cannot slip by.
+	const drawn = $derived.by(() => {
+		const sinceTurn = game.log.slice(game.log.findLastIndex(entry => entry.t === 'turn') + 1);
+		const cards = sinceTurn.flatMap(entry =>
+			entry.t === 'draw' ? [world.campaign.playerCards[entry.card]].filter(card => card !== undefined) : [],
+		);
+		const epidemics = sinceTurn.flatMap(entry => (entry.t === 'epidemic' ? [entry] : []));
+		return { cards, epidemics };
+	});
 	const eventsNeeded = $derived(Math.min(world.campaign.rationing, rationed.length));
 
 	// The engine only accepts a full pick, so a swap in progress lives here until it is complete again.
@@ -106,6 +119,26 @@
 		if (next.length === eventsNeeded) send({ type: 'PICK_EVENTS', cards: next });
 	}
 </script>
+
+{#snippet drew()}
+	{#if drawn.cards.length}
+		<div class="drew" data-testid="drawn">
+			<span>Drew</span>
+			{#each drawn.cards as card (card.id)}
+				<span class="pill" class:epidemic={card.kind === 'epidemic'}
+					>{card.kind === 'epidemic' ? 'Epidemic' : cardName(world, card.id)}</span
+				>
+			{/each}
+			{#each drawn.epidemics as entry (entry.seq)}
+				<span class="pill epidemic">
+					{entry.city
+						? `${cityName(entry.city)} lost ${entry.removed} cube${entry.removed === 1 ? '' : 's'}`
+						: 'No city struck'}, rate {entry.rate}
+				</span>
+			{/each}
+		</div>
+	{/if}
+{/snippet}
 
 <footer class="dock">
 	{#if snap.phase === 'setup.supply'}
@@ -194,8 +227,8 @@
 		<div class="middle">
 			{#if overLimit.length}
 				<p class="prompt">
-					{overLimit.map(other => seatName(world, other)).join(', ')} must discard down to the hand limit. Click a card in
-					that hand, or play an event.
+					{overLimit.map(other => seatName(world, other)).join(', ')} must discard down to the hand limit.
+					{overLimit.some(owns) ? 'Click a card in that hand, or play an event.' : 'Waiting for them.'}
 				</p>
 			{:else if pending}
 				<p class="prompt">
@@ -222,7 +255,7 @@
 							</button>
 						{/each}
 						{#if noSupplies}
-							<button disabled title={noSupplies}>Make supplies<small>{noSupplies}</small></button>
+							<button disabled title={noSupplies}>Make supplies <small>{noSupplies}</small></button>
 						{/if}
 					</div>
 				{:else}
@@ -230,8 +263,10 @@
 				{/if}
 			{:else if snap.phase === 'playing.draw'}
 				<p class="prompt">{seatName(world, game.active)} draws 2 Player cards.</p>
+				{@render drew()}
 			{:else}
 				<p class="prompt">Infect cities: {game.infectionsLeft} card{game.infectionsLeft === 1 ? '' : 's'} to flip.</p>
+				{@render drew()}
 				<div class="flipped" data-testid="flipped">
 					{#each flipped as entry (entry.seq)}
 						<div class="flipcard" animate:flip={{ duration: 300 }}>
@@ -400,6 +435,28 @@
 		margin: 0;
 		color: var(--muted);
 		font-size: 0.78rem;
+	}
+
+	.drew {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.3rem;
+		color: var(--muted);
+		font-size: 0.72rem;
+	}
+
+	.pill {
+		padding: 0.05rem 0.5rem;
+		border: 1px solid var(--line);
+		border-radius: 999px;
+		color: var(--ink);
+	}
+
+	.pill.epidemic {
+		border-color: #ff3b6b;
+		background: rgb(255 59 107 / 0.16);
+		color: #ff8fab;
 	}
 
 	.flipcard {
