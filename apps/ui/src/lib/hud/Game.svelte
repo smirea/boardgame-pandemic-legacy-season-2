@@ -2,6 +2,8 @@
 	import { insights, isForsaken, legalActions, legalDecides, legalPlays, onGrid, pack, scenarios } from '@repo/game';
 	import type { Action, CardId, CityId, Command, EdgeDef, Play, SeatId } from '@repo/game';
 	import Board from '#lib/board/Board.svelte';
+	import type { BoardPoint } from '#lib/board/projection.ts';
+	import { travelOf } from '#lib/board/travel.ts';
 	import type { BoardMarks, BoardView, CityView, Fx, FxKind, Travel } from '#lib/board/types.ts';
 	import type { SessionView } from '#lib/session/session.svelte.ts';
 	import { inkOn } from '#lib/color.ts';
@@ -133,15 +135,14 @@
 
 	const send = (command: Command) => session.send(command);
 
-	const TRAVEL: Record<string, Travel> = { drive: 'land', run: 'land', sail: 'sea', charter: 'sea' };
-	/** The vehicle for a pawn's most recent move: a car on the roads, a boat at sea, a plane for any flight. */
-	function travelOf(seat: SeatId): Travel {
+	/** How a pawn made its most recent move, which picks its vehicle and the way it goes. */
+	function lastMove(seat: SeatId): { travel: Travel; course: BoardPoint[] | null } {
 		const log = game?.log ?? [];
 		for (let index = log.length - 1; index >= 0; index--) {
 			const entry = log[index]!;
-			if (entry.t === 'move' && entry.seat === seat) return TRAVEL[entry.by] ?? 'air';
+			if (entry.t === 'move' && entry.seat === seat) return travelOf(entry, campaign.edges);
 		}
-		return 'land';
+		return { travel: 'land', course: null };
 	}
 	function act(action: Action) {
 		send({ type: 'ACTION', seat: game!.active, action });
@@ -408,7 +409,7 @@
 				color: SEAT_COLORS[index]!,
 				name: seatName(world, seat),
 				active: game!.active === seat && playing,
-				travel: travelOf(seat),
+				...lastMove(seat),
 			})),
 			cursors: Object.entries(session.cursors).map(([id, point], index) => ({
 				id,

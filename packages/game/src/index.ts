@@ -29,6 +29,7 @@ export {
 	overLimit,
 	passage,
 	regionAt,
+	routeCourse,
 	SEAT_IDS,
 	seaRoute,
 	tableSeating,

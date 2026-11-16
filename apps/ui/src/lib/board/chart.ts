@@ -256,7 +256,8 @@ function wear(ctx: Ctx, width: number, height: number) {
 	ctx.globalCompositeOperation = 'source-over';
 }
 
-export type Chart = { known: OffscreenCanvas };
+/** The printed chart, and the region lines on a clear sheet of their own, which fade as regions are revealed. */
+export type Chart = { known: OffscreenCanvas; lines: OffscreenCanvas };
 
 /** Paints both sheets. Slow enough that the board calls it through `loadChart`, in a worker. */
 export function paintChart(bounds: BoardBounds): Chart {
@@ -403,13 +404,15 @@ export function paintChart(bounds: BoardBounds): Chart {
 		ctx.drawImage(layer.canvas, 0, 0);
 		ctx.globalCompositeOperation = 'source-over';
 		toBoard(ctx);
-		regionLines(ctx, bounds, px);
 		frame(ctx, sphere, px);
 		ctx.setTransform(1, 0, 0, 1, 0, 0);
 		wear(ctx, width, height);
 		return canvas;
 	};
-	return { known: finish(ink) };
+	const lines = sheet(width, height);
+	toBoard(lines.ctx);
+	regionLines(lines.ctx, bounds, px);
+	return { known: finish(ink), lines: lines.canvas };
 }
 
 /**
@@ -533,6 +536,10 @@ export class FogMask {
 	 * and to 0 a little way out. The smoke shader shapes its billowing outline from this field.
 	 */
 	readonly field: OffscreenCanvas;
+	/** Where region lines show: white along each border, as strong as the more hidden of the two locations it divides. */
+	readonly lines: OffscreenCanvas;
+	#linesCtx: OffscreenCanvasRenderingContext2D;
+	#borders: { a: CityId; b: CityId; path: Path2D }[];
 	#fieldCtx: OffscreenCanvasRenderingContext2D;
 	#ctx: Ctx;
 	#scale: number;
@@ -550,6 +557,14 @@ export class FogMask {
 		// CPU-backed on purpose: uploading a GPU canvas into WebGL forces a readback that stalled a reveal for 500ms.
 		this.field = new OffscreenCanvas(canvas.width, canvas.height);
 		this.#fieldCtx = this.field.getContext('2d', { willReadFrequently: true })!;
+		this.lines = new OffscreenCanvas(canvas.width, canvas.height);
+		this.#linesCtx = this.lines.getContext('2d', { willReadFrequently: true })!;
+		this.#borders = partition(bounds).borders.map(border => {
+			const path = new Path2D();
+			path.moveTo(border.from.x, border.from.z);
+			path.lineTo(border.to.x, border.to.z);
+			return { a: border.a, b: border.b, path };
+		});
 		this.#cells = partition(bounds).cells.map(cell => {
 			const at = pack.positions[cell.id]!;
 			const path = new Path2D();
@@ -603,5 +618,20 @@ export class FogMask {
 		field.filter = `blur(${this.blur * scale}px)`;
 		field.drawImage(this.canvas, 0, 0);
 		field.filter = 'none';
+		const lines = this.#linesCtx;
+		lines.setTransform(1, 0, 0, 1, 0, 0);
+		lines.fillStyle = '#000';
+		lines.fillRect(0, 0, this.lines.width, this.lines.height);
+		lines.setTransform(scale, 0, 0, scale, -this.bounds.minX * scale, -this.bounds.minZ * scale);
+		lines.strokeStyle = '#fff';
+		lines.lineWidth = 1.2;
+		lines.lineCap = 'round';
+		for (const border of this.#borders) {
+			const amount = Math.max(cover(border.a), cover(border.b));
+			if (amount <= 0.001) continue;
+			lines.globalAlpha = amount;
+			lines.stroke(border.path);
+		}
+		lines.globalAlpha = 1;
 	}
 }

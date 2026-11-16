@@ -3,18 +3,31 @@
 	import { untrack } from 'svelte';
 	import { cubicOut } from 'svelte/easing';
 	import { Tween } from 'svelte/motion';
-	import { Quaternion, QuadraticBezierCurve3, TubeGeometry, Vector3 } from 'three';
+	import { CatmullRomCurve3, Quaternion, QuadraticBezierCurve3, TubeGeometry, Vector3 } from 'three';
 	import type { BoardPoint } from './projection';
-	import { CITY_RADIUS, CITY_TOP } from './routes';
+	import { CITY_RADIUS, CITY_TOP, trimmed } from './routes';
 	import type { Travel } from './types';
 
-	type Props = { from: BoardPoint; to: BoardPoint; color: string; travel: Travel; fresh: boolean };
+	type Props = {
+		from: BoardPoint;
+		to: BoardPoint;
+		color: string;
+		travel: Travel;
+		course: BoardPoint[] | null;
+		fresh: boolean;
+	};
 
-	let { from, to, color, travel, fresh }: Props = $props();
+	let { from, to, color, travel, course, fresh }: Props = $props();
 
 	const RADIAL = 6;
-	// A flight arcs high over the chart so it never reads as a road; a drive or a sailing hugs it.
+	// A drive or a sailing traces the route it used just above it; a flight arcs high over the chart so it never reads as a road.
 	const curve = $derived.by(() => {
+		if (course && course.length > 1)
+			return new CatmullRomCurve3(
+				trimmed(course, CITY_RADIUS * 0.8).map(point => new Vector3(point.x, CITY_TOP + 0.2, point.z)),
+				false,
+				'centripetal',
+			);
 		const length = Math.hypot(to.x - from.x, to.z - from.z);
 		const inset = Math.min(CITY_RADIUS * 0.8, length / 3) / length;
 		const start = new Vector3(from.x + (to.x - from.x) * inset, CITY_TOP + 0.2, from.z + (to.z - from.z) * inset);

@@ -5,6 +5,7 @@
 	import { Tween } from 'svelte/motion';
 	import type { BoardPoint } from './projection';
 	import { CITY_TOP } from './routes';
+	import { along } from './travel';
 	import type { PawnView, Travel } from './types';
 	import Vehicle from './Vehicle.svelte';
 
@@ -37,16 +38,33 @@
 	let mode = $state<Travel>(untrack(() => pawn.travel));
 	// A shuffle between slots in the same city is a step, not a trip, so it gets no vehicle.
 	let trip = $state(false);
+	// A drive or a sailing keeps to the route it used; the pawn's slot offset fades from one end to the other.
+	let route = $state.raw<{ path: ReturnType<typeof along>; start: BoardPoint; end: BoardPoint } | null>(null);
 	const travel = new Tween(1, { easing: cubicInOut });
 	$effect(() => {
 		const next = target;
 		const kind = pawn.travel;
+		const course = pawn.course;
 		untrack(() => {
 			if (next.x === to.x && next.z === to.z) return;
 			const t = travel.current;
 			from = { x: from.x + (to.x - from.x) * t, z: from.z + (to.z - from.z) * t };
 			to = { ...next };
-			const distance = Math.hypot(to.x - from.x, to.z - from.z);
+			const first = course?.[0];
+			const last = course?.at(-1);
+			const follows =
+				first &&
+				last &&
+				Math.hypot(last.x - at.x, last.z - at.z) < 0.01 &&
+				Math.hypot(first.x - from.x, first.z - from.z) < 3;
+			route = follows
+				? {
+						path: along(course!),
+						start: { x: from.x - first.x, z: from.z - first.z },
+						end: { x: to.x - last.x, z: to.z - last.z },
+					}
+				: null;
+			const distance = route ? route.path.total : Math.hypot(to.x - from.x, to.z - from.z);
 			trip = distance > 3;
 			mode = kind;
 			void travel.set(0, { duration: 0 });
@@ -54,8 +72,22 @@
 		});
 	});
 
-	const distance = $derived(Math.hypot(to.x - from.x, to.z - from.z));
-	const heading = $derived(Math.atan2(-(to.z - from.z), to.x - from.x));
+	const distance = $derived(route ? route.path.total : Math.hypot(to.x - from.x, to.z - from.z));
+	const ground = $derived.by(() => {
+		const t = travel.current;
+		if (!route)
+			return {
+				x: from.x + (to.x - from.x) * t,
+				z: from.z + (to.z - from.z) * t,
+				heading: Math.atan2(-(to.z - from.z), to.x - from.x),
+			};
+		const point = route.path.at(t);
+		return {
+			x: point.x + route.start.x + (route.end.x - route.start.x) * t,
+			z: point.z + route.start.z + (route.end.z - route.start.z) * t,
+			heading: point.heading,
+		};
+	});
 	// 0 at either end of the trip and 1 for most of it: how far the pawn has turned into its vehicle.
 	const morph = $derived(trip ? Math.min(1, Math.min(travel.current, 1 - travel.current) / 0.14) : 0);
 	const position = $derived.by(() => {
@@ -63,11 +95,7 @@
 		const lift = trip ? STYLE[mode].lift(distance) : 0.4;
 		const bob = trip && mode === 'sea' ? Math.sin(t * Math.PI * 10) * 0.12 : 0;
 		const base = trip && mode === 'sea' ? CITY_TOP - 0.45 : CITY_TOP;
-		return [from.x + (to.x - from.x) * t, base + Math.sin(Math.PI * t) * lift + bob, from.z + (to.z - from.z) * t] as [
-			number,
-			number,
-			number,
-		];
+		return [ground.x, base + Math.sin(Math.PI * t) * lift + bob, ground.z] as [number, number, number];
 	});
 	// A plane noses up as it climbs and down as it lands; a boat rolls with the swell.
 	const pitch = $derived(trip && mode === 'air' ? Math.cos(Math.PI * travel.current) * 0.35 : 0);
@@ -104,7 +132,7 @@
 		</T.Group>
 	{/if}
 	{#if morph > 0}
-		<T.Group rotation.y={heading} scale={Math.max(0.001, morph) * VEHICLE_SCALE}>
+		<T.Group rotation.y={ground.heading} scale={Math.max(0.001, morph) * VEHICLE_SCALE}>
 			<T.Group rotation.z={pitch} rotation.x={roll}>
 				<Vehicle kind={mode} color={pawn.color} />
 			</T.Group>

@@ -1,9 +1,11 @@
 import { edgeKey, pack } from '@repo/game';
 import type { CardId, CityId, Command, LogEntry, PublicState, SeatId, StructureKind } from '@repo/game';
+import type { BoardPoint } from '#lib/board/projection.ts';
+import { travelOf } from '#lib/board/travel.ts';
 import type { Travel } from '#lib/board/types.ts';
 
 export type Mark =
-	| { k: 'trail'; seat: SeatId; from: CityId; to: CityId; travel: Travel }
+	| { k: 'trail'; seat: SeatId; from: CityId; to: CityId; travel: Travel; course: BoardPoint[] | null }
 	| { k: 'cubes'; city: CityId; kind: 'supply' | 'plague' | 'hollow'; delta: number }
 	| { k: 'build'; city: CityId; structure: StructureKind }
 	| { k: 'route'; a: CityId; b: CityId; kind: 'land' | 'sea' }
@@ -20,7 +22,6 @@ export type Beat = {
 	moments: Moment[];
 };
 
-const TRAVEL: Record<string, Travel> = { drive: 'land', run: 'land', sail: 'sea', charter: 'sea', captainSail: 'sea' };
 const STRUCTURES: StructureKind[] = ['center', 'tower', 'shelter'];
 
 function seatOf(state: PublicState, command: Command | null): SeatId | null {
@@ -91,7 +92,11 @@ export function beatOf(before: PublicState, after: PublicState, command: Command
 			const to = now.players[seat]!.location;
 			if (!from || from === to) continue;
 			const move = log.findLast(entry => entry.t === 'move' && entry.seat === seat);
-			marks.push({ k: 'trail', seat, from, to, travel: move?.t === 'move' ? (TRAVEL[move.by] ?? 'air') : 'air' });
+			const way =
+				move?.t === 'move' ? travelOf(move, after.world.campaign.edges) : { travel: 'air' as const, course: null };
+			// A step that moved the pawn more than once draws one trail from where it began, so no one course fits.
+			const course = move?.t === 'move' && move.from === from && move.to === to ? way.course : null;
+			marks.push({ k: 'trail', seat, from, to, travel: way.travel, course });
 		}
 		for (const [id, place] of Object.entries(now.locations)) {
 			const city = id as CityId;

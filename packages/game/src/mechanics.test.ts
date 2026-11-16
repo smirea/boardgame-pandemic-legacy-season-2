@@ -1823,9 +1823,9 @@ describe('drawing connections: what a line may not cross', () => {
 
 	test('a supply line may not cross unexplored map, and may once that ground is revealed', () => {
 		const campaign = fresh();
-		expect(passage(city('cairo'), city('lagos')).through as string[]).toContain('khartoum');
+		expect(passage(city('cairo'), city('lagos'), 'land').through as string[]).toContain('khartoum');
 		expect(checkEdge(campaign, city('cairo'), city('lagos'), 'land')).toBe('It would cross unexplored map');
-		reveal(campaign, passage(city('cairo'), city('lagos')).through);
+		reveal(campaign, passage(city('cairo'), city('lagos'), 'land').through);
 		expect(checkEdge(campaign, city('cairo'), city('lagos'), 'land')).toBeNull();
 	});
 
@@ -1847,7 +1847,7 @@ describe('drawing connections: what a line may not cross', () => {
 			pack.cities.map(entry => entry.id),
 		);
 		expect(checkEdge(campaign, city('lagos'), city('haven-north-atlantic'), 'land')).toBe('Supply lines join cities');
-		expect(checkEdge(campaign, city('washington'), city('denver'), 'land')).toContain('No land route');
+		expect(checkEdge(campaign, city('cairo'), city('dar-es-salaam'), 'land')).toContain('No land route');
 	});
 
 	test('a sea lane may not cross another sea lane', () => {
@@ -1876,9 +1876,9 @@ describe('drawing connections: what a line may not cross', () => {
 			{ a: city('lagos'), b: city('dar-es-salaam'), kind: 'land' },
 			{ a: city('lagos'), b: city('antananarivo'), kind: 'land' },
 		);
-		expect(passage(city('dar-es-salaam'), city('haven-indian-ocean')).regionLines).toBe(1);
+		expect(passage(city('dar-es-salaam'), city('haven-indian-ocean'), 'sea').regionLines).toBe(1);
 		expect(checkEdge(campaign, city('dar-es-salaam'), city('haven-indian-ocean'), 'sea')).toBeNull();
-		expect(passage(city('antananarivo'), city('jakarta')).regionLines).toBeGreaterThan(1);
+		expect(passage(city('antananarivo'), city('jakarta'), 'sea').regionLines).toBeGreaterThan(1);
 		expect(checkEdge(campaign, city('antananarivo'), city('jakarta'), 'sea')).toBe(
 			'A sea lane may cross only one region line',
 		);

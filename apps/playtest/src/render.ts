@@ -491,7 +491,7 @@ export function renderBoard(world: World): string {
 function linkNote(campaign: World['campaign'], a: CityId, b: CityId, kind: 'land' | 'sea'): string {
 	const onGrid = grid(campaign);
 	const [from, to] = onGrid.has(a) || !onGrid.has(b) ? [a, b] : [b, a];
-	const fixed = crossesUnexplored(campaign, a, b)
+	const fixed = crossesUnexplored(campaign, a, b, kind)
 		? 'It would cross unexplored map'
 		: crossesEdge(campaign, a, b, kind)
 			? `It would cross another ${kind === 'land' ? 'supply line' : 'sea lane'}`

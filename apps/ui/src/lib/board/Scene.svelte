@@ -4,11 +4,12 @@
 	import { T, useThrelte } from '@threlte/core';
 	import { interactivity, OrbitControls } from '@threlte/extras';
 	import { untrack } from 'svelte';
-	import { MeshStandardMaterial, MOUSE, SRGBColorSpace, Texture } from 'three';
+	import { CanvasTexture, LinearFilter, MeshStandardMaterial, MOUSE, SRGBColorSpace, Texture } from 'three';
 	import type { PerspectiveCamera } from 'three';
 	import type { OrbitControls as OrbitControlsImpl } from 'three/examples/jsm/controls/OrbitControls.js';
 	import CityMarker from './CityMarker.svelte';
 	import Flags from './Flags.svelte';
+	import { FogMask } from './chart';
 	import { loadChart } from './chartLoader';
 	import { DEFAULT_TILT, fitBoard } from './fit';
 	import Fog from './Fog.svelte';
@@ -19,7 +20,6 @@
 	import Pulse from './Pulse.svelte';
 	import RemoteCursor from './RemoteCursor.svelte';
 	import Ring from './Ring.svelte';
-	import { routeBow } from './routes';
 	import RouteTube from './RouteTube.svelte';
 	import Trail from './Trail.svelte';
 	import type { BoardView } from './types';
@@ -66,18 +66,44 @@
 		return map;
 	};
 	// Until the worker hands the chart back, the board is a blank sheet of the same paper.
-	let sheets = $state.raw<{ known: Texture } | null>(null);
+	let sheets = $state.raw<{ known: Texture; lines: Texture } | null>(null);
 	loadChart(bounds).then(
 		images => {
-			sheets = { known: texture(images.known) };
+			sheets = { known: texture(images.known), lines: texture(images.lines) };
 			invalidate();
 		},
 		error => console.error(error),
 	);
+
+	// Region lines mark the edge of what is known, so a line shows only beside a location still hidden and
+	// fades out with the fog as the regions on both sides are revealed.
+	const fogMask = new FogMask(bounds);
+	const lineMask = new CanvasTexture(fogMask.lines);
+	lineMask.minFilter = LinearFilter;
+	lineMask.generateMipmaps = false;
+	const regionLines = { uLines: { value: null as Texture | null }, uLineMask: { value: lineMask } };
+	const inkRegionLines = (material: MeshStandardMaterial) => {
+		material.onBeforeCompile = shader => {
+			Object.assign(shader.uniforms, regionLines);
+			shader.fragmentShader = shader.fragmentShader
+				.replace('#include <common>', '#include <common>\nuniform sampler2D uLines;\nuniform sampler2D uLineMask;')
+				.replace(
+					'#include <map_fragment>',
+					`#include <map_fragment>
+					#ifdef USE_MAP
+						vec4 regionInk = texture2D( uLines, vMapUv );
+						diffuseColor.rgb = mix( diffuseColor.rgb, regionInk.rgb, regionInk.a * texture2D( uLineMask, vMapUv ).r );
+					#endif`,
+				);
+		};
+		return material;
+	};
+
 	// The materials stay put and take the chart when it lands; swapping material objects under a mesh loses them.
-	const sheetMaterial = new MeshStandardMaterial({ color: BLANK, alphaTest: 0.5, roughness: 0.92 });
-	const landMaterial = new MeshStandardMaterial({ color: BLANK, roughness: 0.92 });
+	const sheetMaterial = inkRegionLines(new MeshStandardMaterial({ color: BLANK, alphaTest: 0.5, roughness: 0.92 }));
+	const landMaterial = inkRegionLines(new MeshStandardMaterial({ color: BLANK, roughness: 0.92 }));
 	$effect(() => {
+		regionLines.uLines.value = sheets?.lines ?? null;
 		for (const material of [sheetMaterial, landMaterial]) {
 			material.map = sheets?.known ?? null;
 			material.color.set(sheets ? '#ffffff' : BLANK);
@@ -132,10 +158,6 @@
 	const routeKey = (route: { a: CityId; b: CityId; kind: string }) => `${route.kind}:${edgeKey(route.a, route.b)}`;
 	const initialEdges = new Set(untrack(() => view.edges.map(routeKey)));
 
-	const bows = $derived.by(() => {
-		const lanes = view.edges.filter(edge => edge.kind === 'sea');
-		return new Map([...view.edges, ...view.ghostEdges].map(route => [routeKey(route), routeBow(route, lanes)]));
-	});
 	const visibleCities = $derived(pack.cities.filter(city => view.cities[city.id]!.revealed));
 	// Board units covered by one screen pixel at the whole-board view, the zoom at which labels are most crowded.
 	const unitsPerPixel = $derived((2 * fit.distance * Math.tan((FOV * Math.PI) / 360)) / Math.max(1, $size.height));
@@ -217,20 +239,22 @@
 	<T is={landMaterial} />
 </T.Mesh>
 
-<Fog {bounds} hidden={city => !view.cities[city]!.revealed} />
+<Fog
+	{bounds}
+	mask={fogMask}
+	hidden={city => !view.cities[city]!.revealed}
+	onpaint={() => {
+		lineMask.needsUpdate = true;
+		invalidate();
+	}}
+/>
 
 {#each view.ghostEdges as route (`ghost:${routeKey(route)}`)}
-	<RouteTube {route} from={layout[route.a]!} to={layout[route.b]!} bow={bows.get(routeKey(route)) ?? 0} ghost />
+	<RouteTube {route} ghost />
 {/each}
 
 {#each view.edges as route (routeKey(route))}
-	<RouteTube
-		{route}
-		from={layout[route.a]!}
-		to={layout[route.b]!}
-		bow={bows.get(routeKey(route)) ?? 0}
-		animate={!initialEdges.has(routeKey(route))}
-	/>
+	<RouteTube {route} animate={!initialEdges.has(routeKey(route))} />
 {/each}
 
 {#each visibleCities as city (city.id)}
@@ -261,6 +285,7 @@
 		to={layout[trail.to]!}
 		color={trail.color}
 		travel={trail.travel}
+		course={trail.course}
 		fresh={trail.fresh}
 	/>
 {/each}

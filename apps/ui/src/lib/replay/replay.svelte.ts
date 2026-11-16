@@ -396,6 +396,7 @@ export function marksAt(loaded: Loaded, frame: number): BoardMarks {
 					to: mark.to,
 					color: colorOf(mark.seat) ?? NEUTRAL,
 					travel: mark.travel,
+					course: mark.course,
 					fresh: earlier === step,
 				});
 	}

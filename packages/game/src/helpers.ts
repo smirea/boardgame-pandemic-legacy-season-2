@@ -189,12 +189,58 @@ export function segmentsCross(a: Point, b: Point, c: Point, d: Point): boolean {
 	return d1 * d2 < 0 && d3 * d4 < 0;
 }
 
-/** Whether a straight line between the two locations would cross a line of the same kind already on the board. */
+type Course = { points: Point[]; min: Point; max: Point };
+const courses = new Map<string, Course>();
+
+/**
+ * The course a line between two locations takes on the board, from `a` to `b`: the arch or the way
+ * around the coasts that `gen-geometry.ts` chose. The rules test this course and the board draws it, so
+ * a line that looks clear is clear. A pair with no generated course (a line laid by an older build) is straight.
+ */
+export function routeCourse(a: CityId, b: CityId, kind: EdgeKind): Point[] {
+	const course = courseOf(a, b, kind).points;
+	return a < b ? course : course.toReversed();
+}
+
+function courseOf(a: CityId, b: CityId, kind: EdgeKind): Course {
+	const key = `${kind}:${edgeKey(a, b)}`;
+	const known = courses.get(key);
+	if (known) return known;
+	const [first, second] = a < b ? [a, b] : [b, a];
+	const points = pack.routeCourses[key]?.map(([x, z]) => ({ x, z })) ?? [
+		pack.positions[first]!,
+		pack.positions[second]!,
+	];
+	const course = {
+		points,
+		min: { x: Math.min(...points.map(point => point.x)), z: Math.min(...points.map(point => point.z)) },
+		max: { x: Math.max(...points.map(point => point.x)), z: Math.max(...points.map(point => point.z)) },
+	};
+	courses.set(key, course);
+	return course;
+}
+
+/** Whether two courses cross. Courses that share a location meet there, which is not a crossing. */
+function coursesCross(one: Course, other: Course): boolean {
+	if (one.max.x < other.min.x || other.max.x < one.min.x || one.max.z < other.min.z || other.max.z < one.min.z)
+		return false;
+	for (let i = 1; i < one.points.length; i++)
+		for (let j = 1; j < other.points.length; j++)
+			if (segmentsCross(one.points[i - 1]!, one.points[i]!, other.points[j - 1]!, other.points[j]!)) return true;
+	return false;
+}
+
+/** Whether a line between the two locations would cross a line of the same kind already on the board. */
 export function crossesEdge(campaign: Campaign, a: CityId, b: CityId, kind: EdgeKind): boolean {
-	const from = pack.positions[a]!;
-	const to = pack.positions[b]!;
+	const course = courseOf(a, b, kind);
 	return campaign.edges.some(
-		edge => edge.kind === kind && segmentsCross(from, to, pack.positions[edge.a]!, pack.positions[edge.b]!),
+		edge =>
+			edge.kind === kind &&
+			edge.a !== a &&
+			edge.a !== b &&
+			edge.b !== a &&
+			edge.b !== b &&
+			coursesCross(course, courseOf(edge.a, edge.b, edge.kind)),
 	);
 }
 
@@ -220,35 +266,41 @@ export function nearestLocation(point: Point): CityId {
 
 export const regionAt = (point: Point): RegionId => cityDef(nearestLocation(point)).region;
 
-const SAMPLES = 48;
+const STEP = 0.5;
 const passageCache = new Map<string, { through: CityId[]; regionLines: number }>();
 
-/** What a straight line between two locations passes: every location whose ground it crosses, and how many region lines. */
-export function passage(a: CityId, b: CityId): { through: CityId[]; regionLines: number } {
-	const key = edgeKey(a, b);
+/** What a line between two locations passes along its course: every location whose ground it crosses, and how many region lines. */
+export function passage(a: CityId, b: CityId, kind: EdgeKind): { through: CityId[]; regionLines: number } {
+	const key = `${kind}:${edgeKey(a, b)}`;
 	const known = passageCache.get(key);
 	if (known) return known;
-	const from = pack.positions[a]!;
-	const to = pack.positions[b]!;
+	const points = courseOf(a, b, kind).points;
 	const through: CityId[] = [];
 	let regionLines = 0;
 	let last: RegionId | null = null;
-	for (let step = 0; step <= SAMPLES; step++) {
-		const t = step / SAMPLES;
-		const owner = nearestLocation({ x: from.x + (to.x - from.x) * t, z: from.z + (to.z - from.z) * t });
+	const visit = (point: Point) => {
+		const owner = nearestLocation(point);
 		if (!through.includes(owner)) through.push(owner);
 		const region = cityDef(owner).region;
 		if (last !== null && region !== last) regionLines += 1;
 		last = region;
+	};
+	visit(points[0]!);
+	for (let i = 1; i < points.length; i++) {
+		const from = points[i - 1]!;
+		const to = points[i]!;
+		const steps = Math.max(1, Math.ceil(Math.hypot(to.x - from.x, to.z - from.z) / STEP));
+		for (let step = 1; step <= steps; step++)
+			visit({ x: from.x + ((to.x - from.x) * step) / steps, z: from.z + ((to.z - from.z) * step) / steps });
 	}
 	const found = { through, regionLines };
 	passageCache.set(key, found);
 	return found;
 }
 
-/** Whether a straight line between the two locations would run over ground no one has revealed yet. */
-export const crossesUnexplored = (campaign: Campaign, a: CityId, b: CityId) =>
-	passage(a, b).through.some(id => !campaign.locations[id]?.revealed);
+/** Whether a line between the two locations would run over ground no one has revealed yet. */
+export const crossesUnexplored = (campaign: Campaign, a: CityId, b: CityId, kind: EdgeKind) =>
+	passage(a, b, kind).through.some(id => !campaign.locations[id]?.revealed);
 
 export const isCandidate = (a: CityId, b: CityId, kind: EdgeKind) =>
 	pack.candidateEdges.some(edge => edge.kind === kind && edgeKey(edge.a, edge.b) === edgeKey(a, b));

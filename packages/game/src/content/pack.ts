@@ -1,5 +1,5 @@
 import type { BundleId, CityId, RegionId } from '../ids';
-import { candidateEdges, positions } from './geometry.generated';
+import { candidateEdges, positions, routeCourses } from './geometry.generated';
 import type {
 	BundleDef,
 	Color,
@@ -454,6 +454,7 @@ export const pack: ContentPack = {
 	edges: startingEdges,
 	candidateEdges,
 	positions,
+	routeCourses,
 	reconRoutes,
 	searches: searches as ContentPack['searches'],
 	jobs: [

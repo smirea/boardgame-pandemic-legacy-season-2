@@ -12,7 +12,8 @@ import type { BoardBounds, BoardPoint } from './projection';
 type Ring = { at: BoardPoint; next: CityId | null }[];
 
 export type Cell = { id: CityId; outline: BoardPoint[] };
-export type Border = { from: BoardPoint; to: BoardPoint };
+/** A stretch of region line, between the ground of `a` and of `b`. */
+export type Border = { from: BoardPoint; to: BoardPoint; a: CityId; b: CityId };
 
 const sites = Object.entries(pack.positions) as [CityId, BoardPoint][];
 
@@ -74,7 +75,7 @@ export function partition(bounds: BoardBounds) {
 			// Each shared edge is listed by both cells, so only the lesser id draws it.
 			if (!corner.next || corner.next < id) return;
 			if (cityDef(corner.next).region === cityDef(id).region) return;
-			borders.push({ from: corner.at, to: ring[(index + 1) % ring.length]!.at });
+			borders.push({ from: corner.at, to: ring[(index + 1) % ring.length]!.at, a: id, b: corner.next });
 		});
 	}
 	const found = { cells, borders };

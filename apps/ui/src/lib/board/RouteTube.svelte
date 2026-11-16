@@ -18,15 +18,14 @@
 	import { cubicInOut } from 'svelte/easing';
 	import { Tween } from 'svelte/motion';
 	import { TubeGeometry } from 'three';
-	import type { BoardPoint } from './projection';
 	import { routeCurve } from './routes';
 
-	type Props = { route: EdgeDef; from: BoardPoint; to: BoardPoint; bow?: number; ghost?: boolean; animate?: boolean };
+	type Props = { route: EdgeDef; ghost?: boolean; animate?: boolean };
 
-	let { route, from, to, bow = 0, ghost = false, animate = false }: Props = $props();
+	let { route, ghost = false, animate = false }: Props = $props();
 
 	const RADIAL = 6;
-	const curve = $derived(routeCurve(route, from, to, bow));
+	const curve = $derived(routeCurve(route));
 	const segments = $derived(Math.max(16, Math.round(curve.getLength() * 2)));
 	const tube = $derived(new TubeGeometry(curve, segments, ghost ? 0.09 : route.kind === 'sea' ? 0.16 : 0.2, RADIAL));
 	const dashes = $derived(dashTexture(Math.max(3, Math.round(curve.getLength() / 1.6))));
@@ -44,7 +43,7 @@
 	});
 </script>
 
-<T.Mesh geometry={tube} castShadow={!ghost}>
+<T.Mesh geometry={tube}>
 	{#if ghost}
 		<T.MeshBasicMaterial color="#3a2e22" alphaMap={dashes} alphaTest={0.5} transparent opacity={0.5} />
 	{:else if route.kind === 'sea'}

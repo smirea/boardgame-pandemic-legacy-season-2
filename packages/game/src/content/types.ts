@@ -279,6 +279,8 @@ export type ContentPack = {
 	/** Pairs players may join with a drawn supply line or sea lane, precomputed from geography. */
 	candidateEdges: EdgeDef[];
 	positions: Record<CityId, { x: number; z: number }>;
+	/** The course each line takes on the board, keyed `${kind}:${edgeKey}`, from the lesser id's end. */
+	routeCourses: Record<string, [number, number][]>;
 	reconRoutes: ReconRoute[];
 	searches: Record<CityId, SearchBoxDef[]>;
 	jobs: JobDef[];

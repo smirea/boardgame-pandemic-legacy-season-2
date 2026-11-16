@@ -107,17 +107,23 @@
 	import { untrack } from 'svelte';
 	import { cubicInOut } from 'svelte/easing';
 	import { CanvasTexture, LinearFilter, ShaderMaterial, Vector2, Vector4 } from 'three';
-	import { FogMask } from './chart';
+	import type { FogMask } from './chart';
 	import { FRAME, LAND_HEIGHT } from './projection';
 	import type { BoardBounds } from './projection';
 
-	type Props = { bounds: BoardBounds; hidden: (city: CityId) => boolean };
+	type Props = {
+		bounds: BoardBounds;
+		mask: FogMask;
+		hidden: (city: CityId) => boolean;
+		/** After each repaint of the mask, so whatever else reads it can upload it. */
+		onpaint?: () => void;
+	};
 
-	let { bounds, hidden }: Props = $props();
+	let { bounds, mask: initialMask, hidden, onpaint }: Props = $props();
 
 	const REVEAL_SECONDS = 2.6;
 	const area = untrack(() => bounds);
-	const mask = new FogMask(area);
+	const mask = untrack(() => initialMask);
 	const texture = (canvas: OffscreenCanvas) => {
 		const map = new CanvasTexture(canvas);
 		map.minFilter = LinearFilter;
@@ -164,6 +170,7 @@
 		mask.draw(id => sources.get(id)?.cover ?? 0);
 		maskTexture.needsUpdate = true;
 		fieldTexture.needsUpdate = true;
+		onpaint?.();
 	};
 	paint();
 	const foggy = () => [...sources.values()].some(source => source.cover > 0);

@@ -1,6 +1,6 @@
 import type { BoardBounds } from './projection';
 
-export type ChartImages = { known: ImageBitmap };
+export type ChartImages = { known: ImageBitmap; lines: ImageBitmap };
 
 const loads = new Map<string, Promise<ChartImages>>();
 

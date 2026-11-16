@@ -1,4 +1,5 @@
 import type { CityId, EdgeDef } from '@repo/game';
+import type { BoardPoint } from './projection';
 
 export type CityHighlight = 'target' | 'selected' | null;
 
@@ -24,7 +25,16 @@ export type CityView = {
 /** How a pawn made its last move, which decides the vehicle it travels in. */
 export type Travel = 'land' | 'sea' | 'air';
 
-export type PawnView = { id: string; city: CityId; color: string; name: string; active: boolean; travel: Travel };
+export type PawnView = {
+	id: string;
+	city: CityId;
+	color: string;
+	name: string;
+	active: boolean;
+	travel: Travel;
+	/** The way the last move went over the board, city to city, when it kept to a road or the sea. */
+	course: BoardPoint[] | null;
+};
 
 export type CursorView = { id: string; name: string; color: string; x: number; z: number };
 
@@ -36,7 +46,15 @@ export type MarkTone = 'ink' | 'good' | 'bad' | 'warn' | 'hollow';
 
 /** What a replay draws over the board to show one step: the paths taken, the cities involved, and what happened at each. */
 export type BoardMarks = {
-	trails: { id: string; from: CityId; to: CityId; color: string; travel: Travel; fresh: boolean }[];
+	trails: {
+		id: string;
+		from: CityId;
+		to: CityId;
+		color: string;
+		travel: Travel;
+		course: BoardPoint[] | null;
+		fresh: boolean;
+	}[];
 	rings: { city: CityId; color: string }[];
 	flags: { id: string; city: CityId; text: string; tone: MarkTone }[];
 };
