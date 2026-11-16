@@ -1,4 +1,16 @@
-import { checkEdge, cityDef, grid, handLimit, insights, isForsaken, neighbours, pack, score } from '@repo/game';
+import {
+	checkEdge,
+	cityDef,
+	crossesEdge,
+	crossesUnexplored,
+	grid,
+	handLimit,
+	insights,
+	isForsaken,
+	neighbours,
+	pack,
+	score,
+} from '@repo/game';
 import type { CardId, CityId, Decision, LogEntry, PublicState, SeatId, World } from '@repo/game';
 import type { Option, Who } from './commands.ts';
 import { flavorFor } from './flavor.ts';
@@ -140,8 +152,14 @@ export function renderLog(world: World, entry: LogEntry): string {
 			return `${seat(entry.seat)} drew [${cardName(world, entry.card)}]`;
 		case 'epidemic':
 			return `EPIDEMIC${entry.city ? ` in ${city(entry.city)}` : ''}: ${entry.removed} cubes removed, infection rate now ${entry.rate}`;
-		case 'infect':
-			return `infect ${city(entry.city)}: ${entry.effect}`;
+		case 'infect': {
+			const card = world.campaign.infectionCards[entry.card];
+			const improved =
+				card?.kind === 'city' && card.improvement
+					? pack.infectionImprovements.find(item => item.id === card.improvement)?.name
+					: null;
+			return `infect ${city(entry.city)}: ${entry.effect}${entry.effect === 'blocked' && improved ? ` by its ${improved} card` : improved ? ` (a ${improved} card)` : ''}`;
+		}
 		case 'outbreak':
 			return `OUTBREAK in ${city(entry.city)}`;
 		case 'incident':
@@ -456,11 +474,29 @@ export function renderBoard(world: World): string {
 		);
 		for (const edge of reachable) {
 			const [from, to] = onGrid.has(edge.a) ? [edge.a, edge.b] : [edge.b, edge.a];
-			const blocked = checkEdge(campaign, from, to, edge.kind);
-			lines.push(`  ${from} ${edge.kind === 'sea' ? '~' : '-'} ${to}${blocked ? `   (not now: ${blocked})` : ''}`);
+			const note = linkNote(campaign, from, to, edge.kind);
+			lines.push(`  ${from} ${edge.kind === 'sea' ? '~' : '-'} ${to}${note ? `   (${note.slice(2)})` : ''}`);
 		}
 	}
 	return lines.join('\n');
+}
+
+/**
+ * Why a link cannot be drawn, with what the map itself forbids named first: being off the grid is
+ * curable, and saying only that would hide a line that can never be drawn.
+ */
+function linkNote(campaign: World['campaign'], a: CityId, b: CityId, kind: 'land' | 'sea'): string {
+	const onGrid = grid(campaign);
+	const [from, to] = onGrid.has(a) || !onGrid.has(b) ? [a, b] : [b, a];
+	const fixed = crossesUnexplored(campaign, a, b)
+		? 'It would cross unexplored map'
+		: crossesEdge(campaign, a, b, kind)
+			? `It would cross another ${kind === 'land' ? 'supply line' : 'sea lane'}`
+			: null;
+	const reason = fixed ?? checkEdge(campaign, from, to, kind);
+	if (!reason)
+		return isForsaken(campaign, from) ? `, not now: ${from} is forsaken, and only Drive or Ferry works there` : '';
+	return `, not now: ${reason}`;
 }
 
 export function renderOptions(options: Option[], filter?: string, hints: string[] = []): string {
@@ -518,10 +554,7 @@ export function renderCity(world: World, id: CityId): string {
 			pack.candidateEdges
 				.flatMap(edge => (edge.a === id ? [edge] : edge.b === id ? [{ ...edge, b: edge.a }] : []))
 				.filter(edge => !neighbours(campaign, id).includes(edge.b) && campaign.locations[edge.b]?.revealed)
-				.map(edge => {
-					const blocked = checkEdge(campaign, id, edge.b, edge.kind);
-					return `${edge.b}(${edge.kind}${blocked ? `, not now: ${blocked}` : ''})`;
-				})
+				.map(edge => `${edge.b}(${edge.kind}${linkNote(campaign, id, edge.b, edge.kind)})`)
 				.join(', ') || 'none'
 		}`,
 		`Player cards: ${cards.map(card => `${enc(card.id)} in ${where(card.id)}${card.kind === 'city' && card.improvement ? ` +${card.improvement}` : ''}`).join(', ') || 'none'}`,

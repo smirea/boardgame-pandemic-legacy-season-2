@@ -586,6 +586,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 			discardFromHand(ctx.game, ctx.seat, card);
 			ctx.game.locations[city]!.hollow -= 1;
 			ctx.game.pieces.hollow += 1;
+			log(ctx.game, { t: 'note', text: `A Hollow Man was removed from ${cityDef(city).name}` });
 		},
 	},
 	broker: {
@@ -659,6 +660,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 		apply(ctx) {
 			ctx.loc.hollow -= 1;
 			ctx.game.pieces.hollow += 1;
+			log(ctx.game, { t: 'note', text: `A Hollow Man was removed from ${ctx.def.name}` });
 		},
 	},
 	selfInject: {

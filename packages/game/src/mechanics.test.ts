@@ -1781,3 +1781,42 @@ describe('drawing connections: what a line may not cross', () => {
 			expect(pack.candidateEdges.some(edge => edge.a === entry.id || edge.b === entry.id)).toBe(true);
 	});
 });
+
+describe('found in November', () => {
+	test('a character cannot take a scar it already carries', () => {
+		const actor = late((world, game) => {
+			world.campaign.scars = ['smallHand', 'reconExtraCard'];
+			character(world, A).slots[0] = { kind: 'scar', id: 'smallHand' };
+			game.pending = [{ t: 'scar', seat: A }];
+		});
+		expect(
+			reject(worldOf(actor), phase(actor), { type: 'DECIDE', decide: { d: 'scar', scar: 'smallHand', target: 1 } }),
+		).toBe('This character already carries that scar');
+		send(actor, { type: 'DECIDE', decide: { d: 'scar', scar: 'reconExtraCard', target: 1 } });
+		expect(character(worldOf(actor), A).slots[1]).toEqual({ kind: 'scar', id: 'reconExtraCard' });
+	});
+
+	test('the log says who called off an Infect step with Cordon, and where a Hollow Man was removed', () => {
+		const cordon = late((world, game) => {
+			give(world, B, cityCards(world, 'lagos', 1));
+			game.actionsLeft = 0;
+			game.infectionsLeft = 2;
+			game.pending = [{ t: 'cordon' }];
+		}, 'playing.infect');
+		const card = gameOf(cordon).players[B]!.hand[0]!;
+		send(cordon, { type: 'DECIDE', decide: { d: 'cordon', seat: B, card } });
+		expect(
+			gameOf(cordon).log.some(
+				entry =>
+					entry.t === 'note' &&
+					entry.text === 'Bo discarded a card to Cordon: the rest of this Infect step is called off',
+			),
+		).toBe(true);
+		const strike = late((world, game) => {
+			character(world, A).slots[1] = { kind: 'ability', id: 'soldier' };
+			game.locations[game.players[A]!.location]!.hollow = 1;
+		});
+		act(strike, { a: 'strike' });
+		expect(gameOf(strike).log.at(-2)).toMatchObject({ t: 'note' });
+	});
+});

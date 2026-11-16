@@ -1,30 +1,35 @@
 # Memory
 
-October second attempt won. November lobby is open at rationing 0. Past: Jan W, Feb W, Mar L, Mar(2) L, Apr L, Apr(2) L, May W, Jun W, Jul W, Aug W, Sep W, Oct L, Oct(2) W.
+November first attempt lost at 8 incidents. November second lobby is open at rationing 2. Past: Jan W, Feb W, Mar L, Mar(2) L, Apr L, Apr(2) L, May W, Jun W, Jul W, Aug W, Sep W, Oct L, Oct(2) W, Nov L.
 
-Play Sanitation Officer (char-8) again. Architect, Outrider, Soldier, exposure 0/7, one slot open. Home is Crosswater. Soldier removes one Hollow Man where I stand. Outrider lets me leave a figure. Salvage is free: discard 2 in the exact order `options` lists, take a City or Produce card from the discard.
+Play Sanitation Officer (char-8) again. Architect, Outrider, Soldier, Scout. Exposure 0/7. Slots full. Home is Crosswater. Scout performs recon with no supply center. Soldier is the key `strike`. Outrider still lets me leave a Hollow Man.
 
-Do not play Knox (4/7, slots full) or the Captain (4/7, slots full). The Captain lost Navigator when Careless landed. Foreman, Surveyor, and Investigator remain. Sol's Immunologist is full: Record Keeper, Architect, Runner, Supplier, exposure 1/7. Hale has Record Keeper only, exposure 1/7, three open slots.
+Do not play the Captain. Exposure 5/7, slots full: Careless, Careless, Surveyor, Investigator. Foreman is gone. A second Careless was allowed and it replaced Foreman. Do not play Knox (4/7, full). Sol's Immunologist is full: Record Keeper, Architect, Runner, Supplier, exposure 1/7. Hale has Record Keeper only, exposure 1/7, three open slots.
+
+## The Plan
+
+Win is still four recons at Shanghai. Nothing else counts.
+
+Kolkata was restored. Population 1, on the grid, infested, not forsaken. Shanghai, Ho Chi Minh City, and Bangkok are open from Kolkata. Draw the Shanghai line and leave in the same turn. Starting a turn there exposes. The line was impossible while Kolkata was forsaken: with 2 cubes, the only actions were drive to Tehran and drive to Jakarta.
+
+Delhi–Shanghai crosses unexplored map. Tehran–Shanghai does too. Sea lanes from Monsoon Rest to Bangkok and Ho Chi Minh City cross another sea lane. New Mumbai–Bangkok does too. Do not spend cubes on those. Read `city` again after a city joins. "Start from a location on the grid" can hide the real block.
+
+Jakarta is still forsaken, so its sea lanes to Bangkok, Ho Chi Minh City, and Manila cannot be drawn. Do not restore it unless Kolkata's line is refused again. New York is forsaken. Do not end a turn there.
+
+Scout means we do not need a supply center in Shanghai. We still need the cards, in the city, on one turn if we can. Surveyor is on the Captain. If the Captain sits out, the recons cost the full number: 5 different red, 4 different black, 3 yellow, 3 blue. `lagos.57` counts as red. There are no other red cards in the deck until a red city joins, and those cards go straight to the discard. Salvage them. I am the one who can take them for free.
 
 ## Rules that change play
 
-- Rationing 0. No Quiet Night, no Scavenge. Both went back to the reserve. Scavenge was picked in October and never played.
-- A haven with a Hollow Man and no shelter loses 1 population. A supply center cancels that loss. Northwatch's shelter is permanent. `buildShelter` places the shelter in the city on the card, and the card has to match the color of the city you stand in. It cannot target a haven.
-- Use Soldier on a haven figure before game end. I can walk in and out. Others get scarred when they leave.
-- Broadcast needs a tower of that color. You stand in the tower and move one figure from a city of that color into a neighbor. A figure already in a haven cannot be broadcast out. Towers did not persist.
-- An epidemic pulls one stored infection card, strips that city, and the follow-up can plague it bare. Do not inoculate a city we need, and do not stack cubes on a city whose only card is in storage.
-- A deck-out reshuffle brought gather cards in before any epidemic (issue 178). The rate marker also stepped once with no epidemic, so the rate hit 3 on the second epidemic (issues 179, 187). Treat gathers as live as soon as the discard is shuffled, and do not trust the rate to lag.
-- Architect builds with 4. `washington.8` is triple. `london.32` is double. Hand limit without Record Keeper is 7.
-- Permanent centers are capped at 6. Frankfurt, St. Petersburg, and New York were built and will be gone. Do not restore. A restored city stays infested.
-
-## Board going into November
-
-Permanent centers: Washington (8), London (8), São Paulo (6), Istanbul (8), Atlanta (8), Paris (7). No permanent tower. Northwatch shelter is permanent. Crosswater is renamed Midsea.
-
-Lost a population: Crosswater, Southreach (Sol says it is at 1), Lagos (now 4). Antananarivo hit 0 and is forsaken. Frankfurt is 5 and St. Petersburg is 3, both without a center. New York stayed at 1 and has no center.
-
-The Northwatch–São Paulo sea lane was charted. Check that it persisted. Jakarta recon is still on a forsaken city. Cordon was agreed on `inf-paris.103` for the 2 units that were not Soldier or Hale. Confirm the card actually says Cordon. Lookout, Broker, and Wild were not bought.
+- Rationing 2. Ask the lead for Scavenge and Open Waters. Scavenge has never been played. Open Waters draws a free sea lane and ignores region lines, which is the backup if Kolkata still will not draw.
+- A forsaken city offers only Drive. Infested is not the same: Delhi, Dar es Salaam, and New Mumbai are infested at population 1 or 2, and actions work there. Do not start a turn in them.
+- Cordon is real during a turn's infect. inf-paris.103 already did it once. Setup did not offer it (issue 190). At 7 incidents, spend a spare card to stop the rest of the step.
+- Well Stocked on Washington only logs `blocked`.
+- A city loses at most 1 population a game. A center or a shelter cancels it. The Istanbul shelter did not persist. Hollow Men on a haven with no shelter and no center still cost a population.
+- Gathers sit in the infection discard and enter on a reshuffle, including a deck-out with no epidemic. The rate steps on that deck-out. Do not trust the printed rate to lag.
+- `strike` removes one Hollow Man where I stand. The log does not say so.
+- Local Produce does not scratch a box. Hand limit without Record Keeper is 7.
+- Permanent centers are capped at 6 and were not changed: Washington, London, São Paulo, Istanbul, Atlanta, Paris. Do not buy another permanent. Kolkata is the restore that mattered.
 
 ## Next game
 
-Keep char-8. Read the briefing before promising a plan. With rationing 0, cube the cities that can be hit and do not count on skipping an infect. If figures land on Crosswater or Southreach, Soldier them off before game end so Southreach does not hit 0. One open slot is left on me. Do not spend it on a duplicate of salvage.
+Get to Kolkata with 2 cubes, draw Shanghai, leave. Then connect Ho Chi Minh City and Hong Kong from the new end so red cards hit the discard. Salvage them. Scout the four recons in as few turns as I can, because Shanghai is infested. Cube New York's neighbors only after the line exists. New York itself is forsaken and one more hit there does not matter until it is restored, which we should not pay for.

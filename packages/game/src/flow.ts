@@ -1,6 +1,6 @@
 import { current, isDraft } from 'immer';
 import { pack } from './content/pack';
-import type { ObjectiveId } from './content/types';
+import type { ObjectiveId, ScarId } from './content/types';
 import { drawBottom, drawPiled, drawTop, newDeck, newPiledDeck, stackOnTop } from './decks';
 import { characterOf, cityDef, grid, has, hasRule, isForsaken, isHaven, log, neighbours, player } from './helpers';
 import type { BundleId, CardId, CharacterId, CityId, RegionId, SeatId } from './ids';
@@ -248,8 +248,12 @@ export function expose(world: World, seat: SeatId) {
 	if (box === 'skull') kill(world, seat);
 }
 
+export const hasScar = (character: Character, scar: ScarId) =>
+	character.jobScar === scar || character.slots.some(slot => slot?.kind === 'scar' && slot.id === scar);
+
+/** A character can take a scar when one it does not already carry is in the box and there is somewhere to put it. */
 export function canTakeScar(world: World, character: Character): boolean {
-	const scars = world.campaign.scars.filter(scar => scar !== 'carrier');
+	const scars = world.campaign.scars.filter(scar => scar !== 'carrier' && !hasScar(character, scar));
 	return scars.length > 0 && scarTargets(character).length > 0;
 }
 

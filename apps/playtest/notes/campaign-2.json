@@ -590,5 +590,44 @@
 				"fix": "The figure is the chance of losing a cube. The setup view now says the last 3 flips place Hollow Men."
 			}
 		]
+	},
+	"g13": {
+		"summary": "Lost on turn 14 at eight incidents without a single recon. The table never reached Shanghai.",
+		"story": "Sol led with the Immunologist, beside the Captain and the Sanitation Officer. November has one objective: complete the Plan, four recons at Shanghai, each paid in a different colour. Shanghai was revealed but off the grid, and getting there was the whole game. The straight lines from Delhi and from Tehran both cross ground nobody has revealed, so the rules refuse them. The one open line runs from Kolkata, and Kolkata was forsaken, where only Drive or Ferry works. The table drew Tehran to Delhi, Lagos to Dar es Salaam, sea lanes on to the Indian Ocean haven, New Mumbai and Jakarta, and found Jakarta forsaken too. With 34 cubes, no events and three epidemics pulling cards out of storage, the incident track filled while they were still looking for a way east.",
+		"highlights": [
+			"The stricter connection rules shaped the game on their first day: two tempting lines to Shanghai were refused for crossing unexplored map.",
+			"Forsaken cities became a wall. Kolkata and Jakarta, the two gateways to East Asia, could not be built from.",
+			"The Indian Ocean haven, renamed Monsoon Rest, was joined to the grid by sea from Dar es Salaam.",
+			"First Strike: the Soldier ability removed a Hollow Man in Lagos. First Cordon: Sol discarded a card to call off the rest of an Infect step.",
+			"Game end: the table bought Restore, to reopen a gateway for the second attempt, and Scout."
+		],
+		"parity": "All four checks passed: 1 objective required, Complete the Plan, mandatory; supplies 4 + 30 in bonuses = 34. Card 11-01 was read at setup, removed Build 3 supply centers and Turn the Hollow Men, and revealed the four recon routes at Shanghai with their costs. Card 11-02 was read at game end and added nothing, as researched. A forsaken city allowed only Drive or Ferry, which is the researched rule and the reason the open line from Kolkata could not be drawn.",
+		"findings": [
+			{
+				"finding": "A character took the same scar twice, and the second copy covered an ability.",
+				"kind": "Engine gap",
+				"fix": "A character cannot take a scar it already carries. Test added."
+			},
+			{
+				"finding": "Cordon ended an Infect step and the log said nothing, so another player's Cordon was refused with no visible reason.",
+				"kind": "Engine gap",
+				"fix": "The log says who called off the step with Cordon, who kept a cube with a shield, and where a Hollow Man was removed. Test added."
+			},
+			{
+				"finding": "The city view said a link was blocked only because its end was off the grid. Once that city was joined, the real block appeared: unexplored map.",
+				"kind": "Lab gap",
+				"fix": "The map's own blocks are named first, whether or not an end is on the grid, and a forsaken end is called out."
+			},
+			{
+				"finding": "An infection was logged as blocked with no reason.",
+				"kind": "Lab wording",
+				"fix": "The log names the improvement on the card that blocked it."
+			},
+			{
+				"finding": "No line could be drawn out of forsaken Kolkata or Jakarta. A Cordon card drawn at setup asked nothing. An Epidemic on an empty city placed no Plague cube.",
+				"kind": "Not a bug",
+				"fix": "All three are the researched rules."
+			}
+		]
 	}
 }
