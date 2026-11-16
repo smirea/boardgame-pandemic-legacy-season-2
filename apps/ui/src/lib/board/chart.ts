@@ -526,19 +526,30 @@ function compass(ctx: Ctx, at: BoardPoint, radius: number, px: (pixels: number) 
  * its whole cell is charted.
  */
 export class FogMask {
+	/** The exact mask: 1 on the ground of unrevealed locations. */
 	readonly canvas: OffscreenCanvas;
+	/**
+	 * The mask blurred by `blur` board units, so it falls from 1 deep in the fog to 0.5 on the true edge
+	 * and to 0 a little way out. The smoke shader shapes its billowing outline from this field.
+	 */
+	readonly field: OffscreenCanvas;
+	#fieldCtx: OffscreenCanvasRenderingContext2D;
 	#ctx: Ctx;
 	#scale: number;
 	#cells: { id: CityId; path: Path2D; at: BoardPoint; reach: number }[];
 
 	constructor(
 		readonly bounds: BoardBounds,
-		readonly width = 2048,
+		readonly width = 1024,
+		readonly blur = 2.6,
 	) {
 		this.#scale = width / (bounds.maxX - bounds.minX);
 		const { canvas, ctx } = sheet(width, Math.round((bounds.maxZ - bounds.minZ) * this.#scale));
 		this.canvas = canvas;
 		this.#ctx = ctx;
+		// CPU-backed on purpose: uploading a GPU canvas into WebGL forces a readback that stalled a reveal for 500ms.
+		this.field = new OffscreenCanvas(canvas.width, canvas.height);
+		this.#fieldCtx = this.field.getContext('2d', { willReadFrequently: true })!;
 		this.#cells = partition(bounds).cells.map(cell => {
 			const at = pack.positions[cell.id]!;
 			const path = new Path2D();
@@ -554,8 +565,12 @@ export class FogMask {
 	draw(cover: (id: CityId) => number) {
 		const ctx = this.#ctx;
 		const scale = this.#scale;
+		// Opaque black under the white cells: the value lives in the colour channels, which a blur keeps
+		// honest, where transparent pixels would blur into full-strength colour at partial alpha.
 		ctx.setTransform(1, 0, 0, 1, 0, 0);
-		ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+		ctx.globalCompositeOperation = 'source-over';
+		ctx.fillStyle = '#000';
+		ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 		ctx.setTransform(scale, 0, 0, scale, -this.bounds.minX * scale, -this.bounds.minZ * scale);
 		ctx.save();
 		ctx.fillStyle = '#fff';
@@ -571,10 +586,9 @@ export class FogMask {
 				const radius = (1 - amount) * cell.reach * 1.15;
 				const feather = cell.reach * 0.3;
 				const hole = ctx.createRadialGradient(cell.at.x, cell.at.z, 0, cell.at.x, cell.at.z, radius + feather);
-				hole.addColorStop(0, 'rgb(0 0 0 / 1)');
-				hole.addColorStop(radius / (radius + feather), 'rgb(0 0 0 / 1)');
+				hole.addColorStop(0, '#000');
+				hole.addColorStop(radius / (radius + feather), '#000');
 				hole.addColorStop(1, 'rgb(0 0 0 / 0)');
-				ctx.globalCompositeOperation = 'destination-out';
 				ctx.fillStyle = hole;
 				ctx.fill(cell.path);
 				ctx.restore();
@@ -583,5 +597,11 @@ export class FogMask {
 		}
 		ctx.fill(settled);
 		ctx.restore();
+		const field = this.#fieldCtx;
+		field.fillStyle = '#000';
+		field.fillRect(0, 0, this.field.width, this.field.height);
+		field.filter = `blur(${this.blur * scale}px)`;
+		field.drawImage(this.canvas, 0, 0);
+		field.filter = 'none';
 	}
 }
