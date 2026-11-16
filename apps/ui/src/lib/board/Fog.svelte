@@ -1,10 +1,49 @@
+<script lang="ts" module>
+	const NOISE = /* glsl */ `
+		uniform float uTime;
+		uniform float uReveal;
+		uniform float uAspect;
+		float fogHash( vec2 p ) { return fract( sin( dot( p, vec2( 127.1, 311.7 ) ) ) * 43758.5453 ); }
+		float fogNoise( vec2 p ) {
+			vec2 i = floor( p );
+			vec2 f = fract( p );
+			vec2 u = f * f * ( 3.0 - 2.0 * f );
+			return mix( mix( fogHash( i ), fogHash( i + vec2( 1.0, 0.0 ) ), u.x ),
+				mix( fogHash( i + vec2( 0.0, 1.0 ) ), fogHash( i + vec2( 1.0, 1.0 ) ), u.x ), u.y );
+		}
+		float fogFbm( vec2 p ) {
+			float value = 0.0;
+			float amplitude = 0.5;
+			for ( int i = 0; i < 4; i++ ) {
+				value += amplitude * fogNoise( p );
+				p *= 2.03;
+				amplitude *= 0.5;
+			}
+			return value;
+		}
+	`;
+
+	// Mist drifts over the unknown sheet in two layers. Where a region is being revealed, its edge
+	// glows like scorched paper, so the eye follows the world being charted.
+	const FOG = /* glsl */ `
+		float fogMask = texture2D( alphaMap, vAlphaMapUv ).g;
+		vec2 fogUv = vAlphaMapUv * vec2( uAspect, 1.0 );
+		float mist = fogFbm( fogUv * 5.0 + vec2( uTime * 0.035, uTime * 0.012 ) );
+		float wisp = fogFbm( fogUv * 13.0 - vec2( uTime * 0.05, -uTime * 0.02 ) );
+		diffuseColor.rgb = mix( diffuseColor.rgb, vec3( 0.84, 0.85, 0.83 ), 0.16 + 0.46 * mist );
+		float fogEdge = smoothstep( 0.02, 0.3, fogMask ) * ( 1.0 - smoothstep( 0.3, 0.8, fogMask ) );
+		diffuseColor.rgb = mix( diffuseColor.rgb, vec3( 0.45, 0.24, 0.09 ), fogEdge * ( 0.15 + 0.65 * uReveal ) );
+		diffuseColor.a *= clamp( fogMask * ( 1.0 + 0.7 * ( wisp - 0.5 ) ), 0.0, 1.0 );
+	`;
+</script>
+
 <script lang="ts">
 	import { pack } from '@repo/game';
 	import type { CityId } from '@repo/game';
 	import { T, useTask } from '@threlte/core';
 	import { untrack } from 'svelte';
 	import { cubicInOut } from 'svelte/easing';
-	import { CanvasTexture, LinearFilter } from 'three';
+	import { CanvasTexture, LinearFilter, MeshStandardMaterial } from 'three';
 	import type { Texture } from 'three';
 	import { FogMask } from './chart';
 	import type { FogSource } from './chart';
@@ -15,11 +54,31 @@
 
 	let { bounds, sheet, hidden }: Props = $props();
 
-	const REVEAL_SECONDS = 1.6;
-	const mask = new FogMask(untrack(() => bounds));
+	const REVEAL_SECONDS = 1.8;
+	const area = untrack(() => bounds);
+	const mask = new FogMask(area);
 	const alpha = new CanvasTexture(mask.canvas);
 	alpha.minFilter = LinearFilter;
 	alpha.generateMipmaps = false;
+
+	const uniforms = {
+		uTime: { value: 0 },
+		uReveal: { value: 0 },
+		uAspect: { value: (area.maxX - area.minX) / (area.maxZ - area.minZ) },
+	};
+	const material = new MeshStandardMaterial({
+		map: untrack(() => sheet),
+		alphaMap: alpha,
+		transparent: true,
+		depthWrite: false,
+		roughness: 1,
+	});
+	material.onBeforeCompile = shader => {
+		Object.assign(shader.uniforms, uniforms);
+		shader.fragmentShader = shader.fragmentShader
+			.replace('#include <common>', `#include <common>\n${NOISE}`)
+			.replace('#include <alphamap_fragment>', FOG);
+	};
 
 	const cities = pack.cities.filter(city => !city.lost);
 	const sources = new Map<CityId, FogSource & { progress: number; target: number; wait: number }>(
@@ -39,10 +98,12 @@
 		alpha.needsUpdate = true;
 	};
 	paint();
+	const foggy = () => [...sources.values()].some(source => source.cover > 0);
 
-	// A region being revealed wears away city by city, the way the clouds used to lift one after another.
+	// One clock drives the drifting mist while any fog is left, and the reveal while a region is lifting.
 	const { start, stop } = useTask(
 		delta => {
+			uniforms.uTime.value += delta;
 			let moving = false;
 			for (const source of sources.values()) {
 				if (source.progress === source.target) continue;
@@ -58,11 +119,15 @@
 						: Math.max(source.target, source.progress - step);
 				source.cover = cubicInOut(source.progress);
 			}
-			if (!moving) return stop();
-			paint();
+			uniforms.uReveal.value = moving
+				? Math.min(1, uniforms.uReveal.value + delta * 3)
+				: Math.max(0, uniforms.uReveal.value - delta * 0.8);
+			if (moving) paint();
+			if (!moving && !foggy() && uniforms.uReveal.value === 0) stop();
 		},
 		{ autoStart: false },
 	);
+	if (foggy()) start();
 
 	$effect(() => {
 		let changed = false;
@@ -84,5 +149,5 @@
 	receiveShadow
 >
 	<T.PlaneGeometry args={[bounds.maxX - bounds.minX, bounds.maxZ - bounds.minZ]} />
-	<T.MeshStandardMaterial map={sheet} alphaMap={alpha} transparent depthWrite={false} roughness={1} />
+	<T is={material} />
 </T.Mesh>

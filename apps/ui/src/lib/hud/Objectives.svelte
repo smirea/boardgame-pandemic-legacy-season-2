@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { pack } from '@repo/game';
 	import type { ObjectiveId, PublicState } from '@repo/game';
+	import { backOut } from 'svelte/easing';
+	import { fly } from 'svelte/transition';
 
 	type Props = { snap: PublicState; onwaive: (objective: ObjectiveId) => void };
 
@@ -17,11 +19,12 @@
 	<span class="need" title="Objectives completed out of the number needed to win"
 		>{game?.completed.length ?? 0} / {needed}</span
 	>
-	{#each objectives as objective (objective.id)}
+	{#each objectives as objective, index (objective.id)}
 		{@const progress = game?.progress[objective.id] ?? 0}
 		{@const done = game?.completed.includes(objective.id) ?? false}
 		{@const waived = game?.waived.includes(objective.id) ?? false}
 		<button
+			in:fly={{ y: -40, duration: 520, delay: 250 + index * 120, easing: backOut }}
 			class="objective"
 			class:done
 			class:waived

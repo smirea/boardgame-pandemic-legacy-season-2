@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { pack } from '@repo/game';
 	import type { Insights, PublicState } from '@repo/game';
+	import { fly } from 'svelte/transition';
 	import { MONTHS } from './labels.svelte.ts';
 
 	type Props = {
@@ -58,11 +59,14 @@
 			{#if info.playerDeck.cards > 0}
 				<div class="stat" title="Cards left in the Player deck">
 					<span class="caption">Player deck</span>
-					<strong data-testid="deck-count">{info.playerDeck.cards}</strong>
+					{#key info.playerDeck.cards}<strong data-testid="deck-count" in:fly={{ y: -10, duration: 280 }}
+							>{info.playerDeck.cards}</strong
+						>{/key}
 				</div>
 				<div class="stat minor" title="Turns left before the Player deck runs out">
 					<span class="caption">Turns left</span>
-					<strong>{info.playerDeck.turnsLeft}</strong>
+					{#key info.playerDeck.turnsLeft}<strong in:fly={{ y: -10, duration: 280 }}>{info.playerDeck.turnsLeft}</strong
+						>{/key}
 				</div>
 				<div class="stat" title="Chance that the next Player card drawn is an Epidemic">
 					<span class="caption">Epidemic next draw</span>
@@ -80,7 +84,7 @@
 
 			<div class="stat" title="Supply cubes left in the stockpile">
 				<span class="caption">Stockpile</span>
-				<strong>{game.stockpile}</strong>
+				{#key game.stockpile}<strong in:fly={{ y: -10, duration: 280 }}>{game.stockpile}</strong>{/key}
 			</div>
 		{/if}
 
@@ -104,7 +108,7 @@
 	.bar {
 		display: flex;
 		align-items: center;
-		gap: 1.3rem;
+		gap: 1.1rem;
 		height: 3rem;
 		padding: 0 0.9rem;
 		font-size: 0.8rem;
@@ -112,14 +116,14 @@
 	}
 
 	/* The bar shares its width with the replay's side panel, so secondary figures give way first. */
-	@container topbar (width < 1320px) {
+	@container topbar (width < 1560px) {
 		.month span,
 		.minor {
 			display: none;
 		}
 	}
 
-	@container topbar (width < 1180px) {
+	@container topbar (width < 1300px) {
 		.track .caption {
 			display: none;
 		}

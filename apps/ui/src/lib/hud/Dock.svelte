@@ -287,8 +287,8 @@
 				{:else if snap.phase === 'playing.actions'}
 					{#if canAct}
 						<div class="chips" data-testid="actions">
-							{#each chips as chip (chip.name)}
-								<button onclick={() => ongroup(chip.name)}>
+							{#each chips as chip, index (chip.name)}
+								<button style:--i={index} onclick={() => ongroup(chip.name)}>
 									{chip.label}
 									{#if chip.detail}<small>{chip.detail}</small>{/if}
 									{#if chip.free}<small class="free">free</small>{/if}
@@ -655,6 +655,24 @@
 	.prompt {
 		color: var(--ink);
 		line-height: 1.35;
+	}
+
+	/* Whatever the dock asks for next rises into place, so a change of step is noticed. */
+	.middle > *,
+	.turn > *,
+	.setup > * {
+		animation: rise 320ms cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
+	}
+
+	.chips > button {
+		animation: rise 300ms calc(var(--i, 0) * 35ms) both;
+	}
+
+	@keyframes rise {
+		from {
+			opacity: 0;
+			translate: 0 0.6rem;
+		}
 	}
 
 	.waiting {

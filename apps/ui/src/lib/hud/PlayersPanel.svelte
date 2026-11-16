@@ -2,6 +2,8 @@
 	import { handLimit, pack } from '@repo/game';
 	import type { SeatId, World } from '@repo/game';
 	import { inkOn } from '#lib/color.ts';
+	import { backOut } from 'svelte/easing';
+	import { fly } from 'svelte/transition';
 	import { cityName, SEAT_COLORS } from './labels.svelte.ts';
 
 	type Props = {
@@ -24,6 +26,7 @@
 		{@const character = world.campaign.characters[player.character]!}
 		{@const job = pack.jobs.find(candidate => candidate.id === character.job)}
 		<div
+			in:fly={{ x: -80, duration: 520, delay: 120 + index * 110, easing: backOut }}
 			class="player"
 			class:active={game.active === seat}
 			class:viewing={viewing === seat}

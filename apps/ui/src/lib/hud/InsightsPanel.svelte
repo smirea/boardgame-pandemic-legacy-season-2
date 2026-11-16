@@ -1,5 +1,8 @@
 <script lang="ts">
 	import type { CardId, CityId, Insights, World } from '@repo/game';
+	import { flip } from 'svelte/animate';
+	import { backOut } from 'svelte/easing';
+	import { fade, fly } from 'svelte/transition';
 	import { cityName, logLine } from './labels.svelte.ts';
 
 	type Props = { world: World; info: Insights; onfocus: (city: CityId) => void; onlockdown: (card: CardId) => void };
@@ -30,89 +33,93 @@
 	);
 </script>
 
-<section class="panel">
+<section class="panel" in:fly={{ x: 80, duration: 520, delay: 200, easing: backOut }}>
 	<nav>
 		<button class:on={tab === 'threats'} onclick={() => (tab = 'threats')}>Threats</button>
 		<button class:on={tab === 'decks'} onclick={() => (tab = 'decks')}>Decks</button>
 		<button class:on={tab === 'log'} onclick={() => (tab = 'log')}>Log</button>
 	</nav>
 
-	{#if tab === 'threats'}
-		<p class="hint">
-			{#if info.infection.opening}
-				The opening infection flips {info.infection.rate} cards{world.campaign.rules.includes('hollowSetup')
-					? ', then 3 more that place Hollow Men'
-					: ''}. A city with no cubes takes a plague cube.
-			{:else}
-				Next Infect step flips {info.infection.rate}. Incidents left: {info.incidentsLeft}.
-			{/if}
-		</p>
-		{#if info.infection.atRisk.length === 0}
-			<p class="calm">
-				{info.infection.opening
-					? 'Every city that can be hit holds a cube.'
-					: 'No unsupplied city can be hit next turn.'}
-			</p>
-		{/if}
-		<ul>
-			{#each info.infection.atRisk.slice(0, 9) as risk (risk.city)}
-				<li>
-					<button onclick={() => onfocus(risk.city)}>
-						<span class="bar" style:width={percent(risk.odds)}></span>
-						<span class="name">{cityName(risk.city)}</span>
-						{#if risk.outbreak}<em>outbreak</em>{/if}
-						<b>{percent(risk.odds)}</b>
-					</button>
-				</li>
-			{/each}
-		</ul>
-	{:else if tab === 'decks'}
-		<p class="hint">Infection deck, top layer first. Cards in a layer come in an unknown order.</p>
-		{#each info.infection.strata as stratum, index (index)}
-			<div class="stratum">
-				<span class="size">{stratum.size}</span>
-				<span class="cards">
-					{#each entries(stratum.cities) as [city, count] (city)}
-						<span>{label(city)}{count > 1 ? ` ×${count}` : ''}</span>
+	{#key tab}
+		<div class="pane" in:fly={{ y: 8, duration: 240 }}>
+			{#if tab === 'threats'}
+				<p class="hint">
+					{#if info.infection.opening}
+						The opening infection flips {info.infection.rate} cards{world.campaign.rules.includes('hollowSetup')
+							? ', then 3 more that place Hollow Men'
+							: ''}. A city with no cubes takes a plague cube.
+					{:else}
+						Next Infect step flips {info.infection.rate}. Incidents left: {info.incidentsLeft}.
+					{/if}
+				</p>
+				{#if info.infection.atRisk.length === 0}
+					<p class="calm">
+						{info.infection.opening
+							? 'Every city that can be hit holds a cube.'
+							: 'No unsupplied city can be hit next turn.'}
+					</p>
+				{/if}
+				<ul>
+					{#each info.infection.atRisk.slice(0, 9) as risk (risk.city)}
+						<li animate:flip={{ duration: 350 }} in:fade={{ duration: 250 }}>
+							<button onclick={() => onfocus(risk.city)}>
+								<span class="bar" style:width={percent(risk.odds)}></span>
+								<span class="name">{cityName(risk.city)}</span>
+								{#if risk.outbreak}<em>outbreak</em>{/if}
+								<b>{percent(risk.odds)}</b>
+							</button>
+						</li>
 					{/each}
-				</span>
-			</div>
-		{/each}
-		<p class="hint">Infection discard</p>
-		<div class="stratum">
-			<span class="cards">
-				{#each entries(info.infection.discard) as [city, count] (city)}
-					<span>{label(city)}{count > 1 ? ` ×${count}` : ''}</span>
-				{:else}
-					<span>empty</span>
+				</ul>
+			{:else if tab === 'decks'}
+				<p class="hint">Infection deck, top layer first. Cards in a layer come in an unknown order.</p>
+				{#each info.infection.strata as stratum, index (index)}
+					<div class="stratum">
+						<span class="size">{stratum.size}</span>
+						<span class="cards">
+							{#each entries(stratum.cities) as [city, count] (city)}
+								<span>{label(city)}{count > 1 ? ` ×${count}` : ''}</span>
+							{/each}
+						</span>
+					</div>
 				{/each}
-			</span>
-		</div>
-		{#each lockable as card (card.id)}
-			<button
-				class="lockdown"
-				onclick={() => onlockdown(card.id)}
-				title="Lockdown: destroy this Infection card for good">Destroy {cityName(card.city)}</button
-			>
-		{/each}
-		<p class="hint">Player deck, {info.playerDeck.cards} cards</p>
-		<div class="stratum">
-			<span class="cards">
-				{#each entries(info.playerDeck.byKind) as [kind, count] (kind)}
-					<span>{kind} ×{count}</span>
+				<p class="hint">Infection discard</p>
+				<div class="stratum">
+					<span class="cards">
+						{#each entries(info.infection.discard) as [city, count] (city)}
+							<span>{label(city)}{count > 1 ? ` ×${count}` : ''}</span>
+						{:else}
+							<span>empty</span>
+						{/each}
+					</span>
+				</div>
+				{#each lockable as card (card.id)}
+					<button
+						class="lockdown"
+						onclick={() => onlockdown(card.id)}
+						title="Lockdown: destroy this Infection card for good">Destroy {cityName(card.city)}</button
+					>
 				{/each}
-			</span>
+				<p class="hint">Player deck, {info.playerDeck.cards} cards</p>
+				<div class="stratum">
+					<span class="cards">
+						{#each entries(info.playerDeck.byKind) as [kind, count] (kind)}
+							<span>{kind} ×{count}</span>
+						{/each}
+					</span>
+				</div>
+				{#if info.playerDeck.epidemicWithin}
+					<p class="hint">An epidemic comes within {info.playerDeck.epidemicWithin} draws.</p>
+				{/if}
+			{:else}
+				<ol>
+					{#each lines as line (line.seq)}
+						<li class={line.tone}>{line.text}</li>
+					{/each}
+				</ol>
+			{/if}
 		</div>
-		{#if info.playerDeck.epidemicWithin}
-			<p class="hint">An epidemic comes within {info.playerDeck.epidemicWithin} draws.</p>
-		{/if}
-	{:else}
-		<ol>
-			{#each lines as line (line.seq)}
-				<li class={line.tone}>{line.text}</li>
-			{/each}
-		</ol>
-	{/if}
+	{/key}
 </section>
 
 <style>
@@ -131,6 +138,12 @@
 		font-size: 0.78rem;
 		overflow: hidden auto;
 		scrollbar-width: thin;
+	}
+
+	.pane {
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
 	}
 
 	nav {

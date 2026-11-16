@@ -2,7 +2,7 @@
 	import { insights, isForsaken, legalActions, legalDecides, legalPlays, onGrid, pack, scenarios } from '@repo/game';
 	import type { Action, CardId, CityId, Command, EdgeDef, Play, SeatId } from '@repo/game';
 	import Board from '#lib/board/Board.svelte';
-	import type { BoardView, CityView, Fx, FxKind } from '#lib/board/types.ts';
+	import type { BoardView, CityView, Fx, FxKind, Travel } from '#lib/board/types.ts';
 	import type { SessionView } from '#lib/session/session.svelte.ts';
 	import { inkOn } from '#lib/color.ts';
 	import { LS } from '#lib/storage.ts';
@@ -113,6 +113,17 @@
 	let resetView = $state(0);
 
 	const send = (command: Command) => session.send(command);
+
+	const TRAVEL: Record<string, Travel> = { drive: 'land', run: 'land', sail: 'sea', charter: 'sea' };
+	/** The vehicle for a pawn's most recent move: a car on the roads, a boat at sea, a plane for any flight. */
+	function travelOf(seat: SeatId): Travel {
+		const log = game?.log ?? [];
+		for (let index = log.length - 1; index >= 0; index--) {
+			const entry = log[index]!;
+			if (entry.t === 'move' && entry.seat === seat) return TRAVEL[entry.by] ?? 'air';
+		}
+		return 'land';
+	}
 	function act(action: Action) {
 		send({ type: 'ACTION', seat: game!.active, action });
 		targeting = null;
@@ -365,6 +376,7 @@
 				color: SEAT_COLORS[index]!,
 				name: seatName(world, seat),
 				active: game!.active === seat && playing,
+				travel: travelOf(seat),
 			})),
 			cursors: Object.entries(session.cursors).map(([id, point], index) => ({
 				id,
@@ -469,7 +481,7 @@
 
 		{#if game && playing}
 			<!-- The chart's key, printed in its corner: what each mark beside a city name means. -->
-			<dl class="legend" aria-label="Map key">
+			<dl class="legend" aria-label="Map key" in:fly={{ y: 20, duration: 500, delay: 600 }}>
 				<dt><b class="num">3</b></dt>
 				<dd>Population</dd>
 				<dt><b class="supplies">1</b></dt>
@@ -525,8 +537,8 @@
 					<input bind:value={filter} placeholder="Type to filter" aria-label="Filter the list" />
 				{/if}
 				<div class="rows">
-					{#each shown as option (option)}
-						<button class:picked={picked.includes(option)} onclick={() => pick(option)}
+					{#each shown as option, index (option)}
+						<button style:--i={Math.min(index, 12)} class:picked={picked.includes(option)} onclick={() => pick(option)}
 							><strong>{option.label}</strong><span>{option.detail}</span></button
 						>
 					{:else}
@@ -614,7 +626,7 @@
 		{/if}
 
 		{#if menu}
-			<div class="menu" transition:fly={{ y: -10, duration: 160 }}>
+			<div class="menu" transition:scale={{ start: 0.92, duration: 180, opacity: 0 }}>
 				<button onclick={download}>Export campaign save</button>
 				{#if session.mode !== 'join' && !spectator}
 					<button onclick={downloadRecord} data-testid="save-recording">Save this game's recording</button>
@@ -1167,6 +1179,7 @@
 	}
 
 	.menu {
+		transform-origin: top right;
 		position: absolute;
 		top: 0.4rem;
 		right: 0.7rem;
@@ -1180,6 +1193,41 @@
 		background: var(--panel-solid);
 		box-shadow: 0 1rem 2.5rem rgb(0 0 0 / 0.5);
 		font-size: 0.85rem;
+	}
+
+	.menu > * {
+		animation: rise 260ms calc(var(--n, 0) * 30ms) both;
+	}
+
+	.menu > :nth-child(2) {
+		--n: 1;
+	}
+
+	.menu > :nth-child(3) {
+		--n: 2;
+	}
+
+	.menu > :nth-child(4) {
+		--n: 3;
+	}
+
+	.menu > :nth-child(5) {
+		--n: 4;
+	}
+
+	.menu > :nth-child(n + 6) {
+		--n: 5;
+	}
+
+	@keyframes rise {
+		from {
+			opacity: 0;
+			translate: 0 0.4rem;
+		}
+	}
+
+	.rows button {
+		animation: rise 240ms calc(var(--i, 0) * 25ms) both;
 	}
 
 	.menu button,
