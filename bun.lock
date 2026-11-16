@@ -5,10 +5,10 @@
     "": {
       "name": "boardgame-pandemic-legacy-season-2",
       "devDependencies": {
+        "@stefan.inc/env-manager": "^1.0.0",
         "@types/bun": "^1.4.4",
         "@types/node": "^26.6.5",
         "concurrently": "^10.0.6",
-        "env-manager": "github:smirea/env-manager#3d16babe8e4d11d3f131b0f8af8497bc0b8b7180",
         "lefthook": "^2.2.1",
         "oxfmt": "^0.72.0",
         "oxlint": "^1.87.0",
@@ -465,6 +465,8 @@
 
     "@standard-schema/spec": ["@standard-schema/spec@1.1.0", "", {}, "sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w=="],
 
+    "@stefan.inc/env-manager": ["@stefan.inc/env-manager@1.0.0", "", { "dependencies": { "@aws-sdk/client-secrets-manager": "^3.980.0", "@aws-sdk/client-sts": "^3.980.0", "yargs": "^18.0.0", "zod": "^4.3.6" }, "bin": { "env-manager": "src/cli.ts" } }, "sha512-lNCYhZOmC1aw86gMpen++r2xJrxYQdIZdtlMFhnU/mAr4ew4E0H+ehnRfJNnljIs5rGXWEizjjqn2Z2QD8vrGg=="],
+
     "@stefan.inc/feedback-engine": ["@stefan.inc/feedback-engine@1.4.0", "", { "dependencies": { "dom-accessibility-api": "^0.7.1", "modern-screenshot": "^4.7.0", "oxc-parser": "^0.158.0" }, "peerDependencies": { "svelte": "^5.29.0" } }, "sha512-xWnXK0/YK0EEBGDxB/gBOsHK62xeQDarEChUbv2C6IPT/NwoLTdzBZmXBIsb7AEVGYAuq1M+gqABGWc4Z6l/JA=="],
 
     "@sveltejs/acorn-typescript": ["@sveltejs/acorn-typescript@1.0.13", "", { "peerDependencies": { "acorn": "^8.9.0" } }, "sha512-wgKggnhZVL9Bfx1OaKKTrYY9BFRk6C8UAkQNUcIv1+llzYrIqy+RZm5HPKzn0NpEBvTVhTqB4kQyllZywsRBRQ=="],
@@ -538,10 +540,6 @@
     "@types/topojson-specification": ["@types/topojson-specification@1.0.5", "", { "dependencies": { "@types/geojson": "*" } }, "sha512-C7KvcQh+C2nr6Y2Ub4YfgvWvWCgP2nOQMtfhlnwsRL4pYmmwzBS7HclGiS87eQfDOU/DLQpX6GEscviaz4yLIQ=="],
 
     "@types/webxr": ["@types/webxr@0.5.24", "", {}, "sha512-h8fgEd/DpoS9CBrjEQXR+dIDraopAEfu4wYVNY2tEPwk60stPWhvZMf4Foo5FakuQ7HFZoa8WceaWFervK2Ovg=="],
-
-    "@types/yargs": ["@types/yargs@17.0.35", "", { "dependencies": { "@types/yargs-parser": "*" } }, "sha512-qUHkeCyQFxMXg79wQfTtfndEC+N9ZZg76HJftDJp+qH2tV7Gj4OJi7l+PiWwJ+pWtW8GwSmqsDj/oymhrTWXjg=="],
-
-    "@types/yargs-parser": ["@types/yargs-parser@21.0.3", "", {}, "sha512-I4q9QU9MQv4oEOz4tAHJtNz1cwuLxn2F3xcc2iV5WdqLPpUnj30aUuxt1mAxYTG+oe8CZMV/+6rU4S4gRDzqtQ=="],
 
     "@typescript/typescript-aix-ppc64": ["@typescript/typescript-aix-ppc64@7.0.2", "", { "os": "aix", "cpu": "ppc64" }, "sha512-MTKKkWB7p/0E9xi1d1tHtZ5PiLkGEMIq88pK2CubZjOsLtYTLqhgIgi6zepFa+9GHZ6h05NMCkQxGKiPXMxXtQ=="],
 
@@ -634,8 +632,6 @@
     "emoji-regex": ["emoji-regex@10.6.0", "", {}, "sha512-toUI84YS5YmxW219erniWD0CIVOo46xGKColeNQRgOzDorgBi1v4D71/OFzgD9GO2UGKIv1C3Sp8DAn0+j5w7A=="],
 
     "enhanced-resolve": ["enhanced-resolve@5.27.0", "", { "dependencies": { "graceful-fs": "^4.2.4", "tapable": "^2.3.3" } }, "sha512-Do6BB2xzlcc/odFg+XEYyneAx4T/WfywO71yw9ePS2tVfRsf7JVR4mUeELadIeHzixkzbG5DpluiEFPi2WGfYQ=="],
-
-    "env-manager": ["env-manager@github:smirea/env-manager#3d16bab", { "dependencies": { "@aws-sdk/client-secrets-manager": "^3.980.0", "@aws-sdk/client-sts": "^3.980.0", "@types/bun": "^1.3.6", "@types/yargs": "^17.0.35", "lefthook": "^2.0.16", "oxlint": "^1.1.0", "typescript": "^5.9.3", "yargs": "^18.0.0", "zod": "^4.3.6" }, "bin": { "env-manager": "./src/cli.ts" } }, "smirea-env-manager-3d16bab", "sha512-0KXq9TMop9oF4de97X8afTEe7nH54BE4H4O+tTR1z2WqtRtMW5KGYnRc1OQN11znJTSbSLZqjZbTr0eDyVJ9lw=="],
 
     "error-stack-parser-es": ["error-stack-parser-es@1.0.5", "", {}, "sha512-5qucVt2XcuGMcEGgWI7i+yZpmpByQ8J1lHhcL7PwqCwu9FPP3VUXzT4ltHe5i2z9dePwEHcDVOAfSnHsOlCXRA=="],
 
@@ -882,8 +878,6 @@
     "@tailwindcss/oxide-wasm32-wasi/@tybys/wasm-util": ["@tybys/wasm-util@0.10.4", "", { "dependencies": { "tslib": "^2.4.0" }, "bundled": true }, "sha512-W3c4gRigFS0T/Ma4qIYF3GDAc5AQdHb1yL5znJT1Zv1YaD9Kitx656wBjvr19qbiosmZT8lWDM5BEMynUqX65A=="],
 
     "@tailwindcss/oxide-wasm32-wasi/tslib": ["tslib@2.9.1", "", { "bundled": true }, "sha512-a4Ux9VKuIMHsOS7ENbEq6hK2ZGYIT27Rtl0E4eD9KqwxhKiQeMZE/9xb3IdYwWaSOyIBQLExhQgXDTYoiCxnWA=="],
-
-    "env-manager/typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
 
     "rolldown/@oxc-project/types": ["@oxc-project/types@0.156.0", "", {}, "sha512-1Duyg48TdJNdyhEB8Xn1L36bT9Pv6GUtlKjHxOys8xkaF/rQq3XJE+bAurSK/AgIz5mGFsb77cn9Pb20+WCScw=="],
 
