@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
 	import favicon from '#lib/assets/favicon.svg';
+	import { startFeedback } from '#lib/feedback.ts';
+	import { onMount } from 'svelte';
 	import './layout.css';
 
 	let { children } = $props();
@@ -13,6 +15,12 @@
 			},
 		},
 	});
+
+	if (import.meta.env.DEV)
+		onMount(() => {
+			const stop = startFeedback();
+			return () => void stop.then(destroy => destroy());
+		});
 </script>
 
 <svelte:head>

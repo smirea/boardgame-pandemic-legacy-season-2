@@ -1,13 +1,23 @@
 <script lang="ts">
 	import type { CityId } from '@repo/game';
 	import { Canvas } from '@threlte/core';
-	import { NoToneMapping } from 'three';
+	import { NoToneMapping, WebGLRenderer } from 'three';
 	import { partHint, partKey } from './hints';
 	import type { Part } from './hints';
 	import type { Placement } from './labels';
 	import type { BoardPoint } from './projection';
 	import Scene from './Scene.svelte';
 	import type { BoardView } from './types';
+
+	// The feedback editor (development only) redraws the page, and a WebGL canvas reads blank once its frame is presented.
+	const createRenderer = (canvas: HTMLCanvasElement) =>
+		new WebGLRenderer({
+			canvas,
+			powerPreference: 'high-performance',
+			antialias: true,
+			alpha: true,
+			preserveDrawingBuffer: import.meta.env.DEV,
+		});
 
 	type Props = {
 		view: BoardView;
@@ -64,7 +74,7 @@
 		hovered = null;
 	}}
 >
-	<Canvas toneMapping={NoToneMapping}>
+	<Canvas toneMapping={NoToneMapping} {createRenderer}>
 		<Scene {view} {oncity} {onpointer} {onhint} hoverCity={hovered?.city ?? null} {resetView} {covered} />
 	</Canvas>
 	{#if hovered && hint}
