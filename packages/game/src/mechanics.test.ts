@@ -1596,3 +1596,46 @@ describe('found in June', () => {
 		).toEqual([1, 2, 3]);
 	});
 });
+
+describe('found in July', () => {
+	test('Open Waters offers each sea lane once, not once from each end', () => {
+		const actor = late(world => void conjure(world, A, { kind: 'event', event: 'openWaters' }));
+		const lanes = legalPlays(worldOf(actor), 'playing.actions').flatMap(option =>
+			option.play.e === 'openWaters' ? [[option.play.a, option.play.b].toSorted().join('~')] : [],
+		);
+		expect(lanes.length).toBeGreaterThan(0);
+		expect(new Set(lanes).size).toBe(lanes.length);
+	});
+
+	test('the Sanitation Officer may discard any two cards to salvage, not only the first two', () => {
+		const actor = late((world, game) => {
+			character(world, A).job = 'sanitationOfficer';
+			give(world, A, [
+				...cityCards(world, 'cairo', 1),
+				...cityCards(world, 'lagos', 1),
+				...cityCards(world, 'london', 1),
+			]);
+			game.playerDiscard.push(...cityCards(world, 'tripoli', 1));
+			game.playerDeck.order = game.playerDeck.order.filter(card => !game.playerDiscard.includes(card));
+			game.playerDeck.piles = [{ size: game.playerDeck.order.length, epidemics: 0 }];
+		});
+		const pairs = legalActions(worldOf(actor), A).flatMap(action =>
+			action.a === 'salvage' ? [action.discard.toSorted().join('+')] : [],
+		);
+		expect(new Set(pairs).size).toBe(3);
+	});
+
+	test('a briefing says which cities of a new region start infested, and which objectives come and go', () => {
+		const world = JSON.parse(JSON.stringify(worldOf(late()))) as World;
+		world.campaign.briefing = [];
+		world.campaign.opened = world.campaign.opened.filter(id => id !== 'africa');
+		world.campaign.regions = world.campaign.regions.filter(id => id !== 'africa');
+		openBundle(world, 'africa' as never, true);
+		expect(world.campaign.briefing.some(line => line.startsWith('Infested from the start'))).toBe(true);
+		world.campaign.briefing = [];
+		world.campaign.objectives = ['triangulate'];
+		world.campaign.opened = world.campaign.opened.filter(id => id !== 'signal-hint');
+		openBundle(world, 'signal-hint' as never, false);
+		expect(world.campaign.briefing).toContain('Objectives leaving play: Triangulate signals.');
+	});
+});

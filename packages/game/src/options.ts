@@ -178,8 +178,10 @@ export function legalActions(world: World, seat: SeatId): Action[] {
 	for (const card of held)
 		for (const take of cityCards(world, game.playerDiscard))
 			candidates.push({ a: 'broker', card: card.id, take: take.id });
-	if (hand.length >= 2)
-		for (const take of game.playerDiscard) candidates.push({ a: 'salvage', discard: hand.slice(0, 2), take });
+	if (characterOf(world, seat).job === 'sanitationOfficer')
+		for (const [index, first] of hand.entries())
+			for (const second of hand.slice(index + 1))
+				for (const take of game.playerDiscard) candidates.push({ a: 'salvage', discard: [first, second], take });
 	candidates.push({ a: 'strike' });
 	for (const card of held) {
 		candidates.push({ a: 'supply', card: card.id });
@@ -253,8 +255,20 @@ export function legalPlays(world: World, phase: Phase): { seat: SeatId; card: Ca
 				default:
 					break;
 			}
-			for (const play of plays)
-				if (checkPlay(world, seat, card, play, phase) === null) result.push({ seat, card, play });
+			for (const play of plays) {
+				if (checkPlay(world, seat, card, play, phase) !== null) continue;
+				// A sea lane drawn from either end is the same lane, so it is offered once.
+				const mirrored =
+					play.e === 'openWaters' &&
+					result.some(
+						other =>
+							other.card === card &&
+							other.play.e === 'openWaters' &&
+							other.play.a === play.b &&
+							other.play.b === play.a,
+					);
+				if (!mirrored) result.push({ seat, card, play });
+			}
 		}
 	}
 	return result;

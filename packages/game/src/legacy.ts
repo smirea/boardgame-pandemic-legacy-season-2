@@ -6,6 +6,7 @@ import type {
 	EventId,
 	InfectionImprovementId,
 	JobId,
+	ObjectiveId,
 	RuleId,
 	SearchBoxDef,
 	StructureKind,
@@ -336,6 +337,23 @@ function unlockLine(campaign: Campaign, unlock: Unlock): string | null {
 			return `New job found: ${named(pack.jobs, unlock.job)}`;
 		case 'action':
 			return ACTION_BRIEFS[unlock.action] ?? null;
+		case 'region': {
+			const infested = pack.cities
+				.filter(city => city.region === unlock.region && city.startsInfested)
+				.map(city => city.name);
+			return infested.length
+				? `Infested from the start, so a character who begins a turn there is exposed: ${infested.join(', ')}.`
+				: null;
+		}
+		case 'objectives': {
+			const names = (ids: ObjectiveId[] = []) =>
+				ids.map(id => pack.objectives.find(entry => entry.id === id)!.name).join(', ');
+			const parts = [
+				unlock.remove?.length ? `Objectives leaving play: ${names(unlock.remove)}.` : '',
+				unlock.add?.length ? `New objectives: ${names(unlock.add)}.` : '',
+			].filter(Boolean);
+			return parts.length ? parts.join(' ') : null;
+		}
 		case 'rule':
 			return RULE_BRIEFS[unlock.rule] ?? null;
 		case 'stockpileBonus':

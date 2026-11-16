@@ -362,7 +362,8 @@ function needs(state: PublicState, who: Who): string[] {
 				pending?.t !== 'discard'
 			)
 				out.push('You are over your hand limit. Discard with `do decide:discard:...`.');
-			if (game.active === who.seat) {
+			// While another player owes the game a discard or a choice, the active player can do nothing, so nothing needs them.
+			if (game.active === who.seat && !blockedBy(state, who)) {
 				const step =
 					phase === 'playing.actions'
 						? `YOUR TURN: ${game.actionsLeft} action(s) left. \`do <key> ...\`, then \`do end\`.`
@@ -397,7 +398,7 @@ function idleActions(state: PublicState, who: Who): string[] {
 	const idle = state.world.campaign.actions.filter(action => !listed.has(action));
 	return idle.length
 		? [
-				`Unlocked, but not possible where you stand with what you hold: ${idle.join(', ')}. (A supply line or tower costs 2 cubes from your character. A sea lane costs 2. A supply center costs 5 cards of the city's colour.)`,
+				`Unlocked, but not possible where you stand with what you hold: ${idle.join(', ')}. (Base costs, before any ability or job lowers them: a supply line, sea lane or tower takes 2 cubes from your character, and a supply center takes 5 cards of the city's colour.)`,
 			]
 		: [];
 }

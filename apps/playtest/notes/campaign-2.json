@@ -365,5 +365,59 @@
 				"fix": "Both reported for the third time. The guide now states each in so many words."
 			}
 		]
+	},
+	"g08": {
+		"summary": "Won on turn 13 with four incidents: four objectives, including the new one, towers in three colours.",
+		"story": "Kit led with the Sanitation Officer, one of June's two new characters, beside Knox the Laborer and the Immunologist. July's perimeter report opened Africa for the players, with Kinshasa, Khartoum and Dar es Salaam infested from the start, and added the Triangulate objective. Knox raised towers in Istanbul, St. Petersburg and Lagos: black, blue and yellow, which completed it. A sea lane from Lagos to Antananarivo and a supply line from St. Petersburg to Moscow completed Connect 2 new cities. A pawn entered Farwater again for the lost haven. The Sanitation Officer searched Bogotá and set a Kinshasa Infection card aside, the Immunologist played Open Waters to join Farwater to Northwatch, and centers in Bogotá, Atlanta and Istanbul finished it, the last one reached by Airlift.",
+		"highlights": [
+			"Triangulate signals completed in the month it arrived: towers in a black, a blue and a yellow city.",
+			"First towers and the first Transmit of the year, both unlocked by Africa.",
+			"Second forced opening: Africa, by the July perimeter report.",
+			"First Sanitation Officer, first Open Waters, first Surplus.",
+			"Three wins in a row. Game end made two more supply centers permanent. Rationing drops to 2 for August."
+		],
+		"parity": "All four checks passed, with supplies at 18 + 15 lab bonus + 10 relief = 43, the last game of relief. Card 07-01 was read at setup and forced Africa, on the month the research gives, and added Triangulate. Card 07-02 was read at game end and added nothing, which matches the research. Triangulate needed blue, yellow and black, the rule fixed from the static review. Washington kept population 8 with a Plague cube on it, because its supply center's gain cancelled the loss, both steps as researched.",
+		"findings": [
+			{
+				"finding": "The Sanitation Officer's salvage offered a single pair of cards to discard.",
+				"kind": "Engine gap",
+				"fix": "Every pair is offered. Test added."
+			},
+			{
+				"finding": "Open Waters listed every sea lane twice, once from each end.",
+				"kind": "Engine gap",
+				"fix": "Each lane is offered once. Test added."
+			},
+			{
+				"finding": "Triangulate vanished from the objectives the moment it was completed, and the table could not tell whether it counted.",
+				"kind": "Lab gap, engine wording",
+				"fix": "It counted. The lab now lists a completed objective that has left play, and the briefing says which objectives come and go."
+			},
+			{
+				"finding": "Africa arrived with three infested cities and the briefing did not say so.",
+				"kind": "Engine gap",
+				"fix": "A region's briefing names the cities that start infested. Test added."
+			},
+			{
+				"finding": "The deck view hid forsaken cities' Infection cards, after the odds fix from June.",
+				"kind": "Engine bug, introduced by that fix",
+				"fix": "The layers show every card again. Only the odds leave forsaken cities out."
+			},
+			{
+				"finding": "The active player's `wait` returned at once while another player owed a discard.",
+				"kind": "Lab bug",
+				"fix": "Nothing needs the active player while the game is held up by someone else."
+			},
+			{
+				"finding": "The hint on unlocked actions quoted base costs that Foreman and Architect had lowered. A reason with an apostrophe never reached the game.",
+				"kind": "Lab wording",
+				"fix": "The hint says these are base costs. The guide warns about apostrophes."
+			},
+			{
+				"finding": "Washington kept its population with a Plague cube on it. A search card for a forsaken city could not be used.",
+				"kind": "Not a bug",
+				"fix": "The supply center's gain cancels the loss. Only Drive or Ferry works in a forsaken city."
+			}
+		]
 	}
 }

@@ -1,29 +1,25 @@
 # Memory
 
-June won. July is next, rationing 4. July is the last of the three games with 10 extra relief cubes.
+July won. August is next, rationing 2. July was the last game with the 10 extra relief cubes. August's setup pile is smaller. Place every cube. Do not armor a forsaken city.
 
-Stay Knox unless the month needs cards pulled from the discard. Knox is full: Helmsman, Record Keeper (hand 8), Foreman, Scout. Exposure 2/7, no scar. Laborer build is 4 cards plus 2 cubes. The key is `buildCenter:a+b+c+d:true`. Scout recons with no center. The first Drive or Ferry is free even after another action. A land line costs 1 cube. A sea lane still costs 2.
+Stay Knox. Full slots: Helmsman, Record Keeper (hand 8), Foreman, Scout. Exposure 2/7, no scar. Laborer build is 4 cards plus 2 cubes: `buildCenter:a+b+c+d:true`. Land lines cost 1 cube. Sea lanes cost 2. The first Drive or Ferry is free even after another action. Charter does not use that free move. Scout recons with no center.
 
-Sol's Immunologist has Record Keeper, Architect (4 cards, no cubes), and Runner: from a haven or a center, discard any City card and move anywhere on the grid. Sable has Courier and Facilitator. She can give any card, and she can take any card, from someone in the same location. A normal trade still moves only the card of the city you are standing in.
+Sol's Immunologist has Record Keeper, Architect (4 cards, no cubes), and Runner. Runner only works from a haven or a center, and it spends a city card, so do not Runner with the cards a build needs. Kit played the Sanitation Officer. The job was not given an ability. Its free action, discard 2 to take a City or Produce card from the discard, was never used. Captain (char-7) is still unplayed.
 
-Captain (char-7, Northwatch) and Sanitation Officer (char-8, Midsea) are new and unplayed. Captain discards any City card to move to any port on your sea route. Sanitation Officer, as a free action, discards 2 cards to take a City or Produce Supplies card from the discard.
+Permanent centers: Washington (pop 8), London (pop 8), São Paulo (pop 4), Istanbul (pop 6), Atlanta (pop 5). Bogotá's center was not made permanent. Towers were not made permanent. They are gone.
 
-Permanent centers: Washington (pop 8), London (pop 8), São Paulo (pop 3). Atlanta (pop 4) and Paris (pop 3) had centers in June and do not have them now. Lagos is pop 3 with no center. Istanbul is pop 5. Tripoli and Chicago are pop 1. Los Angeles is pop 1 and infested.
+Istanbul and Atlanta had every infection card stored in July. Treat them as immune until a card shows up in the deck. Also stored, so do not armor them for infection: São Paulo, Lima, Lagos, St. Petersburg, and the older set (Jacksonville, Denver, one London, two Washington, two New York). Washington and New York each still had a card in the deck. Well Stocked blocks at 2 or more cubes on `inf-washington.14` and `inf-london.33`. At 1 cube it does not.
 
-Forsaken, pop 0, still infested: Jacksonville, San Francisco, Denver, Cairo, Mexico City. Do not end a turn in a forsaken city, an infested city, or a city with plague. Passing through does not expose. Do not armor a forsaken city. Its card is set aside and another card is flipped. That skip worked at the June setup.
+Forsaken, pop 0, infested: Jacksonville, San Francisco, Denver, Cairo, Mexico City, Los Angeles, Santiago. Do not end a turn in a forsaken city, an infested city, or a city with plague. Passing through does not expose. Plague cubes do not carry over. Population does. New York is pop 1. Chicago, Tripoli, Lima, Buenos Aires, Kinshasa, and St. Petersburg are pop 1. Kinshasa is infested.
 
-Setup will not leave cubes in the stockpile. Place every cube. Put the extras on a city with no infection cards, as a cache: São Paulo, Lima, and Atlanta. A city with one card cannot be drawn twice in the opening 9. Cover each live city with at least as many cubes as it has cards before stacking extras.
+On the grid since July: Moscow (black, from St. Petersburg), Antananarivo (black port, sea lane from Lagos), Kinshasa (yellow, infested). Farwater also has a sea lane to Northwatch. That was Open Waters. Off-grid: Khartoum, Dar es Salaam, Johannesburg. Lagos recon is gone. Cairo recon remains: 4 different black cards, and a center unless Scout is there. Cairo is forsaken. The blacks on the grid are Istanbul, Tripoli, Cairo, Moscow, and Antananarivo.
 
-Lagos recon still wants 5 different yellows. Scout means no center. Cairo recon wants 4 different blacks and a center, and Cairo is forsaken. On the grid the blacks are only Istanbul, Tripoli, and Cairo. Moscow is black, off grid, and links from St. Petersburg. Frankfurt to Moscow crosses a line. Connecting a city puts its City cards in the Player discard for that game, so it cannot be searched until next game.
+Airlift was unrationed and I played it. Treat it as gone. At rationing 2, name Quiet Night and Surplus. Card Swap only if nobody is the Instructor. Open Waters returns to the reserve. Its targets were a short list, not every port pair.
 
-Frankfurt (blue, pop 2) and St. Petersburg (blue port, pop 1) are on the grid, both linked to Istanbul. Farwater is on the grid. Walking into it completed June's lost-haven objective.
+Inoculate is free, in the city, on an Infection card in the discard. A Player-card key is legal and costs the table that card. Do not use it. A search can set an Infection card aside until game end. The city card stays in hand. Transmit is from a tower and gives anyone a card of that city's color.
 
-Inoculate is free, in the city, and only on an Infection card in the discard. Ignore a key that names a Player card. Two Istanbul cards and a second Washington card were stored in June. Also stored, so do not armor them for infection: both São Paulo, both Lima, Atlanta, and the older set (Jacksonville x2, Denver, Bogotá, one London, Lagos x2, one Washington, New York x2). Well Stocked removes nothing when the city has 2 or more cubes. It is on `inf-washington.14` and `inf-london.33`. At 1 cube it does not block.
+Triangulate completed and then vanished from the objective list. Do not count it as a checked win until it is still on the list after the unlock. The unlock said the lines cross on land and named no action. Nothing was on the board afterward.
 
-A double card counts as 2 of its colour for a build. `washington.8` is a triple and counts as 3. June's rate track started on the first 2, with 9 epidemics in the deck. Do not carry May's position forward. The first three boxes are all rate 2.
+One Produce card still has 1 use. Do not scratch a last box unless the fill wins. `washington.8` is a triple and counts as 3. Hand-limit discard key is `decide:discard:seat-1:<card>`. The prompt omits the seat.
 
-At rationing 4, name Surplus, Open Waters, Quiet Night, and Resilience. Surplus has still never been played. The id last time was `surplus.226`. Open Waters is new: a free sea lane between two ports, and region boundaries do not limit it. Card Swap matters less now that Sable can take.
-
-Win is 3 objectives, every starred one included. Shuttle flies only between havens and supply centers. Produce system fills havens and centers, scratches one box, and the card is gone for that game. One Produce still has 2 uses. Do not scratch a last box unless the fill wins the game.
-
-Never saw a legal key for replace, retrieve, freeEdge, removeHollow, shield, cordon, skip, or rename. Rename is lobby only, and the three havens already have names.
+Never saw a legal key for replace, retrieve, freeEdge, removeHollow, shield, cordon, skip, or rename.

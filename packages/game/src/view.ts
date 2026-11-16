@@ -77,7 +77,8 @@ export function insights(world: World): Insights | null {
 		const found = world.campaign.infectionCards[card];
 		return found?.kind !== 'city' || !isForsaken(world.campaign, found.city);
 	};
-	const strata = (opening ? [openingDeck] : game.infectionDeck.strata).map(stratum => stratum.filter(infects));
+	const layers = opening ? [openingDeck] : game.infectionDeck.strata;
+	const strata = layers.map(stratum => stratum.filter(infects));
 	const hollowSetup = world.campaign.rules.includes('hollowSetup');
 	const rate = opening ? pack.numbers.setupInfections - (hollowSetup ? 3 : 0) : rates[game.rateIndex]!;
 	const keyOf = (card: CardId) => cityOfInfection(world, card);
@@ -115,7 +116,7 @@ export function insights(world: World): Insights | null {
 			deck: game.infectionDeck.order.length,
 			odds,
 			expected,
-			strata: strata.map(stratum => ({ size: stratum.length, cities: countCities(world, stratum) })),
+			strata: layers.map(stratum => ({ size: stratum.length, cities: countCities(world, stratum) })),
 			discard: countCities(world, game.infectionDiscard),
 			atRisk,
 		},

@@ -20,6 +20,11 @@ export function renderObjectives(world: World): string[] {
 			`  [${done ? 'x' : waived ? '-' : ' '}] ${def.mandatory ? '*' : ' '}${def.name} (${id}) ${progress}/${def.target}: ${def.rule}${waived ? ' (waived)' : ''}`,
 		);
 	}
+	// An objective that leaves play the moment it is completed still counts toward this game's win.
+	for (const id of game?.completed ?? []) {
+		if (campaign.objectives.includes(id)) continue;
+		lines.push(`  [x]  ${objectiveDef(id).name} (${id}): done this game and counted. It has now left play for good.`);
+	}
 	return lines;
 }
 
@@ -463,6 +468,14 @@ export function renderCity(world: World, id: CityId): string {
 			? `cubes ${location.supplies} · plague ${location.plague} · hollow men ${location.hollow} · center ${location.center} · tower ${location.tower} · shelter ${location.shelter}`
 			: '',
 		`links: ${neighbours(campaign, id).join(', ') || 'none'}`,
+		...pack.reconRoutes
+			.filter(
+				route => route.city === id && campaign.routes.includes(route.id) && !campaign.opened.includes(route.opens),
+			)
+			.map(
+				route =>
+					`RECON here: ${route.count} ${route.color} cards${route.unique ? ' of different cities' : ''}${route.needsCenter ? ', needs a supply center' : ''}`,
+			),
 		`possible new links: ${
 			pack.candidateEdges
 				.flatMap(edge => (edge.a === id ? [edge] : edge.b === id ? [{ ...edge, b: edge.a }] : []))
