@@ -1,7 +1,8 @@
 import { describe, expect, test } from 'bun:test';
 import { botCommand } from './bot';
+import { tableSeating } from './helpers';
 import { createGameActor } from './machine';
-import type { GameRecord } from './record';
+import type { GameRecord, Patch } from './record';
 import { applyPatches, diff, framesOf, gameIndexOf, parseRecord, recordStep, startRecord } from './record';
 import type { PublicState } from './view';
 import { publicState } from './view';
@@ -39,6 +40,16 @@ describe('game recordings', () => {
 			expect(frames).toHaveLength(states[index]!.length);
 			for (const [step, frame] of frames.entries()) expect(frame).toEqual(states[index]![step]!);
 		}
+	});
+
+	test('a recording made before a field existed plays back with that field filled', () => {
+		const { records } = recordGames(7, 1);
+		const old = JSON.parse(JSON.stringify(records[0]!));
+		delete old.initial.world.campaign.seating;
+		for (const step of old.steps) step.patch = step.patch.filter((patch: Patch) => !patch.p.includes('seating'));
+		const frames = framesOf(parseRecord(old));
+		expect(frames[0]!.world.campaign.seating).toEqual([]);
+		for (const frame of frames) expect(() => tableSeating(frame.world.campaign)).not.toThrow();
 	});
 
 	test('a recording is named for the game it holds and ends when that game closes', () => {

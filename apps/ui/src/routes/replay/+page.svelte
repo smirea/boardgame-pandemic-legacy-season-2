@@ -92,7 +92,7 @@
 		try {
 			if (indexUrl) {
 				index = (await fetchJson(indexUrl)) as ReplayIndex;
-				const wanted = index.games.find(entry => entry.id === params.get('game')) ?? index.games.at(-1);
+				const wanted = index.games.find(entry => entry.id === params.get('game')) ?? index.games[0];
 				if (wanted) await open(wanted);
 				if (!params.get('game')) {
 					tab = 'games';
@@ -136,8 +136,16 @@
 	$effect(() => {
 		if (!playing || !loaded) return;
 		if (frame >= total) {
-			playing = false;
-			return;
+			const games = index?.games ?? [];
+			const at = games.findIndex(entry => entry.id === current);
+			const next = at >= 0 ? games[at + 1] : undefined;
+			if (!next) {
+				playing = false;
+				return;
+			}
+			// A run plays on through the year: the next game opens and keeps playing.
+			const timer = setTimeout(() => open(next).then(() => (playing = !error)), 1500 / speed);
+			return () => clearTimeout(timer);
 		}
 		const timer = setTimeout(() => go(frame + 1), dwellAt(loaded, frame, { bubbles, follow }) / speed);
 		return () => clearTimeout(timer);

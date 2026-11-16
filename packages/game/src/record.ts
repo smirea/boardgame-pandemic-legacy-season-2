@@ -1,4 +1,5 @@
 import type { Command } from './machine';
+import { parseSave } from './machine';
 import type { PublicState } from './view';
 
 /**
@@ -164,11 +165,18 @@ export function recordStep(
 	return true;
 }
 
-/** Every state of the recording in order. Index 0 is the start, index n is the state after step n. */
+/**
+ * Every state of the recording in order. Index 0 is the start, index n is the state after step n.
+ * Patches apply to the states as recorded. Each returned state is then upgraded like a save, so a
+ * recording made before a field existed still renders on today's screens.
+ */
 export function framesOf(record: GameRecord): PublicState[] {
-	const frames = [record.initial];
-	for (const step of record.steps) frames.push(applyPatches(frames.at(-1)!, step.patch));
-	return frames;
+	const recorded = [record.initial];
+	for (const step of record.steps) recorded.push(applyPatches(recorded.at(-1)!, step.patch));
+	return recorded.map(state => ({
+		...state,
+		world: parseSave({ v: 1, phase: state.phase, world: state.world }).world,
+	}));
 }
 
 export function parseRecord(raw: unknown): GameRecord {

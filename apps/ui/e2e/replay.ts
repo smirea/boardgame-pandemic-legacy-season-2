@@ -89,7 +89,7 @@ try {
 		`the recording is named ${record.id}, month ${record.month}`,
 	);
 	const frames = framesOf(record);
-	assert(JSON.stringify(frames.at(-1)) === JSON.stringify(live), 'the last frame is not the live state');
+	assert(Bun.deepEquals(frames.at(-1), live), 'the last frame is not the live state');
 	ok(
 		'the host records every command of the game',
 		`${record.steps.length} steps, ${Math.round(JSON.stringify(record).length / 1024)} kB`,
