@@ -173,7 +173,7 @@ function purchaseText(purchase: Purchase): string {
 		case 'population':
 			return 'Raise the population by 1.';
 		case 'restore':
-			return 'Bring a forsaken city back to population 1.';
+			return 'Bring a forsaken city back to population 1. It stays infested for good: starting a turn there still exposes a character.';
 		case 'permanent':
 			return `This ${purchase.structure} starts every later game already built.`;
 	}

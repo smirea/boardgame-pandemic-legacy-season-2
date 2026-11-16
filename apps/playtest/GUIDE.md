@@ -26,11 +26,13 @@ One player is the lead for each game. Only the lead sends setup and game-end com
 
 **Winning and losing.** A game is won the moment the required number of objectives is complete, with every objective marked `*` among them. An objective that can no longer be completed (a region already revealed in an earlier game) is dropped automatically and shows as `[-]`. Then the rest decide the win, even if that is fewer than the required number. Supply centers do not survive into the next game unless they were made permanent. It is lost at 8 incidents, or when the Player deck cannot supply a full draw, or later in the year when the Hollow Men figures run out. Losing is normal. A lost month is replayed once, then the year moves on.
 
+**Forsaken and infested.** Once the rule is in play, a city at population 0 is forsaken and becomes infested. Infested is permanent: Restore brings the population back but a character who starts a turn there is still exposed.
+
 **New cities.** When a city joins the grid during a game, its City cards go to the Player discard pile and its Infection cards wait in the Game End area until the next game (`decks` shows both). So a new city cannot be infected in the game it joins.
 
 **The board.** Havens are safe platforms at sea. Cities sit on the mainland. A location is on the grid when a chain of supply lines and sea lanes joins it to a haven. Only grid cities are in the decks.
 
-**Setup.** The lead places the month's supply cubes on the grid, then the game infects 9 cities at once before the first turn, one cube each. Cities left empty at setup can take a Plague cube before anyone has moved.
+**Setup.** The lead places the month's supply cubes on the grid, then the game flips 9 Infection cards at once before the first turn, one cube each. A city can come up more than once. Cities left empty at setup can take a Plague cube before anyone has moved.
 
 **A turn** has three steps.
 

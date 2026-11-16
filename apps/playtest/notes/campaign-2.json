@@ -238,5 +238,49 @@
 				"fix": "Each matches the research or the card's text."
 			}
 		]
+	},
+	"g05": {
+		"summary": "Lost on turn 11 at eight incidents with two supply centers built. Fourth loss in a row, which triggered the relief turning point.",
+		"story": "Kit led with Sable the Instructor, Vex kept Knox the Laborer, and Sol took the Immunologist, the new job the Opal lab had brought. With the lab's bonus the table had 42 cubes and put at least two on every city, but the opening infection hit Lima and Bogotá twice each and emptied both. Knox built Istanbul and then Lagos. The Immunologist made supplies straight from the reserve and inoculated four Infection cards into storage, both of Lima's among them, and played Stock Up. It was not enough: San Francisco took the seventh incident, and Bogotá, already at two Plague cubes with its last card still in the discard pile, was struck by an epidemic and filled the track.",
+		"highlights": [
+			"First game with a job found during the campaign: the Immunologist, whose Make Supplies draws on the reserve.",
+			"Inoculate used as a strategy: four Infection cards stored out of the decks in one game.",
+			"The Opal lab's bonus arrived at setup as the research says: 27 cubes plus 15.",
+			"Four losses in a row resolved the second turning point: 10 relief cubes for each of the next 3 games.",
+			"Three cities ended forsaken: Jacksonville, Denver and San Francisco. The table bought Rebirth, Record Keeper and Well Stocked."
+		],
+		"parity": "All four checks passed, including the supply check with the lab's bonus: 27 + 15 = 42 cubes. No Legacy card was due. The losing-streak turning point resolved after the fourth straight loss, which is its researched trigger, and gives 10 cubes a game for 3 games (the one figure the research has). Restored cities stayed infested, which the research states is permanent.",
+		"findings": [
+			{
+				"finding": "The losing-streak turning point resolved and nothing told the players.",
+				"kind": "Engine gap",
+				"fix": "The game-end briefing now announces it and what it gives. The audit now tracks both turning points."
+			},
+			{
+				"finding": "Restore left Cairo and Los Angeles marked infested, which read as a bug.",
+				"kind": "Not a bug",
+				"fix": "The research rule: infested is permanent. The shop text and the guide now say so."
+			},
+			{
+				"finding": "Rebirth's text still did not say what the card does.",
+				"kind": "Wording",
+				"fix": "Rewritten again: the city is not infected, no cube lost, no Plague cube."
+			},
+			{
+				"finding": "Inoculated cards could not be seen anywhere afterwards.",
+				"kind": "Lab gap",
+				"fix": "The decks view lists what is in storage."
+			},
+			{
+				"finding": "Inoculate offered a city's discarded Player cards as well as its Infection cards.",
+				"kind": "Not a bug",
+				"fix": "The research rule covers both piles. The briefing line added last game says so."
+			},
+			{
+				"finding": "The opening infection hit two cities twice. A city at two Plague cubes took a third without an outbreak.",
+				"kind": "Not a bug",
+				"fix": "Nine cards are flipped, not nine cities. An outbreak needs a city already at three. The guide now says nine cards."
+			}
+		]
 	}
 }

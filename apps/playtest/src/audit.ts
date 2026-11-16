@@ -134,7 +134,7 @@ function setupChecks(world: World, supplies: number): Check[] {
 		},
 		{
 			name: 'supply cubes at setup (projected supplies plus campaign bonuses)',
-			expected: `${projected} + bonus ${campaign.stockpileBonus}`,
+			expected: `${projected} + bonus ${campaign.stockpileBonus}${campaign.losingStreakBonusGames > 0 ? ' + 10 relief' : ''}`,
 			actual: String(supplies),
 			ok: supplies >= (projected ?? 0),
 		},
@@ -231,6 +231,12 @@ export function observe(audit: Audit, previous: PublicState | null, next: Public
 		(record ?? audit.games.at(-1))?.opened.push({ bundle, forced });
 	}
 	for (const rule of campaign.rules) if (!previous?.world.campaign.rules.includes(rule)) bump(audit, `rule:${rule}`);
+	// A turning point leaves the list at the moment it resolves.
+	for (const point of previous?.world.campaign.turningPoints ?? []) {
+		if (campaign.turningPoints.includes(point)) continue;
+		bump(audit, `turningPoint:${point}`);
+		(record ?? audit.games.at(-1))?.opened.push({ bundle: `turning point ${point}`, forced: false });
+	}
 
 	if (game && record) {
 		const from = audit.seq[index] ?? -1;
@@ -325,6 +331,7 @@ function universe(world: World): { key: string; live: boolean }[] {
 		...['empty', 'scar', 'skull', 'worker'].map(key => ({ key: `exposure:${key}`, live: true })),
 		...['epidemic', 'death', 'edge', 'connected', 'reveal'].map(key => ({ key: `log:${key}`, live: true })),
 		...['LOCKDOWN', 'WAIVE_OBJECTIVE', 'UNDO', 'RENAME_HAVEN'].map(key => ({ key: `command:${key}`, live: true })),
+		...['firstForsaken', 'losingStreak'].map(key => ({ key: `turningPoint:${key}`, live: campaign.month >= 2 })),
 	];
 }
 

@@ -413,6 +413,9 @@ export function resolveGameEnd(world: World) {
 	if (campaign.turningPoints.includes('losingStreak') && lastFour.length === 4 && lastFour.every(result => !result)) {
 		campaign.turningPoints = campaign.turningPoints.filter(id => id !== 'losingStreak');
 		campaign.losingStreakBonusGames = 3;
+		campaign.briefing.push(
+			'Turning point: four games lost in a row. Relief arrives: 10 extra cubes in the stockpile for each of the next 3 games.',
+		);
 	}
 	for (const character of Object.values(campaign.characters)) {
 		if (character.carrier && !character.dead) {

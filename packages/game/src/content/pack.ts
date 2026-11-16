@@ -637,7 +637,7 @@ export const pack: ContentPack = {
 		{
 			id: 'rebirth',
 			name: 'Rebirth',
-			text: 'When this card is drawn while its city has population 4 or more, it does nothing.',
+			text: 'When this Infection card is drawn while its city has population 4 or more, the city is not infected: no cube lost, no Plague cube.',
 			cost: 2,
 		},
 		{

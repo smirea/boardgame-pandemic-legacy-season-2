@@ -1,23 +1,29 @@
 # Memory
 
-April was lost. The replay is rationing 6. Stay Knox. Exposure 2/7, no scar. The blank was from starting a turn in plagued São Paulo. Entering a plague city mid-turn does not scratch. Do not end a turn in one.
+April, second attempt, was lost. Incident 8 was Bogotá's third plague. May is next, rationing 8. Replay is rationing 8.
 
-Knox, Laborer, Southreach. Helmsman: first Drive or Ferry is free. Record Keeper: hand limit 8. Foreman: a land line costs 1 cube. A sea lane still shows as 2. Lines that would cross are refused. A sea lane may cross only one region boundary.
+Stay Knox. Exposure 2/7, no scar. Helmsman: first Drive or Ferry is free, even after another action. Record Keeper: hand limit 8. Foreman: a land line costs 1 cube. A sea lane still shows as 2. Lines that would cross are refused. A sea lane may cross only one region boundary.
 
-Hale, Radio Operator, exposure 1/7. Transfer is any distance and moves cubes, not cards. Sable, Instructor, exposure 1/7. Gives any card to someone in the same city. A normal share only moves the card of the city you are both standing in. Quinn is benched, scar Shaken: recon needs 1 extra card. I recon, not Quinn. Reed is unused. Immunologist (char-6) appeared from the Opal lab, home Southreach, exposure 0. The job's Make Supplies takes cubes from the reserve. The log will not explain inoculate. Use it only when the key is an infection card of the city you stand in. Ignore a key that names a city card.
+Do not end a turn in a plague city. Entering one mid-turn does not scratch. Sol took a blank in Lima. Kit took a blank in Denver. Both are at exposure with no scar: Immunologist 1/7, Sable 2/7.
 
-Permanent centers: Washington (pop 7) and London (pop 6). Atlanta and Istanbul were built this game and did not stick. London recon still wants 4 different blues. Lagos recon wants 5 different yellows and is now possible. Cairo recon wants 4 different blacks. Only Istanbul, Tripoli, and Cairo exist, so do not plan it. São Paulo recon wants 4 yellow cards and a center we do not have.
+Immunologist (Sol) now has Record Keeper. Make Supplies takes cubes from the reserve. Inoculate is free, only in the city, and only on an infection card. The card goes to storage, out of the decks. I do not know if it comes back next month. Ignore a key that names a city card. That list has included cards already discarded. The real key looks like inf-london.34.
 
-Grid now includes Lima and Bogotá. Santiago is the only off-grid city. One city cannot finish Connect 2. Buenos Aires has the Opal lab. Farwater is still only linked to Los Angeles.
+Hale is benched. Quinn is benched, scar Shaken: recon needs 1 extra card. I recon, not Quinn. Reed is unused.
 
-Populations: Washington 7, London 6, Istanbul 3, Atlanta 3, New York 2, Lagos 2, Buenos Aires 2, Bogotá 2, Lima 2. At 1, and one more lost month can forsake them: Jacksonville, São Paulo, Tripoli, Cairo, San Francisco, Denver, Chicago, Mexico City, Los Angeles, Santiago. Cairo and Los Angeles were restored to 1 and are still marked infested. I do not know what that flag does.
+Foundations (london.32) counts as 2 of its colour when building. Infrastructure (washington.8) counts as 3. Spend those on centers. Keep a normal city card for recon. Well Stocked: if the city holds 2 or more cubes when that infection card is drawn, remove none. It is on inf-washington.14 and on one London card. Rebirth was bought on Tripoli. The text only says the card does nothing at population 4 or more. Tripoli is 1, so do not plan on it. Do not buy Rebirth on a city under 4.
 
-Yellow cities on the grid: Jacksonville, São Paulo, Lagos, Mexico City, Buenos Aires, Lima, Bogotá, Los Angeles. That is 8. A city that joins during a game dumps its cards into the player discard. Do not plan to search a city in the game you connect it.
+Permanent centers: Washington (pop 8) and London (pop 7). Istanbul (pop 4) and Lagos (pop 3) were built and were not made permanent. Rebuild Lagos. It is the yellow recon site.
 
-Search cards still live: chicago.64 (1), denver.72 (1), lima.89 (1), bogota.85 (1). Buenos Aires.96 had both boxes scratched. san-francisco.68 was spent on the Atlanta center with its boxes unused.
+London recon wants 4 different blues and the center is already there. Lagos recon wants 5 different yellows and a center we have to rebuild. Cairo recon wants 4 different blacks. Only Istanbul, Tripoli, and Cairo exist. Do not plan it.
 
-`supply` only adds. A refusal exits 0, so a chained confirm still fires. Place 2 on hot cities, never 3, never 0. An epidemic strips every cube off one city. The rate track is 2, 2, 2, 3. The second epidemic stayed at 2. The third moved the rate to 3. A city that already has plague takes another incident if it has no cube when hit. At 7 incidents, cube every bare city in the discard before the next draw. Denver was the known threat. The epidemic put Cairo on top and we lost.
+Forsaken, still on the grid, infested, population 0: Jacksonville, San Francisco, Denver. I do not know what infested does. Cairo and Los Angeles were already infested and are still population 1. At 1, one more loss can forsake them: Bogotá, Lima, Buenos Aires, Tripoli, Cairo, Chicago, Mexico City, Los Angeles, São Paulo, Santiago. Restore costs 2. A permanent center costs 3.
 
-Card Swap: the player who plays it picks both cards. Say which card you will not give up before anyone plays it. Stock Up moves 6 from the reserve to the stockpile. It worked. At rationing 6, name Quiet Night, Resilience, Card Swap, Stock Up, Surplus, and Purge before the confirm. Rebirth's shop text only says it does nothing at population 4 or more. Do not buy it. Restore costs 2 and returns a city to pop 1. A permanent center costs 3.
+Santiago is the only off-grid city. One city cannot finish Connect 2. Buenos Aires has the lab. Farwater is still only linked to Los Angeles. I never found which haven is lost.
 
-The win is 3 objectives, every starred one included. Build the three centers before side trips. A haven does not count as connecting a city.
+Search cards still live: lima.89 (1), san-francisco.68 (2), denver.72 is in the deck and may still have a box, bogota.85 was still in the deck. buenos-aires.96 has no boxes left.
+
+Place 2 on every grid city at setup. Extras go on the highest odds, not on Washington or London. An epidemic strips every cube off one city, then the discard is shuffled on top. The rate track is 2, 2, 2, 3, 3, 4, 4, 5, 5, 5, 5. Eight epidemics were in the April deck. The third one moved the rate to 3. At 7 incidents, one bare city in the next infect loses. Cube or inoculate that city before the draw. A cube on a city that has 2 plague stops the outbreak. Inoculate is better when the card is already in the discard.
+
+Card Swap: the player who plays it picks both cards. Say which card you will not give up. Stock Up moves 6 from the reserve to the stockpile. Surplus was rationed and never drawn. At rationing 8, name Quiet Night, Resilience, Card Swap, Stock Up, Surplus, Supply Drop, Second Wind, and Airlift before the confirm.
+
+The win is 3 objectives, every starred one included. Build the three centers before side trips. A haven does not count as connecting a city. São Paulo's two infection cards never entered the deck.

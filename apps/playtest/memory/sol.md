@@ -1,54 +1,37 @@
 # Memory
 
-April, first attempt, lost at 8 incidents. Cairo was bare when the epidemic pile flipped. April replays once, rationing 6. I was Hale, Radio Operator, exposure 1/7. Ending on Denver's plague did not scratch me. The loss came first.
+April's second attempt lost at 8 incidents. May is next. Rationing 8. The April replay is spent.
+
+I am the Immunologist, char-6, home Southreach, exposure 1/7 (blank). Record Keeper: hand limit 8. Make Supplies draws from the reserve, not the stockpile. I do not have Helmsman. I asked for it. Knox is 2/7 with Helmsman, Record Keeper, and Foreman. Sable is 2/7, Instructor, no ability. She took a blank in Denver.
 
 ## Rules that change play
 
-A lost month is replayed once, then the year moves on. March was the second loss, so we left it.
+One plague at game end drops population by 1. Population 1 becomes forsaken and infested. The city stays on the grid at 0. A supply cube on a plagued city is lost instead of a new plague. Three plague should outbreak. The loss at 8 logged no outbreak.
 
-Setup may put more cubes on a city than its population. Population only caps Produce. Confirming supply then infects nine cities, one cube each, before turn 1. A city with two cubes goes bare if it is hit twice.
+Exposure is at the start of your turn. Ending in a clean city does not save you if the infect before your next turn plagues it. Do not end on a city with a card still in the pile.
 
-Well Stocked is one card, inf-washington.14. It blocks only when that card is drawn and Washington has 2 or more cubes.
+Inoculate is free in a city whose infection card is in the discard. It removes that card until the next game. The cards are back in May. `decks` does not show storage. In Bogota it also listed a discarded player card. I do not know what that key does.
 
-A supply cube on a plagued city is lost instead of a new plague cube. Plague stays. Three plague is an outbreak. Exposure is only at the start of your turn in a plague city. A blank still advances the count. Knox is 2/7, Sable is 1/7, I am 1/7.
+An epidemic strips one city, then the discard is on top. At 7 incidents, every bare city in that discard is a loss. Inoculate or cube those cards before the draw. A center does not win by itself.
 
-Inoculate is free, only while you stand in a city whose infection card is in the discard. It removes that card. The log line is only the action name. The card does not appear in the game end area.
+Foundations (london.32) counts as 2 blues for a build. Infrastructure (washington.8) counts as 3. Well Stocked (inf-washington.14 and inf-london.33) skips the hit if the city has 2 or more cubes. Rebirth does nothing unless the city has population 4 or more. Do not buy it for anyone else.
 
-Card Swap lets the holder trade one card between two players at any distance. The holder need not be one of them. Stock Up moves 6 cubes from the reserve to the stockpile and does not place them. Surplus, new and rationed, takes up to 3 stockpile cubes onto your character.
-
-With an Instructor present, Knox took Buenos Aires while both stood in Sao Paulo. I am not sure that take is legal. It worked. Otherwise share is only the card of the city you are both in.
-
-Radio transfer moves cubes between players at any distance, on your turn, free. It does not put a cube on a city. Istanbul does not touch Tripoli. The walk is two drives, through Midsea or Cairo.
-
-Laborer builds with 4 cards of the city's colour plus 2 cubes, standing there. Lines are 2 cubes, 1 with Knox's Foreman. His first drive each turn is free. Hand limit 7. Discard with decide:discard:seat-2 and the card id. An epidemic strips every cube off one city.
-
-Local Produce does not scratch a box. System Produce does. Discarding a Produce does not scratch it.
-
-Restore sets a forsaken city back to population 1 and leaves it infested. Rebirth is for sale and the shop never says what it does below population 4. Do not buy it blind.
+Laborer builds with 4 cards of the city's colour plus 2 cubes, or 5 cards and no cubes. Lines are not free. Share is the city you share, unless an Instructor is there, in which case any card can move. Cairo recon is still impossible: only three black cities exist.
 
 ## Campaign state
 
-Permanent centers: Washington population 7, London population 6. Atlanta and Istanbul were built and did not stick. London recon still needs 4 different blues, and the center is already there. Cairo recon is still impossible: only three black cities.
+Permanent centers: Washington population 8, London population 7. Istanbul is population 4 and Lagos population 3. Both centers were built and did not stick.
 
-Knox: Laborer, Helmsman, Record Keeper, Foreman. Exposure 2/7.
-Hale: Radio Operator. No ability. Exposure 1/7.
-Sable: Instructor. Exposure 1/7.
-Quinn: Administrator, Shaken. Exposure 2/7. Sat out.
-Reed: Farmer. Sat out.
-Immunologist (char-6), home Southreach, exposure 0/7. Make Supplies draws from the reserve.
+Forsaken, infested, population 0, still linked: Jacksonville, Denver, San Francisco. Denver is the only link to San Francisco. Cairo and Los Angeles are population 1 and infested. Also population 1: Sao Paulo, Tripoli, Chicago, Mexico City, Bogota, Lima, Buenos Aires. Santiago is off-grid. Atlanta is 3. New York is 2.
 
-Population 1, one loss from forsaken: Jacksonville, Sao Paulo, Tripoli, Cairo, San Francisco, Denver, Chicago, Mexico City. Cairo and Los Angeles are population 1 and still infested. Santiago is off-grid at population 1.
-
-Buenos Aires has the Opal lab. Bogota and Lima are on the grid. Santiago connects from Sao Paulo or Buenos Aires. A line that would cross another line is refused.
-
-washington.8 is triple and london.32 is double. Both were still in the deck.
-
-Quiet Night and Resilience were in the deck and never drawn. Card Swap and Stock Up were played and are back in the reserve. Surplus is in the reserve too.
+London recon still needs 4 different blues, and the center is already there. Lagos recon needs 5 different yellows and a center we would have to build again. A line to Santiago from Bogota is blocked because it would cross another line. Sao Paulo or Buenos Aires can still connect it. One new city is not the connect objective.
 
 ## Next game
 
-Build the three centers before the incident track hits 6. At 7, one epidemic on a pile of bare cities is a loss. Two cubes stop a double draw. One cube does not survive an epidemic strip.
+At 7, stop building and clear the discard. Quiet Night skips the infect after an epidemic. Resilience sets two discard cards of one city aside. Take those before Surplus. Stock Up is weak while the stockpile is large. I do not need it.
 
-Pick Quiet Night, Resilience, and Surplus. Add Supply Drop if it is in the reserve. I want the skip and the set-aside before anything cute.
+Put the cube down in the same turn I make it. Two cubes on a city with two cards in the pile. One cube does not survive a double draw.
 
-The fourth card for a center changes hands in that city, or by Sable giving it, or by Card Swap. Do not plan a one-drive walk from Istanbul to Tripoli.
+Do not spend the last London card on a center if we are reconning. Foundations can be the build card. The four blues have to be in one hand in London.
+
+Restore costs 2 and only returns a forsaken city to population 1, still infested. Permanent costs 3. I would restore Denver before I buy another ability. Rebirth, if we buy it, goes on a Washington or London infection card only.

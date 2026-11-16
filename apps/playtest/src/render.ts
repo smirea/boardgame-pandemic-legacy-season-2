@@ -493,6 +493,7 @@ export function renderDecks(world: World): string {
 		`Player discard (${game.playerDiscard.length}): ${game.playerDiscard.map(id => `${enc(id)} [${cardName(world, id)}]`).join(', ') || 'empty'}`,
 		`Infection discard (${game.infectionDiscard.length}): ${game.infectionDiscard.map(id => `${enc(id)} [${cardName(world, id)}]`).join(', ') || 'empty'}`,
 		`Game End area (${game.gameEndArea.length}; cards out of this game: set aside by Resilience or a search, or of cities that joined the grid this game): ${game.gameEndArea.map(id => cardName(world, id)).join(', ') || 'empty'}`,
+		`Storage (inoculated cards, out of the decks for the rest of the year unless a later rule brings them back): ${world.campaign.stored.player.length} Player, ${world.campaign.stored.infection.length} Infection${world.campaign.stored.infection.length ? `: ${world.campaign.stored.infection.map(id => cardName(world, id)).join(', ')}` : ''}`,
 		'Infection deck layers, top first (cards known to be in each layer):',
 	];
 	for (const layer of found.infection.strata)
