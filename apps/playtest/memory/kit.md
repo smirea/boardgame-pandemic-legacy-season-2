@@ -1,47 +1,46 @@
 # Memory
 
-May won. June lobby is open, rationing 6. Past: Jan W, Feb W, Mar L, Mar(2) L, Apr L, Apr(2) L, May W. Four losses gave 10 extra relief cubes for May, June, and July. May was the first of those three.
+June won. July lobby is open, rationing 4. Past: Jan W, Feb W, Mar L, Mar(2) L, Apr L, Apr(2) L, May W, Jun W. July is the last month of the extra relief cubes from the four losses.
 
-I stayed Sable, Instructor, exposure 2/7, no new scratch. I now have Courier: deliver cubes to an adjacent location. Hand limit is still 7. Knox has Laborer, Helmsman, Record Keeper, Foreman, and Scout. Scout recons without a supply center. Sol's Immunologist has Record Keeper and Architect, so Sol builds with 4 cards, and Make Supplies still comes from the reserve. Knox's exposure is 2/7. Sol's is 1/7.
+I stayed Sable, Instructor, exposure 2/7, no scratch. I now have Courier and Facilitator. Hand limit is still 7. Facilitator takes any card from someone in my location, as an action. Instructor still only gives. Knox has Laborer, Helmsman, Record Keeper, Foreman, and Scout. Sol has Record Keeper, Architect, and Runner. Scout recons without a supply center. Architect builds with 4 cards and no cubes. Runner discards any City card to move from a haven or supply center to anywhere on the grid. Knox exposure 2/7. Sol exposure 1/7. Captain (char-7) and Sanitation Officer (char-8) are new and unplayed. Sanitation Officer, free: discard 2 cards to take a City or Produce card from the discard.
 
 ## Rules that change play
 
-- Win is 3 objectives, and the starred one must be one of them. A center carries over only if it was made permanent. We did not buy one. Lagos, Istanbul, and Sao Paulo are gone in June.
-- Scout skips the supply-center requirement on recon. Cairo recon is 4 different black cards. Lagos recon is 5 different yellows. London's recon is done.
-- Courier lets me armor an infested neighbour without entering it. Cairo from Istanbul is the obvious one.
-- Instructor gives any card to someone in the same place. A normal take still has to be the card of the city you are standing in. Knox also took my New York card while we stood in Washington. Do not count on that.
-- Laborer is 4 cards of the city's colour plus 2 cubes. Architect is 4 cards and no cubes. Duplicates count for a build. Recon needs different cities. A double counts as 2. washington.8 is the triple. london.32 is the double.
-- Inoculate is free. Press only an inf- key. The menu also lists discarded player cards of that city. Those keys will eat a card we need. washington.10 was offered that way.
-- An epidemic strips every cube, then the discard is shuffled on top. Well Stocked blocks only at 2 or more cubes. Washington and London each have one. Quiet Night skips only the next infect step.
-- Rebirth on inf-tripoli.47 does nothing under population 4. Tripoli is population 1.
-- Exposure is at the start of a turn on plague, or in an infested city. Do not end a turn in one.
-- A new city's player cards go to the discard and its infection cards wait until next game. Search boxes on those cards cannot be scratched in the game the city joins. I never saw retrieve.
-- Population 0 is forsaken and infested. Restore brings it back at population 1 and it stays infested. Bad deal at 2 production units.
-- Opening infection set San Francisco's two cards and one Denver card aside to Game End and redrew. I do not know if that repeats. Do not stand in those cities.
-- `wait` returns at once while the lead still owes setup or a buy. Say the exact ids, then let them spend. A late objection cannot be undone. When a give will break someone's hand limit, name the discard before you give.
+- Win is 3 objectives, and every starred one must be among them. A center carries over only if it was made permanent. Atlanta and Paris did not. Sao Paulo did.
+- A normal trade is only the card of the city you are both standing in. I can give any card. With Facilitator I can also take any card. Do the take in the same place, same turn, before they walk off.
+- Courier delivers to an adjacent location and costs an action. The adjacent key only offers the full count I am carrying. To put one cube next door while holding two, deliver one locally first, then re-read options. Issue 107.
+- Laborer is 4 cards plus 2 cubes. A double counts as 2. washington.8 is the triple and counts as 3. london.32 is the double. Duplicates count for a build. Recon needs different cities.
+- Supply lines and sea lanes cost 2 cubes. Foreman makes Knox's supply lines cost 1. I never saw a sea lane discounted.
+- Inoculate is free. Press only an inf- key.
+- An epidemic strips every cube. Well Stocked is stuck to one infection card and blocks only that card, and only at 2 or more cubes. The other card of that city hits normally.
+- Exposure is at the start of a turn on plague, or in an infested city. Passing through Lagos did not expose Sol. Do not end a turn in one.
+- A new city's player cards go to the discard. Its infection cards wait until next game, so it cannot be infected, or searched, the game it joins. Frankfurt to Moscow crosses a supply line. St. Petersburg to Moscow does not.
+- Population 0 is forsaken and infested. Restore is a bad deal. Farwater was the lost haven and the board never said so.
+- confirm-supply would not appear while cubes were unplaced (Sol, issue 102). Place all of them. A 0% city can hold a cache. Atlanta did.
+- `wait` returns while the lead owes setup or a buy. Say the exact buy keys. Sol waits on an objection window.
 
-## Board going into June
+## Board going into July
 
-Permanent centers: Washington (pop 8), London (pop 8). Both have Well Stocked.
+Permanent centers: Washington (pop 8), London (pop 8), Sao Paulo (pop 3). Shuttle reaches all three. Atlanta (pop 4) and Paris (pop 3) have no center.
 
-No center, but on the grid: Istanbul pop 5, Lagos pop 4, Sao Paulo pop 2, Paris pop 2 (linked to London), Atlanta pop 3, New York pop 2, Chicago pop 1.
+On the grid, no center: Istanbul pop 5, Lagos pop 3, Frankfurt pop 2 (linked to Istanbul), New York pop 2, Chicago pop 1, Tripoli pop 1, St. Petersburg pop 1 (port, linked to Istanbul), Bogota, Lima, Santiago, Buenos Aires (lab) all pop 1, Los Angeles pop 1 infested.
 
-Pop 0, forsaken: Jacksonville, Denver, San Francisco, Cairo, Mexico City. Cairo and Los Angeles were already infested. Do not walk in.
+Pop 0, forsaken, infested: Jacksonville, Denver, San Francisco, Cairo, Mexico City. Do not end a turn in them.
 
-Pop 1: Tripoli, Bogota, Lima, Santiago, Buenos Aires (lab). Buenos Aires to Santiago and Sao Paulo to Santiago are already linked. Bogota to Santiago still crosses a line.
+Off the grid: Moscow (black, pop 1). Connect it from St. Petersburg. Its cards hit the discard the game it joins, so a Moscow card is not in hand until the next game unless Sanitation Officer pulls it.
 
-Off the grid: Frankfurt (blue, pop 2, from Paris or Istanbul), St. Petersburg (blue port, pop 1, sea from London), Moscow (black, pop 1). Moscow is the fourth black city. Cairo recon is impossible until Moscow is connected and its cards are in the deck.
+Lagos recon is 5 different yellows. Cairo recon is 4 different black cards and still wants Moscow in the deck. Knox can recon without a center. Cairo is forsaken, so recon and leave.
 
-Cannot be infected for the rest of the year: Sao Paulo, Lima, Atlanta. Their infection cards are all in storage. Also stored, so thinner decks: Jacksonville 2, Denver 1, Bogota 1, London 1, Lagos 2, Washington 1, New York 2.
+Two Istanbul infection cards and two Lagos cards were inoculated before June's epidemics. Each city still has one live infection card. Frankfurt and St. Petersburg can be infected in July. Their search cards are in the deck: frankfurt.104 has one box, st-petersburg.108 has two.
 
 ## How they play
 
-Vex will drop a side trip to finish the objective, then spend the shop on abilities. He took Scout, Courier, and Architect and left every new center temporary. Say the buy with the exact key.
+Vex will drop a side trip to finish the starred objective, then buy abilities. He rejected population bumps for Runner on Sol. Say the buy with the exact key.
 
-Sol inoculates every discarded infection card in reach, and will sail by discarding a card you still need. Name the cards that must not be spent. Sol's hand hit 9 and the game froze until a discard. Name the produce, not a colour card.
+Sol inoculates, and will now spend a city card to teleport. Name the cards Runner must not eat. The triple and the double are on that list. Sol's hand can hit the limit. Name the discard before a give.
 
 ## Next game
 
-Rationing is 6. Ask for one Quiet Night, Resilience, Card Swap, Surplus, one Supply Drop, one Airlift. Surplus has still never been played. Skip Stock Up. The extra cubes run through July.
+Rationing is 4. Ask for Open Waters, Surplus, Quiet Night, and Resilience. Open Waters draws a sea lane and ignores region boundaries. Surplus has still never been played. Skip Stock Up.
 
-June should connect Moscow if we want Cairo recon, and Knox can recon without building there. I should search the first boxed card I can stand on. bogota.85, lima.89, paris.100, and santiago.93 all have a box. The last two were in the discard, so they are in the June deck.
+Stay Sable. Facilitator plus a meeting assembles a build without a trip to the city on the card. Search the first boxed card I can stand on. If Cairo recon is live, connect Moscow from St. Petersburg and do not expect its cards in hand this game.

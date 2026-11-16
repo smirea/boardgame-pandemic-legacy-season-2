@@ -26,13 +26,13 @@ One player is the lead for each game. Only the lead sends setup and game-end com
 
 **Winning and losing.** A game is won the moment the required number of objectives is complete, with every objective marked `*` among them. An objective that can no longer be completed (a region already revealed in an earlier game) is dropped automatically and shows as `[-]`. Then the rest decide the win, even if that is fewer than the required number. Supply centers do not survive into the next game unless they were made permanent. It is lost at 8 incidents, or when the Player deck cannot supply a full draw, or later in the year when the Hollow Men figures run out. Losing is normal. A lost month is replayed once, then the year moves on.
 
-**Forsaken and infested.** Once the rule is in play, a city at population 0 is forsaken and becomes infested. A forsaken city is never infected: when its Infection card comes up it is set aside in the Game End area and another card is flipped in its place, so a setup can log more than 9 flips. Only Drive or Ferry works inside one. Infested is permanent: Restore brings the population back but a character who starts a turn there is still exposed.
+**Forsaken and infested.** Once the rule is in play, a city at population 0 is forsaken and becomes infested. Inoculate, once unlocked, works on both discard piles: it stores your city's Player card or its Infection card, whichever you name. Storing a Player card costs the table that card. A forsaken city is never infected: when its Infection card comes up it is set aside in the Game End area and another card is flipped in its place, so a setup can log more than 9 flips. Only Drive or Ferry works inside one. Infested is permanent: Restore brings the population back but a character who starts a turn there is still exposed.
 
 **New cities.** When a city joins the grid during a game, its City cards go to the Player discard pile and its Infection cards wait in the Game End area until the next game (`decks` shows both). So a new city cannot be infected in the game it joins.
 
 **The board.** Havens are safe platforms at sea. Cities sit on the mainland. A location is on the grid when a chain of supply lines and sea lanes joins it to a haven. Only grid cities are in the decks.
 
-**Setup.** The lead places the month's supply cubes on the grid, then the game flips 9 Infection cards at once before the first turn, one cube each. A city can come up more than once. Cities left empty at setup can take a Plague cube before anyone has moved.
+**Setup.** The lead places every one of the month's supply cubes on the grid (none may be kept back), then the game flips 9 Infection cards at once before the first turn, one cube each. A city can come up more than once. Cities left empty at setup can take a Plague cube before anyone has moved.
 
 **A turn** has three steps.
 
@@ -45,6 +45,8 @@ Cubes never leave the game. A cube an infection removes goes back to the stockpi
 A city may hold more cubes than its population. Population only caps Produce Supplies.
 
 So supply cubes are armour. Your main job between objectives is keeping cubes on the cities most likely to be hit. `status` lists the trouble spots with their odds.
+
+**Each game starts clean.** The infection rate, the incident track and the decks all reset every game. Only what the year made permanent carries over.
 
 **Hand limit** is 7. Over it, you must discard, and the game waits until you do, even on another player's turn. `wait` tells you when that is you.
 
@@ -66,7 +68,7 @@ Each costs 1 action unless `options` shows another cost. `options` is the truth 
 - `deliver:<count>`: put cubes from your character on your location.
 - `pickUp:<count>` and `transfer:...`: move cubes between the location, you, and a player who is with you. A transfer with the Radio Operator works at any distance. Both are free actions: they cost nothing, any number of times, on your own turn.
 - `produce:<card>:<mode>`: discard a Produce Supplies card. Both modes need you to stand in a haven or a supply center city. `local` fills your location up to its population from the stockpile. `system` fills every haven and supply center city and scratches one of the card's two boxes. Either way the card goes to the discard pile for the rest of this game and comes back next game. The boxes last all year: when both are scratched the card is destroyed for good.
-- `share:<card>:<seat>:<true|false>`: give (`true`) or take (`false`) the card of the city you both stand in. An Instructor may give any card, so `options` lists more when one is involved.
+- `share:<card>:<seat>:<true|false>`: give (`true`) or take (`false`) the card of the city you both stand in. An Instructor may give any card, and a player sharing with the Instructor on their own turn may take any card from them, so `options` lists more when one is involved.
 - `buildCenter:<cards>`: discard 5 City cards of the city's colour to build a supply center there. Three new ones in a game is the standing objective.
 - `establishLine:<city>`: unlocks with the first region you reveal and stays unlocked for the rest of the year. A supply line may not cross another supply line, and `board` says which links are blocked and why. Spend cubes from your character to draw a supply line to a neighbouring revealed city. That joins it to the grid.
 - `chartLane:<port>`: the same over water, once it is unlocked.

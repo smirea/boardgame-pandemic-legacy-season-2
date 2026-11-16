@@ -113,7 +113,8 @@ export function legalActions(world: World, seat: SeatId): Action[] {
 	}
 	if (me.supplies > 0) {
 		for (let count = me.supplies; count >= 1; count--) candidates.push({ a: 'deliver', count });
-		for (const to of neighbours(campaign, here)) candidates.push({ a: 'deliver', count: me.supplies, to });
+		for (const to of neighbours(campaign, here))
+			for (let count = me.supplies; count >= 1; count--) candidates.push({ a: 'deliver', count, to });
 	}
 	const cubesHere = game.locations[here]!.supplies;
 	for (let count = cubesHere; count >= 1; count--) candidates.push({ a: 'pickUp', count });

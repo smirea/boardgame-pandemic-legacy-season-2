@@ -326,5 +326,44 @@
 				"fix": "Both follow the research. The Inoculate options now say which pile each card comes from."
 			}
 		]
+	},
+	"g07": {
+		"summary": "Won on turn 9 with one incident, the cleanest game of the year so far.",
+		"story": "Sol led with the Immunologist, beside Knox the Laborer and Sable the Instructor, each carrying the ability bought in May. With 46 cubes and six events the table went straight for the objectives. Knox drew supply lines from Istanbul to Frankfurt and to St. Petersburg in the opening turns, which completed Connect 2 new cities. The Immunologist stored Istanbul and Washington Infection cards as they came up. A pawn walked into Farwater, the haven found in March, which counts as accessing a lost haven. Supply centers went up in Atlanta, Paris and São Paulo, and the third ended the game with two epidemics drawn and a single Plague cube on the board.",
+		"highlights": [
+			"Three objectives in nine turns: Connect 2 new cities, Access a lost haven, Build 3 supply centers.",
+			"Europe paid off at once: Frankfurt and St. Petersburg joined by supply line, and a center built in Paris.",
+			"Shuttle Flight was available for the first time, unlocked by Europe's recon.",
+			"Card Swap now logs what it moved: Knox gave Istanbul, the Immunologist gave Los Angeles.",
+			"Game end: card 06-02 brought two new characters and two Rationed Events. The table made a supply center permanent and bought Facilitator and Runner. Rationing drops to 4."
+		],
+		"parity": "All four checks passed, with supplies at 21 + 15 lab bonus + 10 relief = 46. Card 06-01 was read at setup: Europe was already open, so its perimeter report forced nothing and Frankfurt was not lost. Card 06-02 was read at game end. The research records no new rules for June, and none arrived. Entering an already-found lost haven completed the objective, which matches the research wording: any haven that is not one of the three starting ones.",
+		"findings": [
+			{
+				"finding": "Infection odds at setup ranked forsaken cities highest, though their cards are set aside and replaced.",
+				"kind": "Engine bug",
+				"fix": "Forsaken cities' cards are left out of the odds, at setup and in play. Test added."
+			},
+			{
+				"finding": "A Courier could deliver only the whole stack to a neighbouring city.",
+				"kind": "Engine gap",
+				"fix": "Every count is offered for a neighbouring delivery too. Test added."
+			},
+			{
+				"finding": "The lead expected to confirm supplies with cubes kept back.",
+				"kind": "Not a bug",
+				"fix": "The research setup places every cube. The guide now says none may be kept back."
+			},
+			{
+				"finding": "The infection rate was back at 2 after May's three epidemics.",
+				"kind": "Not a bug",
+				"fix": "Each game starts clean. The guide now says so."
+			},
+			{
+				"finding": "Any card could be taken from the Instructor on the taker's turn. Inoculate offered Player cards.",
+				"kind": "Not a bug",
+				"fix": "Both reported for the third time. The guide now states each in so many words."
+			}
+		]
 	}
 }

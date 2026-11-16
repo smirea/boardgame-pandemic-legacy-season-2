@@ -1,5 +1,5 @@
 import { pack } from './content/pack';
-import { cityDef, grid } from './helpers';
+import { cityDef, grid, isForsaken } from './helpers';
 import type { CardId, CityId } from './ids';
 import type { GameSnapshot, Phase } from './machine';
 import { phaseOf } from './machine';
@@ -72,7 +72,12 @@ export function insights(world: World): Insights | null {
 	const openingDeck = Object.values(world.campaign.infectionCards)
 		.filter(card => card.kind === 'city' && onGridNow.has(card.city) && !stored.has(card.id))
 		.map(card => card.id);
-	const strata = opening ? [openingDeck] : game.infectionDeck.strata;
+	// A forsaken city's card is set aside when it comes up and another is flipped, so it takes no share of the odds.
+	const infects = (card: CardId) => {
+		const found = world.campaign.infectionCards[card];
+		return found?.kind !== 'city' || !isForsaken(world.campaign, found.city);
+	};
+	const strata = (opening ? [openingDeck] : game.infectionDeck.strata).map(stratum => stratum.filter(infects));
 	const hollowSetup = world.campaign.rules.includes('hollowSetup');
 	const rate = opening ? pack.numbers.setupInfections - (hollowSetup ? 3 : 0) : rates[game.rateIndex]!;
 	const keyOf = (card: CardId) => cityOfInfection(world, card);

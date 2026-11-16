@@ -30,7 +30,7 @@ import {
 	stackInfection,
 	worldOf,
 } from './testkit';
-import { publicState } from './view';
+import { insights, publicState } from './view';
 
 const produceCards = (world: World) =>
 	Object.values(world.campaign.playerCards)
@@ -1563,5 +1563,36 @@ describe('found in May', () => {
 			event: 'cardSwap',
 			detail: 'Ada gives Cairo, Bo gives Lagos',
 		});
+	});
+});
+
+describe('found in June', () => {
+	test('infection odds leave out forsaken cities, whose cards are set aside and replaced', () => {
+		const actor = late(world => {
+			if (!world.campaign.rules.includes('forsaken')) world.campaign.rules.push('forsaken');
+			world.campaign.locations[city('cairo')]!.population = 0;
+			stackInfection(world, ['cairo', 'lagos', 'london']);
+		});
+		const odds = insights(worldOf(actor))!.infection.odds;
+		expect(odds[city('cairo')]).toBeUndefined();
+		expect(odds[city('lagos')]).toBe(1);
+		expect(odds[city('london')]).toBe(1);
+	});
+
+	test('a Courier may deliver any number of cubes to a neighbouring city', () => {
+		const actor = late((world, game) => {
+			character(world, A).slots[1] = { kind: 'ability', id: 'courier' };
+			game.players[A]!.supplies = 3;
+		});
+		const next = legalActions(worldOf(actor), A).flatMap(action =>
+			action.a === 'deliver' && action.to ? [action] : [],
+		);
+		const first = next[0]!.to;
+		expect(
+			next
+				.filter(action => action.to === first)
+				.map(action => action.count)
+				.toSorted(),
+		).toEqual([1, 2, 3]);
 	});
 });

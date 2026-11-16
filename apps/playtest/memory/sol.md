@@ -1,43 +1,49 @@
 # Memory
 
-May won. June is next. Rationing 6. Two games of the +10 relief cubes should still be ahead, June included.
+June won on turn 9. July is next. Rationing is 4.
 
-I am the Immunologist, char-6, home Southreach, exposure 1/7. Record Keeper and Architect: hand limit 8, and I build a center with 4 cards of the city's colour, no cubes. Make Supplies still draws from the reserve. Knox has Helmsman, Record Keeper, Foreman, and Scout. Sable has Courier. She can deliver to an adjacent city.
+I am the Immunologist, char-6, home Southreach, exposure 1/7. Record Keeper, Architect, and Runner. Hand limit 8. I build a center with 4 cards of the city's colour. Runner discards any City card to move from a haven or supply center to anywhere on the grid. Make Supplies still draws from the reserve.
+
+Knox is the Laborer with Helmsman, Record Keeper, Foreman, and Scout. His slots are full. Sable is the Instructor with Courier and Facilitator. She can give any card. Facilitator lets her take any card from someone in her city, and that take costs an action.
 
 ## Rules that change play
 
-One plague at game end drops population by 1. Population 0 is forsaken and infested. A supply cube on a plagued city is spent before a new plague is added. Three plague outbreaks. We never saw the outbreak.
+A forsaken city is never infected. Its card is set aside and another card is flipped, so setup can log more than 9 flips. The odds and the threat panel still rank those cities. Ignore Cairo, San Francisco, Denver, Jacksonville, and Mexico City on that panel. Issue 103.
 
-At setup, San Francisco and Denver (population 0) were skipped and their cards went to the Game End area, and the flip continued to 9 real hits. Issue 89. Do not count on it until it happens again. Cairo at population 1 was hit normally.
+confirm-supply is not offered until the stockpile is empty. Issue 102. Place every setup cube. Opening hits return cubes to the stockpile. Park a cache on a city with no live infection card.
 
-Inoculate is free in a city whose infection card is in the discard. It also listed discarded player cards. I do not know what those keys do. Do not press them.
+One plague cube at game end drops that city by 1. The three cities where we built a center each gained 1. I am not sure the gain is caused by the center.
 
-Exposure is at the start of your turn in a city with plague, or on leaving Hollow Men without a shelter. Do not end a turn on plague.
+Share moves only the card of the city you stand in. An Instructor can give any card and cannot take one. Card Swap is the remote trade. Do not put an apostrophe in a `why:` sentence. Issue 109. The command never arrives.
 
-Share moves the city you are standing in, unless an Instructor is there. Sable can give any card. Options also offered me a take of her other cards. Untested. Card Swap trades one card each and is how blues move across the table.
+Well Stocked blocks only at 2 or more cubes. Do not inoculate those cards. Inoculate a plain infection card that is sitting in the discard. Rebirth does nothing under population 4. Foundations counts as 2. Infrastructure counts as 3. A line or a tower costs 2 cubes, and 1 with Foreman. A sea lane costs 2.
 
-Well Stocked blocks only at 2 or more cubes. Do not inoculate those cards. Rebirth does nothing under population 4. Foundations counts as 2. Infrastructure counts as 3. Laborer builds with 4 cards plus 2 cubes. Lines are not free. Foreman makes Knox's lines cost 1 fewer.
+Do not end a turn on plague or in an infested city. Search in a forsaken city is untested. The guide says only Drive or Ferry works there.
 
-A city that joins mid-game cannot be infected that game. Its city cards go to the player discard. Paris did this and completed Connect. Search cards in that discard are stuck unless a retrieve key appears. None did.
+A city that joins mid-game cannot be infected that game. Its city cards go to the player discard. Sanitation Officer, a new job, discards 2 cards to take a City or Produce card from the discard.
 
 ## Campaign state
 
-Permanent centers: Washington population 8, London population 8. Istanbul is population 5, Lagos population 4, São Paulo population 2. Those three centers were built in May and did not stick.
+Permanent centers: Washington population 8, London population 8, Sao Paulo population 3. Atlanta is population 4 and Paris is population 3. Those two centers did not stick. Lagos is population 3. Istanbul is population 5.
 
-Forsaken, infested, population 0: Jacksonville, Denver, San Francisco, Cairo, Mexico City. Los Angeles is population 1 and infested. Also population 1: Tripoli, Chicago, Bogotá, Lima, Buenos Aires, Santiago, St. Petersburg, Moscow. Paris and New York are population 2. Atlanta is 3 and its only infection card is inoculated.
+On the grid now: Frankfurt, linked to Istanbul, population 2. St. Petersburg, linked to Istanbul, population 1, a port. Moscow is still off the grid, black, population 1. Farwater is a haven. Entering it was the lost haven. It links to Los Angeles.
 
-Europe is open. Paris is on the grid, linked to London. Off-grid: Frankfurt from Paris or Istanbul, St. Petersburg from Istanbul or by sea from London, Moscow a black city not yet linked. Lagos recon still needs 5 different yellows and a center. Cairo recon needs 4 different blacks. Moscow would be the fourth if it joins. Scout lets Knox recon without a center.
+Population 1: Tripoli, Chicago, Bogota, Lima, Buenos Aires, Santiago, St. Petersburg, Los Angeles (infested), Moscow. New York is population 2.
 
-Inoculated for the year, so they cannot be drawn: all São Paulo, all Lima, Atlanta's only card, two Lagos, two New York, one Washington that is not Well Stocked, plus the older Jacksonville, Denver, Bogotá, and London cards. San Francisco's cards and the set-aside Denver and Paris cards were in the Game End area and should be back in June.
+Forsaken, infested, population 0: Jacksonville, Denver, San Francisco, Cairo, Mexico City. Do not restore one unless we must stand there. Restore costs 2 and the city stays infested.
+
+Lagos recon still needs 5 different yellows. Cairo recon needs 4 different blacks, and the city is forsaken, so it may be illegal. Scout lets Knox recon without a center.
+
+Inoculated, out of the deck: all Sao Paulo, all Lima, Atlanta's only card, two Lagos, two Istanbul, two New York, two Washington (the plain ones, not Well Stocked), plus the older Jacksonville, Denver, Bogota, and London cards. One Istanbul card is still live. The London and Washington Well Stocked cards are still live.
 
 ## Next game
 
-Do not place the whole stockpile. Leave a pile for Make Supplies and Produce. I can still armor from the reserve.
+Rationing is 4. Ask for Quiet Night, Card Swap, Surplus, and Open Waters. Surplus has been seeded and never drawn. Open Waters is new: a free sea lane between any two ports, and region boundaries do not limit it.
 
-Architect means I only need 4 cards of one colour in the build city. Sable's Courier armors a neighbor without entering it. Use that on infested cities.
+Keep this character so Runner gets used. Someone should play Sanitation Officer or Captain. Captain discards a City card to move to any port on our sea route.
 
-Quiet Night skips the infect step you play it before, including the one after an epidemic. Card Swap is how a recon hand gets built. Take Resilience before Surplus. Surplus was in the May deck and never came up. At rationing 6 I want two Quiet Nights, Resilience, Card Swap, Surplus, and one Supply Drop.
+Ask Sable to give a card, or to spend Facilitator and take it. Do not try to hand her one. Runner is how I reach the build city from a center.
 
-Two cubes on a city for each of its cards in the current layer. One cube does not survive a double draw. Washington and London Well Stocked cards stay in the deck.
+Forsaken cities get no cubes. Two cubes on a live city for each of its cards. Sao Paulo and Atlanta have no live infection cards.
 
-Do not restore a population 0 city unless we are about to stand there. Restore is 2 units, returns population 1, and the city stays infested.
+The starred build was the whole win. Connect and the lost haven were already done before the third center. Do not spend a turn searching until the centers are safe, unless search is the objective we are missing.
