@@ -339,7 +339,9 @@ function unlockLine(campaign: Campaign, unlock: Unlock): string | null {
 		case 'scar':
 			return `New scar in the box: ${named(pack.scars, unlock.scar)}`;
 		case 'job':
-			return `New job found: ${named(pack.jobs, unlock.job)}`;
+			return `A new character has joined the roster with a job nobody had before: ${named(pack.jobs, unlock.job)} That text describes the job, not a new rule for everyone.`;
+		case 'lab':
+			return `A lab was found in ${pack.cities.find(entry => entry.id === unlock.city)!.name}. Every lab found counts toward the final score.`;
 		case 'action':
 			return actionBriefs[unlock.action] ?? null;
 		case 'region': {

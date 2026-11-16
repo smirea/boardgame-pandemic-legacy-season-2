@@ -1,33 +1,27 @@
 # Memory
 
-December won at 7 incidents. The campaign is over. Score 545. Past: Jan W, Feb W, Mar L, Mar(2) L, Apr L, Apr(2) L, May W, Jun W, Jul W, Aug W, Sep W, Oct L, Oct(2) W, Nov L, Nov(2) L, Dec W.
+October first lost when the Player deck ran out. Incidents 7/8. Hollow Men 1/3, one figure in Farwater. Build centers was waived. Past: Jan W, Feb W, Mar W, Apr W, May W, Jun W, Jul W, Aug W, Sep W, Oct L. Next lobby is October second at rationing 6.
 
-Hale (char-2) is dead. Carrier scar is listed twice. Record Keeper and Foreman are gone. Do not put a sample on a character we still need.
+Rook (char-1) is dead. Vex is the Scientist (char-8), home Southreach, exposure 1/7, no ability yet. Once per turn, free, the Scientist destroys the Infection card of the city they stand in from the discard. Sol is still Wren (char-2), Broker and Helmsman, exposure 2/7. I am Pike (char-3), Instructor, Facilitator, Navigator, Seasick. Exposure 2/7. Home Southreach. Navigator makes one Chart Sea Lane a turn free, which is how I live with Seasick.
 
-I am still the Sanitation Officer (char-8). Architect, Outrider, Soldier, Scout. Exposure 1/7. Slots full. Home is Crosswater. Sol's Immunologist kept Architect, Runner and Record Keeper. Shaken replaced Supplier: recon needs 1 extra card. Exposure 2/7. Reed now has Lookout, Broker and Saboteur, exposure 0/7.
+## Board that matters
 
-## What the last game actually was
+Permanent tower in Los Angeles. Permanent shelters in Tripoli and Baghdad. St. Petersburg is forsaken. Farwater lost 1. Washington, Cairo, Johannesburg, Kolkata, Jakarta, and Shanghai each gained 1. Tripoli kept its population because the shelter was there when the plague scored.
 
-The Plan left play. The win was one vial: Lake Baikal to a supply center in Johannesburg. `selfInject` at the Pearl lab takes the sample. The carrier moves only by Drive or Ferry, discards a matching colour to enter each city, and dies at game end.
-
-The working road was Tehran–Utopia–Lake Baikal, then Utopia, Tehran, Istanbul, Lagos, Dar es Salaam, Johannesburg. Colours: red, black, black, yellow, yellow, blue. Foreman draws a land line for 1 cube. Draw both grid ends before anyone takes the sample.
-
-Johannesburg and Lake Baikal cannot be infected the game they join. Their City cards go to the player discard. Architect builds the center with 4 blues. Salvage is free: discard 2, take a City or Produce from the discard.
+Forsaken: that infection card is set aside and another city is flipped, so the hit still lands. Only Drive or Ferry works there. Restore costs 2 and the city stays infested. Do not buy it unless we need the city.
 
 ## Rules that change play
 
-- Forsaken cities block Share. Only Drive or Ferry works there. A card of a forsaken city stays in the hand that drew it.
-- Outrider cancels the exposure for leaving Hollow Men. It does not cancel infested exposure at the start of a turn. A shelter does.
-- Soldier's key is `strike`, in the city, 1 figure, 1 action.
-- An epidemic strikes one stored Infection card, strips that city, and puts the card back in the deck. The plague is the next time that city is drawn with no cubes. Do not inoculate a city you need to keep unless you want it in that lottery.
-- Resilience can be played any time, not only on an epidemic. It sets aside up to 2 discarded Infection cards of one city.
-- Cordon is offered mid-infect. The prompt can show a table choice and then list no `decide` key. Try the key the moment it appears. Setup still does not offer it.
-- `selfInject` scratched three boxes and wrote Carrier twice. Treat it as possibly destroying the rest of the character.
-- Well Stocked blocks only at 2 or more cubes. A center gives back the game-end population point. A city loses at most 1 population a game.
-- Hand limit without Record Keeper is 7. Rationing going out was 2.
+Infested cities and plague cities expose you at the start of the turn, before actions. A shelter built that turn is too late. Do not end a turn in an infested city unless it is already sheltered. Seasick does not stop that exposure. Outrider only stops leaving Hollow Men.
 
-## End of the board
+Shield is a discard of a matching colour card to keep the cube an infection just removed. The pay keys show up only for colours in your hand. Answer quickly. The choice closes as soon as someone skips.
 
-Johannesburg gained 1. Frankfurt, Moscow, New Mumbai, Bangkok and Shanghai each lost 1. Moscow, New Mumbai, Bangkok and Shanghai are forsaken. Do not restore them. A restored city stays infested. Washington, Sao Paulo, Atlanta and Paris lost nothing because of their centers.
+Inoculate stores a discarded Infection card for the whole game when no Epidemic will pull it back. Never inoculate a player card that still has a search box.
 
-Never appeared in my options: replace, freeEdge, shield. Skip was named on the Cordon prompt and not listed.
+Supply Drop and Stock Up both take cubes from the reserve. The reserve stayed 0 while the stockpile moved, and neither card ever became playable. Do not count on them.
+
+Search companions worked and did not write a log line. Check the city before you trust the play. Airlift does log.
+
+freeEdge never appeared. replace was only the dead player's new character. A shelter still asked for a colour card even after the briefing said it was free.
+
+Jakarta recon was used on turn 1 to open Coral Sea. Do not plan on a second route from there.

@@ -1,33 +1,33 @@
 # Memory
 
-Campaign-2 is over. December, first attempt, won. Score 545: early wins 400, late wins 30, population 80, sample 100, labs 50, forsaken -115. The finished screen says month 13. There is no next game.
+October first, the tour, was lost. The Player deck ran out. Incidents stopped at 7/8. Hollow Men 1/3. Next lobby is October second at rationing 6.
 
-Hale (char-2) is dead. Carrier. Exposure 4/7. Both slots are Carrier scars. Record Keeper and Foreman are gone. Do not play Hale.
+Rook (char-1) is dead. Laborer, Saboteur. Do not play Rook. A character at 6/7 dies on the next exposure.
 
-Do not play the Captain (char-7). Exposure 5/7, two Careless scars, Surveyor, Investigator.
+I am the Scientist (char-8), home Southreach, exposure 1/7, one blank from leaving Lima. No bought abilities. Once per turn, free, destroyInfection removes this city's Infection card from the discard. That is not Inoculate. Inoculate stores the card, and an Epidemic can pull a stored card back out.
 
-Reed (char-5), Farmer, Northwatch, exposure 0/7, now has Lookout, Broker, and Saboteur. One slot is still empty.
+Wren (char-2): Radio Operator, Broker, Helmsman, exposure 2/7. Pike (char-3): Instructor, Facilitator, Seasick, Navigator, exposure 2/7. Seasick makes sea lanes cost 1 more cube. Navigator makes one Chart Sea Lane free each turn.
 
-Immunologist (char-6): exposure 2/7, Record Keeper, Architect, Runner, Shaken. Supplier is gone.
+Still unplayed: Immunologist, Captain, Sanitation Officer, Vector Control Expert. Vector Control builds a shelter with no card, in any location, including a haven.
 
-Sanitation Officer (char-8): exposure 1/7, Architect, Outrider, Soldier, Scout. Slots full.
+## Rules that change the next game
 
-## Rules that decided the win
+October's starred objective is 3 Hollow Men in different havens at once. Waiving build centers did not win the game by itself.
 
-December is one objective. Carry the sample from Lake Baikal to a supply center in Johannesburg.
+Broadcast: stand in a tower city and move a Hollow Man from a city of that colour into a neighbour. Los Angeles has a permanent yellow tower. Lima's neighbours include Farwater. One figure in Farwater does not carry over. Figures reset. The tower does not.
 
-selfInject at the lake makes the carrier. This time it scratched three boxes and wrote Carrier into two slots. Treat another selfInject as possibly lethal.
+Permanent shelters: Tripoli and Baghdad. Coralhold's shelter does not come back. A shelter blocks exposure and blocks the game-end population loss. Tripoli had plague and lost nothing.
 
-The carrier moves only by Drive or Ferry, discards one card of that city's colour to enter, and dies at game end. A haven asked for no card. When I held two matching cards, options listed only one. The other worked after the first was spent.
+St. Petersburg is forsaken, population 0, and stays infested even if restored. The briefing says its Infection cards are skipped and only Drive or Ferry works there. I did not restore it. Restore costs 2 and the city stays infested.
 
-The short walk is Utopia (red), Tehran (black), Istanbul (black), Lagos (yellow), Dar es Salaam (yellow), Johannesburg (blue). The line that makes it is Tehran–Utopia, drawn from Tehran. Foreman made each of my lines cost 1 cube. Lake Baikal joins only from Utopia. Johannesburg joins only from Dar es Salaam. A city that joins cannot be infected that game.
+Infested is permanent at population above 0. Osaka was population 1 and still infested. Starting a turn there exposes you. Walking through on your own turn does not. Leaving a Hollow Man exposes you. A haven has no colour, so Build Shelter cannot target one. Shelter Wright can.
 
-Utopia has 8 infection cards. They were already in the discard at the start, with no flip in the log. Inoculate stores them. Each epidemic pulls one stored card, strips that city, and returns the card.
+Shield: when infection removes a supply cube, any player may discard a City card of that city's colour to keep it. An empty city takes plague instead, and shield does not open. Quiet Night, played before the first flip, skips that whole infect step. Supply Drop does nothing when the reserve is empty.
 
-Leaving a Hollow Man exposes you. Outrider leaves clean. Soldier removes one figure where you stand. An infested city exposes you at the start of a turn. The Kolkata shelter prevents both. Share only moves the card of the city you are standing in. Forsaken cities cannot host a share. Card Swap is the remote trade. We never drew it.
+A new city joins the grid the moment the line is drawn. Its cards sit out of the decks for that game. Santiago is on the grid from São Paulo. Coralhold linked to Jakarta the moment the recon finished, despite the briefing saying it was off the grid until a line was drawn.
 
-Architect builds with 4 cards. Kit built Johannesburg with Atlanta, both Johannesburg cards, and St Petersburg. The wild was not needed.
+Death's replace choice lists living unused characters. The new pawn starts at its home haven, with no actions left that turn, then draws. The log may rename the death onto the new character. Trust status.
 
-Permanent centers stayed at the cap of 6. No permanent purchase was offered. Lookout, Broker, and Saboteur cost 2 each and are now on Reed.
+Permanent centers I saw: Jakarta, Washington, Cairo, Johannesburg, Kolkata, Shanghai. That is the cap of 6. Tripoli's tower was already permanent, and Los Angeles is now too.
 
-Cordon did not open during setup. Later it announced a choice and gave me no discard key.
+Rationing 6 means six rationed events. Do not assume the next deck has zero Epidemics. This one was cut to 30 cards and had none.

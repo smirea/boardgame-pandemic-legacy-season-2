@@ -69,6 +69,18 @@ export const player = (game: Game, seat: SeatId): Player => {
 	return found;
 };
 
+/**
+ * Who sat in `seat` when the log entry numbered `seq` was written: the next character to die in
+ * that seat, or whoever sits there now. A log line about a dead character keeps that character's name.
+ */
+export function characterAt(world: World, seat: SeatId, seq: number): Character | undefined {
+	const game = world.game;
+	if (!game) return undefined;
+	const death = game.log.find(entry => entry.t === 'death' && entry.seat === seat && entry.seq >= seq);
+	const id = death?.t === 'death' ? death.character : game.players[seat]?.character;
+	return id ? world.campaign.characters[id] : undefined;
+}
+
 export const characterOf = (world: World, seat: SeatId): Character =>
 	world.campaign.characters[player(world.game!, seat).character]!;
 

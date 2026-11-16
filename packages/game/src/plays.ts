@@ -86,7 +86,8 @@ export function checkPlay(world: World, seat: SeatId, card: CardId, play: Play, 
 				: 'Pick 1 or 2 discarded Infection cards of one city';
 		}
 		case 'supplyDrop':
-			return onGrid.has(play.city) && game.reserve > 0 ? ok : 'Pick a location on the grid';
+			if (game.reserve === 0) return 'The reserve is empty, so there is nothing to drop';
+			return onGrid.has(play.city) ? ok : 'Pick a location on the grid';
 		case 'secondWind':
 			return phase === 'playing.actions' ? ok : 'Second Wind is played during the action step';
 		case 'scavenge':
@@ -104,7 +105,7 @@ export function checkPlay(world: World, seat: SeatId, card: CardId, play: Play, 
 		case 'purifier':
 			return (game.locations[play.city]?.plague ?? 0) > 0 ? ok : 'No Plague cubes there';
 		case 'stockUp':
-			return game.reserve > 0 ? ok : 'The reserve is empty';
+			return game.reserve > 0 ? ok : 'The reserve is empty, so there is nothing to move';
 		case 'cardSwap': {
 			const first = game.players[play.a];
 			const second = game.players[play.b];

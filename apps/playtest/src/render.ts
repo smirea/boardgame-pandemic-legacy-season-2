@@ -1,4 +1,5 @@
 import {
+	characterAt,
 	checkEdge,
 	cityDef,
 	crossesEdge,
@@ -132,14 +133,14 @@ const SEARCH_FINDS: Record<string, string> = {
 	quarantineCard: 'the chance to set an Infection card aside until game end (a choice follows)',
 	removeHollow: 'the chance to remove Hollow Men (a choice follows)',
 	freeEdge: 'a free supply line or sea lane from here (a choice follows)',
-	discover: 'something new for the campaign (see the Legacy briefing)',
+	discover: 'a lead (the next line says what it opened, or that it was already followed)',
 	companion: 'a companion, who joins your hand',
 	infest: 'an infestation: this city now exposes whoever starts a turn in it',
 	nothing: 'nothing',
 };
 
 export function renderLog(world: World, entry: LogEntry): string {
-	const seat = (id: SeatId) => seatName(world, id);
+	const seat = (id: SeatId) => characterAt(world, id, entry.seq)?.name ?? seatName(world, id);
 	const city = (id: CityId) => cityName(world, id);
 	switch (entry.t) {
 		case 'turn':

@@ -2,8 +2,8 @@ import { describe, expect, test } from 'bun:test';
 import { checkEdge } from './actions';
 import { pack } from './content/pack';
 import type { EventId, SearchResult } from './content/types';
-import { bump, epidemicCount, placeHollow, setupInfection } from './flow';
-import { grid, handLimit, hasEdge, isCandidate, passage, segmentsCross } from './helpers';
+import { bump, epidemicCount, freeCharacters, placeHollow, setupInfection } from './flow';
+import { characterAt, grid, handLimit, hasEdge, isCandidate, passage, segmentsCross } from './helpers';
 import type { BundleId, CardId, CityId } from './ids';
 import { createGameActor, parseSave, reject } from './machine';
 import type { Action } from './actions';
@@ -1264,6 +1264,26 @@ describe('parity gaps found by the static review', () => {
 		const card = gameOf(actor).players[A]!.hand.at(-1)!;
 		send(actor, { type: 'PLAY', seat: A, card, play: { e: 'medic' } });
 		expect(gameOf(actor).log.at(-1)).toMatchObject({ t: 'note', text: expect.stringContaining('played Medic') });
+	});
+
+	test('a log line about a character who died keeps that character, not the replacement', () => {
+		const actor = late((world, game) => {
+			const dying = character(world, A);
+			dying.exposure = dying.exposureTrack.length - 1;
+			game.locations[game.players[A]!.location]!.plague = 1;
+			game.active = C;
+		});
+		const victim = character(worldOf(actor), A);
+		send(actor, { type: 'END_ACTIONS', seat: C });
+		for (const type of ['DRAW', 'DRAW', 'INFECT', 'INFECT'] as const)
+			if (!reject(worldOf(actor), phase(actor), { type })) send(actor, { type });
+		const death = gameOf(actor).log.find(entry => entry.t === 'death')!;
+		expect(death).toMatchObject({ character: victim.id });
+		const free = freeCharacters(worldOf(actor))[0]!;
+		send(actor, { type: 'DECIDE', decide: { d: 'replace', character: free.id } });
+		expect(character(worldOf(actor), A).id).toBe(free.id);
+		expect(characterAt(worldOf(actor), A, death.seq)!.id).toBe(victim.id);
+		expect(characterAt(worldOf(actor), A, gameOf(actor).nextSeq)!.id).toBe(free.id);
 	});
 
 	test('only the North America recon completes the January objective', () => {

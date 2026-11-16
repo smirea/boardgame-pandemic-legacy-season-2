@@ -218,8 +218,10 @@ function resolveSearch(ctx: Ctx, result: SearchResult) {
 			game.pending.push({ t: 'freeEdge', seat: ctx.seat, kind: result.kind, ignoreRegions: false });
 			return;
 		case 'discover':
-			if (campaign.opened.includes(result.bundle)) game.actionsLeft += 1;
-			else openBundle(ctx.world, result.bundle, false);
+			if (campaign.opened.includes(result.bundle)) {
+				game.actionsLeft += 1;
+				log(game, { t: 'note', text: 'That lead was already followed: 1 extra action this turn' });
+			} else openBundle(ctx.world, result.bundle, false);
 			return;
 		case 'companion':
 			return giveCompanion(ctx, result.companion);
@@ -302,11 +304,20 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 			return needed > 0 && ctx.game.stockpile > 0 ? ok : 'Nothing would be produced';
 		},
 		apply(ctx, { card, mode, first }) {
+			const filled: string[] = [];
+			const short: string[] = [];
 			for (const city of fillTargets(ctx, mode, first)) {
-				const amount = Math.min(shortfall(ctx, city), ctx.game.stockpile);
+				const wanted = shortfall(ctx, city);
+				const amount = Math.min(wanted, ctx.game.stockpile);
 				ctx.game.stockpile -= amount;
 				ctx.game.locations[city]!.supplies += amount;
+				if (amount > 0) filled.push(`${cityDef(city).name} +${amount}`);
+				if (amount < wanted) short.push(cityDef(city).name);
 			}
+			log(ctx.game, {
+				t: 'note',
+				text: `Produced: ${filled.join(', ')}${short.length ? `. The stockpile ran out before filling ${short.join(', ')}` : ''}`,
+			});
 			removeFromHand(ctx.game, ctx.seat, card);
 			const produce = ctx.campaign.playerCards[card]!;
 			if (mode === 'system' && produce.kind === 'produce' && --produce.boxesLeft <= 0)

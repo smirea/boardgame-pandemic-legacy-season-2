@@ -15,6 +15,7 @@ export type { Insights, PublicState } from './view';
 export { insights, onGrid, publicState } from './view';
 export {
 	cardValue,
+	characterAt,
 	cityDef,
 	crossesEdge,
 	crossesUnexplored,

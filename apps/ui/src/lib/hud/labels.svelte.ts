@@ -1,4 +1,4 @@
-import { cityDef, handLimit, pack, routeCost } from '@repo/game';
+import { characterAt, cityDef, handLimit, pack, routeCost } from '@repo/game';
 import type { Action, CardId, CityId, Decide, Decision, LogEntry, Play, Purchase, SeatId, World } from '@repo/game';
 
 export const MONTHS = [
@@ -271,13 +271,14 @@ export function purchaseLabel(world: World, purchase: Purchase): string {
 
 /** One log entry as a short line, or null for entries that only repeat another line. */
 export function logLine(world: World, entry: LogEntry): { tone: '' | 'head' | 'good' | 'bad'; text: string } | null {
+	const who = (seat: SeatId) => characterAt(world, seat, entry.seq)?.name ?? seatName(world, seat);
 	switch (entry.t) {
 		case 'turn':
-			return { tone: 'head', text: `${seatName(world, entry.seat)}'s turn` };
+			return { tone: 'head', text: `${who(entry.seat)}'s turn` };
 		case 'move':
-			return { tone: '', text: `${seatName(world, entry.seat)} to ${cityName(entry.to)}` };
+			return { tone: '', text: `${who(entry.seat)} to ${cityName(entry.to)}` };
 		case 'draw':
-			return { tone: '', text: `${seatName(world, entry.seat)} draws ${cardName(world, entry.card)}` };
+			return { tone: '', text: `${who(entry.seat)} draws ${cardName(world, entry.card)}` };
 		case 'epidemic':
 			return {
 				tone: 'bad',
@@ -293,7 +294,7 @@ export function logLine(world: World, entry: LogEntry): { tone: '' | 'head' | 'g
 		case 'exposure':
 			return {
 				tone: entry.result === 'empty' ? '' : 'bad',
-				text: `${seatName(world, entry.seat)} is exposed: ${{ empty: 'nothing', scar: 'a scar', skull: 'death', worker: 'sent home' }[entry.result]}`,
+				text: `${who(entry.seat)} is exposed: ${{ empty: 'nothing', scar: 'a scar', skull: 'death', worker: 'sent home' }[entry.result]}`,
 			};
 		case 'connected':
 			return { tone: 'good', text: `${cityName(entry.city)} joins the grid` };
@@ -312,7 +313,7 @@ export function logLine(world: World, entry: LogEntry): { tone: '' | 'head' | 'g
 		case 'search':
 			return {
 				tone: '',
-				text: `${seatName(world, entry.seat)} searches ${cityName(entry.city)}`,
+				text: `${who(entry.seat)} searches ${cityName(entry.city)}`,
 			};
 		case 'end':
 			return {
