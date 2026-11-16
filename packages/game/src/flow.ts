@@ -1,6 +1,6 @@
 import { current, isDraft } from 'immer';
 import { pack } from './content/pack';
-import type { ObjectiveId } from './content/types';
+import type { ObjectiveId, ScarId } from './content/types';
 import { drawBottom, drawPiled, drawTop, newDeck, newPiledDeck, stackOnTop } from './decks';
 import { characterOf, cityDef, grid, has, hasRule, isForsaken, isHaven, log, neighbours, player } from './helpers';
 import type { BundleId, CardId, CharacterId, CityId, RegionId, SeatId } from './ids';
@@ -248,8 +248,12 @@ export function expose(world: World, seat: SeatId) {
 	if (box === 'skull') kill(world, seat);
 }
 
+export const hasScar = (character: Character, scar: ScarId) =>
+	character.jobScar === scar || character.slots.some(slot => slot?.kind === 'scar' && slot.id === scar);
+
+/** A character can take a scar when one it does not already carry is in the box and there is somewhere to put it. */
 export function canTakeScar(world: World, character: Character): boolean {
-	const scars = world.campaign.scars.filter(scar => scar !== 'carrier');
+	const scars = world.campaign.scars.filter(scar => scar !== 'carrier' && !hasScar(character, scar));
 	return scars.length > 0 && scarTargets(character).length > 0;
 }
 
@@ -327,6 +331,10 @@ function drawInfectionCard(world: World, end: 'top' | 'bottom'): (DrawnCity & { 
 			if (!infectable) return null;
 			game.infectionDeck = newDeck(campaign.rng, game.infectionDiscard.splice(0));
 			game.rateIndex = Math.min(game.rateIndex + 1, numbers.infectionRates.length - 1);
+			log(game, {
+				t: 'note',
+				text: 'The Infection deck ran out: its discard pile is reshuffled into a new deck and the infection rate moves one step',
+			});
 		}
 		const id = end === 'top' ? drawTop(game.infectionDeck)! : drawBottom(game.infectionDeck)!;
 		const card = campaign.infectionCards[id]!;
@@ -334,10 +342,11 @@ function drawInfectionCard(world: World, end: 'top' | 'bottom'): (DrawnCity & { 
 			game.infectionDiscard.push(id);
 			if (end === 'bottom') return null;
 			gathers += 1;
-			log(game, {
-				t: 'note',
-				text: 'A Hollow Men card was flipped: the next city gets a Hollow Man and is not infected',
-			});
+			if (gathers === 1)
+				log(game, {
+					t: 'note',
+					text: 'A Hollow Men card was flipped: the next city gets a Hollow Man and is not infected',
+				});
 			continue;
 		}
 		if (isForsaken(campaign, card.city)) {

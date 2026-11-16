@@ -2,7 +2,7 @@ import { addEdge, checkEdge } from './actions';
 import { pack } from './content/pack';
 import type { ScarId } from './content/types';
 import { drawPiled } from './decks';
-import { canTakeScar, freeCharacters, intensify, movePawn, scarTargets } from './flow';
+import { canTakeScar, freeCharacters, hasScar, intensify, movePawn, scarTargets } from './flow';
 import { characterOf, cityDef, discardFromHand, grid, handLimit, log, player, removeFromHand } from './helpers';
 import type { CardId, CharacterId, CityId, SeatId } from './ids';
 import { createCharacter } from './legacy';
@@ -284,6 +284,7 @@ export function checkDecide(world: World, decide: Decide): string | null {
 			if (!seat || !game.players[seat]) return 'Pick who takes the scar';
 			const character = characterOf(world, seat);
 			if (!campaign.scars.includes(decide.scar) || decide.scar === 'carrier') return 'That scar is not available';
+			if (hasScar(character, decide.scar)) return 'This character already carries that scar';
 			return scarTargets(character).includes(decide.target) ? ok : 'A scar cannot go there';
 		}
 		case 'replace': {
@@ -403,12 +404,20 @@ export function applyDecide(world: World, decide: Decide) {
 		case 'cordon':
 			discardFromHand(game, decide.seat, decide.card);
 			game.infectionsLeft = 0;
+			log(game, {
+				t: 'note',
+				text: `${characterOf(world, decide.seat).name} discarded a card to Cordon: the rest of this Infect step is called off`,
+			});
 			return;
 		case 'shield': {
 			const city = (pending as { city: CityId }).city;
 			discardFromHand(game, decide.seat, decide.card);
 			game.locations[city]!.supplies += 1;
 			game.stockpile -= 1;
+			log(game, {
+				t: 'note',
+				text: `${characterOf(world, decide.seat).name} discarded a card to keep the cube in ${cityDef(city).name}`,
+			});
 			return;
 		}
 	}
