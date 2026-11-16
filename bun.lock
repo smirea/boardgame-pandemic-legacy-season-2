@@ -45,7 +45,6 @@
         "@fontsource/im-fell-english": "^5.3.0",
         "@repo/game": "workspace:*",
         "@repo/net": "workspace:*",
-        "@stefan.inc/feedback-engine": "^1.4.0",
         "@sveltejs/adapter-static": "^4.0.0",
         "@sveltejs/kit": "^3.0.1",
         "@sveltejs/vite-plugin-svelte": "^7.3.1",
@@ -61,6 +60,7 @@
         "world-atlas": "^2.0.2",
       },
       "devDependencies": {
+        "@stefan.inc/feedback-engine": "^1.5.0",
         "@tailwindcss/vite": "^4.3.3",
         "@types/d3-geo": "^3.1.1",
         "@types/three": "^0.187.0",
@@ -418,7 +418,7 @@
 
     "@standard-schema/spec": ["@standard-schema/spec@1.1.0", "", {}, "sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w=="],
 
-    "@stefan.inc/feedback-engine": ["@stefan.inc/feedback-engine@1.4.0", "", { "dependencies": { "dom-accessibility-api": "^0.7.1", "modern-screenshot": "^4.7.0", "oxc-parser": "^0.158.0" }, "peerDependencies": { "svelte": "^5.29.0" } }, "sha512-xWnXK0/YK0EEBGDxB/gBOsHK62xeQDarEChUbv2C6IPT/NwoLTdzBZmXBIsb7AEVGYAuq1M+gqABGWc4Z6l/JA=="],
+    "@stefan.inc/feedback-engine": ["@stefan.inc/feedback-engine@1.5.0", "", { "dependencies": { "dom-accessibility-api": "^0.7.1", "modern-screenshot": "^4.7.0", "oxc-parser": "^0.158.0" }, "peerDependencies": { "svelte": "^5.29.0" } }, "sha512-DPeMNsDAX/1FWvxZOArnVVpNsqvo+kAb3xq0ueJGw77/kW8f3ZmIg+sQ4F72SFm7tPkwhGaNEtMkgAE/7a7NnA=="],
 
     "@sveltejs/acorn-typescript": ["@sveltejs/acorn-typescript@1.0.13", "", { "peerDependencies": { "acorn": "^8.9.0" } }, "sha512-wgKggnhZVL9Bfx1OaKKTrYY9BFRk6C8UAkQNUcIv1+llzYrIqy+RZm5HPKzn0NpEBvTVhTqB4kQyllZywsRBRQ=="],
 

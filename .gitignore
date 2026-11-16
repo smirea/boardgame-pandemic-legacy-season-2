@@ -23,3 +23,6 @@ build
 
 # agent working files
 .audit/*.todo.md
+
+# task-orchestrator session files
+.orchestrator

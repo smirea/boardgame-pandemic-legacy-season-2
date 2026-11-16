@@ -10,7 +10,7 @@ const uiHost = new URL(env.UI_URL).hostname;
 export default defineConfig({
 	plugins: [
 		tailwindcss(),
-		feedbackProcrastimate({ token: env.PROCRASTIMATE_TOKEN }),
+		feedbackProcrastimate({ token: env.PROCRASTIMATE_TOKEN, project: 'a/bg-pandemic-2' }),
 		sveltekit({
 			preprocess: [feedbackEngine()],
 			adapter: adapter({
