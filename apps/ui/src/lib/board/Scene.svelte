@@ -17,6 +17,7 @@
 	import type { BoardBounds, BoardPoint } from './projection';
 	import Pulse from './Pulse.svelte';
 	import RemoteCursor from './RemoteCursor.svelte';
+	import { routeBow } from './routes';
 	import RouteTube from './RouteTube.svelte';
 	import type { BoardView } from './types';
 
@@ -106,6 +107,10 @@
 	const routeKey = (route: { a: CityId; b: CityId; kind: string }) => `${route.kind}:${edgeKey(route.a, route.b)}`;
 	const initialEdges = new Set(untrack(() => view.edges.map(routeKey)));
 
+	const bows = $derived.by(() => {
+		const lanes = view.edges.filter(edge => edge.kind === 'sea');
+		return new Map([...view.edges, ...view.ghostEdges].map(route => [routeKey(route), routeBow(route, lanes)]));
+	});
 	const visibleCities = $derived(pack.cities.filter(city => view.cities[city.id]!.revealed));
 	// Board units covered by one screen pixel at the whole-board view, the zoom at which labels are most crowded.
 	const unitsPerPixel = $derived((2 * fit.distance * Math.tan((FOV * Math.PI) / 360)) / Math.max(1, $size.height));
@@ -185,11 +190,17 @@
 <Fog {bounds} sheet={unknownSheet} hidden={city => !view.cities[city]!.revealed} />
 
 {#each view.ghostEdges as route (`ghost:${routeKey(route)}`)}
-	<RouteTube {route} from={layout[route.a]!} to={layout[route.b]!} ghost />
+	<RouteTube {route} from={layout[route.a]!} to={layout[route.b]!} bow={bows.get(routeKey(route)) ?? 0} ghost />
 {/each}
 
 {#each view.edges as route (routeKey(route))}
-	<RouteTube {route} from={layout[route.a]!} to={layout[route.b]!} animate={!initialEdges.has(routeKey(route))} />
+	<RouteTube
+		{route}
+		from={layout[route.a]!}
+		to={layout[route.b]!}
+		bow={bows.get(routeKey(route)) ?? 0}
+		animate={!initialEdges.has(routeKey(route))}
+	/>
 {/each}
 
 {#each visibleCities as city (city.id)}

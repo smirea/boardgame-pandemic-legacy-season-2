@@ -62,7 +62,7 @@
 			<div class="row">
 				{#if !character.worker}
 					<span class="exposure" title="Exposure track. A scar or a skull hides under some boxes.">
-						Exposure
+						<span class="caption">Exposure</span>
 						{#each { length: pack.numbers.exposureBoxes } as _, box (box)}
 							{@const result = box < character.exposure ? character.exposureTrack[box] : undefined}
 							<i
@@ -235,6 +235,10 @@
 		color: var(--on);
 		font-weight: 700;
 		text-decoration: underline wavy;
+	}
+
+	.caption {
+		margin-right: 0.3rem;
 	}
 
 	.row b {

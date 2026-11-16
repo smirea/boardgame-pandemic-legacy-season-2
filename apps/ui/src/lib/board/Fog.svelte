@@ -33,7 +33,8 @@
 		diffuseColor.rgb = mix( diffuseColor.rgb, vec3( 0.84, 0.85, 0.83 ), 0.1 + 0.36 * mist );
 		float fogEdge = smoothstep( 0.02, 0.3, fogMask ) * ( 1.0 - smoothstep( 0.3, 0.8, fogMask ) );
 		diffuseColor.rgb = mix( diffuseColor.rgb, vec3( 0.45, 0.24, 0.09 ), fogEdge * ( 0.15 + 0.65 * uReveal ) );
-		diffuseColor.a *= clamp( fogMask * ( 1.0 + 0.7 * ( wisp - 0.5 ) ), 0.0, 1.0 );
+		// Settled fog is fully opaque; only a lifting edge frays with the mist.
+		diffuseColor.a *= smoothstep( 0.15, 0.6, fogMask * ( 0.75 + 0.5 * wisp ) );
 	`;
 </script>
 
@@ -46,7 +47,6 @@
 	import { CanvasTexture, LinearFilter, MeshStandardMaterial } from 'three';
 	import type { Texture } from 'three';
 	import { FogMask } from './chart';
-	import type { FogSource } from './chart';
 	import { LAND_HEIGHT } from './projection';
 	import type { BoardBounds } from './projection';
 
@@ -80,21 +80,16 @@
 			.replace('#include <alphamap_fragment>', FOG);
 	};
 
-	const cities = pack.cities.filter(city => !city.lost);
-	const sources = new Map<CityId, FogSource & { progress: number; target: number; wait: number }>(
+	// Every location owns ground, lost havens included: the rules count theirs as unexplored too.
+	const cities = pack.cities;
+	const sources = new Map<CityId, { cover: number; progress: number; target: number; wait: number }>(
 		cities.map(city => {
 			const covered = hidden(city.id) ? 1 : 0;
-			return [city.id, { at: pack.positions[city.id]!, cover: covered, progress: covered, target: covered, wait: 0 }];
+			return [city.id, { cover: covered, progress: covered, target: covered, wait: 0 }];
 		}),
 	);
-	const links = cities.flatMap((a, index) =>
-		cities
-			.slice(index + 1)
-			.filter(b => b.region === a.region)
-			.map(b => [sources.get(a.id)!, sources.get(b.id)!] as [FogSource, FogSource]),
-	);
 	const paint = () => {
-		mask.draw([...sources.values()], links);
+		mask.draw(id => sources.get(id)?.cover ?? 0);
 		alpha.needsUpdate = true;
 	};
 	paint();

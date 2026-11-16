@@ -1,9 +1,11 @@
+import { pack } from '@repo/game';
+import type { CityId } from '@repo/game';
 import { geoGraticule } from 'd3-geo';
 import type { GeoPermissibleObjects } from 'd3-geo';
 import { feature } from 'topojson-client';
 import type { Topology } from 'topojson-specification';
 import landTopology from 'world-atlas/land-50m.json';
-import coarseTopology from 'world-atlas/land-110m.json';
+import { partition } from './partition';
 import { boardPath, FRAME, project } from './projection';
 import type { BoardBounds, BoardPoint } from './projection';
 
@@ -285,9 +287,8 @@ function paintChart(bounds: BoardBounds): Chart {
 		const topology = data as Topology;
 		return new Path2D(boardPath(feature(topology, topology.objects['land']!)) ?? '');
 	};
+	// Every coast, wash and ring follows the same 50m coastline the rules test water against.
 	const land = outline(landTopology);
-	// Wide strokes only need the general shape of a coast, and the coarse outline is many times faster to stroke.
-	const coarse = outline(coarseTopology);
 	const sphere = new Path2D(boardPath({ type: 'Sphere' }) ?? '');
 	const sea = new Path2D();
 	sea.addPath(sphere);
@@ -318,10 +319,10 @@ function paintChart(bounds: BoardBounds): Chart {
 		rings.globalCompositeOperation = 'source-over';
 		rings.strokeStyle = `rgb(${SEA_INK} / ${0.42 - ring * 0.06})`;
 		rings.lineWidth = 2 * ring * gap + thickness;
-		rings.stroke(coarse);
+		rings.stroke(land);
 		rings.globalCompositeOperation = 'destination-out';
 		rings.lineWidth = 2 * ring * gap - thickness;
-		rings.stroke(coarse);
+		rings.stroke(land);
 	}
 	ink.setTransform(1, 0, 0, 1, 0, 0);
 	ink.drawImage(rings.canvas, 0, 0);
@@ -338,7 +339,7 @@ function paintChart(bounds: BoardBounds): Chart {
 	] as const) {
 		ink.strokeStyle = `rgb(150 100 48 / ${alpha})`;
 		ink.lineWidth = widthUnits;
-		ink.stroke(coarse);
+		ink.stroke(land);
 	}
 	ink.restore();
 
@@ -403,7 +404,7 @@ function paintChart(bounds: BoardBounds): Chart {
 		] as const) {
 			ctx.strokeStyle = `rgb(52 104 152 / ${alpha * strength})`;
 			ctx.lineWidth = widthUnits;
-			ctx.stroke(coarse);
+			ctx.stroke(land);
 		}
 		ctx.restore();
 		ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -421,12 +422,38 @@ function paintChart(bounds: BoardBounds): Chart {
 		ctx.drawImage(layer.canvas, 0, 0);
 		ctx.globalCompositeOperation = 'source-over';
 		toBoard(ctx);
+		regionLines(ctx, bounds, px);
 		frame(ctx, sphere, px);
 		ctx.setTransform(1, 0, 0, 1, 0, 0);
 		wear(ctx, width, height);
 		return canvas;
 	};
 	return { known: finish(ink, 1), unknown: finish(faint, 0.55, 0.3) };
+}
+
+/**
+ * Region boundaries, exactly where `regionAt` changes: a dash-and-dot rule in boundary red on a pale
+ * halo, so it reads over water-lining and coast without competing with routes.
+ */
+function regionLines(ctx: Ctx, bounds: BoardBounds, px: (pixels: number) => number) {
+	const path = new Path2D();
+	for (const border of partition(bounds).borders) {
+		path.moveTo(border.from.x, border.from.z);
+		path.lineTo(border.to.x, border.to.z);
+	}
+	ctx.save();
+	ctx.beginPath();
+	ctx.rect(FRAME.minX, FRAME.minZ, FRAME.maxX - FRAME.minX, FRAME.maxZ - FRAME.minZ);
+	ctx.clip();
+	ctx.lineCap = 'round';
+	ctx.strokeStyle = 'rgb(246 238 218 / 0.6)';
+	ctx.lineWidth = px(8);
+	ctx.stroke(path);
+	ctx.strokeStyle = 'rgb(128 38 26 / 0.9)';
+	ctx.lineWidth = px(3.2);
+	ctx.setLineDash([px(20), px(5), px(3.5), px(5)]);
+	ctx.stroke(path);
+	ctx.restore();
 }
 
 /** The neatline around the world, with a ruled border marking every ten degrees. */
@@ -512,106 +539,71 @@ function compass(ctx: Ctx, at: BoardPoint, radius: number, px: (pixels: number) 
 	ctx.restore();
 }
 
-export type FogSource = { at: BoardPoint; cover: number };
-
 /**
- * How much of the unknown sheet shows at each point of the board. Every hidden city fades the ink
- * around it, and so does the line between two hidden cities of the same region, so a region reads as
- * one blank patch. A fixed noise field makes the edge ragged, and as a city's cover falls the patch
- * wears away from the edges in.
+ * How much of the unknown sheet shows at each point: the ground of every location still unrevealed,
+ * cut exactly from the rules partition. A location being revealed opens from its city outward until
+ * its whole cell is charted.
  */
 export class FogMask {
 	readonly canvas: HTMLCanvasElement;
 	#ctx: Ctx;
-	#noise: Float32Array;
-	#field: Float32Array;
-	#image: ImageData;
 	#scale: number;
+	#cells: { id: CityId; path: Path2D; at: BoardPoint; reach: number }[];
 
 	constructor(
 		readonly bounds: BoardBounds,
-		readonly width = 1024,
+		readonly width = 2048,
 	) {
 		this.#scale = width / (bounds.maxX - bounds.minX);
-		const height = Math.round((bounds.maxZ - bounds.minZ) * this.#scale);
-		const { canvas, ctx } = sheet(width, height);
+		const { canvas, ctx } = sheet(width, Math.round((bounds.maxZ - bounds.minZ) * this.#scale));
 		this.canvas = canvas;
 		this.#ctx = ctx;
-		this.#image = ctx.createImageData(width, height);
-		this.#field = new Float32Array(width * height);
-		this.#noise = valueNoise(width, height, random(71));
+		this.#cells = partition(bounds).cells.map(cell => {
+			const at = pack.positions[cell.id]!;
+			const path = new Path2D();
+			cell.outline.forEach((corner, index) =>
+				index ? path.lineTo(corner.x, corner.z) : path.moveTo(corner.x, corner.z),
+			);
+			path.closePath();
+			const reach = Math.max(...cell.outline.map(corner => Math.hypot(corner.x - at.x, corner.z - at.z)));
+			return { id: cell.id, path, at, reach };
+		});
 	}
 
-	draw(points: FogSource[], links: [FogSource, FogSource][], radius = 15) {
-		const field = this.#field;
-		field.fill(0);
-		const { width, height } = this.canvas;
+	draw(cover: (id: CityId) => number) {
+		const ctx = this.#ctx;
 		const scale = this.#scale;
-		const { minX, minZ } = this.bounds;
-		const stamp = (a: BoardPoint, b: BoardPoint, cover: number) => {
-			if (cover <= 0.001) return;
-			const reach = radius * scale;
-			const x0 = Math.max(0, Math.floor((Math.min(a.x, b.x) - minX) * scale - reach));
-			const x1 = Math.min(width - 1, Math.ceil((Math.max(a.x, b.x) - minX) * scale + reach));
-			const y0 = Math.max(0, Math.floor((Math.min(a.z, b.z) - minZ) * scale - reach));
-			const y1 = Math.min(height - 1, Math.ceil((Math.max(a.z, b.z) - minZ) * scale + reach));
-			const dx = b.x - a.x;
-			const dz = b.z - a.z;
-			const lengthSq = dx * dx + dz * dz;
-			for (let y = y0; y <= y1; y++) {
-				const z = minZ + y / scale;
-				for (let x = x0; x <= x1; x++) {
-					const px = minX + x / scale;
-					const t = lengthSq ? Math.max(0, Math.min(1, ((px - a.x) * dx + (z - a.z) * dz) / lengthSq)) : 0;
-					const distance = Math.hypot(px - (a.x + dx * t), z - (a.z + dz * t));
-					const near = 1 - distance / radius;
-					if (near <= 0) continue;
-					const value = cover * near * near * (3 - 2 * near);
-					const index = y * width + x;
-					if (value > field[index]!) field[index] = value;
-				}
-			}
-		};
-		for (const point of points) stamp(point.at, point.at, point.cover);
-		for (const [a, b] of links) stamp(a.at, b.at, Math.min(a.cover, b.cover));
-		const data = this.#image.data;
-		for (let i = 0; i < field.length; i++) {
-			const alpha = Math.max(0, Math.min(1, (field[i]! + 0.45 * (this.#noise[i]! - 0.5) - 0.24) * 7));
-			const value = alpha * 255;
-			data[i * 4] = value;
-			data[i * 4 + 1] = value;
-			data[i * 4 + 2] = value;
-			data[i * 4 + 3] = 255;
-		}
-		this.#ctx.putImageData(this.#image, 0, 0);
-	}
-}
-
-function valueNoise(width: number, height: number, rand: () => number) {
-	const out = new Float32Array(width * height);
-	for (const [cell, weight] of [
-		[72, 0.5],
-		[26, 0.3],
-		[9, 0.2],
-	] as const) {
-		const columns = Math.ceil(width / cell) + 2;
-		const rows = Math.ceil(height / cell) + 2;
-		const grid = Float32Array.from({ length: columns * rows }, () => rand());
-		for (let y = 0; y < height; y++) {
-			const gy = y / cell;
-			const row = Math.floor(gy);
-			const fy = gy - row;
-			const sy = fy * fy * (3 - 2 * fy);
-			for (let x = 0; x < width; x++) {
-				const gx = x / cell;
-				const column = Math.floor(gx);
-				const fx = gx - column;
-				const sx = fx * fx * (3 - 2 * fx);
-				const top = grid[row * columns + column]! * (1 - sx) + grid[row * columns + column + 1]! * sx;
-				const bottom = grid[(row + 1) * columns + column]! * (1 - sx) + grid[(row + 1) * columns + column + 1]! * sx;
-				out[y * width + x]! += (top * (1 - sy) + bottom * sy) * weight;
+		ctx.setTransform(1, 0, 0, 1, 0, 0);
+		ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+		ctx.setTransform(scale, 0, 0, scale, -this.bounds.minX * scale, -this.bounds.minZ * scale);
+		ctx.save();
+		ctx.beginPath();
+		ctx.rect(FRAME.minX, FRAME.minZ, FRAME.maxX - FRAME.minX, FRAME.maxZ - FRAME.minZ);
+		ctx.clip();
+		ctx.fillStyle = '#fff';
+		// Settled cells go into one path, so two unknown neighbours never show a seam between them.
+		const settled = new Path2D();
+		for (const cell of this.#cells) {
+			const amount = cover(cell.id);
+			if (amount >= 0.999) settled.addPath(cell.path);
+			else if (amount > 0.001) {
+				ctx.save();
+				ctx.clip(cell.path);
+				ctx.fill(cell.path);
+				const radius = (1 - amount) * cell.reach * 1.15;
+				const feather = cell.reach * 0.3;
+				const hole = ctx.createRadialGradient(cell.at.x, cell.at.z, 0, cell.at.x, cell.at.z, radius + feather);
+				hole.addColorStop(0, 'rgb(0 0 0 / 1)');
+				hole.addColorStop(radius / (radius + feather), 'rgb(0 0 0 / 1)');
+				hole.addColorStop(1, 'rgb(0 0 0 / 0)');
+				ctx.globalCompositeOperation = 'destination-out';
+				ctx.fillStyle = hole;
+				ctx.fill(cell.path);
+				ctx.restore();
+				ctx.fillStyle = '#fff';
 			}
 		}
+		ctx.fill(settled);
+		ctx.restore();
 	}
-	return out;
 }
