@@ -43,7 +43,6 @@
       "name": "@repo/ui",
       "dependencies": {
         "@fontsource/barlow-semi-condensed": "^5.3.0",
-        "@fontsource/cormorant-sc": "^5.3.0",
         "@fontsource/im-fell-english": "^5.3.0",
         "@repo/game": "workspace:*",
         "@repo/net": "workspace:*",
@@ -206,8 +205,6 @@
     "@esbuild/win32-x64": ["@esbuild/win32-x64@0.28.2", "", { "os": "win32", "cpu": "x64" }, "sha512-5ebpxr3nWMzrL/rnUI755Jkuee0bHL/Gq0WTF9lvcpv73wAp5eu8MfBUgWK9bhWvZjj7yX8etf/8tI8Ney695g=="],
 
     "@fontsource/barlow-semi-condensed": ["@fontsource/barlow-semi-condensed@5.3.0", "", {}, "sha512-EdpQ1GlLMofGqDsQhEw+g6DonNKmzt21p8y/oNbTl4BFzEkqYkFyE2fj25YGxmZBL/LZZGAxe74FlvEWcgc31w=="],
-
-    "@fontsource/cormorant-sc": ["@fontsource/cormorant-sc@5.3.0", "", {}, "sha512-4iTWFRwm6x6UJ2tJpcMYShL2KLgLSwiXt5KTPSe6GHpDr54ZzkH3/JXXvczGWV3MnzTUc4PCqPsbh/VLNPlxGg=="],
 
     "@fontsource/im-fell-english": ["@fontsource/im-fell-english@5.3.0", "", {}, "sha512-FcgdWfY9WeUM2gQkfmwhn4Ed9LVtlll8LSSZvHfbsUrnHK5tHHnGg6BgwAfHogp52adU3eE89J/3B52qV3b+Vw=="],
 

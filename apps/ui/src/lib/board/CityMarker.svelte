@@ -19,8 +19,8 @@
 	import { Spring, Tween } from 'svelte/motion';
 	import { inkOn } from '#lib/color.ts';
 	import type { Part } from './hints';
-	import { anchorOffset, NAME_SIZE } from './labels';
-	import type { Anchor } from './labels';
+	import { DISC_REACH, NAME_SIZE } from './labels';
+	import type { Placement } from './labels';
 	import Pop from './Pop.svelte';
 	import { fonts, printDisc, printName, printSticker } from './print.svelte';
 	import Printed from './Printed.svelte';
@@ -33,13 +33,15 @@
 		city: CityDef;
 		at: BoardPoint;
 		state: CityView;
-		anchor: Anchor;
+		placement: Placement;
+		/** Under the pointer, so its printed name lights up. */
+		lit: boolean;
 		onselect: () => void;
 		/** A pointer over one of the city's parts, or off it when `event` is null. */
 		onhint: (part: Part, event: PointerEvent | null) => void;
 	};
 
-	let { city, at, state, anchor, onselect, onhint }: Props = $props();
+	let { city, at, state, placement, lit, onselect, onhint }: Props = $props();
 
 	// Every piece has its own place around the disc, so a glance tells what stands where.
 	const SPOT = {
@@ -66,7 +68,22 @@
 	// Prints lie just above the fog's lowest sheet, so a name running out over unexplored sea stays legible.
 	const INK = 0.2;
 
-	const name = $derived(fonts.ready ? printName(state.name, NAME_SIZE, state.odds, !state.onGrid) : null);
+	const name = $derived(fonts.ready ? printName(state.name, NAME_SIZE, !state.onGrid, lit) : null);
+	// A name that stands off from its city is tied back to the disc by a fine ruled line.
+	const leader = $derived.by(() => {
+		if (!placement.leader || !name) return null;
+		const halfWidth = name.width / 2 - NAME_SIZE * 0.3;
+		const halfHeight = NAME_SIZE * 0.45;
+		const toX = Math.max(placement.x - halfWidth, Math.min(0, placement.x + halfWidth));
+		const toZ = Math.max(placement.z - halfHeight, Math.min(0, placement.z + halfHeight));
+		const distance = Math.hypot(toX, toZ);
+		const length = distance - DISC_REACH - 0.2;
+		if (length <= 0.3) return null;
+		const ux = toX / distance;
+		const uz = toZ / distance;
+		const mid = DISC_REACH + length / 2;
+		return { x: ux * mid, z: uz * mid, length, angle: Math.atan2(-uz, ux) };
+	});
 	const face = $derived(fonts.ready ? printDisc(state.population, city.port, 2.8, inkOn(color)) : null);
 	const permanent = $derived(state.structures.filter(structure => structure.permanent));
 	const stickers = $derived(
@@ -131,7 +148,18 @@
 
 <T.Group position={[at.x, LAND_HEIGHT, at.z]}>
 	{#if name}
-		<Printed print={name} position={[0, INK, anchorOffset(anchor)]} opacity={ink.current} order={4} />
+		<Printed print={name} position={[placement.x, INK, placement.z]} opacity={ink.current} order={4} />
+		{#if leader}
+			<T.Mesh position={[leader.x, INK, leader.z]} rotation={[-Math.PI / 2, 0, leader.angle]} renderOrder={4}>
+				<T.PlaneGeometry args={[leader.length, 0.1]} />
+				<T.MeshBasicMaterial
+					color={lit ? '#8e2a12' : '#2a2017'}
+					transparent
+					opacity={ink.current * (lit ? 0.9 : 0.5)}
+					depthWrite={false}
+				/>
+			</T.Mesh>
+		{/if}
 	{/if}
 
 	<T.Group scale={scale.current}>

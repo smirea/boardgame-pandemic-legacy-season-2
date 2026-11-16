@@ -201,7 +201,6 @@
 
 	function clickCity(city: CityId) {
 		if (snap.phase === 'setup.supply') return send({ type: 'PLACE_SUPPLY', city, count: 1 });
-		selected = city;
 		const options = (targeting?.cities ?? cityOptions).get(city) ?? [];
 		if (targeting && options.length === 0) return;
 		chooser = null;
@@ -394,7 +393,6 @@
 			pack.cities.map((city): [CityId, CityView] => {
 				const record = campaign.locations[city.id]!;
 				const location = game?.locations[city.id];
-				const odds = showOdds ? (info!.infection.odds[city.id] ?? 0) : 0;
 				return [
 					city.id,
 					{
@@ -413,11 +411,13 @@
 						forsaken: isForsaken(campaign, city.id),
 						lab: record.lab,
 						highlight: selected === city.id ? 'selected' : targets.has(city.id) ? 'target' : null,
-						// Odds only earn label space where a hit would hurt: an empty city, or a nearly empty one at real risk.
-						odds:
-							odds > 0 && ((location?.supplies ?? 0) === 0 || ((location?.supplies ?? 0) === 1 && odds >= 0.3))
-								? odds
-								: null,
+						infection: showOdds
+							? {
+									odds: info!.infection.odds[city.id] ?? 0,
+									inDeck: info!.infection.strata.reduce((sum, stratum) => sum + (stratum.cities[city.id] ?? 0), 0),
+									discarded: info!.infection.discard[city.id] ?? 0,
+								}
+							: null,
 					},
 				];
 			}),
@@ -450,16 +450,6 @@
 			})),
 			fx,
 			marks,
-		};
-	});
-
-	const selectedInfo = $derived.by(() => {
-		if (!selected || !info) return null;
-		const count = (record: Record<string, number>) => record[selected!] ?? 0;
-		return {
-			inDeck: info.infection.strata.reduce((sum, stratum) => sum + count(stratum.cities), 0),
-			inDiscard: count(info.infection.discard),
-			odds: count(info.infection.odds),
 		};
 	});
 
@@ -533,7 +523,7 @@
 {/snippet}
 
 {#snippet key()}
-	<!-- The chart's key: what each piece and printed mark around a city means. Hovering any of them says the same. -->
+	<!-- The chart's key: what each piece and printed mark around a city means. Hovering a city or a piece says more. -->
 	<dl class="legend" aria-label="Map key" in:fly={{ y: 20, duration: 500, delay: 600 }}>
 		<dt><b class="num">3</b></dt>
 		<dd>Population, on the city</dd>
@@ -553,8 +543,6 @@
 		<dd>Shelter, bottom left</dd>
 		<dt><b class="sticker"></b></dt>
 		<dd>Printed: permanent</dd>
-		<dt><b class="odds">6%</b></dt>
-		<dd>Chance it is infected next</dd>
 		<dt><b class="ring"></b></dt>
 		<dd>Somewhere you can act</dd>
 		<dt><b class="line"></b></dt>
@@ -611,22 +599,6 @@
 						confirm('Mark this objective impossible for this game? The remaining objectives then decide the win.') &&
 						send({ type: 'WAIVE_OBJECTIVE', objective })}
 				/>
-			</div>
-		{/if}
-
-		{#if selected && campaign.locations[selected]?.revealed}
-			{@const record = campaign.locations[selected]!}
-			<div class="cityinfo" transition:fade={{ duration: 120 }}>
-				<strong>{cityName(selected)}</strong>
-				<span>Population {record.population}</span>
-				{#if selectedInfo}
-					<span title="This city's Infection cards"
-						>Infection cards: {selectedInfo.inDeck} in deck, {selectedInfo.inDiscard} discarded</span
-					>
-					<span>Hit next turn: {Math.round(selectedInfo.odds * 100)}%</span>
-				{/if}
-				{#if record.infested}<span class="bad">Infested</span>{/if}
-				<button onclick={() => (selected = null)} aria-label="Close">×</button>
 			</div>
 		{/if}
 
@@ -975,13 +947,6 @@
 		background: #f1e7cf;
 	}
 
-	.legend .odds {
-		color: #8b5a12;
-		font-family: var(--font-display);
-		font-style: italic;
-		font-weight: 400;
-	}
-
 	.legend .line,
 	.legend .lane,
 	.legend .border {
@@ -1005,7 +970,6 @@
 		border-radius: 50%;
 	}
 
-	.cityinfo,
 	.targeting {
 		position: absolute;
 		left: 50%;
@@ -1021,24 +985,6 @@
 		font-size: 0.8rem;
 		transform: translateX(-50%);
 		white-space: nowrap;
-	}
-
-	.cityinfo {
-		bottom: 0.7rem;
-	}
-
-	.cityinfo strong {
-		font-family: var(--font-display);
-		font-size: 1rem;
-		font-weight: 400;
-	}
-
-	.cityinfo span {
-		color: var(--muted);
-	}
-
-	.cityinfo .bad {
-		color: var(--hollow);
 	}
 
 	.targeting {
@@ -1078,7 +1024,6 @@
 		border-color: var(--paper);
 	}
 
-	.cityinfo button,
 	.targeting button,
 	.chooser header button {
 		border: 0;
@@ -1088,7 +1033,6 @@
 		cursor: pointer;
 	}
 
-	.cityinfo button:hover,
 	.targeting button:hover,
 	.chooser header button:hover {
 		color: var(--ink);

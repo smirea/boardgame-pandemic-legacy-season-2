@@ -6,7 +6,8 @@ export type Print = { texture: CanvasTexture; width: number; height: number };
 export type PrintedKind = 'center' | 'tower' | 'shelter' | 'lab';
 
 const PX_PER_UNIT = 64;
-const NAME_FONT = '"Cormorant SC"';
+const NAME_FONT = '"IM Fell English"';
+const NAME_STYLE = `italic 400`;
 const NUMBER_FONT = '"Barlow Semi Condensed"';
 const INK = '#2a2017';
 const PAPER = '#e9dcbd';
@@ -16,10 +17,8 @@ const PAPER = '#e9dcbd';
 export const fonts = $state({ ready: false });
 if (typeof document !== 'undefined')
 	void Promise.all([
-		document.fonts.load(`700 64px ${NAME_FONT}`),
-		document.fonts.load(`600 64px ${NAME_FONT}`),
+		document.fonts.load(`${NAME_STYLE} 64px ${NAME_FONT}`),
 		document.fonts.load(`700 64px ${NUMBER_FONT}`),
-		document.fonts.load(`italic 400 64px "IM Fell English"`),
 	]).then(() => (fonts.ready = true));
 
 function sheet(width: number, height: number, paint: (context: CanvasRenderingContext2D) => void): Print {
@@ -45,45 +44,34 @@ const measure = (() => {
 	};
 })();
 
-/** How wide a city's printed name runs, odds aside, in board units. */
+const NAME_SPACING = 0.02;
+
+/** How wide a city's printed name runs, in board units. */
 export const nameWidth = (name: string, size: number) =>
-	measure(`700 ${size}px ${NAME_FONT}`, size * 0.06, name) + size * 0.6;
+	measure(`${NAME_STYLE} ${size}px ${NAME_FONT}`, size * NAME_SPACING, name) + size * 0.6;
 
 /**
- * A city's name the way an engraver lettered it: spaced small capitals in ink, with a paper halo that
- * keeps it readable across coastlines and lines. `odds`, when given, follows in a smaller italic.
+ * A city's name lettered on the chart in an engraver's italic, with a faint paper halo that only lifts it off
+ * coastlines and lines. A lit name is the one under the pointer.
  */
-export function printName(name: string, size: number, odds: number | null, faded: boolean): Print {
-	const font = `700 ${size}px ${NAME_FONT}`;
-	const spacing = size * 0.06;
-	const oddsFont = `italic 400 ${size * 0.72}px "IM Fell English"`;
-	const oddsText = odds === null ? '' : ` ${Math.round(odds * 100)}%`;
+export function printName(name: string, size: number, faded: boolean, lit: boolean): Print {
+	const font = `${NAME_STYLE} ${size}px ${NAME_FONT}`;
 	const pad = size * 0.3;
-	const lettered = measure(font, spacing, name);
-	const oddsWidth = oddsText ? measure(oddsFont, 0, oddsText) : 0;
-	const width = lettered + oddsWidth + pad * 2;
+	const width = nameWidth(name, size);
 	const height = size * 1.5;
 	return sheet(width, height, context => {
 		const baseline = height / 2 + size * 0.3;
 		context.textBaseline = 'alphabetic';
 		context.lineJoin = 'round';
 		context.font = font;
-		context.letterSpacing = `${spacing}px`;
+		context.letterSpacing = `${size * NAME_SPACING}px`;
 		context.strokeStyle = PAPER;
-		context.lineWidth = size * 0.22;
-		context.globalAlpha = 0.85;
+		context.lineWidth = size * (lit ? 0.3 : 0.14);
+		context.globalAlpha = lit ? 0.9 : 0.35;
 		context.strokeText(name, pad, baseline);
-		context.globalAlpha = faded ? 0.55 : 1;
-		context.fillStyle = INK;
+		context.globalAlpha = faded && !lit ? 0.5 : 1;
+		context.fillStyle = lit ? '#8e2a12' : INK;
 		context.fillText(name, pad, baseline);
-		if (!oddsText) return;
-		context.letterSpacing = '0px';
-		context.font = oddsFont;
-		context.globalAlpha = 0.85;
-		context.strokeText(oddsText, pad + lettered, baseline);
-		context.globalAlpha = 1;
-		context.fillStyle = odds !== null && odds >= 0.3 ? '#a3301c' : '#8b5a12';
-		context.fillText(oddsText, pad + lettered, baseline);
 	});
 }
 

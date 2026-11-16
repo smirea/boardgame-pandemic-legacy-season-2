@@ -17,7 +17,7 @@
 	import Fog from './Fog.svelte';
 	import type { Part } from './hints';
 	import { layoutLabels, NAME_SIZE } from './labels';
-	import type { Anchor } from './labels';
+	import type { Placement } from './labels';
 	import { buildLandGeometry, mapToSheet } from './land';
 	import Pawn from './Pawn.svelte';
 	import { fonts, nameWidth } from './print.svelte';
@@ -37,11 +37,13 @@
 		resetView?: number;
 		/** A pointer over part of a city, or off it when `event` is null. */
 		onhint?: (city: CityId, part: Part, event: PointerEvent | null) => void;
+		/** The city under the pointer, whose printed name lights up. */
+		hoverCity?: CityId | null;
 		/** Screen rectangles, in pixels from the canvas corner, that HUD panels cover. The fitted view keeps cities out of them. */
 		covered?: { x: number; y: number; width: number; height: number }[];
 	};
 
-	let { view, oncity, onpointer, onhint, resetView = 0, covered = [] }: Props = $props();
+	let { view, oncity, onpointer, onhint, hoverCity = null, resetView = 0, covered = [] }: Props = $props();
 
 	interactivity();
 
@@ -223,7 +225,7 @@
 						at: layout[city.id]!,
 					})),
 				)
-			: new Map<CityId, Anchor>(),
+			: new Map<CityId, Placement>(),
 	);
 	const flagsByCity = $derived.by(() => {
 		const map = new Map<CityId, NonNullable<BoardView['marks']>['flags']>();
@@ -313,7 +315,8 @@
 		{city}
 		at={layout[city.id]!}
 		state={view.cities[city.id]!}
-		anchor={anchors.get(city.id) ?? 's'}
+		placement={anchors.get(city.id) ?? { x: 0, z: 3.4, leader: false }}
+		lit={hoverCity === city.id}
 		onselect={() => oncity?.(city.id)}
 		onhint={(part, event) => onhint?.(city.id, part, event)}
 	/>

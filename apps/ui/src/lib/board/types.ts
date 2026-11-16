@@ -19,8 +19,8 @@ export type CityView = {
 	forsaken: boolean;
 	lab: boolean;
 	highlight: CityHighlight;
-	/** Chance of being hit in the next Infect step, when it is worth showing. */
-	odds: number | null;
+	/** The city's Infection cards and its chance of being hit in the next Infect step, while a game is played. */
+	infection: { odds: number; inDeck: number; discarded: number } | null;
 };
 
 /** How a pawn made its last move, which decides the vehicle it travels in. */

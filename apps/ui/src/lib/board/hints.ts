@@ -1,8 +1,13 @@
 import type { StructureKind } from '@repo/game';
 import type { CityView } from './types';
 
-/** What a hover over the board explains: a heading and a few short lines. */
-export type HintText = { title: string; lines: string[] };
+export type HintTone = 'bad' | 'good' | null;
+
+/** One line of a hint: a label and its value, set in two aligned columns. */
+export type HintRow = { label: string; value: string; tone?: HintTone };
+
+/** What a hover over the board explains: a heading, aligned rows of facts, and a sentence or two of rules. */
+export type HintText = { title: string; rows: HintRow[]; notes: string[] };
 
 export type Part = 'city' | 'supplies' | 'plague' | 'hollow' | 'lab' | { structure: StructureKind; permanent: boolean };
 
@@ -15,49 +20,66 @@ export const STRUCTURE_NAME: Record<StructureKind, string> = {
 	shelter: 'Shelter',
 };
 
-const plural = (count: number, one: string, many = `${one}s`) => `${count} ${count === 1 ? one : many}`;
-
-const lasting = (permanent: boolean) =>
-	permanent ? 'Permanent: printed on the board, it stands in every game.' : 'Temporary: removed when this game ends.';
-
-function structureLine(kind: StructureKind, permanent: boolean) {
-	return `${STRUCTURE_NAME[kind]}, ${permanent ? 'permanent' : 'temporary'}`;
-}
+const percent = (odds: number) => `${Math.round(odds * 100)}%`;
 
 /** Everything at one city, for a hover over its disc. */
 export function cityHint(city: CityView): HintText {
-	const lines = [`Population ${city.population}`];
-	if (city.port) lines.push('Port: sea movement may start or end here');
-	lines.push(city.supplies ? plural(city.supplies, 'supply cube') : 'No supply cubes');
-	if (city.plague) lines.push(plural(city.plague, 'plague cube'));
-	if (city.hollow) lines.push(plural(city.hollow, 'Hollow Man', 'Hollow Men'));
-	for (const structure of city.structures) lines.push(structureLine(structure.kind, structure.permanent));
-	if (city.lab) lines.push('Lab found here');
-	if (city.odds !== null) lines.push(`${Math.round(city.odds * 100)}% chance it is infected next`);
-	if (city.infested) lines.push('Infested');
-	if (city.forsaken) lines.push('Forsaken');
-	if (!city.onGrid) lines.push('Not on the grid: no supply line or sea lane links it to a haven');
-	return { title: city.name, lines };
+	const rows: HintRow[] = [
+		{ label: 'Population', value: String(city.population) },
+		{ label: 'Supply cubes', value: String(city.supplies), tone: city.supplies === 0 ? 'bad' : null },
+		{ label: 'Plague cubes', value: String(city.plague), tone: city.plague > 0 ? 'bad' : null },
+	];
+	if (city.hollow) rows.push({ label: 'Hollow Men', value: String(city.hollow), tone: 'bad' });
+	if (city.infection) {
+		rows.push({
+			label: 'Infected next',
+			value: percent(city.infection.odds),
+			tone: city.infection.odds > 0 && city.supplies === 0 ? 'bad' : null,
+		});
+		rows.push({
+			label: 'Infection cards',
+			value: `${city.infection.inDeck} in deck, ${city.infection.discarded} discarded`,
+		});
+	}
+	for (const structure of city.structures)
+		rows.push({ label: STRUCTURE_NAME[structure.kind], value: structure.permanent ? 'Permanent' : 'Temporary' });
+	if (city.lab) rows.push({ label: 'Lab', value: 'Found', tone: 'good' });
+	if (city.port) rows.push({ label: 'Port', value: 'Sea moves start or end here' });
+	rows.push({ label: 'Grid', value: city.onGrid ? 'Connected' : 'Not connected', tone: city.onGrid ? null : 'bad' });
+	if (city.infested) rows.push({ label: 'Infested', value: 'Yes', tone: 'bad' });
+	if (city.forsaken) rows.push({ label: 'Forsaken', value: 'Yes', tone: 'bad' });
+	return { title: city.name, rows, notes: [] };
 }
 
 /** One piece or printed mark beside a city. */
 export function partHint(part: Part, city: CityView): HintText {
 	if (part === 'city') return cityHint(city);
+	const here = { label: 'City', value: city.name };
 	if (part === 'supplies')
 		return {
-			title: plural(city.supplies, 'supply cube'),
-			lines: [`In ${city.name}. An infection here removes one instead of placing a plague cube.`],
+			title: 'Supply cubes',
+			rows: [{ label: 'Count', value: String(city.supplies) }, here],
+			notes: ['An infection here removes one instead of placing a plague cube.'],
 		};
 	if (part === 'plague')
 		return {
-			title: plural(city.plague, 'plague cube'),
-			lines: [
-				`In ${city.name}. Each one was an incident: an infection with no supply cube to stop it.`,
+			title: 'Plague cubes',
+			rows: [{ label: 'Count', value: String(city.plague), tone: 'bad' }, here],
+			notes: [
+				'Each one was an incident: an infection with no supply cube to stop it.',
 				'A character starting a turn here gains exposure.',
 			],
 		};
-	if (part === 'hollow') return { title: plural(city.hollow, 'Hollow Man', 'Hollow Men'), lines: [`In ${city.name}.`] };
-	if (part === 'lab')
-		return { title: 'Lab', lines: [`Found in ${city.name}. Every lab found counts toward the final score.`] };
-	return { title: STRUCTURE_NAME[part.structure], lines: [`In ${city.name}.`, lasting(part.permanent)] };
+	if (part === 'hollow')
+		return {
+			title: 'Hollow Men',
+			rows: [{ label: 'Count', value: String(city.hollow), tone: 'bad' }, here],
+			notes: [],
+		};
+	if (part === 'lab') return { title: 'Lab', rows: [here], notes: ['Every lab found counts toward the final score.'] };
+	return {
+		title: STRUCTURE_NAME[part.structure],
+		rows: [here, { label: 'Lasts', value: part.permanent ? 'Permanent' : 'This game only' }],
+		notes: [part.permanent ? 'Printed on the board, it stands in every game.' : 'Removed when this game ends.'],
+	};
 }

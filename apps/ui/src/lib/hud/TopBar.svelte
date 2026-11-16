@@ -45,17 +45,6 @@
 					{/each}
 				</div>
 
-				<div class="track incidents" title="Incidents: the game is lost when the track is full">
-					<span class="caption">Incidents</span>
-					{#each { length: pack.numbers.incidentLimit } as _, index (index)}
-						<span class="pip" class:on={index < game.incidents} class:last={index === pack.numbers.incidentLimit - 1}
-						></span>
-					{/each}
-					<strong class:hot={game.incidents >= pack.numbers.incidentLimit - 2}
-						>{game.incidents}/{pack.numbers.incidentLimit}</strong
-					>
-				</div>
-
 				{#if info.playerDeck.cards > 0}
 					<div class="stat" title="Cards left in the Player deck" data-deck="player">
 						<span class="caption">Player deck</span>
@@ -252,24 +241,6 @@
 		background: var(--warn);
 		color: var(--paper-ink);
 		transform: scale(1.15);
-	}
-
-	/* Incidents are kept as a tally: a filled box for each one, the last box ruled in red. */
-	.incidents .pip {
-		width: 0.62rem;
-		height: 0.8rem;
-		border-radius: 1px;
-	}
-
-	.incidents .pip.on {
-		border-color: var(--danger);
-		background: var(--danger);
-		transform: none;
-	}
-
-	.incidents .pip.last {
-		border-color: var(--danger);
-		border-width: 1.5px;
 	}
 
 	.right {

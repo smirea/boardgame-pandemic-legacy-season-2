@@ -45,7 +45,7 @@
 	}}
 >
 	<Canvas toneMapping={NoToneMapping}>
-		<Scene {view} {oncity} {onpointer} {onhint} {resetView} {covered} />
+		<Scene {view} {oncity} {onpointer} {onhint} hoverCity={hovered?.city ?? null} {resetView} {covered} />
 	</Canvas>
 	{#if hovered && hint}
 		<div
@@ -58,7 +58,13 @@
 			data-testid="board-hint"
 		>
 			<strong>{hint.title}</strong>
-			{#each hint.lines as line, index (index)}<span>{line}</span>{/each}
+			<dl>
+				{#each hint.rows as row (row.label)}
+					<dt>{row.label}</dt>
+					<dd class={row.tone ?? ''}>{row.value}</dd>
+				{/each}
+			</dl>
+			{#each hint.notes as note, index (index)}<p>{note}</p>{/each}
 		</div>
 	{/if}
 </div>
@@ -75,15 +81,16 @@
 			radial-gradient(ellipse at 50% 50%, #221e18 0%, var(--table) 78%);
 	}
 
-	/* A paper slip beside the pointer, in the chart's own colours. */
+	/* A paper slip beside the pointer, in the chart's own colours: labels in one column, values in the next. */
 	.hint {
 		position: absolute;
 		z-index: 32;
 		display: flex;
 		flex-direction: column;
-		gap: 0.1rem;
-		max-width: 15rem;
-		padding: 0.4rem 0.6rem 0.45rem;
+		gap: 0.3rem;
+		width: max-content;
+		max-width: 17rem;
+		padding: 0.45rem 0.65rem 0.5rem;
 		border: 1px solid rgb(42 32 23 / 0.35);
 		border-radius: 2px;
 		background: rgb(240 231 210 / 0.97);
@@ -91,7 +98,7 @@
 		color: var(--slip-ink);
 		font-family: var(--font-ui);
 		font-size: 0.78rem;
-		line-height: 1.3;
+		line-height: 1.35;
 		translate: 1rem 1rem;
 		pointer-events: none;
 	}
@@ -109,12 +116,42 @@
 	}
 
 	.hint strong {
+		padding-bottom: 0.15rem;
+		border-bottom: 1px solid rgb(42 32 23 / 0.2);
 		font-family: var(--font-display);
-		font-size: 1.02rem;
+		font-size: 1.05rem;
 		font-weight: 400;
 	}
 
-	.hint span {
-		color: rgb(42 32 23 / 0.8);
+	.hint dl {
+		display: grid;
+		grid-template-columns: max-content auto;
+		gap: 0.08rem 0.9rem;
+		margin: 0;
+	}
+
+	.hint dt {
+		color: rgb(42 32 23 / 0.62);
+	}
+
+	.hint dd {
+		margin: 0;
+		font-weight: 600;
+		font-variant-numeric: tabular-nums;
+	}
+
+	.hint dd.bad {
+		color: #a3301c;
+	}
+
+	.hint dd.good {
+		color: #2f6e5c;
+	}
+
+	.hint p {
+		max-width: 15rem;
+		margin: 0;
+		color: rgb(42 32 23 / 0.75);
+		font-size: 0.74rem;
 	}
 </style>

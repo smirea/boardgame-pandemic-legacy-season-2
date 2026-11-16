@@ -7,7 +7,7 @@ const lagos: CityView = {
 	name: 'Lagos',
 	revealed: true,
 	onGrid: true,
-	supplies: 7,
+	supplies: 0,
 	plague: 2,
 	hollow: 1,
 	population: 3,
@@ -20,37 +20,47 @@ const lagos: CityView = {
 	forsaken: false,
 	lab: true,
 	highlight: null,
-	odds: 0.25,
+	infection: { odds: 0.25, inDeck: 2, discarded: 1 },
 };
 
+const row = (label: string) => cityHint(lagos).rows.find(entry => entry.label === label);
+
 describe('board hints', () => {
-	test('a city lists everything in it, and says which structures last', () => {
-		expect(cityHint(lagos)).toEqual({
-			title: 'Lagos',
-			lines: [
-				'Population 3',
-				'Port: sea movement may start or end here',
-				'7 supply cubes',
-				'2 plague cubes',
-				'1 Hollow Man',
-				'Supply center, temporary',
-				'Satellite tower, permanent',
-				'Lab found here',
-				'25% chance it is infected next',
-			],
-		});
+	test('a city lists everything in it as label and value', () => {
+		expect(cityHint(lagos).rows.map(entry => `${entry.label}: ${entry.value}`)).toEqual([
+			'Population: 3',
+			'Supply cubes: 0',
+			'Plague cubes: 2',
+			'Hollow Men: 1',
+			'Infected next: 25%',
+			'Infection cards: 2 in deck, 1 discarded',
+			'Supply center: Temporary',
+			'Satellite tower: Permanent',
+			'Lab: Found',
+			'Port: Sea moves start or end here',
+			'Grid: Connected',
+		]);
+	});
+
+	test('an empty city shows its zero supply cubes as a warning', () => {
+		expect(row('Supply cubes')).toEqual({ label: 'Supply cubes', value: '0', tone: 'bad' });
 	});
 
 	test('a building says whether it stays for good', () => {
-		expect(partHint({ structure: 'tower', permanent: true }, lagos).lines).toContain(
-			'Permanent: printed on the board, it stands in every game.',
-		);
-		expect(partHint({ structure: 'center', permanent: false }, lagos).lines).toContain(
-			'Temporary: removed when this game ends.',
-		);
+		expect(partHint({ structure: 'tower', permanent: true }, lagos).notes).toEqual([
+			'Printed on the board, it stands in every game.',
+		]);
+		expect(partHint({ structure: 'center', permanent: false }, lagos).rows).toContainEqual({
+			label: 'Lasts',
+			value: 'This game only',
+		});
 	});
 
 	test('a city off the grid says so', () => {
-		expect(cityHint({ ...lagos, onGrid: false }).lines.at(-1)).toMatch(/^Not on the grid/);
+		expect(cityHint({ ...lagos, onGrid: false }).rows.at(-1)).toEqual({
+			label: 'Grid',
+			value: 'Not connected',
+			tone: 'bad',
+		});
 	});
 });
