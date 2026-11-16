@@ -60,6 +60,7 @@
 	const solo = $derived(session.mode === 'solo');
 	const owns = (seat: SeatId) => !spectator && (solo || mine.includes(seat));
 	const canAct = $derived(game !== null && owns(game.active));
+	const unclaimed = $derived(game !== null && !spectator && !solo && !game.seats.some(seat => mine.includes(seat)));
 	let viewing = $state<SeatId | null>(null);
 	$effect(() => {
 		// The dock follows whoever's turn it is, until the player picks a hand to look at.
@@ -558,6 +559,16 @@
 			</div>
 		{/if}
 
+		{#if unclaimed}
+			<!-- A networked player has to say which pawn is theirs before any control is offered. Asking beats leaving the dock empty. -->
+			<div class="whoami" data-testid="whoami" transition:fly={{ y: 12, duration: 180 }}>
+				<span>Who do you play?</span>
+				{#each game!.seats as seat (seat)}
+					<button onclick={() => claim(seat)}>{seatName(world, seat)}</button>
+				{/each}
+			</div>
+		{/if}
+
 		{#if targeting}
 			<div class="targeting" transition:fly={{ y: 12, duration: 180 }}>
 				{targeting.label}
@@ -913,6 +924,37 @@
 		top: 3.2rem;
 		border-color: var(--warn);
 		color: var(--warn);
+	}
+
+	.whoami {
+		position: absolute;
+		top: 5.6rem;
+		left: 50%;
+		z-index: 31;
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
+		padding: 0.5rem 0.9rem;
+		border: 1px solid var(--paper);
+		border-radius: 3px;
+		background: var(--panel-solid);
+		font-size: 0.9rem;
+		transform: translateX(-50%);
+		white-space: nowrap;
+	}
+
+	.whoami button {
+		padding: 0.25rem 0.7rem;
+		border: 1px solid var(--line-strong);
+		border-radius: 3px;
+		background: var(--wash);
+		color: var(--paper);
+		font: inherit;
+		cursor: pointer;
+	}
+
+	.whoami button:hover {
+		border-color: var(--paper);
 	}
 
 	.cityinfo button,

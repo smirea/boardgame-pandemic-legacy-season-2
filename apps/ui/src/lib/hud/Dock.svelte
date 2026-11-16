@@ -105,7 +105,11 @@
 		}),
 	);
 	const overLimit = $derived(game.seats.filter(other => game.players[other]!.hand.length > handLimit(world, other)));
-	const blocked = $derived(pending !== undefined || overLimit.length > 0);
+	// The hand limit waits until both cards of a draw are in hand, so being over it does not always mean discarding now.
+	const discarding = $derived(
+		overLimit.filter(other => decides.some(decide => decide.d === 'discard' && decide.seat === other)),
+	);
+	const refused = (command: Command) => !canAct || reject(world, snap.phase, command) !== null;
 	const rationed = $derived(
 		Object.values(world.campaign.playerCards).filter(card => card.kind === 'event' && card.mode === 'rationed'),
 	);
@@ -300,10 +304,15 @@
 			</div>
 
 			<div class="middle">
-				{#if overLimit.length}
+				{#if discarding.length}
 					<p class="prompt">
-						{overLimit.map(other => seatName(world, other)).join(', ')} must discard down to the hand limit.
-						{overLimit.some(owns) ? 'Click a card in that hand, or play an event.' : 'Waiting for them.'}
+						{discarding.map(other => seatName(world, other)).join(', ')} must discard down to the hand limit.
+						{discarding.some(owns) ? 'Click a card in that hand, or play an event.' : 'Waiting for them.'}
+					</p>
+				{:else if overLimit.length && !pending}
+					<p class="prompt">
+						{overLimit.map(other => seatName(world, other)).join(', ')} is over the hand limit and discards once the draw
+						is finished.
 					</p>
 				{:else if pending}
 					<p class="prompt">
@@ -371,7 +380,7 @@
 					</div>
 					<button
 						class="primary"
-						disabled={!canAct || blocked}
+						disabled={refused({ type: 'END_ACTIONS', seat: game.active })}
 						onclick={() => send({ type: 'END_ACTIONS', seat: game.active })}
 						data-testid="end-actions"
 						title="Space"
@@ -387,7 +396,7 @@
 				{:else if snap.phase === 'playing.draw'}
 					<button
 						class="primary"
-						disabled={!canAct || blocked}
+						disabled={refused({ type: 'DRAW' })}
 						onclick={() => send({ type: 'DRAW' })}
 						data-testid="draw"
 						title="Space">Draw card ({game.drawsLeft})</button
@@ -395,7 +404,7 @@
 				{:else}
 					<button
 						class="primary"
-						disabled={!canAct || blocked}
+						disabled={refused({ type: 'INFECT' })}
 						onclick={() => send({ type: 'INFECT' })}
 						data-testid="infect"
 						title="Space">Flip infection ({game.infectionsLeft})</button

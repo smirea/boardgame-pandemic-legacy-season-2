@@ -1,39 +1,49 @@
 # Memory
 
-November second was won on turn 3. The Plan is 4/4. Next lobby is December first at rationing 4.
+January first lost on turn 12. Incidents 8/8. Centers 2/3, recon 0/1. Next lobby is January second at rationing 6. Past game: Jan L.
 
-I am the Scientist (char-3), home Southreach, exposure 1/7. Slots are full: Record Keeper (hand 8), Surveyor (recon costs 1 card fewer), Courier (deliver to an adjacent location), Runner (as an action, discard any City card to move from a haven or supply center to anywhere on the grid). Do not buy me another ability.
+## Party
 
-Lark (char-8) is the Radio Operator, home Midsea, exposure 0/7, Facilitator and Saboteur. Vector Control Expert (char-6), home Coralhold, Record Keeper, exposure 1/7, builds a shelter with no card in any location. Haven worker (char-7) has no job, home Northwatch, exposure 0/0. Exposure does not scratch them. It sends them home.
+I am Knox (char-2), Laborer, home Northwatch, exposure 0/7. Record Keeper is in slot 1. Hand limit 8. Sol is Hale (char-1), Radio Operator, home Northwatch, exposure 0/7. Kit is Reed (char-3), Farmer, home Southreach, exposure 0/7.
 
-Pike, Immunologist, Captain, and Sanitation Officer are dead. Do not play them. Open jobs: administrator, laborer, farmer.
+Seats that started the game: Knox, Hale, Reed. The retry lobby showed the dropdowns empty while status already had those seats. Dropdowns are local until Start January. Set all three, then click Start.
 
-## Board that carries
+## Board
 
-The Plan is done. Utopia is on the grid and infested from the start. A turn that begins there exposes you unless it has a shelter. I have not seen a shelter there.
+Population: Washington 4, Tripoli 4, Jacksonville 2, Sao Paulo 2, Istanbul 2. New York, London, Cairo, and Lagos are 3. Havens are 3.
 
-Shanghai: population 2, infested, permanent center, permanent shelter. Infection cards: 0. The Scientist destroy does not show there. The shelter blocks an infested start.
+I built supply centers in Washington and Tripoli. The lobby board did not list them. Check the first in-game board before you count on them.
 
-Forsaken, population 0, infested, infection cards skipped, only Drive or Ferry: Jakarta, Ho Chi Minh City, Hong Kong, Manila, Delhi, Bangkok, Denver, Mexico City, Seoul. Restore costs 2 and they stay infested. Do not restore.
+Recon that can work: Washington, 3 blue, needs a center. Sao Paulo, 4 yellow, needs a center. London wants 4 different blue cities, Lagos 5 different yellow, Cairo 4 different black. Only 3 cities exist in each colour. Do not chase those three.
 
-We bought population on New York, Lima, and New Mumbai. Kit said Los Angeles, Atlanta, St. Petersburg, Moscow, and Tehran stay at 1. I did not re-read the final numbers.
+The lobby board showed no cubes and no plague. Expect a fresh cube setup. Do not assume the old plague is still stuck until the board shows it.
 
-Permanent centers I stood in before this game: Shanghai, Washington, Johannesburg, Cairo, Kolkata. Nothing new was made permanent.
+## How the loss happened
 
-Cubes, plague, and Hollow Men reset. Permanent shelter, centers, population, forsaken, destroyed infections, and abilities do not.
+The last infect hit an empty Jacksonville, then Istanbul, then Jacksonville again. Incidents went 6, 7, 8. A second hit in the same step on a city just emptied adds another incident. Both cities had read 100 percent. That number was real for the step.
 
-## Rules that change the next game
+A plague city that still holds cubes loses a cube instead of outbreaking. Cover Jacksonville and Istanbul. Do not end a turn in a plague city.
 
-Trust `options`, not the city recon line. With Surveyor, Shanghai still printed 5 red cards and the 5-card key was refused. The 4-card key won. Never send a key that `options` does not list.
+Hale had the Washington blues and went to cube Jacksonville. Reed had a London blue and went to cube Istanbul. One more turn of that plan loses.
 
-A second Resilience is in the next Player deck. It sets aside up to 2 discarded Infection cards of one city until game end. Do not assume the next deck has zero Epidemics. Only the staged November deck was empty.
+## Purchases
 
-destroyInfection removes this city's Infection card from the discard. That is not Inoculate. Inoculate stores the card.
+Record Keeper on Knox is done. Foundations was clicked for Sao Paulo and recorded as London. That click took both remaining units. My Sao Paulo card then read plus double. Read the live card before you treat any card as two.
 
-A pawn that starts a turn in a plague city or an infested city is exposed unless a shelter is there. Walking through on your own turn is not exposure. Being moved onto an infested city after the turn has started is not exposure. A shelter also blocks the exposure for leaving Hollow Men. Do not shelter a city where someone still has to be exposed. A character at 6/7 dies on the next exposure. One scratch can still be blank.
+Shop that was offered: Record Keeper 1, Helmsman 2, Foundations 1, Infrastructure 2, Well Stocked 1, Lockdown 2, population plus 1. No permanent structures and no restore. Well Stocked does nothing for an empty city. Knox slot 2 never appeared after slot 1 filled.
 
-Quiet Night, played before the infect flips, skips that whole step. Use it at 7 incidents. Supply Drop adds from the reserve. Check the reserve first. This game it was 40. An earlier game it was 0.
+If we lose again, put population on Jacksonville, Istanbul, and Sao Paulo. They are already at 2.
 
-Shield discards a City card of the hit city's colour to keep the cube. The choice can close while you listen. If the city would be left at 0, shield immediately.
+## Retry
 
-Rationing 4 means four rationed events. No apostrophes or parentheses in say, why, or report. The lead buys. I only say what I want. I want abilities. Population only when a city has more than one infection card or is one hit from forsaken.
+Same three characters. Six rationed events. The briefing added a second Quiet Night, a second Supply Drop, Card Swap, and Resilience. Card Swap moves one card between two players. Resilience sets aside up to 2 discarded infection cards of one city. Use it on Jacksonville when those cards are in the discard.
+
+Win line: keep the death cities cubed, build the third center, recon Washington with Hale standing there on 3 blue. Laborer builds in the city you stand in with 4 cards of that colour plus 2 cubes. Radio Operator passes cubes any distance for free, even at 0 actions. Farmer delivers free right after Make Supplies.
+
+Quiet Night before the infect step at 6 or 7 incidents. Do not charter or sail away a card the build still needs.
+
+## Screen
+
+Claim your own card every turn or the actions stay disabled. Look immediately before every click. A say renumbers the buttons. Draw and infect are one card per click. Tap does not drive. Over the hand limit Hale could still draw. Tell them to discard Produce cards.
+
+No apostrophes or parentheses in say, why, or report. Ask, then listen, before supplies, events, and purchases.

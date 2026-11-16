@@ -458,7 +458,7 @@ export function renderBoard(world: World): string {
 					: null,
 				...routes.map(
 					route =>
-						`RECON here: ${route.count} ${route.color} cards${route.unique ? ' of different cities' : ''}${route.needsCenter ? ', needs a supply center' : ''} (before any ability changes the count: see options for what you can pay)`,
+						`RECON here: ${route.count} ${route.color} cards${route.unique ? ' of different cities' : ''}${route.needsCenter ? (location?.center ? ', and its supply center is built' : ', needs a supply center') : ''} (before any ability changes the count: see options for what you can pay)`,
 				),
 			].filter(Boolean);
 			lines.push(
@@ -551,7 +551,7 @@ export function renderCity(world: World, id: CityId): string {
 			)
 			.map(
 				route =>
-					`RECON here: ${route.count} ${route.color} cards${route.unique ? ' of different cities' : ''}${route.needsCenter ? ', needs a supply center' : ''} (before any ability changes the count: see options for what you can pay)`,
+					`RECON here: ${route.count} ${route.color} cards${route.unique ? ' of different cities' : ''}${route.needsCenter ? (location?.center ? ', and its supply center is built' : ', needs a supply center') : ''} (before any ability changes the count: see options for what you can pay)`,
 			),
 		`possible new links: ${
 			pack.candidateEdges

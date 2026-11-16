@@ -47,3 +47,15 @@ Thirty-one reports across the three games. None was a rule the engine got wrong.
 - Supply Drop and Stock Up were refused with an empty reserve and gave no reason.
 
 Each is fixed, with tests in `mechanics.test.ts` where the engine changed.
+
+## A whole game by clicks
+
+Run `ui-january` (`apps/playtest/configs/ui-january.json`) put all three players on the click-only harness with a new campaign. They may only `look` at the screen and `click`, `type`, `choose` and `tap` on it, which the lab turns into real mouse and keyboard input in their own tab. They played January from the empty lobby to the next lobby: 133 commands, every one sent by a click, none by key. The game was lost on turn 12.
+
+It found what keyed play cannot:
+
+- Seat drop-downs were local to each browser, so every player saw a different table. Seats are game state now.
+- Nothing could be pressed on your own turn until you found the claim button. The screen now asks "Who do you play?".
+- With a hand over the limit after the first card of a draw, the screen blocked both Draw and Discard. The engine allowed the second draw all along. The buttons now ask the engine.
+
+Each fix was checked by clicking: the seat change and the prompt on two networked tabs through the lab, the draw in a browser against the dev server. The notes are in `apps/playtest/notes/ui-january.json`.

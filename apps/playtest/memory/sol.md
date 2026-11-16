@@ -1,41 +1,41 @@
 # Memory
 
-November second was won on turn 3. The Plan is 4/4. Incidents ended 2/8. Next lobby is December, rationing 4.
+January first was lost. Incidents 8/8. Build was 2/3, recon 0/1. Next lobby is January again, rationing 6. Same characters are still seated: Vex on Knox, Sol on Hale, Kit on Reed.
 
-I am the Vector Control Expert, char-6, home Coralhold, exposure 1/7, Record Keeper only. No new ability. Build Shelter was not offered in Shanghai, which already has one. The footer still says a shelter costs a card. The free shelter is untested.
+Hale (char-1), Radio Operator, home Northwatch, exposure 0/7, no ability. Knox (char-2), Laborer, home Northwatch, exposure 0/7, Record Keeper, hand limit 8. Reed (char-3), Farmer, home Southreach, exposure 0/7. Administrator and Instructor are still open.
 
-The Scientist is char-3, exposure 1/7: Record Keeper, Surveyor, Courier, Runner. Runner discards any City card to move from a haven or supply center to anywhere on the grid. Surveyor sets the recon price exactly 1 card lower. A 5-card recon was refused while the city text still said 5. Use the option key.
+## How to play the screen
 
-Lark is char-8, Radio Operator, home Midsea, exposure 0/7, Facilitator and Saboteur. Pike is dead. char-7 is an empty haven worker at exposure 0/0. Do not count on that character dying.
+Claim Hale before the actions appear. Drive is "Drive / Ferry", then the city in the chooser, not the threat-list button of the same name. Look text goes stale. Trust the numbered controls. Look again after every say.
+
+At 0 actions the button is Draw cards, then one Draw card per card. If the first card puts the hand over 7, Draw and every card go dead until the second card exists. Tap a city, then press Space. Then click a Produce that is not covered by the next card. The rightmost one works. Discard Produce before blues or a city we still need.
+
+No apostrophe in say, why, or report.
 
 ## Rules that change play
 
-Shanghai's shelter is permanent and Shanghai is infested, so a start there is safe. Osaka, Kolkata, Tokyo, and Utopia are infested with no shelter. Utopia is population 8, has 8 infection cards, has no center, and its only link is Shanghai. Do not end a turn in an unsheltered infested city, or in a city with plague.
+Do not end a turn on a plague city. One cube absorbs one hit. At rate 3 the same empty plague city can incident twice in one infect. Jacksonville did. A city at 0 cubes and plague is two losses, not one.
 
-Forsaken, population 0, infested, only Drive or Ferry: Jakarta, Ho Chi Minh City, Hong Kong, Manila, Delhi, Bangkok, Denver, Mexico City, Seoul. Restore costs 2 and they stay infested. Do not restore one unless we need the city.
+Radio Operator moves cubes to any character at any distance. I never pressed it. Use it. Sharing a card still wants the city printed on the card. Sail and charter discard a city card. Do not spend a card the recon or the yellow center still needs.
 
-Population 1, not yet infested, so one plague forsakes them for good: Los Angeles, Atlanta, St. Petersburg, Moscow, Tehran. Already infested at population 1: Kinshasa, Khartoum. Raised to 2: New York (3 infection cards), Lima (2), New Mumbai (2, still infested).
+Farmer: a Deliver right after Make Supplies is free. A drive in between breaks it. A haven can produce. Reed made 3 at Midsea.
 
-A colour shield lets any player discard a matching city card to keep the cube. Pay when that hit would empty the city. Do not spend a card a goal still needs.
+Laborer builds with one fewer card by also spending 2 cubes. Foundations counts as 2 of its colour. Infrastructure would count as 3.
 
-One cube on two likely cities beats two cubes on one. A city with one infection card needs one cube until the deck reshuffles.
+Washington recon is 3 blue cards in one hand, standing there. The board still says it needs a supply center even though the center is built. Do not trust that sentence. Try the button. London recon wants 4 different blue cities and only 3 blue cities exist. Lagos wants 5 different yellow and only 3 exist. Cairo wants 4 different black and only 3 exist. São Paulo wants 4 yellow cards.
 
-Quiet Night skips the next infect only if it is played before that step's first flip. Played during the previous action step, it did skip the infect. Hold it for the step that can lose the month.
+Threat percentages can stick at 100 for two cities at once. Check the city's infection cards. 0 percent means those cards are in the discard. Quote the card count, not the stuck percent.
 
-Supply Drop and Supplier spend reserve cubes. The reserve was 0 all of November first and 40 this game. Do not assume. Carry cubes with Make Supplies, then deliver.
+The loss shop was ability, city card, infection card, and population. No permanent and no restore. Record Keeper is 1, Helmsman is 2, Foundations is 1, Infrastructure is 2, Well Stocked is 1, Lockdown is 2, population is 1. A non-lead click spends the shared units. The city list stays open after a buy, and the Bought line can omit one. Do not click a second city by accident. Unspent units are lost.
 
-Cordon costs 2. That card still infects, then any player may discard a card to stop the rest of the step. We did not buy one.
+New rationed cards in the reserve, not yet played: a second Quiet Night (skip the next infect), a second Supply Drop (4 cubes on a grid location), Card Swap (two players trade one card), Resilience (set aside up to 2 discarded infection cards of one city). Quiet Night has to be played before the first flip of the step it should skip.
 
-No apostrophe in a say or a why.
+## Board at upkeep
 
-## Board after November second
+Centers: Washington, Tripoli. Populations after the automatic change: Washington 4, Tripoli 4, Jacksonville 2, São Paulo 2, Istanbul 2, and 3 everywhere else including the havens. I have not seen the board since the new lobby opened, so do not assume plague or cubes carried over.
 
-Permanent shelter: Shanghai. Permanent centers I stood on or read at upkeep: Washington, Cairo, Johannesburg, Kolkata, Shanghai. Tripoli has a permanent tower. The November shop had no permanent category.
+Stickers: sao-paulo.22 Foundations (it was in Knox's hand), london.29 Foundations (it was in the deck).
 
-Shanghai was population 2 in the game, and upkeep listed Shanghai +1. Kolkata was population 3 at upkeep, with its permanent center. Treat those as the board until setup says otherwise.
+End of the lost game, for the cube plan if plague is still there: Istanbul plague 3, Jacksonville plague 3 with all 3 infection cards in the discard, São Paulo plague 2. Those three are the cities that lost a population step.
 
-The 8 production went to population on New York, Lima, and New Mumbai, Runner on the Scientist, and Facilitator plus Saboteur on Lark. I wanted Los Angeles and Atlanta instead of Saboteur. They are still population 1.
-
-This deck was 40 cards with no epidemics because the table was staged. Rationing next is 4. Do not assume December is cut the same way.
-
-After the win, a December lobby read showed Shanghai, Osaka, Kolkata, Tokyo, Moscow, Tehran, Kinshasa, and Khartoum as population 1, off the grid, with no links. That contradicted upkeep. Recheck the board at setup before trusting a lobby city read.
+Seat dropdowns do not commit until the lead starts the game.

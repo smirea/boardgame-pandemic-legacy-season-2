@@ -13,6 +13,8 @@ declare const window: {
 		getRecord(): GameRecord | null;
 	};
 	__lab?: HTMLElement[];
+	/** What each control said when it was listed, so a click on one that has since changed is refused. */
+	__labText?: string[];
 };
 declare const document: Document;
 
@@ -98,8 +100,19 @@ export async function look(tab: Tab): Promise<string> {
 			...document.querySelectorAll<HTMLElement>('button, input, select, textarea, [role="button"]'),
 		].filter(visible);
 		window.__lab = nodes;
+		window.__labText = nodes.map(node => node.innerText);
 		const controls = nodes.map((node, index) => {
 			const field = node as HTMLInputElement;
+			if (node instanceof HTMLSelectElement) {
+				const entries = [...node.options].map(option => option.text.trim());
+				const chosen = node.selectedOptions[0]?.text.trim() ?? '';
+				return {
+					index,
+					tag: 'select',
+					text: `now "${chosen}", entries: ${entries.join(', ')}`.slice(0, 200),
+					disabled: node.disabled,
+				};
+			}
 			const text = (
 				node.innerText ||
 				node.getAttribute('aria-label') ||
@@ -115,7 +128,8 @@ export async function look(tab: Tab): Promise<string> {
 		});
 		const cities = [...document.querySelectorAll<HTMLElement>('.label[data-city]')].map(node => node.dataset['city']!);
 		// The map labels would bury the panels' text, so they are hidden for the read. Cities are listed on their own.
-		const labels = [...document.querySelectorAll<HTMLElement>('.label[data-city]')];
+		// An element on its way out is inert until its exit finishes. A person no longer reads it as part of the screen.
+		const labels = [...document.querySelectorAll<HTMLElement>('.label[data-city], [inert]')];
 		for (const label of labels) label.style.display = 'none';
 		const text = document.body.innerText
 			.replace(/[ \t]+/g, ' ')
@@ -148,17 +162,27 @@ export async function click(tab: Tab, target: string): Promise<string> {
 			? nodes[index]
 			: nodes.find(candidate => candidate.innerText.replace(/\s+/g, ' ').trim().toLowerCase() === wanted.toLowerCase());
 		if (!node || !node.isConnected) return { error: 'No such control now. Run `look` again.' };
+		if (node.innerText !== (window.__labText ?? [])[nodes.indexOf(node)])
+			return {
+				error: 'The screen changed since your last `look`, and that control now says something else. Run `look` again.',
+			};
 		if ((node as HTMLButtonElement).disabled) return { error: `That control is disabled: ${node.innerText.trim()}` };
 		node.scrollIntoView({ block: 'center', inline: 'center' });
 		const box = node.getBoundingClientRect();
-		const x = box.x + box.width / 2;
-		const y = box.y + box.height / 2;
-		const hit = document.elementFromPoint(x, y);
-		if (hit && hit !== node && !node.contains(hit) && !hit.contains(node))
-			return {
-				error: `Something covers that control: <${hit.tagName.toLowerCase()} class="${hit.className}">. A person could not click it.`,
-			};
-		return { x, y, text: node.innerText.replace(/\s+/g, ' ').trim().slice(0, 60) };
+		// A control can be partly under another, like a card in a fanned hand. A person clicks the part that shows.
+		const spots = [0.5, 0.15, 0.85].flatMap(fx => [0.5, 0.2, 0.8].map(fy => ({ fx, fy })));
+		let covering: Element | null = null;
+		for (const { fx, fy } of spots) {
+			const x = box.x + box.width * fx;
+			const y = box.y + box.height * fy;
+			const hit = document.elementFromPoint(x, y);
+			if (!hit || hit === node || node.contains(hit) || hit.contains(node))
+				return { x, y, text: node.innerText.replace(/\s+/g, ' ').trim().slice(0, 60) };
+			covering ??= hit;
+		}
+		return {
+			error: `Something covers that control: <${covering!.tagName.toLowerCase()} class="${covering!.className}">. A person could not click it.`,
+		};
 	}, target);
 	if ('error' in point) return point.error!;
 	await tab.page.mouse.click(point.x!, point.y!);

@@ -1,0 +1,54 @@
+{
+	"g00": {
+		"summary": "A whole January game played only by clicking the real screen: 133 commands, none sent by key. Lost on turn 12 at the eighth incident, after three Epidemics.",
+		"story": "Three players sat down at an empty campaign with nothing but the screen. They typed three names into the lobby, created Knox the Laborer, Hale the Radio Operator and Reed the Farmer, argued about the seat drop-downs, pressed Begin January and started the game. Knox dropped supplies on Washington. The table found out that nothing can be done until you tell the game which pawn is yours, then moved by Drive and by tapping cities, made and delivered supplies, shared and transferred cards, and built two of the three supply centers. Hale's hand went over the limit in the middle of a draw and the screen refused both the second card and the discard until the table worked around it. Three Epidemics later Istanbul and Jacksonville took the last incidents. At game end the table bought an ability and two card improvements and closed the game.",
+		"highlights": [
+			"The full loop by clicks: character creation, seats, leaving the prologue, setup, twelve turns, the game-end screen, spending, and back to the lobby.",
+			"Every kind of move the month allows was made on screen: Drive, Make Supplies, Deliver, Pick Up, Transfer, Share, Produce, Build Supply Center, an Event, hand-limit discards.",
+			"Three peers over WebRTC, each clicking in its own tab."
+		],
+		"parity": "January's objectives, supplies and required count matched the research timeline. The game ran on the same engine checks as a keyed game: the lab reads each click's command from the host tab's recording.",
+		"findings": [
+			{
+				"finding": "Each player's lobby showed its own seat choices, because seat drop-downs were local to each browser.",
+				"kind": "ui",
+				"fix": "Seats are game state now (a SEAT command). Every lobby shows the same table, a new character takes the first empty seat, and the last game's seats are kept. Checked on two networked tabs."
+			},
+			{
+				"finding": "On your own turn nothing could be pressed until you found the small claim button on your character.",
+				"kind": "ui",
+				"fix": "A networked player who has claimed no pawn is asked \"Who do you play?\" with one button per character. Checked on two networked tabs."
+			},
+			{
+				"finding": "After the first card of a draw put a hand over the limit, Draw was disabled and so was every card. The rules let the second card be drawn first.",
+				"kind": "ui bug",
+				"fix": "End actions, Draw and Flip are enabled by the engine's own check, not by the screen's guess, and the prompt says the discard comes after the draw. Checked in a browser: second draw, discard prompt, two discards."
+			},
+			{
+				"finding": "A card in a full fanned hand could not be clicked at its middle, because the next card covers it.",
+				"kind": "lab",
+				"fix": "The lab's click now presses a part of the control that shows, as a person would."
+			},
+			{
+				"finding": "A numbered control changed under a player between look and click, and the click bought the wrong thing.",
+				"kind": "lab",
+				"fix": "A click is refused when the control no longer says what it said at the last look."
+			},
+			{
+				"finding": "Text of a list that had just closed still showed in look.",
+				"kind": "lab",
+				"fix": "look no longer reads elements that are on their way out."
+			},
+			{
+				"finding": "look did not say which entry of a drop-down was selected.",
+				"kind": "lab",
+				"fix": "It does now."
+			},
+			{
+				"finding": "The recon hint said a city needs a supply center after one was built there.",
+				"kind": "lab",
+				"fix": "The hint says the center is built."
+			}
+		]
+	}
+}
