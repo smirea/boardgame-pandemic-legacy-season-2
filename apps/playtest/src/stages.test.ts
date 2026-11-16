@@ -2,7 +2,7 @@ import { describe, expect, test } from 'bun:test';
 import { cityDef, createGameActor, legalDecides, phaseOf, publicState, reject } from '@repo/game';
 import type { Action, CardId, CityId, Command, Decide, GameActor, Play, Save, SeatId, World } from '@repo/game';
 import { newAudit, observe } from './audit.ts';
-import { stages, tourNovember, tourOctober, workerTrap } from './stages.ts';
+import { stages, tourNovember, tourOctober, tourSearches, workerTrap } from './stages.ts';
 
 const [A, B, C] = ['seat-1', 'seat-2', 'seat-3'] as SeatId[];
 const city = (id: string) => id as CityId;
@@ -45,7 +45,8 @@ function table(save: Save) {
 				const waiting = world().game!.pending[0];
 				const options = legalDecides(world());
 				if (options.length) {
-					const spared = options.find(option => option.d !== 'discard' || !option.cards.some(held => dealt.has(held)));
+					const kept = (held: CardId) => dealt.has(held) || world().campaign.playerCards[held]?.kind === 'companion';
+					const spared = options.find(option => option.d !== 'discard' || !option.cards.some(kept));
 					send({ type: 'DECIDE', decide: answers[waiting?.t ?? 'discard']?.(options) ?? spared ?? options[0]! });
 					continue;
 				}
@@ -154,6 +155,102 @@ describe('tour stages', () => {
 			'exposure:skull',
 			'log:death',
 			'infect:outbreak',
+		])
+			expect(game.audit.exercised[key], key).toBeGreaterThan(0);
+		expect(game.audit.problems).toEqual([]);
+	});
+
+	test('Searches: every companion, both scars, the Lookout and the free sea lane can all be played', () => {
+		const game = seated(tourSearches(7), ['Gale', 'Moss', 'Tarn']);
+		game.stage('tour-searches');
+		const { act, card, world } = game;
+		const me = (seat: SeatId) => world().game!.players[seat]!;
+		// A scar may cover an ability. The brief says to put it in an empty slot, so the Lookout stays.
+		const scar = (name: string) => (options: Decide[]) =>
+			options.find(option => option.d === 'scar' && option.scar === name && option.target === 3)!;
+
+		act(A, { a: 'search', card: card('denver', A), box: 0 });
+		act(A, { a: 'drive', to: city('los-angeles') });
+		act(A, { a: 'drive', to: city('mexico-city') });
+		act(A, { a: 'search', card: card('mexico-city', A), box: 0 });
+		game.endTurn(A, { scar: scar('lineExtraCube') });
+		expect(game.audit.exercised['scar:lineExtraCube']).toBe(1);
+
+		act(B, { a: 'search', card: card('dar-es-salaam', B), box: 0 });
+		game.endTurn(B, { scar: scar('smallHand') });
+		expect(game.audit.exercised['scar:smallHand']).toBe(1);
+
+		act(C, { a: 'search', card: card('shanghai', C), box: 0 });
+		act(C, { a: 'drive', to: city('osaka') });
+		act(C, { a: 'search', card: card('osaka', C), box: 0 });
+		expect(game.pending()).toBe('freeEdge');
+		game.decide({ d: 'freeEdge', to: city('seoul') });
+		act(C, { a: 'drive', to: city('seoul') });
+		game.endTurn(C);
+
+		act(A, { a: 'makeSupplies' });
+		act(A, { a: 'establishLine', to: city('denver') });
+		// The Lineman takes a cube off the cost of a supply line.
+		expect(me(A).supplies).toBe(0);
+		act(A, { a: 'drive', to: city('los-angeles') });
+		act(A, { a: 'drive', to: city('haven-eastern-pacific') });
+		game.endTurn(A);
+
+		// The Field Surgeon is in hand, so starting a second turn in infested Dar es Salaam scratched nothing.
+		const moss = world().campaign.characters[me(B).character]!;
+		expect(moss.exposure).toBe(moss.exposureTrack.indexOf('scar') + 1);
+		act(B, { a: 'drive', to: city('johannesburg') });
+		act(B, { a: 'shuttle', to: city('haven-north-atlantic') });
+		act(B, { a: 'drive', to: city('london') });
+		act(B, { a: 'drive', to: city('st-petersburg') });
+		game.endTurn(B);
+
+		const seoul = world().game!.playerDiscard.find(held => {
+			const def = world().campaign.playerCards[held]!;
+			return def.kind === 'city' && def.city === 'seoul';
+		})!;
+		act(C, { a: 'search', card: seoul, box: 0 });
+		for (const to of ['ho-chi-minh-city', 'kolkata', 'jakarta']) act(C, { a: 'drive', to: city(to) });
+		game.endTurn(C);
+
+		act(A, { a: 'drive', to: city('lima') });
+		act(A, { a: 'search', card: card('lima', A), box: 0 });
+		// Three companions and five City cards are one over the hand limit. The searched Denver card is the one to let go.
+		game.decide({ d: 'discard', seat: A, cards: [card('denver', A)] });
+		act(A, { a: 'drive', to: city('bogota') });
+		const left = world().game!.actionsLeft;
+		act(A, { a: 'search', card: card('bogota', A), box: 0 });
+		// The Tracker makes a search cost no action.
+		expect(world().game!.actionsLeft).toBe(left);
+		while (game.pending()) game.decide(legalDecides(world())[0]!);
+		// The Builder takes a card off the cost of a supply center.
+		act(A, {
+			a: 'buildCenter',
+			cards: ['mexico-city', 'lima', 'santiago', 'bogota'].map(name => card(name, A)),
+		});
+		game.endTurn(A);
+
+		act(B, { a: 'search', card: card('st-petersburg', B), box: 0 });
+		game.decide({ d: 'discard', seat: B, cards: [card('dar-es-salaam', B)] });
+		act(B, { a: 'makeSupplies' });
+		act(B, { a: 'buildTower' });
+		game.endTurn(B);
+
+		act(C, { a: 'search', card: card('jakarta', C), box: 0 });
+
+		for (const key of [
+			'found:companion:lineman',
+			'found:companion:builder',
+			'found:companion:tracker',
+			'found:companion:fieldSurgeon',
+			'found:companion:rigger',
+			'scar:lineExtraCube',
+			'scar:smallHand',
+			'abilityInPlay:lookout',
+			'search:stockpile',
+			'search:nothing',
+			'search:infest',
+			'freeEdge:sea',
 		])
 			expect(game.audit.exercised[key], key).toBeGreaterThan(0);
 		expect(game.audit.problems).toEqual([]);

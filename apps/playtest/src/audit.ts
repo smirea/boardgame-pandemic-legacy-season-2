@@ -160,6 +160,12 @@ export function observe(audit: Audit, previous: PublicState | null, next: Public
 		if (command.type === 'ACTION') bump(audit, `action:${command.action.a}`);
 		if (command.type === 'PLAY') bump(audit, `play:${command.play.e}`);
 		if (command.type === 'DECIDE') bump(audit, `decide:${command.decide.d}`);
+		if (command.type === 'DECIDE' && command.decide.d === 'scar') bump(audit, `scar:${command.decide.scar}`);
+		if (command.type === 'ACTION' && command.action.a === 'selfInject') bump(audit, 'scar:carrier');
+		if (command.type === 'DECIDE' && command.decide.d === 'freeEdge') {
+			const before = previous?.world.campaign.edges.length ?? campaign.edges.length;
+			for (const edge of campaign.edges.slice(before)) bump(audit, `freeEdge:${edge.kind}`);
+		}
 		if (command.type === 'PURCHASE') {
 			const purchase = command.purchase;
 			bump(audit, `purchase:${purchase.t}`);
@@ -238,6 +244,10 @@ export function observe(audit: Audit, previous: PublicState | null, next: Public
 		(record ?? audit.games.at(-1))?.opened.push({ bundle, forced });
 	}
 	for (const rule of campaign.rules) if (!previous?.world.campaign.rules.includes(rule)) bump(audit, `rule:${rule}`);
+	if (previous)
+		for (const card of Object.values(campaign.playerCards))
+			if (card.kind === 'companion' && !previous.world.campaign.playerCards[card.id])
+				bump(audit, `found:companion:${card.companion}`);
 	// A turning point leaves the list at the moment it resolves.
 	for (const point of previous?.world.campaign.turningPoints ?? []) {
 		if (campaign.turningPoints.includes(point)) continue;
@@ -327,6 +337,17 @@ export function universe(world: World): { key: string; live: boolean }[] {
 			live: job.starting || campaign.jobsFound.some(found => found.job === job.id),
 		})),
 		...pack.bundles.map(bundle => ({ key: `bundle:${bundle.id}`, live: true })),
+		...pack.companions.map(companion => ({ key: `found:companion:${companion.id}`, live: true })),
+		...pack.scars.map(scar => ({ key: `scar:${scar.id}`, live: campaign.scars.includes(scar.id) })),
+		...pack.abilities.map(ability => ({
+			key: `abilityInPlay:${ability.id}`,
+			live: campaign.abilitiesForSale.includes(ability.id),
+		})),
+		...[...new Set(Object.values(pack.searches).flatMap(boxes => boxes.map(box => box.result.t)))].map(result => ({
+			key: `search:${result}`,
+			live: campaign.actions.includes('search'),
+		})),
+		...['land', 'sea'].map(kind => ({ key: `freeEdge:${kind}`, live: campaign.actions.includes('search') })),
 		...pack.legacyDeck.map(card => ({ key: `legacy:${card.id}`, live: card.month <= campaign.month })),
 		...pack.objectives
 			.filter(objective => objective.id !== 'prologueCenters')

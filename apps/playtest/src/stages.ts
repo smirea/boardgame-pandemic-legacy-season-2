@@ -63,7 +63,34 @@ export const workerTrap = (world: World): CityId => {
 	return beside;
 };
 
-export const labScenarios = { ...scenarios, 'tour-october': tourOctober, 'tour-november': tourNovember };
+/**
+ * October for a group that has searched almost nowhere. Two characters stand one exposure from a scar,
+ * one of them trained as a Lookout, and the sea lane from Osaka to Seoul was never charted.
+ */
+export function tourSearches(seed?: number): Save {
+	const save = campaignAt(10, seed, {
+		cast: [
+			['Gale', 'laborer'],
+			['Moss', 'radioOperator'],
+			['Tarn', 'instructor'],
+		],
+	});
+	const { campaign } = save.world;
+	const [, moss, tarn] = Object.values(campaign.characters);
+	tarn!.slots[0] = { kind: 'ability', id: 'lookout' };
+	for (const marked of [moss!, tarn!]) marked.exposure = marked.exposureTrack.indexOf('scar');
+	campaign.edges = campaign.edges.filter(edge => ![edge.a, edge.b].every(end => end === 'osaka' || end === 'seoul'));
+	const refused = checkEdge(campaign, id('osaka'), id('seoul'), 'sea');
+	if (refused) throw new Error(`the tour needs a free sea lane from Osaka to Seoul: ${refused}`);
+	return save;
+}
+
+export const labScenarios = {
+	...scenarios,
+	'tour-october': tourOctober,
+	'tour-november': tourNovember,
+	'tour-searches': tourSearches,
+};
 
 function cardsOf(world: World, cities: string[]): CardId[] {
 	return cities.map(city => {
@@ -228,6 +255,45 @@ function stageNovember(world: World) {
 	game.pending = [];
 }
 
+function stageSearches(world: World) {
+	const game = world.game!;
+	deal(world, [
+		cardsOf(world, ['denver', 'mexico-city', 'lima', 'santiago', 'bogota']),
+		cardsOf(world, ['dar-es-salaam', 'st-petersburg']),
+		cardsOf(world, ['shanghai', 'osaka', 'jakarta']),
+	]);
+	// The Seoul card lies in the discard pile, which is where a Lookout searches from.
+	discarded(world, cardsOf(world, ['seoul'])[0]!);
+	game.players[seats[0]!]!.location = id('denver');
+	game.players[seats[1]!]!.location = id('dar-es-salaam');
+	game.players[seats[2]!]!.location = id('shanghai');
+	calm(world, [
+		'denver',
+		'los-angeles',
+		'mexico-city',
+		'haven-eastern-pacific',
+		'lima',
+		'santiago',
+		'dar-es-salaam',
+		'johannesburg',
+		'haven-north-atlantic',
+		'london',
+		'st-petersburg',
+		'shanghai',
+		'osaka',
+		'seoul',
+		'ho-chi-minh-city',
+		'kolkata',
+		'jakarta',
+	]);
+	// Seat 1 goes first, so the two marked characters begin their first turn where the stage put them.
+	game.active = seats[0]!;
+	game.actionsLeft = pack.numbers.actionsPerTurn;
+	wellSupplied(world, 3, []);
+	tourDeck(world, 40);
+	game.pending = [];
+}
+
 const PLAN_COLOURS: Color[] = ['red', 'yellow', 'blue', 'black'];
 
 /** The Plan recons this campaign has not made yet. Finished steps carry over to a second attempt. */
@@ -354,8 +420,45 @@ const planFinish = (world: World): Stage => {
 	};
 };
 
+const searches: Stage = {
+	apply: stageSearches,
+	summary:
+		'The lab arranged the table: pawns at Denver, Dar es Salaam and Shanghai, a chosen hand for each seat, the Seoul card in the discard pile, seat 1 to move first, cities topped up toward 3 cubes for as long as the reserve lasted, and a Player deck of 40 cards with no Epidemics.',
+	table: [
+		'This is a **tour game**. A campaign already ran the whole year. This game exists to play the searches, companions and scars that campaign never reached, so finishing your list below matters more than winning. Keep the game going until every list is done.',
+		'Pick these characters in the lobby: seat 1 takes **Gale**, seat 2 takes **Moss**, seat 3 takes **Tarn**. Do not create or pick anyone else.',
+		'When the first action step starts, the lab rearranges the table once: it moves the pawns, deals each of you a chosen hand, and makes seat 1 the first to move. `wait` shows a chat line starting TABLE STAGED when that has happened. Run `status` and `options` again after it. Do not act before it.',
+		'A search does not use up the city card, so keep every card your list names. Some companions found by a search are not played: they stay in your hand and change a cost while you hold them. `report` it if a cost does not change the way your list says.',
+		'A companion found by a search can put you over the hand limit. Then discard a City card you have already searched with. Never discard a companion.',
+	],
+	seats: [
+		[
+			'You are Gale, at Denver, holding the Denver, Mexico City, Lima, Santiago and Bogotá cards.',
+			'Turn 1: Search at Denver. The Lineman joins your hand. Drive to Los Angeles, then Mexico City. Search at Mexico City. The Builder joins your hand.',
+			'Turn 2: Make supplies once. Establish a supply line from Mexico City to Denver. With the Lineman it costs 1 cube, not 2. Drive to Los Angeles, then Farwater.',
+			'Turn 3: drive to Lima and Search there. The Tracker joins your hand: from now on your searches cost no action. You are now one card over the hand limit: discard the Denver card. Drive to Bogotá and Search there. It should cost no action. Then Build a supply center at Bogotá with 4 yellow cards (Mexico City, Lima, Santiago, Bogotá). With the Builder it takes 4 cards, not 5.',
+			'Whenever you are over the hand limit, discard what you drew. Never discard a companion or a yellow card.',
+		],
+		[
+			'You are Moss, at Dar es Salaam, which is infested. Moss is one exposure from a scar.',
+			'At the start of your first turn Moss is exposed and a scar choice appears. Take the scar named **Injured** (supply lines cost 1 more cube), in any empty slot.',
+			'Turn 1: Search at Dar es Salaam. The Field Surgeon joins your hand. End your turn still in Dar es Salaam.',
+			'Turn 2: you start in an infested city again. With the Field Surgeon in hand you should not be exposed. `report` it if you are. Then drive to Johannesburg, Shuttle to Northwatch, drive to London, drive to St. Petersburg.',
+			'Turn 3: Search at St. Petersburg with its first box. The Rigger joins your hand. Make supplies once. Build a tower there. With the Rigger it costs 1 cube, not 2.',
+		],
+		[
+			'You are Tarn, at Shanghai, which is infested, with the Lookout ability. Tarn is one exposure from a scar.',
+			'At the start of your first turn Tarn is exposed and a scar choice appears. Take the scar named **Burdened** (hand limit 1 lower). Put it in an empty slot, not on the Lookout: a scar covers what is in its slot.',
+			'Turn 1: Search at Shanghai. Drive to Osaka. Search at Osaka. It gives a free sea lane: answer the choice by picking Seoul. Drive to Seoul.',
+			'Turn 2: use the Lookout. The Seoul card is in the discard pile, not your hand: Search at Seoul with it. Then drive to Ho Chi Minh City, Kolkata, Jakarta.',
+			'Turn 3: Search at Jakarta.',
+		],
+	],
+};
+
 /** The stage for the game about to be played, by name. A stage may depend on how far the campaign has come. */
 export const stages: Record<string, (world: World) => Stage> = {
 	'tour-october': () => october,
 	'tour-november': world => (planLeft(world).length === PLAN_COLOURS.length ? november : planFinish(world)),
+	'tour-searches': () => searches,
 };
