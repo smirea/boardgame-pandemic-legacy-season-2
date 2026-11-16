@@ -1465,3 +1465,56 @@ describe('choices the January players asked for', () => {
 		for (const build of builds) expect(refuses(actor, build)).toBeNull();
 	});
 });
+
+describe('found in February', () => {
+	test('Resilience can set aside two discarded Infection cards of one city', () => {
+		const actor = late((world, game) => {
+			conjure(world, A, { kind: 'event', event: 'resilience' });
+			const wanted = infectionCards(world, 'cairo', 2);
+			game.infectionDeck.order = game.infectionDeck.order.filter(card => !wanted.includes(card));
+			game.infectionDeck.strata = [game.infectionDeck.order.toSorted()];
+			game.infectionDiscard = [...wanted, ...infectionCards(world, 'lagos', 1)];
+		});
+		const world = worldOf(actor);
+		const cairo = infectionCards(world, 'cairo', 2);
+		const pairs = legalPlays(world, 'playing.actions').filter(
+			option => option.play.e === 'resilience' && option.play.cards.length === 2,
+		);
+		expect(pairs.map(option => (option.play.e === 'resilience' ? option.play.cards : []))).toEqual([cairo]);
+		send(actor, { type: 'PLAY', ...pairs[0]! });
+		expect(gameOf(actor).gameEndArea).toEqual(expect.arrayContaining(cairo));
+		expect(gameOf(actor).infectionDiscard).toHaveLength(1);
+	});
+
+	test('a Legacy briefing names each new card and says what it does', () => {
+		const actor = createGameActor({ seed: 9 }).start();
+		const havens = pack.cities.filter(entry => entry.kind === 'haven' && !entry.lost);
+		actor.send({ type: 'CREATE_CHARACTER', name: 'Ada', job: 'farmer', home: havens[0]!.id });
+		actor.send({ type: 'CREATE_CHARACTER', name: 'Bo', job: 'laborer', home: havens[0]!.id });
+		actor.send({ type: 'BEGIN_CAMPAIGN' });
+		const cast = Object.values(worldOf(actor).campaign.characters);
+		actor.send({
+			type: 'START_GAME',
+			seating: cast.map((entry, index) => ({ seat: [A, B][index]!, character: entry.id })),
+		});
+		const briefing = worldOf(actor).campaign.briefing;
+		expect(briefing[0]).toStartWith('January:');
+		expect(briefing).toContain('New ability for sale: Helmsman. Your first Drive or Ferry each turn is free.');
+		expect(briefing.filter(line => line.startsWith('New Infection card improvement'))).toHaveLength(2);
+	});
+
+	test('setup says how many cubes are left when a placement asks for more', () => {
+		const save = octoberSave();
+		const actor = createGameActor({ seed: 3, save }).start();
+		const cast = Object.values(worldOf(actor).campaign.characters).slice(0, 3);
+		actor.send({
+			type: 'START_GAME',
+			seating: cast.map((entry, index) => ({ seat: [A, B, C][index]!, character: entry.id })),
+		});
+		const left = gameOf(actor).stockpile;
+		const target = [...grid(worldOf(actor).campaign)][3]!;
+		expect(reject(worldOf(actor), phase(actor), { type: 'PLACE_SUPPLY', city: target, count: left + 1 })).toBe(
+			`Only ${left} cubes are left to place`,
+		);
+	});
+});

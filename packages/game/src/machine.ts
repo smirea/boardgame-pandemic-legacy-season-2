@@ -135,7 +135,10 @@ export function reject(world: World, phase: Phase, command: Command): string | n
 				return 'Pick a location on the grid';
 			const fits =
 				command.count > 0 ? command.count <= game.stockpile : -command.count <= game.locations[command.city]!.supplies;
-			return fits ? inPhase('setup.supply') : 'Not that many cubes';
+			if (fits) return inPhase('setup.supply');
+			return command.count > 0
+				? `Only ${game.stockpile} cube${game.stockpile === 1 ? ' is' : 's are'} left to place`
+				: 'That location does not hold that many cubes';
 		}
 		case 'AUTO_SUPPLY':
 			return inPhase('setup.supply');

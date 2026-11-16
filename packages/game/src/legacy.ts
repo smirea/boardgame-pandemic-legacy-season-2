@@ -161,8 +161,11 @@ export function openBundle(world: World, id: BundleId, forced: boolean) {
 	if (forced) campaign.forced.push(id);
 	if (game) log(game, { t: 'unlock', bundle: id, forced });
 	campaign.briefing.push(`${bundle.name}${forced ? ' (opened by a perimeter report)' : ''}`);
-	for (const unlock of bundle.unlocks) applyUnlock(world, unlock);
-	if (!forced) for (const unlock of bundle.reward ?? []) applyUnlock(world, unlock);
+	for (const unlock of [...bundle.unlocks, ...(forced ? [] : (bundle.reward ?? []))]) {
+		const line = unlockLine(unlock);
+		if (line) campaign.briefing.push(line);
+		applyUnlock(world, unlock);
+	}
 }
 
 const pushUnique = <T>(list: T[], value: T) => {
@@ -269,6 +272,31 @@ export function applyUnlock(world: World, unlock: Unlock) {
 	}
 }
 
+const named = <T extends { id: string; name: string; text: string }>(list: T[], id: string) => {
+	const found = list.find(entry => entry.id === id)!;
+	return `${found.name}. ${found.text}`;
+};
+
+/** What a briefing says about an unlock that adds something with a name and a rule of its own. */
+function unlockLine(unlock: Unlock): string | null {
+	switch (unlock.t) {
+		case 'event':
+			return `New ${unlock.mode === 'rationed' ? 'Rationed' : unlock.mode === 'unrationed' ? 'Unrationed' : 'permanent'} Event: ${named(pack.events, unlock.event)}`;
+		case 'ability':
+			return `New ability for sale: ${named(pack.abilities, unlock.ability)}`;
+		case 'cityImprovement':
+			return `New City card improvement for sale: ${named(pack.cityImprovements, unlock.improvement)}`;
+		case 'infectionImprovement':
+			return `New Infection card improvement for sale: ${named(pack.infectionImprovements, unlock.improvement)}`;
+		case 'scar':
+			return `New scar in the box: ${named(pack.scars, unlock.scar)}`;
+		case 'job':
+			return `New job found: ${named(pack.jobs, unlock.job)}`;
+		default:
+			return null;
+	}
+}
+
 /** Reads Legacy cards in order until one halts. `won` is only known for cards read at game end. */
 export function readLegacy(world: World, phase: 'setup' | 'gameEnd', won?: boolean) {
 	const campaign = world.campaign;
@@ -283,7 +311,11 @@ export function readLegacy(world: World, phase: 'setup' | 'gameEnd', won?: boole
 		const applies = !card.when || (card.when === 'won') === won;
 		if (applies) {
 			campaign.briefing.push(`${card.title}: ${card.text}`);
-			for (const unlock of card.unlocks) applyUnlock(world, unlock);
+			for (const unlock of card.unlocks) {
+				const line = unlockLine(unlock);
+				if (line) campaign.briefing.push(line);
+				applyUnlock(world, unlock);
+			}
 		}
 		if (card.halt) {
 			campaign.legacyHalt = { kind: card.halt, month: campaign.month };

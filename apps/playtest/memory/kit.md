@@ -1,40 +1,48 @@
 # Memory
 
-January won. Sable (Instructor, home Midsea) is alive, exposure 0/7, no ability. Knox (Laborer, Southreach) has Helmsman: the first drive each turn is free, and a Laborer center is 4 cards plus 2 cubes. Hale (Radio Operator, Midsea) moves cubes at any range. February rationing is 2. Past games: Jan W.
+February won. Quinn (Administrator, Northwatch) is alive, exposure 0/7, no ability. Sable (Instructor, Midsea) sat this one out and is clean. Knox (Laborer, Southreach) has Helmsman and Record Keeper. Reed (Farmer, Northwatch) is alive, no ability. Hale is benched. Past games: Jan W, Feb W.
 
 ## Rules that change play
 
-- Instructor give works both ways. Anyone in my city can take any card from me. Cards held by the others move only in the named city. Assemble a build on me, then let Knox take it.
-- Transfer moves the whole stack or nothing. Never park spare cubes on the person who is about to build. Make supplies at the city and deliver.
-- `establishLine` appears only while carrying 2 cubes, then costs the action and the cubes. Chicago and Atlanta joined the grid with their player cards already in the discard, search boxes included, and their infection cards did not enter the deck. A new city is a route, not a draw.
-- Epidemic strips a city to zero supply and shuffles the discard on top. Rate stays 2 for two epidemics, then 3. Cube a city before the epidemic if all of its infection cards are already discarded. Jacksonville's three cards did this to us.
-- Plague and supply sit together. A hit removes supply first. Well Stocked, bought onto a Washington infection card: a hit removes nothing if the city has 2 or more cubes. Stack 2, then stop.
-- Second Wind is +2 actions, action step only. Quiet Night skips the next infect whenever it is played. Supply Drop is 4 reserve cubes on one grid city. Airlift is any pawn to any grid city, any turn.
-- Produce system fills every haven and supply center to population and scratches one use. Save it for when two centers exist.
-- Hand limit 7. Pass cards only after a build has made room. The game halts until the over-limit player discards.
-- Centers do not persist. Permanent and restore were not in the January shop. February starts with no centers. Washington and Istanbul each gained 1 population. Tripoli lost 1.
-- Washington recon is any 3 blues, once a center is there. A triple-count Washington card was bought on washington.8, which Hale was holding.
+- No Instructor this game, and it hurt. A card changes hands only in its own city. Pick the meeting city from the card, not from the city you wish you were building in.
+- Administrator is one action: move any pawn onto any other pawn. Move yourself first, then pull. The destination is where the other pawn is at that moment.
+- Do not teleport Knox for a single step. Helmsman already makes the first drive each turn free.
+- A Laborer center is 4 cards plus 2 cubes. Anyone else pays 5 cards and no cubes. +triple counts as 3. I built Washington with London + washington.8 + London. london.32 is now Double. Treat it as 2 until a build key proves otherwise. washington.8 is still +triple next game.
+- Record Keeper sits in a second slot on Knox. I never saw the text. Ask before planning around it.
+- Reed's deliver right after Make Supplies is free, once a turn.
+- Resilience's listed key removed one discarded infection card when two of that city were in the discard. Do not trust "up to 2" until it is shown.
+- Purge cleared Cairo's plague from another region. The card shows its name and nothing else until a plague cube makes it legal.
+- Search needs that city's card in hand while you stand there. los-angeles.79 has 2 boxes. denver.72 has 1. Atlanta's search said quarantineCard and the board never showed an effect.
+- A city that joins puts player cards in the discard and keeps infection cards out until next game. Los Angeles and Denver enter the infection deck in March.
+- Centers die unless permanent. Only Washington survived. São Paulo and Atlanta did not.
+- Washington is population 5, with Well Stocked on one infection card. One hit does nothing if the city has 2 or more cubes when that card comes up. Cairo and Atlanta are population 2. Tripoli is population 2 with 3 infection cards.
+- São Paulo and Cairo ended on 2 plague. I do not know if plague persists. Do not start a turn in either until that is settled. Exposure is the price.
+- The rate track is 2, 2, 2, then 3. The first two epidemics do not raise the rate. The stripped city is infected again off the reshuffle before anyone can act. Armor it before the draw.
+- Hand limit 7. A full hand builds or discards before the draw.
+- Produce system was never played. It fills havens and centers and scratches a use. March starts with a center, so it is live.
+- Card Swap was rationed in and never drawn.
+- Sail works. Discard a port card, move to that port. I sailed to Tripoli and the cube stopped the incident. Do not sail away a card the build still needs.
 
 ## What worked
 
-Feeding Knox. Early blues for the Washington center, later four blacks for Istanbul. I held cards back while Knox's hand was the recon set, then let them take. São Paulo at 0 with both infection cards in the discard got two cubes before the draw. That is the pattern.
+Get the matching cards onto one person in the city those cards can be passed, then let Knox spend the cubes. When my own hand was already a 5-count, I built Washington myself and left Knox free to connect Los Angeles and Denver. Two lines from Atlanta finished the second objective. The third center won.
 
 ## How they play
 
-Vex states one plan and builds. Give Vex the cards and the cubes and get out of the hand. Sol plays the percentages, spends events, and will walk across the map to cube an empty city. Side with Sol when a city in the top of the deck is at 0. Side with Vex when the build cards are already in hand.
+Vex will spend the turn on the objective and take the incident. Hand over four cards and two cubes. Sol cubes whichever city the top of the deck will hit, and will not end a turn on plague. Side with Sol when a city in the top layer is at 0. Side with Vex when the build cards are already in a hand.
 
-## Board going into February
+## Board going into March
 
-On the grid: the Atlantic, plus Chicago (via New York) and Atlanta (via Washington). Both at 0 cubes and not in the infection deck as of January's end. Still off the grid: San Francisco, Denver, Los Angeles, Mexico City. Open lines that were listed: Chicago–Atlanta, Chicago–Denver, Jacksonville–Atlanta, Jacksonville–San Francisco, Southreach–Los Angeles by sea. Washington–Atlanta is done.
+Permanent center: Washington only. On the grid now: Los Angeles (yellow, via Atlanta) and Denver (blue, via Atlanta). Still off the grid: San Francisco, Mexico City. Lines that were still open: Chicago–Denver, Jacksonville–San Francisco, Southreach–Los Angeles by sea.
 
-Only three black cities exist, so Cairo's "4 different blacks" recon is still impossible. Lagos still wants 5 different yellows. London's 4 different blues is now possible (New York, Washington, London, Chicago, Atlanta, and the off-grid blues once connected).
+Recon: Washington is 3 blues and the center is already there. London is 4 different blues. São Paulo is 4 yellows and needs a center again. Lagos is 5 different yellows. Cairo is 4 different blacks and there is still no fourth black city.
 
 ## Next game
 
-Lobby closes fast. Pick the haven in the same breath as the character. Northwatch was empty all of January because I was already locked to Midsea.
+Lobby closes fast. Say the character and the haven in one breath. `create` did not seat me. `pick` did.
 
-Stay Sable unless the seat has to change. The pass-any-card trick is how the centers got built. Farmer (free deliver after make supplies) and Administrator (move a pawn to another pawn) are still open. If I switch, do it before anyone else leaves the lobby.
+Stay Quinn unless the build cards are split across three hands. Then Sable's pass is worth the switch. Northwatch starts next to London and New York.
 
-Helmsman is on Knox, so Knox should walk to the build. I carry the matching cards and stand there. Do not sail away a card the build still needs.
+Make cubes from the stockpile. Never strip the city you are about to build in.
 
-Four new rationed events joined the reserve and the briefing did not name them. Ask the lead to read the names before the February pick.
+I cannot see the shop. Ask the lead to read every price, and to name the rationed events. The February briefing did not.

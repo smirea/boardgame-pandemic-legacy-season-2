@@ -52,5 +52,49 @@
 				"fix": "They unlock in February. Guide corrected."
 			}
 		]
+	},
+	"g01": {
+		"summary": "Won on turn 12 with five incidents: three supply centers, and Los Angeles and Denver joined to the grid.",
+		"story": "Sol led with a new character, Reed the Farmer, and Kit benched the Instructor for Quinn, an Administrator. Vex kept Knox the Laborer, now with Helmsman. Reed filled every city to its population. The opening infection hit London three times and Reed refilled it. The first epidemic stripped São Paulo, and Quinn played Resilience in the new pause before the reshuffle. Quinn pulled pawns together in Lagos so Knox could collect yellow cards and build São Paulo, then built Washington himself with the Triple card bought in January. Knox drew supply lines to Los Angeles and Denver, which completed the second objective, searched Atlanta, and built the Atlanta center for the win.",
+		"highlights": [
+			"Second straight win, in 12 turns. Rationing is now 0, so March starts with no Rationed Events.",
+			"First Search of the year: Atlanta, which let the table set a São Paulo Infection card aside.",
+			"The Epidemic pause added after the first run was used as intended: Resilience played on the city that had just been struck.",
+			"The Triple improvement paid for a supply center on its own with two more cards.",
+			"Game end: Washington's center was made permanent, the first permanent structure of the year. Record Keeper went to Knox and Double to a London card."
+		],
+		"parity": "All four checks passed: 2 objectives required; Build 3 supply centers (mandatory), Recon a new area and Connect 2 new cities in play; 33 cubes. Legacy card 02-01 was read at setup. North America was already open, so its perimeter report forced nothing. Card 02-02 was read at game end and put permanent supply centers on sale, added three Rationed Events and armed the two turning points, as the research schedules.",
+		"findings": [
+			{
+				"finding": "Resilience says up to 2 cards of one city, but only one card could be named, so the second São Paulo card went back on the deck.",
+				"kind": "Engine gap",
+				"fix": "Pairs of cards of one city are offered. Test added."
+			},
+			{
+				"finding": "The briefing said three new events had arrived without naming them, and a held event showed only its name.",
+				"kind": "Engine and lab gap",
+				"fix": "A briefing now names every new card with its rule, in the game and in the lab. The lab's status lists each held event with what it does."
+			},
+			{
+				"finding": "A search that found a choice logged only a code word, and the choice itself was not logged.",
+				"kind": "Engine and lab gap",
+				"fix": "The game logs what was set aside, taken or removed. The lab describes each kind of find in plain words."
+			},
+			{
+				"finding": "Only the lead could see the shop at game end.",
+				"kind": "Lab gap",
+				"fix": "Every player can read the shop. Only the lead can buy."
+			},
+			{
+				"finding": "Placing 3 cubes with 2 left answered 'Not that many cubes', which read as a population cap.",
+				"kind": "Wording",
+				"fix": "The game says how many cubes are left to place."
+			},
+			{
+				"finding": "Cities that joined mid-game put cards with unused search boxes into the discard pile, out of reach.",
+				"kind": "Not a bug",
+				"fix": "The research rule. They are drawn next game."
+			}
+		]
 	}
 }

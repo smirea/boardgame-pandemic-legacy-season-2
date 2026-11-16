@@ -209,7 +209,11 @@ export function legalPlays(world: World, phase: Phase): { seat: SeatId; card: Ca
 					for (const pawn of game.seats) for (const to of onGrid) plays.push({ e: 'airlift', pawn, to });
 					break;
 				case 'resilience':
-					for (const target of game.infectionDiscard) plays.push({ e: 'resilience', cards: [target] });
+					for (const [index, target] of game.infectionDiscard.entries()) {
+						plays.push({ e: 'resilience', cards: [target] });
+						for (const second of game.infectionDiscard.slice(index + 1))
+							plays.push({ e: 'resilience', cards: [target, second] });
+					}
 					break;
 				case 'supplyDrop':
 					for (const city of onGrid) plays.push({ e: 'supplyDrop', city });

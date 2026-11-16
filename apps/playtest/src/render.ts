@@ -104,6 +104,20 @@ function troubleLines(world: World): string[] {
 		: [];
 }
 
+const SEARCH_FINDS: Record<string, string> = {
+	supplies: 'supply cubes, placed on the city',
+	stockpile: 'cubes for the stockpile',
+	actions: 'extra actions this turn',
+	retrieve: 'a card to take from the Player discard pile (a choice follows)',
+	quarantineCard: 'the chance to set an Infection card aside until game end (a choice follows)',
+	removeHollow: 'the chance to remove Hollow Men (a choice follows)',
+	freeEdge: 'a free supply line or sea lane from here (a choice follows)',
+	discover: 'something new for the campaign (see the Legacy briefing)',
+	companion: 'a companion, who joins your hand',
+	infest: 'an infestation: this city now exposes whoever starts a turn in it',
+	nothing: 'nothing',
+};
+
 export function renderLog(world: World, entry: LogEntry): string {
 	const seat = (id: SeatId) => seatName(world, id);
 	const city = (id: CityId) => cityName(world, id);
@@ -143,7 +157,7 @@ export function renderLog(world: World, entry: LogEntry): string {
 		case 'objective':
 			return `OBJECTIVE COMPLETE: ${objectiveDef(entry.objective).name}`;
 		case 'search':
-			return `${seat(entry.seat)} searched ${city(entry.city)}: ${entry.result}`;
+			return `${seat(entry.seat)} searched ${city(entry.city)} and found: ${SEARCH_FINDS[entry.result]}`;
 		case 'note':
 			return entry.text;
 		case 'end':
@@ -295,6 +309,23 @@ export function renderStatus(state: PublicState, who: Who | null): string {
 	}
 	for (const pending of game.pending.slice(0, 1)) lines.push(`PENDING CHOICE: ${pendingLine(world, pending)}`);
 	lines.push('Players:', ...playerLines(world, who));
+	const special = game.seats.flatMap(seat =>
+		game.players[seat]!.hand.flatMap(id => {
+			const card = campaign.playerCards[id]!;
+			const def =
+				card.kind === 'event'
+					? pack.events.find(entry => entry.id === card.event)
+					: card.kind === 'companion'
+						? pack.companions.find(entry => entry.id === card.companion)
+						: null;
+			return def ? [`  ${enc(id)} (${seatName(world, seat)}): ${def.name}. ${def.text}`] : [];
+		}),
+	);
+	if (special.length)
+		lines.push(
+			'Events and companions in hands (played with `play:` keys, at any time, when they have a legal target):',
+			...special,
+		);
 	if (phase.startsWith('playing')) lines.push(...troubleLines(world));
 	return lines.join('\n');
 }
@@ -430,7 +461,7 @@ export function renderDecks(world: World): string {
 		`Player deck: ${found.playerDeck.cards} cards · by kind ${JSON.stringify(found.playerDeck.byKind)}`,
 		`Player discard (${game.playerDiscard.length}): ${game.playerDiscard.map(id => `${enc(id)} [${cardName(world, id)}]`).join(', ') || 'empty'}`,
 		`Infection discard (${game.infectionDiscard.length}): ${game.infectionDiscard.map(id => `${enc(id)} [${cardName(world, id)}]`).join(', ') || 'empty'}`,
-		`Game End area (${game.gameEndArea.length}; Infection cards of cities that joined the grid this game wait here and enter the deck next game): ${game.gameEndArea.map(id => cardName(world, id)).join(', ') || 'empty'}`,
+		`Game End area (${game.gameEndArea.length}; cards out of this game: set aside by Resilience or a search, or of cities that joined the grid this game): ${game.gameEndArea.map(id => cardName(world, id)).join(', ') || 'empty'}`,
 		'Infection deck layers, top first (cards known to be in each layer):',
 	];
 	for (const layer of found.infection.strata)

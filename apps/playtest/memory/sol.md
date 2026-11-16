@@ -1,41 +1,53 @@
 # Memory
 
-January won, 2 incidents. I was Hale, Radio Operator, home Midsea. February rationing is 2. Four new rationed events are in the reserve and were not named.
+February won, 5 incidents, turn 12. I was Reed, Farmer, home Northwatch. Quinn (Administrator, Northwatch) and Knox (Laborer, Southreach) played. Hale and Sable sat out.
 
 ## Rules that change play
 
-Epidemics strip every cube and do not add plague. The rate track is 2, 2, 2, 3, so the third epidemic is the one that raises it. The discard, including the stripped city, is shuffled on top.
+Farmer: the Deliver right after Make Supplies is free, once a turn. It is the whole action. Carry cubes in, make one, deliver all of them.
 
-A non-instructor passes only the card of the city you are both standing in. The instructor passes any card she holds, and only while colocated. Give her the cards that have to move across the map.
+A non-instructor shares only the card of the city you are both standing in. Card Swap trades one card each and was never drawn. Do not count on it. Say the path you are walking. The Administrator can move you onto another pawn once a turn.
 
-Radio transfer works at any range and only for the whole stack. Deliver is 1 or all, never a middle count. Do not take a builder's cubes. Make your own.
+Laborer builds with 4 cards of the colour plus 2 cubes. Anyone else needs 5. A +triple card counts as 3 and a +double counts as 2. Do not take the builder's cubes.
 
-`makeSupplies` works in any location. The produce card needs a haven or a supply center. System fills every haven and center up to population and scratches one box. Local fills only the place you stand, and only up to population. Havens hold cubes and are never infected. That pile is a bank.
+Establish Line costs 2 cubes. Sail discards the destination's port card and can cross the grid in one action.
 
-Establish Line showed up in Lagos once I carried 2 cubes, and it spent those 2. It did not appear in Washington while I carried 1. Treat 2 cubes as the cost until proven otherwise.
+Search is listed only on a card that still has boxes, and only in that city. The last box drops the label. The one search this game was quarantineCard, and it set aside inf-sao-paulo.28. The log did not say so.
 
-Supply Drop puts 4 cubes from the reserve on any grid location. Second Wind gives the active player 2 actions, action step only. Quiet Night skips the next infect. Airlift moves a pawn.
+Resilience sets aside up to 2 discarded infection cards of one city, before the epidemic reshuffle. This game it removed 1 of 2 Sao Paulo cards. One card of a 0-cube city left on top is not a clear.
 
-A center does not survive the month. None could be made permanent. Supply lines did: Lagos–Istanbul and Washington–Atlanta are on the board.
+Purge removes a plague cube. The hand list shows the name only.
 
-Well Stocked, if it landed, means a hit removes nothing while that city has 2 or more cubes. Keep that city at 2. Helmsman is on Knox: his first drive each turn is free. Plan his route as one free step plus the rest.
+Epidemics strip cubes and add no plague. The rate track is 2, 2, 2, 3, 3, 4, 4, 5, 5, 5, 5. The third epidemic is the one that raises it. We drew two and it stayed at 2.
+
+Setup will not place cubes over population. Extra cubes can sit on a haven. The refusal text is "Not that many cubes."
+
+Plague exposure is starting your turn there. Walking through does not scratch. I do not know if plague lasts the month. Sao Paulo and Cairo ended on 2. Do not start a turn in either until status shows them clear. One more cube there is an outbreak.
 
 ## Campaign state
 
-Grid blues: New York, Washington (pop 4), London, Chicago (pop 2), Atlanta (pop 1). Off grid: San Francisco, Denver. London recon is 4 different blues and now has the cities, but it still needs a center in London.
+Objectives done: 3 centers, and Los Angeles and Denver connected. No recon.
 
-Grid yellows: Jacksonville, Sao Paulo, Lagos. Off grid: Los Angeles, Mexico City. Sao Paulo recon is any 4 yellows plus a center. Lagos recon still needs 5 different yellows. Impossible until more yellows join.
+Permanent: the Washington center. Blue, population 5, links New York, Jacksonville, Atlanta, Midsea, Southreach. The Sao Paulo and Atlanta centers do not carry over.
 
-Grid blacks: Istanbul (pop 4), Tripoli (pop 2), Cairo. Cairo recon still needs 4 different blacks. Impossible.
+Lines on the board: Washington–Atlanta, Lagos–Istanbul, Atlanta–Los Angeles, Atlanta–Denver.
 
-Chicago's two player cards started in the discard, and its infection cards were not in the deck. Do not plan a Chicago build or a Chicago hit. Atlanta joined with no cards seen in hand.
+Grid blues: New York 3, Washington 5, London 3, Chicago 2, Atlanta 2, Denver 2. Off grid: San Francisco.
+Grid yellows: Jacksonville 3, Sao Paulo 3, Lagos 3, Los Angeles 1. Off grid: Mexico City.
+Grid blacks: Istanbul 4, Tripoli 2, Cairo 2.
 
-Knox (Vex) is the Laborer and the lead. He builds with 4 cards plus 2 cubes and will eat an incident to stay on the objective. Sable (Kit) hands cards and will hold them when asked. She also draws supply lines. Both of us still live at Midsea. Administrator and Farmer are the open jobs.
+London recon still needs a center and 4 different blues. Sao Paulo recon needs a center and 4 yellows. Lagos recon needs 5 different yellows. Cairo recon needs 4 different blacks, and only 3 black cities exist.
+
+london.32 is +double. washington.8 is +triple. atlanta.76 is searched out. los-angeles.79 has 2 search boxes and denver.72 has 1. Both went to the discard when the city joined.
+
+Knox has Helmsman and Record Keeper, hand limit 8. Quinn moves one pawn onto another pawn, once a turn. Reed's free Deliver is the supply line. Sable still passes any card she holds, and only while colocated.
+
+The March lobby opened at rationing 0. Three new rationed events were added and not named. Restore was not for sale.
 
 ## Next game
 
-Sail once, if the discarded card is truly spare. Use local produce at the first center. Search only if I am holding a boxed card in its own city.
+Washington is the bank. System-produce from it early. That fills every haven and every center.
 
-Get the instructor the cards early. Do not leave a black or blue stuck in my hand until the build city.
+If Resilience leaves a stripped city with even one card on top, put cubes there before the next epidemic.
 
-Armor any city on 0 that is in the next pile before I spend the action on a new line. Tripoli plagued because I drew the line instead.
+Hand Knox the fourth build card by standing in that card's city. A port card that is truly spare is the time to sail.

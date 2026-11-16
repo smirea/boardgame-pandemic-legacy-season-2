@@ -658,6 +658,12 @@ async function handle(agent: string, words: string[]): Promise<string> {
 			}
 		}
 		case 'options':
+			if (state.phase === 'upkeep' && !who.lead)
+				return renderOptions(
+					optionsFor(state, { ...who, lead: true }, lab.picks).filter(option => option.key.startsWith('buy:')),
+					rest[0],
+					['This is the shop as the lead sees it. Only the lead can buy. Tell them what you want with `say`.'],
+				);
 			return renderOptions(
 				optionsFor(state, who, lab.picks),
 				rest[0],

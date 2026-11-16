@@ -337,10 +337,16 @@ export function applyDecide(world: World, decide: Decide) {
 			current.location = campaign.characters[next]!.home;
 			return;
 		}
-		case 'retrieve':
+		case 'retrieve': {
 			game.playerDiscard.splice(game.playerDiscard.indexOf(decide.card), 1);
 			player(game, seat).hand.push(decide.card);
+			const taken = campaign.playerCards[decide.card]!;
+			log(game, {
+				t: 'note',
+				text: `Took ${taken.kind === 'city' ? cityDef(taken.city).name : `a ${taken.kind} card`} from the discard pile`,
+			});
 			return;
+		}
 		case 'freeEdge':
 			addEdge(world, player(game, seat).location, decide.to, (pending as { kind: 'land' | 'sea' }).kind, true);
 			return;
@@ -348,12 +354,20 @@ export function applyDecide(world: World, decide: Decide) {
 			for (const city of decide.cities) {
 				game.locations[city]!.hollow -= 1;
 				game.pieces.hollow += 1;
+				log(game, { t: 'note', text: `A Hollow Man was removed from ${cityDef(city).name}` });
 			}
 			return;
-		case 'quarantineCard':
+		case 'quarantineCard': {
 			game.infectionDiscard.splice(game.infectionDiscard.indexOf(decide.card), 1);
 			game.gameEndArea.push(decide.card);
+			const aside = campaign.infectionCards[decide.card]!;
+			if (aside.kind === 'city')
+				log(game, {
+					t: 'note',
+					text: `An Infection card of ${cityDef(aside.city).name} was set aside until the game ends`,
+				});
 			return;
+		}
 		case 'cordon':
 			discardFromHand(game, decide.seat, decide.card);
 			game.infectionsLeft = 0;
