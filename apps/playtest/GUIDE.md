@@ -52,6 +52,8 @@ So supply cubes are armour. Your main job between objectives is keeping cubes on
 
 **Hollow Men.** Once they arrive, their Gather cards start each game in the Infection discard pile and enter the deck with the first Epidemic. When one is flipped, the next city flipped gets a Hollow Man and is not infected. Several in a row still place one figure. Leaving a location that holds Hollow Men exposes your character.
 
+**If the Infection deck runs out** before an Epidemic refills it, its discard pile is reshuffled into a new deck and the infection rate moves one step, with no Epidemic drawn. Inoculating and forsaken cities both thin the deck, so this can happen early.
+
 **Hand limit** is 7. Over it, you must discard, and the game waits until you do, even on another player's turn. `wait` tells you when that is you.
 
 **Epidemic odds.** The Player deck is stacked in equal piles with one epidemic in each. The chance in `status` follows the pile being drawn, so it is not simply epidemics divided by cards.

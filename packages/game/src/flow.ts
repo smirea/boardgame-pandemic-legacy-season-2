@@ -327,6 +327,10 @@ function drawInfectionCard(world: World, end: 'top' | 'bottom'): (DrawnCity & { 
 			if (!infectable) return null;
 			game.infectionDeck = newDeck(campaign.rng, game.infectionDiscard.splice(0));
 			game.rateIndex = Math.min(game.rateIndex + 1, numbers.infectionRates.length - 1);
+			log(game, {
+				t: 'note',
+				text: 'The Infection deck ran out: its discard pile is reshuffled into a new deck and the infection rate moves one step',
+			});
 		}
 		const id = end === 'top' ? drawTop(game.infectionDeck)! : drawBottom(game.infectionDeck)!;
 		const card = campaign.infectionCards[id]!;
@@ -334,10 +338,11 @@ function drawInfectionCard(world: World, end: 'top' | 'bottom'): (DrawnCity & { 
 			game.infectionDiscard.push(id);
 			if (end === 'bottom') return null;
 			gathers += 1;
-			log(game, {
-				t: 'note',
-				text: 'A Hollow Men card was flipped: the next city gets a Hollow Man and is not infected',
-			});
+			if (gathers === 1)
+				log(game, {
+					t: 'note',
+					text: 'A Hollow Men card was flipped: the next city gets a Hollow Man and is not infected',
+				});
 			continue;
 		}
 		if (isForsaken(campaign, card.city)) {

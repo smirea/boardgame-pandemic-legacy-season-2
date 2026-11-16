@@ -551,5 +551,44 @@
 				"fix": "September's rule: the last 3 setup infections place Hollow Men."
 			}
 		]
+	},
+	"g12": {
+		"summary": "Won on turn 11 with one incident: the Hollow Men turned and three supply centers built.",
+		"story": "Vex led with the Captain, beside the Immunologist and the Sanitation Officer. The table renamed its Mediterranean haven Crosswater. The opening infection placed Hollow Men on Istanbul, São Paulo and Lagos, each next door to a haven. With so many Infection cards in storage and five cities forsaken, the Infection deck ran out on the second turn and was rebuilt from its discard pile, which moved the infection rate a step with no Epidemic drawn. Towers in Istanbul and São Paulo let the Sanitation Officer and the Captain broadcast Hollow Men into the havens, and the third haven completed Turn the Hollow Men and opened the defection. Centers in Frankfurt, St. Petersburg and New York, with a Quiet Night to cover the last turn, won it.",
+		"highlights": [
+			"The Hollow Men defect: a figure in each of three different havens, the October objective under the researched rule.",
+			"The Infection deck ran out and reshuffled before any Epidemic, the first time the year has seen that rule.",
+			"First haven renamed by the table.",
+			"A sea lane charted from Northwatch to São Paulo.",
+			"Game end: Cordon, Soldier and a second Record Keeper. Rationing drops to 0 for November."
+		],
+		"parity": "All four checks passed, the same as the first attempt: 2 objectives, both mandatory, and 38 cubes. No Legacy card was due. Completing Turn the Hollow Men opened the defection content, which is the third turning point in the research, folded into the objective here. An empty Infection deck was reshuffled and the rate marker advanced one space, which is the rulebook rule in the research notes.",
+		"findings": [
+			{
+				"finding": "The infection rate moved a step with no Epidemic drawn, and nothing said why.",
+				"kind": "Engine gap",
+				"fix": "It is the rule for an empty Infection deck. The log now says when the deck runs out and is reshuffled, and the guide explains it."
+			},
+			{
+				"finding": "Several Hollow Men cards in a row logged one line each for a single figure.",
+				"kind": "Wording",
+				"fix": "One line."
+			},
+			{
+				"finding": "A renamed haven kept its old name in the city view.",
+				"kind": "Lab bug",
+				"fix": "The city view uses the name the table gave."
+			},
+			{
+				"finding": "Build Shelter was not offered in a haven, and its key read as if the shelter went to the city on the card.",
+				"kind": "Not a bug, lab wording",
+				"fix": "The research rule needs a card of the city's colour, and a haven has none. The option now says the shelter goes where you stand and what the card is for."
+			},
+			{
+				"finding": "Opening odds read 67% for each of nine live cities that were all hit.",
+				"kind": "Lab wording",
+				"fix": "The figure is the chance of losing a cube. The setup view now says the last 3 flips place Hollow Men."
+			}
+		]
 	}
 }

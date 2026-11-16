@@ -105,6 +105,10 @@ export function optionsFor(state: PublicState, who: Who, seating: (CharacterId |
 				action.a === 'monitor'
 					? ` · frequency ${action.frequency + 1} of ${pack.frequencies.length}: the top 4 Player cards are discarded, then the frequency gives what it holds`
 					: '';
+			const sheltered =
+				action.a === 'buildShelter'
+					? ` · builds the shelter in the city you stand in${action.card ? ' and discards this card, which only has to match that city in colour' : ''}. A haven has no colour, so this action cannot shelter one`
+					: '';
 			const stored =
 				action.a === 'inoculate'
 					? ` · this city's ${action.card in campaign.playerCards ? 'PLAYER card from the Player discard pile' : 'Infection card from the Infection discard pile'} goes into storage, out of the decks`
@@ -112,7 +116,7 @@ export function optionsFor(state: PublicState, who: Who, seating: (CharacterId |
 			add(
 				keyOf(action.a, action, 'a'),
 				action.a,
-				`${describe(state, action, 'a')}${stored}${tuned}`,
+				`${describe(state, action, 'a')}${stored}${tuned}${sheltered}`,
 				{ type: 'ACTION', seat: who.seat, action },
 				actionCost(world, who.seat, action),
 			);

@@ -222,7 +222,7 @@ function renderSetup(state: PublicState): string[] {
 				: []),
 			`Supply setup: ${game.stockpile} cubes left to place. Cities with no cubes take a Plague cube when infected.`,
 			'Place by hand with `supply <city-id> <count>`: a number adds, a negative number takes back, `=2` sets the city to exactly 2. `do autosupply` spreads the rest. Then `do confirm-supply`, which cannot be undone.',
-			'Grid cities (cubes now, population, chance to be hit in the opening infection):',
+			`Grid cities (cubes now, population, chance to lose a cube in the opening infection${campaign.rules.includes('hollowSetup') ? '. The last 3 of the 9 flips place a Hollow Man and take no cube' : ''}):`,
 		];
 		for (const city of grid(campaign)) {
 			if (cityDef(city).kind !== 'city') continue;
@@ -500,7 +500,7 @@ export function renderCity(world: World, id: CityId): string {
 		return holder ? `hand of ${seatName(world, holder)}` : 'out of play';
 	};
 	return [
-		`${def.name} (${id}) · ${def.kind} · ${def.color ?? 'no colour'} · region ${def.region}${def.port ? ' · port' : ''}`,
+		`${cityName(world, id)} (${id}) · ${def.kind} · ${def.color ?? 'no colour'} · region ${def.region}${def.port ? ' · port' : ''}`,
 		`population ${record.population} · revealed ${record.revealed} · on grid ${grid(campaign).has(id)} · infested ${record.infested} · permanent ${record.permanent.join(', ') || 'none'}${record.lab ? ' · lab' : ''}`,
 		location
 			? `cubes ${location.supplies} · plague ${location.plague} · hollow men ${location.hollow} · center ${location.center} · tower ${location.tower} · shelter ${location.shelter}`
