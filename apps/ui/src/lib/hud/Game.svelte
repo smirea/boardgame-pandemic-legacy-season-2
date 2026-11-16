@@ -17,6 +17,7 @@
 	import type { BoardMarks, BoardView, CityView, Fx, FxKind, Travel } from '#lib/board/types.ts';
 	import type { SessionView } from '#lib/session/session.svelte.ts';
 	import { inkOn } from '#lib/color.ts';
+	import { presentFeedback } from '#lib/feedback.ts';
 	import { LS } from '#lib/storage.ts';
 	import { untrack } from 'svelte';
 	import type { Snippet } from 'svelte';
@@ -742,6 +743,15 @@
 
 		{#if menu}
 			<div class="menu" transition:scale={{ start: 0.92, duration: 180, opacity: 0 }}>
+				{#if import.meta.env.DEV}
+					<button
+						onclick={() => {
+							menu = false;
+							// The capture waits for the menu's exit transition, so the screenshot shows the table without it.
+							setTimeout(() => void presentFeedback(), 220);
+						}}>Give feedback <kbd>⌥⌘ click</kbd></button
+					>
+				{/if}
 				<button onclick={download}>Export campaign save</button>
 				{#if session.mode !== 'join' && !spectator}
 					<button onclick={downloadRecord} data-testid="save-recording">Save this game's recording</button>
@@ -1470,6 +1480,13 @@
 	.menu a:hover {
 		border-color: var(--line);
 		background: var(--wash);
+	}
+
+	.menu kbd {
+		margin-left: 0.6rem;
+		color: var(--muted);
+		font: inherit;
+		font-size: 0.75rem;
 	}
 
 	.menu .danger {

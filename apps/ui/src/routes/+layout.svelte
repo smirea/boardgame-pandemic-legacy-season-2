@@ -16,11 +16,7 @@
 		},
 	});
 
-	if (import.meta.env.DEV)
-		onMount(() => {
-			const stop = startFeedback();
-			return () => void stop.then(destroy => destroy());
-		});
+	if (import.meta.env.DEV) onMount(startFeedback);
 </script>
 
 <svelte:head>
