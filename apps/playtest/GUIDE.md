@@ -80,7 +80,7 @@ Each costs 1 action unless `options` shows another cost. `options` is the truth 
 - `buildCenter:<cards>`: discard 5 City cards of the city's colour to build a supply center there. Three new ones in a game is the standing objective.
 - `establishLine:<city>`: unlocks with the first region you reveal and stays unlocked for the rest of the year. A supply line may not cross another supply line, and `board` says which links are blocked and why. Spend cubes from your character to draw a supply line to a neighbouring revealed city. That joins it to the grid.
 - `chartLane:<port>`: the same over water, once it is unlocked.
-- `recon:<route>:<cards>`: at a marked city with a supply center, discard the listed cards to reveal a whole new region. `board` marks where recon is possible and what it costs.
+- `recon:<route>:<cards>`: at a marked city, discard the listed cards to reveal a whole new region. Most routes need a supply center in the city, a few do not: `city <id>` says which. `board` marks where recon is possible and what it costs.
 - `search:<card>:<box>`: unlocks with the first region you reveal and stays unlocked. Holding a city's card while standing in that city, scratch one of the card's search boxes. Only some City cards have boxes. A card that has them shows `(2 search boxes)` after its name, and `options` then lists the search. Finds range from supplies to new places to nothing.
 - `buildShelter`, `buildTower`, and others appear in `options` as the year unlocks them. The Legacy briefing at the start of a game says what is new.
 

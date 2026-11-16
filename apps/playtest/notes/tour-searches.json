@@ -1,0 +1,45 @@
+{
+	"g09": {
+		"summary": "Tour game. Lost on turn 19 when the Player deck ran out, at two incidents. The last twelve untracked items were played: five passive companions, two scars, the Lookout, three search results and a free sea lane.",
+		"story": "After the first tours the count was complete only for what the lab had been counting. Five companions that are held, not played, had never been found, nor two of the scars, nor a search made from the discard pile. This table went looking. Vex's Gale found the Lineman in Denver and the Builder in Mexico City, laid a supply line to Denver for one cube, found the Tracker in Lima, searched Bogotá for no action and raised a supply center there with four cards. Sol's Moss began in infested Dar es Salaam, took the scar Injured, found the Field Surgeon and sat through a second turn there untouched, then crossed to St. Petersburg for the Rigger and a one-cube tower. Kit's Tarn took the scar Burdened in Shanghai, searched it, drew a free sea lane from Osaka to Seoul, used the Lookout to search Seoul with a card from the discard pile, and found nothing at all in Jakarta.",
+		"highlights": [
+			"Each passive companion changed a cost while held: the Lineman a supply line, the Builder a supply center, the Rigger a tower, the Tracker a search, the Field Surgeon an exposure.",
+			"A Lookout search made with a City card that was in the discard pile.",
+			"Scars placed in an empty slot beside an ability, with the choice of slot left to the player.",
+			"A free sea lane from a sea search, to go with the free supply line of the first tour."
+		],
+		"parity": "October's card was read in October. No invariant broke after the stage. Seat 1 was made the first player by the stage so that the two marked characters began their first turn where it put them.",
+		"findings": [
+			{
+				"finding": "Monitor's log line said it discarded all four revealed cards when the player had kept one.",
+				"kind": "bug",
+				"fix": "The line names the cards revealed, the card kept and says the rest were discarded. Test: Monitor says which revealed card the player kept."
+			},
+			{
+				"finding": "A briefing for an earned Event card read like an effect happening now (\"the active player gains 2 actions\").",
+				"kind": "briefing",
+				"fix": "The line names the card, says where it goes, then quotes its text as what it does when played."
+			},
+			{
+				"finding": "Searching Shanghai said the city is now infested. It already was.",
+				"kind": "log",
+				"fix": "The log says the city was already infested and nothing changes."
+			},
+			{
+				"finding": "A held Supply Drop could not be played and nothing said why.",
+				"kind": "lab",
+				"fix": "options lists held cards that cannot be played now, with the engine's reason."
+			},
+			{
+				"finding": "The stage cleared a Hollow Man from Kolkata that setup had placed, so the Hollow Men objective looked broken.",
+				"kind": "lab",
+				"fix": "The stage text now says plague and Hollow Men are cleared from the cities on the players' routes."
+			},
+			{
+				"finding": "The guide said every recon needs a supply center.",
+				"kind": "guide",
+				"fix": "It says most do and points to `city <id>`."
+			}
+		]
+	}
+}

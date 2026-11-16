@@ -3,7 +3,17 @@ import { checkEdge } from './actions';
 import { pack } from './content/pack';
 import type { EventId, SearchResult } from './content/types';
 import { bump, epidemicCount, freeCharacters, placeHollow, setupInfection } from './flow';
-import { characterAt, grid, handLimit, hasEdge, isCandidate, passage, segmentsCross, tableSeating } from './helpers';
+import {
+	cardLabel,
+	characterAt,
+	grid,
+	handLimit,
+	hasEdge,
+	isCandidate,
+	passage,
+	segmentsCross,
+	tableSeating,
+} from './helpers';
 import type { BundleId, CardId, CityId } from './ids';
 import { createGameActor, parseSave, reject } from './machine';
 import type { Action } from './actions';
@@ -1328,6 +1338,19 @@ describe('parity gaps found by the static review', () => {
 		expect(characterAt(worldOf(actor), A, gameOf(actor).nextSeq)!.id).toBe(free.id);
 	});
 
+	test('Monitor says which revealed card the player kept', () => {
+		const frequency = pack.frequencies.findIndex(reward => reward && 'take' in reward);
+		const actor = late((world, game) => {
+			game.locations[game.players[A]!.location]!.tower = true;
+			world.campaign.frequenciesUsed = [];
+		});
+		act(actor, { a: 'monitor', frequency });
+		const line = gameOf(actor).log.findLast(entry => entry.t === 'note')!;
+		const kept = gameOf(actor).players[A]!.hand.map(card => cardLabel(worldOf(actor).campaign, card));
+		expect(kept.length).toBeGreaterThan(0);
+		expect(line).toMatchObject({ text: expect.stringContaining(`kept ${kept.join(', ')}`) });
+	});
+
 	test('only the North America recon completes the January objective', () => {
 		const counting = pack.reconRoutes.filter(route => route.counts.includes('reconRegion')).map(route => route.id);
 		expect(counting).toEqual(['north-america']);
@@ -1636,7 +1659,7 @@ describe('found in the replayed March', () => {
 		world.campaign.opened = world.campaign.opened.filter(id => id !== 'arrive-eastern-pacific');
 		openBundle(world, 'arrive-eastern-pacific' as never, false);
 		expect(
-			world.campaign.briefing.some(line => line.startsWith('Another copy of a Rationed Event: Second Wind.')),
+			world.campaign.briefing.some(line => line.startsWith('Another copy of a Rationed Event card: Second Wind.')),
 		).toBe(true);
 	});
 });

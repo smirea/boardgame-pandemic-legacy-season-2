@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'bun:test';
-import { botCommand, createGameActor, publicState, reject } from '@repo/game';
+import { botCommand, createGameActor, publicState, reject, scenarios } from '@repo/game';
 import type { CharacterId } from '@repo/game';
 import { newAudit, observe, renderParity, untouched } from './audit.ts';
-import { composite, optionsFor, seatOf } from './commands.ts';
+import { composite, heldUnplayable, optionsFor, seatOf } from './commands.ts';
 import type { Who } from './commands.ts';
 import { renderBoard, renderOptions, renderStatus } from './render.ts';
 
@@ -100,5 +100,34 @@ describe('choices with several targets', () => {
 		} as never);
 		expect(composite(options, 'play:safeHouses.9:cairo+paris')).toBeNull();
 		expect(composite(options, 'play:safeHouses.9:cairo')).toBeNull();
+	});
+});
+
+describe('cards in hand that cannot be played', () => {
+	test('a Supply Drop held with an empty reserve is listed with the reason', () => {
+		const actor = createGameActor({ seed: 5, save: scenarios.october(5) }).start();
+		const seating = Object.values(actor.getSnapshot().context.world.campaign.characters)
+			.slice(0, 3)
+			.map((character, index) => ({ seat: seatOf(index), character: character.id }));
+		actor.send({ type: 'START_GAME', seating });
+		for (const type of ['ACK_BRIEFING', 'AUTO_SUPPLY', 'CONFIRM_SUPPLY', 'CONFIRM_EVENTS'] as const)
+			actor.send({ type });
+		const state = structuredClone(publicState(actor.getSnapshot()));
+		const { campaign } = state.world;
+		const game = state.world.game!;
+		const seat = seatOf(0);
+		expect(heldUnplayable(state, seat)).toEqual([]);
+		const drop = Object.values(campaign.playerCards).find(
+			card => card.kind === 'event' && card.event === 'supplyDrop',
+		)!;
+		for (const player of Object.values(game.players)) player.hand = player.hand.filter(card => card !== drop.id);
+		game.playerDeck.order = game.playerDeck.order.filter(card => card !== drop.id);
+		game.players[seat]!.hand.push(drop.id);
+		game.reserve = 0;
+		expect(heldUnplayable(state, seat)).toEqual([
+			'In your hand but not playable right now: Supply Drop (The reserve is empty, so there is nothing to drop).',
+		]);
+		game.reserve = 4;
+		expect(heldUnplayable(state, seat)).toEqual([]);
 	});
 });

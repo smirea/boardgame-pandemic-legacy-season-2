@@ -33,7 +33,7 @@ Watch a live game from your own browser at the address `lab start` prints, with 
 `configs/campaign.json` sets the run name, the seed, the starting save or scenario, the ports, and the players. Each player has an id, a persona file, a memory file, a harness, and the model that plays it. Copy the file to try another table.
 
 - `configs/ui-harness.json` is a two-player example on the click-only harness, starting from the October scenario. `configs/ui-january.json` plays January from a new campaign with all three players on it.
-- `configs/tour-october.json` and `configs/tour-november.json` are tour games (below).
+- `configs/tour-october.json`, `configs/tour-november.json` and `configs/tour-searches.json` are tour games (below).
 
 `start` can also name a `stage` and a `coverage` list. `coverage` names earlier runs: what their recordings exercised counts as done, so the briefs list only what no run has reached yet.
 

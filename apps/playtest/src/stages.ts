@@ -327,7 +327,7 @@ type Stage = {
 const october: Stage = {
 	apply: stageOctober,
 	summary:
-		'The lab arranged the table: pawns at Jakarta, Riyadh and Delhi, a chosen hand for each seat, Hong Kong at 3 plague and drawn first, 1 plague in Baghdad, Hollow Men in Osaka and Tokyo, cities topped up toward 3 cubes for as long as the reserve lasted, and a Player deck of 30 cards with no Epidemics.',
+		'The lab arranged the table: pawns at Jakarta, Riyadh and Delhi, a chosen hand for each seat, Hong Kong at 3 plague and drawn first, 1 plague in Baghdad, Hollow Men in Osaka and Tokyo, plague and Hollow Men cleared from the cities on your routes, cities topped up toward 3 cubes for as long as the reserve lasted, and a Player deck of 30 cards with no Epidemics.',
 	table: [
 		'This is a **tour game**. A campaign already ran the whole year. This game exists to play the parts that campaign never reached, so finishing your list below matters more than winning. Keep the game going until every list is done.',
 		'Pick these characters in the lobby: seat 1 takes **Rook**, seat 2 takes **Wren**, seat 3 takes **Pike**. Do not create or pick anyone else.',
@@ -360,7 +360,7 @@ const october: Stage = {
 const november: Stage = {
 	apply: stageNovember,
 	summary:
-		"The lab arranged the table: all pawns at Shanghai, hands holding the cards for the four Plan recons, Shanghai's Infection card in the discard pile, a supplied yellow city drawn first, 1 plague in New York, cities topped up toward 3 cubes for as long as the reserve lasted, and a Player deck of 40 cards with no Epidemics.",
+		"The lab arranged the table: all pawns at Shanghai, hands holding the cards for the four Plan recons, Shanghai's Infection card in the discard pile, a supplied yellow city drawn first, 1 plague in New York, plague and Hollow Men cleared from the cities on your routes, cities topped up toward 3 cubes for as long as the reserve lasted, and a Player deck of 40 cards with no Epidemics.",
 	table: [
 		'This is a **tour game**. A campaign already ran the whole year. This game exists to play the parts that campaign never reached, so finishing your list below matters more than a fast win. The fourth Plan recon at Shanghai wins the game. **Do not make the red recon until every other list is done**, because it ends the game.',
 		'Pick these characters in the lobby: seat 1 takes the **Scientist**, seat 2 takes the **Vector Control Expert**, seat 3 takes **Pike**. Everyone else in this group is dead.',
@@ -423,7 +423,7 @@ const planFinish = (world: World): Stage => {
 const searches: Stage = {
 	apply: stageSearches,
 	summary:
-		'The lab arranged the table: pawns at Denver, Dar es Salaam and Shanghai, a chosen hand for each seat, the Seoul card in the discard pile, seat 1 to move first, cities topped up toward 3 cubes for as long as the reserve lasted, and a Player deck of 40 cards with no Epidemics.',
+		'The lab arranged the table: pawns at Denver, Dar es Salaam and Shanghai, a chosen hand for each seat, the Seoul card in the discard pile, seat 1 to move first, plague and Hollow Men cleared from the cities on your routes, cities topped up toward 3 cubes for as long as the reserve lasted, and a Player deck of 40 cards with no Epidemics.',
 	table: [
 		'This is a **tour game**. A campaign already ran the whole year. This game exists to play the searches, companions and scars that campaign never reached, so finishing your list below matters more than winning. Keep the game going until every list is done.',
 		'Pick these characters in the lobby: seat 1 takes **Gale**, seat 2 takes **Moss**, seat 3 takes **Tarn**. Do not create or pick anyone else.',

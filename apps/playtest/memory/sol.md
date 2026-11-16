@@ -1,41 +1,36 @@
 # Memory
 
-January first was lost. Incidents 8/8. Build was 2/3, recon 0/1. Next lobby is January again, rationing 6. Same characters are still seated: Vex on Knox, Sol on Hale, Kit on Reed.
+October first (tour) lost when the Player deck ran out on turn 19. Centers 2/3, Hollow Men in havens 2/3, incidents 2/8. No Epidemics were in that deck. Next lobby is October second, rationing 6.
 
-Hale (char-1), Radio Operator, home Northwatch, exposure 0/7, no ability. Knox (char-2), Laborer, home Northwatch, exposure 0/7, Record Keeper, hand limit 8. Reed (char-3), Farmer, home Southreach, exposure 0/7. Administrator and Instructor are still open.
+## People
 
-## How to play the screen
+Moss (char-2), me, Radio Operator, home Midsea, exposure 3/7. Helmsman in slot 1. Injured in slot 2: supply lines cost 1 more cube. Do not cover either.
+Gale (char-1), Laborer, exposure 1/7, no scar. Built the London center.
+Tarn (char-3), Instructor, Lookout, Burdened (hand -1), Record Keeper (hand +1) in slot 2, Courier in slot 3. Exposure 3/7. Courier delivers to an adjacent city.
+Administrator and Farmer were still open at the start of October. Do not create a character unless the brief says so.
 
-Claim Hale before the actions appear. Drive is "Drive / Ferry", then the city in the chooser, not the threat-list button of the same name. Look text goes stale. Trust the numbered controls. Look again after every say.
+## Board that carries
 
-At 0 actions the button is Draw cards, then one Draw card per card. If the first card puts the hand over 7, Draw and every card go dead until the second card exists. Tap a city, then press Space. Then click a Produce that is not covered by the next card. The rightmost one works. Discard Produce before blues or a city we still need.
+Permanent centers are full at 6. London is the one we added. Bogota's center was not made permanent and will be gone. Buenos Aires shelter is permanent. St. Petersburg and Bogota towers were not.
+Seoul and Khartoum are forsaken and infested. Restore is 2, returns them to population 1, and they stay infested. Left undone on purpose: a forsaken city's infection card is set aside, so it cannot incident. Only Drive or Ferry works there.
+Hollow Men in havens at game end cost Midsea and Southreach one population each. Plague cost Seoul and Khartoum a step, which is why they are forsaken. Centers gained a step: Washington, London, Cairo, Bogota, Johannesburg, Kolkata, Shanghai.
+Wellington is on the grid, linked only to Coralhold. Coralhold recon is done.
+Setup logged a Hollow Man on Kolkata. It was never on the board (issue 11). Trust `status` and `board`, not the setup line. Gather cards stay in the infection discard until an Epidemic. A deck with no Epidemics never places another figure.
 
-No apostrophe in say, why, or report.
+## Rules that change a turn
 
-## Rules that change play
+Do not end a turn on a plague city. Infested still exposes you at the start of a turn even with no plague, unless a shelter is there or you hold Field Surgeon. That companion worked: the second turn in Dar es Salaam did not expose me.
+Rigger, while held, makes a tower cost 1 cube instead of 2. Injured does not change towers.
+Helmsman: the first Drive or Ferry of the turn costs no action. Shuttle still costs one.
+Search does not spend the city card. A companion can put you over 7. Discard a city card you have already searched. Never discard a companion. The discard is `decide:discard:<seat>:<card>` and it locks every action until you do it.
+Share only the card of the city you are both standing in. `share:<card>:<seat>:true` gives it.
+Radio Operator transfer is free at any distance. `give=false` takes. `give=true` gives. Read the key. The old one is not the other direction.
+Shield: discard a city card of the hit city's colour to keep the cube. If I have no card of that colour, `options decide` shows only skip. `decide:skip` closes the choice for the whole table, even when I am not the active player. If the city is at 0 and someone else might pay, `say` and `listen`. Do not skip. If every infection card of that city is already in the discard, the shield prevents nothing until the infection deck reshuffles.
+System produce fills every haven and every supply center, havens with no infection cards included. One cube on a city stops one hit. Population does not cap a delivery. It caps produce.
+Quiet Night skips the next infect step. Played after the draw and before any flip, that is the current player's infect.
+Reserve was 0 all game. Supply Drop had no play key. Stock Up could not move cubes. Do not count on either while the reserve is empty.
+No apostrophe or quote in `say`, `why`, or `report`.
 
-Do not end a turn on a plague city. One cube absorbs one hit. At rate 3 the same empty plague city can incident twice in one infect. Jacksonville did. A city at 0 cubes and plague is two losses, not one.
+## How to spend
 
-Radio Operator moves cubes to any character at any distance. I never pressed it. Use it. Sharing a card still wants the city printed on the card. Sail and charter discard a city card. Do not spend a card the recon or the yellow center still needs.
-
-Farmer: a Deliver right after Make Supplies is free. A drive in between breaks it. A haven can produce. Reed made 3 at Midsea.
-
-Laborer builds with one fewer card by also spending 2 cubes. Foundations counts as 2 of its colour. Infrastructure would count as 3.
-
-Washington recon is 3 blue cards in one hand, standing there. The board still says it needs a supply center even though the center is built. Do not trust that sentence. Try the button. London recon wants 4 different blue cities and only 3 blue cities exist. Lagos wants 5 different yellow and only 3 exist. Cairo wants 4 different black and only 3 exist. São Paulo wants 4 yellow cards.
-
-Threat percentages can stick at 100 for two cities at once. Check the city's infection cards. 0 percent means those cards are in the discard. Quote the card count, not the stuck percent.
-
-The loss shop was ability, city card, infection card, and population. No permanent and no restore. Record Keeper is 1, Helmsman is 2, Foundations is 1, Infrastructure is 2, Well Stocked is 1, Lockdown is 2, population is 1. A non-lead click spends the shared units. The city list stays open after a buy, and the Bought line can omit one. Do not click a second city by accident. Unspent units are lost.
-
-New rationed cards in the reserve, not yet played: a second Quiet Night (skip the next infect), a second Supply Drop (4 cubes on a grid location), Card Swap (two players trade one card), Resilience (set aside up to 2 discarded infection cards of one city). Quiet Night has to be played before the first flip of the step it should skip.
-
-## Board at upkeep
-
-Centers: Washington, Tripoli. Populations after the automatic change: Washington 4, Tripoli 4, Jacksonville 2, São Paulo 2, Istanbul 2, and 3 everywhere else including the havens. I have not seen the board since the new lobby opened, so do not assume plague or cubes carried over.
-
-Stickers: sao-paulo.22 Foundations (it was in Knox's hand), london.29 Foundations (it was in the deck).
-
-End of the lost game, for the cube plan if plague is still there: Istanbul plague 3, Jacksonville plague 3 with all 3 infection cards in the discard, São Paulo plague 2. Those three are the cities that lost a population step.
-
-Seat dropdowns do not commit until the lead starts the game.
+At most 6 permanent centers, and the option vanishes on the sixth. Unspent production units are lost. I want the infection deck blunted and cities kept off 0. Well Stocked is 1. Restore is 2 and leaves the city infested. A permanent center is 3. A permanent shelter is 2.

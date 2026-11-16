@@ -32,8 +32,8 @@ The notes themselves are in `apps/playtest/notes/campaign-2.json`.
 ## What the run showed
 
 - **The schedule holds.** All 24 Legacy cards were read in their own month, at setup or game end as marked. Every month's objectives, required count and supplies matched the research timeline. The one difference the audit flagged, in August, was a one-time objective this group had already completed.
-- **Mechanics reached in play.** 158 of 182 tracked mechanics happened at least once, counted from the recordings with `lab coverage campaign-2`. Every action the campaign unlocked was used except Sabotage, Broker and Facilitate (abilities bought in December or never bought).
-- **Not reached in this campaign.** No character died of exposure and no city outbreaked. The Coral Sea haven, New Zealand, the Jade lab and the red and blue steps of the Plan were never opened. Three tour games played all of it afterwards, which brings the count to 182 of 182: see `docs/playtest/tour.md`.
+- **Mechanics reached in play.** 181 of 227 tracked mechanics happened at least once, counted from the recordings with `lab coverage campaign-2`. Every action the campaign unlocked was used except Sabotage, Broker and Facilitate (abilities bought in December or never bought).
+- **Not reached in this campaign.** No character died of exposure and no city outbreaked. The Coral Sea haven, New Zealand, the Jade lab and the red and blue steps of the Plan were never opened. Most of the searches and their companions were never found either. Four tour games played all of it afterwards, which brings the count to 227 of 227: see `docs/playtest/tour.md`.
 - **What the players found.** 232 reports over 16 games. About one in five was a real defect in the engine. The rest were the playtest's own text views or the rules as researched. Each game's notes list them with what was done.
 
 ## What was fixed along the way

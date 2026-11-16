@@ -12,6 +12,7 @@ import {
 	gameIndexOf,
 	newCampaign,
 	overLimit,
+	pack,
 	parseRecord,
 	parseSave,
 	recordStep,
@@ -25,7 +26,7 @@ import type { CharacterId, Command, GameRecord, PublicState, RecordNote, Save, S
 import { newAudit, observe, renderParity, untouched } from './audit.ts';
 import type { Audit, Issue } from './audit.ts';
 import { writeBriefs } from './brief.ts';
-import { composite, mayRaw, optionsFor, parseVerb, seatOf } from './commands.ts';
+import { composite, heldUnplayable, mayRaw, optionsFor, parseVerb, seatOf } from './commands.ts';
 import type { Who } from './commands.ts';
 import { loadConfig, repoRoot } from './config.ts';
 import { coverageOfRun } from './coverage.ts';
@@ -783,16 +784,18 @@ async function handle(agent: string, words: string[]): Promise<string> {
 				optionsFor(state, who, lab.picks),
 				rest[0],
 				state.phase === 'playing.actions' && state.world.game?.active === who.seat
-					? idleActions(state, who)
-					: state.phase === 'lobby'
-						? [
-								'Also available in the lobby, typed as commands of their own: `create <job> <haven-id> <name>`, `pick <character-id>`, `rename <haven-id> <name>`. `chars` lists characters, open jobs and havens.',
-							]
-						: state.phase === 'setup.supply'
-							? ['Also: `supply <city-id> <count>` places cubes by hand.']
-							: state.phase === 'setup.events'
-								? ['Also: `events <card> <card> ...` chooses the Rationed Events.']
-								: [],
+					? [...idleActions(state, who), ...heldUnplayable(state, who.seat)]
+					: state.phase.startsWith('playing')
+						? heldUnplayable(state, who.seat)
+						: state.phase === 'lobby'
+							? [
+									'Also available in the lobby, typed as commands of their own: `create <job> <haven-id> <name>`, `pick <character-id>`, `rename <haven-id> <name>`. `chars` lists characters, open jobs and havens.',
+								]
+							: state.phase === 'setup.supply'
+								? ['Also: `supply <city-id> <count>` places cubes by hand.']
+								: state.phase === 'setup.events'
+									? ['Also: `events <card> <card> ...` chooses the Rationed Events.']
+									: [],
 			);
 		case 'board':
 			return renderBoard(state.world);

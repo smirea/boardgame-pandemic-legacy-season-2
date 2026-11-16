@@ -1,49 +1,31 @@
 # Memory
 
-January first lost on turn 12. Incidents 8/8. Centers 2/3, recon 0/1. Next lobby is January second at rationing 6. Past game: Jan L.
+October first lost on turn 19. The Player deck ran out. Centers 2/3, Hollow Men 2/3, incidents 2/8. Next lobby is October second at rationing 6. Past games: Jan W, Feb W, Mar W, Apr W, May W, Jun W, Jul W, Aug W, Sep W, Oct L.
 
 ## Party
 
-I am Knox (char-2), Laborer, home Northwatch, exposure 0/7. Record Keeper is in slot 1. Hand limit 8. Sol is Hale (char-1), Radio Operator, home Northwatch, exposure 0/7. Kit is Reed (char-3), Farmer, home Southreach, exposure 0/7.
-
-Seats that started the game: Knox, Hale, Reed. The retry lobby showed the dropdowns empty while status already had those seats. Dropdowns are local until Start January. Set all three, then click Start.
+Gale (char-1), Laborer, home Northwatch, exposure 1/7, blank box, no ability. Moss (char-2), Radio Operator, Helmsman, scar Injured (supply lines cost 1 more cube), exposure 3/7. Tarn (char-3), Instructor, Lookout, scar Burdened (hand limit -1), Record Keeper (+1, so the hand is 7), Courier, exposure 3/7. Vector Control Expert (char-8) is on the roster and unplayed: Build Shelter needs no card and works in any location.
 
 ## Board
 
-Population: Washington 4, Tripoli 4, Jacksonville 2, Sao Paulo 2, Istanbul 2. New York, London, Cairo, and Lagos are 3. Havens are 3.
+Permanent centers, and the cap of 6 is full: Washington, Cairo, Johannesburg, Kolkata, Shanghai, London. Bogotá's center was not made permanent and will be gone. Permanent tower: Tripoli. St. Petersburg, Bogotá and Buenos Aires towers were temporary. Permanent shelter: Buenos Aires.
 
-I built supply centers in Washington and Tripoli. The lobby board did not list them. Check the first in-game board before you count on them.
+Forsaken, unrestored: Seoul and Khartoum. They are infested. Only Drive or Ferry works there. Their infection cards are set aside. Restore is 2 and they stay infested.
 
-Recon that can work: Washington, 3 blue, needs a center. Sao Paulo, 4 yellow, needs a center. London wants 4 different blue cities, Lagos 5 different yellow, Cairo 4 different black. Only 3 cities exist in each colour. Do not chase those three.
+Wellington is on the grid with the Topaz lab. Other labs: Buenos Aires, Johannesburg. Havens: Northwatch, Midsea, Southreach, Farwater, Coralhold, Monsoon Rest.
 
-The lobby board showed no cubes and no plague. Expect a fresh cube setup. Do not assume the old plague is still stuck until the board shows it.
+## How to play it
 
-## How the loss happened
+Search does not spend the city card. Lineman: lines cost 1 fewer cube (base 2). Builder: centers need 1 fewer card (base 5). Tracker: searches cost no action. Laborer stacks with Builder: 3 cards plus 2 cubes, or 4 cards and no cubes.
 
-The last infect hit an empty Jacksonville, then Istanbul, then Jacksonville again. Incidents went 6, 7, 8. A second hit in the same step on a city just emptied adds another incident. Both cities had read 100 percent. That number was real for the step.
+Broadcast from a tower moves a Hollow Man of that colour into a neighbour. Two broadcasts in one turn walked Cairo to Tripoli to Midsea.
 
-A plague city that still holds cubes loses a cube instead of outbreaking. Cover Jacksonville and Istanbul. Do not end a turn in a plague city.
+Gather cards start in the infection discard and join on an epidemic. A deck with no epidemics does not place more Hollow Men than setup, and one of the three setup figures (Kolkata) did not stick. Do not plan on a third figure unless an epidemic or an empty infection deck is real.
 
-Hale had the Washington blues and went to cube Jacksonville. Reed had a London blue and went to cube Istanbul. One more turn of that plan loses.
+Shield: discard a city card of the hit colour to keep the cube. The choice closes while you `listen`, and `skip` then fails. Decide at once.
 
-## Purchases
+Stock Up and Supply Drop have no play key when the reserve is empty. Inoculate is free. Stored infection cards return on an epidemic.
 
-Record Keeper on Knox is done. Foundations was clicked for Sao Paulo and recorded as London. That click took both remaining units. My Sao Paulo card then read plus double. Read the live card before you treat any card as two.
+Leaving a Hollow Man location exposes you. Do not have Moss draw supply lines. Helmsman makes Moss's first drive free.
 
-Shop that was offered: Record Keeper 1, Helmsman 2, Foundations 1, Infrastructure 2, Well Stocked 1, Lockdown 2, population plus 1. No permanent structures and no restore. Well Stocked does nothing for an empty city. Knox slot 2 never appeared after slot 1 filled.
-
-If we lose again, put population on Jacksonville, Istanbul, and Sao Paulo. They are already at 2.
-
-## Retry
-
-Same three characters. Six rationed events. The briefing added a second Quiet Night, a second Supply Drop, Card Swap, and Resilience. Card Swap moves one card between two players. Resilience sets aside up to 2 discarded infection cards of one city. Use it on Jacksonville when those cards are in the discard.
-
-Win line: keep the death cities cubed, build the third center, recon Washington with Hale standing there on 3 blue. Laborer builds in the city you stand in with 4 cards of that colour plus 2 cubes. Radio Operator passes cubes any distance for free, even at 0 actions. Farmer delivers free right after Make Supplies.
-
-Quiet Night before the infect step at 6 or 7 incidents. Do not charter or sail away a card the build still needs.
-
-## Screen
-
-Claim your own card every turn or the actions stay disabled. Look immediately before every click. A say renumbers the buttons. Draw and infect are one card per click. Tap does not drive. Over the hand limit Hale could still draw. Tell them to discard Produce cards.
-
-No apostrophes or parentheses in say, why, or report. Ask, then listen, before supplies, events, and purchases.
+No apostrophes in say, why, or report. Ask, then listen, before supplies, events, and purchases. A new center built this game does not count next game unless it was made permanent. The objective still wants 3 new ones.

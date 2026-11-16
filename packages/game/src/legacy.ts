@@ -333,7 +333,8 @@ function unlockLine(campaign: Campaign, unlock: Unlock): string | null {
 				unlock.mode === 'rationed'
 					? 'The card joins the Rationed Events the group picks from at each setup, starting next game.'
 					: 'The card is in the Player deck from the next game on.';
-			return `${owned ? `Another copy of a ${mode} Event` : `New ${mode} Event`}: ${named(pack.events, unlock.event)} ${where}`;
+			const event = pack.events.find(entry => entry.id === unlock.event)!;
+			return `${owned ? `Another copy of a ${mode} Event card` : `New ${mode} Event card`}: ${event.name}. ${where} When played it reads: ${event.text}`;
 		}
 		case 'ability':
 			return `New ability for sale: ${named(pack.abilities, unlock.ability)}`;

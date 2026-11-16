@@ -226,6 +226,8 @@ function resolveSearch(ctx: Ctx, result: SearchResult) {
 		case 'companion':
 			return giveCompanion(ctx, result.companion);
 		case 'infest':
+			if (campaign.locations[ctx.here]!.infested)
+				log(game, { t: 'note', text: `${cityDef(ctx.here).name} was already infested, so nothing changes` });
 			campaign.locations[ctx.here]!.infested = true;
 			return;
 		case 'nothing':
@@ -525,22 +527,24 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 			for (let i = 0; i < 4 && ctx.game.playerDeck.order.length > 0; i++)
 				revealed.push(drawPiled(ctx.game.playerDeck, card => ctx.campaign.playerCards[card]!.kind === 'epidemic')!);
 			ctx.game.playerDiscard.push(...revealed);
-			log(ctx.game, {
-				t: 'note',
-				text: `Monitor revealed and discarded ${revealed.map(id => cardLabel(ctx.campaign, id)).join(', ') || 'nothing'}. An Epidemic revealed this way has no effect`,
-			});
 			ctx.campaign.frequenciesUsed.push(frequency);
 			const reward = pack.frequencies[frequency];
+			// Only what this Monitor revealed may be kept, never an older discard.
+			const keep =
+				reward && 'take' in reward
+					? revealed
+							.filter(id => ctx.campaign.playerCards[id]!.kind !== 'epidemic')
+							.toReversed()
+							.slice(0, reward.take)
+					: [];
+			const names = (cards: CardId[]) => cards.map(id => cardLabel(ctx.campaign, id)).join(', ') || 'nothing';
+			log(ctx.game, {
+				t: 'note',
+				text: `Monitor revealed ${names(revealed)}${keep.length ? `. ${characterOf(ctx.world, ctx.seat).name} kept ${names(keep)}` : ''}. The rest went to the discard pile. An Epidemic revealed this way has no effect`,
+			});
 			if (reward && 'bundle' in reward) openBundle(ctx.world, reward.bundle, false);
-			if (reward && 'take' in reward) {
-				// Only what this Monitor revealed may be kept, never an older discard.
-				const keep = revealed
-					.filter(id => ctx.campaign.playerCards[id]!.kind !== 'epidemic')
-					.toReversed()
-					.slice(0, reward.take);
-				ctx.game.playerDiscard = ctx.game.playerDiscard.filter(id => !keep.includes(id));
-				ctx.me.hand.push(...keep);
-			}
+			ctx.game.playerDiscard = ctx.game.playerDiscard.filter(id => !keep.includes(id));
+			ctx.me.hand.push(...keep);
 		},
 	},
 	broadcast: {

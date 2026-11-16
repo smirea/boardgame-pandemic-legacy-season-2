@@ -1,5 +1,6 @@
 import {
 	actionCost,
+	grid,
 	legalActions,
 	legalDecides,
 	legalPlays,
@@ -16,6 +17,7 @@ import type {
 	Decide,
 	JobId,
 	ObjectiveId,
+	Play,
 	PublicState,
 	Purchase,
 	SeatId,
@@ -339,3 +341,32 @@ export function mayRaw(state: PublicState, who: Who, command: Command): string |
 }
 
 export const starterJobs = () => pack.jobs.filter(job => job.starting);
+
+/** Event and companion cards in hand that cannot be played right now, with the engine's reason where there is one. */
+export function heldUnplayable(state: PublicState, seat: SeatId): string[] {
+	const { world, phase } = state;
+	const game = world.game;
+	if (!game || !phase.startsWith('playing')) return [];
+	const playable = new Set(legalPlays(world, phase).map(option => option.card));
+	const anywhere = [...grid(world.campaign)][0]!;
+	const lines = (game.players[seat]?.hand ?? []).flatMap(card => {
+		const held = world.campaign.playerCards[card];
+		if (!held || (held.kind !== 'event' && held.kind !== 'companion') || playable.has(card)) return [];
+		const spent = held.kind === 'companion' && pack.companions.find(entry => entry.id === held.companion)?.spent;
+		if (held.kind === 'companion' && !spent) return [];
+		// These two take cubes from the reserve, which is the usual reason neither can be played.
+		const sample: Play | null =
+			held.kind === 'event' && held.event === 'supplyDrop'
+				? { e: 'supplyDrop', city: anywhere }
+				: held.kind === 'event' && held.event === 'stockUp'
+					? { e: 'stockUp' }
+					: null;
+		const reason = sample ? reject(world, phase, { type: 'PLAY', seat, card, play: sample }) : null;
+		const name =
+			held.kind === 'event'
+				? pack.events.find(entry => entry.id === held.event)!.name
+				: pack.companions.find(entry => entry.id === held.companion)!.name;
+		return [`${name}${reason ? ` (${reason})` : ''}`];
+	});
+	return lines.length ? [`In your hand but not playable right now: ${lines.join(', ')}.`] : [];
+}

@@ -1,43 +1,51 @@
 # Memory
 
-January first lost on turn 12, incidents 8/8. Centers 2/3, recon never done. Next lobby is January second, rationing 6. Seats already read Vex Knox, Sol Hale, Kit Reed. Past: Jan L.
+October first lost on turn 19. The Player deck ran out. Incidents 2/8. Centers 2/3. Hollow Men 2/3. Next lobby was not shown. The lab died during upkeep, before SESSION COMPLETE.
 
 ## Who is alive
 
-Reed (char-3), mine. Farmer, home Southreach. Exposure 0/7. Hand limit 7. No ability. A Deliver right after Make Supplies is free. If I move in between, Deliver costs an action. Do not end a turn in a plague city. Exposure happens when the next turn starts there.
+Tarn (char-3), mine. Instructor, home Southreach. Exposure 3/7. Lookout is in the first slot. Burdened is in an empty slot and cuts the hand limit to 6. Do not cover Lookout. A scar covers whatever is in its slot.
 
-Knox (char-2). Laborer, Record Keeper, home Northwatch. Exposure 0/7. Hand limit 8. Builds a center with 4 cards of the city colour plus 2 cubes from Knox. Holds sao-paulo.22 with Foundations, so that card counts as 2 yellow.
+Record Keeper on Tarn was named by Vex and may not have been saved. Check the slots before counting on a hand of 7. Courier was not bought unless the last unit landed after the lab died.
 
-Hale (char-1). Radio Operator, home Northwatch. Exposure 0/7. Hand limit 7. Transfer with Hale works at any distance, and either player can send the cubes. Hale hits 8 or 9 cards and will press Space to draw past a dead Draw button. Tell Hale to discard Produce and keep city cards. The turn stays held until the hand is 7.
+Gale (char-1). Laborer. Exposure 1/7. Holds Lineman, Builder, and Tracker when those companions are in hand. Lines cost 1 cube with Lineman. Searches cost no action with Tracker. A center with Laborer and Builder was reported as 4 cards. I did not see both discounts stack.
 
-Open jobs: administrator, instructor.
+Moss (char-2). Radio Operator, Helmsman, Injured. Exposure 3/7. First Drive or Ferry is free. Transfer with Moss is free at any distance. Injured makes lines cost 1 more. Field Surgeon, while held, blocks exposure from infested cities. Rigger, while held, makes a tower cost 1 cube.
 
-## Board
+## Board that sticks
 
-Cubes, plague, and centers reset. Population and stickers stay.
+Cubes, plague, and Hollow Men reset. Population, grid, and permanent stickers stay.
 
-Population 4: Washington, Tripoli. Both had centers this game. The centers are gone.
-Population 2, and they took the plagues: Jacksonville, Sao Paulo, Istanbul. Istanbul reached 3 plague. Jacksonville's second empty hit filled the track.
-Population 3: New York, London, Cairo, Lagos, and the three havens.
+London is a permanent center, and it took the sixth slot. Bogota has a center this game only. The cap blocked a permanent Bogota center.
 
-Recon, and only two are possible. Washington needs 3 blue cards and a center. Sao Paulo needs 4 yellow cards and a center. London wants 4 different blue cities, Lagos 5 different yellow, Cairo 4 different black. Only 3 cities exist in each colour. Ignore those three.
+Buenos Aires has a tower and a shelter this game. A permanent shelter was the intended buy and was not confirmed.
 
-A London card in the deck may also have Foundations. I did not see it in a hand after the buy.
+Wellington is on the grid, blue, with the Topaz lab. Its cards start in the player discard. Coralhold recon is 2 red cards and resolved with no supply center there.
+
+Seoul and Khartoum dropped to 0 and were forsaken when upkeep opened. Vex said they would not restore them. A forsaken city takes only Drive or Ferry, and its infection card is set aside. Restore would leave it infested.
+
+Midsea and Southreach each lost 1 population and were not at 0.
 
 ## How to play the next one
 
-Rationing is 6. Reserve gained a second Quiet Night, a second Supply Drop, Card Swap, and Resilience. Play Quiet Night before the first flip when two cities are empty. It skips that whole infect step.
+Search does not spend the city card. Discard a searched city card when the hand is over the limit. Never discard a companion. A companion changes its cost only while it is held.
 
-On my turn, press claim if Make supplies, Drive, and Sail are missing. Open Drive / Ferry and use the live buttons. Look keeps the previous city list on screen after the move. Do not click a city from that leftover text.
+Lookout searches a discard card in the city you are standing in. The card stays in the discard. Do not inoculate that player card.
 
-One supply cube on a city with 3 plague stops the outbreak. An epidemic on an empty city removes nothing and does not add a plague. The plague comes when that infection card is flipped later.
+A free sea lane from a search is a choice. Seoul was the only offer, and the lane was free.
 
-100 percent on the threat list means that city will be drawn. Cube it before the flip. Jacksonville at 100 percent with no cubes lost us.
+Do not end a turn in an infested city or a plague city. The next exposure is box 4. The Seoul one was blank.
 
-Produce local at a haven fills it to 3. Pick up is free. Carry the cubes onto the empty plague city and leave.
+Quiet Night skips the infect step only if played before the first flip.
 
-Share only the card of the city you are standing in. Do not sail away a blue or yellow card we still need for a center or a recon.
+Shield puts the lost cube back. Pay only when the city is at 0. A city that still has cubes is not worth a search card.
 
-Game-end buys cannot be undone, and a mis-click spends the unit. Say the city before the click. Record Keeper and Foundations are already in the campaign. Helmsman, Infrastructure, Well Stocked, Lockdown, and a population buy have not been bought. Permanent centers were not for sale in a way we used. At most 6 permanent centers exist once they unlock.
+Supply Drop needs cubes in the reserve. A full stockpile and an empty reserve offered no play key.
 
-UI. The seat drop-down can show a name while status still says NOT PICKED. Choose Reed on seat 3 anyway. The assignment stuck when January started.
+Monitor discards 4 deck cards and puts one of them in your hand. The log calls that gift discarded too. It shortens the game.
+
+Sail discards a port card and can cross the map when the key is listed. Transmit from a tower sends one card of that city's colour.
+
+Eight Hollow Men gather cards sit in the infection discard until an epidemic or a reshuffle. A deck with no epidemics will not place more figures. A setup line that says a Hollow Man landed can be wrong. Check the city.
+
+Apostrophes and quotes in say, why, and report never arrive.
