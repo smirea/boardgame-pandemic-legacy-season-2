@@ -23,7 +23,7 @@ The count comes from the recordings, not from the lab's running tally. `lab cove
 
 The catalogue grew while this was done. It started at 182 keys: every action, event and companion play, decision, purchase, job, bundle, Legacy card, objective, infection outcome and exposure outcome. The first two tours filled it. Checking what it left out found twelve more things no game had touched, so the catalogue now also counts each companion found, each scar taken, each ability held by a seated character, each kind of search result, and both kinds of free line: 227 keys. A fourth tour game played the twelve.
 
-What the catalogue still does not count: each of the 33 search boxes by city (it counts the 11 kinds of result), and the effect of each ability in use (it counts that a seated character held it). `mechanics.test.ts` covers those one by one.
+What the catalogue still does not count: each of the 39 search boxes by city (it counts the 11 kinds of result), and the effect of each ability in use (it counts that a seated character held it). `mechanics.test.ts` covers those one by one.
 
 ## The games
 
