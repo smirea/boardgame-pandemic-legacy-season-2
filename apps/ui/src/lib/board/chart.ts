@@ -272,6 +272,26 @@ export function paintChart(bounds: BoardBounds): Chart {
 	};
 	// Every coast, wash and ring follows the same 50m coastline the rules test water against.
 	const land = outline(landTopology);
+	// Water-lining and coastal washes ring only land big enough to read; specks of island keep their ink
+	// but get no halo, which would scatter rings across the open ocean.
+	const shores = (() => {
+		const topology = landTopology as unknown as Topology;
+		const all = feature(topology, topology.objects['land']!) as unknown as {
+			features?: { geometry: unknown }[];
+			geometry?: unknown;
+		};
+		const geometries = (all.features?.map(item => item.geometry) ?? [all.geometry]) as {
+			type: string;
+			coordinates: unknown;
+		}[];
+		const polygons = geometries.flatMap(geometry =>
+			geometry.type === 'MultiPolygon'
+				? (geometry.coordinates as number[][][][])
+				: [geometry.coordinates as number[][][]],
+		);
+		const kept = polygons.filter(polygon => boardPath.area({ type: 'Polygon', coordinates: polygon }) > 1.2);
+		return new Path2D(boardPath({ type: 'MultiPolygon', coordinates: kept }) ?? '');
+	})();
 	const sphere = new Path2D(boardPath({ type: 'Sphere' }) ?? '');
 	const sea = new Path2D();
 	sea.addPath(sphere);
@@ -298,14 +318,14 @@ export function paintChart(bounds: BoardBounds): Chart {
 	rings.lineJoin = 'round';
 	const gap = 0.62;
 	const thickness = px(1.5);
-	for (let ring = 6; ring >= 1; ring--) {
+	for (let ring = 4; ring >= 1; ring--) {
 		rings.globalCompositeOperation = 'source-over';
-		rings.strokeStyle = `rgb(${SEA_INK} / ${0.42 - ring * 0.06})`;
+		rings.strokeStyle = `rgb(${SEA_INK} / ${0.34 - ring * 0.065})`;
 		rings.lineWidth = 2 * ring * gap + thickness;
-		rings.stroke(land);
+		rings.stroke(shores);
 		rings.globalCompositeOperation = 'destination-out';
 		rings.lineWidth = 2 * ring * gap - thickness;
-		rings.stroke(land);
+		rings.stroke(shores);
 	}
 	ink.setTransform(1, 0, 0, 1, 0, 0);
 	ink.drawImage(rings.canvas, 0, 0);
@@ -369,7 +389,7 @@ export function paintChart(bounds: BoardBounds): Chart {
 		] as const) {
 			ctx.strokeStyle = `rgb(52 104 152 / ${alpha})`;
 			ctx.lineWidth = widthUnits;
-			ctx.stroke(land);
+			ctx.stroke(shores);
 		}
 		ctx.restore();
 		ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -407,12 +427,12 @@ function regionLines(ctx: Ctx, bounds: BoardBounds, px: (pixels: number) => numb
 	ctx.rect(FRAME.minX, FRAME.minZ, FRAME.maxX - FRAME.minX, FRAME.maxZ - FRAME.minZ);
 	ctx.clip();
 	ctx.lineCap = 'round';
-	ctx.strokeStyle = 'rgb(246 238 218 / 0.6)';
-	ctx.lineWidth = px(8);
+	ctx.strokeStyle = 'rgb(246 238 218 / 0.5)';
+	ctx.lineWidth = px(10);
 	ctx.stroke(path);
-	ctx.strokeStyle = 'rgb(128 38 26 / 0.9)';
-	ctx.lineWidth = px(3.2);
-	ctx.setLineDash([px(20), px(5), px(3.5), px(5)]);
+	ctx.strokeStyle = 'rgb(110 30 20 / 0.95)';
+	ctx.lineWidth = px(4.4);
+	ctx.setLineDash([px(26), px(7), px(5), px(7)]);
 	ctx.stroke(path);
 	ctx.restore();
 }

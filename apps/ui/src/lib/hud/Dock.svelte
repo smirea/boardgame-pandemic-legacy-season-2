@@ -393,15 +393,19 @@
 
 	/* Beside the replay panel the dock is narrower, so the held cards shrink rather than run into the prompts. */
 	@container dock (width < 1100px) {
-		.hand {
-			--card-size: 0.66rem;
+		.dock {
+			grid-template-columns: minmax(7rem, 10rem) minmax(0, 1.5fr) minmax(0, 1fr) 8rem;
 		}
 
-		.holder small {
+		.held .hand {
+			--card-size: 0.6rem;
+		}
+
+		.held .holder small {
 			display: none;
 		}
 
-		.holder {
+		.held .holder {
 			margin-top: 1.6rem;
 		}
 	}

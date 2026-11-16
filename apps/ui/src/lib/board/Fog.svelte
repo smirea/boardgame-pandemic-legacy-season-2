@@ -48,7 +48,7 @@
 			soft /= 8.0;
 			if ( mask < 0.002 && soft < 0.002 ) discard;
 
-			vec2 p = vUv * vec2( uAspect, 1.0 ) * 4.2;
+			vec2 p = vUv * vec2( uAspect, 1.0 ) * 3.4;
 			float t = uTime;
 			vec2 warp = vec2( fbm( p * 0.6 + vec2( t * 0.015, -t * 0.01 ), 3 ), fbm( p * 0.6 - vec2( t * 0.012, t * 0.017 ) + 5.2, 3 ) );
 			float density = fbm( p + warp * 1.1 + vec2( t * 0.03, t * 0.012 ), 5 );
@@ -58,11 +58,11 @@
 
 			// Light from the upper left: a puff brighter than the smoke behind it toward the light is lit.
 			float light = clamp( 0.55 + ( density - lit ) * 1.8, 0.0, 1.0 );
-			vec3 shadowed = vec3( 0.55, 0.53, 0.5 );
-			vec3 sunlit = vec3( 0.93, 0.91, 0.86 );
+			vec3 shadowed = vec3( 0.44, 0.43, 0.41 );
+			vec3 sunlit = vec3( 0.84, 0.82, 0.78 );
 			vec3 color = mix( shadowed, sunlit, smoothstep( 0.1, 0.95, density * 0.55 + light * 0.55 ) );
 			// The bank darkens toward its edge, as smoke thins over the ground.
-			color *= mix( 0.9, 1.0, smoothstep( 0.5, 1.0, soft ) );
+			color *= mix( 0.95, 1.0, smoothstep( 0.5, 1.0, soft ) );
 
 			// Settled fog (mask 1) is fully opaque. While a location opens, smoke thinner than the opening survives less.
 			float opening = 1.0 - mask;

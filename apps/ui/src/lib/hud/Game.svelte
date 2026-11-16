@@ -92,11 +92,14 @@
 	let stage = $state<HTMLElement | null>();
 	let leftPanel = $state<HTMLElement | null>();
 	let rightPanel = $state<HTMLElement | null>();
+	let legendPanel = $state<HTMLElement | null>();
 	// Where the corner panels sit, so the board can keep city labels out from under them.
 	let covered = $state.raw<{ x: number; y: number; width: number; height: number }[]>([]);
 	$effect(() => {
 		// `bind:this` hands back null, not undefined, once a panel leaves the screen.
-		const panels = [leftPanel, rightPanel].filter((panel): panel is HTMLElement => panel instanceof HTMLElement);
+		const panels = [leftPanel, rightPanel, legendPanel].filter(
+			(panel): panel is HTMLElement => panel instanceof HTMLElement,
+		);
 		if (!stage || panels.length === 0) return void (covered = []);
 		const measure = () => {
 			const origin = stage!.getBoundingClientRect();
@@ -481,7 +484,7 @@
 
 		{#if game && playing && !spectator}
 			<!-- The chart's key, printed in its corner: what each mark beside a city name means. -->
-			<dl class="legend" aria-label="Map key" in:fly={{ y: 20, duration: 500, delay: 600 }}>
+			<dl class="legend" aria-label="Map key" bind:this={legendPanel} in:fly={{ y: 20, duration: 500, delay: 600 }}>
 				<dt><b class="num">3</b></dt>
 				<dd>Population</dd>
 				<dt><b class="supplies">1</b></dt>
@@ -502,6 +505,8 @@
 				<dd>Haven</dd>
 				<dt><b class="pawn"></b></dt>
 				<dd>A character</dd>
+				<dt><b class="border"></b></dt>
+				<dd>Region boundary</dd>
 			</dl>
 		{/if}
 		{#if game && snap.phase !== 'upkeep'}
@@ -811,6 +816,15 @@
 
 	.legend .lane {
 		border-top: 2px dashed #2d5873;
+	}
+
+	.legend .border {
+		width: 1.2rem;
+		min-width: 0;
+		height: 0;
+		padding: 0;
+		border-top: 3px dashed #6e1e14;
+		border-radius: 0;
 	}
 
 	.legend .haven {

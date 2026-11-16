@@ -107,7 +107,9 @@
 			if (rect.x + rect.width / 2 < width / 2) left = Math.max(left, rect.x + rect.width);
 			else right = Math.max(right, width - rect.x);
 		}
-		return { left: left / width, right: right / width };
+		// On a narrow stage, such as the replay's, panels may not squeeze the board below 70% of its width.
+		const squeeze = Math.min(1, 0.3 / Math.max(0.001, (left + right) / width));
+		return { left: (left / width) * squeeze, right: (right / width) * squeeze };
 	});
 	const fit = $derived(
 		fitBoard(bounds, $size.width / Math.max(1, $size.height), FOV, DEFAULT_TILT, { bounds: cityBounds, ...sides }),

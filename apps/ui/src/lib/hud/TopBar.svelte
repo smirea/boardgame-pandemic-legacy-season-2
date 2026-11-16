@@ -171,10 +171,14 @@
 	}
 
 	/* The figures give way before the controls: Fit map and Menu always stay on screen. */
+	/* Figures that do not fit wrap onto a second line that is never shown, so none is ever cut in half. */
 	.stats {
 		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
-		gap: 1.1rem;
+		align-content: flex-start;
+		column-gap: 1.1rem;
+		height: 1.7rem;
 		min-width: 0;
 		overflow: hidden;
 	}

@@ -101,7 +101,7 @@
 		</p>
 	</section>
 
-	<section>
+	<section class="spend">
 		<h2>
 			Spend production units: {upkeep.units} left{campaign.freeAbilityUnits
 				? `, plus ${campaign.freeAbilityUnits} free for abilities`
@@ -162,12 +162,13 @@
 		gap: 1rem;
 		width: min(46rem, 92vw);
 		max-height: 100%;
+		min-height: 0;
 		padding: 1.4rem 1.7rem 1.4rem;
 		border-radius: 2px;
 		background: var(--document);
 		color: var(--slip-ink);
 		box-shadow: var(--document-shadow);
-		overflow: auto;
+		overflow: hidden;
 		animation: laid 420ms cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
 	}
 
@@ -231,19 +232,35 @@
 		font-size: 0.85rem;
 	}
 
+	/* The shopping list takes whatever height is left and scrolls inside, so Done never leaves the sheet. */
+	.spend {
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+		min-height: 0;
+	}
+
+	.upkeep > :not(.spend) {
+		flex: none;
+	}
+
 	.shop {
+		flex: 1;
 		display: grid;
 		grid-template-columns: 24rem minmax(0, 1fr);
 		gap: 1rem;
 		min-height: 0;
 	}
 
-	/* Two columns, so every upgrade on offer is in view at once and none hides below the fold. */
 	.groups {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
 		align-content: start;
 		gap: 0.2rem;
+		min-height: 0;
+		overflow: auto;
+		scrollbar-width: thin;
+		scrollbar-color: rgb(42 32 23 / 0.45) transparent;
 	}
 
 	.groups button {
@@ -275,8 +292,14 @@
 		line-height: 1.35;
 	}
 
+	.detail {
+		display: flex;
+		flex-direction: column;
+		min-height: 0;
+	}
+
 	.targets {
-		max-height: 12rem;
+		min-height: 0;
 		overflow: auto;
 		scrollbar-width: thin;
 	}
