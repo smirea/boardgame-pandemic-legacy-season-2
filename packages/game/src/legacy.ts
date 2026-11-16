@@ -303,7 +303,7 @@ export const actionBriefs: Partial<Record<ActionId, string>> = {
 
 export const ruleBriefs: Partial<Record<RuleId, string>> = {
 	forsaken:
-		'New rule: a city at population 0 is forsaken. Its Infection cards are skipped, nothing but Drive or Ferry works there, and it becomes infested. Restore at game end brings it back.',
+		'New rule: a city at population 0 is forsaken. When one of its Infection cards is flipped it is set aside and another card is flipped in its place, nothing but Drive or Ferry works there, and it becomes infested. Restore at game end brings it back.',
 	epidemicScaling: 'New rule: the number of Epidemics in the deck grows with the number of City cards in it.',
 	hollowSetup:
 		'New rule: the last 3 setup infections place Hollow Men. Running out of Hollow Men figures loses the game.',
@@ -328,7 +328,11 @@ function unlockLine(campaign: Campaign, unlock: Unlock): string | null {
 			const owned = Object.values(campaign.playerCards).some(
 				card => card.kind === 'event' && card.event === unlock.event,
 			);
-			return `${owned ? `Another copy of a ${mode} Event` : `New ${mode} Event`}: ${named(pack.events, unlock.event)}`;
+			const where =
+				unlock.mode === 'rationed'
+					? 'The card joins the Rationed Events the group picks from at each setup, starting next game.'
+					: 'The card is in the Player deck from the next game on.';
+			return `${owned ? `Another copy of a ${mode} Event` : `New ${mode} Event`}: ${named(pack.events, unlock.event)} ${where}`;
 		}
 		case 'ability':
 			return `New ability for sale: ${named(pack.abilities, unlock.ability)}`;
@@ -369,8 +373,20 @@ function unlockLine(campaign: Campaign, unlock: Unlock): string | null {
 			const city = pack.cities.find(entry => entry.id === route.city)!.name;
 			return `A recon route is now known: at ${city}, discard ${route.count} ${route.color} cards${route.unique ? ' of different cities' : ''}${route.needsCenter ? '. The city needs a supply center' : ''}.`;
 		}
-		case 'haven':
-			return `${pack.cities.find(entry => entry.id === unlock.city)!.name} is now on the map. It is not on the grid until a line reaches it.`;
+		case 'haven': {
+			const reached = pack.bundles.some(
+				bundle =>
+					bundle.unlocks.includes(unlock) &&
+					bundle.unlocks.some(
+						other =>
+							other.t === 'region' && other.connect?.some(edge => edge.a === unlock.city || edge.b === unlock.city),
+					),
+			);
+			const name = pack.cities.find(entry => entry.id === unlock.city)!.name;
+			return reached
+				? `${name} is now on the map, and a line already reaches it.`
+				: `${name} is now on the map. It is not on the grid until a line reaches it.`;
+		}
 		case 'frequencyHint': {
 			const worth = pack.frequencies.flatMap((reward, index) => (reward && 'bundle' in reward ? [index + 1] : []));
 			return `The bearings cross on three Monitor frequencies that open something new: ${worth.join(', ')}. The other seven only return cards.`;

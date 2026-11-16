@@ -1,0 +1,66 @@
+{
+	"g09": {
+		"summary": "Tour game. Lost on turn 16 when the Player deck ran out, at seven incidents. Seventeen mechanics the campaign never reached were played here for the first time.",
+		"story": "This table was staged to stand where the year-long campaign never went. Vex took Rook, a Laborer one exposure from death, to Jakarta and opened the Coral Sea with two red cards, ferried to the haven it revealed, and opened New Zealand from there, which brought the Topaz shield and a new job. He burned the Osaka card to sabotage a Hollow Man. Sol's Wren searched Riyadh and took the free supply line to Dar es Salaam, found a medic in Baghdad and used him on the spot, traded Tehran for Istanbul with Broker, then shuttled to Johannesburg and found the Jade lab. Kit's Pike searched Delhi and Kolkata, shot a Hollow Man out of Tokyo and purified Hong Kong after its outbreak. Rook ended a turn in infested Osaka and died at the start of the next. Vex came back as the Scientist the Jade lab had just added, destroyed an Infection card, and broadcast a Hollow Man into Farwater. The short deck ran out before the table could turn three Hollow Men.",
+		"highlights": [
+			"Both untaken recons in one turn: Coral Sea from Jakarta, then New Zealand from the haven, with the Topaz shield used eleven times afterwards.",
+			"All four companion cards the campaign never found: Medic, Marksman, Purifier and Shelter Wright, each found by a search and played.",
+			"An outbreak on the first Infect step, from a city at three plague cubes.",
+			"The first death by exposure in play: the last box of the track, the hand discarded, the seat refilled by a free character.",
+			"An objective waived by the table."
+		],
+		"parity": "The October card was read in October. Objectives after it: build 3 supply centers and turn the Hollow Men, two needed. No invariant broke after the stage, which conserves cubes and counts each staged plague cube as an incident.",
+		"findings": [
+			{
+				"finding": "Playing a companion card changed the board but wrote nothing to the log (Medic, Marksman, Purifier).",
+				"kind": "bug",
+				"fix": "Companion plays are logged with the player and the place. Test: playing a companion card is written to the log."
+			},
+			{
+				"finding": "After Rook was replaced, the log said the Scientist had been exposed and died.",
+				"kind": "bug",
+				"fix": "Log lines are named after whoever held the seat when they were written. Test: a log line about a character who died keeps that character."
+			},
+			{
+				"finding": "Finding the Jade lab gave no briefing line about what a lab is.",
+				"kind": "briefing",
+				"fix": "The briefing now says a lab was found and that labs count toward the score."
+			},
+			{
+				"finding": "The Vector Control Expert's job text read like a new rule for everyone.",
+				"kind": "briefing",
+				"fix": "A found job is announced as a new character on the roster, with a note that the text describes the job."
+			},
+			{
+				"finding": "System-wide Produce drained the stockpile and never said where the cubes went or which sites went without.",
+				"kind": "log",
+				"fix": "Produce logs each site it filled and the sites the stockpile could not reach."
+			},
+			{
+				"finding": "Supply Drop and Stock Up could not be played with an empty reserve and gave no reason.",
+				"kind": "message",
+				"fix": "Both now say the reserve is empty. The reserve was empty because the stage spent it on the board."
+			},
+			{
+				"finding": "A haven revealed together with its sea lane was announced as off the grid.",
+				"kind": "briefing",
+				"fix": "The line now says a line already reaches it."
+			},
+			{
+				"finding": "A Rationed Event earned mid-game did not say where the card went.",
+				"kind": "briefing",
+				"fix": "The line says it joins the Rationed Events picked at setup from the next game."
+			},
+			{
+				"finding": "A search that found a lead already followed looked like a missing briefing.",
+				"kind": "log",
+				"fix": "The log says the lead was already followed and gives the extra action."
+			},
+			{
+				"finding": "The forsaken rule said its Infection cards are skipped. Players could not tell whether another card is flipped.",
+				"kind": "briefing",
+				"fix": "The text now says the card is set aside and another is flipped in its place, which is what the engine does."
+			}
+		]
+	}
+}
