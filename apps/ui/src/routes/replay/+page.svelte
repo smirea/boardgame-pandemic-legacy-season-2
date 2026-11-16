@@ -8,6 +8,7 @@
 	import { load, marksAt, ReplaySession } from '#lib/replay/replay.svelte.ts';
 	import type { IndexGame, Loaded, PanelTab, ReplayIndex, SaidNote } from '#lib/replay/replay.svelte.ts';
 	import Transport, { SPEEDS } from '#lib/replay/Transport.svelte';
+	import { typing } from '#lib/keys.ts';
 	import { LS } from '#lib/storage.ts';
 
 	const params = new URLSearchParams(location.search);
@@ -157,15 +158,7 @@
 	});
 
 	function onkey(event: KeyboardEvent) {
-		const target = event.target;
-		if (
-			!loaded ||
-			event.metaKey ||
-			event.ctrlKey ||
-			event.altKey ||
-			(target instanceof HTMLInputElement && target.type !== 'range')
-		)
-			return;
+		if (!loaded || event.metaKey || event.ctrlKey || event.altKey || typing(event)) return;
 		const key = event.key;
 		if (key === 'ArrowRight') go(frame + 1);
 		else if (key === 'ArrowLeft') go(frame - 1);

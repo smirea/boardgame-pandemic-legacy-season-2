@@ -18,6 +18,7 @@
 	import type { SessionView } from '#lib/session/session.svelte.ts';
 	import { inkOn } from '#lib/color.ts';
 	import { presentFeedback } from '#lib/feedback.ts';
+	import { onButton, typing } from '#lib/keys.ts';
 	import { LS } from '#lib/storage.ts';
 	import { untrack } from 'svelte';
 	import type { Snippet } from 'svelte';
@@ -468,16 +469,12 @@
 
 	/** Space advances the turn, Z undoes, F fits the map, Escape closes whatever is open. */
 	function onkey(event: KeyboardEvent) {
-		const typing =
-			event.target instanceof HTMLInputElement ||
-			event.target instanceof HTMLSelectElement ||
-			event.target instanceof HTMLButtonElement;
 		if (event.key === 'Escape') {
 			targeting = null;
 			chooser = null;
 			menu = false;
 		}
-		if (typing || event.metaKey || event.ctrlKey || !game) return;
+		if (typing(event) || onButton(event) || event.metaKey || event.ctrlKey || !game) return;
 		const key = event.key.toLowerCase();
 		if (key === 'f') resetView++;
 		if (key === 'z' && snap.canUndo && canAct) send({ type: 'UNDO' });
