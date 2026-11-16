@@ -278,7 +278,8 @@ export function applyUnlock(world: World, unlock: Unlock) {
 	}
 }
 
-const ACTION_BRIEFS: Partial<Record<ActionId, string>> = {
+/** One line on what each unlockable action does, as a briefing announces it. */
+export const actionBriefs: Partial<Record<ActionId, string>> = {
 	recon:
 		'New action: Recon. In a marked city with a supply center, discard the cards its route asks for to reveal a region.',
 	establishLine:
@@ -300,7 +301,7 @@ const ACTION_BRIEFS: Partial<Record<ActionId, string>> = {
 		"New action: Broadcast. In a tower city, move a Hollow Man out of a city of that city's colour into a neighbouring location.",
 };
 
-const RULE_BRIEFS: Partial<Record<RuleId, string>> = {
+export const ruleBriefs: Partial<Record<RuleId, string>> = {
 	forsaken:
 		'New rule: a city at population 0 is forsaken. Its Infection cards are skipped, nothing but Drive or Ferry works there, and it becomes infested. Restore at game end brings it back.',
 	epidemicScaling: 'New rule: the number of Epidemics in the deck grows with the number of City cards in it.',
@@ -310,6 +311,8 @@ const RULE_BRIEFS: Partial<Record<RuleId, string>> = {
 	topazShield:
 		'New rule: when a city loses a cube to an infection, any player may discard a City card of its colour to keep the cube.',
 	gentleEpidemic: 'New rule: an Epidemic removes 1 cube from the city it strikes, not all of them.',
+	carrier:
+		'New action at Lake Baikal: Take the sample. That character becomes the carrier. The carrier moves only by Drive or Ferry, must discard a City card of the colour of each city it enters, and dies when the game ends.',
 };
 
 const named = <T extends { id: string; name: string; text: string }>(list: T[], id: string) => {
@@ -338,7 +341,7 @@ function unlockLine(campaign: Campaign, unlock: Unlock): string | null {
 		case 'job':
 			return `New job found: ${named(pack.jobs, unlock.job)}`;
 		case 'action':
-			return ACTION_BRIEFS[unlock.action] ?? null;
+			return actionBriefs[unlock.action] ?? null;
 		case 'region': {
 			const infested = pack.cities
 				.filter(city => city.region === unlock.region && city.startsInfested)
@@ -357,13 +360,15 @@ function unlockLine(campaign: Campaign, unlock: Unlock): string | null {
 			return parts.length ? parts.join(' ') : null;
 		}
 		case 'rule':
-			return RULE_BRIEFS[unlock.rule] ?? null;
+			return ruleBriefs[unlock.rule] ?? null;
 		case 'route': {
 			const route = pack.reconRoutes.find(entry => entry.id === unlock.route);
 			if (!route) return null;
 			const city = pack.cities.find(entry => entry.id === route.city)!.name;
 			return `A recon route is now known: at ${city}, discard ${route.count} ${route.color} cards${route.unique ? ' of different cities' : ''}${route.needsCenter ? '. The city needs a supply center' : ''}.`;
 		}
+		case 'haven':
+			return `${pack.cities.find(entry => entry.id === unlock.city)!.name} is now on the map. It is not on the grid until a line reaches it.`;
 		case 'frequencyHint': {
 			const worth = pack.frequencies.flatMap((reward, index) => (reward && 'bundle' in reward ? [index + 1] : []));
 			return `The bearings cross on three Monitor frequencies that open something new: ${worth.join(', ')}. The other seven only return cards.`;
@@ -371,7 +376,7 @@ function unlockLine(campaign: Campaign, unlock: Unlock): string | null {
 		case 'gather':
 			return `Hollow Men: ${unlock.cards} Gather cards join the Infection cards. They start each game in the discard pile and enter the deck with the first Epidemic. When one is flipped, the next city flipped gets a Hollow Man and is not infected. Leaving a location that holds Hollow Men exposes a character.`;
 		case 'assemble':
-			return `Hollow Men: ${unlock.cards} Assemble cards join the Infection cards.`;
+			return `Hollow Men: ${unlock.cards} Assemble cards join the Infection cards. They work as Gather cards do.`;
 		case 'freeAbilityUnits':
 			return `${unlock.amount} free production units for character abilities: spend them now, during setup, on abilities that last all year.`;
 		case 'stockpileBonus':

@@ -3,6 +3,7 @@ import type { ActionId, CityDef, CompanionId, EdgeKind, RuleId, SearchResult } f
 import { drawPiled } from './decks';
 import { bump, havensWithHollow, kill, movePawn, setProgress, settleGrid, towerColours } from './flow';
 import {
+	cardLabel,
 	cardValue,
 	characterOf,
 	cityDef,
@@ -508,11 +509,14 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 			return valid && !ctx.campaign.frequenciesUsed.includes(frequency) ? ok : 'That frequency is used up';
 		},
 		apply(ctx, { frequency }) {
-			for (let i = 0; i < 4 && ctx.game.playerDeck.order.length > 0; i++) {
-				ctx.game.playerDiscard.push(
-					drawPiled(ctx.game.playerDeck, card => ctx.campaign.playerCards[card]!.kind === 'epidemic')!,
-				);
-			}
+			const revealed: CardId[] = [];
+			for (let i = 0; i < 4 && ctx.game.playerDeck.order.length > 0; i++)
+				revealed.push(drawPiled(ctx.game.playerDeck, card => ctx.campaign.playerCards[card]!.kind === 'epidemic')!);
+			ctx.game.playerDiscard.push(...revealed);
+			log(ctx.game, {
+				t: 'note',
+				text: `Monitor revealed and discarded ${revealed.map(id => cardLabel(ctx.campaign, id)).join(', ') || 'nothing'}. An Epidemic revealed this way has no effect`,
+			});
 			ctx.campaign.frequenciesUsed.push(frequency);
 			const reward = pack.frequencies[frequency];
 			if (reward && 'bundle' in reward) openBundle(ctx.world, reward.bundle, false);

@@ -6,7 +6,7 @@ export type { Action } from './actions';
 export { actionCost, actionIds, checkAction, checkEdge, routeCost } from './actions';
 export type { Decide, Play } from './plays';
 export type { Purchase } from './legacy';
-export { newCampaign, productionUnits, purchaseCost, score } from './legacy';
+export { actionBriefs, newCampaign, productionUnits, purchaseCost, ruleBriefs, score } from './legacy';
 export type { Command, GameActor, GameSnapshot, Phase, Save, Seating } from './machine';
 export { createGameActor, gameMachine, parseSave, phaseOf, reject } from './machine';
 export { legalActions, legalDecides, legalPlays, legalPurchases, payColor, payments } from './options';

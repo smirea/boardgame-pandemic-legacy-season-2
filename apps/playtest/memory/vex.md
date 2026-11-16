@@ -1,37 +1,31 @@
 # Memory
 
-November first lost at 8 incidents. November second is next, rationing 2. Scavenge is rationed and was not in the deck. Ask the lead to pick it.
+November second lost at 8 incidents. Plan was 2/4: yellow and black done, blue and red not. December is next, rationing 4. This was the second November, so the year moves on.
 
-I am the Captain (char-7), exposure 5/7. Slots: Careless, Careless, Surveyor, Investigator. Foreman is gone. Land lines cost 2 cubes again. Sea lanes cost 2. Do not search. Do not buy onto me. Two boxes are left, and the next exposure can kill. Leaving a Hollow Man with no shelter exposes you. I scarred walking out of Istanbul.
+I am the Captain (char-7), exposure 5/7. Slots full: Careless, Careless, Surveyor, Investigator. Do not search. Do not buy onto me. The next exposure can kill. Do not start a turn in an infested or plague city. Do not leave a Hollow Man unless the city has a shelter.
 
-Kolkata was restored to population 1 and stays infested. It is no longer forsaken. Draw Shanghai and Ho Chi Minh City from Kolkata, then leave in the same turn. Do not start a turn there. Delhi–Shanghai and Tehran–Shanghai cross unexplored map.
+Kolkata shelter is permanent. Sleep there. Shanghai is one drive away. The tower was not made permanent. Transmit died with it. While a tower stood in a black city it only sent black cards.
 
-A forsaken city offers only Drive. Kolkata and Jakarta both refused the line while I held the cubes. Jakarta was not restored. Do not draw from it.
+On the grid now: Shanghai, Hong Kong, Bangkok, Ho Chi Minh City. Lines: Kolkata–Shanghai, Kolkata–Ho Chi Minh City, Shanghai–Hong Kong. Sea lane: Kolkata–Bangkok. Seoul and Osaka are still off. A city that just joined cannot be infected that game. Next game it can. All four are population 1.
 
-Kit is the Sanitation Officer: Architect, Outrider, Soldier, Scout. Exposure 0/7. Scout recons with no supply center, at the full card cost, because Surveyor is on me. Kit should perform the Shanghai recons. One recon per trip fits a hand of 7.
+`jakarta.153` is wild. It counts as any colour in a recon. It is the only Jakarta card. Jakarta stays forsaken. Do not restore it.
 
-Sol's Immunologist is unchanged, exposure 1/7. The Istanbul shelter was built and was not made permanent. It will be gone. Northwatch's shelter is still permanent.
+Permanent centers, still the cap of 6: Washington, London, São Paulo, Istanbul, Atlanta, Paris. Hale has Record Keeper and Foreman. Lines cost 1 cube fewer if Hale draws them. Mine still cost 2. Sea lanes cost 2.
 
-Newly on the grid: Delhi, Dar es Salaam, Monsoon Rest, New Mumbai. Sea lanes: Dar es Salaam–Monsoon Rest, Monsoon Rest–New Mumbai, Monsoon Rest–Jakarta. Monsoon Rest cannot reach Bangkok or Ho Chi Minh City, and New Mumbai cannot reach Bangkok. Those lanes cross a sea lane. Dar es Salaam to New Mumbai crosses more than one region line.
+Newly forsaken, and now infested: Lima, Bogotá, Delhi. Do not restore them. A forsaken city cannot incident. Restoring it makes it infectable and a turn started there still exposes you. Moscow and Paris took plague and are not forsaken.
 
-Permanent centers, the cap of 6: Washington, London, São Paulo, Istanbul, Atlanta, Paris. No new center this game.
+Kit is the Sanitation Officer: Architect, Outrider, Soldier, Scout. Exposure 1/7. Scout recons with no center, at the full card cost, because Surveyor is on me. Outrider leaves Hollow Men clean. Soldier removes one figure where Kit stands. Kit salvages by discarding 2.
 
-New York is forsaken. Do not restore it. Bogotá fell to 1. Antananarivo stays forsaken. Do not restore it.
+Sol's Immunologist is unchanged, exposure 1/7, slots full. Make Supplies works in any city. Sol's version takes cubes from the reserve. System Produce fills havens and centers and can leave the last centers empty when the stockpile runs out.
 
-`lagos.57` still counts as red. No other red card starts in the deck until a red city joins. A city that joins puts its cards in the discard. Kit salvages by discarding 2. Investigator swaps a held city card for any city card in the discard.
+Share only the card of the city you both stand in. Card Swap is one remote trade and it is back in the reserve. Investigator swaps any city card with the discard. Shelter builds where you stand. The card only has to match the colour, and it is discarded. The action stays hidden until you hold that colour.
 
-Cordon is on `inf-paris.103`. In an infect step the table may discard a card to stop the rest. Send it in the same breath the choice opens. Mine was rejected because the window had already closed, and the log never said who resolved it. Setup did not offer cordon. I am unsure whether setup counts.
+Cordon stops the rest of an infect step if someone discards in the same breath the choice opens. It did not open during setup, and it did not open when the Cordon card was the last flip. The discard key is `decide:discard:seat-1:<card>`, not the short form the prompt shows.
+
+Scavenge draws 4, keeps city cards, and discards the rest with no effect, epidemics included. The log does not name them. It is rationed and back in the reserve. Ask the lead to pick it. Monitor also dumped an epidemic and did not say so. That one is not written on the card. Do not mill with Monitor.
+
+Lookout, Broker, and Saboteur are still unbought. Each costs 2. Saboteur removes a Hollow Man from a city of that colour. Broker is a worse Investigator. Lookout searches from the discard, which Careless makes a bad idea on me.
 
 Washington's Well Stocked card removes nothing at 2 or more cubes. The log says blocked.
 
-An epidemic that pulls a stored infection card did not strike Bogotá while it had 0 cubes, and that card was not the next flip. Issue 203. Do not trust an empty city to incident on the pull.
-
-Forsaken infection cards are set aside and replaced, so the deck runs out early. The rate then steps with no epidemic. It happened twice.
-
-A link that only says "start from a location on the grid" may be illegal once the city joins. Read the city again before spending the cubes.
-
-Share only the card of the city you both stand in.
-
-Lookout, Broker, Saboteur and wild are still unbought. Each costs 2, which is a whole restore.
-
-Next route: cubes, Kolkata, draw Shanghai, leave to Tehran the same turn. Connect Hong Kong and Seoul from Shanghai. Sleep in one of those. Both were clean. Shanghai, Delhi, Dar es Salaam and New Mumbai are infested.
+An epidemic that finds an empty city removes 0 cubes. The card can still plague on a later flip of that infect. Do not leave Bogotá, Paris, Lagos, or Dar es Salaam at 0.

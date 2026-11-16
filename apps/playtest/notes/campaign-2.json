@@ -629,5 +629,44 @@
 				"fix": "All three are the researched rules."
 			}
 		]
+	},
+	"g14": {
+		"summary": "Lost on turn 17 at eight incidents with two of the four Plan recons done. The Plan was not completed in November.",
+		"story": "Kit led with the Sanitation Officer, beside the Captain and the Immunologist. With Kolkata restored, the table drew the supply line from Kolkata to Shanghai in the opening turns and the Sanitation Officer made the yellow recon there. Lines went on to Hong Kong, Bangkok and Ho Chi Minh City to bring red cards into the deck, a shelter went up in Kolkata so a pawn could sleep there, and a tower in Kolkata let the Captain Monitor for cards. The black recon followed. The red recon needs five red cards of different cities and the blue needs three, and the cards did not come: three epidemics, pulling stored cards back out each time, filled the track on turn 17.",
+		"highlights": [
+			"The Plan begun: yellow and black recons made at Shanghai. Steps of the Plan are permanent, so they carried to the end of the month.",
+			"Shanghai joined to the grid from Kolkata, the one line the map allowed, after the gateway city was restored.",
+			"Scavenge and Monitor both threw Epidemics away unresolved, which is what their rules say and what nobody at the table expected.",
+			"A search at Tehran let the table remove Hollow Men.",
+			"Game end: a permanent shelter, the Universal improvement and Foreman. The Plan was not finished, so December opens Utopia for the players and its reward is lost."
+		],
+		"parity": "The checks passed as in the first attempt: 1 objective, Complete the Plan, and 34 cubes. No Legacy card was due. Each recon at Shanghai opened its Plan step and counted toward the objective, with no supply center needed there, as researched. With the Plan unfinished after both November games, December's card forces Utopia, which matches the research: Utopia joins the grid and its Infection cards start in the discard pile.",
+		"findings": [
+			{
+				"finding": "Monitor and Scavenge discarded cards, Epidemics among them, and the log named none of them.",
+				"kind": "Engine gap",
+				"fix": "The log lists what Monitor revealed and what Scavenge kept and discarded, and says a discarded Epidemic has no effect."
+			},
+			{
+				"finding": "Nobody could say what a tower does, months after towers arrived.",
+				"kind": "Lab gap",
+				"fix": "New `actions` command lists what every unlocked action and added rule does."
+			},
+			{
+				"finding": "Build Shelter looked locked until someone held a card of the right colour.",
+				"kind": "Lab wording",
+				"fix": "The hint on unlocked actions gives the shelter's cost."
+			},
+			{
+				"finding": "The hand-limit prompt quoted a key without the seat, which was refused.",
+				"kind": "Lab wording",
+				"fix": "The prompt points at the exact key in the options."
+			},
+			{
+				"finding": "A Cordon card flipped at setup asked nothing. Shanghai arrived infested.",
+				"kind": "Not a bug",
+				"fix": "Setup is not an Infect step, and Shanghai is infested from the start. Regions revealed from now on name their infested cities in the briefing."
+			}
+		]
 	}
 }

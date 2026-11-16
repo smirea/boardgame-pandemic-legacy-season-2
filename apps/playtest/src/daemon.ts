@@ -8,6 +8,7 @@ import { appendFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSyn
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
+	actionBriefs,
 	gameIndexOf,
 	newCampaign,
 	overLimit,
@@ -15,6 +16,7 @@ import {
 	parseSave,
 	recordStep,
 	reject,
+	ruleBriefs,
 	scenarios,
 	startRecord,
 } from '@repo/game';
@@ -364,7 +366,9 @@ function needs(state: PublicState, who: Who): string[] {
 				optionsFor(state, who, lab.picks).some(option => option.key.startsWith('decide:discard')) &&
 				pending?.t !== 'discard'
 			)
-				out.push('You are over your hand limit. Discard with `do decide:discard:...`.');
+				out.push(
+					'You are over your hand limit. Discard with the exact key from `options decide`, which names your seat and the card.',
+				);
 			// While another player owes the game a discard or a choice, the active player can do nothing, so nothing needs them.
 			if (game.active === who.seat && !blockedBy(state, who)) {
 				const step =
@@ -401,7 +405,7 @@ function idleActions(state: PublicState, who: Who): string[] {
 	const idle = state.world.campaign.actions.filter(action => !listed.has(action));
 	return idle.length
 		? [
-				`Unlocked, but not possible where you stand with what you hold: ${idle.join(', ')}. (Base costs, before any ability or job lowers them: a supply line, sea lane or tower takes 2 cubes from your character, and a supply center takes 5 cards of the city's colour.)`,
+				`Unlocked, but not possible where you stand with what you hold: ${idle.join(', ')}. (Base costs, before any ability or job lowers them: a supply line, sea lane or tower takes 2 cubes from your character, a supply center takes 5 cards of the city's colour, and a shelter takes 1 card of the city's colour. The actions command says what each one does.)`,
 			]
 		: [];
 }
@@ -538,6 +542,7 @@ const HELP = `Commands (run as: ./play <you> <command>):
   do <key> [<key>..] why: <reason>   send commands in order; stops at the first that fails.
                       End every do with why: and one sentence on why you chose it
   board               every revealed location, by region, with links
+  actions             what every action and rule unlocked this year does
   city <id>           one location in detail
   decks               discard piles and the known layers of the Infection deck
   log [n]             the last n log lines of this game
@@ -713,6 +718,17 @@ async function handle(agent: string, words: string[]): Promise<string> {
 			);
 		case 'board':
 			return renderBoard(state.world);
+		case 'actions': {
+			// What every action and rule unlocked so far does, for players who met them months ago.
+			const { campaign } = state.world;
+			const lines = campaign.actions.flatMap(action =>
+				actionBriefs[action] ? [`  ${actionBriefs[action]!.replace(/^New (free )?action: /, '')}`] : [],
+			);
+			const rules = campaign.rules.flatMap(rule =>
+				ruleBriefs[rule] ? [`  ${ruleBriefs[rule]!.replace(/^New rule: /, '')}`] : [],
+			);
+			return ['Unlocked actions:', ...lines, ...(rules.length ? ['Rules added this year:', ...rules] : [])].join('\n');
+		}
 		case 'city':
 			return rest[0] && isCity(rest[0])
 				? renderCity(state.world, rest[0])
