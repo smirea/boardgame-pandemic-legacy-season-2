@@ -1,10 +1,12 @@
 import { pack } from './content/pack';
 import type {
 	AbilityId,
+	ActionId,
 	CityImprovementId,
 	EventId,
 	InfectionImprovementId,
 	JobId,
+	RuleId,
 	SearchBoxDef,
 	StructureKind,
 	Unlock,
@@ -244,6 +246,7 @@ export function applyUnlock(world: World, unlock: Unlock) {
 				const now = Math.min(unlock.amount, world.game.reserve);
 				world.game.reserve -= now;
 				world.game.stockpile += now;
+				log(world.game, { t: 'note', text: `${now} cubes moved from the reserve to the stockpile` });
 			}
 			return;
 		case 'freeAbilityUnits':
@@ -272,6 +275,40 @@ export function applyUnlock(world: World, unlock: Unlock) {
 	}
 }
 
+const ACTION_BRIEFS: Partial<Record<ActionId, string>> = {
+	recon:
+		'New action: Recon. In a marked city with a supply center, discard the cards its route asks for to reveal a region.',
+	establishLine:
+		'New action: Supply Line. Spend 2 cubes from your character to join your city to a neighbouring one. Lines may not cross each other.',
+	search:
+		"New action: Search. Holding a city's card while in that city, scratch one of the card's search boxes and take what it finds.",
+	shuttle: 'New action: Shuttle Flight. Fly between havens and cities with a supply center.',
+	buildTower: 'New action: Build Tower. Spend 2 cubes from your character to raise a tower in your city.',
+	transmit: "New action: Transmit. In a tower city, send a City card of that city's colour to any player.",
+	buildShelter:
+		"New action: Build Shelter. Discard a card of your city's colour. No one is exposed in or leaving a sheltered city, and it loses no population at game end.",
+	inoculate:
+		"New free action: Inoculate. Move your city's Player card or Infection card from its discard pile into storage, out of the decks.",
+	chartLane:
+		'New action: Sea Lane. Spend 2 cubes from your character to join your port to another. A lane may cross one region boundary.',
+	monitor:
+		'New action: Monitor. In a tower city, tune to a frequency. Four Player cards are discarded and the frequency gives what it holds.',
+	broadcast:
+		"New action: Broadcast. In a tower city, move a Hollow Man out of a city of that city's colour into a neighbouring location.",
+};
+
+const RULE_BRIEFS: Partial<Record<RuleId, string>> = {
+	forsaken:
+		'New rule: a city at population 0 is forsaken. Its Infection cards are skipped, nothing but Drive or Ferry works there, and it becomes infested. Restore at game end brings it back.',
+	epidemicScaling: 'New rule: the number of Epidemics in the deck grows with the number of City cards in it.',
+	hollowSetup:
+		'New rule: the last 3 setup infections place Hollow Men. Running out of Hollow Men figures loses the game.',
+	epidemicFromStorage: 'New rule: an Epidemic strikes a stored Infection card first, if there is one.',
+	topazShield:
+		'New rule: when a city loses a cube to an infection, any player may discard a City card of its colour to keep the cube.',
+	gentleEpidemic: 'New rule: an Epidemic removes 1 cube from the city it strikes, not all of them.',
+};
+
 const named = <T extends { id: string; name: string; text: string }>(list: T[], id: string) => {
 	const found = list.find(entry => entry.id === id)!;
 	return `${found.name}. ${found.text}`;
@@ -297,6 +334,14 @@ function unlockLine(campaign: Campaign, unlock: Unlock): string | null {
 			return `New scar in the box: ${named(pack.scars, unlock.scar)}`;
 		case 'job':
 			return `New job found: ${named(pack.jobs, unlock.job)}`;
+		case 'action':
+			return ACTION_BRIEFS[unlock.action] ?? null;
+		case 'rule':
+			return RULE_BRIEFS[unlock.rule] ?? null;
+		case 'stockpileBonus':
+			return `The stockpile grows by ${unlock.amount} cubes now and at every later setup.`;
+		case 'permanentStructure':
+			return `New at game end: a ${unlock.structure} can be made permanent, so it starts every later game already built.`;
 		default:
 			return null;
 	}

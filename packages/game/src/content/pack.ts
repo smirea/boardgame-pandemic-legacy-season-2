@@ -634,7 +634,12 @@ export const pack: ContentPack = {
 			cost: 1,
 		},
 		{ id: 'lockdown', name: 'Lockdown', text: 'While in the discard pile, any player may destroy this card.', cost: 2 },
-		{ id: 'rebirth', name: 'Rebirth', text: 'No effect while the city has population 4 or more.', cost: 2 },
+		{
+			id: 'rebirth',
+			name: 'Rebirth',
+			text: 'When this card is drawn while its city has population 4 or more, it does nothing.',
+			cost: 2,
+		},
 		{
 			id: 'cordon',
 			name: 'Cordon',

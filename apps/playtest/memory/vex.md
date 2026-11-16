@@ -1,27 +1,23 @@
 # Memory
 
-April, first attempt. Lobby rationing is 4. March was lost twice, so the year moved on. Stay Knox. Foreman is on me now.
+April was lost. The replay is rationing 6. Stay Knox. Exposure 2/7, no scar. The blank was from starting a turn in plagued São Paulo. Entering a plague city mid-turn does not scratch. Do not end a turn in one.
 
-Knox, Laborer, Southreach. Exposure 1/7, no scar. Helmsman: first Drive or Ferry is free. Record Keeper: hand limit 8. Foreman: supply lines cost 1 cube fewer. The text does not say sea lanes. A sea lane cost 2 cubes before I bought Foreman.
+Knox, Laborer, Southreach. Helmsman: first Drive or Ferry is free. Record Keeper: hand limit 8. Foreman: a land line costs 1 cube. A sea lane still shows as 2. Lines that would cross are refused. A sea lane may cross only one region boundary.
 
-Hale, Radio Operator, exposure 1/7. The scratch this game was blank. transfer to seat-2, true gives, false takes, any distance. Quinn, Administrator, exposure 2/7, scar Shaken: recon needs 1 extra card. I am treating that tax as Quinn's alone until a recon says otherwise. Quinn moves any pawn onto any other pawn, once a turn. Do not let that pull land me in a plague city. Undo can reverse it.
+Hale, Radio Operator, exposure 1/7. Transfer is any distance and moves cubes, not cards. Sable, Instructor, exposure 1/7. Gives any card to someone in the same city. A normal share only moves the card of the city you are both standing in. Quinn is benched, scar Shaken: recon needs 1 extra card. I recon, not Quinn. Reed is unused. Immunologist (char-6) appeared from the Opal lab, home Southreach, exposure 0. The job's Make Supplies takes cubes from the reserve. The log will not explain inoculate. Use it only when the key is an infection card of the city you stand in. Ignore a key that names a city card.
 
-Permanent centers: Washington (pop 6) and London (pop 5). london.32 is +double. Well Stocked is the card inf-washington.14, not the city. It blocks only when that card is drawn and the city has 2 or more cubes.
+Permanent centers: Washington (pop 7) and London (pop 6). Atlanta and Istanbul were built this game and did not stick. London recon still wants 4 different blues. Lagos recon wants 5 different yellows and is now possible. Cairo recon wants 4 different blacks. Only Istanbul, Tripoli, and Cairo exist, so do not plan it. São Paulo recon wants 4 yellow cards and a center we do not have.
 
-Populations: Istanbul 2, Lagos 2, Tripoli 2, Jacksonville 2, São Paulo 2, Atlanta 2, Denver 2, San Francisco 2, New York 3. Cairo 1, Chicago 1, Mexico City 1. One bad game forsakes a city at 1.
+Grid now includes Lima and Bogotá. Santiago is the only off-grid city. One city cannot finish Connect 2. Buenos Aires has the Opal lab. Farwater is still only linked to Los Angeles.
 
-Los Angeles is FORSAKEN, population 0, infested. los-angeles.79 and los-angeles.80 are in the box. The city is still on the grid. Farwater is still linked only to Los Angeles. Restore costs 2 and only returns a city to pop 1. I skipped it. Do not skip it again if we still need that city's cards.
+Populations: Washington 7, London 6, Istanbul 3, Atlanta 3, New York 2, Lagos 2, Buenos Aires 2, Bogotá 2, Lima 2. At 1, and one more lost month can forsake them: Jacksonville, São Paulo, Tripoli, Cairo, San Francisco, Denver, Chicago, Mexico City, Los Angeles, Santiago. Cairo and Los Angeles were restored to 1 and are still marked infested. I do not know what that flag does.
 
-Yellow cities that still deal cards: Jacksonville, São Paulo, Lagos, Mexico City. That is 4. Lagos recon wants 5 different yellows. Do not plan it unless Los Angeles is restored or a new yellow region exists. São Paulo recon wants 4 yellow cards, not different cities, and a center we do not have. London recon wants 4 different blues, and the center is already there. I should be the one to recon, not Quinn. Cairo recon wants 4 different blacks. Only 3 black cities exist.
+Yellow cities on the grid: Jacksonville, São Paulo, Lagos, Mexico City, Buenos Aires, Lima, Bogotá, Los Angeles. That is 8. A city that joins during a game dumps its cards into the player discard. Do not plan to search a city in the game you connect it.
 
-Search cards still in the deck: chicago.64 (1), san-francisco.68 (2), mexico-city.82 (1), denver.72 (1).
+Search cards still live: chicago.64 (1), denver.72 (1), lima.89 (1), bogota.85 (1). Buenos Aires.96 had both boxes scratched. san-francisco.68 was spent on the Atlanta center with its boxes unused.
 
-`supply` only adds. It will not take cubes back, and a refusal exits 0, so a chained confirm still fires. Place 2 on every grid city the first time. A third cube dies to an epidemic. A city at 0 is an incident. Game end has no undo. Say the exact buy, wait, then buy.
+`supply` only adds. A refusal exits 0, so a chained confirm still fires. Place 2 on hot cities, never 3, never 0. An epidemic strips every cube off one city. The rate track is 2, 2, 2, 3. The second epidemic stayed at 2. The third moved the rate to 3. A city that already has plague takes another incident if it has no cube when hit. At 7 incidents, cube every bare city in the discard before the next draw. Denver was the known threat. The epidemic put Cairo on top and we lost.
 
-An epidemic strips supply cubes only. The discard becomes the next layer. The rate track started over at the first 2 this game. Do not carry the old position.
+Card Swap: the player who plays it picks both cards. Say which card you will not give up before anyone plays it. Stock Up moves 6 from the reserve to the stockpile. It worked. At rationing 6, name Quiet Night, Resilience, Card Swap, Stock Up, Surplus, and Purge before the confirm. Rebirth's shop text only says it does nothing at population 4 or more. Do not buy it. Restore costs 2 and returns a city to pop 1. A permanent center costs 3.
 
-Do not end a turn in a plague city. Exposure is at the start of the turn. Cubes do not stop it. Plague cubes cleared after the game. The forsaken flag did not.
-
-We finished searches and the lost haven and still lost, because the starred objective is 3 centers and we built the first one at 5 incidents. Next game, build centers before side trips. At rationing 4, name the four events before confirming. Card Swap and Stock Up were in the deck and never played. Quiet Night, Purge or Resilience would have mattered more at 6 incidents.
-
-The win is 3 objectives, every starred one included. A haven joining the grid does not count as connecting a city.
+The win is 3 objectives, every starred one included. Build the three centers before side trips. A haven does not count as connecting a city.

@@ -651,8 +651,12 @@ async function handle(agent: string, words: string[]): Promise<string> {
 					return lines.join('\n');
 				}
 				if (Date.now() > deadline) {
-					const game = current!.world.game;
-					return `${renderHeader(current!)}\nStill waiting${game ? ` on ${current!.world.campaign.characters[game.players[game.active]!.character]?.name}` : ''}. Run \`wait\` again.`;
+					const now = current!;
+					const active = now.world.game && now.phase.startsWith('playing') ? now.world.game.active : null;
+					const on = active
+						? now.world.campaign.characters[now.world.game!.players[active]!.character]?.name
+						: `the lead, ${config.players[(lab.session?.startIndex ?? 0) % config.players.length]!.name}`;
+					return `${renderHeader(now)}\nStill waiting on ${on}. Run \`wait\` again.`;
 				}
 				await Bun.sleep(400);
 			}

@@ -30,6 +30,8 @@ One player is the lead for each game. Only the lead sends setup and game-end com
 
 **The board.** Havens are safe platforms at sea. Cities sit on the mainland. A location is on the grid when a chain of supply lines and sea lanes joins it to a haven. Only grid cities are in the decks.
 
+**Setup.** The lead places the month's supply cubes on the grid, then the game infects 9 cities at once before the first turn, one cube each. Cities left empty at setup can take a Plague cube before anyone has moved.
+
 **A turn** has three steps.
 
 1. Up to 4 actions.
@@ -64,7 +66,7 @@ Each costs 1 action unless `options` shows another cost. `options` is the truth 
 - `produce:<card>:<mode>`: discard a Produce Supplies card. Both modes need you to stand in a haven or a supply center city. `local` fills your location up to its population from the stockpile. `system` fills every haven and supply center city and scratches one of the card's two boxes. Either way the card goes to the discard pile for the rest of this game and comes back next game. The boxes last all year: when both are scratched the card is destroyed for good.
 - `share:<card>:<seat>:<true|false>`: give (`true`) or take (`false`) the card of the city you both stand in. An Instructor may give any card, so `options` lists more when one is involved.
 - `buildCenter:<cards>`: discard 5 City cards of the city's colour to build a supply center there. Three new ones in a game is the standing objective.
-- `establishLine:<city>`: unlocks with the first region you reveal and stays unlocked for the rest of the year. Spend cubes from your character to draw a supply line to a neighbouring revealed city. That joins it to the grid.
+- `establishLine:<city>`: unlocks with the first region you reveal and stays unlocked for the rest of the year. A supply line may not cross another supply line, and `board` says which links are blocked and why. Spend cubes from your character to draw a supply line to a neighbouring revealed city. That joins it to the grid.
 - `chartLane:<port>`: the same over water, once it is unlocked.
 - `recon:<route>:<cards>`: at a marked city with a supply center, discard the listed cards to reveal a whole new region. `board` marks where recon is possible and what it costs.
 - `search:<card>:<box>`: unlocks with the first region you reveal and stays unlocked. Holding a city's card while standing in that city, scratch one of the card's search boxes. Only some City cards have boxes. A card that has them shows `(2 search boxes)` after its name, and `options` then lists the search. Finds range from supplies to new places to nothing.

@@ -729,6 +729,10 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 			const discard = pile === 'player' ? ctx.game.playerDiscard : ctx.game.infectionDiscard;
 			discard.splice(discard.indexOf(card), 1);
 			ctx.campaign.stored[pile].push(card);
+			log(ctx.game, {
+				t: 'note',
+				text: `${ctx.def.name}'s ${pile === 'player' ? 'Player' : 'Infection'} card was inoculated: it is in storage, out of the decks`,
+			});
 		},
 	},
 	salvage: {

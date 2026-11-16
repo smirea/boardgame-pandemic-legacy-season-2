@@ -194,5 +194,49 @@
 				"fix": "The improvement belongs to the card it was bought for."
 			}
 		]
+	},
+	"g04": {
+		"summary": "Lost on turn 11 at eight incidents, one supply center short. South America was forced open and the Opal lab was found.",
+		"story": "Sol led as Hale the Radio Operator, with Knox the Laborer and Sable the Instructor back in. The April perimeter report opened South America for the players, because nobody had reconned it: Buenos Aires started on the grid, with Bogotá, Lima and Santiago off it. This time the lead could move setup cubes, and shifted two after Kit objected. Knox joined Bogotá and Lima on the first turn, which completed Connect 2 new cities, then searched Buenos Aires twice. The first box found the Opal lab, which unlocked Inoculate and added 15 cubes to the stockpile on the spot. The second finished the search objective. Knox built Atlanta and Istanbul. Three epidemics later the rate was 3, and bare Cairo was the first flip of the step that filled the track.",
+		"highlights": [
+			"First forced opening: the perimeter report opened South America at setup. The explorer's reward event was lost and the opening counted toward no objective, as the research rules say.",
+			"The Opal lab, found by a land search at Buenos Aires. Its stockpile bonus landed in the same game: the stockpile went from 11 to 26.",
+			"First Inoculate: Sable stored a São Paulo Infection card out of the decks.",
+			"Card Swap and the Instructor's give were both used to route cards to the builder.",
+			"Game end: card 04-02 put Rebirth on sale. The table spent all 4 units restoring Cairo and Los Angeles, the first Restore purchases."
+		],
+		"parity": "All four checks passed: 3 objectives required; the five March objectives still in play; 27 cubes. Card 04-01 was read at setup and forced South America, which the research schedules for April and not March, where it was only a warning. Card 04-02 was read at game end. Epidemic scaling set the epidemic count from this month, as the research notes. The Opal lab arrived by the trigger the research gives, a land search on the Buenos Aires card.",
+		"findings": [
+			{
+				"finding": "Inoculate ran with no explanation: the briefing named no rule, the log said only 'inoculate', and a stored card simply vanished.",
+				"kind": "Engine gap",
+				"fix": "A briefing now explains every new action and rule in one line. The log says which card went into storage."
+			},
+			{
+				"finding": "The stockpile jumped by 15 with nothing in the log.",
+				"kind": "Engine gap",
+				"fix": "The log says how many cubes moved from the reserve."
+			},
+			{
+				"finding": "Rebirth's text did not say what the improvement does.",
+				"kind": "Wording",
+				"fix": "Rewritten: when the card is drawn while its city has population 4 or more, it does nothing."
+			},
+			{
+				"finding": "`wait` said it was waiting on Knox during setup, when it was waiting on the lead.",
+				"kind": "Lab bug",
+				"fix": "It names the lead outside of turns."
+			},
+			{
+				"finding": "Supply lines refused for crossing another line, and nine cities infected at setup, both unexplained.",
+				"kind": "Guide gap",
+				"fix": "The guide covers the opening infection and the no-crossing rule."
+			},
+			{
+				"finding": "Inoculate offered a discarded Player card as well as Infection cards. An Instructor's card was taken on another player's turn. Card Swap let its player choose both cards.",
+				"kind": "Not a bug",
+				"fix": "Each matches the research or the card's text."
+			}
+		]
 	}
 }
