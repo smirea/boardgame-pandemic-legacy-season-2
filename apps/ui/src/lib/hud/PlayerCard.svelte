@@ -1,7 +1,17 @@
-<script lang="ts">
-	import { cityDef, pack } from '@repo/game';
+<script lang="ts" module>
+	import { cityDef } from '@repo/game';
 	import type { PlayerCard } from '@repo/game';
 	import { CITY_COLOR } from '#lib/board/CityMarker.svelte';
+
+	const KIND_COLOR = { event: '#b08628', companion: '#6f5a96', produce: '#8d8476', epidemic: '#a8261c' } as const;
+
+	/** The colour a card is known by at a glance: its city's region, or its kind. */
+	export const cardColor = (card: PlayerCard) =>
+		card.kind === 'city' ? CITY_COLOR[cityDef(card.city).color ?? 'haven'] : KIND_COLOR[card.kind];
+</script>
+
+<script lang="ts">
+	import { pack } from '@repo/game';
 	import MapArt from '#lib/cards/MapArt.svelte';
 
 	type Props = { card: PlayerCard; onclick?: () => void; tone?: 'play' | 'discard' | null; small?: boolean };
@@ -18,7 +28,7 @@
 				return {
 					title: city.name,
 					kicker: city.port ? 'Port' : 'City',
-					color: CITY_COLOR[city.color ?? 'haven'],
+					color: cardColor(card),
 					text: improvement?.text ?? '',
 					badge: improvement?.name,
 				};
@@ -28,26 +38,26 @@
 				return {
 					title: event.name,
 					kicker: card.mode === 'unrationed' ? 'Event, one use' : 'Event',
-					color: '#c9a227',
+					color: cardColor(card),
 					text: event.text,
 				};
 			}
 			case 'companion': {
 				const companion = pack.companions.find(item => item.id === card.companion)!;
-				return { title: companion.name, kicker: 'Companion', color: '#8f6ad9', text: companion.text };
+				return { title: companion.name, kicker: 'Companion', color: cardColor(card), text: companion.text };
 			}
 			case 'produce':
 				return {
 					title: 'Produce Supplies',
 					kicker: `${card.boxesLeft} system-wide left`,
-					color: '#e8e2d0',
+					color: cardColor(card),
 					text: 'At a haven or supply center: fill it, or every one, up to population.',
 				};
 			case 'epidemic':
 				return {
 					title: 'Epidemic',
 					kicker: 'Increase, infect, intensify',
-					color: '#ff3b6b',
+					color: cardColor(card),
 					text: 'Raise the rate. Strip the bottom city. Restack the discards.',
 				};
 		}
@@ -90,6 +100,7 @@
 </button>
 
 <style>
+	/* Player cards are card stock in the hand: printed ink on paper, the region's colour along the top. */
 	.card {
 		position: relative;
 		display: flex;
@@ -98,17 +109,22 @@
 		height: 9.7em;
 		flex: none;
 		padding: 0;
-		border: 1px solid rgb(255 255 255 / 0.14);
-		border-radius: 0.6em;
-		background: linear-gradient(170deg, #1d2732, #121920);
-		color: var(--ink, #e9e6dc);
+		border: 1px solid rgb(60 44 28 / 0.4);
+		border-radius: 0.4em;
+		background: linear-gradient(172deg, #f0e8d6, #e2d6bb);
+		color: #2a2017;
+		font-family: var(--font-ui);
 		font-size: var(--card-size, 0.73rem);
 		text-align: left;
 		overflow: hidden;
+		box-shadow:
+			0 0.15em 0.3em rgb(0 0 0 / 0.35),
+			0 0.6em 1.4em rgb(0 0 0 / 0.25);
 		transition:
-			transform 160ms ease,
-			box-shadow 160ms ease,
-			border-color 160ms ease;
+			box-shadow 200ms ease,
+			outline-color 200ms ease;
+		outline: 2px solid transparent;
+		outline-offset: 1px;
 	}
 
 	.card.small {
@@ -120,40 +136,31 @@
 		cursor: pointer;
 	}
 
-	.card:not(:disabled):hover {
-		transform: translateY(-0.5rem);
-		box-shadow: 0 0.6rem 1.2rem rgb(0 0 0 / 0.45);
-	}
-
 	.card.play {
-		border-color: var(--accent, #7dfcc0);
-		box-shadow: 0 0 0 1px var(--accent, #7dfcc0);
+		outline-color: var(--warn);
 	}
 
 	.card.discard {
-		border-color: var(--danger, #ff6b6b);
-		box-shadow: 0 0 0 1px var(--danger, #ff6b6b);
+		outline-color: var(--danger);
 	}
 
 	.head {
 		display: flex;
 		flex-direction: column;
-		padding: 0.55em 0.6em 0.4em;
-		border-top: 0.42em solid var(--band);
+		padding: 0.45em 0.6em 0.35em;
+		border-top: 0.38em solid var(--band);
 	}
 
 	.kicker {
-		color: var(--muted, #8a9aa8);
-		font-size: 0.6em;
-		font-weight: 700;
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
+		color: #6f604c;
+		font-size: 0.66em;
+		font-weight: 600;
 	}
 
 	.title {
-		font-size: 1.02em;
-		font-weight: 700;
-		line-height: 1.12;
+		font-family: var(--font-display);
+		font-size: 1.18em;
+		line-height: 1.05;
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -162,7 +169,8 @@
 	.art {
 		flex: 1;
 		min-height: 0;
-		border-block: 1px solid rgb(255 255 255 / 0.1);
+		margin: 0 0.35em;
+		border: 1px solid rgb(60 44 28 / 0.35);
 	}
 
 	.foot {
@@ -188,10 +196,10 @@
 
 	.badge {
 		padding: 0 0.4em;
-		border-radius: 0.3em;
+		border-radius: 0.15em;
 		background: var(--band);
-		color: #10161c;
-		font-size: 0.58em;
+		color: #f3ecdc;
+		font-size: 0.62em;
 		font-weight: 700;
 	}
 
@@ -200,16 +208,14 @@
 		place-items: center;
 		width: 1.15em;
 		height: 1.15em;
-		border: 1px solid var(--warn, #ffd166);
-		border-radius: 0.25em;
-		color: var(--warn, #ffd166);
+		border: 1px solid #2a2017;
+		border-radius: 0.15em;
+		color: #2a2017;
 		font-size: 0.72em;
 	}
 
 	.box.used {
-		border-color: var(--muted, #8a9aa8);
-		color: var(--muted, #8a9aa8);
-		opacity: 0.5;
+		opacity: 0.35;
 	}
 
 	.glyph {
@@ -217,7 +223,6 @@
 		place-items: center;
 		flex: 1;
 		min-height: 0;
-		background: radial-gradient(circle, color-mix(in srgb, var(--band) 24%, transparent), transparent 70%);
 		color: var(--band);
 		font-size: 2.3em;
 		line-height: 1;
@@ -225,8 +230,8 @@
 
 	.text {
 		padding: 0.3em 0.6em 0.55em;
-		color: var(--muted, #8a9aa8);
-		font-size: 0.6em;
+		color: #5a4c3a;
+		font-size: 0.66em;
 		line-height: 1.3;
 		display: -webkit-box;
 		-webkit-line-clamp: 4;
@@ -236,6 +241,17 @@
 	}
 
 	.epidemic {
-		background: linear-gradient(170deg, #3a1020, #1a0810);
+		border-color: #5a1a10;
+		background: linear-gradient(172deg, #6e2416, #3e130b);
+		color: #f1dccd;
+	}
+
+	.epidemic .kicker,
+	.epidemic .text {
+		color: rgb(241 220 205 / 0.75);
+	}
+
+	.epidemic .glyph {
+		color: #f08a6a;
 	}
 </style>

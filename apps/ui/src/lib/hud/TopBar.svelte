@@ -87,32 +87,30 @@
 	.bar {
 		display: flex;
 		align-items: center;
-		gap: 1.1rem;
+		gap: 1.3rem;
 		height: 3rem;
 		padding: 0 0.9rem;
-		border-bottom: 1px solid var(--line);
-		background: var(--panel-solid);
-		font-size: 0.74rem;
+		font-size: 0.8rem;
 		white-space: nowrap;
 	}
 
 	.month {
 		display: flex;
-		flex-direction: column;
-		line-height: 1.15;
+		align-items: baseline;
+		gap: 0.55rem;
 	}
 
 	.month strong {
-		font-size: 0.95rem;
-		letter-spacing: 0.01em;
+		font-family: var(--font-display);
+		font-size: 1.45rem;
+		font-weight: 400;
+		line-height: 1;
 	}
 
 	.month span,
 	.caption {
 		color: var(--muted);
-		font-size: 0.6rem;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
+		font-size: 0.78rem;
 	}
 
 	.spacer {
@@ -127,11 +125,12 @@
 	}
 
 	.stat {
-		gap: 0.4rem;
+		gap: 0.45rem;
 	}
 
 	.stat strong {
-		font-size: 0.95rem;
+		font-size: 1.05rem;
+		font-weight: 600;
 	}
 
 	.stat span:not(.caption) {
@@ -147,58 +146,63 @@
 	}
 
 	.caption {
-		margin-right: 0.25rem;
+		margin-right: 0.3rem;
 	}
 
 	.pip {
 		display: grid;
 		place-items: center;
-		width: 1.05rem;
-		height: 1.05rem;
-		border: 1px solid var(--line);
+		width: 1.1rem;
+		height: 1.1rem;
+		border: 1px solid var(--line-strong);
 		border-radius: 50%;
 		color: var(--muted);
-		font-size: 0.6rem;
-		font-weight: 700;
-		transition: all 300ms ease;
+		font-size: 0.68rem;
+		font-weight: 600;
+		transition:
+			background 300ms ease,
+			color 300ms ease,
+			transform 300ms cubic-bezier(0.3, 1.6, 0.5, 1);
 	}
 
 	.pip.past {
-		opacity: 0.45;
+		opacity: 0.35;
 	}
 
 	.pip.on {
 		border-color: var(--warn);
 		background: var(--warn);
-		color: #1a1300;
+		color: var(--paper-ink);
 		transform: scale(1.15);
 	}
 
+	/* Incidents are kept as a tally: a filled box for each one, the last box ruled in red. */
 	.incidents .pip {
-		width: 0.7rem;
-		height: 0.7rem;
-		border-radius: 0.15rem;
+		width: 0.62rem;
+		height: 0.8rem;
+		border-radius: 1px;
 	}
 
 	.incidents .pip.on {
-		border-color: #7be02a;
-		background: #7be02a;
+		border-color: var(--danger);
+		background: var(--danger);
 		transform: none;
 	}
 
 	.incidents .pip.last {
 		border-color: var(--danger);
+		border-width: 1.5px;
 	}
 
 	.right {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: 0.45rem;
 		margin-left: auto;
 	}
 
 	.link {
-		color: var(--accent);
+		color: var(--good);
 	}
 
 	.link.down {
@@ -206,16 +210,17 @@
 	}
 
 	button {
-		padding: 0.25rem 0.6rem;
+		padding: 0.25rem 0.7rem;
 		border: 1px solid var(--line);
-		border-radius: 0.35rem;
+		border-radius: 2px;
 		background: transparent;
 		color: var(--ink);
 		font: inherit;
 		cursor: pointer;
+		transition: border-color 150ms ease;
 	}
 
 	button:hover {
-		border-color: var(--accent);
+		border-color: var(--line-strong);
 	}
 </style>

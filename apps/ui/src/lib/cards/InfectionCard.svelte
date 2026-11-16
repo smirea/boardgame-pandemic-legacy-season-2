@@ -10,7 +10,7 @@
 	let { card, onclick, note }: Props = $props();
 
 	const city = $derived(card.kind === 'city' ? cityDef(card.city) : null);
-	const accent = $derived(city ? CITY_COLOR[city.color ?? 'haven'] : '#b48cff');
+	const accent = $derived(city ? CITY_COLOR[city.color ?? 'haven'] : '#8f74ad');
 	const improvement = $derived(
 		card.kind === 'city' ? pack.infectionImprovements.find(item => item.id === card.improvement) : undefined,
 	);
@@ -36,21 +36,24 @@
 </button>
 
 <style>
+	/* Infection cards are the dark half of the table: a night chart with the city's region colour as its pin. */
 	.card {
+		--tint: color-mix(in srgb, var(--accent) 70%, #e7dcc6);
 		position: relative;
 		display: block;
 		width: 11em;
 		height: 7.2em;
 		flex: none;
 		padding: 0;
-		border: 0.12em solid var(--accent);
-		border-radius: 0.55em;
-		background: #0b1512;
-		color: #f1ede2;
+		border: 1px solid color-mix(in srgb, var(--accent) 60%, #1d1914);
+		border-radius: 0.4em;
+		background: #1d1914;
+		color: #ece2cd;
+		font-family: var(--font-ui);
 		font-size: var(--card-size, 0.72rem);
 		text-align: left;
 		overflow: hidden;
-		box-shadow: 0 0.3em 0.9em rgb(0 0 0 / 0.45);
+		box-shadow: 0 0.3em 0.9em rgb(0 0 0 / 0.5);
 	}
 
 	.card:not(:disabled) {
@@ -68,34 +71,32 @@
 		inset: auto 0 0 0;
 		display: flex;
 		flex-direction: column;
-		padding: 0.9em 0.6em 0.4em;
-		background: linear-gradient(to top, rgb(5 9 8 / 0.95) 55%, transparent);
+		padding: 1em 0.6em 0.4em;
+		background: linear-gradient(to top, rgb(22 19 15 / 0.96) 55%, transparent);
 	}
 
 	.hollow {
 		inset: 0;
 		justify-content: center;
 		gap: 0.2em;
-		background: repeating-linear-gradient(135deg, #1a1326 0 0.6em, #221833 0.6em 1.2em);
+		background: repeating-linear-gradient(135deg, #1f1a24 0 0.5em, #261f2d 0.5em 1em);
 	}
 
 	.kicker {
-		color: var(--accent);
-		font-size: 0.6em;
-		font-weight: 700;
-		letter-spacing: 0.14em;
-		text-transform: uppercase;
+		color: var(--tint);
+		font-size: 0.66em;
+		font-weight: 600;
 	}
 
 	.title {
-		font-size: 1.05em;
-		font-weight: 700;
-		line-height: 1.1;
+		font-family: var(--font-display);
+		font-size: 1.2em;
+		line-height: 1.05;
 	}
 
 	.meta {
-		color: rgb(255 255 255 / 0.55);
-		font-size: 0.58em;
+		color: rgb(236 226 205 / 0.55);
+		font-size: 0.62em;
 		line-height: 1.3;
 	}
 
@@ -104,20 +105,20 @@
 		position: absolute;
 		top: 0.4em;
 		padding: 0.05em 0.45em;
-		border-radius: 0.3em;
-		font-size: 0.6em;
-		font-weight: 700;
+		border-radius: 0.15em;
+		font-size: 0.64em;
+		font-weight: 600;
 	}
 
 	.badge {
 		left: 0.4em;
 		background: var(--accent);
-		color: #0b1512;
+		color: #f1e9d6;
 	}
 
 	.note {
 		right: 0.4em;
-		background: rgb(5 9 8 / 0.85);
-		color: #f1ede2;
+		background: #e7dcc6;
+		color: #2a2017;
 	}
 </style>

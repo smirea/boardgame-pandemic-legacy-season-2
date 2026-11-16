@@ -45,24 +45,24 @@
 		<T.ConeGeometry args={[0.46, 1.2, 20]} />
 		<T.MeshStandardMaterial
 			color={pawn.color}
-			roughness={0.35}
+			roughness={0.55}
 			emissive={pawn.color}
-			emissiveIntensity={pawn.active ? 0.55 : 0.05}
+			emissiveIntensity={pawn.active ? 0.35 : 0}
 		/>
 	</T.Mesh>
 	<T.Mesh position.y={1.36} castShadow>
 		<T.SphereGeometry args={[0.33, 20, 16]} />
 		<T.MeshStandardMaterial
 			color={pawn.color}
-			roughness={0.35}
+			roughness={0.55}
 			emissive={pawn.color}
-			emissiveIntensity={pawn.active ? 0.55 : 0.05}
+			emissiveIntensity={pawn.active ? 0.35 : 0}
 		/>
 	</T.Mesh>
 	{#if pawn.active}
 		<T.Mesh position.y={0.04} rotation.x={-Math.PI / 2}>
 			<T.RingGeometry args={[0.62, 0.78, 32]} />
-			<T.MeshBasicMaterial color={pawn.color} transparent opacity={0.85} />
+			<T.MeshBasicMaterial color="#2a2017" transparent opacity={0.8} />
 		</T.Mesh>
 	{/if}
 </T.Group>

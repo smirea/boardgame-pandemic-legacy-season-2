@@ -43,42 +43,57 @@
 </section>
 
 <style>
+	/* Objectives hang over the top of the chart as paper tags. A finished one gets stamped. */
 	.objectives {
 		display: flex;
-		align-items: center;
-		gap: 0.4rem;
-		padding: 0.3rem 0.45rem;
-		border: 1px solid var(--line);
-		border-radius: 999px;
-		background: var(--panel);
-		backdrop-filter: blur(8px);
-		font-size: 0.72rem;
+		align-items: flex-start;
+		gap: 0.5rem;
+		font-size: 0.8rem;
 		white-space: nowrap;
 	}
 
 	.need {
-		padding: 0.15rem 0.55rem;
-		border-radius: 999px;
-		background: var(--accent);
-		color: #06120c;
+		padding: 0.2rem 0.5rem;
+		border-radius: 2px;
+		background: var(--slip-ink);
+		color: var(--slip);
 		font-weight: 700;
+		box-shadow: var(--slip-shadow);
 	}
 
 	.objective {
+		position: relative;
 		display: inline-flex;
 		align-items: center;
 		gap: 0.45rem;
-		padding: 0.15rem 0.6rem;
-		border: 1px solid transparent;
-		border-radius: 999px;
-		background: rgb(255 255 255 / 0.05);
-		color: var(--ink);
+		padding: 0.2rem 0.65rem 0.2rem 1rem;
+		border: 0;
+		background: var(--slip);
+		color: var(--slip-ink);
 		font: inherit;
+		box-shadow: var(--slip-shadow);
+		clip-path: polygon(0.55rem 0, 100% 0, 100% 100%, 0.55rem 100%, 0 50%);
 		cursor: pointer;
 		transition:
-			border-color 200ms ease,
+			translate 300ms cubic-bezier(0.2, 0.9, 0.3, 1.3),
 			background 400ms ease,
 			color 400ms ease;
+	}
+
+	.objective::before {
+		content: '';
+		position: absolute;
+		left: 0.45rem;
+		top: 50%;
+		width: 0.28rem;
+		height: 0.28rem;
+		border-radius: 50%;
+		background: var(--table);
+		translate: 0 -50%;
+	}
+
+	.objective:hover:not(:disabled) {
+		translate: 0 2px;
 	}
 
 	.objective:disabled {
@@ -86,17 +101,23 @@
 	}
 
 	.objective.mandatory {
-		border-color: rgb(255 209 102 / 0.55);
+		background: #f0dfb4;
 	}
 
 	.objective.done {
-		border-color: var(--accent);
-		background: rgb(125 252 192 / 0.14);
-		color: var(--accent);
+		background: #c9dccd;
+		color: var(--ink-good);
+		animation: stamped 500ms cubic-bezier(0.2, 1.4, 0.4, 1);
+	}
+
+	@keyframes stamped {
+		from {
+			scale: 1.25;
+		}
 	}
 
 	.objective.waived {
-		opacity: 0.4;
+		opacity: 0.45;
 		text-decoration: line-through;
 	}
 

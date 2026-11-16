@@ -4,14 +4,15 @@
 	import { T, useThrelte } from '@threlte/core';
 	import { interactivity, OrbitControls } from '@threlte/extras';
 	import { untrack } from 'svelte';
-	import { MOUSE } from 'three';
+	import { CanvasTexture, MOUSE, SRGBColorSpace } from 'three';
 	import type { PerspectiveCamera } from 'three';
 	import type { OrbitControls as OrbitControlsImpl } from 'three/examples/jsm/controls/OrbitControls.js';
 	import CityMarker from './CityMarker.svelte';
-	import Cloud from './Cloud.svelte';
+	import { drawChart } from './chart';
 	import { fitBoard } from './fit';
+	import Fog from './Fog.svelte';
 	import { layoutLabels } from './labels';
-	import { buildLandGeometry } from './land';
+	import { buildLandGeometry, mapToSheet } from './land';
 	import Pawn from './Pawn.svelte';
 	import type { BoardBounds, BoardPoint } from './projection';
 	import Pulse from './Pulse.svelte';
@@ -34,7 +35,7 @@
 	interactivity();
 
 	const FOV = 30;
-	const { size } = useThrelte();
+	const { size, renderer } = useThrelte();
 	const layout = pack.positions;
 	const landGeometry = buildLandGeometry();
 	const bounds: BoardBounds = (() => {
@@ -50,6 +51,16 @@
 	})();
 	const boardSize = { width: bounds.maxX - bounds.minX, depth: bounds.maxZ - bounds.minZ };
 	const boardCentre = { x: (bounds.minX + bounds.maxX) / 2, z: (bounds.minZ + bounds.maxZ) / 2 };
+	mapToSheet(landGeometry, bounds);
+	const chart = drawChart(bounds);
+	const texture = (canvas: HTMLCanvasElement) => {
+		const map = new CanvasTexture(canvas);
+		map.colorSpace = SRGBColorSpace;
+		map.anisotropy = renderer.capabilities.getMaxAnisotropy();
+		return map;
+	};
+	const knownSheet = texture(chart.known);
+	const unknownSheet = texture(chart.unknown);
 
 	let camera = $state<PerspectiveCamera>();
 	let controls = $state<OrbitControlsImpl>();
@@ -74,7 +85,6 @@
 	const initialEdges = new Set(untrack(() => view.edges.map(routeKey)));
 
 	const visibleCities = $derived(pack.cities.filter(city => view.cities[city.id]!.revealed));
-	const cloudCities = pack.cities.filter(city => !city.lost);
 	// Board units covered by one screen pixel at the whole-board view, the zoom at which labels are most crowded.
 	const unitsPerPixel = $derived((2 * fit.distance * Math.tan((FOV * Math.PI) / 360)) / Math.max(1, $size.height));
 	const anchors = $derived(
@@ -121,10 +131,11 @@
 	/>
 </T.PerspectiveCamera>
 
-<T.HemisphereLight args={['#dfeaf5', '#1c2630', 1.1]} />
+<T.HemisphereLight args={['#fff4dc', '#3a2e20', 2.6]} />
 <T.DirectionalLight
 	position={[-60, 120, 50]}
-	intensity={2.2}
+	color="#fff1d6"
+	intensity={2.9}
 	castShadow
 	shadow.mapSize={[4096, 4096]}
 	shadow.camera.left={-120}
@@ -135,11 +146,6 @@
 	shadow.bias={-0.0004}
 />
 
-<T.Mesh position={[boardCentre.x, -1.6, boardCentre.z]} receiveShadow>
-	<T.BoxGeometry args={[boardSize.width + 3, 3, boardSize.depth + 3]} />
-	<T.MeshStandardMaterial color="#141a20" roughness={0.9} />
-</T.Mesh>
-
 <T.Mesh
 	rotation.x={-Math.PI / 2}
 	position={[boardCentre.x, 0, boardCentre.z]}
@@ -147,12 +153,14 @@
 	onpointermove={event => onpointer?.({ x: event.point.x, z: event.point.z })}
 >
 	<T.PlaneGeometry args={[boardSize.width, boardSize.depth]} />
-	<T.MeshStandardMaterial color="#143a52" roughness={0.35} metalness={0.15} />
+	<T.MeshStandardMaterial map={knownSheet} alphaTest={0.5} roughness={0.92} />
 </T.Mesh>
 
 <T.Mesh geometry={landGeometry} receiveShadow castShadow>
-	<T.MeshStandardMaterial color="#b3ab8c" roughness={0.95} flatShading />
+	<T.MeshStandardMaterial map={knownSheet} roughness={0.92} />
 </T.Mesh>
+
+<Fog {bounds} sheet={unknownSheet} hidden={city => !view.cities[city]!.revealed} />
 
 {#each view.ghostEdges as route (`ghost:${routeKey(route)}`)}
 	<RouteTube {route} from={layout[route.a]!} to={layout[route.b]!} ghost />
@@ -170,10 +178,6 @@
 		anchor={anchors.get(city.id) ?? 'n'}
 		onselect={() => oncity?.(city.id)}
 	/>
-{/each}
-
-{#each cloudCities as city, index (city.id)}
-	<Cloud at={layout[city.id]!} seed={index} hidden={!view.cities[city.id]!.revealed} />
 {/each}
 
 {#each pawnSlots as { pawn, slot, at } (pawn.id)}

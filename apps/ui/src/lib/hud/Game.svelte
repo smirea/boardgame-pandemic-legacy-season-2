@@ -530,7 +530,7 @@
 
 		{#if banner}
 			{#key banner.id}
-				<div class="banner" in:fly={{ x: -400, duration: 450 }} out:fly={{ x: 400, duration: 450 }}>
+				<div class="banner" out:fade={{ duration: 450 }}>
 					<strong>{banner.title}</strong>
 					<span>{banner.text}</span>
 				</div>
@@ -633,23 +633,15 @@
 
 <style>
 	.game {
-		--ink: #e9e6dc;
-		--muted: #8a9aa8;
-		--accent: #7dfcc0;
-		--warn: #ffd166;
-		--danger: #ff6b6b;
-		--line: rgb(255 255 255 / 0.1);
-		--panel: rgb(14 20 27 / 0.82);
-		--panel-solid: #0e141b;
 		position: fixed;
 		/* A page that hosts the game beside something else, such as the replay viewer, sets the inset. */
 		inset: var(--game-inset, 0);
 		display: grid;
 		grid-template-rows: auto minmax(0, 1fr) auto;
 		grid-template-columns: minmax(0, 1fr);
-		background: #070b0f;
+		background: var(--table);
 		color: var(--ink);
-		font-family: 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
+		font-family: var(--font-ui);
 		font-variant-numeric: tabular-nums;
 		overflow: hidden;
 	}
@@ -701,10 +693,10 @@
 		gap: 0.9rem;
 		padding: 0.35rem 0.8rem;
 		border: 1px solid var(--line);
-		border-radius: 999px;
+		border-radius: 3px;
 		background: var(--panel);
 		backdrop-filter: blur(8px);
-		font-size: 0.74rem;
+		font-size: 0.8rem;
 		transform: translateX(-50%);
 		white-space: nowrap;
 	}
@@ -713,18 +705,24 @@
 		bottom: 0.7rem;
 	}
 
+	.cityinfo strong {
+		font-family: var(--font-display);
+		font-size: 1rem;
+		font-weight: 400;
+	}
+
 	.cityinfo span {
 		color: var(--muted);
 	}
 
 	.cityinfo .bad {
-		color: #c79bff;
+		color: var(--hollow);
 	}
 
 	.targeting {
 		top: 3.2rem;
-		border-color: var(--accent);
-		color: var(--accent);
+		border-color: var(--warn);
+		color: var(--warn);
 	}
 
 	.cityinfo button,
@@ -735,6 +733,12 @@
 		color: var(--muted);
 		font: inherit;
 		cursor: pointer;
+	}
+
+	.cityinfo button:hover,
+	.targeting button:hover,
+	.chooser header button:hover {
+		color: var(--ink);
 	}
 
 	.chooser {
@@ -748,45 +752,45 @@
 		width: 22rem;
 		max-height: min(72%, 28rem);
 		padding: 0.6rem;
-		border: 1px solid var(--line);
-		border-radius: 0.7rem;
+		border: 1px solid var(--line-strong);
+		border-radius: 3px;
 		background: var(--panel);
 		backdrop-filter: blur(12px);
-		box-shadow: 0 1rem 3rem rgb(0 0 0 / 0.5);
+		box-shadow: 0 1rem 3rem rgb(0 0 0 / 0.55);
 		transform: translateX(-50%);
 	}
 
 	.chooser header {
 		display: flex;
 		justify-content: space-between;
-		color: var(--muted);
-		font-size: 0.65rem;
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
+		padding: 0 0.15rem;
+		font-family: var(--font-display);
+		font-size: 1rem;
 	}
 
 	.chooser input {
 		padding: 0.35rem 0.55rem;
 		border: 1px solid var(--line);
-		border-radius: 0.4rem;
-		background: rgb(255 255 255 / 0.05);
+		border-radius: 2px;
+		background: var(--wash);
 		color: var(--ink);
 		font: inherit;
-		font-size: 0.78rem;
+		font-size: 0.82rem;
 	}
 
 	.rows {
 		display: flex;
 		flex-direction: column;
-		gap: 0.25rem;
+		gap: 0.2rem;
 		min-height: 0;
 		overflow: auto;
+		scrollbar-width: thin;
 	}
 
 	.rows p {
 		margin: 0;
 		color: var(--muted);
-		font-size: 0.75rem;
+		font-size: 0.8rem;
 	}
 
 	.rows button {
@@ -796,28 +800,31 @@
 		gap: 0.6rem;
 		padding: 0.35rem 0.6rem;
 		border: 1px solid var(--line);
-		border-radius: 0.4rem;
-		background: rgb(255 255 255 / 0.04);
+		border-radius: 2px;
+		background: var(--wash);
 		color: var(--ink);
 		font: inherit;
-		font-size: 0.8rem;
+		font-size: 0.85rem;
 		text-align: left;
 		cursor: pointer;
+		transition:
+			border-color 150ms ease,
+			background 150ms ease;
 	}
 
-	.rows button:hover,
-	.rows button.picked {
-		border-color: var(--accent);
+	.rows button:hover {
+		border-color: var(--line-strong);
 	}
 
 	.rows button.picked {
-		background: rgb(125 252 192 / 0.12);
+		border-color: var(--paper);
+		background: rgb(220 207 178 / 0.12);
 	}
 
 	.rows span {
 		margin-left: auto;
 		color: var(--muted);
-		font-size: 0.7rem;
+		font-size: 0.75rem;
 		text-align: right;
 	}
 
@@ -836,15 +843,15 @@
 
 	.toasts div {
 		padding: 0.3rem 0.8rem;
-		border-radius: 999px;
-		background: var(--panel-solid);
 		border: 1px solid var(--line);
-		font-size: 0.76rem;
+		border-radius: 2px;
+		background: var(--panel-solid);
+		font-size: 0.82rem;
 	}
 
 	.toasts .good {
-		border-color: var(--accent);
-		color: var(--accent);
+		border-color: var(--good);
+		color: var(--good);
 	}
 
 	.toasts .bad {
@@ -852,32 +859,50 @@
 		color: var(--danger);
 	}
 
+	/* The epidemic lands like a quarantine stamp across the chart: it overshoots, settles, and bleeds. */
 	.banner {
 		position: absolute;
-		top: 34%;
-		left: 0;
-		right: 0;
+		top: 30%;
+		left: 50%;
 		z-index: 45;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 0.2rem;
-		padding: 1.1rem 0;
-		background: linear-gradient(
-			90deg,
-			transparent,
-			rgb(255 59 107 / 0.85) 25%,
-			rgb(255 59 107 / 0.85) 75%,
-			transparent
-		);
-		color: white;
+		gap: 0.15rem;
+		padding: 0.7rem 2.6rem 0.8rem;
+		border: 3px double rgb(176 48 28 / 0.9);
+		background: rgb(28 12 8 / 0.82);
+		color: #e46a4c;
+		translate: -50% 0;
+		rotate: -3deg;
 		pointer-events: none;
+		animation: stamp 520ms cubic-bezier(0.2, 1.4, 0.4, 1) both;
 	}
 
 	.banner strong {
-		font-size: 2.2rem;
-		letter-spacing: 0.3em;
-		text-transform: uppercase;
+		font-family: var(--font-display);
+		font-size: 3rem;
+		font-weight: 400;
+		line-height: 1;
+		letter-spacing: 0.04em;
+	}
+
+	.banner span {
+		color: var(--ink);
+		font-size: 0.9rem;
+	}
+
+	@keyframes stamp {
+		from {
+			opacity: 0;
+			scale: 1.7;
+		}
+		60% {
+			opacity: 1;
+		}
+		to {
+			scale: 1;
+		}
 	}
 
 	.turn-banner {
@@ -887,20 +912,21 @@
 		z-index: 44;
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
-		padding: 0.35rem 1rem;
-		border: 1px solid var(--seat);
-		border-radius: 999px;
+		gap: 0.55rem;
+		padding: 0.3rem 1.1rem 0.35rem;
+		border: 1px solid var(--line-strong);
+		border-bottom: 2px solid var(--seat);
+		border-radius: 2px;
 		background: var(--panel-solid);
-		font-size: 0.95rem;
-		font-weight: 650;
+		font-family: var(--font-display);
+		font-size: 1.15rem;
 		transform: translateX(-50%);
 		pointer-events: none;
 	}
 
 	.turn-banner i {
-		width: 0.6rem;
-		height: 0.6rem;
+		width: 0.55rem;
+		height: 0.55rem;
 		border-radius: 50%;
 		background: var(--seat);
 	}
@@ -909,7 +935,7 @@
 		position: absolute;
 		inset: 0;
 		z-index: 43;
-		box-shadow: inset 0 0 9rem 2rem rgb(255 59 107 / 0.55);
+		box-shadow: inset 0 0 10rem 2rem rgb(140 28 18 / 0.6);
 		animation: flash 1.6s ease-out forwards;
 		pointer-events: none;
 	}
@@ -928,17 +954,17 @@
 
 	.outcome {
 		position: absolute;
-		top: 30%;
+		top: 28%;
 		left: 50%;
 		z-index: 46;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 0.3rem;
-		padding: 1.4rem 3.5rem;
+		gap: 0.4rem;
+		padding: 1.3rem 3.5rem 1.5rem;
 		border: 1px solid var(--danger);
-		border-radius: 1rem;
-		background: rgb(10 14 19 / 0.88);
+		border-radius: 2px;
+		background: rgb(20 18 14 / 0.9);
 		backdrop-filter: blur(10px);
 		color: var(--danger);
 		translate: -50% 0;
@@ -946,19 +972,20 @@
 	}
 
 	.outcome.won {
-		border-color: var(--accent);
-		color: var(--accent);
+		border-color: var(--good);
+		color: var(--good);
 	}
 
 	.outcome strong {
-		font-size: 3.2rem;
-		letter-spacing: 0.18em;
-		text-transform: uppercase;
+		font-family: var(--font-display);
+		font-size: 3.6rem;
+		font-weight: 400;
+		line-height: 1;
 	}
 
 	.outcome span {
 		color: var(--ink);
-		font-size: 0.95rem;
+		font-size: 1rem;
 	}
 
 	.scrim {
@@ -968,40 +995,53 @@
 		display: grid;
 		place-items: center;
 		padding: 1rem;
-		background: rgb(4 7 10 / 0.55);
+		background: rgb(12 10 8 / 0.62);
 	}
 
 	.briefing {
 		width: min(34rem, 90vw);
-		padding: 1.3rem 1.5rem;
-		border: 1px solid var(--line);
-		border-radius: 0.9rem;
-		background: var(--panel);
-		backdrop-filter: blur(14px);
+		padding: 1.4rem 1.6rem 1.3rem;
+		border-radius: 2px;
+		background: var(--paper);
+		color: var(--paper-ink);
+		box-shadow:
+			0 1.5rem 4rem rgb(0 0 0 / 0.6),
+			inset 0 0 3rem rgb(120 86 48 / 0.18);
 	}
 
 	.briefing h2 {
-		margin: 0 0 0.6rem;
-		font-size: 1.2rem;
+		margin: 0 0 0.7rem;
+		font-family: var(--font-display);
+		font-size: 1.7rem;
+		font-weight: 400;
 	}
 
 	.briefing ul {
-		margin: 0 0 1rem;
+		margin: 0 0 1.1rem;
 		padding-left: 1.1rem;
-		color: var(--ink);
-		font-size: 0.85rem;
+		font-size: 0.95rem;
 		line-height: 1.5;
 	}
 
+	.briefing li::marker {
+		color: var(--paper-muted);
+	}
+
 	.primary {
-		padding: 0.45rem 1rem;
-		border: 1px solid var(--accent);
-		border-radius: 0.4rem;
-		background: var(--accent);
-		color: #06120c;
+		padding: 0.45rem 1.1rem;
+		border: 1px solid var(--paper);
+		border-radius: 2px;
+		background: var(--paper);
+		color: var(--paper-ink);
 		font: inherit;
 		font-weight: 700;
 		cursor: pointer;
+	}
+
+	.briefing .primary {
+		border-color: var(--paper-ink);
+		background: var(--paper-ink);
+		color: var(--paper);
 	}
 
 	.menu {
@@ -1011,25 +1051,32 @@
 		z-index: 70;
 		display: flex;
 		flex-direction: column;
-		gap: 0.3rem;
-		padding: 0.6rem;
-		border: 1px solid var(--line);
-		border-radius: 0.6rem;
+		gap: 0.25rem;
+		padding: 0.5rem;
+		border: 1px solid var(--line-strong);
+		border-radius: 3px;
 		background: var(--panel-solid);
-		font-size: 0.8rem;
+		box-shadow: 0 1rem 2.5rem rgb(0 0 0 / 0.5);
+		font-size: 0.85rem;
 	}
 
 	.menu button,
 	.menu a {
 		padding: 0.35rem 0.7rem;
-		border: 1px solid var(--line);
-		border-radius: 0.35rem;
+		border: 1px solid transparent;
+		border-radius: 2px;
 		background: none;
 		color: var(--ink);
 		font: inherit;
 		text-align: left;
 		text-decoration: none;
 		cursor: pointer;
+	}
+
+	.menu button:hover,
+	.menu a:hover {
+		border-color: var(--line);
+		background: var(--wash);
 	}
 
 	.menu .danger {

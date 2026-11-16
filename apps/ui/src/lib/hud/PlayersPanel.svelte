@@ -27,6 +27,7 @@
 			class:active={game.active === seat}
 			class:viewing={viewing === seat}
 			style:--seat={SEAT_COLORS[index]}
+			style:--tilt={`${[-0.6, 0.45, -0.3, 0.55][index] ?? 0}deg`}
 		>
 			<button class="main" onclick={() => onview(seat)} title="Show this hand">
 				<span class="pawn"></span>
@@ -60,7 +61,7 @@
 						class="claim"
 						class:on={mine.includes(seat)}
 						onclick={() => onclaim(seat)}
-						title="Mark this seat as yours">{mine.includes(seat) ? 'me' : `play ${character.name}`}</button
+						title="Mark this seat as yours">{mine.includes(seat) ? 'you' : `play ${character.name}`}</button
 					>
 				{/if}
 			</div>
@@ -86,27 +87,33 @@
 </section>
 
 <style>
+	/* Each character is a slip of card laid on the chart. Whoever's turn it is gets pulled out of the stack. */
 	.players {
 		display: flex;
 		flex-direction: column;
-		gap: 0.4rem;
+		gap: 0.45rem;
 	}
 
 	.player {
-		padding: 0.45rem 0.55rem;
-		border: 1px solid var(--line);
+		padding: 0.45rem 0.6rem 0.5rem;
 		border-left: 3px solid var(--seat);
-		border-radius: 0.5rem;
-		background: var(--panel);
-		backdrop-filter: blur(8px);
+		border-radius: 2px;
+		background: var(--slip);
+		color: var(--slip-ink);
+		box-shadow: var(--slip-shadow);
+		rotate: var(--tilt);
 		transition:
-			box-shadow 250ms ease,
-			transform 250ms ease;
+			translate 300ms cubic-bezier(0.2, 0.9, 0.3, 1.2),
+			rotate 300ms ease,
+			box-shadow 300ms ease;
 	}
 
 	.player.active {
-		box-shadow: 0 0 0 1px var(--seat);
-		transform: translateX(0.25rem);
+		translate: 0.4rem 0;
+		rotate: 0deg;
+		box-shadow:
+			0 1px 1px rgb(40 26 12 / 0.35),
+			0 0.9rem 1.8rem rgb(20 12 4 / 0.45);
 	}
 
 	.main {
@@ -117,36 +124,49 @@
 		padding: 0;
 		border: 0;
 		background: none;
-		color: var(--ink);
+		color: inherit;
 		font: inherit;
 		text-align: left;
 		cursor: pointer;
 	}
 
 	.pawn {
-		width: 0.7rem;
-		height: 0.7rem;
+		width: 0.6rem;
+		height: 0.6rem;
 		flex: none;
+		border: 1px solid rgb(42 32 23 / 0.6);
 		border-radius: 50%;
 		background: var(--seat);
+	}
+
+	.player.active .pawn {
+		animation: beat 1.8s ease-in-out infinite;
+	}
+
+	@keyframes beat {
+		50% {
+			box-shadow: 0 0 0 3px color-mix(in srgb, var(--seat) 35%, transparent);
+		}
 	}
 
 	.who {
 		display: flex;
 		flex-direction: column;
 		min-width: 0;
-		line-height: 1.15;
+		line-height: 1.1;
 	}
 
 	.who strong {
-		font-size: 0.8rem;
+		font-family: var(--font-display);
+		font-size: 1.05rem;
+		font-weight: 400;
 		overflow: hidden;
 		text-overflow: ellipsis;
 	}
 
 	.who small {
-		color: var(--muted);
-		font-size: 0.62rem;
+		color: var(--slip-muted);
+		font-size: 0.72rem;
 	}
 
 	.who small.covered {
@@ -158,8 +178,10 @@
 		max-width: 5.5rem;
 		overflow: hidden;
 		text-overflow: ellipsis;
-		color: var(--muted);
-		font-size: 0.68rem;
+		color: var(--slip-muted);
+		font-family: var(--font-display);
+		font-size: 0.85rem;
+		font-style: italic;
 		white-space: nowrap;
 	}
 
@@ -168,12 +190,13 @@
 		align-items: center;
 		gap: 0.6rem;
 		margin-top: 0.3rem;
-		color: var(--muted);
-		font-size: 0.68rem;
+		color: var(--slip-muted);
+		font-size: 0.74rem;
 	}
 
 	.over {
-		color: var(--danger);
+		color: var(--ink-danger);
+		font-weight: 600;
 	}
 
 	.exposure {
@@ -184,57 +207,58 @@
 	.exposure i {
 		width: 0.5rem;
 		height: 0.5rem;
-		border: 1px solid var(--muted);
+		border: 1px solid var(--slip-muted);
 		border-radius: 1px;
 	}
 
 	.exposure i.scratched {
-		background: var(--muted);
+		background: var(--slip-muted);
 	}
 
 	.exposure i.scar {
-		border-color: var(--warn);
-		background: var(--warn);
+		border-color: var(--ink-warn);
+		background: var(--ink-warn);
 	}
 
 	.exposure i.skull {
-		border-color: var(--danger);
-		background: var(--danger);
+		border-color: var(--ink-danger);
+		background: var(--ink-danger);
 	}
 
 	.claim {
 		margin-left: auto;
 		padding: 0 0.4rem;
-		border: 1px solid var(--line);
-		border-radius: 999px;
+		border: 1px solid var(--slip-line);
+		border-radius: 2px;
 		background: none;
-		color: var(--muted);
+		color: var(--slip-muted);
 		font: inherit;
 		cursor: pointer;
 	}
 
 	.claim.on {
-		border-color: var(--accent);
-		color: var(--accent);
+		border-color: var(--slip-ink);
+		background: var(--slip-ink);
+		color: var(--slip);
 	}
 
 	.traits {
 		display: flex;
 		flex-wrap: wrap;
 		gap: 0.25rem;
-		margin-top: 0.3rem;
-		font-size: 0.6rem;
+		margin-top: 0.35rem;
+		font-size: 0.68rem;
 	}
 
 	.traits span {
 		padding: 0 0.35rem;
-		border-radius: 0.25rem;
-		background: rgb(125 252 192 / 0.14);
-		color: var(--accent);
+		border: 1px solid rgb(61 107 85 / 0.45);
+		border-radius: 2px;
+		color: var(--ink-good);
 	}
 
 	.traits .scar {
-		background: rgb(255 107 107 / 0.16);
-		color: var(--danger);
+		border-color: rgb(163 48 28 / 0.4);
+		color: var(--ink-danger);
 	}
 </style>

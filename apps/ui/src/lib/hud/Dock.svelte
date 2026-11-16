@@ -2,7 +2,8 @@
 	import { actionCost, checkAction, handLimit, pack } from '@repo/game';
 	import type { Action, CardId, Command, Decide, Play, PublicState, SeatId } from '@repo/game';
 	import { flip } from 'svelte/animate';
-	import { fly } from 'svelte/transition';
+	import { backOut, cubicIn } from 'svelte/easing';
+	import { fade, fly } from 'svelte/transition';
 	import {
 		ACTION_NAMES,
 		actionDetail,
@@ -15,7 +16,7 @@
 		cardName,
 	} from './labels.svelte.ts';
 	import InfectionCard from '#lib/cards/InfectionCard.svelte';
-	import PlayerCard from './PlayerCard.svelte';
+	import PlayerCard, { cardColor } from './PlayerCard.svelte';
 
 	type Props = {
 		snap: PublicState;
@@ -37,8 +38,17 @@
 	const world = $derived(snap.world);
 	const game = $derived(world.game!);
 	const pending = $derived(game.pending[0]);
-	const seat = $derived(viewing ?? game.active);
-	const handCards = $derived((game.players[seat]?.hand ?? []).flatMap(id => world.campaign.playerCards[id] ?? []));
+	// The hand held up in front of this player is their own. On a shared screen that is whoever's turn it is.
+	const home = $derived(owns(game.active) ? game.active : (game.seats.find(owns) ?? game.active));
+	const seat = $derived(viewing ?? home);
+	const cardsOf = (other: SeatId) =>
+		(game.players[other]?.hand ?? []).flatMap(id => world.campaign.playerCards[id] ?? []);
+	const handCards = $derived(cardsOf(seat));
+	const others = $derived(game.seats.filter(other => other !== seat));
+	const seatColor = (other: SeatId) => SEAT_COLORS[game.seats.indexOf(other)];
+	// The fan tightens as the hand grows so a full hand still fits between the seats and the prompts.
+	const overlap = $derived(Math.max(0.3, Math.min(2.9, (handCards.length - 3) * 0.55)));
+	const fanAngle = (index: number) => (index - (handCards.length - 1) / 2) * Math.min(4.5, 22 / handCards.length);
 	const mustDiscard = $derived(owns(seat) && decides.some(decide => decide.d === 'discard' && decide.seat === seat));
 	const playable = $derived(new Set(plays.filter(option => option.seat === seat).map(option => option.card)));
 	const FREE = new Set(['pickUp', 'transfer', 'inoculate', 'salvage', 'destroyInfection']);
@@ -146,7 +156,7 @@
 			<div>
 				{#if game.stockpile > 0}
 					<strong>{game.stockpile}</strong> supply cubes to place. Click a city to add one. The opening infection then flips
-					9 cards. The panel on the right shows where it is most likely to land.
+					9 cards. The list on the right shows where it is most likely to land.
 				{:else}
 					<strong>All cubes placed.</strong> The opening infection flips 9 cards next.
 				{/if}
@@ -190,32 +200,63 @@
 		</div>
 	{:else}
 		<div class="hands">
-			<nav>
-				{#each game.seats as other, index (other)}
+			<nav aria-label="Other hands">
+				{#each others as other (other)}
 					<button
-						class:on={other === seat}
 						class:current={other === game.active}
-						style:--seat={SEAT_COLORS[index]}
+						style:--seat={seatColor(other)}
 						onclick={() => onview(other)}
+						title={`Show ${seatName(world, other)}'s hand`}
+						animate:flip={{ duration: 300 }}
 					>
-						{seatName(world, other)}
-						<small>{game.players[other]!.hand.length}</small>
+						<span class="who">{seatName(world, other)}</span>
+						<span class="minis">
+							{#each cardsOf(other) as card (card.id)}
+								<i style:--band={cardColor(card)} title={cardName(world, card.id)} transition:fade={{ duration: 200 }}
+								></i>
+							{/each}
+						</span>
 					</button>
 				{/each}
 			</nav>
+		</div>
+
+		<div class="held" style:--seat={seatColor(seat)}>
+			<p class="holder">
+				<i></i>{seatName(world, seat)}
+				<small
+					>{seat === home && owns(seat) ? 'your hand' : owns(seat) ? 'also yours' : 'their hand'}, {handCards.length} of {handLimit(
+						world,
+						seat,
+					)}</small
+				>
+				{#if seat !== home}<button class="back" onclick={() => onview(home)}>Back to {seatName(world, home)}</button
+					>{/if}
+			</p>
 			{#key seat}
-				<div class="hand" data-testid="hand">
-					{#each handCards as card (card.id)}
-						<div animate:flip={{ duration: 300 }} in:fly={{ y: -60, duration: 350 }} out:fly={{ y: 50, duration: 220 }}>
-							<PlayerCard
-								{card}
-								tone={mustDiscard ? 'discard' : playable.has(card.id) ? 'play' : null}
-								onclick={mustDiscard
-									? () => send({ type: 'DECIDE', decide: { d: 'discard', seat, cards: [card.id] } })
-									: playable.has(card.id)
-										? () => onplaycard(seat, card.id)
-										: undefined}
-							/>
+				<div class="hand" data-testid="hand" style:--overlap={`${overlap}rem`} in:fade={{ duration: 220 }}>
+					{#each handCards as card, index (card.id)}
+						<div
+							class="slot"
+							animate:flip={{ duration: 320 }}
+							in:fly={{ x: 160, y: -220, duration: 520, easing: backOut }}
+							out:fly={{ y: -140, duration: 260, easing: cubicIn }}
+						>
+							<div
+								class="lift"
+								style:--angle={`${fanAngle(index)}deg`}
+								style:--drop={`${Math.abs(fanAngle(index)) * 0.06}rem`}
+							>
+								<PlayerCard
+									{card}
+									tone={mustDiscard ? 'discard' : playable.has(card.id) ? 'play' : null}
+									onclick={mustDiscard
+										? () => send({ type: 'DECIDE', decide: { d: 'discard', seat, cards: [card.id] } })
+										: playable.has(card.id)
+											? () => onplaycard(seat, card.id)
+											: undefined}
+								/>
+							</div>
 						</div>
 					{:else}
 						<p class="empty">No cards in hand.</p>
@@ -318,14 +359,15 @@
 </footer>
 
 <style>
+	/* No tray: the dock is the near edge of the table, with the held hand rising out of the bottom of the screen. */
 	.dock {
+		position: relative;
+		z-index: 35;
 		display: grid;
-		grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) auto;
-		gap: 1rem;
-		height: 10.6rem;
-		padding: 0.5rem 0.9rem 0.6rem;
-		border-top: 1px solid var(--line);
-		background: var(--panel-solid);
+		grid-template-columns: minmax(8rem, 12rem) minmax(0, 1.35fr) minmax(0, 1fr) 9rem;
+		gap: 1.1rem;
+		height: 9.6rem;
+		padding: 0 0.9rem;
 	}
 
 	.setup {
@@ -334,12 +376,14 @@
 		align-items: center;
 		justify-content: center;
 		gap: 1.2rem;
-		font-size: 0.9rem;
+		font-size: 0.95rem;
 	}
 
 	.setup strong {
-		color: var(--accent);
-		font-size: 1.2rem;
+		color: var(--paper);
+		font-family: var(--font-display);
+		font-size: 1.35rem;
+		font-weight: 400;
 	}
 
 	.setup .lost strong {
@@ -348,75 +392,175 @@
 
 	.events {
 		display: flex;
-		gap: 0.3rem;
+		gap: 0.35rem;
 		flex-wrap: wrap;
 		max-width: 40rem;
+	}
+
+	.events > span {
+		transition:
+			opacity 200ms ease,
+			transform 200ms ease;
+	}
+
+	.events > span:hover {
+		transform: translateY(-0.2rem);
+	}
+
+	.unpicked {
+		opacity: 0.5;
 	}
 
 	.hands {
 		display: flex;
 		flex-direction: column;
-		gap: 0.3rem;
+		justify-content: center;
 		min-width: 0;
 	}
 
 	nav {
 		display: flex;
-		gap: 0.3rem;
+		flex-direction: column;
+		gap: 0.35rem;
 	}
 
 	nav button {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.25rem;
-		height: 1.5rem;
-		padding: 0 0.55rem;
-		border: 1px solid var(--line);
-		border-bottom: 2px solid var(--seat);
-		border-radius: 0.35rem;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.2rem;
+		padding: 0.15rem 0 0.15rem 0.55rem;
+		border: 0;
+		border-left: 2px solid var(--seat);
 		background: none;
 		color: var(--muted);
 		font: inherit;
-		font-size: 0.7rem;
+		font-size: 0.8rem;
+		text-align: left;
 		cursor: pointer;
+		transition: color 150ms ease;
 	}
 
-	nav button.on {
-		background: rgb(255 255 255 / 0.08);
+	nav button:hover,
+	nav button.current {
 		color: var(--ink);
 	}
 
-	nav button.current::before {
-		content: '';
-		width: 0.4rem;
-		height: 0.4rem;
-		border-radius: 50%;
-		background: var(--seat);
+	nav button.current .who::after {
+		content: ' is playing';
+		color: var(--muted);
+		font-size: 0.72rem;
 	}
 
-	nav small {
-		margin-left: 0.25rem;
+	.who {
+		font-family: var(--font-display);
+		font-size: 0.98rem;
+	}
+
+	/* Someone else's hand is shown face up but small: a sliver of each card in its region's colour. */
+	.minis {
+		display: flex;
+		gap: 2px;
+		min-height: 0.95rem;
+	}
+
+	.minis i {
+		width: 0.62rem;
+		height: 0.95rem;
+		border-radius: 1px;
+		border-top: 3px solid var(--band);
+		background: #e6dcc5;
+		box-shadow: 0 1px 2px rgb(0 0 0 / 0.5);
+		transition: transform 200ms ease;
+	}
+
+	nav button:hover .minis i {
+		transform: translateY(-2px);
+	}
+
+	.held {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		min-width: 0;
+	}
+
+	.holder {
+		display: flex;
+		align-items: baseline;
+		gap: 0.45rem;
+		margin: 0.15rem 0 0;
+		font-family: var(--font-display);
+		font-size: 1.05rem;
+		white-space: nowrap;
+	}
+
+	.holder i {
+		width: 0.5rem;
+		height: 0.5rem;
+		border-radius: 50%;
+		background: var(--seat);
+		align-self: center;
+	}
+
+	.holder small {
 		color: var(--muted);
+		font-family: var(--font-ui);
+		font-size: 0.75rem;
+	}
+
+	.back {
+		padding: 0;
+		border: 0;
+		border-bottom: 1px solid var(--line-strong);
+		background: none;
+		color: var(--muted);
+		font: inherit;
+		font-family: var(--font-ui);
+		font-size: 0.75rem;
+		cursor: pointer;
+	}
+
+	.back:hover {
+		color: var(--ink);
 	}
 
 	.hand {
 		display: flex;
-		gap: 0.35rem;
+		justify-content: center;
 		min-width: 0;
-		padding-top: 0.5rem;
-		overflow: visible;
+		margin-top: 0.45rem;
+		padding-inline: var(--overlap);
 	}
 
-	.hand > div {
-		min-width: 2.6rem;
-		flex: 0 1 6.1rem;
+	.slot {
+		margin-inline: calc(var(--overlap) / -2);
+	}
+
+	.slot:hover {
+		z-index: 5;
+	}
+
+	.lift {
+		transform: translateY(var(--drop)) rotate(var(--angle));
+		transform-origin: 50% 140%;
+		transition: transform 260ms cubic-bezier(0.2, 0.9, 0.3, 1.2);
+	}
+
+	.slot:hover .lift {
+		transform: translateY(-1.6rem) rotate(0deg) scale(1.08);
 	}
 
 	.empty,
 	.prompt {
 		margin: 0;
 		color: var(--muted);
-		font-size: 0.8rem;
+		font-size: 0.85rem;
+	}
+
+	.empty {
+		padding-top: 2rem;
 	}
 
 	.middle {
@@ -429,12 +573,13 @@
 
 	.prompt {
 		color: var(--ink);
+		line-height: 1.35;
 	}
 
 	.waiting {
 		margin: 0;
 		color: var(--muted);
-		font-size: 0.78rem;
+		font-size: 0.82rem;
 	}
 
 	.drew {
@@ -443,20 +588,20 @@
 		align-items: center;
 		gap: 0.3rem;
 		color: var(--muted);
-		font-size: 0.72rem;
+		font-size: 0.78rem;
 	}
 
 	.pill {
 		padding: 0.05rem 0.5rem;
 		border: 1px solid var(--line);
-		border-radius: 999px;
+		border-radius: 2px;
 		color: var(--ink);
 	}
 
 	.pill.epidemic {
-		border-color: #ff3b6b;
-		background: rgb(255 59 107 / 0.16);
-		color: #ff8fab;
+		border-color: var(--danger);
+		background: rgb(207 91 62 / 0.14);
+		color: #ec8c70;
 	}
 
 	.flipcard {
@@ -486,49 +631,54 @@
 		display: flex;
 		flex-wrap: wrap;
 		gap: 0.3rem;
-		max-height: 7.6rem;
+		max-height: 7.8rem;
 		overflow: auto;
+		scrollbar-width: thin;
 	}
 
 	.chips button,
 	.setup button,
 	.turn button {
-		padding: 0.32rem 0.65rem;
-		border: 1px solid var(--line);
-		border-radius: 0.4rem;
-		background: rgb(255 255 255 / 0.05);
+		padding: 0.32rem 0.7rem;
+		border: 1px solid var(--line-strong);
+		border-radius: 2px;
+		background: none;
 		color: var(--ink);
 		font: inherit;
-		font-size: 0.76rem;
+		font-size: 0.85rem;
 		cursor: pointer;
 		transition:
 			border-color 150ms ease,
+			background 150ms ease,
 			transform 150ms ease;
 	}
 
-	.chips button:hover {
-		border-color: var(--accent);
-		transform: translateY(-1px);
+	.chips button:hover:not(:disabled),
+	.setup button:hover:not(:disabled),
+	.turn button:hover:not(:disabled) {
+		border-color: var(--paper);
+		background: var(--wash);
+	}
+
+	.chips button:active:not(:disabled),
+	.turn button:active:not(:disabled) {
+		transform: translateY(1px);
 	}
 
 	.chips small {
 		margin-left: 0.35rem;
 		color: var(--muted);
-		font-size: 0.66rem;
+		font-size: 0.74rem;
 	}
 
 	.chips small.free {
-		color: var(--accent);
+		color: var(--good);
 	}
 
 	.chips small.count {
 		padding: 0 0.3rem;
-		border-radius: 999px;
-		background: rgb(255 255 255 / 0.1);
-	}
-
-	.unpicked {
-		opacity: 0.45;
+		border-radius: 2px;
+		background: rgb(231 220 198 / 0.12);
 	}
 
 	.turn {
@@ -536,32 +686,44 @@
 		flex-direction: column;
 		justify-content: center;
 		gap: 0.4rem;
-		width: 9.5rem;
 	}
 
 	.pips {
 		display: flex;
 		justify-content: center;
-		gap: 0.3rem;
+		gap: 0.35rem;
 	}
 
 	.pips i {
-		width: 0.8rem;
-		height: 0.8rem;
-		border: 1px solid var(--accent);
+		width: 0.75rem;
+		height: 0.75rem;
+		border: 1px solid var(--paper);
 		border-radius: 50%;
-		transition: background 250ms ease;
+		transition:
+			background 250ms ease,
+			transform 250ms ease;
 	}
 
 	.pips i.on {
-		background: var(--accent);
+		background: var(--paper);
 	}
 
-	button.primary {
-		border-color: var(--accent);
-		background: var(--accent);
-		color: #06120c;
+	.pips i:not(.on) {
+		transform: scale(0.8);
+		opacity: 0.5;
+	}
+
+	button.primary,
+	.turn button.primary,
+	.setup button.primary {
+		border-color: var(--paper);
+		background: var(--paper);
+		color: var(--paper-ink);
 		font-weight: 700;
+	}
+
+	button.primary:hover:not(:disabled) {
+		background: #e9dec5;
 	}
 
 	button:disabled {

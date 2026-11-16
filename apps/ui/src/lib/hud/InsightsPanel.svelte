@@ -116,58 +116,72 @@
 </section>
 
 <style>
+	/* A field note on the chart: what the next infection is likely to hit, the decks, and the log. */
 	.panel {
 		display: flex;
 		flex-direction: column;
 		gap: 0.35rem;
 		max-height: 100%;
-		padding: 0.5rem 0.6rem;
-		border: 1px solid var(--line);
-		border-radius: 0.5rem;
-		background: var(--panel);
-		backdrop-filter: blur(8px);
-		font-size: 0.7rem;
+		padding: 0.4rem 0.6rem 0.6rem;
+		border-radius: 2px;
+		background: var(--slip);
+		color: var(--slip-ink);
+		box-shadow: var(--slip-shadow);
+		rotate: 0.35deg;
+		font-size: 0.78rem;
 		overflow: hidden auto;
+		scrollbar-width: thin;
 	}
 
 	nav {
 		display: flex;
-		gap: 0.25rem;
+		gap: 0.2rem;
+		border-bottom: 1px solid var(--slip-line);
 	}
 
 	nav button {
 		flex: 1;
-		padding: 0.2rem;
+		margin-bottom: -1px;
+		padding: 0.2rem 0.2rem 0.3rem;
 		border: 0;
-		border-radius: 0.3rem;
+		border-bottom: 2px solid transparent;
 		background: none;
-		color: var(--muted);
+		color: var(--slip-muted);
 		font: inherit;
-		font-weight: 600;
+		font-family: var(--font-display);
+		font-size: 0.95rem;
 		cursor: pointer;
+		transition:
+			color 150ms ease,
+			border-color 150ms ease;
+	}
+
+	nav button:hover {
+		color: var(--slip-ink);
 	}
 
 	nav button.on {
-		background: rgb(255 255 255 / 0.08);
-		color: var(--ink);
+		border-bottom-color: var(--slip-ink);
+		color: var(--slip-ink);
 	}
 
 	.hint,
 	.calm {
 		margin: 0.15rem 0 0;
-		color: var(--muted);
-		font-size: 0.64rem;
+		color: var(--slip-muted);
+		font-size: 0.74rem;
+		line-height: 1.3;
 	}
 
 	.calm {
-		color: var(--accent);
+		color: var(--ink-good);
 	}
 
 	ul,
 	ol {
 		display: flex;
 		flex-direction: column;
-		gap: 0.15rem;
+		gap: 0.1rem;
 		margin: 0;
 		padding: 0;
 		list-style: none;
@@ -179,20 +193,24 @@
 		align-items: center;
 		gap: 0.4rem;
 		width: 100%;
-		padding: 0.18rem 0.4rem;
+		padding: 0.14rem 0.35rem;
 		border: 0;
-		border-radius: 0.25rem;
-		background: rgb(255 255 255 / 0.04);
-		color: var(--ink);
+		border-bottom: 1px dotted var(--slip-line);
+		background: none;
+		color: var(--slip-ink);
 		font: inherit;
 		cursor: pointer;
 		overflow: hidden;
 	}
 
+	li button:hover {
+		background: rgb(60 44 28 / 0.06);
+	}
+
 	.bar {
 		position: absolute;
 		inset: 0 auto 0 0;
-		background: rgb(255 107 107 / 0.22);
+		background: rgb(163 48 28 / 0.16);
 		transition: width 400ms ease;
 	}
 
@@ -204,35 +222,33 @@
 
 	li b {
 		margin-left: auto;
+		font-weight: 600;
 	}
 
 	li em {
-		color: var(--danger);
-		font-size: 0.6rem;
-		font-style: normal;
-		text-transform: uppercase;
+		color: var(--ink-danger);
+		font-size: 0.7rem;
 	}
 
 	.lockdown {
 		padding: 0.2rem 0.5rem;
-		border: 1px solid var(--warn);
-		border-radius: 0.3rem;
+		border: 1px solid var(--ink-warn);
+		border-radius: 2px;
 		background: none;
-		color: var(--warn);
+		color: var(--ink-warn);
 		font: inherit;
 		cursor: pointer;
 	}
 
 	.stratum {
 		display: flex;
-		gap: 0.4rem;
-		padding: 0.25rem 0.35rem;
-		border-radius: 0.3rem;
-		background: rgb(255 255 255 / 0.04);
+		gap: 0.45rem;
+		padding: 0.2rem 0.35rem;
+		border-left: 2px solid var(--slip-line);
 	}
 
 	.size {
-		color: var(--warn);
+		color: var(--ink-warn);
 		font-weight: 700;
 	}
 
@@ -240,24 +256,24 @@
 		display: flex;
 		flex-wrap: wrap;
 		gap: 0.1rem 0.45rem;
-		color: var(--ink);
 	}
 
 	ol li {
-		color: var(--muted);
+		color: var(--slip-muted);
+		line-height: 1.3;
 	}
 
 	ol li.head {
-		margin-top: 0.25rem;
-		color: var(--ink);
-		font-weight: 650;
+		margin-top: 0.3rem;
+		color: var(--slip-ink);
+		font-weight: 600;
 	}
 
 	ol li.bad {
-		color: var(--danger);
+		color: var(--ink-danger);
 	}
 
 	ol li.good {
-		color: var(--accent);
+		color: var(--ink-good);
 	}
 </style>

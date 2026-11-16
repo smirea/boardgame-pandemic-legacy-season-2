@@ -19,6 +19,7 @@
 >
 	<rect class="sea" width={ART_WIDTH} height={ART_HEIGHT} />
 	<path class="graticule" d={art.graticule} />
+	<path class="rings" d={art.land} />
 	<path class="land" d={art.land} />
 	{#each art.neighbours as point, index (index)}
 		<circle class="neighbour" cx={point.x} cy={point.y} r="1.5" fill={CITY_COLOR[point.color ?? 'haven']} />
@@ -34,6 +35,7 @@
 </svg>
 
 <style>
+	/* The same chart as the board, cropped: paper sea, a ring of water-lining off the coast, inked land. */
 	svg {
 		display: block;
 		width: 100%;
@@ -41,55 +43,75 @@
 	}
 
 	.sea {
-		fill: #173a52;
+		fill: #e3d8bd;
+	}
+
+	.rings {
+		fill: none;
+		stroke: rgb(52 74 82 / 0.22);
+		stroke-width: 3.2;
+		stroke-linejoin: round;
 	}
 
 	.land {
-		fill: #c5bd9f;
-		stroke: #8f8970;
-		stroke-width: 0.35;
+		fill: #d2bf96;
+		stroke: #3a2c1f;
+		stroke-width: 0.45;
+		stroke-linejoin: round;
 	}
 
 	.graticule {
 		fill: none;
-		stroke: rgb(255 255 255 / 0.1);
+		stroke: rgb(139 74 51 / 0.32);
 		stroke-width: 0.3;
 	}
 
 	.night .sea {
-		fill: #0b1512;
+		fill: #1d1914;
+	}
+
+	.night .rings {
+		stroke: rgb(231 220 198 / 0.08);
 	}
 
 	.night .land {
-		fill: color-mix(in srgb, var(--accent) 22%, #25302b);
-		stroke: color-mix(in srgb, var(--accent) 45%, #25302b);
+		fill: color-mix(in srgb, var(--accent) 16%, #2c261e);
+		stroke: rgb(231 220 198 / 0.55);
+	}
+
+	.night .graticule {
+		stroke: rgb(231 220 198 / 0.1);
 	}
 
 	.neighbour {
-		opacity: 0.75;
-		stroke: rgb(0 0 0 / 0.45);
+		stroke: #2a2017;
 		stroke-width: 0.4;
+	}
+
+	.night .neighbour {
+		stroke: rgb(0 0 0 / 0.6);
+		opacity: 0.8;
 	}
 
 	.halo {
 		fill: none;
 		stroke: var(--accent);
 		stroke-width: 0.7;
-		opacity: 0.55;
+		opacity: 0.6;
 	}
 
 	.halo.inner {
-		opacity: 0.9;
+		opacity: 0.95;
 	}
 
 	.pin {
 		fill: var(--accent);
-		stroke: rgb(0 0 0 / 0.55);
+		stroke: #2a2017;
 		stroke-width: 0.6;
-		filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.5));
+		filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.4));
 	}
 
 	.eye {
-		fill: #f4f1e8;
+		fill: #f1e9d6;
 	}
 </style>
