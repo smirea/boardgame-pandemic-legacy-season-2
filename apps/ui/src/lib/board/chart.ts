@@ -20,7 +20,7 @@ const INK = '52 39 27';
 const SEA_INK = '36 72 106';
 const RULE_INK = '139 74 51';
 
-type Ctx = CanvasRenderingContext2D;
+type Ctx = OffscreenCanvasRenderingContext2D;
 
 function random(seed: number) {
 	return () => {
@@ -32,11 +32,11 @@ function random(seed: number) {
 	};
 }
 
+// Raster on the CPU: the chart is hundreds of wide strokes along a detailed coast, which a GPU canvas
+// (and a software GL one in a test browser) handles far worse. It runs in a worker, so time is cheap.
 function sheet(width: number, height: number) {
-	const canvas = document.createElement('canvas');
-	canvas.width = width;
-	canvas.height = height;
-	return { canvas, ctx: canvas.getContext('2d')! };
+	const canvas = new OffscreenCanvas(width, height);
+	return { canvas, ctx: canvas.getContext('2d', { willReadFrequently: true })! };
 }
 
 function blot(ctx: Ctx, x: number, y: number, radius: number, rgb: string, alpha: number) {
@@ -259,24 +259,13 @@ function wear(ctx: Ctx, width: number, height: number) {
 
 export type Chart = {
 	/** The charted world. */
-	known: HTMLCanvasElement;
+	known: OffscreenCanvas;
 	/** The same sheet with the ink faded to a dotted guess, shown over regions nobody has reached yet. */
-	unknown: HTMLCanvasElement;
+	unknown: OffscreenCanvas;
 };
 
-const charts = new Map<string, Chart>();
-
-/** Drawing the chart takes a noticeable moment, so a board that mounts again reuses the sheets. */
-export function drawChart(bounds: BoardBounds): Chart {
-	const key = `${bounds.minX}:${bounds.maxX}:${bounds.minZ}:${bounds.maxZ}`;
-	const cached = charts.get(key);
-	if (cached) return cached;
-	const chart = paintChart(bounds);
-	charts.set(key, chart);
-	return chart;
-}
-
-function paintChart(bounds: BoardBounds): Chart {
+/** Paints both sheets. Slow enough that the board calls it through `loadChart`, in a worker. */
+export function paintChart(bounds: BoardBounds): Chart {
 	const width = PIXELS;
 	const scale = width / (bounds.maxX - bounds.minX);
 	const height = Math.round((bounds.maxZ - bounds.minZ) * scale);
@@ -410,7 +399,7 @@ function paintChart(bounds: BoardBounds): Chart {
 		ctx.setTransform(1, 0, 0, 1, 0, 0);
 	};
 
-	const finish = (layer: CanvasRenderingContext2D, wash: number, bleach = 0) => {
+	const finish = (layer: Ctx, wash: number, bleach = 0) => {
 		const { canvas, ctx } = sheet(width, height);
 		ctx.drawImage(base, 0, 0);
 		water(ctx, wash);
@@ -545,7 +534,7 @@ function compass(ctx: Ctx, at: BoardPoint, radius: number, px: (pixels: number) 
  * its whole cell is charted.
  */
 export class FogMask {
-	readonly canvas: HTMLCanvasElement;
+	readonly canvas: OffscreenCanvas;
 	#ctx: Ctx;
 	#scale: number;
 	#cells: { id: CityId; path: Path2D; at: BoardPoint; reach: number }[];

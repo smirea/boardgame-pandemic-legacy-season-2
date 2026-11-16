@@ -50,7 +50,7 @@
 	import { LAND_HEIGHT } from './projection';
 	import type { BoardBounds } from './projection';
 
-	type Props = { bounds: BoardBounds; sheet: Texture; hidden: (city: CityId) => boolean };
+	type Props = { bounds: BoardBounds; sheet: Texture | null; hidden: (city: CityId) => boolean };
 
 	let { bounds, sheet, hidden }: Props = $props();
 
@@ -67,11 +67,16 @@
 		uAspect: { value: (area.maxX - area.minX) / (area.maxZ - area.minZ) },
 	};
 	const material = new MeshStandardMaterial({
-		map: untrack(() => sheet),
 		alphaMap: alpha,
 		transparent: true,
 		depthWrite: false,
 		roughness: 1,
+	});
+	// The sheet arrives from a worker after the board is up; until then the fog is plain bleached paper.
+	$effect(() => {
+		material.map = sheet;
+		material.color.set(sheet ? '#ffffff' : '#e3dac6');
+		material.needsUpdate = true;
 	});
 	material.onBeforeCompile = shader => {
 		Object.assign(shader.uniforms, uniforms);

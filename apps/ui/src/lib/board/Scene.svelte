@@ -4,11 +4,11 @@
 	import { T, useThrelte } from '@threlte/core';
 	import { interactivity, OrbitControls } from '@threlte/extras';
 	import { untrack } from 'svelte';
-	import { CanvasTexture, MOUSE, SRGBColorSpace } from 'three';
+	import { MeshStandardMaterial, MOUSE, SRGBColorSpace, Texture } from 'three';
 	import type { PerspectiveCamera } from 'three';
 	import type { OrbitControls as OrbitControlsImpl } from 'three/examples/jsm/controls/OrbitControls.js';
 	import CityMarker from './CityMarker.svelte';
-	import { drawChart } from './chart';
+	import { loadChart } from './chartLoader';
 	import { DEFAULT_TILT, fitBoard } from './fit';
 	import Fog from './Fog.svelte';
 	import { layoutLabels } from './labels';
@@ -36,8 +36,9 @@
 	interactivity();
 
 	const FOV = 30;
-	const { size, renderer } = useThrelte();
+	const { size, renderer, invalidate } = useThrelte();
 	const layout = pack.positions;
+	const BLANK = '#d2c3a1';
 	const landGeometry = buildLandGeometry();
 	const bounds: BoardBounds = (() => {
 		const land = landGeometry.boundingBox!;
@@ -53,15 +54,34 @@
 	const boardSize = { width: bounds.maxX - bounds.minX, depth: bounds.maxZ - bounds.minZ };
 	const boardCentre = { x: (bounds.minX + bounds.maxX) / 2, z: (bounds.minZ + bounds.maxZ) / 2 };
 	mapToSheet(landGeometry, bounds);
-	const chart = drawChart(bounds);
-	const texture = (canvas: HTMLCanvasElement) => {
-		const map = new CanvasTexture(canvas);
+	const texture = (bitmap: ImageBitmap) => {
+		const map = new Texture(bitmap);
 		map.colorSpace = SRGBColorSpace;
+		map.flipY = false;
 		map.anisotropy = renderer.capabilities.getMaxAnisotropy();
+		map.needsUpdate = true;
 		return map;
 	};
-	const knownSheet = texture(chart.known);
-	const unknownSheet = texture(chart.unknown);
+	// Until the worker hands the chart back, the board is a blank sheet of the same paper.
+	let sheets = $state.raw<{ known: Texture; unknown: Texture } | null>(null);
+	loadChart(bounds).then(
+		images => {
+			sheets = { known: texture(images.known), unknown: texture(images.unknown) };
+			invalidate();
+		},
+		error => console.error(error),
+	);
+	// The materials stay put and take the chart when it lands; swapping material objects under a mesh loses them.
+	const sheetMaterial = new MeshStandardMaterial({ color: BLANK, alphaTest: 0.5, roughness: 0.92 });
+	const landMaterial = new MeshStandardMaterial({ color: BLANK, roughness: 0.92 });
+	$effect(() => {
+		for (const material of [sheetMaterial, landMaterial]) {
+			material.map = sheets?.known ?? null;
+			material.color.set(sheets ? '#ffffff' : BLANK);
+			material.needsUpdate = true;
+		}
+		invalidate();
+	});
 
 	let camera = $state<PerspectiveCamera>();
 	let controls = $state<OrbitControlsImpl>();
@@ -180,14 +200,14 @@
 	onpointermove={event => onpointer?.({ x: event.point.x, z: event.point.z })}
 >
 	<T.PlaneGeometry args={[boardSize.width, boardSize.depth]} />
-	<T.MeshStandardMaterial map={knownSheet} alphaTest={0.5} roughness={0.92} />
+	<T is={sheetMaterial} />
 </T.Mesh>
 
 <T.Mesh geometry={landGeometry} receiveShadow castShadow>
-	<T.MeshStandardMaterial map={knownSheet} roughness={0.92} />
+	<T is={landMaterial} />
 </T.Mesh>
 
-<Fog {bounds} sheet={unknownSheet} hidden={city => !view.cities[city]!.revealed} />
+<Fog {bounds} sheet={sheets?.unknown ?? null} hidden={city => !view.cities[city]!.revealed} />
 
 {#each view.ghostEdges as route (`ghost:${routeKey(route)}`)}
 	<RouteTube {route} from={layout[route.a]!} to={layout[route.b]!} bow={bows.get(routeKey(route)) ?? 0} ghost />
