@@ -8,7 +8,7 @@ import type { CardId, CityId } from './ids';
 import { createGameActor, parseSave, reject } from './machine';
 import type { Action } from './actions';
 import { legalActions, legalPlays } from './options';
-import { applyUnlock, closeGame, score } from './legacy';
+import { applyUnlock, closeGame, openBundle, score } from './legacy';
 import { decemberSave, octoberSave } from './scenarios';
 import type { World } from './state';
 import {
@@ -1516,5 +1516,35 @@ describe('found in February', () => {
 		expect(reject(worldOf(actor), phase(actor), { type: 'PLACE_SUPPLY', city: target, count: left + 1 })).toBe(
 			`Only ${left} cubes are left to place`,
 		);
+	});
+});
+
+describe('found in the replayed March', () => {
+	test('Lockdown says in the log which card it destroyed', () => {
+		const actor = late((world, game) => {
+			const card = infectionCards(world, 'cairo')[0]!;
+			const held = world.campaign.infectionCards[card]!;
+			if (held.kind === 'city') held.improvement = 'lockdown';
+			game.infectionDeck.order = game.infectionDeck.order.filter(id => id !== card);
+			game.infectionDeck.strata = [game.infectionDeck.order.toSorted()];
+			game.infectionDiscard = [card];
+		});
+		const card = gameOf(actor).infectionDiscard[0]!;
+		send(actor, { type: 'LOCKDOWN', card });
+		expect(worldOf(actor).campaign.infectionCards[card]).toBeUndefined();
+		expect(gameOf(actor).log.at(-1)).toMatchObject({
+			t: 'note',
+			text: 'Lockdown destroyed an Infection card of Cairo for good',
+		});
+	});
+
+	test('a briefing says when a new event is another copy of one the group already has', () => {
+		const world = JSON.parse(JSON.stringify(worldOf(late()))) as World;
+		world.campaign.briefing = [];
+		world.campaign.opened = world.campaign.opened.filter(id => id !== 'arrive-eastern-pacific');
+		openBundle(world, 'arrive-eastern-pacific' as never, false);
+		expect(
+			world.campaign.briefing.some(line => line.startsWith('Another copy of a Rationed Event: Second Wind.')),
+		).toBe(true);
 	});
 });

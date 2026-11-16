@@ -783,7 +783,10 @@ const control = Bun.serve({
 		if (request.method !== 'POST') return new Response('POST /rpc', { status: 405 });
 		const { agent, words } = (await request.json()) as { agent: string; words: string[] };
 		try {
-			return new Response(await handle(agent, words));
+			const text = await handle(agent, words);
+			// A refusal is an error to the shell, so a chain of commands stops where the game said no.
+			const refused = /^(REFUSED|STOPPED at|usage:|Unknown command)/m.test(text.split('\n\n')[0] ?? '');
+			return new Response(text, { status: refused ? 409 : 200 });
 		} catch (error) {
 			journal({ kind: 'lab-error', agent, words, error: String(error) });
 			return new Response(`LAB ERROR: ${error instanceof Error ? error.message : String(error)}`, { status: 500 });

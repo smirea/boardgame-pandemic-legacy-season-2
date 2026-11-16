@@ -13,6 +13,7 @@ import type {
 	CharacterId,
 	CityId,
 	Command,
+	Decide,
 	JobId,
 	ObjectiveId,
 	PublicState,
@@ -133,7 +134,7 @@ export function optionsFor(state: PublicState, who: Who, seating: (CharacterId |
 		add(
 			keyOf(`decide:${decide.d}`, decide, 'd'),
 			`decide ${decide.d}`,
-			describe(state, decide, 'd') || 'pass on this choice',
+			decide.d === 'scar' ? scarText(state, decide, who) : describe(state, decide, 'd') || 'pass on this choice',
 			{
 				type: 'DECIDE',
 				decide,
@@ -143,6 +144,22 @@ export function optionsFor(state: PublicState, who: Who, seating: (CharacterId |
 	for (const id of game.infectionDiscard)
 		add(`lockdown:${enc(id)}`, 'lockdown', `destroy ${human(world, id)}`, { type: 'LOCKDOWN', card: id });
 	return options;
+}
+
+/** A scar choice in words: which scar, on whom, and what it would cover. */
+function scarText(state: PublicState, decide: Extract<Decide, { d: 'scar' }>, who: Who): string {
+	const { world } = state;
+	const game = world.game!;
+	const pending = game.pending[0];
+	const seat = decide.seat ?? (pending && 'seat' in pending ? pending.seat : null) ?? who.seat;
+	const character = world.campaign.characters[game.players[seat]!.character]!;
+	const scar = pack.scars.find(entry => entry.id === decide.scar)!;
+	const slot = decide.target === 'job' ? null : character.slots[decide.target];
+	const where =
+		decide.target === 'job'
+			? `over ${character.name}'s job, which switches the job off`
+			: `in ${character.name}'s slot ${decide.target + 1}, ${slot ? `covering ${slot.id}, which is lost` : 'which is empty'}`;
+	return `${scar.name} (${scar.text}) ${where}`;
 }
 
 function purchaseText(purchase: Purchase): string {
@@ -193,10 +210,19 @@ export function parseVerb(state: PublicState, words: string[]): Verb | null {
 			return { v: 'pick', character: id! };
 		}
 		case 'supply': {
-			const [city, count] = rest;
-			if (!city || !isCity(city) || !Number.isInteger(Number(count)))
-				return { v: 'error', message: 'usage: supply <city-id> <count> (a negative count takes cubes back)' };
-			return { v: 'command', command: { type: 'PLACE_SUPPLY', city, count: Number(count) } };
+			const [city, amount = ''] = rest;
+			// `=2` sets the city to 2 cubes, whichever way that moves them. A plain number adds, a negative one takes back.
+			const exact = amount.startsWith('=');
+			const number = Number(exact ? amount.slice(1) : amount);
+			if (!city || !isCity(city) || amount === '' || !Number.isInteger(number))
+				return {
+					v: 'error',
+					message:
+						'usage: supply <city-id> <count>. `supply london 2` adds 2, `supply london -1` takes 1 back, `supply london =2` sets it to exactly 2.',
+				};
+			const count = exact ? number - (state.world.game?.locations[city]?.supplies ?? 0) : number;
+			if (count === 0) return { v: 'error', message: `${city} already holds ${number} cubes.` };
+			return { v: 'command', command: { type: 'PLACE_SUPPLY', city, count } };
 		}
 		case 'events':
 			return { v: 'command', command: { type: 'PICK_EVENTS', cards: rest.map(dec) as CardId[] } };

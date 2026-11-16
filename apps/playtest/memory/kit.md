@@ -1,42 +1,40 @@
 # Memory
 
-March lost at 8 incidents. Quinn (Administrator, Northwatch) is exposure 1/7, blank, no scar, no ability. Knox (Laborer, Southreach) is 1/7 blank, with Helmsman and Record Keeper. Hale (Radio Operator, Midsea) is clean. Sable and Reed are benched. Past games: Jan W, Feb W, Mar L. The next session is the March replay. Rationing is 2.
+March replay lost at 8 incidents. April lobby is open, rationing 4. Past: Jan W, Feb W, Mar L, Mar(2) L. Knox (Laborer) is 1/7 with Helmsman, Record Keeper, Foreman. Hale (Radio Operator) is 1/7, one blank scratch. Quinn (Administrator) is 2/7 with Shaken: recon costs Quinn one extra card. A scar fills an ability slot. Sable and Reed are benched.
 
 ## Rules that change play
 
-- Rationing 0 meant pick exactly 0 events. Card Swap and Stock Up never entered. At rationing 2, try to put those two in. If it demands exactly 2, they are the two.
-- Record Keeper is hand limit +1. It is passive and the sheet never says so. Knox holds 8. Everyone else holds 7.
-- Helmsman makes the first Drive or Ferry of the turn free. Do not spend the Administrator action to move Knox one step.
-- A double counts as 2 toward a center. Confirmed. london.32 is +double. washington.8 is +triple. Anyone else pays 5 cards. A Laborer pays 4 cards plus 2 cubes.
-- System produce, from a haven or a center, fills every haven and every center up to population and scratches one use. Havens are population 3. It does not armour an ordinary city.
-- Plague does not carry over. Cubes do not. A center carries over only if it was made permanent. London's was not, and it is gone. Washington's remains. Washington is population 6. London is population 4.
-- Lockdown is on inf-sao-paulo.26. When that card is in the discard, look for a destroy key. We have not seen it, so do not promise the cost.
-- Well Stocked: 2 or more cubes when that infection card is drawn, and the city loses nothing. Washington has one of these.
-- Exposure is checked at the start of a turn in a plague city. A blank scratch is nothing. Do not end a turn on plague.
-- The rate track is 2, 2, 2, 3, 3, 4. The third epidemic raises the rate to 3. The fourth stays at 3. The stripped city comes back off the reshuffle before anyone can act.
-- Chart Sea Lane is unlocked. A sea lane costs 2 cubes from your character. Nobody has Shaken, Injured or Seasick. Shaken makes recon cost one extra card. Injured makes a supply line cost one extra cube. Seasick makes a sea lane cost one extra cube.
-- The shop has no restore. Population is 1 per step and can buy back a drop. `wait` returns at once while the lead still must act, and a buy has no undo. Say the spend, then do not count on an answer arriving first.
-- A city that joins puts its player cards in the discard and holds its infection cards out until next game. San Francisco and Mexico City are on the grid now, so those infection cards are live.
-- Pass a card only in the city it names. The Radio Operator moves cubes at any distance. The Administrator moves any pawn onto any other pawn for one action.
+- Foreman makes Knox's supply lines cost 1 cube fewer. It does not cheapen a center. A sea lane is still 2 cubes from the character, and those cubes return to the stockpile.
+- Shaken is on Quinn only. Someone else should recon. London recon is 4 different blues, and the center is already permanent. São Paulo recon is 4 yellow cards plus a center. Lagos needs 5 different yellows. Cairo needs 4 different blacks, and only 3 black cities exist.
+- Well Stocked is the infection card, not the city. At 2 or more cubes that card removes nothing. Any other card of the same city still removes a cube.
+- Lockdown: while that infection card is in the discard, any player may destroy it so it cannot be reshuffled. The card just vanishes. Look for the key.
+- Exposure is checked at the start of a turn in a plague city. Do not end a turn on plague. A blank scratch is nothing. Shaken is the cheap scar. Death is still in the track.
+- Laborer is 4 cards plus 2 cubes. Five cards need no cubes. A triple counts as 3. washington.8 was spent on London.
+- Helmsman: Knox's first Drive or Ferry is free. Do not spend Administrator to move Knox one step. Record Keeper: Knox holds 8. Everyone else holds 7.
+- Pass a card only in the city it names. Sable, the Instructor, may give any card from anywhere.
+- System produce fills every haven and every center from the stockpile and scratches a box. Local fills one site and does not scratch. Havens are population 3. Cubes and plague do not carry over. A center carries over only if it was made permanent.
+- Supply placement only adds. With 0 left you cannot move a cube. Cover the low cities before confirm.
+- A sea lane may cross only one region boundary. Farwater can be reached from Los Angeles only.
+- Chart, search, and walking into the lost haven all worked. Card Swap and Stock Up were in the deck and were never drawn.
 
-## Board going into the replay
+## Board going into April
 
-No city is off the grid. San Francisco is tied to Denver. Mexico City is tied to Los Angeles. Connect 2 cities may be dead unless a recon adds cities.
+Permanent centers: Washington (pop 6) and London (pop 5).
 
-Recon: London needs 4 different blues and a center again. São Paulo needs 4 yellows and a center. Lagos needs 5 different yellows, and there are now 5 yellow cities: Jacksonville, São Paulo, Lagos, Los Angeles, Mexico City. Cairo still needs a fourth black city.
+Population: Washington 6, London 5, New York 3, Istanbul 2, Lagos 2, Jacksonville 2, São Paulo 2, Tripoli 2, Atlanta 2, Denver 2, San Francisco 2, Cairo 1, Chicago 1, Mexico City 1, Los Angeles 0.
 
-Population: Washington 6, London 4, Istanbul 3, New York 3, Lagos 3, Jacksonville 2, São Paulo 2, Chicago 2, Cairo 2, Tripoli 2, Atlanta 2, Denver 2, San Francisco 2, Los Angeles 1, Mexico City 1.
-
-Search cards seen: los-angeles.79 (2 boxes), chicago.64 (1), san-francisco.68 (2), mexico-city.82 (1). Sol said denver.72 has 1. No search was resolved. The lost haven never appeared. A search may be what reveals it.
+Los Angeles is forsaken and infested. It is still drawn, and it is still Farwater's only link. Mexico City's only link is Los Angeles. Restore cost 2 and was not bought. One more drop forsakes Cairo or Chicago.
 
 ## How they play
 
-Sol armours the city the next cards will hit and will not end a turn on plague. Vex spends the turn on the objective and will take the incident. At 6 incidents, side with Sol. Vex wanted the London center made permanent, with Foreman on Knox. That objection arrived after the buy.
+Vex will spend the turn on the objective and will refuse a restore to keep a permanent center. At 6 incidents that lost the game: two cards were about to flip, I could armor one city, I picked Chicago, and the flips were Istanbul and Lagos. A bare city and a one-plague city are the same incident. Armor a city that is in the pile.
+
+Sol armors the card that is about to flip and will not end on plague.
 
 ## Next game
 
-The replay lobby was already seated: Vex as Knox, Sol as Hale, Kit as Quinn. Stay Quinn. Northwatch is one move from London.
+Rationing is 4. Ask for Stock Up, Card Swap, and Second Wind if the reserve really has it. Vex thought Farwater added a second copy.
 
-Build London again before the recon, and do not spend the four different blues on the center. The double can be the extra card the center needs.
+The lobby still showed Kit on Quinn. Stay unless the seat is open. If it is open, take Sable: passing any card is how three centers get built, and Quinn is the wrong pawn for a recon.
 
-One cube stops one hit. Two plague and no cube is an outbreak, and at 7 incidents that is the game. São Paulo's second plague was the loss, on the turn after an epidemic.
+Do not sail with a triple or a double. When the hand is already five cards, build with them and leave the cubes on the cities.

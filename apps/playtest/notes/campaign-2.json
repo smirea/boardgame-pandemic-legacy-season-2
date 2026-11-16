@@ -145,5 +145,54 @@
 				"fix": "All three are the rules as researched. The guide now says each."
 			}
 		]
+	},
+	"g03": {
+		"summary": "Lost on turn 9 at eight incidents, but found and reached the eastern Pacific haven and completed two of three objectives.",
+		"story": "Vex led, with the same table: Knox the Laborer, Hale the Radio Operator, Quinn the Administrator. The lead wanted to rebalance the opening cubes, could not take any back, and confirmed a layout that left Atlanta empty. The opening infection then stripped Jacksonville and Los Angeles. Knox opened with two searches in Los Angeles. The second sighted a haven out in the eastern Pacific, and Knox charted the year's first sea lane to it and walked in, which completed both Perform 2 searches and Access a lost haven. London was the only new supply center. An epidemic stripped Lagos, Hale sailed to Cairo and saved it, and Istanbul and Lagos took the last two plague cubes on one Infect step.",
+		"highlights": [
+			"The lost haven of the eastern Pacific, found by a sea search at Los Angeles and reached in the same game, two months ahead of its perimeter report.",
+			"First sea lane charted, the action unlocked at the end of the previous game.",
+			"First forsaken city: Los Angeles ended at population 0, which resolved the first turning point and opened the Forsaken rules. Restore appeared in the shop and the table declined it.",
+			"First scar of the year, from an exposure, and the first use of Lockdown to destroy an Infection card for good.",
+			"Game end: London's center made permanent, Foreman bought for Knox. Rationing rises to 4 for April."
+		],
+		"parity": "All four checks passed against the research for March. No Legacy card was due and none was read. The search opened the eastern Pacific haven's sighting and the arrival opened its contents, including the stockpile bonus, which under the fix made earlier landed in this game. The first turning point resolved at game end when a city stood at population 0, which is when the research timeline schedules it. Epidemic scaling was active from this game, as card 03-02 set.",
+		"findings": [
+			{
+				"finding": "Lockdown destroyed an Infection card and nothing said so. Two players reported the card as lost by a bug.",
+				"kind": "Engine gap",
+				"fix": "The game logs which card Lockdown destroyed. Test added."
+			},
+			{
+				"finding": "The lead could not take setup cubes back, so a layout the table had rejected was confirmed.",
+				"kind": "Lab gap",
+				"fix": "The engine always allowed it. The lab's supply command now takes a negative count or an exact amount (=2), and the setup view says so."
+			},
+			{
+				"finding": "A refused command still ended with success, so a chained command ran on into confirm.",
+				"kind": "Lab bug",
+				"fix": "A refusal is now an error to the shell and stops the chain."
+			},
+			{
+				"finding": "Scar choices were bare keys with slot numbers and no names.",
+				"kind": "Lab gap",
+				"fix": "Each choice says which scar, what it does, whose character, and what it would cover."
+			},
+			{
+				"finding": "The briefing announced Second Wind as new when one was already in the reserve.",
+				"kind": "Wording",
+				"fix": "A briefing now says when a card is another copy."
+			},
+			{
+				"finding": "The playtest flavor line for forsaken cities said the city is struck from the rolls, which reads as removed from the board.",
+				"kind": "Lab wording",
+				"fix": "Rewritten. A forsaken city stays on the board and can be restored."
+			},
+			{
+				"finding": "Well Stocked protected one Infection card, not every stocked city.",
+				"kind": "Not a bug",
+				"fix": "The improvement belongs to the card it was bought for."
+			}
+		]
 	}
 }

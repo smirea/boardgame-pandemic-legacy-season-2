@@ -46,7 +46,10 @@ const FLAVOR: [prefix: string, line: string][] = [
 	['Opal lab found', 'Behind a collapsed stairwell, a door with a working lock.'],
 	['Jade lab found', 'The notebooks are in three hands and end on the same day.'],
 	['Pearl lab reached', 'Ice on the inside of the glass, and one rack still sealed.'],
-	['Forsaken cities', 'A city with nobody left to supply is struck from the rolls.'],
+	[
+		'Forsaken cities',
+		'The last lamp in a city goes out. The boats stop calling there until someone pays to bring it back.',
+	],
 	['Signals triangulated', 'Three towers, three bearings, and the lines cross on land.'],
 	['The Hollow Men defect', 'They come in unarmed, and they bring maps.'],
 	['Utopia opened', 'The harbour at the end of the Plan is real.'],

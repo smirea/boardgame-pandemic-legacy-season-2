@@ -162,7 +162,7 @@ export function openBundle(world: World, id: BundleId, forced: boolean) {
 	if (game) log(game, { t: 'unlock', bundle: id, forced });
 	campaign.briefing.push(`${bundle.name}${forced ? ' (opened by a perimeter report)' : ''}`);
 	for (const unlock of [...bundle.unlocks, ...(forced ? [] : (bundle.reward ?? []))]) {
-		const line = unlockLine(unlock);
+		const line = unlockLine(campaign, unlock);
 		if (line) campaign.briefing.push(line);
 		applyUnlock(world, unlock);
 	}
@@ -278,10 +278,15 @@ const named = <T extends { id: string; name: string; text: string }>(list: T[], 
 };
 
 /** What a briefing says about an unlock that adds something with a name and a rule of its own. */
-function unlockLine(unlock: Unlock): string | null {
+function unlockLine(campaign: Campaign, unlock: Unlock): string | null {
 	switch (unlock.t) {
-		case 'event':
-			return `New ${unlock.mode === 'rationed' ? 'Rationed' : unlock.mode === 'unrationed' ? 'Unrationed' : 'permanent'} Event: ${named(pack.events, unlock.event)}`;
+		case 'event': {
+			const mode = unlock.mode === 'rationed' ? 'Rationed' : unlock.mode === 'unrationed' ? 'Unrationed' : 'permanent';
+			const owned = Object.values(campaign.playerCards).some(
+				card => card.kind === 'event' && card.event === unlock.event,
+			);
+			return `${owned ? `Another copy of a ${mode} Event` : `New ${mode} Event`}: ${named(pack.events, unlock.event)}`;
+		}
 		case 'ability':
 			return `New ability for sale: ${named(pack.abilities, unlock.ability)}`;
 		case 'cityImprovement':
@@ -312,7 +317,7 @@ export function readLegacy(world: World, phase: 'setup' | 'gameEnd', won?: boole
 		if (applies) {
 			campaign.briefing.push(`${card.title}: ${card.text}`);
 			for (const unlock of card.unlocks) {
-				const line = unlockLine(unlock);
+				const line = unlockLine(campaign, unlock);
 				if (line) campaign.briefing.push(line);
 				applyUnlock(world, unlock);
 			}

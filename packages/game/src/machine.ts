@@ -17,7 +17,7 @@ import {
 	startDrawStep,
 	startInfectStep,
 } from './flow';
-import { grid, isForsaken, overLimit } from './helpers';
+import { cityDef, grid, isForsaken, log, overLimit } from './helpers';
 import type { CardId, CharacterId, CityId, SeatId } from './ids';
 import type { Purchase } from './legacy';
 import {
@@ -338,8 +338,14 @@ export const gameMachine = setup({
 		lockdown: assign(
 			change((world, event) => {
 				const { card } = event as Of<'LOCKDOWN'>;
+				const destroyed = world.campaign.infectionCards[card]!;
 				world.game!.infectionDiscard.splice(world.game!.infectionDiscard.indexOf(card), 1);
 				delete world.campaign.infectionCards[card];
+				if (destroyed.kind === 'city')
+					log(world.game!, {
+						t: 'note',
+						text: `Lockdown destroyed an Infection card of ${cityDef(destroyed.city).name} for good`,
+					});
 			}),
 		),
 		waive: assign(

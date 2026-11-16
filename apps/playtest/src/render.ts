@@ -213,7 +213,7 @@ function renderSetup(state: PublicState): string[] {
 					]
 				: []),
 			`Supply setup: ${game.stockpile} cubes left to place. Cities with no cubes take a Plague cube when infected.`,
-			'Use `supply <city-id> <count>` to place by hand, `do autosupply` to spread the rest, then `do confirm-supply`.',
+			'Place by hand with `supply <city-id> <count>`: a number adds, a negative number takes back, `=2` sets the city to exactly 2. `do autosupply` spreads the rest. Then `do confirm-supply`, which cannot be undone.',
 			'Grid cities (cubes now, population, chance to be hit in the opening infection):',
 		];
 		for (const city of grid(campaign)) {
