@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Engraving from '#lib/board/Engraving.svelte';
 	import Game from '#lib/hud/Game.svelte';
 	import { SEAT_COLORS } from '#lib/hud/labels.svelte.ts';
 	import { gameTitle, load, ReplaySession } from '#lib/replay/replay.svelte.ts';
@@ -154,6 +155,7 @@
 <svelte:window onkeydowncapture={onkey} />
 
 <div class="viewer" class:empty={!loaded}>
+	{#if !loaded}<Engraving />{/if}
 	{#if loaded && session.state}
 		<Game {session} spectator />
 
@@ -415,11 +417,11 @@
 	}
 
 	.empty .side {
-		position: static;
+		position: relative;
 		height: auto;
 		max-height: 90vh;
 		border: 1px solid var(--line);
-		border-radius: 0.8rem;
+		border-radius: 3px;
 	}
 
 	header {
@@ -505,8 +507,8 @@
 		display: block;
 		margin-top: 0.6rem;
 		padding: 0.6rem 0.8rem;
-		border: 1px dashed var(--line);
-		border-radius: 0.5rem;
+		border: 1px dashed var(--line-strong);
+		border-radius: 2px;
 		color: var(--ink);
 		font-size: 0.8rem;
 		text-decoration: none;

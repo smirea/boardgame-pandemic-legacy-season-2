@@ -21,69 +21,86 @@
 	const percent = (value: number) => `${Math.round(value * 100)}%`;
 </script>
 
-<header class="bar">
-	<div class="month">
-		<strong>{MONTHS[campaign.month] ?? 'Campaign over'}</strong>
-		<span
-			>{campaign.month > 0 && campaign.month <= 12
-				? campaign.attempt === 1
-					? 'early attempt'
-					: 'late attempt'
-				: ''}</span
-		>
-	</div>
-
-	<div class="spacer"></div>
-
-	{#if game && info}
-		<div class="track" title="Infection rate: cards flipped at the end of every turn">
-			<span class="caption">Rate</span>
-			{#each rates as rate, index (index)}
-				<span class="pip" class:on={index === game.rateIndex} class:past={index < game.rateIndex}>{rate}</span>
-			{/each}
-		</div>
-
-		<div class="track incidents" title="Incidents: the game is lost at 8">
-			<span class="caption">Incidents</span>
-			{#each { length: pack.numbers.incidentLimit } as _, index (index)}
-				<span class="pip" class:on={index < game.incidents} class:last={index === pack.numbers.incidentLimit - 1}
-				></span>
-			{/each}
-		</div>
-
-		{#if info.playerDeck.cards > 0}
-			<div
-				class="stat"
-				title="Player deck. Turns left before it runs out, and the chance the next draw holds an epidemic."
+<div class="frame">
+	<header class="bar">
+		<div class="month">
+			<strong>{MONTHS[campaign.month] ?? 'Campaign over'}</strong>
+			<span
+				>{campaign.month > 0 && campaign.month <= 12
+					? campaign.attempt === 1
+						? 'early attempt'
+						: 'late attempt'
+					: ''}</span
 			>
-				<span class="caption">Player deck</span>
-				<strong data-testid="deck-count">{info.playerDeck.cards}</strong>
-				<span>{info.playerDeck.turnsLeft} turns</span>
-				<span class="warn" class:hot={info.playerDeck.epidemicNextDraw > 0.5}
-					>epidemic {percent(info.playerDeck.epidemicNextDraw)}</span
+		</div>
+
+		<div class="spacer"></div>
+
+		{#if game && info}
+			<div class="track" title="Infection rate: cards flipped at the end of every turn">
+				<span class="caption">Infection rate</span>
+				{#each rates as rate, index (index)}
+					<span class="pip" class:on={index === game.rateIndex} class:past={index < game.rateIndex}>{rate}</span>
+				{/each}
+			</div>
+
+			<div class="track incidents" title="Incidents: the game is lost when the track is full">
+				<span class="caption">Incidents</span>
+				{#each { length: pack.numbers.incidentLimit } as _, index (index)}
+					<span class="pip" class:on={index < game.incidents} class:last={index === pack.numbers.incidentLimit - 1}
+					></span>
+				{/each}
+				<strong class:hot={game.incidents >= pack.numbers.incidentLimit - 2}
+					>{game.incidents}/{pack.numbers.incidentLimit}</strong
 				>
-				<span>{info.playerDeck.epidemicsDrawn}/{info.playerDeck.epidemicsDrawn + info.playerDeck.epidemicsLeft}</span>
+			</div>
+
+			{#if info.playerDeck.cards > 0}
+				<div class="stat" title="Cards left in the Player deck">
+					<span class="caption">Player deck</span>
+					<strong data-testid="deck-count">{info.playerDeck.cards}</strong>
+				</div>
+				<div class="stat minor" title="Turns left before the Player deck runs out">
+					<span class="caption">Turns left</span>
+					<strong>{info.playerDeck.turnsLeft}</strong>
+				</div>
+				<div class="stat" title="Chance that the next Player card drawn is an Epidemic">
+					<span class="caption">Epidemic next draw</span>
+					<strong class="warn" class:hot={info.playerDeck.epidemicNextDraw > 0.5}
+						>{percent(info.playerDeck.epidemicNextDraw)}</strong
+					>
+				</div>
+				<div class="stat" title="Epidemics drawn so far, out of all in the deck">
+					<span class="caption">Epidemics</span>
+					<strong
+						>{info.playerDeck.epidemicsDrawn}/{info.playerDeck.epidemicsDrawn + info.playerDeck.epidemicsLeft}</strong
+					>
+				</div>
+			{/if}
+
+			<div class="stat" title="Supply cubes left in the stockpile">
+				<span class="caption">Stockpile</span>
+				<strong>{game.stockpile}</strong>
 			</div>
 		{/if}
 
-		<div class="stat" title="Supply cubes left in the stockpile">
-			<span class="caption">Stockpile</span>
-			<strong>{game.stockpile}</strong>
+		<div class="right">
+			{#if !solo}
+				<span class="link" class:down={status !== 'connected'} title="Connection to the host"
+					>{status === 'connected' ? `${Math.max(1, players)} online` : status}</span
+				>
+			{/if}
+			<button onclick={onreset} title="Show the whole map">Fit map</button>
+			<button onclick={onmenu}>Menu</button>
 		</div>
-	{/if}
-
-	<div class="right">
-		{#if !solo}
-			<span class="link" class:down={status !== 'connected'} title="Connection to the host"
-				>{status === 'connected' ? `${Math.max(1, players)} online` : status}</span
-			>
-		{/if}
-		<button onclick={onreset} title="Show the whole map">Fit map</button>
-		<button onclick={onmenu}>Menu</button>
-	</div>
-</header>
+	</header>
+</div>
 
 <style>
+	.frame {
+		container: topbar / inline-size;
+	}
+
 	.bar {
 		display: flex;
 		align-items: center;
@@ -92,6 +109,31 @@
 		padding: 0 0.9rem;
 		font-size: 0.8rem;
 		white-space: nowrap;
+	}
+
+	/* The bar shares its width with the replay's side panel, so secondary figures give way first. */
+	@container topbar (width < 1320px) {
+		.month span,
+		.minor {
+			display: none;
+		}
+	}
+
+	@container topbar (width < 1180px) {
+		.track .caption {
+			display: none;
+		}
+	}
+
+	@container topbar (width < 1000px) {
+		.bar {
+			gap: 0.8rem;
+		}
+
+		.pip {
+			width: 0.95rem;
+			height: 0.95rem;
+		}
 	}
 
 	.month {
@@ -110,7 +152,7 @@
 	.month span,
 	.caption {
 		color: var(--muted);
-		font-size: 0.78rem;
+		font-size: 0.82rem;
 	}
 
 	.spacer {
@@ -128,21 +170,29 @@
 		gap: 0.45rem;
 	}
 
-	.stat strong {
+	.stat + .stat {
+		margin-left: -0.5rem;
+		padding-left: 0.8rem;
+		border-left: 1px solid var(--line);
+	}
+
+	.stat strong,
+	.track strong {
 		font-size: 1.05rem;
 		font-weight: 600;
 	}
 
-	.stat span:not(.caption) {
-		color: var(--muted);
+	.track strong {
+		margin-left: 0.4rem;
+	}
+
+	.track strong.hot,
+	.stat .warn.hot {
+		color: var(--danger);
 	}
 
 	.stat .warn {
 		color: var(--warn);
-	}
-
-	.stat .warn.hot {
-		color: var(--danger);
 	}
 
 	.caption {

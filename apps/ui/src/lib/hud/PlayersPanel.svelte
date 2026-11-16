@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { handLimit, pack } from '@repo/game';
 	import type { SeatId, World } from '@repo/game';
+	import { inkOn } from '#lib/color.ts';
 	import { cityName, SEAT_COLORS } from './labels.svelte.ts';
 
 	type Props = {
@@ -27,6 +28,7 @@
 			class:active={game.active === seat}
 			class:viewing={viewing === seat}
 			style:--seat={SEAT_COLORS[index]}
+			style:--on={inkOn(SEAT_COLORS[index] ?? '#000000')}
 			style:--tilt={`${[-0.6, 0.45, -0.3, 0.55][index] ?? 0}deg`}
 		>
 			<button class="main" onclick={() => onview(seat)} title="Show this hand">
@@ -38,6 +40,7 @@
 					>
 				</span>
 				<span class="where">{cityName(player.location)}</span>
+				{#if game.active === seat}<span class="turnmark">Playing</span>{/if}
 			</button>
 			<div class="row">
 				<span title="Supply cubes carried">▪ {player.supplies}</span>
@@ -61,7 +64,7 @@
 						class="claim"
 						class:on={mine.includes(seat)}
 						onclick={() => onclaim(seat)}
-						title="Mark this seat as yours">{mine.includes(seat) ? 'you' : `play ${character.name}`}</button
+						title={`Mark ${character.name} as the character you play`}>{mine.includes(seat) ? 'you' : 'claim'}</button
 					>
 				{/if}
 			</div>
@@ -95,11 +98,15 @@
 	}
 
 	.player {
+		position: relative;
+		--soft: color-mix(in srgb, var(--on) 74%, transparent);
+		--rule: color-mix(in srgb, var(--on) 35%, transparent);
 		padding: 0.45rem 0.6rem 0.5rem;
-		border-left: 3px solid var(--seat);
 		border-radius: 2px;
-		background: var(--slip);
-		color: var(--slip-ink);
+		background:
+			radial-gradient(ellipse at 15% 0%, rgb(255 248 228 / 0.2), transparent 65%),
+			linear-gradient(170deg, var(--seat), color-mix(in srgb, var(--seat) 82%, #140c06));
+		color: var(--on);
 		box-shadow: var(--slip-shadow);
 		rotate: var(--tilt);
 		transition:
@@ -134,7 +141,7 @@
 		width: 0.6rem;
 		height: 0.6rem;
 		flex: none;
-		border: 1px solid rgb(42 32 23 / 0.6);
+		border: 2px solid var(--on);
 		border-radius: 50%;
 		background: var(--seat);
 	}
@@ -145,7 +152,7 @@
 
 	@keyframes beat {
 		50% {
-			box-shadow: 0 0 0 3px color-mix(in srgb, var(--seat) 35%, transparent);
+			box-shadow: 0 0 0 3px color-mix(in srgb, var(--on) 35%, transparent);
 		}
 	}
 
@@ -165,7 +172,7 @@
 	}
 
 	.who small {
-		color: var(--slip-muted);
+		color: var(--soft);
 		font-size: 0.72rem;
 	}
 
@@ -173,12 +180,35 @@
 		text-decoration: line-through;
 	}
 
+	.turnmark {
+		position: absolute;
+		top: -0.55rem;
+		right: 0.5rem;
+		padding: 0 0.4rem;
+		border-radius: 2px;
+		background: var(--slip-ink);
+		color: var(--slip);
+		font-family: var(--font-ui);
+		font-size: 0.68rem;
+		font-style: normal;
+		font-weight: 700;
+		line-height: 1.1rem;
+		animation: tagged 380ms cubic-bezier(0.2, 1.4, 0.4, 1);
+	}
+
+	@keyframes tagged {
+		from {
+			opacity: 0;
+			translate: 0 0.4rem;
+		}
+	}
+
 	.where {
 		margin-left: auto;
 		max-width: 5.5rem;
 		overflow: hidden;
 		text-overflow: ellipsis;
-		color: var(--slip-muted);
+		color: var(--soft);
 		font-family: var(--font-display);
 		font-size: 0.85rem;
 		font-style: italic;
@@ -189,14 +219,16 @@
 		display: flex;
 		align-items: center;
 		gap: 0.6rem;
+		white-space: nowrap;
 		margin-top: 0.3rem;
-		color: var(--slip-muted);
+		color: var(--soft);
 		font-size: 0.74rem;
 	}
 
 	.over {
-		color: var(--ink-danger);
-		font-weight: 600;
+		color: var(--on);
+		font-weight: 700;
+		text-decoration: underline wavy;
 	}
 
 	.exposure {
@@ -207,39 +239,39 @@
 	.exposure i {
 		width: 0.5rem;
 		height: 0.5rem;
-		border: 1px solid var(--slip-muted);
+		border: 1px solid var(--soft);
 		border-radius: 1px;
 	}
 
 	.exposure i.scratched {
-		background: var(--slip-muted);
+		background: var(--soft);
 	}
 
 	.exposure i.scar {
-		border-color: var(--ink-warn);
-		background: var(--ink-warn);
+		border-color: #f1c35a;
+		background: #f1c35a;
 	}
 
 	.exposure i.skull {
-		border-color: var(--ink-danger);
-		background: var(--ink-danger);
+		border-color: #1d140d;
+		background: #1d140d;
 	}
 
 	.claim {
 		margin-left: auto;
 		padding: 0 0.4rem;
-		border: 1px solid var(--slip-line);
+		border: 1px solid var(--rule);
 		border-radius: 2px;
 		background: none;
-		color: var(--slip-muted);
+		color: var(--soft);
 		font: inherit;
 		cursor: pointer;
 	}
 
 	.claim.on {
-		border-color: var(--slip-ink);
-		background: var(--slip-ink);
-		color: var(--slip);
+		border-color: var(--on);
+		background: var(--on);
+		color: var(--seat);
 	}
 
 	.traits {
@@ -252,13 +284,12 @@
 
 	.traits span {
 		padding: 0 0.35rem;
-		border: 1px solid rgb(61 107 85 / 0.45);
 		border-radius: 2px;
-		color: var(--ink-good);
+		background: color-mix(in srgb, var(--on) 16%, transparent);
 	}
 
 	.traits .scar {
-		border-color: rgb(163 48 28 / 0.4);
-		color: var(--ink-danger);
+		background: rgb(20 10 6 / 0.35);
+		text-decoration: underline dotted;
 	}
 </style>

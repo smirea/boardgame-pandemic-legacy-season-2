@@ -311,6 +311,7 @@ try {
 		await click('ack-briefing');
 	}
 	await page.locator('.upkeep').waitFor();
+	await page.locator('.briefing').waitFor({ state: 'detached' });
 	const units = snap.world.game!.upkeep!.units;
 	const campaignBefore = snap.world.campaign;
 	await shot('6-upkeep');

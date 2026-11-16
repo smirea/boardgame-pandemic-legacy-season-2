@@ -2,11 +2,11 @@
 	import type { Color } from '@repo/game';
 
 	export const CITY_COLOR: Record<Color | 'haven', string> = {
-		blue: '#3d618f',
-		yellow: '#c4952c',
-		black: '#3b3732',
-		red: '#a9432d',
-		haven: '#4b8a77',
+		blue: '#2f64a3',
+		yellow: '#d9a128',
+		black: '#3a3632',
+		red: '#bc3f27',
+		haven: '#2f8f74',
 	};
 </script>
 

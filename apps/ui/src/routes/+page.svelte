@@ -87,7 +87,7 @@
 					type="password"
 					placeholder="Shared with your group"
 					data-testid="passphrase"
-				/></label
+				/><small>Needed to host or join. Playing on this screen needs none.</small></label
 			>
 			<div class="buttons">
 				<button class="primary" disabled={!secret} onclick={() => start('host')} data-testid="host">Host</button>
@@ -138,7 +138,7 @@
 
 	p {
 		margin: 0;
-		color: var(--muted);
+		color: #c3b8a3;
 		font-size: 1rem;
 		line-height: 1.5;
 	}
@@ -146,16 +146,22 @@
 	label {
 		display: flex;
 		flex-direction: column;
-		gap: 0.2rem;
+		gap: 0.3rem;
+		color: var(--ink);
+		font-size: 0.9rem;
+	}
+
+	label small {
 		color: var(--muted);
-		font-size: 0.85rem;
+		font-size: 0.8rem;
 	}
 
 	input {
-		padding: 0.45rem 0.1rem;
+		padding: 0.5rem 0.6rem;
 		border: 0;
-		border-bottom: 1px solid var(--line-strong);
-		background: none;
+		border-bottom: 1px solid rgb(231 220 198 / 0.45);
+		border-radius: 2px 2px 0 0;
+		background: rgb(10 8 6 / 0.55);
 		color: var(--ink);
 		font: inherit;
 		font-size: 1.05rem;
@@ -168,7 +174,7 @@
 	}
 
 	input::placeholder {
-		color: rgb(151 140 121 / 0.6);
+		color: rgb(190 178 158 / 0.75);
 	}
 
 	.buttons {

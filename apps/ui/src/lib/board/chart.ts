@@ -15,7 +15,7 @@ import type { BoardBounds, BoardPoint } from './projection';
 
 const PIXELS = 4096;
 const INK = '52 39 27';
-const SEA_INK = '52 74 82';
+const SEA_INK = '36 72 106';
 const RULE_INK = '139 74 51';
 
 type Ctx = CanvasRenderingContext2D;
@@ -66,11 +66,11 @@ function wobble(x: number, y: number, radius: number, rand: () => number) {
 
 /** The sheet's torn outline: a ragged inset of the rectangle with a bite out of two edges. */
 function tornEdge(width: number, height: number, rand: () => number) {
-	const inset = width * 0.006;
+	const inset = width * 0.0042;
 	const phases = Array.from({ length: 6 }, () => rand() * 100);
 	const bites = [
-		{ at: 0.18 + rand() * 0.1, depth: inset * 5, span: 0.035 },
-		{ at: 0.62 + rand() * 0.1, depth: inset * 3.5, span: 0.05 },
+		{ at: 0.18 + rand() * 0.1, depth: inset * 3.5, span: 0.035 },
+		{ at: 0.62 + rand() * 0.1, depth: inset * 2.2, span: 0.05 },
 	];
 	const ragged = (t: number, side: number) =>
 		inset *
@@ -160,23 +160,23 @@ function wear(ctx: Ctx, width: number, height: number) {
 		const shade = ctx.createLinearGradient(x - 60, 0, x + 60, 0);
 		const dark = index % 2 === 0 ? 0 : 1;
 		shade.addColorStop(0, 'rgb(90 64 36 / 0)');
-		shade.addColorStop(0.5 - dark * 0.02, `rgb(90 64 36 / ${0.08 + 0.04 * dark})`);
-		shade.addColorStop(0.52, 'rgb(255 250 236 / 0.12)');
+		shade.addColorStop(0.5 - dark * 0.02, `rgb(90 64 36 / ${0.04 + 0.03 * dark})`);
+		shade.addColorStop(0.52, 'rgb(255 250 236 / 0.07)');
 		shade.addColorStop(1, 'rgb(255 250 236 / 0)');
 		ctx.fillStyle = shade;
 		ctx.fillRect(x - 60, 0, 120, height);
 	}
 	const fold = ctx.createLinearGradient(0, height / 2 - 50, 0, height / 2 + 50);
 	fold.addColorStop(0, 'rgb(90 64 36 / 0)');
-	fold.addColorStop(0.49, 'rgb(90 64 36 / 0.1)');
-	fold.addColorStop(0.52, 'rgb(255 250 236 / 0.12)');
+	fold.addColorStop(0.49, 'rgb(90 64 36 / 0.06)');
+	fold.addColorStop(0.52, 'rgb(255 250 236 / 0.07)');
 	fold.addColorStop(1, 'rgb(255 250 236 / 0)');
 	ctx.fillStyle = fold;
 	ctx.fillRect(0, height / 2 - 50, width, 100);
 	const crease = (from: BoardPoint, to: BoardPoint) => {
 		for (const [rgb, alpha, offset] of [
-			['80 58 34', 0.28, 0],
-			['255 250 236', 0.4, 2],
+			['80 58 34', 0.16, 0],
+			['255 250 236', 0.24, 2],
 		] as const) {
 			ctx.strokeStyle = `rgb(${rgb} / ${alpha})`;
 			ctx.lineWidth = 1.4;
@@ -236,7 +236,7 @@ function wear(ctx: Ctx, width: number, height: number) {
 		[0, height, 0, height - burn],
 	] as const) {
 		const gradient = ctx.createLinearGradient(x0, y0, x1, y1);
-		gradient.addColorStop(0, 'rgb(84 58 30 / 0.42)');
+		gradient.addColorStop(0, 'rgb(84 58 30 / 0.26)');
 		gradient.addColorStop(1, 'rgb(84 58 30 / 0)');
 		ctx.fillStyle = gradient;
 		ctx.fillRect(0, 0, width, height);
@@ -245,8 +245,8 @@ function wear(ctx: Ctx, width: number, height: number) {
 	const edge = tornEdge(width, height, rand);
 	ctx.save();
 	ctx.filter = 'blur(5px)';
-	ctx.strokeStyle = 'rgb(74 48 24 / 0.5)';
-	ctx.lineWidth = 22;
+	ctx.strokeStyle = 'rgb(74 48 24 / 0.38)';
+	ctx.lineWidth = 16;
 	ctx.stroke(edge);
 	ctx.restore();
 	ctx.globalCompositeOperation = 'destination-in';
@@ -304,21 +304,10 @@ function paintChart(bounds: BoardBounds): Chart {
 
 	ink.save();
 	ink.clip(sea, 'evenodd');
-	ink.fillStyle = `rgb(${SEA_INK} / 0.06)`;
-	ink.fill(sphere);
 	// A survey grid ruled across open water only, finer than the graticule.
 	ink.strokeStyle = `rgb(${SEA_INK} / 0.12)`;
 	ink.lineWidth = px(0.8);
 	ink.stroke(line(geoGraticule().step([5, 5])()));
-	for (const [widthUnits, alpha] of [
-		[3.2, 0.07],
-		[1.6, 0.08],
-		[0.7, 0.08],
-	] as const) {
-		ink.strokeStyle = `rgb(${SEA_INK} / ${alpha})`;
-		ink.lineWidth = widthUnits;
-		ink.stroke(coarse);
-	}
 	// Water-lining: rings that follow the coast out to sea, fading with distance, as engravers did it.
 	const rings = sheet(width, height).ctx;
 	toBoard(rings);
@@ -399,9 +388,31 @@ function paintChart(bounds: BoardBounds): Chart {
 	faint.stroke(land);
 	faint.setLineDash([]);
 
-	const finish = (layer: CanvasRenderingContext2D, bleach = 0) => {
+	// Hand-tinted water: a faded blue wash, laid on heavier along the coasts the way colourists finished a print.
+	const water = (ctx: Ctx, strength: number) => {
+		toBoard(ctx);
+		ctx.save();
+		ctx.clip(sea, 'evenodd');
+		ctx.fillStyle = `rgb(95 150 195 / ${0.55 * strength})`;
+		ctx.fill(sphere);
+		ctx.lineJoin = 'round';
+		for (const [widthUnits, alpha] of [
+			[3.4, 0.16],
+			[1.7, 0.16],
+			[0.8, 0.14],
+		] as const) {
+			ctx.strokeStyle = `rgb(52 104 152 / ${alpha * strength})`;
+			ctx.lineWidth = widthUnits;
+			ctx.stroke(coarse);
+		}
+		ctx.restore();
+		ctx.setTransform(1, 0, 0, 1, 0, 0);
+	};
+
+	const finish = (layer: CanvasRenderingContext2D, wash: number, bleach = 0) => {
 		const { canvas, ctx } = sheet(width, height);
 		ctx.drawImage(base, 0, 0);
+		water(ctx, wash);
 		if (bleach) {
 			ctx.fillStyle = `rgb(248 242 226 / ${bleach})`;
 			ctx.fillRect(0, 0, width, height);
@@ -415,7 +426,7 @@ function paintChart(bounds: BoardBounds): Chart {
 		wear(ctx, width, height);
 		return canvas;
 	};
-	return { known: finish(ink), unknown: finish(faint, 0.3) };
+	return { known: finish(ink, 1), unknown: finish(faint, 0.55, 0.3) };
 }
 
 /** The neatline around the world, with a ruled border marking every ten degrees. */

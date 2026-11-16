@@ -38,16 +38,17 @@
 <style>
 	/* Infection cards are the dark half of the table: a night chart with the city's region colour as its pin. */
 	.card {
-		--tint: color-mix(in srgb, var(--accent) 70%, #e7dcc6);
+		--tint: color-mix(in srgb, var(--accent) 55%, #f3e9d4);
+		--deep: color-mix(in srgb, var(--accent) 55%, #120d09);
 		position: relative;
 		display: block;
 		width: 11em;
 		height: 7.2em;
 		flex: none;
 		padding: 0;
-		border: 1px solid color-mix(in srgb, var(--accent) 60%, #1d1914);
+		border: 1px solid var(--accent);
 		border-radius: 0.4em;
-		background: #1d1914;
+		background: var(--deep);
 		color: #ece2cd;
 		font-family: var(--font-ui);
 		font-size: var(--card-size, 0.72rem);
@@ -72,7 +73,7 @@
 		display: flex;
 		flex-direction: column;
 		padding: 1em 0.6em 0.4em;
-		background: linear-gradient(to top, rgb(22 19 15 / 0.96) 55%, transparent);
+		background: linear-gradient(to top, var(--deep) 55%, transparent);
 	}
 
 	.hollow {

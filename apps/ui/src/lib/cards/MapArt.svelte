@@ -43,18 +43,18 @@
 	}
 
 	.sea {
-		fill: #e3d8bd;
+		fill: #a9c1cc;
 	}
 
 	.rings {
 		fill: none;
-		stroke: rgb(52 74 82 / 0.22);
+		stroke: rgb(36 72 106 / 0.25);
 		stroke-width: 3.2;
 		stroke-linejoin: round;
 	}
 
 	.land {
-		fill: #d2bf96;
+		fill: #dcc9a0;
 		stroke: #3a2c1f;
 		stroke-width: 0.45;
 		stroke-linejoin: round;
@@ -67,7 +67,7 @@
 	}
 
 	.night .sea {
-		fill: #1d1914;
+		fill: color-mix(in srgb, var(--accent) 45%, #120d09);
 	}
 
 	.night .rings {
@@ -75,7 +75,7 @@
 	}
 
 	.night .land {
-		fill: color-mix(in srgb, var(--accent) 16%, #2c261e);
+		fill: color-mix(in srgb, var(--accent) 25%, #2c261e);
 		stroke: rgb(231 220 198 / 0.55);
 	}
 

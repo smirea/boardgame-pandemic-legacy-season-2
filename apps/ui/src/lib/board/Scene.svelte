@@ -9,7 +9,7 @@
 	import type { OrbitControls as OrbitControlsImpl } from 'three/examples/jsm/controls/OrbitControls.js';
 	import CityMarker from './CityMarker.svelte';
 	import { drawChart } from './chart';
-	import { fitBoard } from './fit';
+	import { DEFAULT_TILT, fitBoard } from './fit';
 	import Fog from './Fog.svelte';
 	import { layoutLabels } from './labels';
 	import { buildLandGeometry, mapToSheet } from './land';
@@ -68,7 +68,29 @@
 	let dragging = false;
 	let lastReset = 0;
 	// `$size` subscribes to the store. Reading `size.current` would not rerun when the canvas is resized.
-	const fit = $derived(fitBoard(bounds, $size.width / Math.max(1, $size.height), FOV));
+	const MARKER_REACH = 2.6;
+	const cityBounds: BoardBounds = (() => {
+		const points = Object.values(layout);
+		return {
+			minX: Math.min(...points.map(point => point.x)) - MARKER_REACH,
+			maxX: Math.max(...points.map(point => point.x)) + MARKER_REACH,
+			minZ: Math.min(...points.map(point => point.z)) - MARKER_REACH,
+			maxZ: Math.max(...points.map(point => point.z)) + MARKER_REACH,
+		};
+	})();
+	const sides = $derived.by(() => {
+		const width = Math.max(1, $size.width);
+		let left = 0;
+		let right = 0;
+		for (const rect of covered) {
+			if (rect.x + rect.width / 2 < width / 2) left = Math.max(left, rect.x + rect.width);
+			else right = Math.max(right, width - rect.x);
+		}
+		return { left: left / width, right: right / width };
+	});
+	const fit = $derived(
+		fitBoard(bounds, $size.width / Math.max(1, $size.height), FOV, DEFAULT_TILT, { bounds: cityBounds, ...sides }),
+	);
 	$effect(() => {
 		if (resetView !== lastReset) {
 			lastReset = resetView;

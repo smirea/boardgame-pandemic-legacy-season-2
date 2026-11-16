@@ -233,18 +233,20 @@
 
 	.shop {
 		display: grid;
-		grid-template-columns: 15rem minmax(0, 1fr);
+		grid-template-columns: 24rem minmax(0, 1fr);
 		gap: 1rem;
 		min-height: 0;
 	}
 
+	/* Two columns, so every upgrade on offer is in view at once and none hides below the fold. */
 	.groups {
-		display: flex;
-		flex-direction: column;
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		align-content: start;
 		gap: 0.2rem;
-		max-height: 15rem;
+		max-height: 17rem;
 		overflow: auto;
-		scrollbar-width: thin;
+		scrollbar-color: rgb(42 32 23 / 0.4) transparent;
 	}
 
 	.groups button {

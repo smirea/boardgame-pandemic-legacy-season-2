@@ -16,6 +16,7 @@
 		cardName,
 	} from './labels.svelte.ts';
 	import InfectionCard from '#lib/cards/InfectionCard.svelte';
+	import { inkOn } from '#lib/color.ts';
 	import PlayerCard, { cardColor } from './PlayerCard.svelte';
 
 	type Props = {
@@ -150,213 +151,226 @@
 	{/if}
 {/snippet}
 
-<footer class="dock">
-	{#if snap.phase === 'setup.supply'}
-		<div class="setup">
-			<div>
-				{#if game.stockpile > 0}
-					<strong>{game.stockpile}</strong> supply cubes to place. Click a city to add one. The opening infection then flips
-					9 cards. The list on the right shows where it is most likely to land.
-				{:else}
-					<strong>All cubes placed.</strong> The opening infection flips 9 cards next.
-				{/if}
+<div class="frame">
+	<footer class="dock">
+		{#if snap.phase === 'setup.supply'}
+			<div class="setup">
+				<div>
+					{#if game.stockpile > 0}
+						<strong>{game.stockpile}</strong> supply cubes to place. Click a city to add one. The opening infection then flips
+						9 cards. The list on the right shows where it is most likely to land.
+					{:else}
+						<strong>All cubes placed.</strong> The opening infection flips 9 cards next.
+					{/if}
+				</div>
+				<button onclick={() => send({ type: 'AUTO_SUPPLY' })} data-testid="auto-supply">Spread the rest evenly</button>
+				<button
+					class="primary"
+					disabled={game.stockpile > 0}
+					onclick={() => send({ type: 'CONFIRM_SUPPLY' })}
+					data-testid="confirm-supply">Infect 9 cities</button
+				>
 			</div>
-			<button onclick={() => send({ type: 'AUTO_SUPPLY' })} data-testid="auto-supply">Spread the rest evenly</button>
-			<button
-				class="primary"
-				disabled={game.stockpile > 0}
-				onclick={() => send({ type: 'CONFIRM_SUPPLY' })}
-				data-testid="confirm-supply">Infect 9 cities</button
-			>
-		</div>
-	{:else if snap.phase === 'setup.events'}
-		<div class="setup">
-			<div>Pick <strong>{eventsNeeded}</strong> Rationed Events for the deck ({picked.length} chosen).</div>
-			<div class="events">
-				{#each rationed as card (card.id)}
-					<span class:unpicked={!picked.includes(card.id)}
-						><PlayerCard
-							{card}
-							small
-							tone={picked.includes(card.id) ? 'play' : null}
-							onclick={() => toggleEvent(card.id)}
-						/></span
-					>
-				{/each}
+		{:else if snap.phase === 'setup.events'}
+			<div class="setup">
+				<div>Pick <strong>{eventsNeeded}</strong> Rationed Events for the deck. {picked.length} chosen.</div>
+				<!-- A tray of every Rationed Event with its full text, so the choice never depends on remembering the cards. -->
+				<div class="events" in:fly={{ y: 40, duration: 380 }}>
+					{#each rationed as card (card.id)}
+						{@const event = card.kind === 'event' ? pack.events.find(item => item.id === card.event) : undefined}
+						<button class="card" class:picked={picked.includes(card.id)} onclick={() => toggleEvent(card.id)}>
+							<strong>{event?.name}</strong>
+							<span>{event?.text}</span>
+						</button>
+					{/each}
+				</div>
+				<button
+					class="primary"
+					disabled={picked.length !== eventsNeeded}
+					onclick={() => send({ type: 'CONFIRM_EVENTS' })}
+					data-testid="confirm-events">Deal and begin</button
+				>
 			</div>
-			<button
-				class="primary"
-				disabled={picked.length !== eventsNeeded}
-				onclick={() => send({ type: 'CONFIRM_EVENTS' })}
-				data-testid="confirm-events">Deal and begin</button
-			>
-		</div>
-	{:else if snap.phase === 'over'}
-		<div class="setup">
-			<div class:lost={!game.outcome?.won}>
-				<strong>{game.outcome?.won ? 'Victory' : 'Defeat'}</strong>: {game.outcome?.reason}
+		{:else if snap.phase === 'over'}
+			<div class="setup">
+				<div class:lost={!game.outcome?.won}>
+					<strong>{game.outcome?.won ? 'Victory' : 'Defeat'}</strong>: {game.outcome?.reason}
+				</div>
+				<button class="primary" onclick={() => send({ type: 'CONTINUE' })} data-testid="continue">Go to game end</button
+				>
 			</div>
-			<button class="primary" onclick={() => send({ type: 'CONTINUE' })} data-testid="continue">Go to game end</button>
-		</div>
-	{:else}
-		<div class="hands">
-			<nav aria-label="Other hands">
-				{#each others as other (other)}
-					<button
-						class:current={other === game.active}
-						style:--seat={seatColor(other)}
-						onclick={() => onview(other)}
-						title={`Show ${seatName(world, other)}'s hand`}
-						animate:flip={{ duration: 300 }}
-					>
-						<span class="who">{seatName(world, other)}</span>
-						<span class="minis">
+		{:else}
+			<div class="hands">
+				<nav aria-label="Other hands">
+					{#each others as other (other)}
+						<button
+							class:current={other === game.active}
+							style:--seat={seatColor(other)}
+							onclick={() => onview(other)}
+							title={`Show ${seatName(world, other)}'s hand`}
+							animate:flip={{ duration: 300 }}
+						>
+							<span class="who">{seatName(world, other)}</span>
+							<!-- Card names come from data-name so finding a teammate by name never matches one of their cards. -->
 							{#each cardsOf(other) as card (card.id)}
-								<i style:--band={cardColor(card)} title={cardName(world, card.id)} transition:fade={{ duration: 200 }}
+								<i
+									style:--band={cardColor(card)}
+									style:--on={inkOn(cardColor(card))}
+									data-name={card.kind === 'epidemic' ? 'Epidemic' : cardName(world, card.id)}
+									transition:fade={{ duration: 200 }}
 								></i>
 							{/each}
-						</span>
-					</button>
-				{/each}
-			</nav>
-		</div>
+						</button>
+					{/each}
+				</nav>
+			</div>
 
-		<div class="held" style:--seat={seatColor(seat)}>
-			<p class="holder">
-				<i></i>{seatName(world, seat)}
-				<small
-					>{seat === home && owns(seat) ? 'your hand' : owns(seat) ? 'also yours' : 'their hand'}, {handCards.length} of {handLimit(
-						world,
-						seat,
-					)}</small
-				>
-				{#if seat !== home}<button class="back" onclick={() => onview(home)}>Back to {seatName(world, home)}</button
-					>{/if}
-			</p>
-			{#key seat}
-				<div class="hand" data-testid="hand" style:--overlap={`${overlap}rem`} in:fade={{ duration: 220 }}>
-					{#each handCards as card, index (card.id)}
-						<div
-							class="slot"
-							animate:flip={{ duration: 320 }}
-							in:fly={{ x: 160, y: -220, duration: 520, easing: backOut }}
-							out:fly={{ y: -140, duration: 260, easing: cubicIn }}
-						>
+			<div class="held" style:--seat={seatColor(seat)}>
+				<p class="holder">
+					<strong>{seatName(world, seat)}</strong>
+					<small>{seat === home && owns(seat) ? 'Your hand' : owns(seat) ? 'Also yours' : 'Their hand'}</small>
+					<small>{handCards.length} of {handLimit(world, seat)} cards</small>
+					{#if seat !== home}<button class="back" onclick={() => onview(home)}>Back to {seatName(world, home)}</button
+						>{/if}
+				</p>
+				{#key seat}
+					<div class="hand" data-testid="hand" style:--overlap={`${overlap}rem`} in:fade={{ duration: 220 }}>
+						{#each handCards as card, index (card.id)}
 							<div
-								class="lift"
-								style:--angle={`${fanAngle(index)}deg`}
-								style:--drop={`${Math.abs(fanAngle(index)) * 0.06}rem`}
+								class="slot"
+								animate:flip={{ duration: 320 }}
+								in:fly={{ x: 160, y: -220, duration: 520, easing: backOut }}
+								out:fly={{ y: -140, duration: 260, easing: cubicIn }}
 							>
-								<PlayerCard
-									{card}
-									tone={mustDiscard ? 'discard' : playable.has(card.id) ? 'play' : null}
-									onclick={mustDiscard
-										? () => send({ type: 'DECIDE', decide: { d: 'discard', seat, cards: [card.id] } })
-										: playable.has(card.id)
-											? () => onplaycard(seat, card.id)
-											: undefined}
-								/>
+								<div
+									class="lift"
+									style:--angle={`${fanAngle(index)}deg`}
+									style:--drop={`${Math.abs(fanAngle(index)) * 0.06}rem`}
+								>
+									<PlayerCard
+										{card}
+										tone={mustDiscard ? 'discard' : playable.has(card.id) ? 'play' : null}
+										onclick={mustDiscard
+											? () => send({ type: 'DECIDE', decide: { d: 'discard', seat, cards: [card.id] } })
+											: playable.has(card.id)
+												? () => onplaycard(seat, card.id)
+												: undefined}
+									/>
+								</div>
 							</div>
+						{:else}
+							<p class="empty">No cards in hand.</p>
+						{/each}
+					</div>
+				{/key}
+			</div>
+
+			<div class="middle">
+				{#if overLimit.length}
+					<p class="prompt">
+						{overLimit.map(other => seatName(world, other)).join(', ')} must discard down to the hand limit.
+						{overLimit.some(owns) ? 'Click a card in that hand, or play an event.' : 'Waiting for them.'}
+					</p>
+				{:else if pending}
+					<p class="prompt">
+						{decisionTitle(world, pending)}
+					</p>
+					{#if choices.length}
+						<div class="chips">
+							{#each choices.slice(0, 24) as decide, index (index)}
+								<button onclick={() => send({ type: 'DECIDE', decide })}>{decideLabel(world, decide)}</button>
+							{/each}
 						</div>
 					{:else}
-						<p class="empty">No cards in hand.</p>
-					{/each}
-				</div>
-			{/key}
-		</div>
-
-		<div class="middle">
-			{#if overLimit.length}
-				<p class="prompt">
-					{overLimit.map(other => seatName(world, other)).join(', ')} must discard down to the hand limit.
-					{overLimit.some(owns) ? 'Click a card in that hand, or play an event.' : 'Waiting for them.'}
-				</p>
-			{:else if pending}
-				<p class="prompt">
-					{decisionTitle(world, pending)}
-				</p>
-				{#if choices.length}
-					<div class="chips">
-						{#each choices.slice(0, 24) as decide, index (index)}
-							<button onclick={() => send({ type: 'DECIDE', decide })}>{decideLabel(world, decide)}</button>
-						{/each}
-					</div>
-				{:else}
-					<p class="waiting">Waiting for {seatName(world, decider)}.</p>
-				{/if}
-			{:else if snap.phase === 'playing.actions'}
-				{#if canAct}
-					<div class="chips" data-testid="actions">
-						{#each chips as chip (chip.name)}
-							<button onclick={() => ongroup(chip.name)}>
-								{chip.label}
-								{#if chip.detail}<small>{chip.detail}</small>{/if}
-								{#if chip.free}<small class="free">free</small>{/if}
-								{#if chip.count > 1}<small class="count">{chip.count}</small>{/if}
-							</button>
-						{/each}
-						{#if noSupplies}
-							<button disabled title={noSupplies}>Make supplies <small>{noSupplies}</small></button>
-						{/if}
-					</div>
-				{:else}
-					<p class="prompt">{seatName(world, game.active)} is taking actions.</p>
-				{/if}
-			{:else if snap.phase === 'playing.draw'}
-				<p class="prompt">{seatName(world, game.active)} draws 2 Player cards.</p>
-				{@render drew()}
-			{:else}
-				<p class="prompt">Infect cities: {game.infectionsLeft} card{game.infectionsLeft === 1 ? '' : 's'} to flip.</p>
-				{@render drew()}
-				<div class="flipped" data-testid="flipped">
-					{#each flipped as entry (entry.seq)}
-						<div class="flipcard" animate:flip={{ duration: 300 }}>
-							<InfectionCard card={entry.card} note={entry.note} />
+						<p class="waiting">Waiting for {seatName(world, decider)}.</p>
+					{/if}
+				{:else if snap.phase === 'playing.actions'}
+					{#if canAct}
+						<div class="chips" data-testid="actions">
+							{#each chips as chip (chip.name)}
+								<button onclick={() => ongroup(chip.name)}>
+									{chip.label}
+									{#if chip.detail}<small>{chip.detail}</small>{/if}
+									{#if chip.free}<small class="free">free</small>{/if}
+									{#if chip.count > 1}<small class="count">{chip.count}</small>{/if}
+								</button>
+							{/each}
+							{#if noSupplies}
+								<button disabled title={noSupplies}>Make supplies <small>{noSupplies}</small></button>
+							{/if}
 						</div>
-					{/each}
-				</div>
-			{/if}
-		</div>
+					{:else}
+						<p class="prompt">{seatName(world, game.active)} is taking actions.</p>
+					{/if}
+				{:else if snap.phase === 'playing.draw'}
+					<p class="prompt">{seatName(world, game.active)} draws 2 Player cards.</p>
+					{@render drew()}
+				{:else}
+					<p class="prompt">Infect cities: {game.infectionsLeft} card{game.infectionsLeft === 1 ? '' : 's'} to flip.</p>
+					{@render drew()}
+					<div class="flipped" data-testid="flipped">
+						{#each flipped as entry (entry.seq)}
+							<div class="flipcard" animate:flip={{ duration: 300 }}>
+								<InfectionCard card={entry.card} note={entry.note} />
+							</div>
+						{/each}
+					</div>
+				{/if}
+			</div>
 
-		<div class="turn">
-			{#if snap.phase === 'playing.actions'}
-				<div class="pips" title="Actions left">
-					{#each { length: Math.max(pack.numbers.actionsPerTurn, game.actionsLeft) } as _, index (index)}
-						<i class:on={index < game.actionsLeft}></i>
-					{/each}
-				</div>
-				<button
-					class="primary"
-					disabled={!canAct || blocked}
-					onclick={() => send({ type: 'END_ACTIONS', seat: game.active })}
-					data-testid="end-actions"
-					title="Space"
-				>
-					{game.actionsLeft > 0 ? 'End actions' : 'Draw cards'}
-				</button>
-				<button disabled={!snap.canUndo || !canAct} onclick={() => send({ type: 'UNDO' })} data-testid="undo" title="Z"
-					>Undo</button
-				>
-			{:else if snap.phase === 'playing.draw'}
-				<button
-					class="primary"
-					disabled={!canAct || blocked}
-					onclick={() => send({ type: 'DRAW' })}
-					data-testid="draw"
-					title="Space">Draw card ({game.drawsLeft})</button
-				>
-			{:else}
-				<button
-					class="primary"
-					disabled={!canAct || blocked}
-					onclick={() => send({ type: 'INFECT' })}
-					data-testid="infect"
-					title="Space">Flip infection ({game.infectionsLeft})</button
-				>
-			{/if}
-		</div>
-	{/if}
-</footer>
+			<div class="turn" style:--seat={seatColor(game.active)}>
+				<p class="whose">
+					<strong>{seatName(world, game.active)}'s turn</strong>
+					<small
+						>{snap.phase === 'playing.actions'
+							? `${game.actionsLeft} action${game.actionsLeft === 1 ? '' : 's'} left`
+							: snap.phase === 'playing.draw'
+								? 'Drawing cards'
+								: 'Infecting cities'}</small
+					>
+				</p>
+				{#if snap.phase === 'playing.actions'}
+					<div class="pips" title="Actions left">
+						{#each { length: Math.max(pack.numbers.actionsPerTurn, game.actionsLeft) } as _, index (index)}
+							<i class:on={index < game.actionsLeft}></i>
+						{/each}
+					</div>
+					<button
+						class="primary"
+						disabled={!canAct || blocked}
+						onclick={() => send({ type: 'END_ACTIONS', seat: game.active })}
+						data-testid="end-actions"
+						title="Space"
+					>
+						{game.actionsLeft > 0 ? 'End actions' : 'Draw cards'}
+					</button>
+					<button
+						disabled={!snap.canUndo || !canAct}
+						onclick={() => send({ type: 'UNDO' })}
+						data-testid="undo"
+						title="Z">Undo</button
+					>
+				{:else if snap.phase === 'playing.draw'}
+					<button
+						class="primary"
+						disabled={!canAct || blocked}
+						onclick={() => send({ type: 'DRAW' })}
+						data-testid="draw"
+						title="Space">Draw card ({game.drawsLeft})</button
+					>
+				{:else}
+					<button
+						class="primary"
+						disabled={!canAct || blocked}
+						onclick={() => send({ type: 'INFECT' })}
+						data-testid="infect"
+						title="Space">Flip infection ({game.infectionsLeft})</button
+					>
+				{/if}
+			</div>
+		{/if}
+	</footer>
+</div>
 
 <style>
 	/* No tray: the dock is the near edge of the table, with the held hand rising out of the bottom of the screen. */
@@ -365,7 +379,7 @@
 		position: relative;
 		z-index: 35;
 		display: grid;
-		grid-template-columns: minmax(8rem, 12rem) minmax(0, 1.35fr) minmax(0, 1fr) 9rem;
+		grid-template-columns: minmax(9rem, 15rem) minmax(0, 1.4fr) minmax(0, 1fr) 9rem;
 		gap: 1.1rem;
 		height: 10.4rem;
 		margin-top: -2.6rem;
@@ -375,6 +389,17 @@
 
 	.dock :is(button, input, .slot, .events, .flipped, .drew, .prompt) {
 		pointer-events: auto;
+	}
+
+	/* Beside the replay panel the dock is narrower, so the held cards shrink rather than run into the prompts. */
+	@container dock (width < 1100px) {
+		.hand {
+			--card-size: 0.66rem;
+		}
+	}
+
+	.frame {
+		container: dock / inline-size;
 	}
 
 	.setup {
@@ -398,24 +423,68 @@
 	}
 
 	.events {
-		display: flex;
+		position: absolute;
+		bottom: calc(100% - 2.2rem);
+		left: 50%;
+		display: grid;
+		grid-template-columns: repeat(4, 13.5rem);
 		gap: 0.35rem;
-		flex-wrap: wrap;
-		max-width: 40rem;
+		max-height: min(24rem, calc(100vh - 16rem));
+		padding: 0.8rem;
+		overflow: auto;
+		border-radius: 2px;
+		background: var(--document);
+		box-shadow: var(--document-shadow);
+		translate: -50% 0;
+		scrollbar-width: thin;
 	}
 
-	.events > span {
+	.events .card {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		gap: 0.1rem;
+		padding: 0.4rem 1.6rem 0.45rem 0.55rem;
+		border: 1px solid rgb(42 32 23 / 0.25);
+		border-left: 4px solid #b08628;
+		border-radius: 2px;
+		background: rgb(255 252 242 / 0.35);
+		color: var(--slip-ink);
+		font: inherit;
+		text-align: left;
+		cursor: pointer;
 		transition:
-			opacity 200ms ease,
-			transform 200ms ease;
+			background 150ms ease,
+			border-color 150ms ease;
 	}
 
-	.events > span:hover {
-		transform: translateY(-0.2rem);
+	.events .card:hover {
+		border-color: var(--slip-ink);
 	}
 
-	.unpicked {
-		opacity: 0.5;
+	.events .card.picked {
+		border-color: #b08628;
+		background: #ecd394;
+	}
+
+	.events .card.picked::after {
+		content: '✓';
+		position: absolute;
+		top: 0.3rem;
+		right: 0.5rem;
+		font-weight: 700;
+	}
+
+	.events strong {
+		font-family: var(--font-display);
+		font-size: 1rem;
+		font-weight: 400;
+	}
+
+	.events span {
+		color: var(--slip-muted);
+		font-size: 0.74rem;
+		line-height: 1.25;
 	}
 
 	.hands {
@@ -433,9 +502,9 @@
 
 	nav button {
 		display: flex;
-		flex-direction: column;
-		align-items: flex-start;
-		gap: 0.2rem;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 3px;
 		padding: 0.15rem 0 0.15rem 0.55rem;
 		border: 0;
 		border-left: 2px solid var(--seat);
@@ -453,68 +522,72 @@
 		color: var(--ink);
 	}
 
-	nav button.current .who::after {
-		content: ' is playing';
-		color: var(--muted);
-		font-size: 0.72rem;
-	}
-
 	.who {
+		margin-right: 0.3rem;
+		color: var(--seat);
 		font-family: var(--font-display);
-		font-size: 0.98rem;
+		font-size: 1rem;
 	}
 
-	/* Someone else's hand is shown face up but small: a sliver of each card in its region's colour. */
-	.minis {
-		display: flex;
-		gap: 2px;
-		min-height: 1.1rem;
+	/* Someone else's hand is shown face up but small: a chip per card, in its region's colour, with its name. */
+	nav i {
+		max-width: 4.6rem;
+		padding: 0 0.3rem;
+		overflow: hidden;
+		border-radius: 2px;
+		background: linear-gradient(170deg, var(--band), color-mix(in srgb, var(--band) 78%, #140c06));
+		box-shadow: 0 1px 2px rgb(0 0 0 / 0.45);
+		color: var(--on);
+		font-size: 0.68rem;
+		font-style: normal;
+		font-weight: 600;
+		line-height: 1.15rem;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		transition: translate 200ms ease;
 	}
 
-	.minis i {
-		width: 0.75rem;
-		height: 1.1rem;
-		border-radius: 1px;
-		border-top: 3px solid var(--band);
-		background: #e6dcc5;
-		box-shadow: 0 1px 2px rgb(0 0 0 / 0.5);
-		transition: transform 200ms ease;
+	nav i::after {
+		content: attr(data-name);
 	}
 
-	nav button:hover .minis i {
-		transform: translateY(-2px);
+	nav button:hover i {
+		translate: 0 -2px;
 	}
 
 	.held {
 		position: relative;
 		display: flex;
-		flex-direction: column;
-		align-items: center;
+		align-items: flex-start;
+		justify-content: center;
+		gap: 0.9rem;
 		min-width: 0;
 	}
 
+	/* The holder's name sits beside the fan, outside the space a lifted card sweeps through. */
 	.holder {
 		display: flex;
-		align-items: baseline;
-		gap: 0.45rem;
-		margin: 0.15rem 0 0;
-		font-family: var(--font-display);
-		font-size: 1.05rem;
+		flex-direction: column;
+		align-items: flex-end;
+		gap: 0.1rem;
+		margin: 2.6rem 0 0;
+		padding-right: 0.7rem;
+		border-right: 2px solid var(--seat);
 		white-space: nowrap;
 	}
 
-	.holder i {
-		width: 0.5rem;
-		height: 0.5rem;
-		border-radius: 50%;
-		background: var(--seat);
-		align-self: center;
+	.holder strong {
+		color: var(--seat);
+		font-family: var(--font-display);
+		font-size: 1.2rem;
+		font-weight: 400;
+		line-height: 1.1;
 	}
 
 	.holder small {
 		color: var(--muted);
-		font-family: var(--font-ui);
-		font-size: 0.75rem;
+		font-size: 0.78rem;
+		line-height: 1.25;
 	}
 
 	.back {
@@ -538,7 +611,7 @@
 		display: flex;
 		justify-content: center;
 		min-width: 0;
-		margin-top: 0.4rem;
+		margin-top: 1.2rem;
 		padding-inline: var(--overlap);
 	}
 
@@ -694,6 +767,26 @@
 		flex-direction: column;
 		justify-content: center;
 		gap: 0.4rem;
+	}
+
+	.whose {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		margin: 0;
+		line-height: 1.15;
+	}
+
+	.whose strong {
+		color: var(--seat);
+		font-family: var(--font-display);
+		font-size: 1.15rem;
+		font-weight: 400;
+	}
+
+	.whose small {
+		color: var(--muted);
+		font-size: 0.8rem;
 	}
 
 	.pips {

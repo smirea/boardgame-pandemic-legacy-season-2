@@ -4,6 +4,7 @@
 	import Board from '#lib/board/Board.svelte';
 	import type { BoardView, CityView, Fx, FxKind } from '#lib/board/types.ts';
 	import type { SessionView } from '#lib/session/session.svelte.ts';
+	import { inkOn } from '#lib/color.ts';
 	import { LS } from '#lib/storage.ts';
 	import { untrack } from 'svelte';
 	import { backOut } from 'svelte/easing';
@@ -445,7 +446,14 @@
 
 		{#if game && snap.phase !== 'upkeep'}
 			<aside class="left" bind:this={leftPanel}>
-				<PlayersPanel {world} {mine} {solo} {viewing} onview={seat => (viewing = seat)} onclaim={claim} />
+				<PlayersPanel
+					{world}
+					{mine}
+					solo={solo || spectator}
+					{viewing}
+					onview={seat => (viewing = seat)}
+					onclaim={claim}
+				/>
 			</aside>
 		{/if}
 		{#if game && info && snap.phase !== 'upkeep'}
@@ -459,6 +467,23 @@
 			</aside>
 		{/if}
 
+		{#if game && playing}
+			<!-- The chart's key, printed in its corner: what each mark beside a city name means. -->
+			<dl class="legend" aria-label="Map key">
+				<dt><b class="num">3</b></dt>
+				<dd>Population</dd>
+				<dt><b class="supplies">1</b></dt>
+				<dd>Supply cubes</dd>
+				<dt><b class="plague">1</b></dt>
+				<dd>Plague cubes</dd>
+				<dt><b class="hollow">1</b></dt>
+				<dd>Hollow Men</dd>
+				<dt><b class="odds">6%</b></dt>
+				<dd>Chance it is infected next</dd>
+				<dt><b class="ring"></b></dt>
+				<dd>Somewhere you can act</dd>
+			</dl>
+		{/if}
 		{#if game && snap.phase !== 'upkeep'}
 			<div class="goals">
 				<Objectives
@@ -542,6 +567,7 @@
 				<div
 					class="turn-banner"
 					style:--seat={turnBanner.color}
+					style:--on={inkOn(turnBanner.color)}
 					in:fly={{ y: -24, duration: 320 }}
 					out:fade={{ duration: 450 }}
 				>
@@ -566,12 +592,18 @@
 				<div class="briefing" in:fly={{ y: 24, duration: 300 }}>
 					<h2>New this game</h2>
 					<ul>
-						{#each campaign.briefing as line, index (index)}<li>{line}</li>{/each}
+						{#each campaign.briefing as line, index (index)}
+							{@const split = line.indexOf(': ')}
+							<li>
+								{#if split > 0 && split < 48}<strong>{line.slice(0, split)}</strong>
+									{line.slice(split + 2)}{:else}{line}{/if}
+							</li>
+						{/each}
 					</ul>
 					<button
 						class="primary"
 						onclick={() => (spectator ? (briefingRead = campaign.briefing.join('|')) : send({ type: 'ACK_BRIEFING' }))}
-						data-testid="ack-briefing">Got it</button
+						data-testid="ack-briefing">Continue</button
 					>
 				</div>
 			</div>
@@ -665,12 +697,12 @@
 
 	.left {
 		left: 0.7rem;
-		width: 12.5rem;
+		width: 11.5rem;
 	}
 
 	.right {
 		right: 0.7rem;
-		width: 13rem;
+		width: 12rem;
 		max-height: calc(100% - 1.4rem);
 		display: flex;
 	}
@@ -681,6 +713,78 @@
 		left: 50%;
 		z-index: 30;
 		transform: translateX(-50%);
+	}
+
+	.legend {
+		position: absolute;
+		left: 0.9rem;
+		bottom: 3.4rem;
+		z-index: 25;
+		display: grid;
+		grid-template-columns: 1.6rem auto;
+		align-items: center;
+		gap: 0.15rem 0.4rem;
+		margin: 0;
+		padding: 0.45rem 0.65rem;
+		border: 1px solid rgb(42 32 23 / 0.35);
+		background: rgb(236 227 207 / 0.92);
+		box-shadow: var(--slip-shadow);
+		color: var(--slip-ink);
+		font-size: 0.72rem;
+		rotate: -0.4deg;
+		pointer-events: none;
+	}
+
+	.legend dt {
+		display: flex;
+		justify-content: center;
+	}
+
+	.legend dd {
+		margin: 0;
+	}
+
+	.legend b {
+		min-width: 0.9rem;
+		padding: 0 0.2rem;
+		border-radius: 1px;
+		font-weight: 600;
+		line-height: 1.25;
+		text-align: center;
+	}
+
+	.legend .num {
+		color: #6f604c;
+		font-weight: 500;
+	}
+
+	.legend .supplies {
+		border: 1px solid #2a2017;
+		background: #f1e9d6;
+	}
+
+	.legend .plague {
+		background: #6f8a22;
+		color: #f3f0dc;
+	}
+
+	.legend .hollow {
+		background: #4e3b63;
+		color: #efe6f7;
+	}
+
+	.legend .odds {
+		color: #8b5a12;
+		font-style: italic;
+	}
+
+	.legend .ring {
+		width: 0.95rem;
+		height: 0.95rem;
+		min-width: 0;
+		padding: 0;
+		border: 2px solid #b5521f;
+		border-radius: 50%;
 	}
 
 	.cityinfo,
@@ -914,10 +1018,10 @@
 		align-items: center;
 		gap: 0.55rem;
 		padding: 0.3rem 1.1rem 0.35rem;
-		border: 1px solid var(--line-strong);
-		border-bottom: 2px solid var(--seat);
 		border-radius: 2px;
-		background: var(--panel-solid);
+		background: var(--seat);
+		color: var(--on);
+		box-shadow: 0 0.6rem 1.6rem rgb(0 0 0 / 0.45);
 		font-family: var(--font-display);
 		font-size: 1.15rem;
 		transform: translateX(-50%);
@@ -927,8 +1031,8 @@
 	.turn-banner i {
 		width: 0.55rem;
 		height: 0.55rem;
+		border: 2px solid var(--on);
 		border-radius: 50%;
-		background: var(--seat);
 	}
 
 	.flash {
@@ -1017,10 +1121,28 @@
 	}
 
 	.briefing ul {
+		display: flex;
+		flex-direction: column;
+		gap: 0.55rem;
+		max-height: 60vh;
 		margin: 0 0 1.1rem;
-		padding-left: 1.1rem;
+		padding: 0;
+		overflow: auto;
+		list-style: none;
 		font-size: 0.95rem;
-		line-height: 1.5;
+		line-height: 1.45;
+	}
+
+	.briefing li {
+		padding-left: 0.7rem;
+		border-left: 2px solid rgb(42 32 23 / 0.3);
+	}
+
+	.briefing strong {
+		display: block;
+		font-family: var(--font-display);
+		font-size: 1.08rem;
+		font-weight: 400;
 	}
 
 	.briefing li::marker {

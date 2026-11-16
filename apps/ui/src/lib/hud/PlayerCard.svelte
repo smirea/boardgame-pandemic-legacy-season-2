@@ -13,6 +13,7 @@
 <script lang="ts">
 	import { pack } from '@repo/game';
 	import MapArt from '#lib/cards/MapArt.svelte';
+	import { inkOn } from '#lib/color.ts';
 
 	type Props = { card: PlayerCard; onclick?: () => void; tone?: 'play' | 'discard' | null; small?: boolean };
 
@@ -70,6 +71,7 @@
 	class:play={tone === 'play'}
 	class:discard={tone === 'discard'}
 	style:--band={face.color}
+	style:--on={inkOn(face.color)}
 	disabled={!onclick}
 	{onclick}
 	title={face.text}
@@ -100,8 +102,9 @@
 </button>
 
 <style>
-	/* Player cards are card stock in the hand: printed ink on paper, the region's colour along the top. */
+	/* A player card is printed solid in its region's colour, with the map inset like a plate on the front. */
 	.card {
+		--soft: color-mix(in srgb, var(--on) 72%, transparent);
 		position: relative;
 		display: flex;
 		flex-direction: column;
@@ -109,22 +112,25 @@
 		height: 9.7em;
 		flex: none;
 		padding: 0;
-		border: 1px solid rgb(60 44 28 / 0.4);
+		border: 1px solid color-mix(in srgb, var(--band) 55%, #000);
 		border-radius: 0.4em;
-		background: linear-gradient(172deg, #f0e8d6, #e2d6bb);
-		color: #2a2017;
+		background:
+			radial-gradient(ellipse at 20% 0%, rgb(255 248 228 / 0.22), transparent 60%),
+			linear-gradient(172deg, var(--band), color-mix(in srgb, var(--band) 80%, #140c06));
+		color: var(--on);
 		font-family: var(--font-ui);
 		font-size: var(--card-size, 0.73rem);
 		text-align: left;
 		overflow: hidden;
 		box-shadow:
+			inset 0 0 0 0.22em rgb(255 248 228 / 0.14),
 			0 0.15em 0.3em rgb(0 0 0 / 0.35),
 			0 0.6em 1.4em rgb(0 0 0 / 0.25);
 		transition:
 			box-shadow 200ms ease,
 			outline-color 200ms ease;
 		outline: 2px solid transparent;
-		outline-offset: 1px;
+		outline-offset: 2px;
 	}
 
 	.card.small {
@@ -147,12 +153,11 @@
 	.head {
 		display: flex;
 		flex-direction: column;
-		padding: 0.45em 0.6em 0.35em;
-		border-top: 0.38em solid var(--band);
+		padding: 0.5em 0.6em 0.35em;
 	}
 
 	.kicker {
-		color: #6f604c;
+		color: var(--soft);
 		font-size: 0.66em;
 		font-weight: 600;
 	}
@@ -169,8 +174,11 @@
 	.art {
 		flex: 1;
 		min-height: 0;
-		margin: 0 0.35em;
-		border: 1px solid rgb(60 44 28 / 0.35);
+		margin: 0 0.4em;
+		border: 1px solid rgb(0 0 0 / 0.3);
+		border-radius: 0.15em;
+		overflow: hidden;
+		box-shadow: 0 0 0 0.12em rgb(255 248 228 / 0.35);
 	}
 
 	.foot {
@@ -191,14 +199,14 @@
 		width: 0.42em;
 		height: 0.42em;
 		border-radius: 50%;
-		background: var(--band);
+		background: var(--on);
 	}
 
 	.badge {
 		padding: 0 0.4em;
 		border-radius: 0.15em;
-		background: var(--band);
-		color: #f3ecdc;
+		background: var(--on);
+		color: var(--band);
 		font-size: 0.62em;
 		font-weight: 700;
 	}
@@ -208,9 +216,8 @@
 		place-items: center;
 		width: 1.15em;
 		height: 1.15em;
-		border: 1px solid #2a2017;
+		border: 1px solid var(--on);
 		border-radius: 0.15em;
-		color: #2a2017;
 		font-size: 0.72em;
 	}
 
@@ -223,14 +230,15 @@
 		place-items: center;
 		flex: 1;
 		min-height: 0;
-		color: var(--band);
+		color: var(--on);
 		font-size: 2.3em;
 		line-height: 1;
+		opacity: 0.9;
 	}
 
 	.text {
 		padding: 0.3em 0.6em 0.55em;
-		color: #5a4c3a;
+		color: var(--soft);
 		font-size: 0.66em;
 		line-height: 1.3;
 		display: -webkit-box;
@@ -238,20 +246,5 @@
 		line-clamp: 4;
 		-webkit-box-orient: vertical;
 		overflow: hidden;
-	}
-
-	.epidemic {
-		border-color: #5a1a10;
-		background: linear-gradient(172deg, #6e2416, #3e130b);
-		color: #f1dccd;
-	}
-
-	.epidemic .kicker,
-	.epidemic .text {
-		color: rgb(241 220 205 / 0.75);
-	}
-
-	.epidemic .glyph {
-		color: #f08a6a;
 	}
 </style>

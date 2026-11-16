@@ -3,8 +3,14 @@ import type { BoardBounds } from './projection';
 
 export const DEFAULT_TILT = 0.3;
 
-/** Camera placement that shows all of `bounds` at the given viewport aspect, tilted `tilt` radians off vertical. */
-export function fitBoard(bounds: BoardBounds, aspect: number, fov: number, tilt = DEFAULT_TILT) {
+/** A region that must also land clear of the panels at the screen's sides, given as fractions of the width. */
+export type KeepClear = { bounds: BoardBounds; left: number; right: number };
+
+/**
+ * Camera placement that shows all of `bounds` at the given viewport aspect, tilted `tilt` radians off vertical.
+ * With `keep`, the camera also backs off until that region sits between the side panels, so no city hides under one.
+ */
+export function fitBoard(bounds: BoardBounds, aspect: number, fov: number, tilt = DEFAULT_TILT, keep?: KeepClear) {
 	const probe = new PerspectiveCamera(fov, aspect, 1, 2000);
 	const centreX = (bounds.minX + bounds.maxX) / 2;
 	const corners = [
@@ -35,12 +41,27 @@ export function fitBoard(bounds: BoardBounds, aspect: number, fov: number, tilt 
 		}
 		return (low + high) / 2;
 	};
+	const kept = keep
+		? ([
+				[keep.bounds.minX, keep.bounds.minZ],
+				[keep.bounds.maxX, keep.bounds.minZ],
+				[keep.bounds.minX, keep.bounds.maxZ],
+				[keep.bounds.maxX, keep.bounds.maxZ],
+			] as const)
+		: [];
 	const fits = (distance: number) => {
 		place(distance, centre(distance));
-		return corners.every(([x, z]) => {
+		const sheet = corners.every(([x, z]) => {
 			point.set(x, 0, z).project(probe);
 			return Math.abs(point.x) <= 1 && Math.abs(point.y) <= 1;
 		});
+		return (
+			sheet &&
+			kept.every(([x, z]) => {
+				point.set(x, 0, z).project(probe);
+				return point.x >= -1 + 2 * keep!.left && point.x <= 1 - 2 * keep!.right;
+			})
+		);
 	};
 
 	let near = 20;
