@@ -29,6 +29,8 @@
 	let tab = $state<PanelTab>('timeline');
 	let error = $state<string | null>(null);
 	let busy = $state(false);
+	/** Whether the last move was one step forward, which the game screen announces, rather than a jump. */
+	let stepped = $state(true);
 
 	$effect(() => LS.set({ replay: { speed, panel, bubbles } }));
 
@@ -111,7 +113,9 @@
 
 	function go(to: number) {
 		if (!loaded) return;
-		frame = Math.max(0, Math.min(total, to));
+		to = Math.max(0, Math.min(total, to));
+		stepped = to === frame + 1;
+		frame = to;
 		session.state = loaded.frames[frame]!;
 	}
 
@@ -186,7 +190,7 @@
 <div class="viewer" class:empty={!loaded} class:closed={loaded && !panel}>
 	{#if !loaded}<Engraving />{/if}
 	{#if loaded && session.state}
-		<Game {session} spectator {marks}>
+		<Game {session} spectator {marks} announce={stepped}>
 			{#if session.state.world.game}
 				{#each seated as member, at (member.name)}
 					<Corner

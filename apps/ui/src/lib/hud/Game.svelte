@@ -36,8 +36,16 @@
 		session,
 		spectator = false,
 		marks,
+		announce = true,
 		children,
-	}: { session: SessionView; spectator?: boolean; marks?: BoardMarks; children?: Snippet } = $props();
+	}: {
+		session: SessionView;
+		spectator?: boolean;
+		marks?: BoardMarks;
+		/** False when a spectator jumped rather than stepped, so the events in between are not announced. */
+		announce?: boolean;
+		children?: Snippet;
+	} = $props();
 
 	const snap = $derived(session.state!);
 	const world = $derived(snap.world);
@@ -283,7 +291,7 @@
 		const newest = log.at(-1)?.seq ?? 0;
 		// A spectator jumping through a recording skips over events rather than living through each one at once,
 		// and what was announced where they jumped from no longer applies.
-		const jumped = spectator && (newest < lastSeq || newest - lastSeq > 20);
+		const jumped = spectator && (newest < lastSeq || !untrack(() => announce));
 		if (newest < lastSeq) lastSeq = spectator ? newest : 0;
 		if (jumped) {
 			lastSeq = newest;
