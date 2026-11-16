@@ -100,14 +100,19 @@ export function optionsFor(state: PublicState, who: Who, seating: (CharacterId |
 
 	const mine = game.active === who.seat;
 	if (mine) {
-		for (const action of legalActions(world, who.seat))
+		for (const action of legalActions(world, who.seat)) {
+			const stored =
+				action.a === 'inoculate'
+					? ` · this city's ${action.card in campaign.playerCards ? 'PLAYER card from the Player discard pile' : 'Infection card from the Infection discard pile'} goes into storage, out of the decks`
+					: '';
 			add(
 				keyOf(action.a, action, 'a'),
 				action.a,
-				describe(state, action, 'a'),
+				`${describe(state, action, 'a')}${stored}`,
 				{ type: 'ACTION', seat: who.seat, action },
 				actionCost(world, who.seat, action),
 			);
+		}
 		add('end', 'flow', 'end your actions and move to the draw step', { type: 'END_ACTIONS', seat: who.seat });
 		add('draw', 'flow', 'draw one Player card', { type: 'DRAW' });
 		add('infect', 'flow', 'flip one Infection card', { type: 'INFECT' });
@@ -224,8 +229,26 @@ export function parseVerb(state: PublicState, words: string[]): Verb | null {
 			if (count === 0) return { v: 'error', message: `${city} already holds ${number} cubes.` };
 			return { v: 'command', command: { type: 'PLACE_SUPPLY', city, count } };
 		}
-		case 'events':
-			return { v: 'command', command: { type: 'PICK_EVENTS', cards: rest.map(dec) as CardId[] } };
+		case 'events': {
+			const reserve = Object.values(campaign.playerCards).filter(
+				card => card.kind === 'event' && card.mode === 'rationed' && !campaign.stored.player.includes(card.id),
+			);
+			const count = Math.min(campaign.rationing, reserve.length);
+			const cards = rest.map(dec) as CardId[];
+			const unknown = cards.filter(card => !reserve.some(entry => entry.id === card));
+			const ids = reserve.map(card => enc(card.id)).join(' ');
+			if (unknown.length)
+				return {
+					v: 'error',
+					message: `usage: events <id> <id> ... Not in the reserve: ${unknown.map(enc).join(', ')}. Use the ids, not the names. The reserve holds: ${ids}`,
+				};
+			if (cards.length !== count || new Set(cards).size !== cards.length)
+				return {
+					v: 'error',
+					message: `usage: events <id> <id> ... Name exactly ${count} different cards in one command (you named ${cards.length}). The reserve holds: ${ids}`,
+				};
+			return { v: 'command', command: { type: 'PICK_EVENTS', cards } };
+		}
 		case 'rename': {
 			const [city, ...name] = rest;
 			if (!city || !isCity(city) || !name.length) return { v: 'error', message: 'usage: rename <haven-id> <name>' };

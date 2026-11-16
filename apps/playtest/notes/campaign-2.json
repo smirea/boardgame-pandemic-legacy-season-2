@@ -282,5 +282,49 @@
 				"fix": "Nine cards are flipped, not nine cities. An outbreak needs a city already at three. The guide now says nine cards."
 			}
 		]
+	},
+	"g06": {
+		"summary": "Won on turn 15 with four incidents: three supply centers, Europe reconned from London, and two new cities joined.",
+		"story": "Vex led as Knox the Laborer, with Sol's Immunologist and Kit's Sable the Instructor. The table had 49 cubes: May's 24, the lab's 15 and 10 in relief after four straight losses, and eight Rationed Events at rationing 8. The opening infection logged twelve flips, because three cards belonged to forsaken cities and were set aside for replacements. Knox built Lagos, Istanbul and São Paulo. The Immunologist kept inoculating Infection cards and making supplies from the reserve. Knox then reconned Europe from London with four different blue cards, which put Paris on the grid and finished Connect 2 new cities in the same stroke.",
+		"highlights": [
+			"The losing streak is broken. Relief cubes and a full hand of events turned the game.",
+			"Europe revealed by the players in May, a month before its perimeter report, so Frankfurt is not lost in June.",
+			"Forsaken cities behaved as researched: their Infection cards were set aside and replaced, at setup and in play.",
+			"Game end: Cairo and Mexico City fell to population 0. Card 05-02 put Architect, Courier and Scout on sale and the table bought all three, one for each character.",
+			"Rationing drops to 6 for June."
+		],
+		"parity": "All four checks passed, with the supply check reading 24 + 15 lab bonus + 10 relief = 49. Card 05-01 was read at setup: its perimeter report is for the eastern Pacific haven, which the players had already found in March, so it forced nothing. Card 05-02 was read at game end and unlocked the three abilities the research lists for May. The Europe recon needed 4 blue cards of different cities at a London supply center, as researched.",
+		"findings": [
+			{
+				"finding": "Card Swap logged that it was played but not which cards moved.",
+				"kind": "Engine gap",
+				"fix": "The log names the target of every event: who was airlifted where, which cards were swapped, which city was purged. Test added."
+			},
+			{
+				"finding": "Picking events answered every bad list with 'Pick 8', without naming the bad id or the legal ones.",
+				"kind": "Lab gap",
+				"fix": "The command says which ids are not in the reserve, how many to name, and lists the reserve."
+			},
+			{
+				"finding": "The lead's `wait` returned at once, so plans from the other two arrived after supplies were confirmed.",
+				"kind": "Lab gap",
+				"fix": "New `listen` command blocks until another player speaks. The guide tells the lead to use it before confirming."
+			},
+			{
+				"finding": "During setup the city view called every Player card out of play.",
+				"kind": "Lab bug",
+				"fix": "It says not dealt yet."
+			},
+			{
+				"finding": "The opening infection logged 12 flips. Forsaken cities kept their cubes.",
+				"kind": "Not a bug",
+				"fix": "The research rule: a forsaken city's card is set aside and another is flipped. The guide now explains it."
+			},
+			{
+				"finding": "Inoculate again offered a city's discarded Player cards. An Instructor's card was taken on the taker's turn.",
+				"kind": "Not a bug",
+				"fix": "Both follow the research. The Inoculate options now say which pile each card comes from."
+			}
+		]
 	}
 }

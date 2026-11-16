@@ -20,13 +20,13 @@ The loop is short:
 4. `say <text>` talks to the other players. Keep it short and useful: plans, requests for a card, warnings. Table talk is recorded with the game too.
 5. `report <bug|rules|ux|idea> <text>` records anything that looks wrong, confusing, or missing. Report the moment you see it.
 
-One player is the lead for each game. Only the lead sends setup and game-end commands. Your brief says whether that is you. The lead decides for the table, so before confirming supplies, before the event picks and before each purchase the lead says the plan with `say` and runs `wait` once so the others can answer.
+One player is the lead for each game. Only the lead sends setup and game-end commands. Your brief says whether that is you. The lead decides for the table, so before confirming supplies, before the event picks and before each purchase the lead says the plan with `say` and then runs `listen`, which blocks until someone answers. (`wait` returns at once for a lead with something to do, so it is no use for this.)
 
 ## The game
 
 **Winning and losing.** A game is won the moment the required number of objectives is complete, with every objective marked `*` among them. An objective that can no longer be completed (a region already revealed in an earlier game) is dropped automatically and shows as `[-]`. Then the rest decide the win, even if that is fewer than the required number. Supply centers do not survive into the next game unless they were made permanent. It is lost at 8 incidents, or when the Player deck cannot supply a full draw, or later in the year when the Hollow Men figures run out. Losing is normal. A lost month is replayed once, then the year moves on.
 
-**Forsaken and infested.** Once the rule is in play, a city at population 0 is forsaken and becomes infested. Infested is permanent: Restore brings the population back but a character who starts a turn there is still exposed.
+**Forsaken and infested.** Once the rule is in play, a city at population 0 is forsaken and becomes infested. A forsaken city is never infected: when its Infection card comes up it is set aside in the Game End area and another card is flipped in its place, so a setup can log more than 9 flips. Only Drive or Ferry works inside one. Infested is permanent: Restore brings the population back but a character who starts a turn there is still exposed.
 
 **New cities.** When a city joins the grid during a game, its City cards go to the Player discard pile and its Infection cards wait in the Game End area until the next game (`decks` shows both). So a new city cannot be infected in the game it joins.
 

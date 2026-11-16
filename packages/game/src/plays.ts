@@ -117,6 +117,38 @@ export function checkPlay(world: World, seat: SeatId, card: CardId, play: Play, 
 	}
 }
 
+/** What a played event was aimed at, for the log. */
+function playDetail(world: World, play: Play): string {
+	const { campaign } = world;
+	const who = (seat: SeatId) => characterOf(world, seat).name;
+	const card = (id: CardId) => {
+		const held = campaign.playerCards[id];
+		if (held?.kind === 'city') return cityDef(held.city).name;
+		const infection = campaign.infectionCards[id];
+		return infection?.kind === 'city' ? cityDef(infection.city).name : (held?.kind ?? 'a card');
+	};
+	switch (play.e) {
+		case 'airlift':
+			return `${who(play.pawn)} to ${cityDef(play.to).name}`;
+		case 'cardSwap':
+			return `${who(play.a)} gives ${card(play.cardA)}, ${who(play.b)} gives ${card(play.cardB)}`;
+		case 'resilience':
+			return play.cards.map(card).join(', ');
+		case 'openWaters':
+			return `${cityDef(play.a).name} to ${cityDef(play.b).name}`;
+		case 'safeHouses':
+			return play.cities.map(id => cityDef(id).name).join(', ');
+		case 'supplyDrop':
+		case 'purge':
+		case 'purifier':
+		case 'shelterWright':
+		case 'marksman':
+			return cityDef(play.city).name;
+		default:
+			return '';
+	}
+}
+
 export function applyPlay(world: World, seat: SeatId, card: CardId, play: Play) {
 	const { campaign, game } = world as { campaign: World['campaign']; game: Game };
 	const held = campaign.playerCards[card]!;
@@ -125,7 +157,7 @@ export function applyPlay(world: World, seat: SeatId, card: CardId, play: Play) 
 	const destroyed = (held.kind === 'event' && held.mode === 'unrationed') || held.kind === 'companion';
 	if (destroyed) delete campaign.playerCards[card];
 	else game.playerDiscard.push(card);
-	if (held.kind === 'event') log(game, { t: 'event', seat, event: held.event, detail: '' });
+	if (held.kind === 'event') log(game, { t: 'event', seat, event: held.event, detail: playDetail(world, play) });
 
 	switch (play.e) {
 		case 'airlift':

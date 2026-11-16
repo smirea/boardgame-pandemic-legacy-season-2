@@ -450,6 +450,7 @@ export function renderCity(world: World, id: CityId): string {
 	const infection = Object.values(campaign.infectionCards).filter(card => card.kind === 'city' && card.city === id);
 	const where = (card: CardId) => {
 		if (!game) return 'box';
+		if (game.turn === 0) return 'not dealt yet';
 		if (game.playerDeck.order.includes(card)) return 'deck';
 		if (game.playerDiscard.includes(card)) return 'discard';
 		const holder = game.seats.find(seat => game.players[seat]!.hand.includes(card));

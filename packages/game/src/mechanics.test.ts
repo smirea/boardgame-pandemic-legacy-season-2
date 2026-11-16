@@ -1548,3 +1548,20 @@ describe('found in the replayed March', () => {
 		).toBe(true);
 	});
 });
+
+describe('found in May', () => {
+	test('the log says which cards a Card Swap moved', () => {
+		const actor = late(world => {
+			give(world, A, cityCards(world, 'cairo', 1));
+			give(world, B, cityCards(world, 'lagos', 1));
+			conjure(world, A, { kind: 'event', event: 'cardSwap' });
+		});
+		const swap = legalPlays(worldOf(actor), 'playing.actions').find(option => option.play.e === 'cardSwap')!;
+		send(actor, { type: 'PLAY', ...swap });
+		expect(gameOf(actor).log.at(-1)).toMatchObject({
+			t: 'event',
+			event: 'cardSwap',
+			detail: 'Ada gives Cairo, Bo gives Lagos',
+		});
+	});
+});

@@ -537,6 +537,7 @@ const HELP = `Commands (run as: ./play <you> <command>):
   log [n]             the last n log lines of this game
   chars               every character in the campaign
   say <text>          talk to the table
+  listen [seconds]    block until another player speaks (for a lead waiting on answers before confirming)
   report <bug|rules|ux|idea> <text>   record an issue with a save of this moment
   create <job> <haven-id> <name>   make a new character (lobby)
   pick <character-id>              choose who you play this game (lobby)
@@ -657,6 +658,22 @@ async function handle(agent: string, words: string[]): Promise<string> {
 						? now.world.campaign.characters[now.world.game!.players[active]!.character]?.name
 						: `the lead, ${config.players[(lab.session?.startIndex ?? 0) % config.players.length]!.name}`;
 					return `${renderHeader(now)}\nStill waiting on ${on}. Run \`wait\` again.`;
+				}
+				await Bun.sleep(400);
+			}
+		}
+		case 'listen': {
+			// For a lead who has asked the table something: block until someone else answers, whatever else is waiting.
+			const from = lab.chat.length;
+			const deadline = Date.now() + Math.min(Number(rest[0]) || 40, 50) * 1000;
+			for (;;) {
+				const heard = lab.chat.slice(from).filter(message => message.from !== who.name);
+				if (heard.length || Date.now() > deadline) {
+					lab.chatSeen[who.id] = lab.chat.length;
+					persist();
+					return heard.length
+						? ['TABLE TALK:', ...heard.map(message => `  ${message.from}: ${message.text}`)].join('\n')
+						: 'Nobody answered yet. Run `listen` again, or go ahead.';
 				}
 				await Bun.sleep(400);
 			}
