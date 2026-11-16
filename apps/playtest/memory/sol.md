@@ -1,53 +1,37 @@
 # Memory
 
-February won, 5 incidents, turn 12. I was Reed, Farmer, home Northwatch. Quinn (Administrator, Northwatch) and Knox (Laborer, Southreach) played. Hale and Sable sat out.
+March, first attempt, lost on incident 8. São Paulo's second plague, after the Istanbul epidemic reshuffled the discard. I was Hale, Radio Operator, home Midsea. Quinn (Administrator) and Knox (Laborer) played. Reed and Sable sat out. The replay lobby opened at rationing 2.
 
 ## Rules that change play
 
-Farmer: the Deliver right after Make Supplies is free, once a turn. It is the whole action. Carry cubes in, make one, deliver all of them.
+Radio transfer moves cubes to or from another player at any distance. It does not put a cube on a city. Someone still has to deliver. makeSupplies works in any city. Local Produce fills a haven or center up to population and does not scratch a box. System Produce does, and the last box destroys the card.
 
-A non-instructor shares only the card of the city you are both standing in. Card Swap trades one card each and was never drawn. Do not count on it. Say the path you are walking. The Administrator can move you onto another pawn once a turn.
+A non-instructor shares only the card of the city you are both standing in. Card Swap was not in this deck. Rationing 0 meant the lead could add no rationed events. Rationing 2 should mean two. Ask for Card Swap and Stock Up.
 
-Laborer builds with 4 cards of the colour plus 2 cubes. Anyone else needs 5. A +triple card counts as 3 and a +double counts as 2. Do not take the builder's cubes.
+Record Keeper is hand limit +1 and never offers a key. Helmsman makes the first Drive or Ferry each turn free. I never saw a Ferry key. A +double counts as 2 toward a center. Laborer build is 4 cards of the colour plus 2 cubes. Anyone else needs 5.
 
-Establish Line costs 2 cubes. Sail discards the destination's port card and can cross the grid in one action.
+wellStocked: if the city has 2 or more cubes, that infection removes none. The log says "blocked".
 
-Search is listed only on a card that still has boxes, and only in that city. The last box drops the label. The one search this game was quarantineCard, and it set aside inf-sao-paulo.28. The log did not say so.
+Lockdown is on inf-sao-paulo.26. While it is in the discard, any player may destroy it. Do that before the next epidemic reshuffle. One plague cube is an incident. Three is an outbreak. Do not end a turn in a plague city. Walking through does not scratch. Both exposures this game were blank. The box now holds Shaken (recon needs 1 extra card), Injured (lines cost 1 more cube), and Seasick (sea lanes cost 1 more cube).
 
-Resilience sets aside up to 2 discarded infection cards of one city, before the epidemic reshuffle. This game it removed 1 of 2 Sao Paulo cards. One card of a 0-cube city left on top is not a clear.
-
-Purge removes a plague cube. The hand list shows the name only.
-
-Epidemics strip cubes and add no plague. The rate track is 2, 2, 2, 3, 3, 4, 4, 5, 5, 5, 5. The third epidemic is the one that raises it. We drew two and it stayed at 2.
-
-Setup will not place cubes over population. Extra cubes can sit on a haven. The refusal text is "Not that many cubes."
-
-Plague exposure is starting your turn there. Walking through does not scratch. I do not know if plague lasts the month. Sao Paulo and Cairo ended on 2. Do not start a turn in either until status shows them clear. One more cube there is an outbreak.
+Plague does not carry over. A city new to the grid cannot be infected that game. Setup allowed 3 cubes on Tripoli, population 2.
 
 ## Campaign state
 
-Objectives done: 3 centers, and Los Angeles and Denver connected. No recon.
+Connect 2 is done: San Francisco from Denver, Mexico City from Los Angeles. Their infection cards enter next game. Search cards san-francisco.68 (2 boxes) and mexico-city.82 (1 box) should be in the deck. los-angeles.79 still has 2 search boxes.
 
-Permanent: the Washington center. Blue, population 5, links New York, Jacksonville, Atlanta, Midsea, Southreach. The Sao Paulo and Atlanta centers do not carry over.
+Centers this game: London only, and it is not permanent. Washington is permanent, population 6, links New York, Jacksonville, Atlanta, Midsea, Southreach.
 
-Lines on the board: Washington–Atlanta, Lagos–Istanbul, Atlanta–Los Angeles, Atlanta–Denver.
+Population now: London 4, Jacksonville 2, São Paulo 2, Istanbul 3, Cairo 2, Chicago 2. Chicago and Cairo were bought back up. Los Angeles and Mexico City are 1.
 
-Grid blues: New York 3, Washington 5, London 3, Chicago 2, Atlanta 2, Denver 2. Off grid: San Francisco.
-Grid yellows: Jacksonville 3, Sao Paulo 3, Lagos 3, Los Angeles 1. Off grid: Mexico City.
-Grid blacks: Istanbul 4, Tripoli 2, Cairo 2.
+London recon still needs a center and 4 different blues. São Paulo recon needs a center and 4 yellows. Lagos needs 5 different yellows. Cairo needs 4 different blacks, and only 3 black cities exist. Chart Sea Lane is unlocked and unused.
 
-London recon still needs a center and 4 different blues. Sao Paulo recon needs a center and 4 yellows. Lagos recon needs 5 different yellows. Cairo recon needs 4 different blacks, and only 3 black cities exist.
-
-london.32 is +double. washington.8 is +triple. atlanta.76 is searched out. los-angeles.79 has 2 search boxes and denver.72 has 1. Both went to the discard when the city joined.
-
-Knox has Helmsman and Record Keeper, hand limit 8. Quinn moves one pawn onto another pawn, once a turn. Reed's free Deliver is the supply line. Sable still passes any card she holds, and only while colocated.
-
-The March lobby opened at rationing 0. Three new rationed events were added and not named. Restore was not for sale.
+Knox has Helmsman and Record Keeper, exposure 1/7, no scar. Quinn exposure 1/7, no scar. Hale exposure 0/7, no ability. Sable still passes any card she holds, and only while colocated.
 
 ## Next game
 
-Washington is the bank. System-produce from it early. That fills every haven and every center.
+This is the March replay. Build the three centers early. Washington is already one bank. Rebuild London if we still need the recon.
 
-If Resilience leaves a stripped city with even one card on top, put cubes there before the next epidemic.
+Do not leave a city on plague with no cubes while an epidemic is still in the deck. That is how São Paulo ended the month. Destroy the lockdown card the moment it hits the discard.
 
-Hand Knox the fourth build card by standing in that card's city. A port card that is truly spare is the time to sail.
+Quinn can pull a pawn onto hers once a turn. Name the city and the fallback before the track reaches 6.

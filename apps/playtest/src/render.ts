@@ -1,4 +1,4 @@
-import { cityDef, grid, handLimit, insights, isForsaken, neighbours, pack, score } from '@repo/game';
+import { checkEdge, cityDef, grid, handLimit, insights, isForsaken, neighbours, pack, score } from '@repo/game';
 import type { CardId, CityId, Decision, LogEntry, PublicState, SeatId, World } from '@repo/game';
 import type { Option, Who } from './commands.ts';
 import { flavorFor } from './flavor.ts';
@@ -139,7 +139,7 @@ export function renderLog(world: World, entry: LogEntry): string {
 		case 'incident':
 			return `incident in ${city(entry.city)} (total ${entry.total})`;
 		case 'exposure':
-			return `${seat(entry.seat)} was exposed: ${entry.result}`;
+			return `${seat(entry.seat)} was exposed: ${{ empty: 'a blank box, nothing happens', scar: 'a scar', skull: 'death', worker: 'sent home' }[entry.result]}`;
 		case 'death':
 			return `${seat(entry.seat)}'s character died in ${city(entry.at)}`;
 		case 'event':
@@ -321,6 +321,21 @@ export function renderStatus(state: PublicState, who: Who | null): string {
 			return def ? [`  ${enc(id)} (${seatName(world, seat)}): ${def.name}. ${def.text}`] : [];
 		}),
 	);
+	const traits = game.seats.flatMap(seat => {
+		const character = campaign.characters[game.players[seat]!.character]!;
+		const job = pack.jobs.find(entry => entry.id === character.job);
+		const held = character.slots.flatMap(slot => {
+			if (!slot) return [];
+			const def =
+				slot.kind === 'ability'
+					? pack.abilities.find(entry => entry.id === slot.id)
+					: pack.scars.find(entry => entry.id === slot.id);
+			return def ? [`${slot.kind} ${def.name}: ${def.text}`] : [];
+		});
+		const parts = [job && !character.jobScar ? `${job.name}: ${job.text}` : null, ...held].filter(Boolean);
+		return parts.length ? [`  ${character.name}: ${parts.join(' · ')}`] : [];
+	});
+	if (traits.length) lines.push('Jobs, abilities and scars (passive ones never show in `options`):', ...traits);
 	if (special.length)
 		lines.push(
 			'Events and companions in hands (played with `play:` keys, at any time, when they have a legal target):',
@@ -354,8 +369,10 @@ export function renderBoard(world: World): string {
 			});
 			const structures = [
 				location?.center ? `center${record.permanent.includes('center') ? '(permanent)' : ''}` : null,
-				location?.tower ? 'tower' : null,
-				location?.shelter ? 'shelter' : null,
+				location?.tower ? `tower${record.permanent.includes('tower') ? '(permanent)' : ''}` : null,
+				location?.shelter ? `shelter${record.permanent.includes('shelter') ? '(permanent)' : ''}` : null,
+				// Between games nothing stands on the board, but what was made permanent will be there next game.
+				...(location ? [] : record.permanent.map(structure => `permanent ${structure}`)),
 				record.lab ? 'lab' : null,
 			].filter(Boolean);
 			const routes = pack.reconRoutes.filter(
@@ -391,8 +408,14 @@ export function renderBoard(world: World): string {
 		return a && b && onGrid.has(edge.a) !== onGrid.has(edge.b);
 	});
 	if (reachable.length) {
-		lines.push('New connections that would join a city to the grid (~ is a sea lane):');
-		for (const edge of reachable) lines.push(`  ${edge.a} ${edge.kind === 'sea' ? '~' : '-'} ${edge.b}`);
+		lines.push(
+			'New connections that would join a city to the grid (~ is a sea lane). A line is drawn from the end that is on the grid:',
+		);
+		for (const edge of reachable) {
+			const [from, to] = onGrid.has(edge.a) ? [edge.a, edge.b] : [edge.b, edge.a];
+			const blocked = checkEdge(campaign, from, to, edge.kind);
+			lines.push(`  ${from} ${edge.kind === 'sea' ? '~' : '-'} ${to}${blocked ? `   (not now: ${blocked})` : ''}`);
+		}
 	}
 	return lines.join('\n');
 }
@@ -443,11 +466,19 @@ export function renderCity(world: World, id: CityId): string {
 			pack.candidateEdges
 				.flatMap(edge => (edge.a === id ? [edge] : edge.b === id ? [{ ...edge, b: edge.a }] : []))
 				.filter(edge => !neighbours(campaign, id).includes(edge.b) && campaign.locations[edge.b]?.revealed)
-				.map(edge => `${edge.b}(${edge.kind})`)
+				.map(edge => {
+					const blocked = checkEdge(campaign, id, edge.b, edge.kind);
+					return `${edge.b}(${edge.kind}${blocked ? `, not now: ${blocked}` : ''})`;
+				})
 				.join(', ') || 'none'
 		}`,
 		`Player cards: ${cards.map(card => `${enc(card.id)} in ${where(card.id)}${card.kind === 'city' && card.improvement ? ` +${card.improvement}` : ''}`).join(', ') || 'none'}`,
 		`Infection cards: ${infection.length} (${infection.filter(card => game?.infectionDiscard.includes(card.id)).length} in the discard pile)`,
+		...[...cards, ...infection].flatMap(card => {
+			const id = card.kind === 'city' ? card.improvement : null;
+			const def = id ? [...pack.cityImprovements, ...pack.infectionImprovements].find(entry => entry.id === id) : null;
+			return def ? [`improved card ${enc(card.id)}: ${def.name}. ${def.text}`] : [];
+		}),
 	]
 		.filter(Boolean)
 		.join('\n');

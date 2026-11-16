@@ -1,27 +1,27 @@
 # Memory
 
-Knox, Laborer, home Southreach. Exposure 0/7. Slots: Helmsman and Record Keeper. Helmsman makes my first Drive each turn free. I do not know what Record Keeper does. Read it before I act.
+Knox, Laborer, Southreach. Exposure 1/7, no scar. Helmsman: the first Drive each turn is free and costs no action. Record Keeper is hand limit +1, so I hold 8. That was all it did.
 
-February won. Sol was Reed, Farmer, Northwatch. A Deliver right after Make Supplies is free. Kit was Quinn, Administrator, Northwatch. Once a turn, as an action, she moves any pawn onto any other pawn. She will build a center herself if she holds the cards. Hale and Sable sat out. A share moves only the card of the city we are both standing in.
+March first attempt lost on incident 8, São Paulo's second plague. The replay is March second, rationing 2. Sol played Hale, Radio Operator, Midsea. Kit played Quinn, Administrator, Northwatch. Reed and Sable sat. Quinn moves any pawn onto any other, once a turn. Hale moves cubes at any distance. transfer to seat-2, true gives, false takes.
 
-Laborer build: I must be in the city, hold 4 cards of its colour, and carry 2 cubes. It costs 1 action and spends the cubes. A normal build is 5 cards. The options note still says 5. Look for `laborer=true`.
+Washington is a permanent center, population 6, Well Stocked. The London center was not made permanent and is gone. Populations: London 4, Jacksonville 2, São Paulo 2, Istanbul 3, Cairo 2, Chicago 2, Los Angeles still 1. Plague and loose cubes do not carry over. Buy population only if a city is at 0.
 
-Permanent center on Washington, pop 5, Well Stocked. `board` does not mark it. `city washington` says permanent center. washington.8 is +triple and counts as 3 blues. london.32 is +double. Sol said that makes a London center cheaper. Atlanta (pop 2) and Sao Paulo (pop 3) had centers that died with the game.
+San Francisco and Mexico City are on the grid. Both can be infected now. san-francisco.68 has 2 search boxes. mexico-city.82 has 1. chicago.64 has 1 and was not searched. los-angeles.79 has 2 and was not searched.
 
-Plague does not persist. Sao Paulo and Cairo finished on 2 plague and opened March clean. Cubes are placed again at setup. Population sticks: Washington 5, Atlanta 2, Cairo 2, Los Angeles 1. A turning point watches for a city at 0. Los Angeles is the one that can get there. Do not buy population unless a city is at 0.
+Yellow cities on the grid: Jacksonville, São Paulo, Lagos, Los Angeles, Mexico City. That is 5. Lagos recon needs 5 different yellows and a center in Lagos. São Paulo recon needs 4 yellows, not different cities, and a center. London recon needs 4 different blues and a center. Cairo recon needs 4 different blacks, and only 3 black cities exist. Shaken, if anyone gets it, adds a card to recon.
 
-On the grid now: Los Angeles (yellow, port, pop 1, linked to Atlanta) and Denver (blue, pop 2, linked to Atlanta). Still off the grid: San Francisco, Mexico City. A new line costs 2 cubes from me. Lines that join a city: Jacksonville–San Francisco, Denver–Mexico City, Los Angeles–Mexico City, San Francisco–Denver, San Francisco–Los Angeles. The key is also offered to cities already on the grid. Those did not finish the objective.
+Laborer build is 4 cards plus 2 cubes, in the city. The key says laborer=true only when I am carrying the cubes. With 0 or 1 cube every key was 5 cards and laborer=false. The footnote still says 5. +double counts as 2. washington.8 is +triple. Hale held it.
 
-Recon still open. Each needs a center in that city. Sao Paulo wants 4 yellows. London wants 4 blues of different cities. Lagos wants 5 different yellows, and only 4 yellow cities are on the grid, so Lagos waits on Mexico City. Cairo wants 4 different blacks, and only Istanbul, Tripoli, and Cairo are black.
+Chart Sea Lane is unlocked. A sea lane costs 2 cubes. Foreman was for sale at 1 and was not bought. New scars, nobody has one: Shaken (recon +1 card), Injured (line +1 cube), Seasick (sea lane +1 cube).
 
-Search shows "(N search boxes)" in hand. The key is `search:<card>:<box>`, and I have to be standing in the city. I scratched atlanta.76 and the label vanished. The find was quarantineCard: set aside one infection card from the discard. It comes back next game. los-angeles.79 had 2 boxes and denver.72 had 1 when they hit the discard. The city view does not show boxes. Check the hand.
+Lockdown destroyed inf-sao-paulo.26. No restore was for sale. The lead spent all 4 units before my objection, and game end has no undo. Say the exact buy in the first message. I cannot see the shop.
 
-Purge removes every plague cube in one city and does not lower the incident count. The key and the text appeared only on my own action step.
+Rationing is 2. At 0 the deck had no events, and Card Swap and Stock Up were refused. Push the lead to take both if they are offered.
 
-A city that joins mid-game puts its City cards in the player discard and holds its infection cards until next game. I could not search Los Angeles or Denver in February. Those cards should be in the March deck.
+An epidemic strips supply cubes only. The discard becomes the next infection layer. The stricken city is not put on top. The rate stayed 2 for three steps, then 3 for two. Four epidemics have fired. The next one raises the rate to 4.
 
-An epidemic shuffles the discard onto the deck. It does not put the stricken city on top. The rate track is 2, 2, 2, then 3. Two epidemics have fired. The next one raises the rate.
+Do not end a turn in a plague city. Exposure is at the start of the turn. Both scratches this game were empty. A supply cube on a plague city still absorbs a hit. At 7 incidents the next plague cube loses.
 
-I cannot see the shop. Make the lead read every price. Unspent production is lost. Restore was not for sale.
+The city view lists links the action will not offer. Denver never offered Mexico City. Jacksonville never offered San Francisco. Los Angeles did offer Mexico City. Read options.
 
-Next game: read Record Keeper, use the free drive, build with 4 cards and 2 cubes, sail only with a spare port card, and search Los Angeles or Denver if I draw the boxed card. Feed Washington. Watch Los Angeles at pop 1.
+Next game: stay Knox. Get the shop read before anyone spends. Take the rationed events. Carry 2 cubes before looking for the build. Rebuild London or Lagos and make that center permanent. Search once, then leave. Chart one sea lane. Watch Los Angeles at pop 1.

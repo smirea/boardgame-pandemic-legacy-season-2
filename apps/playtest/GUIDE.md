@@ -20,7 +20,7 @@ The loop is short:
 4. `say <text>` talks to the other players. Keep it short and useful: plans, requests for a card, warnings. Table talk is recorded with the game too.
 5. `report <bug|rules|ux|idea> <text>` records anything that looks wrong, confusing, or missing. Report the moment you see it.
 
-One player is the lead for each game. Only the lead sends setup and game-end commands. Your brief says whether that is you.
+One player is the lead for each game. Only the lead sends setup and game-end commands. Your brief says whether that is you. The lead decides for the table, so before confirming supplies, before the event picks and before each purchase the lead says the plan with `say` and runs `wait` once so the others can answer.
 
 ## The game
 
@@ -37,6 +37,8 @@ One player is the lead for each game. Only the lead sends setup and game-end com
 3. Flip Infection cards equal to the infection rate. Each one hits a city. If the city has supply cubes it loses one. If it has none it takes a Plague cube, which is an incident. A city with 3 Plague cubes outbreaks into its neighbours.
 
 Cubes never leave the game. A cube an infection removes goes back to the stockpile, and so does every cube you spend on a supply line, a tower or a Laborer's build. `makeSupplies` takes them out again.
+
+A city may hold more cubes than its population. Population only caps Produce Supplies.
 
 So supply cubes are armour. Your main job between objectives is keeping cubes on the cities most likely to be hit. `status` lists the trouble spots with their odds.
 
@@ -68,11 +70,11 @@ Each costs 1 action unless `options` shows another cost. `options` is the truth 
 - `search:<card>:<box>`: unlocks with the first region you reveal and stays unlocked. Holding a city's card while standing in that city, scratch one of the card's search boxes. Only some City cards have boxes. A card that has them shows `(2 search boxes)` after its name, and `options` then lists the search. Finds range from supplies to new places to nothing.
 - `buildShelter`, `buildTower`, and others appear in `options` as the year unlocks them. The Legacy briefing at the start of a game says what is new.
 
-Event cards and companions in your hand are played with `play:...` keys at any time, even on another player's turn. They cost no action.
+Event cards and companions in your hand are played with `play:...` keys at any time, even on another player's turn. They cost no action. A Rationed Event goes to the discard pile and returns to the reserve for later games. The lead picks as many as the rationing level at setup, which can be none. An Unrationed Event is in every deck until someone plays it: playing it destroys it for good.
 
 ## Between games
 
-After a game ends the lead opens the game-end step. Cities change population. The group gets production units to spend on upgrades that last all year: abilities for characters, improved cards, more population, and later in the year permanent structures. `options buy` lists what is for sale. Tell the lead what you want and why.
+After a game ends the lead opens the game-end step. Cities change population. The group gets production units to spend on upgrades that last all year: abilities for characters, improved cards, more population, and later in the year permanent structures. `options buy` lists what is for sale, for every player. Restore appears only when a city has dropped to population 0. Tell the lead what you want and why.
 
 ## What we need from you
 

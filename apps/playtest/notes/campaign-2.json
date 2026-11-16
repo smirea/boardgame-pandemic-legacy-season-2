@@ -96,5 +96,54 @@
 				"fix": "The research rule. They are drawn next game."
 			}
 		]
+	},
+	"g02": {
+		"summary": "Lost on turn 16 at eight incidents, with one supply center of three built. First loss of the run.",
+		"story": "Kit led as Quinn the Administrator, Vex kept Knox the Laborer and Sol returned to Hale the Radio Operator. Two wins had driven rationing to 0, so the deck held no event cards at all, and March asks for three objectives. Knox joined San Francisco from Denver and Mexico City from Los Angeles in the first turns, which completed Connect 2 new cities. Quinn built the London center, where the Double card counted as two. After that the table spent its actions on armour: Knox produced at Southreach, Hale carried cubes across the map, and four epidemics kept stripping what they placed. São Paulo took a second Plague cube on turn 16 and filled the track.",
+		"highlights": [
+			"The price of winning: rationing 0 meant no Quiet Night, no Supply Drop, no Resilience. The table lost the kind of game its events had been winning.",
+			"Connect 2 new cities done by turn 3, with supply lines to San Francisco and Mexico City.",
+			"The Double improvement bought in February paid for part of the London center.",
+			"The permanent Washington center from February was standing at setup, as bought.",
+			"Game end: card 03-02 unlocked Sea Lanes, epidemic scaling, three scars and the Foreman ability. The table bought Lockdown and two population."
+		],
+		"parity": "All four checks passed: 3 objectives required; Build 3 supply centers (mandatory), Recon a new area, Connect 2 new cities, Perform 2 searches and Access a lost haven in play; 30 cubes. Card 03-01 was read at setup and 03-02 at game end. South America's perimeter report was a warning only this month, as the research says, and forced nothing.",
+		"findings": [
+			{
+				"finding": "The city view listed Mexico City and San Francisco as possible links that the options then did not offer.",
+				"kind": "Lab gap",
+				"fix": "Both would have crossed an existing supply line, which the rules forbid. The board and city views now say why a link is not possible."
+			},
+			{
+				"finding": "An Unrationed Event played in February was missing from March's deck.",
+				"kind": "Not a bug",
+				"fix": "The research rule: an Unrationed Event is destroyed when played. The guide had said it is always in the deck, and now says until played."
+			},
+			{
+				"finding": "Record Keeper was on a character for two games and nobody could tell what it did.",
+				"kind": "Lab gap",
+				"fix": "Status lists every job, ability and scar at the table with its rule, and marks which are passive."
+			},
+			{
+				"finding": "Exposure logged as 'empty', and improved cards showed only a code name.",
+				"kind": "Lab wording",
+				"fix": "Exposure results are spelled out. The city view explains each improvement on its cards."
+			},
+			{
+				"finding": "The lobby map did not show the permanent supply center.",
+				"kind": "Lab bug",
+				"fix": "Permanent structures show between games."
+			},
+			{
+				"finding": "The lead confirmed supplies and purchases before the others' objections arrived.",
+				"kind": "Process",
+				"fix": "The guide tells the lead to state the plan and wait once before confirming."
+			},
+			{
+				"finding": "Tripoli held more cubes than its population. Restore was not for sale. Zero events could be picked.",
+				"kind": "Not a bug",
+				"fix": "All three are the rules as researched. The guide now says each."
+			}
+		]
 	}
 }
