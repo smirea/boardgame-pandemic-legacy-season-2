@@ -63,10 +63,10 @@
 		return map;
 	};
 	// Until the worker hands the chart back, the board is a blank sheet of the same paper.
-	let sheets = $state.raw<{ known: Texture; unknown: Texture } | null>(null);
+	let sheets = $state.raw<{ known: Texture } | null>(null);
 	loadChart(bounds).then(
 		images => {
-			sheets = { known: texture(images.known), unknown: texture(images.unknown) };
+			sheets = { known: texture(images.known) };
 			invalidate();
 		},
 		error => console.error(error),
@@ -207,7 +207,7 @@
 	<T is={landMaterial} />
 </T.Mesh>
 
-<Fog {bounds} sheet={sheets?.unknown ?? null} hidden={city => !view.cities[city]!.revealed} />
+<Fog {bounds} hidden={city => !view.cities[city]!.revealed} />
 
 {#each view.ghostEdges as route (`ghost:${routeKey(route)}`)}
 	<RouteTube {route} from={layout[route.a]!} to={layout[route.b]!} bow={bows.get(routeKey(route)) ?? 0} ghost />

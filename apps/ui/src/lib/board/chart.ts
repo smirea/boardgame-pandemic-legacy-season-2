@@ -10,9 +10,8 @@ import { boardPath, FRAME, project } from './projection';
 import type { BoardBounds, BoardPoint } from './projection';
 
 /**
- * The board is a printed chart: one canvas for the charted world and one for the same sheet with the
- * ink gone, which shows through wherever a region is still unknown. Both share the paper and the wear,
- * so the two blend without a seam.
+ * The board is a printed chart: paper, water, coasts from the same 50m data the rules use, the
+ * graticule, region lines and wear. Unexplored ground is hidden under smoke drawn by `Fog.svelte`.
  */
 
 const PIXELS = 4096;
@@ -257,12 +256,7 @@ function wear(ctx: Ctx, width: number, height: number) {
 	ctx.globalCompositeOperation = 'source-over';
 }
 
-export type Chart = {
-	/** The charted world. */
-	known: OffscreenCanvas;
-	/** The same sheet with the ink faded to a dotted guess, shown over regions nobody has reached yet. */
-	unknown: OffscreenCanvas;
-};
+export type Chart = { known: OffscreenCanvas };
 
 /** Paints both sheets. Slow enough that the board calls it through `loadChart`, in a worker. */
 export function paintChart(bounds: BoardBounds): Chart {
@@ -359,31 +353,13 @@ export function paintChart(bounds: BoardBounds): Chart {
 		blot(ink, abrasion() * width, abrasion() * height, 30 + abrasion() * 170, '0 0 0', 0.2 + abrasion() * 0.4);
 	}
 	ink.globalCompositeOperation = 'source-over';
-	const faint = sheet(width, height).ctx;
-	toBoard(faint);
-	faint.save();
-	faint.clip(sphere);
-	faint.strokeStyle = `rgb(${INK} / 0.3)`;
-	faint.lineWidth = px(1.6);
-	faint.beginPath();
-	for (let x = bounds.minX - (bounds.maxZ - bounds.minZ); x < bounds.maxX; x += px(14)) {
-		faint.moveTo(x, bounds.minZ);
-		faint.lineTo(x + (bounds.maxZ - bounds.minZ), bounds.maxZ);
-	}
-	faint.stroke();
-	faint.restore();
-	faint.setLineDash([px(2.5), px(6)]);
-	faint.strokeStyle = `rgb(${INK} / 0.4)`;
-	faint.lineWidth = px(1.5);
-	faint.stroke(land);
-	faint.setLineDash([]);
 
 	// Hand-tinted water: a faded blue wash, laid on heavier along the coasts the way colourists finished a print.
-	const water = (ctx: Ctx, strength: number) => {
+	const water = (ctx: Ctx) => {
 		toBoard(ctx);
 		ctx.save();
 		ctx.clip(sea, 'evenodd');
-		ctx.fillStyle = `rgb(95 150 195 / ${0.55 * strength})`;
+		ctx.fillStyle = `rgb(95 150 195 / 0.55)`;
 		ctx.fill(sphere);
 		ctx.lineJoin = 'round';
 		for (const [widthUnits, alpha] of [
@@ -391,7 +367,7 @@ export function paintChart(bounds: BoardBounds): Chart {
 			[1.7, 0.16],
 			[0.8, 0.14],
 		] as const) {
-			ctx.strokeStyle = `rgb(52 104 152 / ${alpha * strength})`;
+			ctx.strokeStyle = `rgb(52 104 152 / ${alpha})`;
 			ctx.lineWidth = widthUnits;
 			ctx.stroke(land);
 		}
@@ -399,14 +375,10 @@ export function paintChart(bounds: BoardBounds): Chart {
 		ctx.setTransform(1, 0, 0, 1, 0, 0);
 	};
 
-	const finish = (layer: Ctx, wash: number, bleach = 0) => {
+	const finish = (layer: Ctx) => {
 		const { canvas, ctx } = sheet(width, height);
 		ctx.drawImage(base, 0, 0);
-		water(ctx, wash);
-		if (bleach) {
-			ctx.fillStyle = `rgb(248 242 226 / ${bleach})`;
-			ctx.fillRect(0, 0, width, height);
-		}
+		water(ctx);
 		ctx.globalCompositeOperation = 'multiply';
 		ctx.drawImage(layer.canvas, 0, 0);
 		ctx.globalCompositeOperation = 'source-over';
@@ -417,7 +389,7 @@ export function paintChart(bounds: BoardBounds): Chart {
 		wear(ctx, width, height);
 		return canvas;
 	};
-	return { known: finish(ink, 1), unknown: finish(faint, 0.55, 0.3) };
+	return { known: finish(ink) };
 }
 
 /**
@@ -529,7 +501,7 @@ function compass(ctx: Ctx, at: BoardPoint, radius: number, px: (pixels: number) 
 }
 
 /**
- * How much of the unknown sheet shows at each point: the ground of every location still unrevealed,
+ * Where the fog lies: the ground of every location still unrevealed,
  * cut exactly from the rules partition. A location being revealed opens from its city outward until
  * its whole cell is charted.
  */
@@ -566,9 +538,6 @@ export class FogMask {
 		ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 		ctx.setTransform(scale, 0, 0, scale, -this.bounds.minX * scale, -this.bounds.minZ * scale);
 		ctx.save();
-		ctx.beginPath();
-		ctx.rect(FRAME.minX, FRAME.minZ, FRAME.maxX - FRAME.minX, FRAME.maxZ - FRAME.minZ);
-		ctx.clip();
 		ctx.fillStyle = '#fff';
 		// Settled cells go into one path, so two unknown neighbours never show a seam between them.
 		const settled = new Path2D();
