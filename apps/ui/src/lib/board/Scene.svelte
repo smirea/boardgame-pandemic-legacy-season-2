@@ -36,7 +36,8 @@
 		/** Bump to return the camera to the fitted view of everything explored. */
 		resetView?: number;
 		/** A pointer over part of a city, or off it when `event` is null. */
-		onhint?: (city: CityId, part: Part, event: PointerEvent | null) => void;
+		/** A pointer over part of a city, or off it when `event` is null, with where the city's name is printed. */
+		onhint?: (city: CityId, part: Part, event: PointerEvent | null, name: Placement | undefined) => void;
 		/** The city under the pointer, whose printed name lights up. */
 		hoverCity?: CityId | null;
 		/** Screen rectangles, in pixels from the canvas corner, that HUD panels cover. The fitted view keeps cities out of them. */
@@ -318,7 +319,7 @@
 		placement={anchors.get(city.id) ?? { x: 0, z: 3.4, leader: false }}
 		lit={hoverCity === city.id}
 		onselect={() => oncity?.(city.id)}
-		onhint={(part, event) => onhint?.(city.id, part, event)}
+		onhint={(part, event) => onhint?.(city.id, part, event, anchors.get(city.id))}
 	/>
 {/each}
 
@@ -346,7 +347,7 @@
 {/each}
 
 {#each flagsByCity as [city, flags] (city)}
-	<Flags at={layout[city]!} {flags} />
+	<Flags at={layout[city]!} {flags} name={anchors.get(city)} />
 {/each}
 
 {#each view.fx as fx (fx.id)}

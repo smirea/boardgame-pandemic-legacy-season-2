@@ -4,6 +4,7 @@
 	import { NoToneMapping } from 'three';
 	import { partHint, partKey } from './hints';
 	import type { Part } from './hints';
+	import type { Placement } from './labels';
 	import type { BoardPoint } from './projection';
 	import Scene from './Scene.svelte';
 	import type { BoardView } from './types';
@@ -20,18 +21,30 @@
 
 	let element = $state<HTMLElement>();
 	// Which part of which city the pointer rests on. The text is read from the view, so it follows the game live.
-	let hovered = $state.raw<{ city: CityId; part: Part; x: number; y: number } | null>(null);
+	let hovered = $state.raw<{ city: CityId; part: Part; x: number; y: number; name?: Placement } | null>(null);
+	// The slip opens away from the city's printed name, so the name it lights up stays in view, unless the
+	// screen's edge leaves no room on that side.
+	const side = $derived.by(() => {
+		const name = hovered?.name;
+		const width = element?.clientWidth ?? 0;
+		const height = element?.clientHeight ?? 0;
+		const x = hovered?.x ?? 0;
+		const y = hovered?.y ?? 0;
+		const left = x > width - 260 ? true : x < 260 ? false : (name?.x ?? 0) > 1;
+		const up = y > height - 200 ? true : y < 200 ? false : (name?.z ?? 0) > 0;
+		return { left, up };
+	});
 	const hint = $derived(
 		hovered && view.cities[hovered.city] ? partHint(hovered.part, view.cities[hovered.city]!) : null,
 	);
 
-	function onhint(city: CityId, part: Part, event: PointerEvent | null) {
+	function onhint(city: CityId, part: Part, event: PointerEvent | null, name?: Placement) {
 		if (!event) {
 			if (hovered?.city === city && partKey(hovered.part) === partKey(part)) hovered = null;
 			return;
 		}
 		const box = element!.getBoundingClientRect();
-		hovered = { city, part, x: event.clientX - box.x, y: event.clientY - box.y };
+		hovered = { city, part, x: event.clientX - box.x, y: event.clientY - box.y, name };
 	}
 </script>
 
@@ -50,8 +63,8 @@
 	{#if hovered && hint}
 		<div
 			class="hint"
-			class:left={hovered.x > (element?.clientWidth ?? 0) - 260}
-			class:up={hovered.y > (element?.clientHeight ?? 0) - 200}
+			class:left={side.left}
+			class:up={side.up}
 			style:left={`${hovered.x}px`}
 			style:top={`${hovered.y}px`}
 			role="tooltip"
@@ -131,7 +144,7 @@
 	}
 
 	.hint dt {
-		color: rgb(42 32 23 / 0.62);
+		color: rgb(42 32 23 / 0.75);
 	}
 
 	.hint dd {

@@ -1,13 +1,13 @@
 import type { CityId } from '@repo/game';
 import type { BoardPoint } from './projection';
 
-/** Where a city's printed name is centred, relative to the city, and whether a leader line ties it back. */
+/** Where a city's printed name is centred, relative to the city, and whether a leader line ties it back: any name not straight above or below its city gets one. */
 export type Placement = { x: number; z: number; leader: boolean };
 
 type Rect = { x: number; z: number; halfWidth: number; halfHeight: number };
 
 /** Cap height of a printed name, in board units. */
-export const NAME_SIZE = 2.1;
+export const NAME_SIZE = 2.3;
 /** The disc's reach, which a leader line starts from. */
 export const DISC_REACH = 2.2;
 
@@ -18,12 +18,12 @@ type Slot = { offset: (width: number) => { x: number; z: number }; cost: number;
 const SLOTS: Slot[] = [
 	{ offset: () => ({ x: 0, z: 3.4 }), cost: 0 },
 	{ offset: () => ({ x: 0, z: -4 }), cost: 0.6 },
-	{ offset: width => ({ x: 1.2 + width / 2, z: 3.6 }), cost: 1 },
-	{ offset: width => ({ x: -1.2 - width / 2, z: 3.6 }), cost: 1 },
-	{ offset: width => ({ x: 1.2 + width / 2, z: -4 }), cost: 1.5 },
-	{ offset: width => ({ x: -1.2 - width / 2, z: -4 }), cost: 1.5 },
-	{ offset: width => ({ x: 4.4 + width / 2, z: 0.3 }), cost: 2 },
-	{ offset: width => ({ x: -5.2 - width / 2, z: 0.3 }), cost: 2 },
+	{ offset: width => ({ x: 1.2 + width / 2, z: 3.6 }), cost: 1, leader: true },
+	{ offset: width => ({ x: -1.2 - width / 2, z: 3.6 }), cost: 1, leader: true },
+	{ offset: width => ({ x: 1.2 + width / 2, z: -4 }), cost: 1.5, leader: true },
+	{ offset: width => ({ x: -1.2 - width / 2, z: -4 }), cost: 1.5, leader: true },
+	{ offset: width => ({ x: 4.4 + width / 2, z: 0.3 }), cost: 2, leader: true },
+	{ offset: width => ({ x: -5.2 - width / 2, z: 0.3 }), cost: 2, leader: true },
 	{ offset: () => ({ x: 0, z: 6 }), cost: 5, leader: true },
 	{ offset: () => ({ x: 0, z: -6.6 }), cost: 5, leader: true },
 ];

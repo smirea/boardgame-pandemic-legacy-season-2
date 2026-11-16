@@ -1,16 +1,21 @@
 <script lang="ts">
 	import { HTML } from '@threlte/extras';
+	import type { Placement } from './labels';
+	import { NAME_SIZE } from './labels';
 	import type { BoardPoint } from './projection';
 	import { CITY_TOP } from './routes';
 	import type { MarkTone } from './types';
 
-	type Props = { at: BoardPoint; flags: { id: string; text: string; tone: MarkTone }[] };
+	type Props = { at: BoardPoint; flags: { id: string; text: string; tone: MarkTone }[]; name?: Placement };
 
-	let { at, flags }: Props = $props();
+	let { at, flags, name }: Props = $props();
+
+	// A name printed north of the city would sit under the flags, so they rise above it instead.
+	const north = $derived(name && name.z < 0 ? name.z - NAME_SIZE : 0);
 </script>
 
 <!-- Paper flags pinned above a city, saying what just happened there. They sit above the city name, never over it. -->
-<HTML position={[at.x, CITY_TOP + 2.4, at.z]} center pointerEvents="none" zIndexRange={[20, 11]}>
+<HTML position={[at.x, CITY_TOP + 2.4, at.z + north]} center pointerEvents="none" zIndexRange={[20, 11]}>
 	<div class="flags">
 		{#each flags as flag, index (flag.id)}
 			<span class="flag {flag.tone}" style:--i={index}>{flag.text}</span>

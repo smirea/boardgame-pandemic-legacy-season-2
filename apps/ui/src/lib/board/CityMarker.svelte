@@ -78,7 +78,7 @@
 		const toZ = Math.max(placement.z - halfHeight, Math.min(0, placement.z + halfHeight));
 		const distance = Math.hypot(toX, toZ);
 		const length = distance - DISC_REACH - 0.2;
-		if (length <= 0.3) return null;
+		if (length <= 0.4) return null;
 		const ux = toX / distance;
 		const uz = toZ / distance;
 		const mid = DISC_REACH + length / 2;
@@ -151,11 +151,11 @@
 		<Printed print={name} position={[placement.x, INK, placement.z]} opacity={ink.current} order={4} />
 		{#if leader}
 			<T.Mesh position={[leader.x, INK, leader.z]} rotation={[-Math.PI / 2, 0, leader.angle]} renderOrder={4}>
-				<T.PlaneGeometry args={[leader.length, 0.1]} />
+				<T.PlaneGeometry args={[leader.length, 0.13]} />
 				<T.MeshBasicMaterial
 					color={lit ? '#8e2a12' : '#2a2017'}
 					transparent
-					opacity={ink.current * (lit ? 0.9 : 0.5)}
+					opacity={ink.current * (lit ? 0.95 : 0.7)}
 					depthWrite={false}
 				/>
 			</T.Mesh>

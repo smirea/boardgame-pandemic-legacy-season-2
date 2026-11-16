@@ -66,8 +66,8 @@ export function printName(name: string, size: number, faded: boolean, lit: boole
 		context.font = font;
 		context.letterSpacing = `${size * NAME_SPACING}px`;
 		context.strokeStyle = PAPER;
-		context.lineWidth = size * (lit ? 0.3 : 0.14);
-		context.globalAlpha = lit ? 0.9 : 0.35;
+		context.lineWidth = size * (lit ? 0.3 : 0.1);
+		context.globalAlpha = lit ? 0.9 : 0.25;
 		context.strokeText(name, pad, baseline);
 		context.globalAlpha = faded && !lit ? 0.5 : 1;
 		context.fillStyle = lit ? '#8e2a12' : INK;
