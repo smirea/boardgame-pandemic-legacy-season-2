@@ -4,13 +4,13 @@
 
 ## What each file covers
 
-`board.json` holds 12 regions, 52 locations (46 cities and 6 havens) and 62 routes.
+`board.json` holds 12 regions, 52 locations (46 cities and 6 havens) and 60 routes.
 
 - Regions carry the recon spot, the card cost and the package or door it opens.
 - Cities carry real coordinates, color, starting population, port status, card counts and printed infested markers. The infested markers are kept in `notes`.
 - Havens use approximate open-ocean coordinates read from board photos.
 - Routes come in three groups:
-  - 18 sea lanes printed on the starting board (`startsEstablished: true`).
+  - 16 sea lanes printed on the starting board (`startsEstablished: true`). Midsea sits west of Gibraltar and Istanbul is reached through Tripoli, so no two starting lanes cross or run together on this map.
   - 9 lines printed on region stickers or packages, which connect when the region opens.
   - 35 routes that players built in documented campaigns.
 

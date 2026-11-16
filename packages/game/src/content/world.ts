@@ -33,7 +33,7 @@ type CityRow = [
 const cityRows: Record<string, CityRow[]> = {
 	atlantic: [
 		['haven-north-atlantic', 'Northwatch', 45, -40, 'haven', 3, 0, 'pg'],
-		['haven-mediterranean', 'Midsea', 38.5, 4, 'haven', 3, 0, 'pg'],
+		['haven-mediterranean', 'Midsea', 37, -14, 'haven', 3, 0, 'pg'],
 		['haven-south-atlantic', 'Southreach', 3, -25, 'haven', 3, 0, 'pg'],
 		['new-york', 'New York', 40.71, -74.01, 'blue', 3, 4, 'pg'],
 		['washington', 'Washington', 38.91, -77.04, 'blue', 3, 4, 'pg'],
@@ -141,12 +141,10 @@ export const startingEdges: EdgeDef[] = [
 	['london', 'haven-north-atlantic'],
 	['haven-north-atlantic', 'haven-south-atlantic'],
 	['haven-north-atlantic', 'haven-mediterranean'],
-	['washington', 'haven-mediterranean'],
 	['jacksonville', 'haven-south-atlantic'],
-	['washington', 'haven-south-atlantic'],
 	['london', 'haven-mediterranean'],
 	['haven-mediterranean', 'tripoli'],
-	['haven-mediterranean', 'istanbul'],
+	['tripoli', 'istanbul'],
 	['istanbul', 'cairo'],
 	['tripoli', 'cairo'],
 	['haven-mediterranean', 'haven-south-atlantic'],

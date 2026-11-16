@@ -129,8 +129,8 @@
 		{
 			"id": "haven-mediterranean",
 			"name": "Mediterranean Haven",
-			"lat": 38.5,
-			"lon": 4,
+			"lat": 37,
+			"lon": -14,
 			"kind": "haven",
 			"color": null,
 			"region": "atlantic",
@@ -987,25 +987,11 @@
 			"confidence": "community"
 		},
 		{
-			"a": "washington",
-			"b": "haven-mediterranean",
-			"kind": "sea",
-			"startsEstablished": true,
-			"confidence": "inferred"
-		},
-		{
 			"a": "jacksonville",
 			"b": "haven-south-atlantic",
 			"kind": "sea",
 			"startsEstablished": true,
 			"confidence": "community"
-		},
-		{
-			"a": "washington",
-			"b": "haven-south-atlantic",
-			"kind": "sea",
-			"startsEstablished": true,
-			"confidence": "inferred"
 		},
 		{
 			"a": "london",
@@ -1022,11 +1008,11 @@
 			"confidence": "community"
 		},
 		{
-			"a": "haven-mediterranean",
+			"a": "tripoli",
 			"b": "istanbul",
 			"kind": "sea",
 			"startsEstablished": true,
-			"confidence": "community"
+			"confidence": "inferred"
 		},
 		{
 			"a": "istanbul",

@@ -1,5 +1,15 @@
 <script lang="ts">
-	import { insights, isForsaken, legalActions, legalDecides, legalPlays, onGrid, pack, scenarios } from '@repo/game';
+	import {
+		insights,
+		isForsaken,
+		legalActions,
+		legalDecides,
+		legalPlays,
+		onGrid,
+		pack,
+		reject,
+		scenarios,
+	} from '@repo/game';
 	import type { Action, CardId, CityId, Command, EdgeDef, Play, SeatId } from '@repo/game';
 	import Board from '#lib/board/Board.svelte';
 	import type { BoardPoint } from '#lib/board/projection.ts';
@@ -203,6 +213,11 @@
 		chooser = null;
 		choose(cityName(city), options);
 		if (options.length <= 1) targeting = null;
+	}
+
+	function takeBack(city: CityId) {
+		const command = { type: 'PLACE_SUPPLY', city, count: -1 } as const;
+		if (reject(world, snap.phase, command) === null) send(command);
 	}
 
 	function group(name: Action['a']) {
@@ -567,7 +582,14 @@
 	/>
 
 	<main class="stage" bind:this={stage}>
-		<Board view={boardView} oncity={clickCity} onpointer={point => session.pointer(point)} {resetView} {covered} />
+		<Board
+			view={boardView}
+			oncity={clickCity}
+			oncityback={takeBack}
+			onpointer={point => session.pointer(point)}
+			{resetView}
+			{covered}
+		/>
 
 		{#if game && seatAt && snap.phase !== 'upkeep'}
 			<div class="column left" class:docked={!spectator} bind:this={leftColumn}>

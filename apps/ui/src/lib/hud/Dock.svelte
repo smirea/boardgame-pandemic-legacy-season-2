@@ -18,6 +18,7 @@
 	import InfectionCard from '#lib/cards/InfectionCard.svelte';
 	import { deal } from './deal.ts';
 	import PlayerCard from './PlayerCard.svelte';
+	import SupplyTray from './SupplyTray.svelte';
 
 	type Props = {
 		snap: PublicState;
@@ -180,14 +181,7 @@
 	<footer class="dock">
 		{#if snap.phase === 'setup.supply'}
 			<div class="setup">
-				<div>
-					{#if game.stockpile > 0}
-						<strong>{game.stockpile}</strong> supply cubes to place. Click a city to add one. The opening infection then flips
-						9 cards. The list on the right shows where it is most likely to land.
-					{:else}
-						<strong>All cubes placed.</strong> The opening infection flips 9 cards next.
-					{/if}
-				</div>
+				<SupplyTray {game} />
 				{#if freeAbilities.length}
 					<details class="free" data-testid="free-abilities">
 						<summary>

@@ -176,7 +176,7 @@ export function discardFromHand(game: Game, seat: SeatId, card: CardId) {
 	game.playerDiscard.push(card);
 }
 
-type Point = { x: number; z: number };
+export type Point = { x: number; z: number };
 
 const cross = (o: Point, a: Point, b: Point) => (a.x - o.x) * (b.z - o.z) - (a.z - o.z) * (b.x - o.x);
 

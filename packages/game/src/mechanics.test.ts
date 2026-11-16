@@ -438,7 +438,7 @@ describe('Hollow Men and forsaken cities', () => {
 			world.campaign.required = 1;
 			game.players[A]!.location = city('tripoli');
 			game.locations[city('tripoli')]!.tower = true;
-			game.locations[city('istanbul')]!.hollow = 3;
+			game.locations[city('tripoli')]!.hollow = 3;
 			for (const haven of havens) game.locations[city(haven)]!.hollow = 1;
 		});
 
@@ -447,7 +447,7 @@ describe('Hollow Men and forsaken cities', () => {
 		expect(refuses(actor, { a: 'broadcast', from: city('lagos'), to: city('haven-south-atlantic') })).toContain(
 			'colour',
 		);
-		for (let i = 0; i < 3; i++) act(actor, { a: 'broadcast', from: city('istanbul'), to: city('haven-mediterranean') });
+		for (let i = 0; i < 3; i++) act(actor, { a: 'broadcast', from: city('tripoli'), to: city('haven-mediterranean') });
 		expect(gameOf(actor).locations[city('haven-mediterranean')]!.hollow).toBe(3);
 		expect(gameOf(actor).progress.defect).toBe(1);
 		expect(gameOf(actor).outcome).toBeNull();
@@ -455,7 +455,7 @@ describe('Hollow Men and forsaken cities', () => {
 
 	test('a Hollow Man in each of three different havens completes the October objective', () => {
 		const actor = defectScene(['haven-north-atlantic', 'haven-south-atlantic']);
-		act(actor, { a: 'broadcast', from: city('istanbul'), to: city('haven-mediterranean') });
+		act(actor, { a: 'broadcast', from: city('tripoli'), to: city('haven-mediterranean') });
 		expect(gameOf(actor).outcome).toMatchObject({ won: true });
 		expect(worldOf(actor).campaign.opened as string[]).toContain('defection');
 	});

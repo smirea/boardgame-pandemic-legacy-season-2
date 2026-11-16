@@ -35,7 +35,6 @@
 		onpointer?: (point: BoardPoint | null) => void;
 		/** Bump to return the camera to the fitted view of everything explored. */
 		resetView?: number;
-		/** A pointer over part of a city, or off it when `event` is null. */
 		/** A pointer over part of a city, or off it when `event` is null, with where the city's name is printed. */
 		onhint?: (city: CityId, part: Part, event: PointerEvent | null, name: Placement | undefined) => void;
 		/** The city under the pointer, whose printed name lights up. */

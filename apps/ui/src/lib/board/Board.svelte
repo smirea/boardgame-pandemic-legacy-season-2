@@ -12,12 +12,14 @@
 	type Props = {
 		view: BoardView;
 		oncity?: (city: CityId) => void;
+		/** A right click on a city, which takes back what a click put there. */
+		oncityback?: (city: CityId) => void;
 		onpointer?: (point: BoardPoint | null) => void;
 		resetView?: number;
 		covered?: { x: number; y: number; width: number; height: number }[];
 	};
 
-	let { view, oncity, onpointer, resetView, covered }: Props = $props();
+	let { view, oncity, oncityback, onpointer, resetView, covered }: Props = $props();
 
 	let element = $state<HTMLElement>();
 	// Which part of which city the pointer rests on. The text is read from the view, so it follows the game live.
@@ -52,6 +54,11 @@
 	class="board"
 	role="presentation"
 	bind:this={element}
+	oncontextmenu={event => {
+		if (!hovered || !oncityback) return;
+		event.preventDefault();
+		oncityback(hovered.city);
+	}}
 	onpointerleave={() => {
 		onpointer?.(null);
 		hovered = null;

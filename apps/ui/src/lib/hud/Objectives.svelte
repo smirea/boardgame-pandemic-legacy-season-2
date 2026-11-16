@@ -25,7 +25,7 @@
 	import type { PublicState } from '@repo/game';
 	import { untrack } from 'svelte';
 	import { backOut } from 'svelte/easing';
-	import { fly, scale } from 'svelte/transition';
+	import { fly } from 'svelte/transition';
 
 	type Props = { snap: PublicState; onwaive: (objective: ObjectiveId) => void };
 
@@ -43,7 +43,6 @@
 	const filled = $derived(Math.max(0, (game?.incidents ?? 0) - flying));
 	let pips = $state<HTMLElement[]>([]);
 	let flights = $state.raw<{ id: number; from: DOMRect; to: DOMRect; delay: number }[]>([]);
-	let notice = $state.raw<{ id: number; text: string } | null>(null);
 	let seen = untrack(() => game?.log.at(-1)?.seq ?? 0);
 	let nextId = 1;
 
@@ -81,9 +80,6 @@
 	function land(id: number) {
 		flights = flights.filter(flight => flight.id !== id);
 		flying = Math.max(0, flying - 1);
-		const noticeId = nextId++;
-		notice = { id: noticeId, text: left(limit - filled) };
-		setTimeout(() => notice?.id === noticeId && (notice = null), 2600);
 	}
 
 	/** Sends a marker from the city it was struck in, up and over the board, into its pip. */
@@ -179,16 +175,11 @@
 
 	{#if game}
 		<!-- The incident track: a marker for every incident, and the game is lost when the last is reached. -->
-		<div class="incidents" title="Incidents: the game is lost when the track is full" data-testid="incidents">
+		<div class="incidents" data-testid="incidents" aria-label={left(limit - filled)}>
 			{#each { length: limit } as _, index (index)}
 				<i bind:this={pips[index]} class:on={index < filled} class:last={index === limit - 1}></i>
 			{/each}
-			<span class="left" class:hot={limit - filled <= 2}>{left(limit - filled)}</span>
-			{#if notice}
-				{#key notice.id}
-					<span class="notice" in:scale={{ start: 0.6, duration: 320, easing: backOut }}>{notice.text}</span>
-				{/key}
-			{/if}
+			<span class="left" class:hot={limit - filled <= 2}>{left(limit - filled)}. The game is lost when it fills.</span>
 		</div>
 	{/if}
 </section>
@@ -316,22 +307,31 @@
 		opacity: 1;
 	}
 
+	/* Bare diamonds over the chart; the slip and its count appear only under the pointer. */
 	.incidents {
 		position: relative;
 		display: flex;
 		align-items: center;
-		gap: 0.3rem;
-		padding: 0.15rem 0.55rem;
+		gap: 0.45rem;
+		padding: 0.3rem 0.6rem;
 		border-radius: 2px;
+		transition:
+			background 200ms ease,
+			box-shadow 200ms ease;
+	}
+
+	.incidents:hover {
 		background: rgb(20 14 10 / 0.72);
 		box-shadow: var(--slip-shadow);
 	}
 
 	.incidents i {
-		width: 0.62rem;
-		height: 0.62rem;
-		margin: 0 0.06rem;
-		border: 1.5px solid rgb(236 227 207 / 0.55);
+		width: 0.95rem;
+		height: 0.95rem;
+		margin: 0 0.08rem;
+		border: 2px solid rgb(42 32 23 / 0.7);
+		background: rgb(239 230 210 / 0.55);
+		box-shadow: 0 1px 2px rgb(20 14 10 / 0.35);
 		rotate: 45deg;
 		transition:
 			background 260ms ease,
@@ -347,31 +347,35 @@
 
 	.incidents i.last {
 		border-color: var(--danger);
-		box-shadow: 0 0 0 1.5px rgb(207 91 62 / 0.35);
 	}
 
 	.left {
-		margin-left: 0.35rem;
-		color: var(--muted);
-		font-size: 0.74rem;
-	}
-
-	.left.hot {
-		color: var(--danger);
-		font-weight: 700;
-	}
-
-	.notice {
 		position: absolute;
 		top: calc(100% + 0.3rem);
 		left: 50%;
 		padding: 0.15rem 0.6rem;
 		border-radius: 2px;
-		background: var(--danger);
-		color: #fff4ec;
-		font-weight: 700;
-		translate: -50% 0;
+		background: rgb(20 14 10 / 0.85);
+		box-shadow: var(--slip-shadow);
+		color: var(--muted);
+		font-size: 0.74rem;
+		white-space: nowrap;
+		translate: -50% -0.2rem;
+		opacity: 0;
 		pointer-events: none;
+		transition:
+			opacity 180ms ease,
+			translate 180ms ease;
+	}
+
+	.incidents:hover .left {
+		opacity: 1;
+		translate: -50% 0;
+	}
+
+	.left.hot {
+		color: var(--danger);
+		font-weight: 700;
 	}
 
 	/* The marker in flight, drawn above everything: it starts at the struck city and ends in its pip. */
@@ -380,9 +384,9 @@
 		top: 0;
 		left: 0;
 		z-index: 80;
-		width: 0.62rem;
-		height: 0.62rem;
-		border: 1.5px solid #fff4ec;
+		width: 0.95rem;
+		height: 0.95rem;
+		border: 2px solid #fff4ec;
 		background: var(--danger);
 		box-shadow: 0 0 0.8rem rgb(207 91 62 / 0.8);
 		pointer-events: none;
