@@ -1,13 +1,14 @@
 import type { CityId } from '@repo/game';
 import type { BoardPoint } from './projection';
 
-export type Anchor = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw';
+export type Anchor = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw' | 'nn' | 'ss';
 
 export type Rect = { x: number; z: number; halfWidth: number; halfHeight: number };
 
 const HEIGHT_PX = 20;
 const MARKER_UNITS = 2.3;
-const ORDER: Anchor[] = ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'];
+// The far positions come last: a label pushed a step further out still beats one sitting on another.
+const ORDER: Anchor[] = ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw', 'nn', 'ss'];
 
 /** Where the label's centre sits relative to the city, in pixels, for a label `width` pixels wide. */
 export function anchorOffset(anchor: Anchor, width: number): { x: number; y: number } {
@@ -30,6 +31,10 @@ export function anchorOffset(anchor: Anchor, width: number): { x: number; y: num
 			return { x: corner, y: 22 };
 		case 'sw':
 			return { x: -corner, y: 22 };
+		case 'nn':
+			return { x: 0, y: -47 };
+		case 'ss':
+			return { x: 0, y: 47 };
 	}
 }
 
@@ -60,7 +65,13 @@ export function layoutLabels(
 	}));
 	const crowding = (city: (typeof cities)[number]) =>
 		cities.filter(other => Math.hypot(other.at.x - city.at.x, other.at.z - city.at.z) < 16).length;
-	const placed: Rect[] = [...blocked];
+	// A label under a panel is unreadable, while two labels touching are merely tight, so panels weigh more.
+	const panels = blocked.map(rect => ({
+		...rect,
+		halfWidth: rect.halfWidth + 4 * unitsPerPixel,
+		halfHeight: rect.halfHeight + 4 * unitsPerPixel,
+	}));
+	const placed: Rect[] = [];
 	const result = new Map<CityId, Anchor>();
 	for (const city of cities.toSorted((a, b) => crowding(b) - crowding(a) || a.id.localeCompare(b.id))) {
 		const width = labelWidth(city.name);
@@ -75,6 +86,7 @@ export function layoutLabels(
 			};
 			const cost =
 				placed.reduce((sum, other) => sum + overlap(rect, other), 0) +
+				panels.reduce((sum, panel) => sum + overlap(rect, panel) * 3, 0) +
 				markers.reduce((sum, marker) => sum + (marker.id === city.id ? 0 : overlap(rect, marker) * 1.5), 0);
 			if (!best || cost < best.cost - 1e-6) best = { anchor, rect, cost };
 			if (cost === 0) break;

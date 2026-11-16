@@ -21,7 +21,10 @@ export type CityView = {
 	odds: number | null;
 };
 
-export type PawnView = { id: string; city: CityId; color: string; name: string; active: boolean };
+/** How a pawn made its last move, which decides the vehicle it travels in. */
+export type Travel = 'land' | 'sea' | 'air';
+
+export type PawnView = { id: string; city: CityId; color: string; name: string; active: boolean; travel: Travel };
 
 export type CursorView = { id: string; name: string; color: string; x: number; z: number };
 

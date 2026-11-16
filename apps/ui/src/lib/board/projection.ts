@@ -1,8 +1,8 @@
-import { geoNaturalEarth1, geoStream } from 'd3-geo';
+import { geoNaturalEarth1, geoPath, geoStream } from 'd3-geo';
 import type { GeoPermissibleObjects } from 'd3-geo';
 
 const PROJECTION_WIDTH = 220;
-export const LAND_HEIGHT = 0.55;
+export const LAND_HEIGHT = 0.3;
 const SOUTH_CUTOFF_LAT = -57;
 const NORTH_CUTOFF_LAT = 76;
 
@@ -20,6 +20,15 @@ const projection = (() => {
 export type BoardPoint = { x: number; z: number };
 
 export type BoardBounds = { minX: number; maxX: number; minZ: number; maxZ: number };
+
+/** The rectangle the projection clips the world to. The chart's frame is drawn on it, which hides the cut through the far north. */
+export const FRAME: BoardBounds = (() => {
+	const [[minX, minZ], [maxX, maxZ]] = projection.clipExtent()!;
+	return { minX, maxX, minZ, maxZ };
+})();
+
+/** SVG path data for any geometry in board units. */
+export const boardPath = geoPath(projection);
 
 /** Board space: x east, z south, matching three.js ground-plane axes. */
 export function project(lat: number, lon: number): BoardPoint {

@@ -17,7 +17,7 @@ export const MONTHS = [
 	'December',
 ];
 
-export const SEAT_COLORS = ['#f25c54', '#4dabf7', '#ffd43b', '#b197fc'];
+export const SEAT_COLORS = ['#d9573f', '#4f93c4', '#e3b23c', '#9a7cc9'];
 
 export const ACTION_NAMES: Record<Action['a'], string> = {
 	drive: 'Drive / Ferry',

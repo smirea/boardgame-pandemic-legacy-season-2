@@ -12,6 +12,8 @@
 		"preview": "bun --env-file=../../.env --env-file=../../.env.local --bun vite preview"
 	},
 	"dependencies": {
+		"@fontsource/barlow-semi-condensed": "^5.3.0",
+		"@fontsource/im-fell-english": "^5.3.0",
 		"@repo/game": "workspace:*",
 		"@repo/net": "workspace:*",
 		"@sveltejs/adapter-static": "^4.0.0",

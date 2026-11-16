@@ -22,8 +22,7 @@
 
 <main>
 	<header>
-		<p class="eyebrow">Playtest lab</p>
-		<h1>Runs</h1>
+		<h1>Playtest runs</h1>
 	</header>
 
 	{#if runs.isPending}
@@ -45,8 +44,7 @@
 							{#if run.lost}<b class="lost">{run.lost} lost</b>{/if}
 							{#if run.games > run.won + run.lost}<b class="live">{run.games - run.won - run.lost} in play</b>{/if}
 						</span>
-						<span class="meta"
-							>{run.games} {run.games === 1 ? 'game' : 'games'} · last played {when(run.updatedAt)}</span
+						<span class="meta">{run.games} {run.games === 1 ? 'game' : 'games'}, last played {when(run.updatedAt)}</span
 						>
 					</a>
 				</li>
@@ -57,59 +55,45 @@
 
 <style>
 	main {
-		--ink: #e9e6dc;
-		--muted: #8a9aa8;
-		--accent: #7dfcc0;
-		--line: rgb(255 255 255 / 0.1);
 		min-height: 100vh;
 		padding: 3rem max(1.5rem, calc(50vw - 22rem));
-		background: #070b0f;
+		background: var(--table);
 		color: var(--ink);
-		font-family: 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
+		font-family: var(--font-ui);
 		font-variant-numeric: tabular-nums;
 	}
 
-	.eyebrow {
-		margin: 0;
-		color: var(--muted);
-		font-size: 0.66rem;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
-	}
-
 	h1 {
-		margin: 0.15rem 0 1.4rem;
-		font-size: 1.5rem;
-		font-weight: 650;
+		margin: 0 0 1.4rem;
+		font-family: var(--font-display);
+		font-size: 2.6rem;
+		font-weight: 400;
 	}
 
 	.hint {
 		color: var(--muted);
-		font-size: 0.85rem;
 	}
 
 	.error {
-		color: #ff8f8f;
-		font-size: 0.85rem;
+		color: var(--danger);
 	}
 
 	ol {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
 		margin: 0;
 		padding: 0;
 		list-style: none;
 	}
 
-	li + li {
-		margin-top: 0.5rem;
-	}
-
 	a {
 		display: grid;
 		grid-template-columns: minmax(0, 1fr) auto;
-		gap: 0.2rem 0.8rem;
+		gap: 0.2rem 1rem;
 		padding: 0.8rem 1rem;
-		border: 1px solid var(--line);
-		border-radius: 0.6rem;
+		border-left: 2px solid var(--line-strong);
+		background: var(--wash);
 		color: inherit;
 		text-decoration: none;
 		transition:
@@ -118,47 +102,48 @@
 	}
 
 	a:hover {
-		border-color: var(--accent);
-		background: rgb(125 252 192 / 0.05);
+		border-left-color: var(--paper);
+		background: rgb(231 220 198 / 0.09);
 	}
 
 	.name {
-		font-size: 0.95rem;
-		font-weight: 650;
-		overflow-wrap: anywhere;
+		font-family: var(--font-display);
+		font-size: 1.2rem;
 	}
 
 	.score {
 		display: flex;
-		gap: 0.35rem;
-		align-self: center;
+		gap: 0.4rem;
+		align-items: center;
 	}
 
 	.score b {
-		padding: 0.05rem 0.5rem;
-		border-radius: 999px;
-		font-size: 0.68rem;
+		padding: 0.05rem 0.45rem;
+		border: 1px solid currentcolor;
+		border-radius: 2px;
+		font-size: 0.75rem;
 		font-weight: 600;
 	}
 
 	.won {
-		background: rgb(125 252 192 / 0.16);
-		color: var(--accent);
+		color: var(--good);
 	}
 
 	.lost {
-		background: rgb(255 107 107 / 0.16);
-		color: #ff8f8f;
+		color: var(--danger);
 	}
 
 	.live {
-		background: rgb(255 255 255 / 0.1);
 		color: var(--muted);
 	}
 
 	.meta {
 		grid-column: 1 / -1;
 		color: var(--muted);
-		font-size: 0.74rem;
+		font-size: 0.8rem;
+	}
+
+	code {
+		color: var(--ink);
 	}
 </style>

@@ -32,9 +32,9 @@
 		inset: 0;
 		display: grid;
 		place-items: center;
-		background: #070b0f;
-		color: #e9e6dc;
-		font-family: 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
+		background: var(--table);
+		color: var(--ink);
+		font-family: var(--font-ui);
 	}
 
 	section {
@@ -46,20 +46,22 @@
 
 	h1 {
 		margin: 0;
-		font-size: 2rem;
+		font-family: var(--font-display);
+		font-size: 2.6rem;
+		font-weight: 400;
 	}
 
 	p {
 		margin: 0;
-		color: #8a9aa8;
+		color: var(--muted);
 	}
 
 	pre {
 		margin: 0;
 		padding: 0.7rem;
-		border-radius: 0.5rem;
-		background: rgb(255 255 255 / 0.06);
-		color: #ff6b6b;
+		border-left: 2px solid var(--danger);
+		background: var(--wash);
+		color: var(--danger);
 		font-size: 0.75rem;
 		white-space: pre-wrap;
 	}
@@ -71,18 +73,18 @@
 
 	button {
 		padding: 0.5rem 0.9rem;
-		border: 1px solid rgb(255 255 255 / 0.14);
-		border-radius: 0.5rem;
-		background: rgb(255 255 255 / 0.05);
+		border: 1px solid var(--line-strong);
+		border-radius: 2px;
+		background: none;
 		color: inherit;
 		font: inherit;
 		cursor: pointer;
 	}
 
 	.primary {
-		border-color: #7dfcc0;
-		background: #7dfcc0;
-		color: #06120c;
+		border-color: var(--paper);
+		background: var(--paper);
+		color: var(--paper-ink);
 		font-weight: 700;
 	}
 </style>
