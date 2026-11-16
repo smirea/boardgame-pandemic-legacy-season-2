@@ -32,7 +32,8 @@ export {
 } from './helpers';
 export { freeCharacters, scarTargets } from './flow';
 export { botCommand } from './bot';
-export { scenarios } from './scenarios';
+export { campaignAt, scenarios } from './scenarios';
+export { give, stackInfection } from './testkit';
 export type {
 	GameNotes,
 	GameRecord,

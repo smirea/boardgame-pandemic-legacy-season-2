@@ -40,15 +40,17 @@ Nothing from the catalogue is left unbuilt. Two things rest on thin sources and 
 - **The Jade lab's gentler Epidemic.** One campaign log reports it. Finding the lab makes an Epidemic remove 1 cube from the struck city instead of all of them.
 - **Seven abilities the sources name.** Investigator and Supplier have described effects, and the two effects that logs describe without a name are given to Facilitator and Runner. Foreman, Outrider and Soldier are named in logs with no effect recorded, so their effects are authored here: a cheaper supply line, no exposure when leaving Hollow Men, and removing a Hollow Man from your own location.
 
-## Known gaps from the campaign review
+## Campaign review
 
-A month-by-month review of the content pack against the research (November 2026) found sixteen differences. Ten are fixed and tested in `mechanics.test.ts` under "parity gaps found by the static review". These are left as they are:
+A month-by-month review of the content pack against the research (November 2026) found sixteen differences. Twelve are fixed and tested in `mechanics.test.ts` under "parity gaps found by the static review". The last two fixed were the sea route from Lima to the eastern Pacific haven, which now arrives with South America, and August's free ability units, which the game screen now offers during setup.
 
-- **Lima's printed route to the eastern Pacific haven** (one source). The haven is found by a sea search at Los Angeles or San Francisco, or by the May perimeter report.
-- **Extra permanent supply center stickers in May.** The count is not recorded. The limit stays at 6.
-- **A forced region can leave a city off the grid.** Utopia joins only through Shanghai and Jakarta only through Kolkata. If the players never connected those, the forced city is revealed but still needs a supply line.
-- **August's free ability units in the UI.** The engine and the playtest lab let the group spend them at setup, as the research says. The game screen still offers them at game end only.
-- **The losing-streak turning point** would count prologue losses. The prologue never records a result, so this cannot happen in play.
+One of the sixteen was not a difference in play: the losing-streak turning point would count prologue losses, but the prologue never records a result.
+
+The rest are places where the research does not settle the rule. The engine's reading is recorded here so it is a decision, not an omission:
+
+- **Permanent supply center stickers.** The research says May adds more stickers and gives no count for either batch. The engine has one limit of 6 for the whole year.
+- **A forced region's printed line.** A region opened by a perimeter report arrives with its printed line (Jakarta to Kolkata, Utopia to Shanghai). The research calls those cities "connected" and "on the grid". The engine draws the line, and the city is on the grid only if the other end is, which is how every other line works.
+- **Europe's forced month.** One source forces Europe in June with Frankfurt ruined, the other records no forced date. The engine follows the first.
 
 ## Rules audit
 
@@ -66,7 +68,7 @@ An independent audit (November 2026) checked all 170 interactions against the en
 - Population is bought in whole steps.
 - A game result records who played.
 
-One is left as it is: **Triangulate needs blue, yellow and black**. The prose catalogue says three different colours and the objective text recorded in `data/legacy-timeline.json` names those three. The engine follows the recorded text.
+The thirteenth was not a defect: **Triangulate needs blue, yellow and black**. The prose catalogue shortens this to "three different colours". The objective text recorded in `data/legacy-timeline.json` names those three colours, and the engine follows it.
 
 ## UI simplifications
 

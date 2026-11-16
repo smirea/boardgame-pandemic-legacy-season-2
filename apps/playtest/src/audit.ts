@@ -274,7 +274,7 @@ export function observe(audit: Audit, previous: PublicState | null, next: Public
 }
 
 /** Everything the engine can do, so the report can say what no game has touched yet. */
-function universe(world: World): { key: string; live: boolean }[] {
+export function universe(world: World): { key: string; live: boolean }[] {
 	const { campaign } = world;
 	const unlockedAction = (id: string) => campaign.actions.includes(id as never);
 	const eventsOwned = new Set(

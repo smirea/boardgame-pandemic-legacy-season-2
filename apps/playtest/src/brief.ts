@@ -15,6 +15,8 @@ type BriefInput = {
 	dir: string;
 	reports: string;
 	leadIndex: number;
+	/** What a staged game tells the whole table and then each seat. */
+	stage?: { table: string[]; seats: string[][] } | null;
 };
 
 /** Turns the lab's list of unused mechanics into things a player can act on this game. */
@@ -107,6 +109,20 @@ export function writeBriefs(input: BriefInput): string[] {
 			'',
 			'In the lobby, choose who you play: `chars` lists the characters and the open jobs, `create <job> <haven-id> <name>` makes a new one, `pick <character-id>` takes one. You do not have to play the same character every game.',
 			'',
+			...(input.stage
+				? [
+						'## This game is staged',
+						'',
+						...input.stage.table.map(line => `- ${line}`),
+						'',
+						'Your list, in order:',
+						'',
+						...(input.stage.seats[index] ?? []).map((line, at) => `${at + 1}. ${line}`),
+						'',
+						'Say in chat when your list is done, and `report` anything on it that the game refused or that worked differently from what the list says.',
+						'',
+					]
+				: []),
 			...(suggestions.length
 				? [
 						'## Worth trying this game',
@@ -120,7 +136,9 @@ export function writeBriefs(input: BriefInput): string[] {
 			'## Rules of the session',
 			'',
 			'- Keep going until `wait` or `status` says **SESSION COMPLETE**. That comes after the game ends and the game-end spending is finished. A turn can take the others a few minutes. Keep running `wait`. Do not stop early for any reason short of the lab not answering three times in a row.',
-			'- Play in character, and play to win.',
+			input.stage
+				? '- Play in character. Your list comes first, winning second.'
+				: '- Play in character, and play to win.',
 			'- End every `do` with `why:` and one sentence of reasoning. The game is recorded, and the replay shows your reason beside each move.',
 			'- `report` every bug, rule surprise and rough edge the moment you meet it.',
 			'- Do not open or edit any file other than the three above and your report file. Do not look at source code. Do not run any command other than `./apps/playtest/play`.',

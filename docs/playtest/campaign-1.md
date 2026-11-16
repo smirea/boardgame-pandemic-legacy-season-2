@@ -90,4 +90,4 @@ While the players were in January, a reviewer (`claudeAgent/claude-opus-5-5`) co
 | Triangulate accepted any three colours                                                                             | July                | Needs blue, yellow and black. Permanent towers count from setup.                                      |
 | A shelter did not stop the population loss from a fourth Hollow Man                                                | October onward      | It does.                                                                                              |
 
-Five smaller differences are declared in `docs/mechanics/coverage.md` under "Known gaps from the campaign review" and left alone.
+The smaller differences were followed up later: see "Campaign review" in `docs/mechanics/coverage.md`.

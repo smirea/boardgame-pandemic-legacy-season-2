@@ -172,6 +172,11 @@ export function applyPlay(world: World, seat: SeatId, card: CardId, play: Play) 
 	if (destroyed) delete campaign.playerCards[card];
 	else game.playerDiscard.push(card);
 	if (held.kind === 'event') log(game, { t: 'event', seat, event: held.event, detail: playDetail(world, play) });
+	if (held.kind === 'companion') {
+		const name = pack.companions.find(companion => companion.id === held.companion)!.name;
+		const where = playDetail(world, play) || cityDef(owner.location).name;
+		log(game, { t: 'note', text: `${characterOf(world, seat).name} played ${name}: ${where}` });
+	}
 
 	switch (play.e) {
 		case 'airlift':

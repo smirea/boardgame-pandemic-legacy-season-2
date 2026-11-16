@@ -41,17 +41,23 @@ const PERMANENT: [city: string, structure: 'center' | 'tower' | 'shelter'][] = [
  * A campaign that won every month before `month` and stands in that month's lobby: regions explored
  * on schedule, the documented routes drawn between revealed locations, a few permanent structures.
  * The sample lab at Lake Baikal is never pre-connected, so December still has to reach it in play.
+ * `unexplored` names bundles this group never opened, and `cast` replaces the usual five characters.
  */
-export function campaignAt(month: number, seed = 12): Save {
+export function campaignAt(
+	month: number,
+	seed = 12,
+	{ unexplored = [], cast = CAST }: { unexplored?: string[]; cast?: [name: string, job: JobId][] } = {},
+): Save {
 	const world: World = { campaign: newCampaign(seed), game: null };
 	const campaign = world.campaign;
 	const havens = pack.cities.filter(city => city.kind === 'haven' && !city.lost).map(city => city.id);
-	CAST.forEach(([name, job], index) => createCharacter(campaign, { name, job, home: havens[index % havens.length]! }));
+	cast.forEach(([name, job], index) => createCharacter(campaign, { name, job, home: havens[index % havens.length]! }));
 
 	for (let played = 1; played < month; played++) {
 		campaign.month = played;
 		readLegacy(world, 'setup');
-		for (const bundle of EXPLORED[played] ?? []) openBundle(world, bundle as BundleId, false);
+		for (const bundle of EXPLORED[played] ?? [])
+			if (!unexplored.includes(bundle)) openBundle(world, bundle as BundleId, false);
 		readLegacy(world, 'gameEnd', true);
 		campaign.results.push({
 			month: played,
@@ -75,10 +81,12 @@ export function campaignAt(month: number, seed = 12): Save {
 	for (const [city, structure] of PERMANENT) {
 		if (revealed(city as CityId)) campaign.locations[city as CityId]!.permanent.push(structure);
 	}
-	const [ada, bo, cy] = Object.values(campaign.characters);
-	ada!.slots[0] = { kind: 'ability', id: 'helmsman' };
-	bo!.slots[0] = { kind: 'ability', id: 'recordKeeper' };
-	cy!.slots[0] = { kind: 'ability', id: 'courier' };
+	if (cast === CAST) {
+		const [ada, bo, cy] = Object.values(campaign.characters);
+		ada!.slots[0] = { kind: 'ability', id: 'helmsman' };
+		bo!.slots[0] = { kind: 'ability', id: 'recordKeeper' };
+		cy!.slots[0] = { kind: 'ability', id: 'courier' };
+	}
 	return { v: 1, phase: 'lobby', world };
 }
 

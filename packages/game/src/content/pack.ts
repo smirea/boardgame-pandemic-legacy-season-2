@@ -108,7 +108,9 @@ const bundles: BundleDef[] = [
 		id: bundleId('south-america'),
 		name: 'South America revealed',
 		unlocks: [
-			region('south-america', ['buenos-aires', 'sao-paulo', 'land']),
+			region('south-america', ['buenos-aires', 'sao-paulo', 'land'], ['lima', 'haven-eastern-pacific', 'sea']),
+			// The map of South America shows a sea route from Lima to the lost haven, so the haven is sighted with it.
+			open('find-eastern-pacific'),
 			{ t: 'action', action: 'establishLine' },
 			{ t: 'action', action: 'search' },
 		],

@@ -24,7 +24,14 @@ export type LabConfig = {
 	run: string;
 	seed: number;
 	/** What the campaign starts from when the run has no save of its own yet. */
-	start: { save?: string; scenario?: string };
+	start: {
+		save?: string;
+		scenario?: string;
+		/** A stage from `stages.ts` that arranges the table once, on the first action step of every game. */
+		stage?: string;
+		/** Runs whose recordings count as already exercised, so the briefs list only what no run has reached. */
+		coverage?: string[];
+	};
 	/** Stop handing out briefs once this month has been played. */
 	lastMonth: number;
 	passphrase: string;

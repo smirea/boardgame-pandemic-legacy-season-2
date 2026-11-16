@@ -61,6 +61,14 @@ if (verb === 'review') {
 	await new Promise(() => {});
 }
 
+if (verb === 'coverage') {
+	// Counts what happened from the recordings of the named runs. Needs no running lab.
+	if (!rest.length) throw new Error('usage: lab coverage <run> [<run>...]');
+	const { renderCoverage } = await import('./src/coverage.ts');
+	console.log(renderCoverage(rest));
+	process.exit(0);
+}
+
 const alive = (pid: number) => {
 	try {
 		process.kill(pid, 0);

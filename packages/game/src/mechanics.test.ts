@@ -4,7 +4,7 @@ import { pack } from './content/pack';
 import type { EventId, SearchResult } from './content/types';
 import { bump, epidemicCount, placeHollow, setupInfection } from './flow';
 import { grid, handLimit, hasEdge, isCandidate, passage, segmentsCross } from './helpers';
-import type { CardId, CityId } from './ids';
+import type { BundleId, CardId, CityId } from './ids';
 import { createGameActor, parseSave, reject } from './machine';
 import type { Action } from './actions';
 import { legalActions, legalPlays } from './options';
@@ -1241,6 +1241,29 @@ describe('parity gaps found by the static review', () => {
 			.filter(edge => edge.a === pack.sampleFrom || edge.b === pack.sampleFrom)
 			.map(edge => (edge.a === pack.sampleFrom ? edge.b : edge.a));
 		expect(partners as string[]).toEqual(['utopia']);
+	});
+
+	test('South America arrives with the sea route from Lima to the eastern Pacific haven', () => {
+		const world: World = { campaign: newCampaign(4), game: null };
+		openBundle(world, 'south-america' as BundleId, false);
+		const { campaign } = world;
+		expect(campaign.locations[city('haven-eastern-pacific')]!.revealed).toBe(true);
+		expect(campaign.opened).toContain('find-eastern-pacific' as BundleId);
+		expect(
+			campaign.edges.some(
+				edge => edge.kind === 'sea' && [edge.a, edge.b].toSorted().join() === 'haven-eastern-pacific,lima',
+			),
+		).toBe(true);
+	});
+
+	test('playing a companion card is written to the log', () => {
+		const actor = late((world, game) => {
+			game.locations[game.players[A]!.location]!.plague = 1;
+			conjure(world, A, { kind: 'companion', companion: 'medic' });
+		});
+		const card = gameOf(actor).players[A]!.hand.at(-1)!;
+		send(actor, { type: 'PLAY', seat: A, card, play: { e: 'medic' } });
+		expect(gameOf(actor).log.at(-1)).toMatchObject({ t: 'note', text: expect.stringContaining('played Medic') });
 	});
 
 	test('only the North America recon completes the January objective', () => {

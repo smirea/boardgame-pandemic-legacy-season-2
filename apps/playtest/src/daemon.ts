@@ -27,7 +27,9 @@ import { writeBriefs } from './brief.ts';
 import { composite, mayRaw, optionsFor, parseVerb, seatOf } from './commands.ts';
 import type { Who } from './commands.ts';
 import { loadConfig, repoRoot } from './config.ts';
+import { coverageOfRun } from './coverage.ts';
 import { recordFile, replaysUrl, servePages } from './replays.ts';
+import { labScenarios, stages } from './stages.ts';
 import type { RecordMeta } from './replays.ts';
 import { isCity, monthName } from './names.ts';
 import {
@@ -88,6 +90,8 @@ type LabState = {
 	chat: { at: string; from: string; text: string }[];
 	chatSeen: Record<string, number>;
 	logSeen: Record<string, { game: number; seq: number }>;
+	/** Games whose table the configured stage has already arranged. */
+	staged?: number[];
 };
 
 const readJson = <T>(path: string, fallback: T): T =>
@@ -103,6 +107,12 @@ const lab: LabState = fresh
 			logSeen: {},
 		});
 const audit: Audit = fresh ? newAudit() : readJson<Audit>(files.audit, newAudit());
+const stage = config.start.stage ? stages[config.start.stage] : null;
+if (config.start.stage && !stage) throw new Error(`unknown stage "${config.start.stage}"`);
+if (!existsSync(files.audit))
+	for (const run of config.start.coverage ?? [])
+		for (const [key, count] of Object.entries(coverageOfRun(run).audit.exercised))
+			audit.exercised[key] = (audit.exercised[key] ?? 0) + count;
 const persist = () => {
 	writeFileSync(files.lab, JSON.stringify(lab, null, '\t'));
 	writeFileSync(files.audit, JSON.stringify(audit));
@@ -121,7 +131,7 @@ function startingSave(): Save {
 	if (!fresh && existsSync(files.latest)) return parseSave(JSON.parse(readFileSync(files.latest, 'utf8')));
 	if (config.start.save) return parseSave(JSON.parse(readFileSync(config.start.save, 'utf8')));
 	if (config.start.scenario) {
-		const scenario = scenarios[config.start.scenario as keyof typeof scenarios];
+		const scenario = labScenarios[config.start.scenario as keyof typeof labScenarios];
 		if (!scenario) throw new Error(`unknown scenario "${config.start.scenario}"`);
 		return scenario(config.seed);
 	}
@@ -317,7 +327,31 @@ async function refresh(command: Command | null = null, agent: string | null = nu
 	const raw = await readState(host);
 	if (raw === currentRaw || raw === 'null') return false;
 	await ingest(JSON.parse(raw) as PublicState, raw, command, agent);
+	await stageIfDue();
 	return true;
+}
+
+/** Arranges the table once per game, the moment setup hands over to the first action step. */
+async function stageIfDue() {
+	const state = current;
+	const game = state?.world.game;
+	if (!stage || !state || !game || state.phase !== 'playing.actions' || game.turn !== 1) return;
+	const index = gameIndex(state);
+	if (lab.staged?.includes(index)) return;
+	lab.staged = [...(lab.staged ?? []), index];
+	const world = structuredClone(state.world);
+	stage.apply(world);
+	await loadSave(host, { v: 1, phase: state.phase, world });
+	const raw = await readState(host);
+	await ingest(JSON.parse(raw) as PublicState, raw, null, null);
+	note('note', 'lab', stage.summary);
+	journal({ kind: 'stage', stage: config.start.stage, text: stage.summary });
+	lab.chat.push({
+		at: new Date().toISOString(),
+		from: 'lab',
+		text: `TABLE STAGED. ${stage.summary} Run status and options again.`,
+	});
+	persist();
 }
 
 const sessionDone = (state: PublicState) =>
@@ -593,6 +627,7 @@ async function handle(agent: string, words: string[]): Promise<string> {
 					dir: dirs.briefs,
 					reports: dirs.reports,
 					leadIndex: lab.session.startIndex % config.players.length,
+					stage,
 				});
 				return paths.join('\n');
 			}

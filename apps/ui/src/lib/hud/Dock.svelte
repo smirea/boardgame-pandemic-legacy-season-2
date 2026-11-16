@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { actionCost, checkAction, handLimit, pack } from '@repo/game';
-	import type { Action, CardId, Command, Decide, Play, PublicState, SeatId } from '@repo/game';
+	import { actionCost, checkAction, handLimit, pack, reject } from '@repo/game';
+	import type { Action, CardId, Command, Decide, Play, PublicState, Purchase, SeatId } from '@repo/game';
 	import { flip } from 'svelte/animate';
 	import { backOut, cubicIn } from 'svelte/easing';
 	import { fade, fly } from 'svelte/transition';
@@ -38,6 +38,25 @@
 
 	const world = $derived(snap.world);
 	const game = $derived(world.game!);
+	/** Abilities the group may take during setup with units a Legacy card gave it for nothing. */
+	const freeAbilities = $derived.by(() => {
+		const { campaign } = world;
+		const offers: Extract<Purchase, { t: 'ability' }>[] = [];
+		if (snap.phase !== 'setup.supply' || campaign.freeAbilityUnits <= 0) return offers;
+		for (const ability of campaign.abilitiesForSale)
+			for (const character of Object.values(campaign.characters)) {
+				const purchase = {
+					t: 'ability' as const,
+					ability,
+					character: character.id,
+					slot: character.slots.indexOf(null),
+				};
+				if (purchase.slot >= 0 && reject(world, snap.phase, { type: 'PURCHASE', purchase }) === null)
+					offers.push(purchase);
+			}
+		return offers;
+	});
+
 	const pending = $derived(game.pending[0]);
 	// The hand held up in front of this player is their own. On a shared screen that is whoever's turn it is.
 	const home = $derived(owns(game.active) ? game.active : (game.seats.find(owns) ?? game.active));
@@ -163,6 +182,21 @@
 						<strong>All cubes placed.</strong> The opening infection flips 9 cards next.
 					{/if}
 				</div>
+				{#if freeAbilities.length}
+					<details class="free" data-testid="free-abilities">
+						<summary>
+							{world.campaign.freeAbilityUnits} free unit{world.campaign.freeAbilityUnits === 1 ? '' : 's'} for abilities
+						</summary>
+						<div class="free-list">
+							{#each freeAbilities as purchase (`${purchase.ability}:${purchase.character}`)}
+								{@const def = pack.abilities.find(ability => ability.id === purchase.ability)!}
+								<button title={def.text} onclick={() => send({ type: 'PURCHASE', purchase })}>
+									{def.name} ({def.cost}) for {world.campaign.characters[purchase.character]!.name}
+								</button>
+							{/each}
+						</div>
+					</details>
+				{/if}
 				<button onclick={() => send({ type: 'AUTO_SUPPLY' })} data-testid="auto-supply">Spread the rest evenly</button>
 				<button
 					class="primary"
@@ -387,7 +421,7 @@
 		pointer-events: none;
 	}
 
-	.dock :is(button, input, .slot, .events, .flipped, .drew, .prompt) {
+	.dock :is(button, input, summary, .slot, .events, .free-list, .flipped, .drew, .prompt) {
 		pointer-events: auto;
 	}
 
@@ -428,6 +462,31 @@
 		font-family: var(--font-display);
 		font-size: 1.35rem;
 		font-weight: 400;
+	}
+
+	.free {
+		position: relative;
+	}
+
+	.free summary {
+		cursor: pointer;
+		color: var(--paper);
+	}
+
+	.free-list {
+		position: absolute;
+		bottom: calc(100% + 0.6rem);
+		left: 50%;
+		display: grid;
+		grid-template-columns: repeat(3, minmax(13rem, 1fr));
+		gap: 0.3rem;
+		max-height: min(26rem, calc(100vh - 14rem));
+		padding: 0.6rem;
+		overflow: auto;
+		translate: -50% 0;
+		border: 1px solid var(--line);
+		border-radius: 0.5rem;
+		background: var(--panel);
 	}
 
 	.setup .lost strong {
