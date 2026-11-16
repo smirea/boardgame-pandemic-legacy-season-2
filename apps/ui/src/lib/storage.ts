@@ -18,6 +18,8 @@ export const LS = new LocalStorage<{
 	debugSnapshot: unknown;
 	/** The host's recording of the game in progress, played back at `/replay`. */
 	record: unknown;
+	/** How this browser last watched a replay. */
+	replay: { speed: number; panel: boolean; bubbles: boolean };
 }>({
 	namespace,
 	getDefaults: () => ({
@@ -29,5 +31,6 @@ export const LS = new LocalStorage<{
 		save: null,
 		debugSnapshot: null,
 		record: null,
+		replay: { speed: 1, panel: true, bubbles: true },
 	}),
 });

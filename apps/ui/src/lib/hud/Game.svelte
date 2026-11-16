@@ -2,11 +2,12 @@
 	import { insights, isForsaken, legalActions, legalDecides, legalPlays, onGrid, pack, scenarios } from '@repo/game';
 	import type { Action, CardId, CityId, Command, EdgeDef, Play, SeatId } from '@repo/game';
 	import Board from '#lib/board/Board.svelte';
-	import type { BoardView, CityView, Fx, FxKind, Travel } from '#lib/board/types.ts';
+	import type { BoardMarks, BoardView, CityView, Fx, FxKind, Travel } from '#lib/board/types.ts';
 	import type { SessionView } from '#lib/session/session.svelte.ts';
 	import { inkOn } from '#lib/color.ts';
 	import { LS } from '#lib/storage.ts';
 	import { untrack } from 'svelte';
+	import type { Snippet } from 'svelte';
 	import { backOut } from 'svelte/easing';
 	import { fade, fly, scale } from 'svelte/transition';
 	import Dock from './Dock.svelte';
@@ -29,8 +30,14 @@
 	import TopBar from './TopBar.svelte';
 	import Upkeep from './Upkeep.svelte';
 
-	// A spectator owns no seat, whatever this browser claimed in a live game. Replays use it.
-	let { session, spectator = false }: { session: SessionView; spectator?: boolean } = $props();
+	// A spectator owns no seat, whatever this browser claimed in a live game. Replays use it, and draw their own
+	// players and step marks over the board, so the panels a player acts from stay out of the way.
+	let {
+		session,
+		spectator = false,
+		marks,
+		children,
+	}: { session: SessionView; spectator?: boolean; marks?: BoardMarks; children?: Snippet } = $props();
 
 	const snap = $derived(session.state!);
 	const world = $derived(snap.world);
@@ -274,10 +281,12 @@
 	$effect(() => {
 		const log = game?.log ?? [];
 		const newest = log.at(-1)?.seq ?? 0;
-		if (newest < lastSeq) lastSeq = 0;
+		if (newest < lastSeq) lastSeq = spectator ? newest : 0;
 		const fresh = log.filter(entry => entry.seq > lastSeq);
 		if (fresh.length === 0) return;
 		lastSeq = newest;
+		// A spectator jumping through a recording skips over events rather than living through each one at once.
+		if (spectator && fresh.length > 20) return;
 		const added: Fx[] = [];
 		const pulse = (city: CityId, kind: FxKind) => added.push({ id: nextFx++, city, kind, delay: added.length * 240 });
 		for (const entry of fresh) {
@@ -388,6 +397,7 @@
 				...point,
 			})),
 			fx,
+			marks,
 		};
 	});
 
@@ -445,7 +455,7 @@
 
 <svelte:window onkeydown={onkey} />
 
-<div class="game" class:spectator>
+<div class="game">
 	<TopBar
 		{snap}
 		{info}
@@ -459,19 +469,12 @@
 	<main class="stage" bind:this={stage}>
 		<Board view={boardView} oncity={clickCity} onpointer={point => session.pointer(point)} {resetView} {covered} />
 
-		{#if game && snap.phase !== 'upkeep'}
+		{#if game && snap.phase !== 'upkeep' && !spectator}
 			<aside class="left" bind:this={leftPanel}>
-				<PlayersPanel
-					{world}
-					{mine}
-					solo={solo || spectator}
-					{viewing}
-					onview={seat => (viewing = seat)}
-					onclaim={claim}
-				/>
+				<PlayersPanel {world} {mine} {solo} {viewing} onview={seat => (viewing = seat)} onclaim={claim} />
 			</aside>
 		{/if}
-		{#if game && info && snap.phase !== 'upkeep'}
+		{#if game && info && snap.phase !== 'upkeep' && !spectator}
 			<aside class="right" bind:this={rightPanel}>
 				<InsightsPanel
 					{world}
@@ -638,6 +641,8 @@
 			<div class="scrim" transition:fade={{ duration: 200 }}><Upkeep {snap} {send} /></div>
 		{/if}
 
+		{@render children?.()}
+
 		{#if menu}
 			<div class="menu" transition:scale={{ start: 0.92, duration: 180, opacity: 0 }}>
 				<button onclick={download}>Export campaign save</button>
@@ -671,7 +676,7 @@
 		{/if}
 	</main>
 
-	{#if game && snap.phase !== 'upkeep'}
+	{#if game && snap.phase !== 'upkeep' && !spectator}
 		<Dock
 			{snap}
 			{canAct}
@@ -701,12 +706,6 @@
 		font-family: var(--font-ui);
 		font-variant-numeric: tabular-nums;
 		overflow: hidden;
-	}
-
-	/* A spectator watches: the buttons that move the game on are not theirs to press. */
-	.game.spectator :global(footer .turn button),
-	.game.spectator :global(footer .setup button) {
-		display: none;
 	}
 
 	.stage {

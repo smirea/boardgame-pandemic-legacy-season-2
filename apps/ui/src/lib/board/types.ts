@@ -32,6 +32,15 @@ export type FxKind = 'infect' | 'plague' | 'outbreak' | 'epidemic' | 'connected'
 
 export type Fx = { id: number; city: CityId; kind: FxKind; delay: number };
 
+export type MarkTone = 'ink' | 'good' | 'bad' | 'warn' | 'hollow';
+
+/** What a replay draws over the board to show one step: the paths taken, the cities involved, and what happened at each. */
+export type BoardMarks = {
+	trails: { id: string; from: CityId; to: CityId; color: string; travel: Travel; fresh: boolean }[];
+	rings: { city: CityId; color: string }[];
+	flags: { id: string; city: CityId; text: string; tone: MarkTone }[];
+};
+
 export type BoardView = {
 	cities: Record<CityId, CityView>;
 	edges: EdgeDef[];
@@ -40,4 +49,5 @@ export type BoardView = {
 	pawns: PawnView[];
 	cursors: CursorView[];
 	fx: Fx[];
+	marks?: BoardMarks;
 };
