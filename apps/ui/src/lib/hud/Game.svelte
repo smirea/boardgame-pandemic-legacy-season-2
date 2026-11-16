@@ -12,6 +12,9 @@
 	import type { Snippet } from 'svelte';
 	import { backOut } from 'svelte/easing';
 	import { fade, fly, scale } from 'svelte/transition';
+	import Corner from './Corner.svelte';
+	import { placeSeats } from './seats.ts';
+	import type { Place } from './seats.ts';
 	import Dock from './Dock.svelte';
 	import InsightsPanel from './InsightsPanel.svelte';
 	import {
@@ -28,7 +31,6 @@
 	} from './labels.svelte.ts';
 	import Lobby from './Lobby.svelte';
 	import Objectives from './Objectives.svelte';
-	import PlayersPanel from './PlayersPanel.svelte';
 	import TopBar from './TopBar.svelte';
 	import Upkeep from './Upkeep.svelte';
 
@@ -39,6 +41,7 @@
 		spectator = false,
 		marks,
 		announce = true,
+		corner,
 		children,
 	}: {
 		session: SessionView;
@@ -46,6 +49,8 @@
 		marks?: BoardMarks;
 		/** False when a spectator jumped rather than stepped, so the events in between are not announced. */
 		announce?: boolean;
+		/** Draws a seat's corner in place of the live table's slip, as the replay does with its speech bubbles. */
+		corner?: Snippet<[SeatId, Place]>;
 		children?: Snippet;
 	} = $props();
 
@@ -108,26 +113,48 @@
 	}
 	let menu = $state(false);
 	let stage = $state<HTMLElement | null>();
-	let leftPanel = $state<HTMLElement | null>();
-	let rightPanel = $state<HTMLElement | null>();
-	let legendPanel = $state<HTMLElement | null>();
-	// Where the corner panels sit, so the board can keep city labels out from under them.
+	let leftColumn = $state<HTMLElement | null>();
+	let rightColumn = $state<HTMLElement | null>();
+	let goals = $state<HTMLElement | null>();
+
+	// Everyone sits round the table in turn order, clockwise, with this browser's player at the bottom right.
+	// A replay, or one screen shared by the table, seats the first player there.
+	const seatAt = $derived(
+		game
+			? placeSeats(game.seats, spectator || solo ? game.seats[0] : game.seats.find(seat => mine.includes(seat)))
+			: null,
+	);
+	// Where the panels on the board's sides sit, so the fitted view keeps cities out from under them.
 	let covered = $state.raw<{ x: number; y: number; width: number; height: number }[]>([]);
 	$effect(() => {
-		// `bind:this` hands back null, not undefined, once a panel leaves the screen.
-		const panels = [leftPanel, rightPanel, legendPanel].filter(
-			(panel): panel is HTMLElement => panel instanceof HTMLElement,
-		);
-		if (!stage || panels.length === 0) return void (covered = []);
+		void seatAt;
+		// `bind:this` hands back null, not undefined, once a column leaves the screen.
+		const columns = [leftColumn, rightColumn].filter((column): column is HTMLElement => column instanceof HTMLElement);
+		if (!stage) return void (covered = []);
+		// The columns run the full height but only their panels cover the board, so the panels are what is measured.
+		// The dock follows the stage and its cards rise over the stage's bottom edge.
+		const panels = [
+			...columns.flatMap(column => [...column.children]),
+			...[goals, stage.nextElementSibling].filter(element => element instanceof HTMLElement),
+		];
+		// A box drawn outside its element, like the dock's cards above its frame, still covers the board.
+		const extent = (element: Element) => {
+			const boxes = [element, ...element.children].map(child => child.getBoundingClientRect());
+			const left = Math.min(...boxes.map(box => box.left));
+			const top = Math.min(...boxes.map(box => box.top));
+			const right = Math.max(...boxes.map(box => box.right));
+			const bottom = Math.max(...boxes.map(box => box.bottom));
+			return { left, top, width: right - left, height: bottom - top };
+		};
 		const measure = () => {
 			const origin = stage!.getBoundingClientRect();
 			covered = panels.map(panel => {
-				const box = panel.getBoundingClientRect();
-				return { x: box.x - origin.x, y: box.y - origin.y, width: box.width, height: box.height };
+				const box = extent(panel);
+				return { x: box.left - origin.x, y: box.top - origin.y, width: box.width, height: box.height };
 			});
 		};
 		const observer = new ResizeObserver(measure);
-		for (const panel of [stage, ...panels]) observer.observe(panel);
+		for (const element of [stage, ...panels]) observer.observe(element);
 		measure();
 		return () => observer.disconnect();
 	});
@@ -375,9 +402,9 @@
 						plague: location?.plague ?? 0,
 						hollow: location?.hollow ?? 0,
 						population: record.population,
-						center: location?.center ?? record.permanent.includes('center'),
-						tower: location?.tower ?? record.permanent.includes('tower'),
-						shelter: location?.shelter ?? record.permanent.includes('shelter'),
+						structures: (['center', 'tower', 'shelter'] as const)
+							.filter(kind => location?.[kind] ?? record.permanent.includes(kind))
+							.map(kind => ({ kind, permanent: record.permanent.includes(kind) })),
 						infested: record.infested,
 						forsaken: isForsaken(campaign, city.id),
 						lab: record.lab,
@@ -476,6 +503,62 @@
 
 <svelte:window onkeydown={onkey} />
 
+{#snippet seated(place: Place)}
+	{@const seat = seatAt?.get(place)}
+	{#if seat && game}
+		<div class="place {place}">
+			{#if corner}
+				{@render corner(seat, place)}
+			{:else}
+				<Corner
+					{seat}
+					{place}
+					{world}
+					name={seatName(world, seat)}
+					color={SEAT_COLORS[game.seats.indexOf(seat)]!}
+					selected={viewing === seat}
+					action="Show this hand in the dock"
+					selectedTag="Hand shown"
+					onselect={() => (viewing = seat)}
+					claim={solo || spectator ? null : { mine: mine.includes(seat), toggle: () => claim(seat) }}
+				/>
+			{/if}
+		</div>
+	{/if}
+{/snippet}
+
+{#snippet key()}
+	<!-- The chart's key: what each piece and printed mark around a city means. Hovering any of them says the same. -->
+	<dl class="legend" aria-label="Map key" in:fly={{ y: 20, duration: 500, delay: 600 }}>
+		<dt><b class="num">3</b></dt>
+		<dd>Population, on the city</dd>
+		<dt><b class="cube"></b></dt>
+		<dd>Supply cubes, right</dd>
+		<dt><b class="cube plague"></b></dt>
+		<dd>Plague cubes, left</dd>
+		<dt><b class="hollow"></b></dt>
+		<dd>Hollow Men, below</dd>
+		<dt><b class="house"></b></dt>
+		<dd>Supply center, top right</dd>
+		<dt><b class="mast"></b></dt>
+		<dd>Satellite tower, top left</dd>
+		<dt><b class="dome"></b></dt>
+		<dd>Shelter, bottom left</dd>
+		<dt><b class="sticker"></b></dt>
+		<dd>Printed: permanent</dd>
+		<dt><b class="odds">6%</b></dt>
+		<dd>Chance it is infected next</dd>
+		<dt><b class="ring"></b></dt>
+		<dd>Somewhere you can act</dd>
+		<dt><b class="line"></b></dt>
+		<dd>Supply line</dd>
+		<dt><b class="lane"></b></dt>
+		<dd>Sea lane</dd>
+		<dt><b class="border"></b></dt>
+		<dd>Region boundary</dd>
+	</dl>
+{/snippet}
+
 <div class="game">
 	<TopBar
 		{snap}
@@ -490,51 +573,31 @@
 	<main class="stage" bind:this={stage}>
 		<Board view={boardView} oncity={clickCity} onpointer={point => session.pointer(point)} {resetView} {covered} />
 
-		{#if game && snap.phase !== 'upkeep' && !spectator}
-			<aside class="left" bind:this={leftPanel}>
-				<PlayersPanel {world} {mine} {solo} {viewing} onview={seat => (viewing = seat)} onclaim={claim} />
-			</aside>
-		{/if}
-		{#if game && info && snap.phase !== 'upkeep' && !spectator}
-			<aside class="right" bind:this={rightPanel}>
-				<InsightsPanel
-					{world}
-					{info}
-					onfocus={city => (selected = city)}
-					onlockdown={card => send({ type: 'LOCKDOWN', card })}
-				/>
-			</aside>
-		{/if}
-
-		{#if game && playing && !spectator}
-			<!-- The chart's key, printed in its corner: what each mark beside a city name means. -->
-			<dl class="legend" aria-label="Map key" bind:this={legendPanel} in:fly={{ y: 20, duration: 500, delay: 600 }}>
-				<dt><b class="num">3</b></dt>
-				<dd>Population</dd>
-				<dt><b class="supplies">1</b></dt>
-				<dd>Supply cubes</dd>
-				<dt><b class="plague">1</b></dt>
-				<dd>Plague cubes</dd>
-				<dt><b class="hollow">1</b></dt>
-				<dd>Hollow Men</dd>
-				<dt><b class="odds">6%</b></dt>
-				<dd>Chance it is infected next</dd>
-				<dt><b class="ring"></b></dt>
-				<dd>Somewhere you can act</dd>
-				<dt><b class="line"></b></dt>
-				<dd>Supply line</dd>
-				<dt><b class="lane"></b></dt>
-				<dd>Sea lane</dd>
-				<dt><b class="haven"></b></dt>
-				<dd>Haven</dd>
-				<dt><b class="pawn"></b></dt>
-				<dd>A character</dd>
-				<dt><b class="border"></b></dt>
-				<dd>Region boundary</dd>
-			</dl>
+		{#if game && seatAt && snap.phase !== 'upkeep'}
+			<div class="column left" class:docked={!spectator} bind:this={leftColumn}>
+				{@render seated('tl')}
+				{#if playing && !spectator}
+					{@render key()}
+				{/if}
+				{@render seated('bl')}
+			</div>
+			<div class="column right" class:docked={!spectator} bind:this={rightColumn}>
+				{@render seated('tr')}
+				{#if info && !spectator}
+					<div class="insights">
+						<InsightsPanel
+							{world}
+							{info}
+							onfocus={city => (selected = city)}
+							onlockdown={card => send({ type: 'LOCKDOWN', card })}
+						/>
+					</div>
+				{/if}
+				{@render seated('br')}
+			</div>
 		{/if}
 		{#if game && snap.phase !== 'upkeep'}
-			<div class="goals">
+			<div class="goals" bind:this={goals}>
 				<Objectives
 					{snap}
 					onwaive={objective =>
@@ -745,22 +808,51 @@
 		min-height: 0;
 	}
 
-	aside {
+	/* The seats sit in the corners, with the chart's key and the insights between them on either side. */
+	.column {
 		position: absolute;
 		top: 0.7rem;
+		bottom: 0.7rem;
 		z-index: 30;
-	}
-
-	.left {
-		left: 0.7rem;
-		width: 11.5rem;
-	}
-
-	.right {
-		right: 0.7rem;
-		width: 12rem;
-		max-height: calc(100% - 1.4rem);
 		display: flex;
+		flex-direction: column;
+		gap: 0.6rem;
+		width: 15.5rem;
+		pointer-events: none;
+	}
+
+	.column > :global(*) {
+		pointer-events: auto;
+	}
+
+	/* The dock's cards rise 2.6rem over the stage's bottom edge, and the bottom seats sit above them. */
+	.column.docked {
+		bottom: 3.3rem;
+	}
+
+	.column.left {
+		left: 0.7rem;
+	}
+
+	.column.right {
+		right: 0.7rem;
+		align-items: flex-end;
+	}
+
+	.place {
+		width: 100%;
+	}
+
+	.place.bl,
+	.place.br {
+		margin-top: auto;
+	}
+
+	.insights {
+		display: flex;
+		width: 12.5rem;
+		min-height: 0;
+		flex: 0 1 auto;
 	}
 
 	.goals {
@@ -772,16 +864,15 @@
 	}
 
 	.legend {
-		position: absolute;
-		left: 0.9rem;
-		bottom: 3.4rem;
-		z-index: 25;
 		display: grid;
-		grid-template-columns: 1.6rem auto;
+		grid-template-columns: 1.4rem auto;
 		align-items: center;
+		align-self: flex-start;
 		gap: 0.05rem 0.4rem;
+		min-height: 0;
 		margin: 0;
 		padding: 0.4rem 0.6rem;
+		overflow: hidden;
 		border: 1px solid rgb(42 32 23 / 0.35);
 		background: rgb(236 227 207 / 0.92);
 		box-shadow: var(--slip-shadow);
@@ -802,47 +893,87 @@
 	}
 
 	.legend b {
-		min-width: 0.9rem;
-		padding: 0 0.2rem;
-		border-radius: 1px;
+		display: block;
 		font-weight: 600;
-		line-height: 1.25;
-		text-align: center;
+		line-height: 1.2;
 	}
 
 	.legend .num {
-		color: #6f604c;
-		font-weight: 500;
+		width: 1rem;
+		height: 1rem;
+		border-radius: 50%;
+		background: #2f64a3;
+		color: #f3ecdc;
+		font-size: 0.68rem;
+		font-weight: 700;
+		line-height: 1rem;
+		text-align: center;
 	}
 
-	.legend .supplies {
+	.legend .cube {
+		width: 0.6rem;
+		height: 0.6rem;
 		border: 1px solid #2a2017;
-		background: #f1e9d6;
+		background: #efe6d2;
 	}
 
-	.legend .plague {
-		background: #6f8a22;
-		color: #f3f0dc;
+	.legend .cube.plague {
+		width: 0.8rem;
+		height: 0.8rem;
+		border-color: #3b5210;
+		background: #93b236;
 	}
 
 	.legend .hollow {
+		width: 0.6rem;
+		height: 0.85rem;
 		background: #4e3b63;
-		color: #efe6f7;
+		clip-path: polygon(50% 0, 100% 100%, 0 100%);
+	}
+
+	.legend .house {
+		width: 0.8rem;
+		height: 0.8rem;
+		background: #8f4129;
+		clip-path: polygon(50% 0, 100% 45%, 85% 45%, 85% 100%, 15% 100%, 15% 45%, 0 45%);
+	}
+
+	.legend .mast {
+		width: 0.7rem;
+		height: 0.95rem;
+		background:
+			radial-gradient(circle at 50% 18%, #e09a2e 0 0.14rem, transparent 0.15rem),
+			linear-gradient(#5e5a53, #5e5a53) center 0.2rem / 2px 100% no-repeat;
+	}
+
+	.legend .dome {
+		width: 0.85rem;
+		height: 0.45rem;
+		border-radius: 0.45rem 0.45rem 0 0;
+		background: #7a8556;
+	}
+
+	.legend .sticker {
+		width: 0.85rem;
+		height: 0.85rem;
+		border: 2px solid #7a3a22;
+		border-radius: 50%;
+		background: #f1e7cf;
 	}
 
 	.legend .odds {
 		color: #8b5a12;
+		font-family: var(--font-display);
 		font-style: italic;
+		font-weight: 400;
 	}
 
 	.legend .line,
-	.legend .lane {
+	.legend .lane,
+	.legend .border {
 		width: 1.2rem;
-		min-width: 0;
 		height: 0;
-		padding: 0;
 		border-top: 3px solid #8e3a24;
-		border-radius: 0;
 	}
 
 	.legend .lane {
@@ -850,37 +981,12 @@
 	}
 
 	.legend .border {
-		width: 1.2rem;
-		min-width: 0;
-		height: 0;
-		padding: 0;
 		border-top: 3px dashed #6e1e14;
-		border-radius: 0;
-	}
-
-	.legend .haven {
-		width: 0.95rem;
-		height: 0.85rem;
-		min-width: 0;
-		padding: 0;
-		background: #2f8f74;
-		clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
-	}
-
-	.legend .pawn {
-		width: 0.7rem;
-		height: 0.95rem;
-		min-width: 0;
-		padding: 0;
-		background: #d9573f;
-		clip-path: polygon(50% 0, 72% 22%, 60% 40%, 100% 100%, 0 100%, 40% 40%, 28% 22%);
 	}
 
 	.legend .ring {
 		width: 0.95rem;
 		height: 0.95rem;
-		min-width: 0;
-		padding: 0;
 		border: 2px solid #b5521f;
 		border-radius: 50%;
 	}

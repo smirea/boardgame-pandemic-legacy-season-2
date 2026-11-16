@@ -258,7 +258,7 @@ try {
 	ok('the speed button and S cycle the speed, and the panel closes');
 
 	const turnMarker = viewer.locator('[data-testid=marker-turn]').nth(2);
-	const label = (await turnMarker.getAttribute('title'))!;
+	const label = (await turnMarker.getAttribute('aria-label'))!;
 	await turnMarker.click();
 	assert(
 		(await viewer.locator('[data-testid=where] span').innerText()).startsWith(label),

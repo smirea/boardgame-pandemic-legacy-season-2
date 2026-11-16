@@ -3,12 +3,12 @@ import type { BoardBounds } from './projection';
 
 export const DEFAULT_TILT = 0.3;
 
-/** A region that must also land clear of the panels at the screen's sides, given as fractions of the width. */
-export type KeepClear = { bounds: BoardBounds; left: number; right: number };
+/** A region that must also land clear of the panels at the screen's edges, given as fractions of the width or height. */
+export type KeepClear = { bounds: BoardBounds; left: number; right: number; top: number; bottom: number };
 
 /**
  * Camera placement that shows all of `bounds` at the given viewport aspect, tilted `tilt` radians off vertical.
- * With `keep`, the camera also backs off until that region sits between the side panels, so no city hides under one.
+ * With `keep`, the camera also backs off until that region sits clear of the panels, so no city hides under one.
  */
 export function fitBoard(bounds: BoardBounds, aspect: number, fov: number, tilt = DEFAULT_TILT, keep?: KeepClear) {
 	const probe = new PerspectiveCamera(fov, aspect, 1, 2000);
@@ -59,7 +59,12 @@ export function fitBoard(bounds: BoardBounds, aspect: number, fov: number, tilt 
 			sheet &&
 			kept.every(([x, z]) => {
 				point.set(x, 0, z).project(probe);
-				return point.x >= -1 + 2 * keep!.left && point.x <= 1 - 2 * keep!.right;
+				return (
+					point.x >= -1 + 2 * keep!.left &&
+					point.x <= 1 - 2 * keep!.right &&
+					point.y >= -1 + 2 * keep!.bottom &&
+					point.y <= 1 - 2 * keep!.top
+				);
 			})
 		);
 	};

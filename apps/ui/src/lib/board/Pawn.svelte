@@ -16,10 +16,12 @@
 	// Pieces are drawn larger than life so a move reads at the whole-map view.
 	const PAWN_SCALE = 2.2;
 	const VEHICLE_SCALE = 3.2;
+	const SLOT_ANGLES = [0, 0.75, -0.75, 1.5, -1.5];
 
 	const target = $derived.by(() => {
-		const angle = -Math.PI / 2 + slot * (Math.PI / 2);
-		return { x: at.x + Math.cos(angle) * 1.1, z: at.z + Math.sin(angle) * 1.1 };
+		// Pawns stand along the back of the disc, so the population printed on its face stays in view.
+		const angle = -Math.PI / 2 + (SLOT_ANGLES[slot % SLOT_ANGLES.length] ?? 0);
+		return { x: at.x + Math.cos(angle) * 1.25, z: at.z + Math.sin(angle) * 1.25 };
 	});
 
 	// Each mode has its own way of crossing the board: a car keeps to the ground, a boat rides the water

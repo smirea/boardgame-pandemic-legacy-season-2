@@ -4,8 +4,10 @@
 	import { T, useThrelte } from '@threlte/core';
 	import { interactivity, OrbitControls } from '@threlte/extras';
 	import { untrack } from 'svelte';
+	import { cubicInOut } from 'svelte/easing';
+	import { Tween } from 'svelte/motion';
 	import { CanvasTexture, LinearFilter, MeshStandardMaterial, MOUSE, SRGBColorSpace, Texture } from 'three';
-	import type { PerspectiveCamera } from 'three';
+	import type { PerspectiveCamera, Vector3 } from 'three';
 	import type { OrbitControls as OrbitControlsImpl } from 'three/examples/jsm/controls/OrbitControls.js';
 	import CityMarker from './CityMarker.svelte';
 	import Flags from './Flags.svelte';
@@ -13,9 +15,12 @@
 	import { loadChart } from './chartLoader';
 	import { DEFAULT_TILT, fitBoard } from './fit';
 	import Fog from './Fog.svelte';
-	import { layoutLabels } from './labels';
+	import type { Part } from './hints';
+	import { layoutLabels, NAME_SIZE } from './labels';
+	import type { Anchor } from './labels';
 	import { buildLandGeometry, mapToSheet } from './land';
 	import Pawn from './Pawn.svelte';
+	import { fonts, nameWidth } from './print.svelte';
 	import type { BoardBounds, BoardPoint } from './projection';
 	import Pulse from './Pulse.svelte';
 	import RemoteCursor from './RemoteCursor.svelte';
@@ -28,13 +33,15 @@
 		view: BoardView;
 		oncity?: (city: CityId) => void;
 		onpointer?: (point: BoardPoint | null) => void;
-		/** Bump to return the camera to the whole-board view. */
+		/** Bump to return the camera to the fitted view of everything explored. */
 		resetView?: number;
-		/** Screen rectangles, in pixels from the canvas corner, that HUD panels cover. Labels keep out of them. */
+		/** A pointer over part of a city, or off it when `event` is null. */
+		onhint?: (city: CityId, part: Part, event: PointerEvent | null) => void;
+		/** Screen rectangles, in pixels from the canvas corner, that HUD panels cover. The fitted view keeps cities out of them. */
 		covered?: { x: number; y: number; width: number; height: number }[];
 	};
 
-	let { view, oncity, onpointer, resetView = 0, covered = [] }: Props = $props();
+	let { view, oncity, onpointer, onhint, resetView = 0, covered = [] }: Props = $props();
 
 	interactivity();
 
@@ -117,62 +124,106 @@
 	let userMoved = $state(false);
 	let dragging = false;
 	let lastReset = 0;
-	// `$size` subscribes to the store. Reading `size.current` would not rerun when the canvas is resized.
-	const MARKER_REACH = 2.6;
-	const cityBounds: BoardBounds = (() => {
-		const points = Object.values(layout);
+	// A city's pieces and its printed name reach this far from its centre, so a fitted view keeps them on screen.
+	const MARKER_REACH = 6;
+	const visibleCities = $derived(pack.cities.filter(city => view.cities[city.id]!.revealed));
+	// A string, so the fitted view is worked out again only when the set of revealed cities changes.
+	const revealedKey = $derived(visibleCities.map(city => city.id).join());
+	// The fitted view frames what has been explored. Before anything is, it frames every location.
+	const explored: BoardBounds = $derived.by(() => {
+		const ids = revealedKey ? (revealedKey.split(',') as CityId[]) : pack.cities.map(city => city.id);
+		const points = ids.map(id => layout[id]!);
 		return {
 			minX: Math.min(...points.map(point => point.x)) - MARKER_REACH,
 			maxX: Math.max(...points.map(point => point.x)) + MARKER_REACH,
 			minZ: Math.min(...points.map(point => point.z)) - MARKER_REACH,
 			maxZ: Math.max(...points.map(point => point.z)) + MARKER_REACH,
 		};
-	})();
-	const sides = $derived.by(() => {
+	});
+	// Panels hugging a side push the view in from that side. Anything else, like the objectives along the top or
+	// the dock's cards rising from the bottom, pushes it in from the top or bottom.
+	const insets = $derived.by(() => {
 		const width = Math.max(1, $size.width);
+		const height = Math.max(1, $size.height);
 		let left = 0;
 		let right = 0;
+		let top = 0;
+		let bottom = 0;
 		for (const rect of covered) {
-			if (rect.x + rect.width / 2 < width / 2) left = Math.max(left, rect.x + rect.width);
-			else right = Math.max(right, width - rect.x);
+			if (rect.x < width * 0.25 && rect.x + rect.width < width / 2) left = Math.max(left, rect.x + rect.width);
+			else if (rect.x + rect.width > width * 0.75 && rect.x > width / 2) right = Math.max(right, width - rect.x);
+			else if (rect.y + rect.height / 2 < height / 2) top = Math.max(top, rect.y + rect.height);
+			else bottom = Math.max(bottom, height - rect.y);
 		}
 		// On a narrow stage, such as the replay's, panels may not squeeze the board below 70% of its width.
 		const squeeze = Math.min(1, 0.3 / Math.max(0.001, (left + right) / width));
-		return { left: (left / width) * squeeze, right: (right / width) * squeeze };
+		return {
+			left: (left / width) * squeeze,
+			right: (right / width) * squeeze,
+			top: Math.min(0.2, top / height),
+			bottom: Math.min(0.2, bottom / height),
+		};
 	});
-	const fit = $derived(
-		fitBoard(bounds, $size.width / Math.max(1, $size.height), FOV, DEFAULT_TILT, { bounds: cityBounds, ...sides }),
-	);
+	// `$size` subscribes to the store. Reading `size.current` would not rerun when the canvas is resized.
+	const aspect = $derived($size.width / Math.max(1, $size.height));
+	const fit = $derived(fitBoard(explored, aspect, FOV, DEFAULT_TILT, { bounds: explored, ...insets }));
+	const whole = $derived(fitBoard(bounds, aspect, FOV));
+	// The first view snaps into place. After that, a newly explored region or a reset glides the camera over.
+	const glide = new Tween(1, { duration: 900, easing: cubicInOut });
+	let path: { from: Vector3; to: Vector3; fromTarget: Vector3; toTarget: Vector3 } | null = null;
 	$effect(() => {
 		if (resetView !== lastReset) {
 			lastReset = resetView;
 			userMoved = false;
 		}
 		if (!camera || !controls || userMoved) return;
-		camera.position.copy(fit.position);
-		controls.target.copy(fit.target);
+		const next = fit;
+		untrack(() => {
+			if (!path) {
+				camera!.position.copy(next.position);
+				controls!.target.copy(next.target);
+				controls!.update();
+				path = { from: next.position, to: next.position, fromTarget: next.target, toTarget: next.target };
+				return;
+			}
+			// A drag leaves damping momentum in the controls, which would carry the glide past its mark. One update
+			// without damping spends it before the glide takes over.
+			controls!.enableDamping = false;
+			controls!.update();
+			controls!.enableDamping = true;
+			path = {
+				from: camera!.position.clone(),
+				to: next.position,
+				fromTarget: controls!.target.clone(),
+				toTarget: next.target,
+			};
+			void glide.set(0, { duration: 0 }).then(() => glide.set(1));
+		});
+	});
+	$effect(() => {
+		const t = glide.current;
+		if (!path || !camera || !controls || untrack(() => userMoved)) return;
+		camera.position.lerpVectors(path.from, path.to, t);
+		controls.target.lerpVectors(path.fromTarget, path.toTarget, t);
 		controls.update();
+		invalidate();
 	});
 
 	// Edges present at first render are part of the board. Anything that shows up later draws itself in.
 	const routeKey = (route: { a: CityId; b: CityId; kind: string }) => `${route.kind}:${edgeKey(route.a, route.b)}`;
 	const initialEdges = new Set(untrack(() => view.edges.map(routeKey)));
 
-	const visibleCities = $derived(pack.cities.filter(city => view.cities[city.id]!.revealed));
-	// Board units covered by one screen pixel at the whole-board view, the zoom at which labels are most crowded.
-	const unitsPerPixel = $derived((2 * fit.distance * Math.tan((FOV * Math.PI) / 360)) / Math.max(1, $size.height));
+	// Names are printed at a fixed size on the chart, so their places depend only on which cities show.
 	const anchors = $derived(
-		layoutLabels(
-			visibleCities.map(city => ({ id: city.id, name: view.cities[city.id]!.name, at: layout[city.id]! })),
-			unitsPerPixel,
-			// Screen to board is close to a plain scale at the whole-board view, which is all the label layout needs.
-			covered.map(rect => ({
-				x: fit.target.x + (rect.x + rect.width / 2 - $size.width / 2) * unitsPerPixel,
-				z: fit.target.z + (rect.y + rect.height / 2 - $size.height / 2) * unitsPerPixel,
-				halfWidth: (rect.width / 2) * unitsPerPixel,
-				halfHeight: (rect.height / 2) * unitsPerPixel,
-			})),
-		),
+		fonts.ready
+			? layoutLabels(
+					visibleCities.map(city => ({
+						id: city.id,
+						width: nameWidth(view.cities[city.id]!.name, NAME_SIZE),
+						at: layout[city.id]!,
+					})),
+				)
+			: new Map<CityId, Anchor>(),
 	);
 	const flagsByCity = $derived.by(() => {
 		const map = new Map<CityId, NonNullable<BoardView['marks']>['flags']>();
@@ -195,7 +246,7 @@
 		enableDamping
 		dampingFactor={0.12}
 		minDistance={25}
-		maxDistance={fit.distance * 1.15}
+		maxDistance={whole.distance * 1.15}
 		minPolarAngle={0.05}
 		maxPolarAngle={1.2}
 		screenSpacePanning={false}
@@ -262,8 +313,9 @@
 		{city}
 		at={layout[city.id]!}
 		state={view.cities[city.id]!}
-		anchor={anchors.get(city.id) ?? 'n'}
+		anchor={anchors.get(city.id) ?? 's'}
 		onselect={() => oncity?.(city.id)}
+		onhint={(part, event) => onhint?.(city.id, part, event)}
 	/>
 {/each}
 

@@ -66,6 +66,23 @@
 	const at = (value: number) => `${(value / Math.max(1, total)) * 100}%`;
 	const turns = $derived(markers.filter(marker => marker.kind === 'turn'));
 	const events = $derived(markers.filter(marker => marker.kind !== 'turn'));
+
+	const MEANING: Record<Marker['kind'], string> = {
+		turn: 'A new turn starts here.',
+		epidemic: 'An Epidemic card was drawn: the infection rate rose and the discards went back on top.',
+		incident: 'An incident: a city with no supply cubes was infected, and the incident track moved up.',
+		objective: 'The table completed an objective.',
+		reveal: 'A region of the map was explored and revealed.',
+		death: 'A character died and leaves the campaign.',
+		end: 'The game ended here.',
+	};
+	// Moments on the same step share a spot on the rail, so the tooltip lists them all.
+	let hint = $state.raw<{ frame: number; entries: Marker[] } | null>(null);
+	const hover = (marker: Marker) =>
+		(hint = {
+			frame: marker.frame,
+			entries: (marker.kind === 'turn' ? turns : events).filter(other => other.frame === marker.frame),
+		});
 </script>
 
 <footer class="transport" data-testid="transport">
@@ -101,9 +118,12 @@
 					class="pin {marker.kind}"
 					class:passed={marker.frame <= frame}
 					style:left={at(marker.frame)}
-					title={marker.label}
 					aria-label={marker.label}
 					onclick={() => go(marker.frame)}
+					onpointerenter={() => hover(marker)}
+					onpointerleave={() => (hint = null)}
+					onfocus={() => hover(marker)}
+					onblur={() => (hint = null)}
 					data-testid="marker-{marker.kind}"
 				></button>
 			{/each}
@@ -114,9 +134,12 @@
 				<button
 					class="tick"
 					style:left={at(marker.frame)}
-					title={marker.label}
 					aria-label={marker.label}
 					onclick={() => go(marker.frame)}
+					onpointerenter={() => hover(marker)}
+					onpointerleave={() => (hint = null)}
+					onfocus={() => hover(marker)}
+					onblur={() => (hint = null)}
 					data-testid="marker-turn"
 				></button>
 			{/each}
@@ -130,6 +153,24 @@
 				data-testid="scrub"
 			/>
 		</div>
+		{#if hint}
+			<div
+				class="hint"
+				style:left={at(hint.frame)}
+				style:--shift={`${-Math.min(100, Math.max(0, ((hint.frame / Math.max(1, total)) * 100 - 10) * 1.25))}%`}
+				role="tooltip"
+				data-testid="marker-hint"
+				transition:fade={{ duration: 90 }}
+			>
+				{#each hint.entries as entry (`${entry.kind}:${entry.label}`)}
+					<p>
+						<i class="pin {entry.kind}"></i><strong>{entry.label}</strong>
+						<span>{MEANING[entry.kind]}</span>
+					</p>
+				{/each}
+				<small>Click to jump here</small>
+			</div>
+		{/if}
 	</div>
 
 	<div class="where" data-testid="where">
@@ -368,19 +409,72 @@
 		background: var(--paper);
 	}
 
+	/* The tick is a hairline, so the button around it is wider to give the pointer something to land on. */
 	.tick {
 		position: absolute;
-		top: 0.95rem;
-		width: 2px;
-		height: 0.45rem;
+		top: 0.85rem;
+		width: 0.6rem;
+		height: 0.7rem;
 		padding: 0;
 		border: 0;
-		background: var(--muted);
+		background: linear-gradient(var(--muted), var(--muted)) center / 2px 0.45rem no-repeat;
 		translate: -50% 0;
 	}
 
-	.tick:hover {
-		background: var(--ink);
+	.tick:hover,
+	.tick:focus-visible {
+		background-image: linear-gradient(var(--ink), var(--ink));
+		background-size: 2px 0.65rem;
+	}
+
+	.hint {
+		position: absolute;
+		bottom: calc(100% - 0.2rem);
+		z-index: 5;
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+		width: max-content;
+		max-width: 17rem;
+		padding: 0.45rem 0.6rem;
+		border: 1px solid var(--line-strong);
+		border-radius: 3px;
+		background: var(--panel-solid);
+		box-shadow: 0 0.6rem 1.6rem rgb(0 0 0 / 0.5);
+		font-size: 0.78rem;
+		line-height: 1.3;
+		translate: var(--shift) 0;
+		pointer-events: none;
+	}
+
+	.hint p {
+		display: grid;
+		grid-template-columns: 0.9rem 1fr;
+		gap: 0.1rem 0.4rem;
+		align-items: center;
+		margin: 0;
+	}
+
+	.hint .pin {
+		position: static;
+		translate: none;
+		opacity: 1;
+	}
+
+	.hint strong {
+		color: var(--ink);
+		font-weight: 600;
+	}
+
+	.hint span {
+		grid-column: 2;
+		color: var(--muted);
+	}
+
+	.hint small {
+		color: var(--muted);
+		font-size: 0.7rem;
+		font-style: italic;
 	}
 
 	input[type='range'] {

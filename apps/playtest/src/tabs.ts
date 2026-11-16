@@ -126,10 +126,9 @@ export async function look(tab: Tab): Promise<string> {
 				.slice(0, 100);
 			return { index, tag: node.tagName.toLowerCase(), text, disabled: Boolean(field.disabled) };
 		});
-		const cities = [...document.querySelectorAll<HTMLElement>('.label[data-city]')].map(node => node.dataset['city']!);
-		// The map labels would bury the panels' text, so they are hidden for the read. Cities are listed on their own.
+		const cities = [...document.querySelectorAll<HTMLElement>('.anchor[data-city]')].map(node => node.dataset['city']!);
 		// An element on its way out is inert until its exit finishes. A person no longer reads it as part of the screen.
-		const labels = [...document.querySelectorAll<HTMLElement>('.label[data-city], [inert]')];
+		const labels = [...document.querySelectorAll<HTMLElement>('[inert]')];
 		for (const label of labels) label.style.display = 'none';
 		const text = document.body.innerText
 			.replace(/[ \t]+/g, ' ')
@@ -190,17 +189,13 @@ export async function click(tab: Tab, target: string): Promise<string> {
 	return `Clicked "${point.text}".`;
 }
 
-/** Clicks a city on the 3D board. The marker sits where its label would be without the label's sideways offset. */
+/** Clicks a city on the 3D board, at the empty anchor each marker keeps at its disc's centre. */
 export async function tapCity(tab: Tab, city: string): Promise<string> {
-	const label = tab.page.locator(`.label[data-city="${city}"]`);
+	const label = tab.page.locator(`.anchor[data-city="${city}"]`);
 	if ((await label.count()) === 0) return `No city "${city}" on the board.`;
 	const point = await label.evaluate(node => {
 		const box = node.getBoundingClientRect();
-		const style = getComputedStyle(node);
-		return {
-			x: box.x + box.width / 2 - parseFloat(style.getPropertyValue('--dx')),
-			y: box.y + box.height / 2 - parseFloat(style.getPropertyValue('--dy')),
-		};
+		return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
 	});
 	await tab.page.mouse.click(point.x, point.y);
 	await tab.page.waitForTimeout(350);

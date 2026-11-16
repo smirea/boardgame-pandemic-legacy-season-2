@@ -1,4 +1,4 @@
-import type { CityId, EdgeDef } from '@repo/game';
+import type { CityId, EdgeDef, StructureKind } from '@repo/game';
 import type { BoardPoint } from './projection';
 
 export type CityHighlight = 'target' | 'selected' | null;
@@ -11,9 +11,8 @@ export type CityView = {
 	plague: number;
 	hollow: number;
 	population: number;
-	center: boolean;
-	tower: boolean;
-	shelter: boolean;
+	/** What stands here, with whether it is printed on the board for good or only lasts this game. */
+	structures: { kind: StructureKind; permanent: boolean }[];
 	infested: boolean;
 	forsaken: boolean;
 	lab: boolean;

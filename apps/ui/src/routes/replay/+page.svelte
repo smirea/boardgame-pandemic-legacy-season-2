@@ -2,7 +2,7 @@
 	import Engraving from '#lib/board/Engraving.svelte';
 	import Game from '#lib/hud/Game.svelte';
 	import Caption from '#lib/replay/Caption.svelte';
-	import Corner from '#lib/replay/Corner.svelte';
+	import Corner from '#lib/hud/Corner.svelte';
 	import Panel from '#lib/replay/Panel.svelte';
 	import { bubblesAt, dwellAt } from '#lib/replay/pacing.ts';
 	import { load, marksAt, ReplaySession } from '#lib/replay/replay.svelte.ts';
@@ -13,7 +13,6 @@
 	const params = new URLSearchParams(location.search);
 	const session = new ReplaySession();
 	const saved = { speed: 1, panel: true, bubbles: true, ...LS.get('replay') };
-	const CORNERS = ['tl', 'tr', 'bl', 'br'] as const;
 
 	let loaded = $state.raw<Loaded | null>(null);
 	let index = $state.raw<ReplayIndex | null>(null);
@@ -36,7 +35,7 @@
 
 	const total = $derived(loaded?.record.steps.length ?? 0);
 	const step = $derived(frame > 0 ? (loaded?.timeline[frame - 1] ?? null) : null);
-	const seated = $derived((loaded?.cast ?? []).filter(member => member.seat).slice(0, CORNERS.length));
+	const seated = $derived((loaded?.cast ?? []).filter(member => member.seat).slice(0, 4));
 	const said = $derived(loaded && bubbles ? bubblesAt(loaded, frame, follow) : new Map<string, SaidNote[]>());
 	const marks = $derived(loaded ? marksAt(loaded, frame) : undefined);
 	const colorOf = (name: string | null) => loaded?.cast.find(member => member.name === name)?.color ?? '#8a9aa8';
@@ -199,19 +198,26 @@
 	{#if !loaded}<Engraving />{/if}
 	{#if loaded && session.state}
 		<Game {session} spectator {marks} announce={stepped}>
-			{#if session.state.world.game}
-				{#each seated as member, at (member.name)}
+			{#snippet corner(seat, place)}
+				{@const member = seated.find(entry => entry.seat === seat)}
+				{#if member}
 					<Corner
-						{member}
-						world={session.state.world}
-						place={CORNERS[at]!}
+						name={member.name}
+						{seat}
+						color={member.color}
+						world={session.state!.world}
+						{place}
 						notes={said.get(member.name) ?? []}
 						dimmed={follow !== null && follow !== member.name}
-						followed={follow === member.name}
-						onfollow={() => toggleFollow(member.name)}
+						selected={follow === member.name}
+						action={follow === member.name ? `Stop following ${member.name}` : `Follow ${member.name}`}
+						selectedTag="Following"
+						onselect={() => toggleFollow(member.name)}
 						onnote={reveal}
 					/>
-				{/each}
+				{/if}
+			{/snippet}
+			{#if session.state.world.game}
 				<Caption {step} color={step?.by ? colorOf(step.by) : null} />
 			{/if}
 		</Game>

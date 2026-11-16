@@ -78,15 +78,11 @@ async function tap(target: ReturnType<Page['locator']>) {
 	await pause(40);
 }
 
-/** Clicks a city on the 3D board. The marker sits where its label would be without the label's sideways offset. */
+/** Clicks a city on the 3D board, at the empty anchor each marker keeps at its disc's centre. */
 async function clickCity(page: Page, id: string) {
-	const point = await page.locator(`.label[data-city="${id}"]`).evaluate(node => {
+	const point = await page.locator(`.anchor[data-city="${id}"]`).evaluate(node => {
 		const box = node.getBoundingClientRect();
-		const style = getComputedStyle(node);
-		return {
-			x: box.x + box.width / 2 - parseFloat(style.getPropertyValue('--dx')),
-			y: box.y + box.height / 2 - parseFloat(style.getPropertyValue('--dy')),
-		};
+		return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
 	});
 	if (process.argv.includes('--debug')) {
 		const hit = await page.evaluate(({ x, y }) => {
@@ -115,7 +111,7 @@ try {
 	const haven = page.locator('input.haven').first();
 	await haven.fill('Avalon');
 	await haven.blur();
-	await page.locator('.label .name', { hasText: /^Avalon$/ }).waitFor();
+	await page.locator('.anchor[data-name="Avalon"]').waitFor({ state: 'attached' });
 	ok('lobby controls: rationing moves and a renamed haven shows on the board');
 
 	await page.locator('.lobby label select').nth(2).selectOption({ label: 'Cy' });
