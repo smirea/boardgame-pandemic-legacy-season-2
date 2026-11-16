@@ -3,7 +3,7 @@ import type { BundleId, CityId, RegionId } from '../ids';
 export type Color = 'blue' | 'yellow' | 'black' | 'red';
 export type EdgeKind = 'land' | 'sea';
 
-export type RegionDef = { id: RegionId; name: string; startsRevealed: boolean; neighbours: RegionId[] };
+export type RegionDef = { id: RegionId; name: string; startsRevealed: boolean };
 
 export type CityDef = {
 	id: CityId;
@@ -237,6 +237,8 @@ export type Unlock =
 	| { t: 'forsake'; city: CityId }
 	/** A scar the group must place on a character of its choice when the next game begins. */
 	| { t: 'owedScar' }
+	/** Tells the group which Monitor frequencies open something, the reward for triangulating the signals. */
+	| { t: 'frequencyHint' }
 	| { t: 'open'; bundle: BundleId }
 	/** Forced opening: the explorer's reward is lost and the recon does not count toward an objective. */
 	| { t: 'perimeter'; bundle: BundleId; penalty?: Unlock[] };

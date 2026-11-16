@@ -1,53 +1,35 @@
 # Memory
 
-July won on turn 13. August is next. Rationing is 2.
+October second won. Centers in Frankfurt, St Petersburg, and New York do not persist. Permanent centers are still Washington, London, Sao Paulo, Istanbul, Atlanta, Paris. November is rationing 0. No rationed events.
 
-I am the Immunologist, char-6, home Southreach, exposure 1/7. Record Keeper, Architect, and Runner. Hand limit 8. I build a center with 4 cards of the city's colour. The options note still says 5. The key is `buildCenter:a+b+c+d:false`. Runner discards any City card to move from a haven or supply center to anywhere on the grid. It works from a center the moment I build it. Make Supplies draws from the reserve. It was offered in Tripoli, which is not a haven or a center. I did not test that.
+I am the Immunologist, char-6, exposure 1/7. Slots full: Record Keeper, Architect, Runner, Supplier. Hand limit 8. Do not buy me another ability. Supplier key is `supply:<card>`. It does not discard the card. Make Supplies and Supplier take cubes from the reserve.
 
-Knox is the Laborer with Helmsman, Record Keeper, Foreman, and Scout. Slots full. The Sanitation Officer was played and has empty slots. Her pull discards 2 cards to take a City or Produce card from the discard. Captain, char-7, has still never been played.
+Kit is the Sanitation Officer: Architect, Outrider, Soldier. Exposure 0/7. Soldier removes one Hollow Man where they stand. Outrider lets them walk in and do it. Ask Kit to clear a haven before game end. The Captain is exposure 4/7, with Careless (discard a card after each search) and no Navigator. Slots: Foreman, Careless, Surveyor, Investigator. Do not send the Captain off a Hollow Man. Hale has Record Keeper.
 
 ## Rules that change play
 
-A forsaken city is never infected. Its card is set aside and another card is flipped. `decks` hid those cards in July (issue 111). Do not trust a layer that names no forsaken city.
+Leaving a location that holds a Hollow Man exposes you, including a haven you were already in when the figure arrived. Check before you move. `undo` removed that shuttle and the scar choice with it.
 
-One plague cube should drop that city by 1. Washington kept population 8 with a plague cube still on it (issue 124). Check Washington before I count on that.
+A haven with a Hollow Man and no shelter loses 1 population at game end. A shelter or a supply center cancels that loss. A city loses at most 1, however many cubes or figures. Northwatch's shelter is permanent. Crosswater and Southreach are population 1. One more figure forsakes them. Do not park a figure on either.
 
-Do not empty a city that still has a live card, even at 0% this infect. I stripped Washington to save Chicago. Washington then plagued. Take the cubes from a city with no live card, or make them from the reserve.
+Antananarivo is forsaken. Lagos is 4. Paris is 7. Frankfurt is 5. St Petersburg is 3. Istanbul stayed 8. The center cancelled its plague loss. Do not cube a forsaken city. Do not start a turn in one. Do not restore Antananarivo. It would stay infested.
 
-An epidemic strips a whole stack back to the stockpile. Do not dump a safe cache onto one city. Two cubes per live card is enough.
+Cordon is on inf-paris.103. When that card is drawn in an infect step, any player may discard a card to stop the rest of the step. Keep a forsaken card for it.
 
-Share moves only the card of the city you stand in. Transmit, from a tower, sends a card of that city's colour to anyone. Card Swap is the remote trade. Do not put an apostrophe in a `why:` or a `say`. The command never arrives.
+An epidemic strips one city and puts one stored Infection card back into the deck. That card can be the next infect, and a stripped city then takes plague. It is not a second hit inside the epidemic itself. Well Stocked (inf-washington.14 and inf-london.33) blocks one hit when the city has 2 or more cubes. Forsaken cards are skipped and another card is flipped.
 
-Well Stocked blocks only at 2 or more cubes. Do not inoculate those cards. Foundations counts as 2. Infrastructure counts as 3. A line costs 2 cubes, and 1 with Foreman. A sea lane costs 2. A tower costs 2 from the character. Foreman did not cheapen the towers we built.
+Shelter plays onto the city of a card. It is not built where you stand. A haven cannot receive one.
 
-Do not end a turn on plague or in an infested city. Driving through did not expose me. Search in a forsaken city is still untested. The guide says only Drive or Ferry works there.
+Broadcast moves one Hollow Man from the tower city into a neighbour. You must stand there. A sea lane makes a haven a neighbour. Transmit sends a card of the tower's colour. Share still moves only the card of the city you both stand in.
 
-Open Waters is a fixed list of port pairs, not any two ports. It does include pairs the region rule blocks. Every pair is listed twice (issue 116). Surplus takes 3 from the stockpile onto me and does not ask for a count (issue 113).
+Architect builds with 4 cards. washington.8 counts as 3. london.32 counts as 2. lagos.57 counts as red. A land line is 2 cubes, or 1 with Foreman. A sea lane is 2. The Captain's free chart is gone.
 
-A city that joins mid-game cannot be infected that game. Its city cards go to the player discard. Triangulate completed and then vanished from the list (issue 122). The unlock named no new action. Connect and the lost haven stayed marked done. The win was the third center, with those two already done.
-
-Rebirth does nothing under population 4. Cairo recon is on a forsaken city. Lagos had no recon line.
-
-## Campaign state
-
-Permanent centers: Washington population 8, London population 8, Sao Paulo population 4, Istanbul population 6, Atlanta population 5. The lead spent all 6 units on Istanbul and Atlanta. Bogota's center was not made permanent. Bogota is population 2. The three towers were not made permanent.
-
-On the grid now: Moscow, linked to St. Petersburg, population 1. Antananarivo, black port, population 2, sea lane from Lagos. Farwater links to Los Angeles and to Northwatch. That second lane is the Open Waters lane.
-
-Off the grid: Khartoum and Dar es Salaam (yellow, infested), Johannesburg (blue, population 2). Kinshasa is on the grid, yellow, population 1, infested.
-
-Forsaken and infested: Jacksonville, Denver, San Francisco, Cairo, Mexico City, Los Angeles, Santiago. Do not restore one unless we must stand there. Restore costs 2 and the city stays infested.
-
-Population 1: Tripoli, Chicago, Lima, Buenos Aires, St. Petersburg, Moscow, Kinshasa, New York. Frankfurt is population 2. Paris is population 3. Lagos is population 3.
-
-Inoculated, out of the deck: the older set, plus the live Lagos, Istanbul, St. Petersburg, and one each of Tripoli and Bogota. Atlanta's card was already stored. Kinshasa's set-aside was for July only. One Istanbul card may still be live if the inoculate did not take the last one. The London and Washington Well Stocked cards are still live.
+The infection-rate marker stepped once when the deck reshuffled with no epidemic (issue 180). Treat it as one step ahead of the epidemic count. No apostrophe in a why or a say.
 
 ## Next game
 
-Rationing is 2. Ask for Quiet Night and Card Swap.
+Rationing 0. Nothing to pick from the reserve. Scavenge was picked and never drawn. It is still unplayed.
 
-Keep this character. Runner and Architect won the month. Someone should play Captain. It has never been in a game.
+Still never bought: Lookout, Broker, wild. Still never done in play: replace, freeEdge, removeHollow, shield, skip. Soldier is how removeHollow happens. Jakarta recon is still 2 red cards, and Jakarta is forsaken. Do not go.
 
-Two more centers are not the only win, but a starred build has been the whole win when the other two objectives were already done. Do not chase a third objective once two are done and the centers are short.
-
-Forsaken cities get no cubes. Two cubes on a live city for each of its cards. Sao Paulo and Atlanta have no live infection cards. Park a cache there. Leave it there.
+Cube every live card, including storage, before the first epidemic. Nothing on a forsaken city. If a Hollow Man is on my haven, I stay and use Supplier. I do not take the scar.

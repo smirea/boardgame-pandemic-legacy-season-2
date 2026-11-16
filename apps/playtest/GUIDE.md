@@ -40,7 +40,7 @@ One player is the lead for each game. Only the lead sends setup and game-end com
 
 1. Up to 4 actions.
 2. Draw 2 Player cards. An EPIDEMIC moves the infection rate one step along its track (the track starts 2, 2, 2, 3, so the number does not rise every time), strips every cube from one city, and puts the Infection discard pile back on top of its deck, so the same cities come up again.
-3. Flip Infection cards equal to the infection rate. Each one hits a city. If the city has supply cubes it loses one. If it has none it takes a Plague cube, which is an incident. A city with 3 Plague cubes outbreaks into its neighbours.
+3. Flip Infection cards equal to the infection rate. Each one hits a city. If the city has supply cubes it loses one. If it has none it takes a Plague cube, which is an incident. A city already holding 3 Plague cubes that is hit again outbreaks into its neighbours. Reaching 3 is not an outbreak.
 
 Cubes never leave the game. A cube an infection removes goes back to the stockpile, and so does every cube you spend on a supply line, a tower or a Laborer's build. `makeSupplies` takes them out again.
 
@@ -48,7 +48,9 @@ A city may hold more cubes than its population. Population only caps Produce Sup
 
 So supply cubes are armour. Your main job between objectives is keeping cubes on the cities most likely to be hit. `status` lists the trouble spots with their odds.
 
-**Each game starts clean.** The infection rate, the incident track and the decks all reset every game. Only what the year made permanent carries over.
+**Each game starts clean.** The infection rate, the incident track, the decks, and every cube, Plague cube and Hollow Man on the board all reset every game. Only what the year made permanent carries over. Plague cubes and Hollow Men lower a city's population at game end, not when they land.
+
+**Hollow Men.** Once they arrive, their Gather cards start each game in the Infection discard pile and enter the deck with the first Epidemic. When one is flipped, the next city flipped gets a Hollow Man and is not infected. Several in a row still place one figure. Leaving a location that holds Hollow Men exposes your character.
 
 **Hand limit** is 7. Over it, you must discard, and the game waits until you do, even on another player's turn. `wait` tells you when that is you.
 
@@ -78,11 +80,13 @@ Each costs 1 action unless `options` shows another cost. `options` is the truth 
 - `search:<card>:<box>`: unlocks with the first region you reveal and stays unlocked. Holding a city's card while standing in that city, scratch one of the card's search boxes. Only some City cards have boxes. A card that has them shows `(2 search boxes)` after its name, and `options` then lists the search. Finds range from supplies to new places to nothing.
 - `buildShelter`, `buildTower`, and others appear in `options` as the year unlocks them. The Legacy briefing at the start of a game says what is new.
 
+A choice that takes several targets is one key with the targets joined by `+`: `do play:safeHouses.241:cairo+lagos+london` places three shelters with one Safe Houses card. `options` lists the single targets.
+
 Event cards and companions in your hand are played with `play:...` keys at any time, even on another player's turn. They cost no action. A Rationed Event goes to the discard pile and returns to the reserve for later games. The lead picks as many as the rationing level at setup, which can be none. An Unrationed Event is in every deck until someone plays it: playing it destroys it for good.
 
 ## Between games
 
-After a game ends the lead opens the game-end step. Cities change population. The group gets production units to spend on upgrades that last all year: abilities for characters, improved cards, more population, and later in the year permanent structures. `options buy` lists what is for sale, for every player. Restore appears only when a city has dropped to population 0. Tell the lead what you want and why.
+After a game ends the lead opens the game-end step. Cities change population. The group gets production units to spend on upgrades that last all year: abilities for characters, improved cards, more population, and later in the year permanent structures. `options buy` lists what is for sale, for every player. Restore appears only when a city has dropped to population 0. At most 6 supply centers can be permanent, and the option disappears once they are. Tell the lead what you want and why.
 
 ## What we need from you
 

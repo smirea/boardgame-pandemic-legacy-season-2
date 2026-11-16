@@ -3,12 +3,12 @@ import { checkEdge } from './actions';
 import { pack } from './content/pack';
 import type { EventId, SearchResult } from './content/types';
 import { bump, epidemicCount, placeHollow, setupInfection } from './flow';
-import { grid, handLimit, hasEdge } from './helpers';
+import { grid, handLimit, hasEdge, isCandidate, passage, segmentsCross } from './helpers';
 import type { CardId, CityId } from './ids';
 import { createGameActor, parseSave, reject } from './machine';
 import type { Action } from './actions';
 import { legalActions, legalPlays } from './options';
-import { applyUnlock, closeGame, openBundle, score } from './legacy';
+import { applyUnlock, closeGame, newCampaign, openBundle, score } from './legacy';
 import { decemberSave, octoberSave } from './scenarios';
 import type { World } from './state';
 import {
@@ -1637,5 +1637,147 @@ describe('found in July', () => {
 		world.campaign.opened = world.campaign.opened.filter(id => id !== 'signal-hint');
 		openBundle(world, 'signal-hint' as never, false);
 		expect(world.campaign.briefing).toContain('Objectives leaving play: Triangulate signals.');
+	});
+});
+
+describe('found in August', () => {
+	test('the Captain and the Runner may discard any City card, not only the first in hand', () => {
+		const actor = late((world, game) => {
+			character(world, A).job = 'captain';
+			character(world, A).slots[1] = { kind: 'ability', id: 'runner' };
+			give(world, A, [...cityCards(world, 'cairo', 1), ...cityCards(world, 'lagos', 1)]);
+			game.players[A]!.location = city('haven-mediterranean');
+		});
+		const offered = legalActions(worldOf(actor), A);
+		const cards = (kind: 'captainSail' | 'run') =>
+			new Set(offered.flatMap(action => (action.a === kind ? [action.card] : []))).size;
+		expect(cards('captainSail')).toBe(2);
+		expect(cards('run')).toBe(2);
+	});
+
+	test('a flipped Hollow Men card is logged, and the next city gets a Hollow Man without being infected', () => {
+		const actor = late((world, game) => {
+			const gather = Object.values(world.campaign.infectionCards).find(card => card.kind === 'gather')!.id;
+			stackInfection(world, ['cairo']);
+			game.infectionDeck.order = [gather, ...game.infectionDeck.order.filter(card => card !== gather)];
+			game.infectionDeck.strata = [game.infectionDeck.order.toSorted()];
+			game.infectionDiscard = game.infectionDiscard.filter(card => card !== gather);
+			game.actionsLeft = 0;
+			game.infectionsLeft = 1;
+		}, 'playing.infect');
+		const cubes = gameOf(actor).locations[city('cairo')]!.supplies;
+		send(actor, { type: 'INFECT' });
+		expect(
+			gameOf(actor).log.some(entry => entry.t === 'note' && entry.text.startsWith('A Hollow Men card was flipped')),
+		).toBe(true);
+		expect(gameOf(actor).locations[city('cairo')]).toMatchObject({ supplies: cubes, hollow: 1 });
+	});
+
+	test('triangulating the signals names the three frequencies that open something', () => {
+		const world = JSON.parse(JSON.stringify(worldOf(late()))) as World;
+		world.campaign.briefing = [];
+		world.campaign.opened = world.campaign.opened.filter(id => id !== 'signal-hint');
+		openBundle(world, 'signal-hint' as never, false);
+		expect(world.campaign.briefing).toContain(
+			'The bearings cross on three Monitor frequencies that open something new: 4, 5, 10. The other seven only return cards.',
+		);
+	});
+});
+
+describe('drawing connections: what a line may not cross', () => {
+	const fresh = () => newCampaign(4);
+	const reveal = (campaign: World['campaign'], ids: string[]) => {
+		for (const id of ids) campaign.locations[city(id)]!.revealed = true;
+	};
+
+	test('a supply line may not run over water: the generated pairs leave out lines that would', () => {
+		for (const [a, b] of [
+			['istanbul', 'lagos'],
+			['jacksonville', 'buenos-aires'],
+			['jacksonville', 'san-francisco'],
+			['kinshasa', 'antananarivo'],
+		])
+			expect(isCandidate(city(a!), city(b!), 'land')).toBe(false);
+		for (const [a, b] of [
+			['washington', 'chicago'],
+			['cairo', 'khartoum'],
+			['sao-paulo', 'buenos-aires'],
+		])
+			expect(isCandidate(city(a!), city(b!), 'land')).toBe(true);
+	});
+
+	test('a supply line may not cross unexplored map, and may once that ground is revealed', () => {
+		const campaign = fresh();
+		expect(passage(city('cairo'), city('lagos')).through as string[]).toContain('khartoum');
+		expect(checkEdge(campaign, city('cairo'), city('lagos'), 'land')).toBe('It would cross unexplored map');
+		reveal(campaign, passage(city('cairo'), city('lagos')).through);
+		expect(checkEdge(campaign, city('cairo'), city('lagos'), 'land')).toBeNull();
+	});
+
+	test('a supply line may not cross another supply line, and may share a city with one', () => {
+		const campaign = fresh();
+		reveal(
+			campaign,
+			pack.cities.map(entry => entry.id),
+		);
+		campaign.edges.push({ a: city('cairo'), b: city('lagos'), kind: 'land' });
+		expect(checkEdge(campaign, city('tripoli'), city('khartoum'), 'land')).toBe('It would cross another supply line');
+		expect(checkEdge(campaign, city('cairo'), city('khartoum'), 'land')).toBeNull();
+	});
+
+	test('a supply line may not end at a haven or pass over another city', () => {
+		const campaign = fresh();
+		reveal(
+			campaign,
+			pack.cities.map(entry => entry.id),
+		);
+		expect(checkEdge(campaign, city('lagos'), city('haven-north-atlantic'), 'land')).toBe('Supply lines join cities');
+		expect(checkEdge(campaign, city('washington'), city('denver'), 'land')).toContain('No land route');
+	});
+
+	test('a sea lane may not cross another sea lane', () => {
+		const campaign = fresh();
+		expect(isCandidate(city('washington'), city('lagos'), 'sea')).toBe(true);
+		expect(checkEdge(campaign, city('washington'), city('lagos'), 'sea')).toBe('It would cross another sea lane');
+		const crossed = (edge: { a: string; b: string }) =>
+			segmentsCross(
+				pack.positions[city('washington')]!,
+				pack.positions[city('lagos')]!,
+				pack.positions[city(edge.a)]!,
+				pack.positions[city(edge.b)]!,
+			);
+		campaign.edges = campaign.edges.filter(edge => !crossed(edge));
+		expect(checkEdge(campaign, city('washington'), city('lagos'), 'sea')).toBeNull();
+	});
+
+	test('a sea lane may cross one region line, and Open Waters lifts only that limit', () => {
+		const campaign = fresh();
+		reveal(
+			campaign,
+			pack.cities.map(entry => entry.id),
+		);
+		// Land lines put the two ports on the grid without adding any sea lane to cross.
+		campaign.edges.push(
+			{ a: city('lagos'), b: city('dar-es-salaam'), kind: 'land' },
+			{ a: city('lagos'), b: city('antananarivo'), kind: 'land' },
+		);
+		expect(passage(city('dar-es-salaam'), city('haven-indian-ocean')).regionLines).toBe(1);
+		expect(checkEdge(campaign, city('dar-es-salaam'), city('haven-indian-ocean'), 'sea')).toBeNull();
+		expect(passage(city('antananarivo'), city('jakarta')).regionLines).toBeGreaterThan(1);
+		expect(checkEdge(campaign, city('antananarivo'), city('jakarta'), 'sea')).toBe(
+			'A sea lane may cross only one region line',
+		);
+		expect(checkEdge(campaign, city('antananarivo'), city('jakarta'), 'sea', true)).toBeNull();
+	});
+
+	test('a sea lane may not cross unexplored map either', () => {
+		const campaign = fresh();
+		campaign.locations[city('antananarivo')]!.revealed = true;
+		expect(checkEdge(campaign, city('lagos'), city('antananarivo'), 'sea')).toBe('It would cross unexplored map');
+	});
+
+	test('every city can still be joined to something', () => {
+		for (const entry of pack.cities)
+			expect(pack.candidateEdges.some(edge => edge.a === entry.id || edge.b === entry.id)).toBe(true);
 	});
 });

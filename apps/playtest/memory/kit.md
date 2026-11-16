@@ -1,49 +1,30 @@
 # Memory
 
-July won. August lobby is open, rationing 2. Past: Jan W, Feb W, Mar L, Mar(2) L, Apr L, Apr(2) L, May W, Jun W, Jul W.
+October second attempt won. November lobby is open at rationing 0. Past: Jan W, Feb W, Mar L, Mar(2) L, Apr L, Apr(2) L, May W, Jun W, Jul W, Aug W, Sep W, Oct L, Oct(2) W.
 
-I played Sanitation Officer (char-8), exposure 0/7, no abilities, hand limit 7, home Midsea. Salvage is free: discard 2, take a city or Produce card from the discard. Options only ever listed one pair, and each pair spent a card I would not give up. I never fired it. Captain (char-7) is still unplayed. Sable still has Courier and Facilitator.
+Play Sanitation Officer (char-8) again. Architect, Outrider, Soldier, exposure 0/7, one slot open. Home is Crosswater. Soldier removes one Hollow Man where I stand. Outrider lets me leave a figure. Salvage is free: discard 2 in the exact order `options` lists, take a City or Produce card from the discard.
 
-Knox: Laborer, Helmsman, Record Keeper (limit 8), Foreman, Scout. Exposure 2/7. No open slot. Sol: Immunologist, Record Keeper, Architect, Runner. Exposure 1/7. One open slot. Immunologist Make Supplies takes from the reserve.
+Do not play Knox (4/7, slots full) or the Captain (4/7, slots full). The Captain lost Navigator when Careless landed. Foreman, Surveyor, and Investigator remain. Sol's Immunologist is full: Record Keeper, Architect, Runner, Supplier, exposure 1/7. Hale has Record Keeper only, exposure 1/7, three open slots.
 
 ## Rules that change play
 
-- Win is 3 objectives, and the starred one must be among them. A center carries over only if it was made permanent. Bogota did not. Istanbul and Atlanta did.
-- Transmit is an action from a tower city. It sends only a city card of that city's color, to anyone. A blue tower cannot send a black card.
-- Build Tower costs 2 cubes from you. Towers did not persist. A tower is cheap to rebuild. A center is not. We skipped permanent towers for that reason.
-- Architect builds with 4 cards and no cubes. Laborer is 4 cards plus 2 cubes. Duplicates count. Two Cairos and two Tripolis built Istanbul.
-- Search scratches one box and the card stays in hand.
-- Inoculate is free. Press an inf- key. Storing a player card costs the table that card.
-- An epidemic strips every cube. The infect step still happens. Quiet Night before the first flip skips that infect and leaves those cards on top.
-- Well Stocked blocks only its own card, and only at 2 or more cubes. Atlanta and Istanbul had their infection cards stored, so they cannot be infected.
-- Exposure is at the start of a turn on plague, or in an infested city. Do not end a turn in one.
-- A new city's player cards hit the discard. Its infection cards wait until next game. Open Waters draws a sea lane and ignores the one-boundary limit.
-- Transmit can push someone over the hand limit and freeze the current turn. Name the discard. `wait` returns at once. `listen` is what blocks.
-- Cairo recon is on the board only: 4 different black cards, and it wants a center. Scout ignores the center. Cairo is forsaken, so recon and leave. Lagos recon was not offered.
-- Place every setup cube. A 0% city can still hold a cache. Restore is a bad deal.
+- Rationing 0. No Quiet Night, no Scavenge. Both went back to the reserve. Scavenge was picked in October and never played.
+- A haven with a Hollow Man and no shelter loses 1 population. A supply center cancels that loss. Northwatch's shelter is permanent. `buildShelter` places the shelter in the city on the card, and the card has to match the color of the city you stand in. It cannot target a haven.
+- Use Soldier on a haven figure before game end. I can walk in and out. Others get scarred when they leave.
+- Broadcast needs a tower of that color. You stand in the tower and move one figure from a city of that color into a neighbor. A figure already in a haven cannot be broadcast out. Towers did not persist.
+- An epidemic pulls one stored infection card, strips that city, and the follow-up can plague it bare. Do not inoculate a city we need, and do not stack cubes on a city whose only card is in storage.
+- A deck-out reshuffle brought gather cards in before any epidemic (issue 178). The rate marker also stepped once with no epidemic, so the rate hit 3 on the second epidemic (issues 179, 187). Treat gathers as live as soon as the discard is shuffled, and do not trust the rate to lag.
+- Architect builds with 4. `washington.8` is triple. `london.32` is double. Hand limit without Record Keeper is 7.
+- Permanent centers are capped at 6. Frankfurt, St. Petersburg, and New York were built and will be gone. Do not restore. A restored city stays infested.
 
-## Board going into August
+## Board going into November
 
-Permanent centers: Washington (pop 8), London (pop 8), Sao Paulo (pop 4), Istanbul (pop 6), Atlanta (pop 5). No towers. Shuttle reaches all five.
+Permanent centers: Washington (8), London (8), São Paulo (6), Istanbul (8), Atlanta (8), Paris (7). No permanent tower. Northwatch shelter is permanent. Crosswater is renamed Midsea.
 
-Farwater is linked to Northwatch and to Los Angeles. Los Angeles is pop 0, forsaken, infested.
+Lost a population: Crosswater, Southreach (Sol says it is at 1), Lagos (now 4). Antananarivo hit 0 and is forsaken. Frankfurt is 5 and St. Petersburg is 3, both without a center. New York stayed at 1 and has no center.
 
-On the grid, no permanent center: Bogota pop 2, Lagos pop 3, Frankfurt pop 2, Paris pop 3, New York pop 1, Chicago pop 1, Tripoli pop 1, St. Petersburg pop 1, Buenos Aires pop 1, Lima pop 1, Kinshasa pop 1 infested, Antananarivo pop 2 black port, Moscow pop 1 black.
-
-Pop 0, forsaken, infested: Jacksonville, Denver, San Francisco, Cairo, Mexico City, Los Angeles, Santiago.
-
-Off the grid: Khartoum (yellow, infested), Dar es Salaam (yellow port, infested), Johannesburg (blue, pop 2). Johannesburg from Kinshasa is the clean connect. Buenos Aires to Dar es Salaam still needs Open Waters.
-
-Black cities for Cairo recon: Istanbul, Tripoli, Cairo, Moscow, Antananarivo.
-
-## How they play
-
-Vex spends units on permanent centers before abilities. He will not buy a tower, a restore, or a population bump. Name the buy keys. When Transmit overflows him, he drops a yellow.
-
-Sol builds with 4 cards and will spend a city card to Runner. Name the cards that must not be eaten. Sol will also walk cubes onto a city that is about to plague.
+The Northwatch–São Paulo sea lane was charted. Check that it persisted. Jakarta recon is still on a forsaken city. Cordon was agreed on `inf-paris.103` for the 2 units that were not Soldier or Hale. Confirm the card actually says Cordon. Lookout, Broker, and Wild were not bought.
 
 ## Next game
 
-Rationing is 2. Ask for Quiet Night and Card Swap. Add Open Waters only if the plan is a blocked sea lane.
-
-Stay the Sanitation Officer if I can salvage with two spare cards. Otherwise go back to Sable. Facilitator on the Officer is the ability to buy when a slot is the better deal than another center.
+Keep char-8. Read the briefing before promising a plan. With rationing 0, cube the cities that can be hit and do not count on skipping an infect. If figures land on Crosswater or Southreach, Soldier them off before game end so Southreach does not hit 0. One open slot is left on me. Do not spend it on a duplicate of salvage.

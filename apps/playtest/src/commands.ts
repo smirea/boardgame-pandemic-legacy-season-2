@@ -101,6 +101,10 @@ export function optionsFor(state: PublicState, who: Who, seating: (CharacterId |
 	const mine = game.active === who.seat;
 	if (mine) {
 		for (const action of legalActions(world, who.seat)) {
+			const tuned =
+				action.a === 'monitor'
+					? ` · frequency ${action.frequency + 1} of ${pack.frequencies.length}: the top 4 Player cards are discarded, then the frequency gives what it holds`
+					: '';
 			const stored =
 				action.a === 'inoculate'
 					? ` · this city's ${action.card in campaign.playerCards ? 'PLAYER card from the Player discard pile' : 'Infection card from the Infection discard pile'} goes into storage, out of the decks`
@@ -108,7 +112,7 @@ export function optionsFor(state: PublicState, who: Who, seating: (CharacterId |
 			add(
 				keyOf(action.a, action, 'a'),
 				action.a,
-				`${describe(state, action, 'a')}${stored}`,
+				`${describe(state, action, 'a')}${stored}${tuned}`,
 				{ type: 'ACTION', seat: who.seat, action },
 				actionCost(world, who.seat, action),
 			);
@@ -182,6 +186,31 @@ function purchaseText(purchase: Purchase): string {
 		case 'permanent':
 			return `This ${purchase.structure} starts every later game already built.`;
 	}
+}
+
+/**
+ * A choice that takes several targets, written as one key with the targets joined by `+`, such as
+ * `play:safeHouses.241:cairo+lagos+london`. Built from the single-target options it combines.
+ */
+export function composite(options: Option[], key: string): Command | null {
+	const cut = key.lastIndexOf(':');
+	const targets = key.slice(cut + 1).split('+');
+	if (cut < 0 || targets.length < 2) return null;
+	const bases = targets.map(target => options.find(option => option.key === `${key.slice(0, cut)}:${target}`));
+	const first = bases[0]?.command;
+	if (!first || bases.some(base => !base)) return null;
+	const merged = structuredClone(first);
+	const inner = (command: Command) =>
+		(command.type === 'PLAY' ? command.play : command.type === 'DECIDE' ? command.decide : null) as Record<
+			string,
+			unknown
+		> | null;
+	const target = inner(merged);
+	const field =
+		target && Object.keys(target).find(name => Array.isArray(target[name]) && (target[name] as unknown[]).length === 1);
+	if (!target || !field) return null;
+	target[field] = bases.map(base => (inner(base!.command)![field] as unknown[])[0]);
+	return merged;
 }
 
 export type Verb =

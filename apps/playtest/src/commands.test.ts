@@ -2,7 +2,7 @@ import { describe, expect, test } from 'bun:test';
 import { botCommand, createGameActor, publicState, reject } from '@repo/game';
 import type { CharacterId } from '@repo/game';
 import { newAudit, observe, renderParity, untouched } from './audit.ts';
-import { optionsFor, seatOf } from './commands.ts';
+import { composite, optionsFor, seatOf } from './commands.ts';
 import type { Who } from './commands.ts';
 import { renderBoard, renderOptions, renderStatus } from './render.ts';
 
@@ -80,4 +80,25 @@ describe('the lab plays the engine through its own option lists', () => {
 		}
 		expect(phases.size).toBe(8);
 	}, 120_000);
+});
+
+describe('choices with several targets', () => {
+	test('a key with targets joined by + becomes one command, and a key it cannot build is refused', () => {
+		const play = (city: string) =>
+			({
+				key: `play:safeHouses.9:${city}`,
+				group: 'play safeHouses',
+				desc: '',
+				command: { type: 'PLAY', seat: seatOf(0), card: 'safeHouses#9', play: { e: 'safeHouses', cities: [city] } },
+			}) as never;
+		const options = [play('cairo'), play('lagos'), play('london')];
+		expect(composite(options, 'play:safeHouses.9:cairo+london')).toEqual({
+			type: 'PLAY',
+			seat: seatOf(0),
+			card: 'safeHouses#9',
+			play: { e: 'safeHouses', cities: ['cairo', 'london'] },
+		} as never);
+		expect(composite(options, 'play:safeHouses.9:cairo+paris')).toBeNull();
+		expect(composite(options, 'play:safeHouses.9:cairo')).toBeNull();
+	});
 });

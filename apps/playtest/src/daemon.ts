@@ -22,7 +22,7 @@ import type { CharacterId, Command, GameRecord, PublicState, RecordNote, Save, S
 import { newAudit, observe, renderParity, untouched } from './audit.ts';
 import type { Audit, Issue } from './audit.ts';
 import { writeBriefs } from './brief.ts';
-import { mayRaw, optionsFor, parseVerb, seatOf } from './commands.ts';
+import { composite, mayRaw, optionsFor, parseVerb, seatOf } from './commands.ts';
 import type { Who } from './commands.ts';
 import { loadConfig, repoRoot } from './config.ts';
 import { recordFile, replaysUrl, servePages } from './replays.ts';
@@ -269,6 +269,9 @@ async function ingest(next: PublicState, raw: string, command: Command | null, a
 	current = next;
 	currentRaw = raw;
 	observe(audit, previous, next, command);
+	// Once a game is under way the seats are whoever it started with, whatever anyone picked since.
+	if (next.world.game)
+		lab.picks = config.players.map((_, index) => next.world.game!.players[seatOf(index)]?.character ?? null);
 	if (previous) remember(previous, next, command, config.players.find(player => player.id === agent)?.name ?? null);
 	const save: Save = { v: 1, phase: next.phase, world: next.world };
 	writeFileSync(files.latest, JSON.stringify(save));
@@ -482,7 +485,9 @@ async function doKeys(who: Who, keys: string[]): Promise<string> {
 	for (const key of keys) {
 		await refresh();
 		const state = current!;
-		const option = optionsFor(state, who, lab.picks).find(candidate => candidate.key === key);
+		const offered = optionsFor(state, who, lab.picks);
+		const several = composite(offered, key);
+		const option = offered.find(candidate => candidate.key === key) ?? (several ? { command: several } : undefined);
 		if (!option) {
 			lines.push(`STOPPED at "${key}": not one of your options right now. Run \`options\` to see the exact keys.`);
 			break;
@@ -545,7 +550,9 @@ const HELP = `Commands (run as: ./play <you> <command>):
   supply <city-id> <count>         place setup cubes by hand (lead)
   events <card> <card> ...         pick Rationed Events (lead)
   rename <haven-id> <name>         name a haven (lobby)
-  raw '<json>'        send a command that options does not list, for multi-card choices
+  A choice with several targets takes them joined by +, for example
+    do play:safeHouses.241:cairo+lagos+london   or   do decide:removeHollow:tehran+riyadh
+  raw '<json>'        send a command that options does not list
 UI harness only: look · click <number|text> · tap <city-id> · type <number> <text> · key <key> · shot`;
 
 async function handle(agent: string, words: string[]): Promise<string> {
@@ -680,7 +687,10 @@ async function handle(agent: string, words: string[]): Promise<string> {
 			}
 		}
 		case 'options':
-			if (state.phase === 'upkeep' && !who.lead)
+			if (
+				(state.phase === 'upkeep' || (state.phase === 'setup.supply' && state.world.campaign.freeAbilityUnits > 0)) &&
+				!who.lead
+			)
 				return renderOptions(
 					optionsFor(state, { ...who, lead: true }, lab.picks).filter(option => option.key.startsWith('buy:')),
 					rest[0],
@@ -772,6 +782,8 @@ async function handle(agent: string, words: string[]): Promise<string> {
 			if (!parsed) return `Unknown command "${verb}".\n${HELP}`;
 			if (parsed.v === 'error') return parsed.message;
 			if (parsed.v === 'pick') {
+				if (state.phase !== 'lobby')
+					return 'REFUSED: characters are chosen in the lobby. This game has started with the seats shown in `status`.';
 				if (lab.picks.some((pick, index) => pick === parsed.character && index !== who.index))
 					return 'Another player already picked that character.';
 				lab.picks[who.index] = parsed.character;

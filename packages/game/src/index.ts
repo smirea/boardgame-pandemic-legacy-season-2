@@ -16,13 +16,18 @@ export { insights, onGrid, publicState } from './view';
 export {
 	cardValue,
 	cityDef,
+	crossesEdge,
+	crossesUnexplored,
 	grid,
 	gridCityCount,
 	handLimit,
 	has,
 	isForsaken,
+	nearestLocation,
 	neighbours,
 	overLimit,
+	passage,
+	regionAt,
 	seaRoute,
 } from './helpers';
 export { freeCharacters, scarTargets } from './flow';

@@ -86,7 +86,7 @@ function troubleLines(world: World): string[] {
 	const rows: { city: CityId; weight: number; text: string }[] = [];
 	for (const city of onGrid) {
 		const location = game.locations[city]!;
-		if (cityDef(city).kind !== 'city') continue;
+		if (cityDef(city).kind !== 'city' || isForsaken(world.campaign, city)) continue;
 		const chance = odds[city] ?? 0;
 		if (location.supplies > 0 && location.plague === 0 && location.hollow === 0) continue;
 		const parts = [
@@ -94,18 +94,21 @@ function troubleLines(world: World): string[] {
 			location.plague ? `PLAGUE ${location.plague}` : null,
 			location.hollow ? `hollow men ${location.hollow}` : null,
 			location.shelter ? 'shelter' : null,
-			isForsaken(world.campaign, city) ? 'forsaken' : null,
-			chance ? `${pct(chance)} hit next infect` : null,
+			`${pct(chance)} hit next infect`,
 		].filter(Boolean);
 		rows.push({
 			city,
-			weight: chance * (location.supplies === 0 ? 2 : 1) + location.plague + location.hollow * 0.2,
+			weight:
+				chance * (location.supplies === 0 ? 2 : 1) +
+				location.plague +
+				location.hollow * 0.2 +
+				(location.supplies === 0 ? 0.5 : 0),
 			text: `  ${cityName(world, city)} (${city}): ${parts.join(', ')}`,
 		});
 	}
 	rows.sort((a, b) => b.weight - a.weight);
 	return rows.length
-		? ['Trouble spots (no cubes, plague, or Hollow Men), worst first:', ...rows.slice(0, 14).map(row => row.text)]
+		? ['Trouble spots (no cubes, plague, or Hollow Men), worst first:', ...rows.slice(0, 22).map(row => row.text)]
 		: [];
 }
 
@@ -214,7 +217,7 @@ function renderSetup(state: PublicState): string[] {
 		const lines = [
 			...(free
 				? [
-						`FREE ABILITY UNITS: ${free} to spend on character abilities right now (\`options buy\`). They cover this game.`,
+						`FREE ABILITY UNITS: ${free} to spend on character abilities right now (\`options buy\`). An ability bought now is permanent, like any other, and is in play this game.`,
 					]
 				: []),
 			`Supply setup: ${game.stockpile} cubes left to place. Cities with no cubes take a Plague cube when infected.`,
@@ -261,6 +264,41 @@ function renderUpkeep(state: PublicState): string[] {
 	if (upkeep?.populationChanges.length)
 		lines.push(
 			`Population changes: ${upkeep.populationChanges.map(change => `${cityName(world, change.city)} ${change.delta > 0 ? '+' : ''}${change.delta}`).join(', ')}`,
+		);
+	const held = (Object.keys(game.locations) as CityId[]).filter(id => {
+		const location = game.locations[id]!;
+		const lost = upkeep.populationChanges.some(change => change.city === id && change.delta < 0);
+		return (location.plague > 0 || location.hollow > 0) && !lost;
+	});
+	if (held.length)
+		lines.push(
+			`Plague or Hollow Men but no population lost: ${held
+				.map(id => {
+					const location = game.locations[id]!;
+					const why = location.shelter
+						? 'shelter'
+						: location.center
+							? 'its supply center gained the 1 back'
+							: 'already at 0';
+					return `${cityName(world, id)} (${why})`;
+				})
+				.join(', ')}. A city loses at most 1 a game, however many cubes or figures it holds.`,
+		);
+	const shop = world.campaign;
+	const costly = [
+		...shop.abilitiesForSale.map(id => ({
+			...pack.abilities.find(entry => entry.id === id)!,
+			free: shop.freeAbilityUnits,
+		})),
+		...shop.cityImprovementsForSale.map(id => ({ ...pack.cityImprovements.find(entry => entry.id === id)!, free: 0 })),
+		...shop.infectionImprovementsForSale.map(id => ({
+			...pack.infectionImprovements.find(entry => entry.id === id)!,
+			free: 0,
+		})),
+	].filter(item => item.cost > upkeep.units + item.free);
+	if (costly.length)
+		lines.push(
+			`For sale but beyond the units left, so not in \`options buy\`: ${costly.map(item => `${item.name} (${item.cost})`).join(', ')}.`,
 		);
 	lines.push(
 		'The lead buys with `do buy:...` (see `options`) and ends with `do finish-upkeep`. Everyone else advises with `say`.',
@@ -507,7 +545,7 @@ export function renderDecks(world: World): string {
 		`Player discard (${game.playerDiscard.length}): ${game.playerDiscard.map(id => `${enc(id)} [${cardName(world, id)}]`).join(', ') || 'empty'}`,
 		`Infection discard (${game.infectionDiscard.length}): ${game.infectionDiscard.map(id => `${enc(id)} [${cardName(world, id)}]`).join(', ') || 'empty'}`,
 		`Game End area (${game.gameEndArea.length}; cards out of this game: set aside by Resilience or a search, or of cities that joined the grid this game): ${game.gameEndArea.map(id => cardName(world, id)).join(', ') || 'empty'}`,
-		`Storage (inoculated cards, out of the decks for the rest of the year unless a later rule brings them back): ${world.campaign.stored.player.length} Player, ${world.campaign.stored.infection.length} Infection${world.campaign.stored.infection.length ? `: ${world.campaign.stored.infection.map(id => cardName(world, id)).join(', ')}` : ''}`,
+		`Storage (inoculated cards, out of the decks${world.campaign.rules.includes('epidemicFromStorage') ? '. With the September rule in play, each Epidemic pulls one stored Infection card back out, strikes its city, and returns the card to the deck' : ' for the rest of the year unless a later rule brings them back'}): ${world.campaign.stored.player.length} Player, ${world.campaign.stored.infection.length} Infection${world.campaign.stored.infection.length ? `: ${world.campaign.stored.infection.map(id => cardName(world, id)).join(', ')}` : ''}`,
 		'Infection deck layers, top first (cards known to be in each layer):',
 	];
 	for (const layer of found.infection.strata)
