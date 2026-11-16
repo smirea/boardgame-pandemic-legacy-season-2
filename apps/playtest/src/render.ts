@@ -265,6 +265,41 @@ function renderUpkeep(state: PublicState): string[] {
 		lines.push(
 			`Population changes: ${upkeep.populationChanges.map(change => `${cityName(world, change.city)} ${change.delta > 0 ? '+' : ''}${change.delta}`).join(', ')}`,
 		);
+	const held = (Object.keys(game.locations) as CityId[]).filter(id => {
+		const location = game.locations[id]!;
+		const lost = upkeep.populationChanges.some(change => change.city === id && change.delta < 0);
+		return (location.plague > 0 || location.hollow > 0) && !lost;
+	});
+	if (held.length)
+		lines.push(
+			`Plague or Hollow Men but no population lost: ${held
+				.map(id => {
+					const location = game.locations[id]!;
+					const why = location.shelter
+						? 'shelter'
+						: location.center
+							? 'its supply center gained the 1 back'
+							: 'already at 0';
+					return `${cityName(world, id)} (${why})`;
+				})
+				.join(', ')}. A city loses at most 1 a game, however many cubes or figures it holds.`,
+		);
+	const shop = world.campaign;
+	const costly = [
+		...shop.abilitiesForSale.map(id => ({
+			...pack.abilities.find(entry => entry.id === id)!,
+			free: shop.freeAbilityUnits,
+		})),
+		...shop.cityImprovementsForSale.map(id => ({ ...pack.cityImprovements.find(entry => entry.id === id)!, free: 0 })),
+		...shop.infectionImprovementsForSale.map(id => ({
+			...pack.infectionImprovements.find(entry => entry.id === id)!,
+			free: 0,
+		})),
+	].filter(item => item.cost > upkeep.units + item.free);
+	if (costly.length)
+		lines.push(
+			`For sale but beyond the units left, so not in \`options buy\`: ${costly.map(item => `${item.name} (${item.cost})`).join(', ')}.`,
+		);
 	lines.push(
 		'The lead buys with `do buy:...` (see `options`) and ends with `do finish-upkeep`. Everyone else advises with `say`.',
 	);

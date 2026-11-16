@@ -358,6 +358,12 @@ function unlockLine(campaign: Campaign, unlock: Unlock): string | null {
 		}
 		case 'rule':
 			return RULE_BRIEFS[unlock.rule] ?? null;
+		case 'route': {
+			const route = pack.reconRoutes.find(entry => entry.id === unlock.route);
+			if (!route) return null;
+			const city = pack.cities.find(entry => entry.id === route.city)!.name;
+			return `A recon route is now known: at ${city}, discard ${route.count} ${route.color} cards${route.unique ? ' of different cities' : ''}${route.needsCenter ? '. The city needs a supply center' : ''}.`;
+		}
 		case 'frequencyHint': {
 			const worth = pack.frequencies.flatMap((reward, index) => (reward && 'bundle' in reward ? [index + 1] : []));
 			return `The bearings cross on three Monitor frequencies that open something new: ${worth.join(', ')}. The other seven only return cards.`;

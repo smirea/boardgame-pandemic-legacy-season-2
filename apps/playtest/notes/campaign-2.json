@@ -473,5 +473,44 @@
 				"fix": "Population changes at game end. Only Drive or Ferry works in a forsaken city."
 			}
 		]
+	},
+	"g10": {
+		"summary": "Won on turn 12 with two incidents: East Asia reconned from Kolkata a month ahead of its deadline.",
+		"story": "Sol led with the Immunologist, beside the Captain and Knox the Laborer. September made Recon East Asia mandatory, and its route was unknown. The perimeter report opened the Indian Ocean haven for the players, which added 15 more cubes for a table total of 42. With the hint from July's triangulation, the table drew a supply line from Tehran to Kolkata, raised a tower in Istanbul and tuned Monitor to frequency 4, which revealed the route. The recon from Kolkata opened East Asia, put Jakarta on the grid, and completed Connect 2 new cities with it. Two more Monitors opened new card improvements and new training. Hollow Men kept arriving, three Gather cards at a time, and a shelter went up in Tehran. Centers in Frankfurt, Moscow and Lagos finished the game.",
+		"highlights": [
+			"Five wins in a row. East Asia opened by the players in September, so October's forced opening and its scar will not happen.",
+			"First Monitor: all three useful frequencies were used in one game. Two of them each discarded an Epidemic unresolved, as the research says Monitor does.",
+			"First shelter, built in Tehran, the action East Asia unlocked. The first Hollow Men at setup: the last 3 opening infections placed figures.",
+			"The Indian Ocean haven was forced open by the perimeter report and reached, with its 15-cube bonus.",
+			"Game end: Navigator, Surveyor, Investigator and a Red Wild improvement. Rationing stays at 0."
+		],
+		"parity": "All four checks passed: 3 objectives required, with Build 3 supply centers and Recon East Asia both mandatory, as the research sets for September; supplies 12 + 30 in bonuses = 42. Card 09-01 was read at setup: Recon a new area left play, the Indian Ocean haven was forced, stored cards now come back through Epidemics, and the last 3 setup infections placed Hollow Men. Card 09-02 was read at game end. The Kolkata route was hidden behind a Monitor frequency, as the research describes. The recording was used to check two reports: cubes did leave Moscow and Buenos Aires on each hit, and the exposure at Tehran came on leaving it.",
+		"findings": [
+			{
+				"finding": "The briefing for the newly revealed route gave only its title, not where or what it costs.",
+				"kind": "Engine gap",
+				"fix": "A briefing now states a new recon route's city, cards and whether it needs a supply center."
+			},
+			{
+				"finding": "London and São Paulo ended with a Plague cube and no population loss, and Riyadh lost 1 with three Hollow Men.",
+				"kind": "Not a bug, lab gap",
+				"fix": "A supply center's gain cancels the loss, and a city loses at most 1 a game. The game-end view now explains each such city."
+			},
+			{
+				"finding": "The Universal improvement was announced but not in the shop.",
+				"kind": "Not a bug, lab gap",
+				"fix": "It cost more than the units left. The game-end view now lists what is for sale but out of reach."
+			},
+			{
+				"finding": "Infections were reported as removing no cube, and an exposure as coming on entering a city.",
+				"kind": "Not a bug",
+				"fix": "The recording shows the cube leaving on each hit and the exposure on leaving Tehran."
+			},
+			{
+				"finding": "Three Hollow Men cards in a row placed one figure, not three. Monitor discarded Epidemics without resolving them.",
+				"kind": "Not a bug",
+				"fix": "Both as researched: the next city gets one figure, and a monitored Epidemic has no effect."
+			}
+		]
 	}
 }
