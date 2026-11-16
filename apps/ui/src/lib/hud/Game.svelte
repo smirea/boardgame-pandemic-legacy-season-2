@@ -529,7 +529,7 @@
 		<dt><b class="num">3</b></dt>
 		<dd>Population, on the city</dd>
 		<dt><b class="port">⚓</b></dt>
-		<dd>Port, under the population</dd>
+		<dd>Port, before the name</dd>
 		<dt><b class="cube"></b></dt>
 		<dd>Supply cubes, right</dd>
 		<dt><b class="cube plague"></b></dt>

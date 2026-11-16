@@ -222,7 +222,7 @@
 			? layoutLabels(
 					visibleCities.map(city => ({
 						id: city.id,
-						width: nameWidth(view.cities[city.id]!.name, NAME_SIZE),
+						width: nameWidth(view.cities[city.id]!.name, city.port, NAME_SIZE),
 						at: layout[city.id]!,
 					})),
 				)

@@ -68,7 +68,7 @@
 	// Prints lie just above the fog's lowest sheet, so a name running out over unexplored sea stays legible.
 	const INK = 0.2;
 
-	const name = $derived(fonts.ready ? printName(state.name, NAME_SIZE, !state.onGrid, lit) : null);
+	const name = $derived(fonts.ready ? printName(state.name, city.port, NAME_SIZE, !state.onGrid, lit) : null);
 	// A name that stands off from its city is tied back to the disc by a fine ruled line.
 	const leader = $derived.by(() => {
 		if (!placement.leader || !name) return null;
@@ -84,7 +84,7 @@
 		const mid = DISC_REACH + length / 2;
 		return { x: ux * mid, z: uz * mid, length, angle: Math.atan2(-uz, ux) };
 	});
-	const face = $derived(fonts.ready ? printDisc(state.population, city.port, 2.8, inkOn(color)) : null);
+	const face = $derived(fonts.ready ? printDisc(state.population, 2.8, inkOn(color)) : null);
 	const permanent = $derived(state.structures.filter(structure => structure.permanent));
 	const stickers = $derived(
 		fonts.ready
@@ -191,7 +191,8 @@
 			/>
 		</T.Mesh>
 		<T.Mesh position.y={DISC + 0.02} rotation.x={-Math.PI / 2}>
-			<T.RingGeometry args={[CITY_RADIUS * 0.8, CITY_RADIUS * 0.88, city.kind === 'haven' ? 6 : 32]} />
+			<!-- A ring's corners start on its x axis and a cylinder's on its z axis, so a haven's ring turns a quarter to match its hex. -->
+			<T.RingGeometry args={[CITY_RADIUS * 0.8, CITY_RADIUS * 0.88, city.kind === 'haven' ? 6 : 32, 1, Math.PI / 2]} />
 			<T.MeshBasicMaterial
 				color={state.infested ? '#b79ad6' : '#efe6d2'}
 				transparent

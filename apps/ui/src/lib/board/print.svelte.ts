@@ -45,59 +45,66 @@ const measure = (() => {
 })();
 
 const NAME_SPACING = 0.02;
+/** The room a port's anchor takes ahead of its name, as a share of the name's size. */
+const ANCHOR_ROOM = 0.95;
 
-/** How wide a city's printed name runs, in board units. */
-export const nameWidth = (name: string, size: number) =>
-	measure(`${NAME_STYLE} ${size}px ${NAME_FONT}`, size * NAME_SPACING, name) + size * 0.6;
+/** How wide a city's printed name runs, in board units, with a port's anchor ahead of it. */
+export const nameWidth = (name: string, port: boolean, size: number) =>
+	measure(`${NAME_STYLE} ${size}px ${NAME_FONT}`, size * NAME_SPACING, name) + size * (0.6 + (port ? ANCHOR_ROOM : 0));
 
 /**
  * A city's name lettered on the chart in an engraver's italic, with a faint paper halo that only lifts it off
- * coastlines and lines. A lit name is the one under the pointer.
+ * coastlines and lines. A port's name opens with an anchor, the way the board marks the places sea movement may
+ * start and end. A lit name is the one under the pointer.
  */
-export function printName(name: string, size: number, faded: boolean, lit: boolean): Print {
+export function printName(name: string, port: boolean, size: number, faded: boolean, lit: boolean): Print {
 	const font = `${NAME_STYLE} ${size}px ${NAME_FONT}`;
 	const pad = size * 0.3;
-	const width = nameWidth(name, size);
+	const width = nameWidth(name, port, size);
 	const height = size * 1.5;
 	return sheet(width, height, context => {
 		const baseline = height / 2 + size * 0.3;
+		const text = pad + (port ? size * ANCHOR_ROOM : 0);
 		context.textBaseline = 'alphabetic';
 		context.lineJoin = 'round';
 		context.font = font;
 		context.letterSpacing = `${size * NAME_SPACING}px`;
+		const glyph = (weight: number) => {
+			if (!port) return;
+			context.save();
+			context.translate(pad + size * 0.4, baseline - size * 0.36);
+			context.scale(size * 0.36, size * 0.36);
+			anchor(context, weight);
+			context.restore();
+		};
 		context.strokeStyle = PAPER;
 		context.lineWidth = size * (lit ? 0.3 : 0.1);
 		context.globalAlpha = lit ? 0.9 : 0.25;
-		context.strokeText(name, pad, baseline);
+		context.strokeText(name, text, baseline);
+		glyph(lit ? 0.9 : 0.5);
 		context.globalAlpha = faded && !lit ? 0.5 : 1;
 		context.fillStyle = lit ? '#8e2a12' : INK;
-		context.fillText(name, pad, baseline);
+		context.strokeStyle = context.fillStyle;
+		context.fillText(name, text, baseline);
+		glyph(0.2);
 	});
 }
 
-/**
- * The face of a city's disc: its population as a large numeral and, for a port, an anchor beneath it, the
- * way the board marks the places sea movement may start and end.
- */
-export function printDisc(population: number, port: boolean, size: number, color: string): Print {
+/** The face of a city's disc: its population as a large numeral. */
+export function printDisc(population: number, size: number, color: string): Print {
 	return sheet(size, size, context => {
 		context.textAlign = 'center';
 		context.textBaseline = 'middle';
 		context.fillStyle = color;
-		context.strokeStyle = color;
-		context.font = `700 ${size * (port ? 0.6 : 0.82)}px ${NUMBER_FONT}`;
-		context.fillText(String(population), size / 2, size * (port ? 0.4 : 0.54));
-		if (!port) return;
-		context.translate(size / 2, size * 0.8);
-		context.scale(size * 0.13, size * 0.13);
-		anchor(context);
+		context.font = `700 ${size * 0.82}px ${NUMBER_FONT}`;
+		context.fillText(String(population), size / 2, size * 0.54);
 	});
 }
 
-/** An anchor about two units tall around the origin, in the context's current colours. */
-function anchor(context: CanvasRenderingContext2D) {
+/** An anchor about two units tall around the origin, stroked in the context's current colour. */
+function anchor(context: CanvasRenderingContext2D, weight: number) {
 	context.lineCap = 'round';
-	context.lineWidth = 0.28;
+	context.lineWidth = weight;
 	context.beginPath();
 	context.arc(0, -0.85, 0.22, 0, Math.PI * 2);
 	context.moveTo(0, -0.63);
