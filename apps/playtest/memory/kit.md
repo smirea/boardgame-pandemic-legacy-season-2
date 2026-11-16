@@ -1,49 +1,43 @@
 # Memory
 
-July won. August lobby is open, rationing 2. Past: Jan W, Feb W, Mar L, Mar(2) L, Apr L, Apr(2) L, May W, Jun W, Jul W.
+August won on turn 8 at 2 incidents. September lobby is open, rationing 0. Past: Jan W, Feb W, Mar L, Mar(2) L, Apr L, Apr(2) L, May W, Jun W, Jul W, Aug W.
 
-I played Sanitation Officer (char-8), exposure 0/7, no abilities, hand limit 7, home Midsea. Salvage is free: discard 2, take a city or Produce card from the discard. Options only ever listed one pair, and each pair spent a card I would not give up. I never fired it. Captain (char-7) is still unplayed. Sable still has Courier and Facilitator.
+I played Sanitation Officer (char-8), exposure 0/7, Architect in slot 0, home Midsea. Salvage is free: discard 2, take a city or Produce card from the discard. It won the game. I picked Knox and chars said char-1, but the pawn was the Officer all game. At the next lobby, pick char-8 and check the pawn before setup. Stay the Officer. Salvage plus Architect is the build engine. Captain (char-7) now has Foreman. Exposure 0/7. Job: discard any city card to move to any port on your sea route.
 
-Knox: Laborer, Helmsman, Record Keeper (limit 8), Foreman, Scout. Exposure 2/7. No open slot. Sol: Immunologist, Record Keeper, Architect, Runner. Exposure 1/7. One open slot. Immunologist Make Supplies takes from the reserve.
+Sol: Immunologist, Record Keeper, Architect, Runner, Supplier. Exposure 1/7. Hand 8. Supplier is an action: 1 cube from the reserve onto a city whose card Sol holds. Knox is benched: Helmsman, Record Keeper, Foreman, Scout. Exposure 2/7. No open slot.
 
 ## Rules that change play
 
-- Win is 3 objectives, and the starred one must be among them. A center carries over only if it was made permanent. Bogota did not. Istanbul and Atlanta did.
-- Transmit is an action from a tower city. It sends only a city card of that city's color, to anyone. A blue tower cannot send a black card.
-- Build Tower costs 2 cubes from you. Towers did not persist. A tower is cheap to rebuild. A center is not. We skipped permanent towers for that reason.
-- Architect builds with 4 cards and no cubes. Laborer is 4 cards plus 2 cubes. Duplicates count. Two Cairos and two Tripolis built Istanbul.
-- Search scratches one box and the card stays in hand.
-- Inoculate is free. Press an inf- key. Storing a player card costs the table that card.
-- An epidemic strips every cube. The infect step still happens. Quiet Night before the first flip skips that infect and leaves those cards on top.
-- Well Stocked blocks only its own card, and only at 2 or more cubes. Atlanta and Istanbul had their infection cards stored, so they cannot be infected.
-- Exposure is at the start of a turn on plague, or in an infested city. Do not end a turn in one.
-- A new city's player cards hit the discard. Its infection cards wait until next game. Open Waters draws a sea lane and ignores the one-boundary limit.
-- Transmit can push someone over the hand limit and freeze the current turn. Name the discard. `wait` returns at once. `listen` is what blocks.
-- Cairo recon is on the board only: 4 different black cards, and it wants a center. Scout ignores the center. Cairo is forsaken, so recon and leave. Lagos recon was not offered.
-- Place every setup cube. A 0% city can still hold a cache. Restore is a bad deal.
+- Rationing 0 means no rationed events. Do not ask for Quiet Night.
+- Win was 3 objectives including the starred 3 centers. A center carries over only if it was made permanent. Paris did. Frankfurt and St. Petersburg did not. A tower did not.
+- The free Architect stuck. The shop would not sell it again. Treat it as permanent.
+- Architect build key is `buildCenter:<cards>:false`. A triple card counts as 3. Two cards were enough.
+- Salvage can pull a spent triple back out of the discard. Do not inoculate a player card unless we want it gone for the year.
+- Inoculate of an infection card is free and permanent. London and Paris are fully stored. Istanbul and Atlanta were already stored.
+- Trouble list hides cities that drop to 0. Open the city. Forsaken names crowd out the real threats.
+- New cities joined mid-game put their player cards in the discard. I never saw Tehran or Riyadh get infected after they joined.
+- Leaving a city with Hollow Men exposes you. Starting a turn there does not, if there is no plague. Do not end a turn on plague or in an infested city.
+- Share still only moves the card of the city you are both in. A blue tower transmits a blue card to anyone. We had no Facilitator.
+- Cairo recon text disappeared when the Middle East opened and never returned. Check the board before chasing it.
+- Farwater completed the lost haven. Monitor was never used. Rebuild a tower if the briefing still wants it.
+- Chicago at pop 0 is forsaken and stays infested. Do not buy the restore.
 
-## Board going into August
+## Board going into September
 
-Permanent centers: Washington (pop 8), London (pop 8), Sao Paulo (pop 4), Istanbul (pop 6), Atlanta (pop 5). No towers. Shuttle reaches all five.
+Permanent centers: Washington (pop 8), London (pop 8, immune), Sao Paulo (pop 5), Istanbul (pop 7, immune), Atlanta (pop 6), Paris (pop 4, immune). No tower. Shuttle reaches those six.
 
-Farwater is linked to Northwatch and to Los Angeles. Los Angeles is pop 0, forsaken, infested.
+On the grid, no permanent center: Frankfurt (pop 3, blue), St. Petersburg (pop 2, blue), Tehran (pop 1, black, not infested), Riyadh (pop 2, black, not infested), Baghdad (pop 1, black, infested), plus the older grid. Tehran links Istanbul. Riyadh links Tehran. From Tehran the open connects are Delhi, Kolkata, and New Mumbai, all infested.
 
-On the grid, no permanent center: Bogota pop 2, Lagos pop 3, Frankfurt pop 2, Paris pop 3, New York pop 1, Chicago pop 1, Tripoli pop 1, St. Petersburg pop 1, Buenos Aires pop 1, Lima pop 1, Kinshasa pop 1 infested, Antananarivo pop 2 black port, Moscow pop 1 black.
+Still off the grid: Johannesburg (blue, pop 2, from Kinshasa), Khartoum, Dar es Salaam, Delhi, New Mumbai, Kolkata. Kinshasa to Johannesburg is still the clean connect. Buenos Aires to Dar es Salaam still crosses too many boundaries.
 
-Pop 0, forsaken, infested: Jacksonville, Denver, San Francisco, Cairo, Mexico City, Los Angeles, Santiago.
-
-Off the grid: Khartoum (yellow, infested), Dar es Salaam (yellow port, infested), Johannesburg (blue, pop 2). Johannesburg from Kinshasa is the clean connect. Buenos Aires to Dar es Salaam still needs Open Waters.
-
-Black cities for Cairo recon: Istanbul, Tripoli, Cairo, Moscow, Antananarivo.
+Pop 0, forsaken, infested: Jacksonville, Denver, San Francisco, Cairo, Mexico City, Los Angeles, Santiago, Chicago.
 
 ## How they play
 
-Vex spends units on permanent centers before abilities. He will not buy a tower, a restore, or a population bump. Name the buy keys. When Transmit overflows him, he drops a yellow.
+Vex will buy a permanent center before abilities, then a new cheap ability if the second center key fails. He left Paris for Santiago and could not transmit. Ask him to send blues before he moves. Foreman means his lines cost 1 cube fewer.
 
-Sol builds with 4 cards and will spend a city card to Runner. Name the cards that must not be eaten. Sol will also walk cubes onto a city that is about to plague.
+Sol will spend a turn armoring a city that is about to plague, and will transmit a blue from a tower. Name the card. Supplier only works for a city whose card is in the Immunologist hand.
 
 ## Next game
 
-Rationing is 2. Ask for Quiet Night and Card Swap. Add Open Waters only if the plan is a blocked sea lane.
-
-Stay the Sanitation Officer if I can salvage with two spare cards. Otherwise go back to Sable. Facilitator on the Officer is the ability to buy when a slot is the better deal than another center.
+Verify the pawn, then keep the Officer. Salvage the triple Washington or the double London rather than building from four loose cards. Inoculate a hot city before stacking cubes on it. Connect from Tehran toward the new coast only if the side objective needs it. Rebuild one tower and use Monitor if the win is not already on the table.

@@ -101,6 +101,10 @@ export function optionsFor(state: PublicState, who: Who, seating: (CharacterId |
 	const mine = game.active === who.seat;
 	if (mine) {
 		for (const action of legalActions(world, who.seat)) {
+			const tuned =
+				action.a === 'monitor'
+					? ` · frequency ${action.frequency + 1} of ${pack.frequencies.length}: the top 4 Player cards are discarded, then the frequency gives what it holds`
+					: '';
 			const stored =
 				action.a === 'inoculate'
 					? ` · this city's ${action.card in campaign.playerCards ? 'PLAYER card from the Player discard pile' : 'Infection card from the Infection discard pile'} goes into storage, out of the decks`
@@ -108,7 +112,7 @@ export function optionsFor(state: PublicState, who: Who, seating: (CharacterId |
 			add(
 				keyOf(action.a, action, 'a'),
 				action.a,
-				`${describe(state, action, 'a')}${stored}`,
+				`${describe(state, action, 'a')}${stored}${tuned}`,
 				{ type: 'ACTION', seat: who.seat, action },
 				actionCost(world, who.seat, action),
 			);

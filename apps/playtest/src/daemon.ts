@@ -269,6 +269,9 @@ async function ingest(next: PublicState, raw: string, command: Command | null, a
 	current = next;
 	currentRaw = raw;
 	observe(audit, previous, next, command);
+	// Once a game is under way the seats are whoever it started with, whatever anyone picked since.
+	if (next.world.game)
+		lab.picks = config.players.map((_, index) => next.world.game!.players[seatOf(index)]?.character ?? null);
 	if (previous) remember(previous, next, command, config.players.find(player => player.id === agent)?.name ?? null);
 	const save: Save = { v: 1, phase: next.phase, world: next.world };
 	writeFileSync(files.latest, JSON.stringify(save));
@@ -680,7 +683,10 @@ async function handle(agent: string, words: string[]): Promise<string> {
 			}
 		}
 		case 'options':
-			if (state.phase === 'upkeep' && !who.lead)
+			if (
+				(state.phase === 'upkeep' || (state.phase === 'setup.supply' && state.world.campaign.freeAbilityUnits > 0)) &&
+				!who.lead
+			)
 				return renderOptions(
 					optionsFor(state, { ...who, lead: true }, lab.picks).filter(option => option.key.startsWith('buy:')),
 					rest[0],
@@ -772,6 +778,8 @@ async function handle(agent: string, words: string[]): Promise<string> {
 			if (!parsed) return `Unknown command "${verb}".\n${HELP}`;
 			if (parsed.v === 'error') return parsed.message;
 			if (parsed.v === 'pick') {
+				if (state.phase !== 'lobby')
+					return 'REFUSED: characters are chosen in the lobby. This game has started with the seats shown in `status`.';
 				if (lab.picks.some((pick, index) => pick === parsed.character && index !== who.index))
 					return 'Another player already picked that character.';
 				lab.picks[who.index] = parsed.character;

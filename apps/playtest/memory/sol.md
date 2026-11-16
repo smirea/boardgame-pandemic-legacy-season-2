@@ -1,53 +1,57 @@
 # Memory
 
-July won on turn 13. August is next. Rationing is 2.
+August won on turn 8. September is next. Rationing is 0, so the lead picks no rationed events.
 
-I am the Immunologist, char-6, home Southreach, exposure 1/7. Record Keeper, Architect, and Runner. Hand limit 8. I build a center with 4 cards of the city's colour. The options note still says 5. The key is `buildCenter:a+b+c+d:false`. Runner discards any City card to move from a haven or supply center to anywhere on the grid. It works from a center the moment I build it. Make Supplies draws from the reserve. It was offered in Tripoli, which is not a haven or a center. I did not test that.
+I am the Immunologist, char-6, home Southreach, exposure 1/7. Record Keeper, Architect, Runner, and Supplier. Hand limit 8. The build key is `buildCenter:a+b+c+d:false`. The options note still says 5 cards. Supplier places 1 cube from the reserve on a city whose card I hold, without standing there. Runner discards a City card to move from a haven or center to anywhere on the grid. In August the list offered only one of the three City cards I held (issue 148).
 
-Knox is the Laborer with Helmsman, Record Keeper, Foreman, and Scout. Slots full. The Sanitation Officer was played and has empty slots. Her pull discards 2 cards to take a City or Produce card from the discard. Captain, char-7, has still never been played.
+The Captain was played and now has Foreman. Discard a City card to move to any port on your sea route. Foreman makes a land line cost 1 cube. It did not cheapen towers or sea lanes before. The Sanitation Officer has Architect. Her pull discards 2 cards to take a City or Produce card from the discard. The log called that salvage.
 
 ## Rules that change play
 
-A forsaken city is never infected. Its card is set aside and another card is flipped. `decks` hid those cards in July (issue 111). Do not trust a layer that names no forsaken city.
+A forsaken city is never infected. The card is set aside and another card is flipped. Do not put cubes on one. Only Drive or Ferry works there. Santiago did not offer a search. Chicago is forsaken now.
 
-One plague cube should drop that city by 1. Washington kept population 8 with a plague cube still on it (issue 124). Check Washington before I count on that.
+One plague cube did not drop Chicago during the game. It stayed population 1 with 2 plague cubes (issues 142 and 143). Game end then applied Chicago -1, once, and it is forsaken. Do not assume a plague cube changes population on the spot.
 
-Do not empty a city that still has a live card, even at 0% this infect. I stripped Washington to save Chicago. Washington then plagued. Take the cubes from a city with no live card, or make them from the reserve.
+Do not empty a live city. An epidemic strips every cube off one city, then the discard is back on top. Two cubes per live card is enough. Cities with no live card are the cache.
 
-An epidemic strips a whole stack back to the stockpile. Do not dump a safe cache onto one city. Two cubes per live card is enough.
+Well Stocked blocks only at 2 or more cubes. London was at 1 when its Well Stocked card was drawn, so the cube still came off. A Hollow Men gather card can ride along and the log says hollow instead of blocked (issues 133, 139, 140). Chicago, Washington, and Baghdad each gained a hollow man that way.
 
-Share moves only the card of the city you stand in. Transmit, from a tower, sends a card of that city's colour to anyone. Card Swap is the remote trade. Do not put an apostrophe in a `why:` or a `say`. The command never arrives.
+Do not end a turn on plague or in an infested city. Leaving a city with Hollow Men exposes you. Driving through an infested city did not. A shelter prevents both. No shelter action was offered.
 
-Well Stocked blocks only at 2 or more cubes. Do not inoculate those cards. Foundations counts as 2. Infrastructure counts as 3. A line costs 2 cubes, and 1 with Foreman. A sea lane costs 2. A tower costs 2 from the character. Foreman did not cheapen the towers we built.
+Share is only the card of the city you stand in. Transmit, from a tower, sends a card of that city's colour. The Paris tower was not made permanent, so rebuild it before you count on transmit or Monitor.
 
-Do not end a turn on plague or in an infested city. Driving through did not expose me. Search in a forsaken city is still untested. The guide says only Drive or Ferry works there.
+Monitor is new and unused. In a tower city it tunes a frequency from 0 to 9 and discards four Player cards. I do not know which frequencies pay, or whether the cards come from the hand.
 
-Open Waters is a fixed list of port pairs, not any two ports. It does include pairs the region rule blocks. Every pair is listed twice (issue 116). Surplus takes 3 from the stockpile onto me and does not ask for a count (issue 113).
+Inoculate stores the city's Player card or Infection card from a discard. Storing a Player card costs the table that card. London and Paris infections are all stored.
 
-A city that joins mid-game cannot be infected that game. Its city cards go to the player discard. Triangulate completed and then vanished from the list (issue 122). The unlock named no new action. Connect and the lost haven stayed marked done. The win was the third center, with those two already done.
+Do not put an apostrophe in a why or a say. The command never arrives.
 
-Rebirth does nothing under population 4. Cairo recon is on a forsaken city. Lagos had no recon line.
+A line costs 2 cubes, 1 with Foreman. A sea lane costs 2. A tower costs 2 from the character. Open Waters is a fixed list of port pairs, each listed twice.
+
+A city that joins mid-game cannot be infected that game. Its city cards go to the player discard.
+
+Rebirth does nothing under population 4. Cairo recon is still unmarked on the board (issue 127).
 
 ## Campaign state
 
-Permanent centers: Washington population 8, London population 8, Sao Paulo population 4, Istanbul population 6, Atlanta population 5. The lead spent all 6 units on Istanbul and Atlanta. Bogota's center was not made permanent. Bogota is population 2. The three towers were not made permanent.
+Permanent centers: Washington 8, London 8, Sao Paulo 5, Istanbul 7, Atlanta 6, Paris 4. Paris has no infection cards. The Paris tower did not stick. Frankfurt (pop 3) and St Petersburg (pop 2) had centers this game and lost them. The St Petersburg permanent key vanished after Paris was bought (issue 147).
 
-On the grid now: Moscow, linked to St. Petersburg, population 1. Antananarivo, black port, population 2, sea lane from Lagos. Farwater links to Los Angeles and to Northwatch. That second lane is the Open Waters lane.
+On the grid now: Tehran, black, pop 1, linked to Istanbul and Riyadh. Riyadh, black, pop 2, linked to Tehran.
 
-Off the grid: Khartoum and Dar es Salaam (yellow, infested), Johannesburg (blue, population 2). Kinshasa is on the grid, yellow, population 1, infested.
+Off the grid: Khartoum and Dar es Salaam (infested), Johannesburg (blue, pop 2), Delhi (infested), New Mumbai (infested port), Kolkata (infested port). Open joins: Moscow or Tehran or Riyadh to Delhi, Tehran to Kolkata or New Mumbai, Kinshasa to Johannesburg. Baghdad to New Mumbai is blocked because it would cross a line.
 
-Forsaken and infested: Jacksonville, Denver, San Francisco, Cairo, Mexico City, Los Angeles, Santiago. Do not restore one unless we must stand there. Restore costs 2 and the city stays infested.
+Forsaken and infested: Jacksonville, Denver, San Francisco, Cairo, Mexico City, Los Angeles, Santiago, Chicago. Do not restore one unless we must stand there. Restore costs 2 and the city stays infested.
 
-Population 1: Tripoli, Chicago, Lima, Buenos Aires, St. Petersburg, Moscow, Kinshasa, New York. Frankfurt is population 2. Paris is population 3. Lagos is population 3.
+Population 1: Tripoli, Lima, Buenos Aires, Moscow, Kinshasa, New York, Tehran, Baghdad. Baghdad and Kinshasa are infested.
 
-Inoculated, out of the deck: the older set, plus the live Lagos, Istanbul, St. Petersburg, and one each of Tripoli and Bogota. Atlanta's card was already stored. Kinshasa's set-aside was for July only. One Istanbul card may still be live if the inoculate did not take the last one. The London and Washington Well Stocked cards are still live.
+Inoculated, out of the deck: the older set, plus every London card and both Paris cards. Washington still has its Well Stocked card. Chicago is forsaken, so its cards are set aside when drawn.
 
 ## Next game
 
-Rationing is 2. Ask for Quiet Night and Card Swap.
+Rationing is 0. There is no Quiet Night and no Card Swap.
 
-Keep this character. Runner and Architect won the month. Someone should play Captain. It has never been in a game.
+Keep this character. Supplier is the new tool: hold the live city's card and cube it from the reserve. Someone should rebuild the Paris tower so Monitor gets used.
 
-Two more centers are not the only win, but a starred build has been the whole win when the other two objectives were already done. Do not chase a third objective once two are done and the centers are short.
+Do not chase a third objective once two are done and the centers are short. A starred build has been the whole win when the other objectives were already done.
 
-Forsaken cities get no cubes. Two cubes on a live city for each of its cards. Sao Paulo and Atlanta have no live infection cards. Park a cache there. Leave it there.
+Forsaken cities get no cubes. Two cubes on a live city for each of its cards. Park a cache on a city with no live card, and leave it there.

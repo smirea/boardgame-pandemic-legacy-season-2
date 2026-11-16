@@ -218,7 +218,7 @@ const bundles: BundleDef[] = [
 	{
 		id: bundleId('signal-hint'),
 		name: 'Signals triangulated',
-		unlocks: [{ t: 'objectives', remove: ['triangulate'] }],
+		unlocks: [{ t: 'objectives', remove: ['triangulate'] }, { t: 'frequencyHint' }],
 	},
 	{
 		id: bundleId('frequency-route'),
@@ -373,7 +373,7 @@ const legacyDeck: LegacyCardDef[] = [
 		1,
 		'pause',
 		'August',
-		'Perimeter report on the Middle East. Monitor is available. Spend up to 2 free units on abilities this game end.',
+		'Perimeter report on the Middle East. Monitor is available. Spend up to 2 free units on abilities now, during setup. What is not spent then can still be spent at this game end.',
 		[perimeter('middle-east'), { t: 'action', action: 'monitor' }, { t: 'freeAbilityUnits', amount: 2 }],
 	),
 	card(8, 2, 'stop', 'Hard lessons', 'New scars and new abilities.', [

@@ -266,6 +266,8 @@ export function applyUnlock(world: World, unlock: Unlock) {
 		case 'owedScar':
 			campaign.owedScars += 1;
 			return;
+		case 'frequencyHint':
+			return;
 		case 'open':
 			return openBundle(world, unlock.bundle, false);
 		case 'perimeter':
@@ -356,6 +358,16 @@ function unlockLine(campaign: Campaign, unlock: Unlock): string | null {
 		}
 		case 'rule':
 			return RULE_BRIEFS[unlock.rule] ?? null;
+		case 'frequencyHint': {
+			const worth = pack.frequencies.flatMap((reward, index) => (reward && 'bundle' in reward ? [index + 1] : []));
+			return `The bearings cross on three Monitor frequencies that open something new: ${worth.join(', ')}. The other seven only return cards.`;
+		}
+		case 'gather':
+			return `Hollow Men: ${unlock.cards} Gather cards join the Infection cards. They start each game in the discard pile and enter the deck with the first Epidemic. When one is flipped, the next city flipped gets a Hollow Man and is not infected. Leaving a location that holds Hollow Men exposes a character.`;
+		case 'assemble':
+			return `Hollow Men: ${unlock.cards} Assemble cards join the Infection cards.`;
+		case 'freeAbilityUnits':
+			return `${unlock.amount} free production units for character abilities: spend them now, during setup, on abilities that last all year.`;
 		case 'stockpileBonus':
 			return `The stockpile grows by ${unlock.amount} cubes now and at every later setup.`;
 		case 'permanentStructure':

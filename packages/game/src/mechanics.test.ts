@@ -1639,3 +1639,47 @@ describe('found in July', () => {
 		expect(world.campaign.briefing).toContain('Objectives leaving play: Triangulate signals.');
 	});
 });
+
+describe('found in August', () => {
+	test('the Captain and the Runner may discard any City card, not only the first in hand', () => {
+		const actor = late((world, game) => {
+			character(world, A).job = 'captain';
+			character(world, A).slots[1] = { kind: 'ability', id: 'runner' };
+			give(world, A, [...cityCards(world, 'cairo', 1), ...cityCards(world, 'lagos', 1)]);
+			game.players[A]!.location = city('haven-mediterranean');
+		});
+		const offered = legalActions(worldOf(actor), A);
+		const cards = (kind: 'captainSail' | 'run') =>
+			new Set(offered.flatMap(action => (action.a === kind ? [action.card] : []))).size;
+		expect(cards('captainSail')).toBe(2);
+		expect(cards('run')).toBe(2);
+	});
+
+	test('a flipped Hollow Men card is logged, and the next city gets a Hollow Man without being infected', () => {
+		const actor = late((world, game) => {
+			const gather = Object.values(world.campaign.infectionCards).find(card => card.kind === 'gather')!.id;
+			stackInfection(world, ['cairo']);
+			game.infectionDeck.order = [gather, ...game.infectionDeck.order.filter(card => card !== gather)];
+			game.infectionDeck.strata = [game.infectionDeck.order.toSorted()];
+			game.infectionDiscard = game.infectionDiscard.filter(card => card !== gather);
+			game.actionsLeft = 0;
+			game.infectionsLeft = 1;
+		}, 'playing.infect');
+		const cubes = gameOf(actor).locations[city('cairo')]!.supplies;
+		send(actor, { type: 'INFECT' });
+		expect(
+			gameOf(actor).log.some(entry => entry.t === 'note' && entry.text.startsWith('A Hollow Men card was flipped')),
+		).toBe(true);
+		expect(gameOf(actor).locations[city('cairo')]).toMatchObject({ supplies: cubes, hollow: 1 });
+	});
+
+	test('triangulating the signals names the three frequencies that open something', () => {
+		const world = JSON.parse(JSON.stringify(worldOf(late()))) as World;
+		world.campaign.briefing = [];
+		world.campaign.opened = world.campaign.opened.filter(id => id !== 'signal-hint');
+		openBundle(world, 'signal-hint' as never, false);
+		expect(world.campaign.briefing).toContain(
+			'The bearings cross on three Monitor frequencies that open something new: 4, 5, 10. The other seven only return cards.',
+		);
+	});
+});

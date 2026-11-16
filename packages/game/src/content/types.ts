@@ -237,6 +237,8 @@ export type Unlock =
 	| { t: 'forsake'; city: CityId }
 	/** A scar the group must place on a character of its choice when the next game begins. */
 	| { t: 'owedScar' }
+	/** Tells the group which Monitor frequencies open something, the reward for triangulating the signals. */
+	| { t: 'frequencyHint' }
 	| { t: 'open'; bundle: BundleId }
 	/** Forced opening: the explorer's reward is lost and the recon does not count toward an objective. */
 	| { t: 'perimeter'; bundle: BundleId; penalty?: Unlock[] };

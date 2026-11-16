@@ -86,7 +86,7 @@ function troubleLines(world: World): string[] {
 	const rows: { city: CityId; weight: number; text: string }[] = [];
 	for (const city of onGrid) {
 		const location = game.locations[city]!;
-		if (cityDef(city).kind !== 'city') continue;
+		if (cityDef(city).kind !== 'city' || isForsaken(world.campaign, city)) continue;
 		const chance = odds[city] ?? 0;
 		if (location.supplies > 0 && location.plague === 0 && location.hollow === 0) continue;
 		const parts = [
@@ -94,18 +94,21 @@ function troubleLines(world: World): string[] {
 			location.plague ? `PLAGUE ${location.plague}` : null,
 			location.hollow ? `hollow men ${location.hollow}` : null,
 			location.shelter ? 'shelter' : null,
-			isForsaken(world.campaign, city) ? 'forsaken' : null,
-			chance ? `${pct(chance)} hit next infect` : null,
+			`${pct(chance)} hit next infect`,
 		].filter(Boolean);
 		rows.push({
 			city,
-			weight: chance * (location.supplies === 0 ? 2 : 1) + location.plague + location.hollow * 0.2,
+			weight:
+				chance * (location.supplies === 0 ? 2 : 1) +
+				location.plague +
+				location.hollow * 0.2 +
+				(location.supplies === 0 ? 0.5 : 0),
 			text: `  ${cityName(world, city)} (${city}): ${parts.join(', ')}`,
 		});
 	}
 	rows.sort((a, b) => b.weight - a.weight);
 	return rows.length
-		? ['Trouble spots (no cubes, plague, or Hollow Men), worst first:', ...rows.slice(0, 14).map(row => row.text)]
+		? ['Trouble spots (no cubes, plague, or Hollow Men), worst first:', ...rows.slice(0, 22).map(row => row.text)]
 		: [];
 }
 
@@ -214,7 +217,7 @@ function renderSetup(state: PublicState): string[] {
 		const lines = [
 			...(free
 				? [
-						`FREE ABILITY UNITS: ${free} to spend on character abilities right now (\`options buy\`). They cover this game.`,
+						`FREE ABILITY UNITS: ${free} to spend on character abilities right now (\`options buy\`). An ability bought now is permanent, like any other, and is in play this game.`,
 					]
 				: []),
 			`Supply setup: ${game.stockpile} cubes left to place. Cities with no cubes take a Plague cube when infected.`,

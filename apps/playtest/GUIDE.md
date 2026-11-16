@@ -48,7 +48,9 @@ A city may hold more cubes than its population. Population only caps Produce Sup
 
 So supply cubes are armour. Your main job between objectives is keeping cubes on the cities most likely to be hit. `status` lists the trouble spots with their odds.
 
-**Each game starts clean.** The infection rate, the incident track and the decks all reset every game. Only what the year made permanent carries over.
+**Each game starts clean.** The infection rate, the incident track, the decks, and every cube, Plague cube and Hollow Man on the board all reset every game. Only what the year made permanent carries over. Plague cubes and Hollow Men lower a city's population at game end, not when they land.
+
+**Hollow Men.** Once they arrive, their Gather cards start each game in the Infection discard pile and enter the deck with the first Epidemic. When one is flipped, the next city flipped gets a Hollow Man and is not infected. Leaving a location that holds Hollow Men exposes your character.
 
 **Hand limit** is 7. Over it, you must discard, and the game waits until you do, even on another player's turn. `wait` tells you when that is you.
 
@@ -82,7 +84,7 @@ Event cards and companions in your hand are played with `play:...` keys at any t
 
 ## Between games
 
-After a game ends the lead opens the game-end step. Cities change population. The group gets production units to spend on upgrades that last all year: abilities for characters, improved cards, more population, and later in the year permanent structures. `options buy` lists what is for sale, for every player. Restore appears only when a city has dropped to population 0. Tell the lead what you want and why.
+After a game ends the lead opens the game-end step. Cities change population. The group gets production units to spend on upgrades that last all year: abilities for characters, improved cards, more population, and later in the year permanent structures. `options buy` lists what is for sale, for every player. Restore appears only when a city has dropped to population 0. At most 6 supply centers can be permanent, and the option disappears once they are. Tell the lead what you want and why.
 
 ## What we need from you
 

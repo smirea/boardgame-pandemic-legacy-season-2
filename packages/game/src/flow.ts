@@ -334,6 +334,10 @@ function drawInfectionCard(world: World, end: 'top' | 'bottom'): (DrawnCity & { 
 			game.infectionDiscard.push(id);
 			if (end === 'bottom') return null;
 			gathers += 1;
+			log(game, {
+				t: 'note',
+				text: 'A Hollow Men card was flipped: the next city gets a Hollow Man and is not infected',
+			});
 			continue;
 		}
 		if (isForsaken(campaign, card.city)) {

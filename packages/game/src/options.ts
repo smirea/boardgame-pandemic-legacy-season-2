@@ -105,7 +105,7 @@ export function legalActions(world: World, seat: SeatId): Action[] {
 	const ticket = held.find(card => card.city === here);
 	for (const to of ports) {
 		if (ticket) candidates.push({ a: 'charter', card: ticket.id, to });
-		if (held[0]) candidates.push({ a: 'captainSail', card: held[0].id, to });
+		for (const card of held) candidates.push({ a: 'captainSail', card: card.id, to });
 	}
 	for (const id of hand) {
 		if (campaign.playerCards[id]?.kind !== 'produce') continue;
@@ -188,7 +188,7 @@ export function legalActions(world: World, seat: SeatId): Action[] {
 		for (const take of cityCards(world, game.playerDiscard))
 			candidates.push({ a: 'investigate', card: card.id, take: take.id });
 	}
-	if (held[0]) for (const to of grid(campaign)) candidates.push({ a: 'run', card: held[0].id, to });
+	for (const card of held) for (const to of grid(campaign)) candidates.push({ a: 'run', card: card.id, to });
 	for (const other of others)
 		for (const card of player(game, other).hand) candidates.push({ a: 'facilitate', with: other, card });
 

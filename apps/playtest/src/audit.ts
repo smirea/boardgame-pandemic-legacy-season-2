@@ -99,9 +99,16 @@ function setupChecks(world: World, supplies: number): Check[] {
 		const objective = pack.objectives.find(candidate => candidate.id === id);
 		return objective?.reward && !objective.mandatory;
 	});
+	// The reverse also holds: one this group completed early has left play, while the research group still had it.
+	const retired = (id: string) => {
+		const objective = pack.objectives.find(candidate => candidate.id === id);
+		return Boolean(objective?.reward && !objective.mandatory && campaign.opened.includes(objective.reward));
+	};
 	const expected = [
 		...new Set([
-			...month.objectives.map(objective => TIMELINE_OBJECTIVES[objective.id] ?? `?${objective.id}`),
+			...month.objectives
+				.map(objective => TIMELINE_OBJECTIVES[objective.id] ?? `?${objective.id}`)
+				.filter(id => !retired(id)),
 			...lingering,
 		]),
 	].sort();

@@ -419,5 +419,59 @@
 				"fix": "The supply center's gain cancels the loss. Only Drive or Ferry works in a forsaken city."
 			}
 		]
+	},
+	"g09": {
+		"summary": "Won on turn 8 with two incidents. The Middle East was forced open and the first Hollow Men appeared.",
+		"story": "Vex led with the Captain, the other of June's new characters, beside the Immunologist and the Sanitation Officer. August's perimeter report opened the Middle East and brought four Hollow Men Gather cards, the Monitor action, and two free units for abilities, which the lead spent at setup on Architect. A pawn stepped into Farwater for the lost haven. The Immunologist stored both of London's and both of Paris's Infection cards, raised a tower in Paris and searched it. Supply lines from Istanbul to Tehran and on to Riyadh completed Connect 2 new cities, and centers in Paris, Frankfurt and St. Petersburg ended it. Along the way the first Hollow Man arrived, in Chicago, flipped in by a Gather card.",
+		"highlights": [
+			"Fourth win in a row, in eight turns.",
+			"First Hollow Men of the year: a Gather card turned Chicago's infection into a Hollow Man.",
+			"Third forced opening: the Middle East, with Baghdad joined at once.",
+			"August's free ability units were spent at setup, the fix made from the static review.",
+			"First Captain. Game end: card 08-02 added scars and abilities; the table made Paris's center permanent, the sixth and last allowed, and bought Supplier and Foreman. Rationing drops to 0 for September."
+		],
+		"parity": "Three checks passed and one differed for a good reason. The research lists Triangulate signals among August's objectives, because the group it follows had not completed it. This group completed it in July, so it had left play. The audit now allows for that. Supplies were 15 + 15 lab bonus = 30, with the relief over. Card 08-01 was read at setup and forced the Middle East on its researched month, with Monitor and the free units. Card 08-02 was read at game end. Gather cards started in the Infection discard pile and turned the next city's flip into a Hollow Man, both as researched.",
+		"findings": [
+			{
+				"finding": "The Captain and the Runner could only discard the first City card in hand.",
+				"kind": "Engine bug",
+				"fix": "Any City card is offered. Test added."
+			},
+			{
+				"finding": "Hollow Men arrived with no explanation: Gather cards sat in the discard pile unannounced, and a city gained a Hollow Man where a cube loss was expected.",
+				"kind": "Engine gap",
+				"fix": "The briefing explains Gather cards when they arrive, and the log says when one is flipped. Test added."
+			},
+			{
+				"finding": "Triangulating the signals in July gave nothing, though September's mandatory recon route is behind one of ten Monitor frequencies.",
+				"kind": "Engine gap, declared earlier as not modelled",
+				"fix": "Completing Triangulate now names the three frequencies that open something. The players were told the three for this run. Test added."
+			},
+			{
+				"finding": "August's card said the free ability units are spent at game end, while the game offered them at setup.",
+				"kind": "Wording",
+				"fix": "The card says now, during setup. The lab says an ability bought then is permanent, and shows the offer to every player."
+			},
+			{
+				"finding": "A player ran `pick` after the game had started, and the lab then showed the wrong character against that seat.",
+				"kind": "Lab bug",
+				"fix": "Picking is refused outside the lobby, and seats always follow the game."
+			},
+			{
+				"finding": "The trouble list filled with forsaken cities and left out empty live ones.",
+				"kind": "Lab bug",
+				"fix": "Forsaken cities are left out and every empty city is listed."
+			},
+			{
+				"finding": "After Paris was made permanent, the other permanent center options vanished.",
+				"kind": "Not a bug",
+				"fix": "Six permanent supply centers is the limit. The guide now says so."
+			},
+			{
+				"finding": "A city at population 1 took Plague cubes without becoming forsaken. A search card could not be used in a forsaken city.",
+				"kind": "Not a bug",
+				"fix": "Population changes at game end. Only Drive or Ferry works in a forsaken city."
+			}
+		]
 	}
 }
