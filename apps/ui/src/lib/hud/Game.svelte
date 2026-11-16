@@ -2,11 +2,12 @@
 	import { insights, isForsaken, legalActions, legalDecides, legalPlays, onGrid, pack, scenarios } from '@repo/game';
 	import type { Action, CardId, CityId, Command, EdgeDef, Play, SeatId } from '@repo/game';
 	import Board from '#lib/board/Board.svelte';
-	import type { BoardView, CityView, Fx, FxKind, Travel } from '#lib/board/types.ts';
+	import type { BoardMarks, BoardView, CityView, Fx, FxKind, Travel } from '#lib/board/types.ts';
 	import type { SessionView } from '#lib/session/session.svelte.ts';
 	import { inkOn } from '#lib/color.ts';
 	import { LS } from '#lib/storage.ts';
 	import { untrack } from 'svelte';
+	import type { Snippet } from 'svelte';
 	import { backOut } from 'svelte/easing';
 	import { fade, fly, scale } from 'svelte/transition';
 	import Dock from './Dock.svelte';
@@ -29,8 +30,22 @@
 	import TopBar from './TopBar.svelte';
 	import Upkeep from './Upkeep.svelte';
 
-	// A spectator owns no seat, whatever this browser claimed in a live game. Replays use it.
-	let { session, spectator = false }: { session: SessionView; spectator?: boolean } = $props();
+	// A spectator owns no seat, whatever this browser claimed in a live game. Replays use it, and draw their own
+	// players and step marks over the board, so the panels a player acts from stay out of the way.
+	let {
+		session,
+		spectator = false,
+		marks,
+		announce = true,
+		children,
+	}: {
+		session: SessionView;
+		spectator?: boolean;
+		marks?: BoardMarks;
+		/** False when a spectator jumped rather than stepped, so the events in between are not announced. */
+		announce?: boolean;
+		children?: Snippet;
+	} = $props();
 
 	const snap = $derived(session.state!);
 	const world = $derived(snap.world);
@@ -274,7 +289,20 @@
 	$effect(() => {
 		const log = game?.log ?? [];
 		const newest = log.at(-1)?.seq ?? 0;
-		if (newest < lastSeq) lastSeq = 0;
+		// A spectator jumping through a recording skips over events rather than living through each one at once,
+		// and what was announced where they jumped from no longer applies.
+		const jumped = spectator && (newest < lastSeq || !untrack(() => announce));
+		if (newest < lastSeq) lastSeq = spectator ? newest : 0;
+		if (jumped) {
+			lastSeq = newest;
+			untrack(() => {
+				toasts = [];
+				banner = null;
+				turnBanner = null;
+				fx = [];
+			});
+			return;
+		}
 		const fresh = log.filter(entry => entry.seq > lastSeq);
 		if (fresh.length === 0) return;
 		lastSeq = newest;
@@ -388,6 +416,7 @@
 				...point,
 			})),
 			fx,
+			marks,
 		};
 	});
 
@@ -445,7 +474,7 @@
 
 <svelte:window onkeydown={onkey} />
 
-<div class="game" class:spectator>
+<div class="game">
 	<TopBar
 		{snap}
 		{info}
@@ -459,19 +488,12 @@
 	<main class="stage" bind:this={stage}>
 		<Board view={boardView} oncity={clickCity} onpointer={point => session.pointer(point)} {resetView} {covered} />
 
-		{#if game && snap.phase !== 'upkeep'}
+		{#if game && snap.phase !== 'upkeep' && !spectator}
 			<aside class="left" bind:this={leftPanel}>
-				<PlayersPanel
-					{world}
-					{mine}
-					solo={solo || spectator}
-					{viewing}
-					onview={seat => (viewing = seat)}
-					onclaim={claim}
-				/>
+				<PlayersPanel {world} {mine} {solo} {viewing} onview={seat => (viewing = seat)} onclaim={claim} />
 			</aside>
 		{/if}
-		{#if game && info && snap.phase !== 'upkeep'}
+		{#if game && info && snap.phase !== 'upkeep' && !spectator}
 			<aside class="right" bind:this={rightPanel}>
 				<InsightsPanel
 					{world}
@@ -613,7 +635,8 @@
 		{/if}
 
 		{#if campaign.briefing.length && briefingRead !== campaign.briefing.join('|')}
-			<div class="scrim" transition:fade={{ duration: 200 }}>
+			<!-- A spectator reads the briefing beside the board instead of in front of it, so what was just revealed stays in view. -->
+			<div class="scrim" class:passive={spectator} transition:fade={{ duration: 200 }}>
 				<div class="briefing" in:fly={{ y: 24, duration: 300 }}>
 					<h2>New this game</h2>
 					<ul>
@@ -637,6 +660,8 @@
 		{:else if snap.phase === 'upkeep'}
 			<div class="scrim" transition:fade={{ duration: 200 }}><Upkeep {snap} {send} /></div>
 		{/if}
+
+		{@render children?.()}
 
 		{#if menu}
 			<div class="menu" transition:scale={{ start: 0.92, duration: 180, opacity: 0 }}>
@@ -671,7 +696,7 @@
 		{/if}
 	</main>
 
-	{#if game && snap.phase !== 'upkeep'}
+	{#if game && snap.phase !== 'upkeep' && !spectator}
 		<Dock
 			{snap}
 			{canAct}
@@ -701,12 +726,6 @@
 		font-family: var(--font-ui);
 		font-variant-numeric: tabular-nums;
 		overflow: hidden;
-	}
-
-	/* A spectator watches: the buttons that move the game on are not theirs to press. */
-	.game.spectator :global(footer .turn button),
-	.game.spectator :global(footer .setup button) {
-		display: none;
 	}
 
 	.stage {
@@ -1167,6 +1186,24 @@
 		place-items: center;
 		padding: 1rem;
 		background: rgb(12 10 8 / 0.62);
+	}
+
+	.scrim.passive {
+		place-items: start center;
+		padding-top: 3.2rem;
+		background: none;
+		pointer-events: none;
+	}
+
+	.scrim.passive .briefing {
+		width: min(26rem, 90vw);
+		padding: 0.9rem 1.1rem 0.9rem;
+		pointer-events: auto;
+	}
+
+	.scrim.passive .briefing ul {
+		max-height: 30vh;
+		font-size: 0.85rem;
 	}
 
 	.briefing {

@@ -8,6 +8,7 @@
 	import type { PerspectiveCamera } from 'three';
 	import type { OrbitControls as OrbitControlsImpl } from 'three/examples/jsm/controls/OrbitControls.js';
 	import CityMarker from './CityMarker.svelte';
+	import Flags from './Flags.svelte';
 	import { loadChart } from './chartLoader';
 	import { DEFAULT_TILT, fitBoard } from './fit';
 	import Fog from './Fog.svelte';
@@ -17,8 +18,10 @@
 	import type { BoardBounds, BoardPoint } from './projection';
 	import Pulse from './Pulse.svelte';
 	import RemoteCursor from './RemoteCursor.svelte';
+	import Ring from './Ring.svelte';
 	import { routeBow } from './routes';
 	import RouteTube from './RouteTube.svelte';
+	import Trail from './Trail.svelte';
 	import type { BoardView } from './types';
 
 	type Props = {
@@ -149,6 +152,11 @@
 			})),
 		),
 	);
+	const flagsByCity = $derived.by(() => {
+		const map = new Map<CityId, NonNullable<BoardView['marks']>['flags']>();
+		for (const flag of view.marks?.flags ?? []) map.set(flag.city, [...(map.get(flag.city) ?? []), flag]);
+		return [...map];
+	});
 	const pawnSlots = $derived.by(() => {
 		const perCity = new Map<CityId, number>();
 		return view.pawns.map(pawn => {
@@ -241,6 +249,24 @@
 
 {#each view.cursors as cursor (cursor.id)}
 	<RemoteCursor {cursor} />
+{/each}
+
+{#each view.marks?.rings ?? [] as ring (`${ring.city}:${ring.color}`)}
+	<Ring at={layout[ring.city]!} color={ring.color} />
+{/each}
+
+{#each view.marks?.trails ?? [] as trail (trail.id)}
+	<Trail
+		from={layout[trail.from]!}
+		to={layout[trail.to]!}
+		color={trail.color}
+		travel={trail.travel}
+		fresh={trail.fresh}
+	/>
+{/each}
+
+{#each flagsByCity as [city, flags] (city)}
+	<Flags at={layout[city]!} {flags} />
 {/each}
 
 {#each view.fx as fx (fx.id)}

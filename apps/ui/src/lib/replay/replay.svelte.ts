@@ -1,5 +1,8 @@
 import { framesOf, pack, parseRecord } from '@repo/game';
-import type { Command, GameRecord, PublicState, RecordNote, World } from '@repo/game';
+import type { CityId, Command, GameRecord, PublicState, RecordNote, SeatId, World } from '@repo/game';
+import type { BoardMarks, MarkTone } from '#lib/board/types.ts';
+import { beatOf } from './beats.ts';
+import type { Beat, Mark, Moment } from './beats.ts';
 
 export type { GameNotes, IndexGame, ReplayIndex } from '@repo/game';
 import {
@@ -13,6 +16,7 @@ import {
 	MONTHS,
 	playGroup,
 	purchaseLabel,
+	SEAT_COLORS,
 	seatName,
 } from '#lib/hud/labels.svelte.ts';
 import type { SessionView } from '#lib/session/session.svelte.ts';
@@ -150,18 +154,109 @@ export type TimelineStep = {
 	/** What the game logged because of this step. */
 	results: { tone: string; text: string }[];
 	/** What was said or noted since the step before, which is the thinking behind this one. */
-	notes: RecordNote[];
+	notes: SaidNote[];
+	beat: Beat;
 };
 
-export type Loaded = { record: GameRecord; frames: PublicState[]; timeline: TimelineStep[]; trailing: RecordNote[] };
+/** A note placed on the frame it was said at: the one just before the step it led to. */
+export type SaidNote = RecordNote & { frame: number; key: number };
+
+/** Someone at the table: the player, the character they played this game, and the colour of its pawn. */
+export type CastMember = { name: string; seat: SeatId | null; color: string };
+
+export type PanelTab = 'timeline' | 'notes' | 'games';
+
+export type Marker = { frame: number; kind: Moment | 'turn'; label: string };
+
+export type Loaded = {
+	record: GameRecord;
+	frames: PublicState[];
+	timeline: TimelineStep[];
+	trailing: SaidNote[];
+	notes: SaidNote[];
+	cast: CastMember[];
+	markers: Marker[];
+};
+
+const NEUTRAL = '#8a9aa8';
+const DANGER = '#cf5b3e';
+const HOLLOW = '#a68bc0';
+
+/**
+ * Who played which seat. A step names the player who sent it and its command names the seat, so the
+ * recording says it; a run's list of games fills in anyone who never acted, in seat order. A seat nobody
+ * claimed, as in a game played on one screen, goes by its character's name.
+ */
+function castOf(record: GameRecord, frames: PublicState[], timeline: TimelineStep[], seated: string[]): CastMember[] {
+	const dealt = frames.find(frame => frame.world.game)?.world;
+	const seats = dealt?.game?.seats ?? [];
+	const votes = new Map<string, Map<SeatId, number>>();
+	for (const step of record.steps) {
+		const command = step.command;
+		if (!step.by || !command || !('seat' in command) || typeof command.seat !== 'string') continue;
+		const tally = votes.get(step.by) ?? new Map<SeatId, number>();
+		tally.set(command.seat, (tally.get(command.seat) ?? 0) + 1);
+		votes.set(step.by, tally);
+	}
+	const seatOf = new Map<string, SeatId>();
+	for (const [name, tally] of votes) seatOf.set(name, [...tally].toSorted((a, b) => b[1] - a[1])[0]![0]);
+	for (const [index, name] of seated.entries()) if (!seatOf.has(name) && seats[index]) seatOf.set(name, seats[index]);
+	const names = [...seated];
+	for (const entry of [...timeline, ...record.notes]) if (entry.by && !names.includes(entry.by)) names.push(entry.by);
+	const claimed = new Set(seatOf.values());
+	for (const seat of seats)
+		if (!claimed.has(seat)) {
+			const name = seatName(dealt!, seat);
+			seatOf.set(name, seat);
+			if (!names.includes(name)) names.push(name);
+		}
+	return names
+		.map(name => {
+			const seat = seatOf.get(name) ?? null;
+			const at = seat ? seats.indexOf(seat) : -1;
+			return {
+				name,
+				seat,
+				color: at >= 0 ? SEAT_COLORS[at]! : NEUTRAL,
+				order: at >= 0 ? at : 10 + names.indexOf(name),
+			};
+		})
+		.toSorted((a, b) => a.order - b.order)
+		.map(({ name, seat, color }) => ({ name, seat, color }));
+}
+
+const MOMENT_LABEL: Record<Moment, string> = {
+	epidemic: 'Epidemic',
+	incident: 'Incident',
+	objective: 'Objective complete',
+	reveal: 'Region revealed',
+	death: 'A character dies',
+	end: 'Game over',
+};
+
+function markersOf(timeline: TimelineStep[]): Marker[] {
+	const markers: Marker[] = [];
+	let turn = 0;
+	for (const step of timeline) {
+		if (step.turn !== turn && step.turn > 0)
+			markers.push({ frame: step.frame, kind: 'turn', label: `Turn ${step.turn}` });
+		turn = step.turn;
+		for (const moment of step.beat.moments) {
+			const hit = step.beat.marks.find(mark => mark.k === 'hit' && mark.hit === moment);
+			const where = hit && hit.k === 'hit' ? ` in ${cityName(hit.city)}` : '';
+			markers.push({ frame: step.frame, kind: moment, label: `${MOMENT_LABEL[moment]}${where}, turn ${step.turn}` });
+		}
+	}
+	return markers;
+}
 
 /** Plays the whole recording once and lays it out as a timeline with each note under the step it led to. */
-export function load(raw: unknown): Loaded {
+export function load(raw: unknown, seated: string[] = []): Loaded {
 	const record = parseRecord(typeof raw === 'string' ? JSON.parse(raw) : raw);
 	const frames = framesOf(record);
-	const notes = record.notes.toSorted((a, b) => a.at - b.at);
+	const notes = record.notes.toSorted((a, b) => a.at - b.at).map((note, key) => ({ ...note, frame: 0, key }));
 	let next = 0;
-	const timeline = record.steps.map((step, index) => {
+	const timeline = record.steps.map((step, index): TimelineStep => {
 		const before = frames[index]!;
 		const after = frames[index + 1]!;
 		const label = commandLabel(before.world, step.command);
@@ -173,8 +268,11 @@ export function load(raw: unknown): Loaded {
 				const line = logLine(after.world, entry);
 				return line ? [line] : [];
 			});
-		const mine: RecordNote[] = [];
-		while (next < notes.length && notes[next]!.at <= step.at) mine.push(notes[next++]!);
+		const mine: SaidNote[] = [];
+		while (next < notes.length && notes[next]!.at <= step.at) {
+			notes[next]!.frame = index;
+			mine.push(notes[next++]!);
+		}
 		return {
 			frame: index + 1,
 			at: step.at,
@@ -183,7 +281,128 @@ export function load(raw: unknown): Loaded {
 			turn: after.world.game?.turn ?? 0,
 			results,
 			notes: mine,
+			beat: beatOf(before, after, step.command),
 		};
 	});
-	return { record, frames, timeline, trailing: notes.slice(next) };
+	const trailing = notes.slice(next);
+	for (const note of trailing) note.frame = record.steps.length;
+	return {
+		record,
+		frames,
+		timeline,
+		trailing,
+		notes,
+		cast: castOf(record, frames, timeline, seated),
+		markers: markersOf(timeline),
+	};
+}
+
+const plural = (count: number, word: string) => `${count} ${word}${count === 1 ? '' : 's'}`;
+const STRUCTURE_NAMES = { center: 'Supply center', tower: 'Tower', shelter: 'Shelter' } as const;
+const HIT_NAMES = {
+	infect: 'Infected',
+	plague: 'Plague cube',
+	outbreak: 'Outbreak',
+	epidemic: 'Epidemic',
+	incident: 'Incident',
+	hollow: 'Hollow Men',
+	blocked: 'Infection held off',
+} as const;
+
+/** What a step's flag says at one city. Cubes an infection took are said by the infection's own flag. */
+function flagsOf(step: TimelineStep): BoardMarks['flags'] {
+	const flags: BoardMarks['flags'] = [];
+	const marks = step.beat.marks;
+	const hitAt = (city: CityId) => marks.some(mark => mark.k === 'hit' && mark.city === city);
+	const lost = (city: CityId) =>
+		marks.find(mark => mark.k === 'cubes' && mark.city === city && mark.kind === 'supply' && mark.delta < 0);
+	const add = (city: CityId, text: string, tone: MarkTone) =>
+		flags.push({ id: `${step.frame}:${flags.length}`, city, text, tone });
+	for (const mark of marks) {
+		if (mark.k === 'cubes') {
+			// The infection's own flag already says what it did to the city.
+			if (mark.delta < 0 && mark.kind === 'supply' && hitAt(mark.city)) continue;
+			if (mark.delta > 0 && mark.kind !== 'supply' && hitAt(mark.city)) continue;
+			const size = Math.abs(mark.delta);
+			if (mark.kind === 'supply')
+				add(mark.city, `${mark.delta > 0 ? '+' : '−'}${plural(size, 'supply cube')}`, mark.delta > 0 ? 'good' : 'ink');
+			else if (mark.kind === 'plague')
+				add(mark.city, `${mark.delta > 0 ? '+' : '−'}${plural(size, 'plague cube')}`, mark.delta > 0 ? 'bad' : 'good');
+			else
+				add(
+					mark.city,
+					mark.delta > 0 ? `+${plural(size, 'Hollow Man')}` : `−${plural(size, 'Hollow Man')}`,
+					mark.delta > 0 ? 'hollow' : 'good',
+				);
+		} else if (mark.k === 'build') add(mark.city, `${STRUCTURE_NAMES[mark.structure]} built`, 'good');
+		else if (mark.k === 'route') add(mark.b, mark.kind === 'sea' ? 'Sea lane charted' : 'Supply line built', 'good');
+		else if (mark.k === 'hit') {
+			const taken = lost(mark.city);
+			const tone = mark.hit === 'blocked' ? 'ink' : mark.hit === 'hollow' ? 'hollow' : 'bad';
+			add(
+				mark.city,
+				`${HIT_NAMES[mark.hit]}${taken && taken.k === 'cubes' ? `, −${plural(-taken.delta, 'cube')}` : ''}`,
+				tone,
+			);
+		} else if (mark.k === 'spot') {
+			if (mark.spot === 'connected') add(mark.city, 'Joins the grid', 'good');
+			else if (mark.spot === 'search') add(mark.city, 'Searched', 'warn');
+			else if (mark.spot === 'death') add(mark.city, 'A character dies here', 'bad');
+			else if (mark.spot === 'target') add(mark.city, targetText(step), 'ink');
+		}
+	}
+	const seen = new Set<string>();
+	return flags.filter(flag => !seen.has(`${flag.city}:${flag.text}`) && seen.add(`${flag.city}:${flag.text}`));
+}
+
+/** The step's own label names the action. The flag keeps it short and drops the detail in brackets. */
+function targetText(step: TimelineStep): string {
+	const text = step.text.replace(/\s*\(.*\)$/, '');
+	return text.length > 28 ? `${text.slice(0, 27)}…` : text;
+}
+
+function ringColor(mark: Mark, actor: string | null): string | null {
+	if (mark.k === 'hit') return mark.hit === 'hollow' ? HOLLOW : mark.hit === 'blocked' ? (actor ?? NEUTRAL) : DANGER;
+	if (mark.k === 'spot' && mark.spot === 'revealed') return null;
+	if (mark.k === 'spot' && mark.spot === 'death') return DANGER;
+	return actor ?? NEUTRAL;
+}
+
+/** Everything drawn over the board at one frame: this step's marks, and the path its character took earlier this turn. */
+export function marksAt(loaded: Loaded, frame: number): BoardMarks {
+	const step = loaded.timeline[frame - 1];
+	if (!step) return { trails: [], rings: [], flags: [] };
+	const world = loaded.frames[frame]!.world;
+	const colorOf = (seat: SeatId | null) => {
+		const at = seat ? (world.game?.seats.indexOf(seat) ?? -1) : -1;
+		return at >= 0 ? SEAT_COLORS[at]! : null;
+	};
+	const actor = colorOf(step.beat.seat);
+	const trails: BoardMarks['trails'] = [];
+	for (let back = frame - 1; back >= 0; back--) {
+		const earlier = loaded.timeline[back]!;
+		if (earlier.turn !== step.turn) break;
+		for (const [index, mark] of earlier.beat.marks.entries())
+			if (mark.k === 'trail')
+				trails.push({
+					id: `${earlier.frame}:${index}`,
+					from: mark.from,
+					to: mark.to,
+					color: colorOf(mark.seat) ?? NEUTRAL,
+					travel: mark.travel,
+					fresh: earlier === step,
+				});
+	}
+	const rings = new Map<CityId, string>();
+	for (const mark of step.beat.marks) {
+		const color = ringColor(mark, actor);
+		const city = mark.k === 'trail' ? mark.to : mark.k === 'route' ? mark.b : mark.city;
+		if (color && !rings.has(city)) rings.set(city, color);
+		if (mark.k === 'route' && color && !rings.has(mark.a)) rings.set(mark.a, color);
+	}
+	return {
+		trails: trails.toReversed(),
+		rings: [...rings].map(([city, color]) => ({ city, color })),
+		flags: flagsOf(step),
+	};
 }
