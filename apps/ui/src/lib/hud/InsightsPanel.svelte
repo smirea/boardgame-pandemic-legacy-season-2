@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import type { CardId, CityId, Insights, World } from '@repo/game';
 	import { flip } from 'svelte/animate';
 	import { backOut } from 'svelte/easing';
@@ -33,7 +34,11 @@
 	);
 </script>
 
-<section class="panel" in:fly={{ x: 80, duration: 520, delay: 200, easing: backOut }}>
+<section
+	class="panel"
+	{@attach feedback(undefined, () => ({ tab }))}
+	in:fly={{ x: 80, duration: 520, delay: 200, easing: backOut }}
+>
 	<nav>
 		<button class:on={tab === 'threats'} onclick={() => (tab = 'threats')}>Threats</button>
 		<button class:on={tab === 'decks'} onclick={() => (tab = 'decks')}>Decks</button>

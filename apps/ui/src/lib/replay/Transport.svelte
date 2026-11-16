@@ -16,6 +16,7 @@
 </script>
 
 <script lang="ts">
+	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { fade } from 'svelte/transition';
 	import type { Marker } from './replay.svelte.ts';
 
@@ -85,7 +86,11 @@
 		});
 </script>
 
-<footer class="transport" data-testid="transport">
+<footer
+	class="transport"
+	data-testid="transport"
+	{@attach feedback(undefined, () => ({ frame, total, turn, playing, speed, follow }))}
+>
 	<div class="buttons">
 		<button onclick={() => go(0)} title="Start (Home)" aria-label="Start"><i class="icon first"></i></button>
 		<button onclick={() => onturn(-1)} title="Previous turn (↑)" aria-label="Previous turn"

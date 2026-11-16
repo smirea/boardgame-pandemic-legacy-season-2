@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { tick } from 'svelte';
 	import { gameTitle } from './replay.svelte.ts';
 	import type { IndexGame, Loaded, PanelTab, ReplayIndex, SaidNote } from './replay.svelte.ts';
@@ -73,7 +74,7 @@
 	</li>
 {/snippet}
 
-<aside class="side" data-testid="panel">
+<aside class="side" data-testid="panel" {@attach feedback(undefined, () => ({ tab }))}>
 	<header>
 		<p class="crumb">
 			{#if index}<a href="/debug/runs" title="All runs">Runs</a> / {index.title}{:else}Replay{/if}

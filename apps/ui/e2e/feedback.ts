@@ -51,9 +51,32 @@ try {
 	// Long enough for pieces to settle after the last move.
 	await page.waitForTimeout(2500);
 
+	// In the lobby a modal dialog covers the board, so a click there rightly selects the dialog, not a city.
+	const cities = await page.$$eval(lobby ? '.anchor[data-city="none"]' : '.anchor[data-city]', nodes =>
+		nodes.map(node => {
+			const box = node.getBoundingClientRect();
+			return { name: (node as HTMLElement).dataset['name']!, x: box.x + box.width / 2, y: box.y + box.height / 2 };
+		}),
+	);
+	const viewport = page.viewportSize()!;
+
 	await page.getByRole('button', { name: 'Menu' }).click({ modifiers: ['Alt', 'Meta'] });
 	const field = page.getByRole('textbox', { name: 'Feedback text' });
 	await field.waitFor({ timeout: 30_000 });
+
+	// A click on a city's disc in the screenshot must select that city, never the board or a neighbour.
+	const shot = (await page.getByRole('img', { name: 'Screenshot' }).boundingBox())!;
+	const missed: string[] = [];
+	for (const city of cities) {
+		await page.mouse.click(
+			shot.x + (city.x / viewport.width) * shot.width,
+			shot.y + (city.y / viewport.height) * shot.height,
+		);
+		const selected = await page.locator('.selected').innerText();
+		if (selected !== city.name) missed.push(`${city.name} selected ${selected}`);
+	}
+	if (missed.length) throw new Error(`Cities a click does not select:\n${missed.join('\n')}`);
+	if (cities.length) console.log(`ok   a click on each of ${cities.length} cities selects it`);
 	// Typed key by key: Space, Z and F are the game's shortcuts, and they must reach the field, not the table.
 	const before = await page.evaluate(() => JSON.stringify(window.DEBUG.getState()));
 	const note = 'fix zoom fit';

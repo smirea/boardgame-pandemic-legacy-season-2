@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import type { CityId, Game } from '@repo/game';
 	import { untrack } from 'svelte';
 
@@ -82,6 +83,7 @@
 	aria-label={`${game.stockpile} supply cubes left`}
 	data-testid="supply-tray"
 	data-left={game.stockpile}
+	{@attach feedback(undefined, () => ({ stockpile: game.stockpile, shown }))}
 >
 	{#each { length: shown } as _, index (index)}
 		<i class="cube"></i>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { actionCost, checkAction, handLimit, pack, reject } from '@repo/game';
 	import type { Action, CardId, Command, Decide, Play, PublicState, Purchase, SeatId } from '@repo/game';
 	import { flip } from 'svelte/animate';
@@ -177,7 +178,18 @@
 	{/if}
 {/snippet}
 
-<div class="frame">
+<div
+	class="frame"
+	{@attach feedback(undefined, () => ({
+		seat,
+		home,
+		canAct,
+		phase: snap.phase,
+		actions: actions.map(action => action.a),
+		plays: plays.length,
+		decides: decides.length,
+	}))}
+>
 	<footer class="dock">
 		{#if snap.phase === 'setup.supply'}
 			<div class="setup">

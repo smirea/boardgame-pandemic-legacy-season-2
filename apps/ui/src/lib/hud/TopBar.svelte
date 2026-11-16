@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { pack } from '@repo/game';
 	import type { Insights, PublicState } from '@repo/game';
 	import { fly } from 'svelte/transition';
@@ -22,7 +23,10 @@
 	const percent = (value: number) => `${Math.round(value * 100)}%`;
 </script>
 
-<div class="frame">
+<div
+	class="frame"
+	{@attach feedback(undefined, () => ({ status, players, solo, month: campaign.month, phase: snap.phase }))}
+>
 	<header class="bar">
 		<div class="month">
 			<strong>{MONTHS[campaign.month] ?? 'Campaign over'}</strong>

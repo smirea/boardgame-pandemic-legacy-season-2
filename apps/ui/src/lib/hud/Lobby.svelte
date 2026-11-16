@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { pack, score, SEAT_IDS, tableSeating } from '@repo/game';
 	import type { CharacterId, CityId, Command, JobId, PublicState } from '@repo/game';
 	import { cityName, MONTHS } from './labels.svelte.ts';
@@ -35,7 +36,14 @@
 	const startCommand = $derived<Command>({ type: 'START_GAME', seating });
 </script>
 
-<div class="lobby">
+<div
+	class="lobby"
+	{@attach feedback(undefined, () => ({
+		phase: snap.phase,
+		characters: Object.keys(campaign.characters).length,
+		seating: campaign.seating,
+	}))}
+>
 	<header>
 		<h1>{finished ? 'Campaign complete' : (MONTHS[campaign.month] ?? '')}</h1>
 		<p>

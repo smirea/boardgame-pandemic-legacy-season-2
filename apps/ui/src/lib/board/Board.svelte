@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import type { CityId } from '@repo/game';
 	import { Canvas } from '@threlte/core';
 	import { NoToneMapping, WebGLRenderer } from 'three';
@@ -63,6 +64,7 @@
 <div
 	class="board"
 	role="presentation"
+	{@attach feedback(undefined, () => ({ hovered: hovered?.city ?? null }))}
 	bind:this={element}
 	oncontextmenu={event => {
 		if (!hovered || !oncityback) return;

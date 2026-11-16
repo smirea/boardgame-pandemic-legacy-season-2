@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import {
 		insights,
 		isForsaken,
@@ -538,7 +539,12 @@
 
 {#snippet key()}
 	<!-- The chart's key: what each piece and printed mark around a city means. Hovering a city or a piece says more. -->
-	<dl class="legend" aria-label="Map key" in:fly={{ y: 20, duration: 500, delay: 600 }}>
+	<dl
+		class="legend"
+		aria-label="Map key"
+		{@attach feedback('MapKey', () => undefined)}
+		in:fly={{ y: 20, duration: 500, delay: 600 }}
+	>
 		<dt><b class="num">3</b></dt>
 		<dd>Population, on the city</dd>
 		<dt><b class="port">⚓</b></dt>
@@ -568,7 +574,16 @@
 	</dl>
 {/snippet}
 
-<div class="game">
+<div
+	class="game"
+	{@attach feedback('Game', () => ({
+		phase: snap.phase,
+		turn: game?.turn,
+		active: game?.active,
+		mine,
+		canAct,
+	}))}
+>
 	<TopBar
 		{snap}
 		{info}
@@ -641,7 +656,12 @@
 		{/if}
 
 		{#if chooser}
-			<div class="chooser" transition:fly={{ y: 16, duration: 180 }} data-testid="chooser">
+			<div
+				class="chooser"
+				transition:fly={{ y: 16, duration: 180 }}
+				data-testid="chooser"
+				{@attach feedback('Chooser', () => ({ title: chooser?.title, filter, picked }))}
+			>
 				<header>{chooser.title}<button onclick={() => (chooser = null)} aria-label="Close">×</button></header>
 				{#if chooser.options.length > 8}
 					<input bind:value={filter} placeholder="Type to filter" aria-label="Filter the list" />
@@ -703,7 +723,12 @@
 		{/if}
 
 		{#if game?.outcome && snap.phase === 'over'}
-			<div class="outcome" class:won={game.outcome.won} in:scale={{ start: 0.7, duration: 600, easing: backOut }}>
+			<div
+				class="outcome"
+				{@attach feedback('Outcome', () => game?.outcome)}
+				class:won={game.outcome.won}
+				in:scale={{ start: 0.7, duration: 600, easing: backOut }}
+			>
 				<strong>{game.outcome.won ? 'Victory' : 'Defeat'}</strong>
 				<span>{game.outcome.reason}</span>
 			</div>
@@ -711,8 +736,19 @@
 
 		{#if campaign.briefing.length && briefingRead !== campaign.briefing.join('|')}
 			<!-- A spectator reads the briefing beside the board instead of in front of it, so what was just revealed stays in view. -->
-			<div class="scrim" class:passive={spectator} transition:fade={{ duration: 200 }}>
-				<div class="briefing" in:fly={{ y: 24, duration: 300 }}>
+			<div
+				class="scrim"
+				class:passive={spectator}
+				role="dialog"
+				aria-modal={!spectator}
+				aria-label="New this game"
+				transition:fade={{ duration: 200 }}
+			>
+				<div
+					class="briefing"
+					{@attach feedback('Briefing', () => ({ briefing: campaign.briefing }))}
+					in:fly={{ y: 24, duration: 300 }}
+				>
 					<h2>New this game</h2>
 					<ul>
 						{#each campaign.briefing as line, index (index)}
@@ -731,15 +767,23 @@
 				</div>
 			</div>
 		{:else if snap.phase === 'lobby' || snap.phase === 'finished'}
-			<div class="scrim" transition:fade={{ duration: 200 }}><Lobby {snap} {send} /></div>
+			<div class="scrim" role="dialog" aria-modal="true" aria-label="Lobby" transition:fade={{ duration: 200 }}>
+				<Lobby {snap} {send} />
+			</div>
 		{:else if snap.phase === 'upkeep'}
-			<div class="scrim" transition:fade={{ duration: 200 }}><Upkeep {snap} {send} /></div>
+			<div class="scrim" role="dialog" aria-modal="true" aria-label="Between games" transition:fade={{ duration: 200 }}>
+				<Upkeep {snap} {send} />
+			</div>
 		{/if}
 
 		{@render children?.()}
 
 		{#if menu}
-			<div class="menu" transition:scale={{ start: 0.92, duration: 180, opacity: 0 }}>
+			<div
+				class="menu"
+				transition:scale={{ start: 0.92, duration: 180, opacity: 0 }}
+				{@attach feedback('Menu', () => undefined)}
+			>
 				{#if import.meta.env.DEV}
 					<button
 						onclick={() => {

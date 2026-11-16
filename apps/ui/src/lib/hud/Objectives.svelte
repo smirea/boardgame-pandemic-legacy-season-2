@@ -21,6 +21,7 @@
 </script>
 
 <script lang="ts">
+	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { pack } from '@repo/game';
 	import type { PublicState } from '@repo/game';
 	import { untrack } from 'svelte';
@@ -139,7 +140,18 @@
 	</svg>
 {/snippet}
 
-<section class="objectives" data-testid="objectives">
+<section
+	class="objectives"
+	data-testid="objectives"
+	{@attach feedback(undefined, () => ({
+		objectives: objectives.map(objective => objective.id),
+		progress: game?.progress,
+		completed: game?.completed,
+		waived: game?.waived,
+		needed,
+		incidents: game?.incidents,
+	}))}
+>
 	<div class="tags">
 		<span class="need" title="Objectives completed out of the number needed to win"
 			>{game?.completed.length ?? 0} / {needed}</span

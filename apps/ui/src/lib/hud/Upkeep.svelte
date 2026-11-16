@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { onGrid, pack, purchaseCost, reject } from '@repo/game';
 	import type { CardId, Command, PublicState, Purchase } from '@repo/game';
 	import { cityName, purchaseLabel } from './labels.svelte.ts';
@@ -84,7 +85,7 @@
 	const inGroup = $derived(offers.filter(offer => offer.group === group));
 </script>
 
-<div class="upkeep">
+<div class="upkeep" {@attach feedback(undefined, () => ({ upkeep, offers: offers.length }))}>
 	<header>
 		<h1>{world.game!.outcome?.won ? 'Victory' : 'Defeat'}</h1>
 		<p>{world.game!.outcome?.reason}</p>

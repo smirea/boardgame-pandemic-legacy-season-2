@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { fly } from 'svelte/transition';
 	import type { TimelineStep } from './replay.svelte.ts';
 
@@ -15,6 +16,7 @@
 	{#key step.frame}
 		<div
 			class="caption"
+			{@attach feedback(undefined, () => step)}
 			style:--who={color ?? 'var(--paper-muted)'}
 			in:fly={{ y: 8, duration: 220 }}
 			data-testid="caption"

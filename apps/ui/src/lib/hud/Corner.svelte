@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { handLimit, pack } from '@repo/game';
 	import type { SeatId, World } from '@repo/game';
 	import { inkOn } from '#lib/color.ts';
@@ -98,7 +99,13 @@
 	const steps = $derived(active ? turnSteps(world, seat) : []);
 </script>
 
-<div class="corner {place}" class:dimmed data-testid="corner" data-player={name}>
+<div
+	class="corner {place}"
+	class:dimmed
+	data-testid="corner"
+	data-player={name}
+	{@attach feedback(undefined, () => ({ name, seat, place, selected, action, player: world.game?.players[seat] }))}
+>
 	{#if top}
 		{@render card()}
 		{@render held()}

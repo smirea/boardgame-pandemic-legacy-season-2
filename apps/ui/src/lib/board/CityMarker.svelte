@@ -17,6 +17,7 @@
 	import { HTML, useCursor } from '@threlte/extras';
 	import { onMount } from 'svelte';
 	import { Spring, Tween } from 'svelte/motion';
+	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { inkOn } from '#lib/color.ts';
 	import type { Part } from './hints';
 	import { DISC_REACH, NAME_SIZE } from './labels';
@@ -51,6 +52,14 @@
 		lab: [3.1, 2.8],
 	} as const;
 	const DISC = CITY_TOP - LAND_HEIGHT;
+	/**
+	 * Half the side of a city's square on the board, over the disc and the pieces around it. The closest cities, Tokyo
+	 * and Osaka, sit 5.34 apart on one axis, so two squares may share a strip between them but never reach the
+	 * other city's disc, and a click on a disc always selects that city.
+	 */
+	const FOOTPRINT = 3.4;
+	/** CSS pixels per board unit in an `HTML` with `transform` and the default distance factor of 10. */
+	const HTML_PX = 40;
 
 	const color = $derived(state.forsaken ? '#8d8476' : CITY_COLOR[city.color ?? 'haven']);
 	const { hovering, onPointerEnter, onPointerLeave } = useCursor();
@@ -214,9 +223,19 @@
 		{/if}
 	</T.Group>
 
-	<!-- An empty point at the disc's centre, so tools that drive the page can find a city, read its name and click it. -->
-	<HTML position.y={DISC} center pointerEvents="none" style="pointer-events: none" zIndexRange={[1, 0]}>
-		<span class="anchor" data-city={city.id} data-name={state.name} aria-hidden="true"></span>
+	<!--
+		An empty square lying on the board over the disc and the pieces around it, centred on the disc. Tools that drive
+		the page find, read and click a city through it, and a feedback capture selects the city anywhere inside it.
+	-->
+	<HTML transform position.y={DISC} rotation.x={-Math.PI / 2} pointerEvents="none" zIndexRange={[1, 0]}>
+		<span
+			class="anchor"
+			style:--size="{FOOTPRINT * 2 * HTML_PX}px"
+			data-city={city.id}
+			data-name={state.name}
+			aria-hidden="true"
+			{@attach feedback(state.name, () => ({ id: city.id, ...state }))}
+		></span>
 	</HTML>
 
 	{#each supplies as cube, index (index)}
@@ -327,8 +346,8 @@
 <style>
 	.anchor {
 		display: block;
-		width: 1px;
-		height: 1px;
+		width: var(--size);
+		height: var(--size);
 		pointer-events: none;
 	}
 </style>
