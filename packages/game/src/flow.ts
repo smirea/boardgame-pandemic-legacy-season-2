@@ -177,6 +177,11 @@ export function setupInfection(world: World) {
 		cards.infection.filter(id => !late.includes(id)),
 	);
 	game.infectionDiscard = [...cards.hollowCards, ...late];
+	if (late.length)
+		log(game, {
+			t: 'note',
+			text: `Utopia was opened by the perimeter report, so its ${late.length} Infection cards start in the discard pile and enter the deck with the first Epidemic`,
+		});
 	const hollowFrom = hasRule(campaign, 'hollowSetup') ? numbers.setupInfections - 3 : numbers.setupInfections;
 	for (let flipped = 0; flipped < numbers.setupInfections && !isOver(world); flipped++) {
 		const card = drawInfectionCard(world, 'top');

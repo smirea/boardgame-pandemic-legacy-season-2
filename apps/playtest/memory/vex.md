@@ -1,31 +1,33 @@
 # Memory
 
-November second lost at 8 incidents. Plan was 2/4: yellow and black done, blue and red not. December is next, rationing 4. This was the second November, so the year moves on.
+Campaign-2 is over. December, first attempt, won. Score 545: early wins 400, late wins 30, population 80, sample 100, labs 50, forsaken -115. The finished screen says month 13. There is no next game.
 
-I am the Captain (char-7), exposure 5/7. Slots full: Careless, Careless, Surveyor, Investigator. Do not search. Do not buy onto me. The next exposure can kill. Do not start a turn in an infested or plague city. Do not leave a Hollow Man unless the city has a shelter.
+Hale (char-2) is dead. Carrier. Exposure 4/7. Both slots are Carrier scars. Record Keeper and Foreman are gone. Do not play Hale.
 
-Kolkata shelter is permanent. Sleep there. Shanghai is one drive away. The tower was not made permanent. Transmit died with it. While a tower stood in a black city it only sent black cards.
+Do not play the Captain (char-7). Exposure 5/7, two Careless scars, Surveyor, Investigator.
 
-On the grid now: Shanghai, Hong Kong, Bangkok, Ho Chi Minh City. Lines: Kolkata–Shanghai, Kolkata–Ho Chi Minh City, Shanghai–Hong Kong. Sea lane: Kolkata–Bangkok. Seoul and Osaka are still off. A city that just joined cannot be infected that game. Next game it can. All four are population 1.
+Reed (char-5), Farmer, Northwatch, exposure 0/7, now has Lookout, Broker, and Saboteur. One slot is still empty.
 
-`jakarta.153` is wild. It counts as any colour in a recon. It is the only Jakarta card. Jakarta stays forsaken. Do not restore it.
+Immunologist (char-6): exposure 2/7, Record Keeper, Architect, Runner, Shaken. Supplier is gone.
 
-Permanent centers, still the cap of 6: Washington, London, São Paulo, Istanbul, Atlanta, Paris. Hale has Record Keeper and Foreman. Lines cost 1 cube fewer if Hale draws them. Mine still cost 2. Sea lanes cost 2.
+Sanitation Officer (char-8): exposure 1/7, Architect, Outrider, Soldier, Scout. Slots full.
 
-Newly forsaken, and now infested: Lima, Bogotá, Delhi. Do not restore them. A forsaken city cannot incident. Restoring it makes it infectable and a turn started there still exposes you. Moscow and Paris took plague and are not forsaken.
+## Rules that decided the win
 
-Kit is the Sanitation Officer: Architect, Outrider, Soldier, Scout. Exposure 1/7. Scout recons with no center, at the full card cost, because Surveyor is on me. Outrider leaves Hollow Men clean. Soldier removes one figure where Kit stands. Kit salvages by discarding 2.
+December is one objective. Carry the sample from Lake Baikal to a supply center in Johannesburg.
 
-Sol's Immunologist is unchanged, exposure 1/7, slots full. Make Supplies works in any city. Sol's version takes cubes from the reserve. System Produce fills havens and centers and can leave the last centers empty when the stockpile runs out.
+selfInject at the lake makes the carrier. This time it scratched three boxes and wrote Carrier into two slots. Treat another selfInject as possibly lethal.
 
-Share only the card of the city you both stand in. Card Swap is one remote trade and it is back in the reserve. Investigator swaps any city card with the discard. Shelter builds where you stand. The card only has to match the colour, and it is discarded. The action stays hidden until you hold that colour.
+The carrier moves only by Drive or Ferry, discards one card of that city's colour to enter, and dies at game end. A haven asked for no card. When I held two matching cards, options listed only one. The other worked after the first was spent.
 
-Cordon stops the rest of an infect step if someone discards in the same breath the choice opens. It did not open during setup, and it did not open when the Cordon card was the last flip. The discard key is `decide:discard:seat-1:<card>`, not the short form the prompt shows.
+The short walk is Utopia (red), Tehran (black), Istanbul (black), Lagos (yellow), Dar es Salaam (yellow), Johannesburg (blue). The line that makes it is Tehran–Utopia, drawn from Tehran. Foreman made each of my lines cost 1 cube. Lake Baikal joins only from Utopia. Johannesburg joins only from Dar es Salaam. A city that joins cannot be infected that game.
 
-Scavenge draws 4, keeps city cards, and discards the rest with no effect, epidemics included. The log does not name them. It is rationed and back in the reserve. Ask the lead to pick it. Monitor also dumped an epidemic and did not say so. That one is not written on the card. Do not mill with Monitor.
+Utopia has 8 infection cards. They were already in the discard at the start, with no flip in the log. Inoculate stores them. Each epidemic pulls one stored card, strips that city, and returns the card.
 
-Lookout, Broker, and Saboteur are still unbought. Each costs 2. Saboteur removes a Hollow Man from a city of that colour. Broker is a worse Investigator. Lookout searches from the discard, which Careless makes a bad idea on me.
+Leaving a Hollow Man exposes you. Outrider leaves clean. Soldier removes one figure where you stand. An infested city exposes you at the start of a turn. The Kolkata shelter prevents both. Share only moves the card of the city you are standing in. Forsaken cities cannot host a share. Card Swap is the remote trade. We never drew it.
 
-Washington's Well Stocked card removes nothing at 2 or more cubes. The log says blocked.
+Architect builds with 4 cards. Kit built Johannesburg with Atlanta, both Johannesburg cards, and St Petersburg. The wild was not needed.
 
-An epidemic that finds an empty city removes 0 cubes. The card can still plague on a later flip of that infect. Do not leave Bogotá, Paris, Lagos, or Dar es Salaam at 0.
+Permanent centers stayed at the cap of 6. No permanent purchase was offered. Lookout, Broker, and Saboteur cost 2 each and are now on Reed.
+
+Cordon did not open during setup. Later it announced a choice and gave me no discard key.

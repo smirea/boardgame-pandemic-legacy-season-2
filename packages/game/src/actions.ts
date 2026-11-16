@@ -691,10 +691,13 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 				if (box !== 'scar') continue;
 				character.carrier = true;
 				log(ctx.game, { t: 'note', text: `${character.name} now carries the sample` });
-				let covered = 0;
-				character.slots = character.slots.map(slot =>
-					slot?.kind !== 'scar' && covered++ < 2 ? { kind: 'scar', id: 'carrier' } : slot,
-				);
+				// The scar covers 2 slots. Empty ones go first, so an ability is lost only when there is no room.
+				const order = character.slots
+					.map((slot, index) => ({ slot, index }))
+					.filter(entry => entry.slot?.kind !== 'scar')
+					.toSorted((a, b) => Number(a.slot !== null) - Number(b.slot !== null))
+					.slice(0, 2);
+				for (const entry of order) character.slots[entry.index] = { kind: 'scar', id: 'carrier' };
 				return;
 			}
 		},

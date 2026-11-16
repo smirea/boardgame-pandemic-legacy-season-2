@@ -10,7 +10,7 @@ import type { Action } from './actions';
 import { legalActions, legalPlays } from './options';
 import { applyUnlock, closeGame, newCampaign, openBundle, score } from './legacy';
 import { decemberSave, octoberSave } from './scenarios';
-import type { World } from './state';
+import type { Character, World } from './state';
 import {
 	A,
 	act,
@@ -840,18 +840,16 @@ describe('game end and the campaign', () => {
 
 	test('four losses in a row add 10 cubes to the next games', () => {
 		const actor = ended(false, world => {
-			world.campaign.results = world.campaign.results
-				.slice(0, -3)
-				.concat(
-					[7, 8, 9].map(month => ({
-						month,
-						attempt: 2 as const,
-						won: false,
-						gridCities: 40,
-						rationing: 6,
-						characters: [],
-					})),
-				);
+			world.campaign.results = world.campaign.results.slice(0, -3).concat(
+				[7, 8, 9].map(month => ({
+					month,
+					attempt: 2 as const,
+					won: false,
+					gridCities: 40,
+					rationing: 6,
+					characters: [],
+				})),
+			);
 		});
 		expect(worldOf(actor).campaign.losingStreakBonusGames).toBe(3);
 		send(actor, { type: 'FINISH_UPKEEP' });
@@ -2023,5 +2021,47 @@ describe('defects found by the rules audit', () => {
 				},
 			}).world.campaign.results[0]!.characters,
 		).toEqual([]);
+	});
+});
+
+describe('found in December', () => {
+	const atSample = (slots: Character['slots'], track: Character['exposureTrack']) =>
+		late((world, game) => {
+			if (!world.campaign.rules.includes('carrier')) world.campaign.rules.push('carrier');
+			world.campaign.locations[pack.sampleFrom]!.revealed = true;
+			game.players[A]!.location = pack.sampleFrom;
+			Object.assign(character(world, A), { slots, exposureTrack: track, exposure: 0 });
+		});
+
+	test('the Carrier scar covers empty slots before it covers an ability', () => {
+		const actor = atSample(
+			[{ kind: 'ability', id: 'helmsman' }, null, { kind: 'ability', id: 'foreman' }, null],
+			['scar', 'empty', 'empty', 'empty', 'empty', 'empty', 'skull'],
+		);
+		act(actor, { a: 'selfInject' });
+		expect(character(worldOf(actor), A).slots).toEqual([
+			{ kind: 'ability', id: 'helmsman' },
+			{ kind: 'scar', id: 'carrier' },
+			{ kind: 'ability', id: 'foreman' },
+			{ kind: 'scar', id: 'carrier' },
+		]);
+	});
+
+	test('taking the sample scratches exposure boxes until a scar appears', () => {
+		const actor = atSample([null, null, null, null], ['empty', 'empty', 'scar', 'empty', 'empty', 'empty', 'skull']);
+		act(actor, { a: 'selfInject' });
+		expect(character(worldOf(actor), A)).toMatchObject({ exposure: 3, carrier: true });
+	});
+
+	test('the carrier may pay to enter a city with any card of its colour', () => {
+		const actor = late((world, game) => {
+			character(world, A).carrier = true;
+			game.players[A]!.location = city('tripoli');
+			give(world, A, [...cityCards(world, 'tripoli', 1), ...cityCards(world, 'istanbul', 1)]);
+		});
+		const drives = legalActions(worldOf(actor), A).flatMap(action =>
+			action.a === 'drive' && action.to === city('cairo') ? [action.card] : [],
+		);
+		expect(drives.toSorted()).toEqual([...gameOf(actor).players[A]!.hand].toSorted());
 	});
 });
