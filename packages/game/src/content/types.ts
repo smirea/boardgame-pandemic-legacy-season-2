@@ -3,7 +3,7 @@ import type { BundleId, CityId, RegionId } from '../ids';
 export type Color = 'blue' | 'yellow' | 'black' | 'red';
 export type EdgeKind = 'land' | 'sea';
 
-export type RegionDef = { id: RegionId; name: string; startsRevealed: boolean; neighbours: RegionId[] };
+export type RegionDef = { id: RegionId; name: string; startsRevealed: boolean };
 
 export type CityDef = {
 	id: CityId;

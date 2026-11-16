@@ -1,21 +1,21 @@
 import type { BundleId, CityId, RegionId } from '../ids';
 import type { CityDef, Color, EdgeDef, EdgeKind, RegionDef } from './types';
 
-type RegionRow = [id: string, name: string, neighbours: string[], revealed?: boolean];
+type RegionRow = [id: string, name: string, revealed?: boolean];
 
 const regionRows: RegionRow[] = [
-	['atlantic', 'Atlantic', ['north-america', 'south-america', 'europe', 'africa', 'middle-east'], true],
-	['north-america', 'North America', ['atlantic', 'south-america', 'eastern-pacific']],
-	['south-america', 'South America', ['atlantic', 'north-america', 'eastern-pacific']],
-	['europe', 'Europe', ['atlantic', 'middle-east']],
-	['africa', 'Africa', ['atlantic', 'middle-east', 'indian-ocean']],
-	['middle-east', 'Middle East and South Asia', ['atlantic', 'europe', 'africa', 'indian-ocean', 'east-asia']],
-	['east-asia', 'East Asia', ['middle-east', 'indian-ocean', 'coral-sea', 'utopia']],
-	['coral-sea', 'Coral Sea', ['east-asia', 'new-zealand']],
-	['new-zealand', 'New Zealand', ['coral-sea']],
-	['eastern-pacific', 'Eastern Pacific', ['north-america', 'south-america']],
-	['indian-ocean', 'Indian Ocean', ['africa', 'middle-east', 'east-asia']],
-	['utopia', 'Utopia', ['east-asia']],
+	['atlantic', 'Atlantic', true],
+	['north-america', 'North America'],
+	['south-america', 'South America'],
+	['europe', 'Europe'],
+	['africa', 'Africa'],
+	['middle-east', 'Middle East and South Asia'],
+	['east-asia', 'East Asia'],
+	['coral-sea', 'Coral Sea'],
+	['new-zealand', 'New Zealand'],
+	['eastern-pacific', 'Eastern Pacific'],
+	['indian-ocean', 'Indian Ocean'],
+	['utopia', 'Utopia'],
 ];
 
 /** Flags: `p` port, `g` on the grid at campaign start, `i` infested from the start, `l` lost haven. */
@@ -107,10 +107,9 @@ const arrivals: Record<string, string> = {
 	'lake-baikal': 'arrive-pearl',
 };
 
-export const regions: RegionDef[] = regionRows.map(([id, name, neighbours, revealed = false]) => ({
+export const regions: RegionDef[] = regionRows.map(([id, name, revealed = false]) => ({
 	id: id as RegionId,
 	name,
-	neighbours: neighbours as RegionId[],
 	startsRevealed: revealed,
 }));
 

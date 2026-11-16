@@ -4,30 +4,48 @@
 import { geoContains } from 'd3-geo';
 import { feature } from 'topojson-client';
 import type { Topology } from 'topojson-specification';
-import landTopology from 'world-atlas/land-110m.json';
+// The same coastline the board draws, so a line the rules call dry looks dry.
+import landTopology from 'world-atlas/land-50m.json';
 import { layoutCities, unproject } from '../src/lib/board/projection.ts';
 import { edgeKey } from '../../../packages/game/src/ids.ts';
 import { cities, documentedEdges, startingEdges } from '../../../packages/game/src/content/world.ts';
 
 const MAX_LAND_LENGTH = 46;
 const MAX_SEA_LENGTH = 62;
-const MIN_LAND_SHARE = 0.72;
+// A supply line may not cross water. The tolerance covers lakes, rivers and the coarseness of the coastline data.
+const MAX_WATER_SHARE = 0.08;
+const MAX_WATER_RUN = 1.5;
+// Cities are nudged apart for legibility, which can leave a coastal city just offshore.
+const COAST_MARGIN = 2;
 const MAX_LAND_SHARE_AT_SEA = 0.34;
 const CLEARANCE = 3.2;
-const SAMPLES = 24;
+const SAMPLES = 60;
 
 const topology = landTopology as unknown as Topology;
 const land = feature(topology, topology.objects['land']!);
 const positions = layoutCities(cities);
 
-function landShare(a: { x: number; z: number }, b: { x: number; z: number }) {
-	let hits = 0;
+/** How much of the straight line is over water, and the longest unbroken stretch of it, away from both ends. */
+function water(a: { x: number; z: number }, b: { x: number; z: number }) {
+	const length = Math.hypot(b.x - a.x, b.z - a.z);
+	let counted = 0;
+	let wet = 0;
+	let run = 0;
+	let longest = 0;
 	for (let i = 1; i < SAMPLES; i++) {
 		const t = i / SAMPLES;
+		if (t * length < COAST_MARGIN || (1 - t) * length < COAST_MARGIN) continue;
+		counted++;
 		const { lat, lon } = unproject({ x: a.x + (b.x - a.x) * t, z: a.z + (b.z - a.z) * t });
-		if (geoContains(land, [lon, lat])) hits++;
+		if (geoContains(land, [lon, lat])) {
+			run = 0;
+		} else {
+			wet++;
+			run++;
+			longest = Math.max(longest, run);
+		}
 	}
-	return hits / (SAMPLES - 1);
+	return { share: counted ? wet / counted : 0, run: (longest / SAMPLES) * length };
 }
 
 function passesNearAnotherCity(aId: string, bId: string) {
@@ -55,11 +73,12 @@ for (let i = 0; i < cities.length; i++) {
 		const to = positions[b.id];
 		const length = Math.hypot(to.x - from.x, to.z - from.z);
 		if (passesNearAnotherCity(a.id, b.id)) continue;
-		const share = landShare(from, to);
-		if (a.kind === 'city' && b.kind === 'city' && length <= MAX_LAND_LENGTH && share >= MIN_LAND_SHARE) {
+		const over = water(from, to);
+		const dry = over.share <= MAX_WATER_SHARE && over.run <= MAX_WATER_RUN;
+		if (a.kind === 'city' && b.kind === 'city' && length <= MAX_LAND_LENGTH && dry) {
 			candidates.set(`land:${edgeKey(a.id, b.id)}`, { a: a.id, b: b.id, kind: 'land' });
 		}
-		if (a.port && b.port && length <= MAX_SEA_LENGTH && share <= MAX_LAND_SHARE_AT_SEA) {
+		if (a.port && b.port && length <= MAX_SEA_LENGTH && 1 - over.share <= MAX_LAND_SHARE_AT_SEA) {
 			candidates.set(`sea:${edgeKey(a.id, b.id)}`, { a: a.id, b: b.id, kind: 'sea' });
 		}
 	}
@@ -69,6 +88,12 @@ for (let i = 0; i < cities.length; i++) {
 for (const [key, edge] of candidates) {
 	const other = edge.a === 'lake-baikal' ? edge.b : edge.b === 'lake-baikal' ? edge.a : null;
 	if (other && other !== 'utopia') candidates.delete(key);
+}
+
+// Every city must still be reachable by some line, or a rule change here could strand it for a whole campaign.
+for (const city of cities) {
+	if (![...candidates.values()].some(edge => edge.a === city.id || edge.b === city.id))
+		throw new Error(`${city.id} has no possible connection`);
 }
 
 const sorted = [...candidates.values()].sort((x, y) => `${x.kind}${x.a}${x.b}`.localeCompare(`${y.kind}${y.a}${y.b}`));

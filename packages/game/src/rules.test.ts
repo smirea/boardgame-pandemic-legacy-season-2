@@ -278,7 +278,7 @@ describe('actions', () => {
 			game.players[A]!.supplies = 1;
 		});
 		expect(refuses(actor, { a: 'establishLine', to: city('denver') })).toContain('cubes');
-		expect(refuses(actor, { a: 'establishLine', to: city('london') })).toBe('No land route between them');
+		expect(refuses(actor, { a: 'establishLine', to: city('london') })).toContain('No land route between them');
 		const funded = january((world, game) => {
 			const { campaign } = world;
 			campaign.actions.push('establishLine');

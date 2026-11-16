@@ -6,7 +6,8 @@ import {
 	cardValue,
 	characterOf,
 	cityDef,
-	crossesSupplyLine,
+	crossesEdge,
+	crossesUnexplored,
 	discardFromHand,
 	grid,
 	has,
@@ -17,6 +18,7 @@ import {
 	log,
 	neighbours,
 	overLimit,
+	passage,
 	player,
 	removeFromHand,
 	seaRoute,
@@ -156,14 +158,16 @@ export function checkEdge(
 	if (!grid(campaign).has(from)) return 'Start from a location on the grid';
 	if (kind === 'land') {
 		if (origin.kind !== 'city' || target.kind !== 'city') return 'Supply lines join cities';
-		if (!isCandidate(from, to, 'land')) return 'No land route between them';
-		return crossesSupplyLine(campaign, from, to) ? 'It would cross another supply line' : ok;
+		if (!isCandidate(from, to, 'land'))
+			return 'No land route between them: a supply line is straight and may not cross water or another city';
+		if (crossesUnexplored(campaign, from, to)) return 'It would cross unexplored map';
+		return crossesEdge(campaign, from, to, 'land') ? 'It would cross another supply line' : ok;
 	}
 	if (!origin.port || !target.port) return 'Sea lanes join ports';
-	if (!isCandidate(from, to, 'sea')) return 'No sea route between them';
-	const regions = pack.regions.find(region => region.id === origin.region)!;
-	const near = origin.region === target.region || regions.neighbours.includes(target.region);
-	return near || ignoreRegions ? ok : 'A sea lane may cross only one region boundary';
+	if (!isCandidate(from, to, 'sea')) return 'No sea route between them: a sea lane may not cross land or another city';
+	if (crossesUnexplored(campaign, from, to)) return 'It would cross unexplored map';
+	if (crossesEdge(campaign, from, to, 'sea')) return 'It would cross another sea lane';
+	return ignoreRegions || passage(from, to).regionLines <= 1 ? ok : 'A sea lane may cross only one region line';
 }
 
 export function addEdge(world: World, a: CityId, b: CityId, kind: EdgeKind, countsForObjective: boolean) {

@@ -1,6 +1,6 @@
 import { pack } from './content/pack';
 import type { AbilityId, CityDef, Color, CompanionId, EdgeKind, JobId, RuleId, ScarId } from './content/types';
-import type { CardId, CityId, SeatId } from './ids';
+import type { CardId, CityId, RegionId, SeatId } from './ids';
 import { edgeKey } from './ids';
 import type { Campaign, Character, Game, LogInput, Player, PlayerCard, World } from './state';
 
@@ -141,13 +141,66 @@ export function segmentsCross(a: Point, b: Point, c: Point, d: Point): boolean {
 	return d1 * d2 < 0 && d3 * d4 < 0;
 }
 
-export function crossesSupplyLine(campaign: Campaign, a: CityId, b: CityId): boolean {
+/** Whether a straight line between the two locations would cross a line of the same kind already on the board. */
+export function crossesEdge(campaign: Campaign, a: CityId, b: CityId, kind: EdgeKind): boolean {
 	const from = pack.positions[a]!;
 	const to = pack.positions[b]!;
 	return campaign.edges.some(
-		edge => edge.kind === 'land' && segmentsCross(from, to, pack.positions[edge.a]!, pack.positions[edge.b]!),
+		edge => edge.kind === kind && segmentsCross(from, to, pack.positions[edge.a]!, pack.positions[edge.b]!),
 	);
 }
+
+const locations = Object.entries(pack.positions) as [CityId, Point][];
+
+/**
+ * The location a point on the board belongs to: the nearest one. This one partition is what the
+ * rules mean by "unexplored map" and by region boundaries, and it is what the board draws, so a
+ * line that looks like it crosses unknown territory or a region line is one the rules refuse.
+ */
+export function nearestLocation(point: Point): CityId {
+	let best = locations[0]![0];
+	let closest = Number.POSITIVE_INFINITY;
+	for (const [id, at] of locations) {
+		const distance = (at.x - point.x) ** 2 + (at.z - point.z) ** 2;
+		if (distance < closest) {
+			closest = distance;
+			best = id;
+		}
+	}
+	return best;
+}
+
+export const regionAt = (point: Point): RegionId => cityDef(nearestLocation(point)).region;
+
+const SAMPLES = 48;
+const passageCache = new Map<string, { through: CityId[]; regionLines: number }>();
+
+/** What a straight line between two locations passes: every location whose ground it crosses, and how many region lines. */
+export function passage(a: CityId, b: CityId): { through: CityId[]; regionLines: number } {
+	const key = edgeKey(a, b);
+	const known = passageCache.get(key);
+	if (known) return known;
+	const from = pack.positions[a]!;
+	const to = pack.positions[b]!;
+	const through: CityId[] = [];
+	let regionLines = 0;
+	let last: RegionId | null = null;
+	for (let step = 0; step <= SAMPLES; step++) {
+		const t = step / SAMPLES;
+		const owner = nearestLocation({ x: from.x + (to.x - from.x) * t, z: from.z + (to.z - from.z) * t });
+		if (!through.includes(owner)) through.push(owner);
+		const region = cityDef(owner).region;
+		if (last !== null && region !== last) regionLines += 1;
+		last = region;
+	}
+	const found = { through, regionLines };
+	passageCache.set(key, found);
+	return found;
+}
+
+/** Whether a straight line between the two locations would run over ground no one has revealed yet. */
+export const crossesUnexplored = (campaign: Campaign, a: CityId, b: CityId) =>
+	passage(a, b).through.some(id => !campaign.locations[id]?.revealed);
 
 export const isCandidate = (a: CityId, b: CityId, kind: EdgeKind) =>
 	pack.candidateEdges.some(edge => edge.kind === kind && edgeKey(edge.a, edge.b) === edgeKey(a, b));

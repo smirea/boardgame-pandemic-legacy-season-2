@@ -1,33 +1,29 @@
 # Memory
 
-October lost at 8 incidents. October second is next, rationing 2. Push Scavenge. It has never been played. Safe Houses is gone.
+October second won. November is next, rationing 0, so the lead picks no rationed events. Scavenge was in the October deck and was never drawn. It is still unplayed.
 
-I am the Captain (char-7), exposure 2/7, both blanks, no scar, home Northwatch. Slots full: Foreman, Navigator, Surveyor, Investigator. Do not buy onto me.
+I am the Captain (char-7), exposure 4/7. Slots: Foreman, Careless (Navigator is gone), Surveyor, Investigator. Do not buy onto me. Careless discards a card after each search. The first Chart Sea Lane is no longer free.
 
-- Foreman: lines cost 1 cube fewer. A tower still costs 2.
-- Navigator: the first Chart Sea Lane each turn is free. Istanbul–Tripoli stuck.
-- Surveyor: recon with 1 card fewer. Not used.
-- Investigator: swap a held City card for any City card in the discard. Listed, never executed.
-- Captain sail discards any City card and moves to a port on the sea route. Leaving Hollow Men this way still exposes you.
+Leaving a Hollow Man with no shelter exposes you. A shelter prevents that and also prevents a plague start. Outrider prevents the leave. My first leave this game was a scar. The second was a blank.
 
-Sol's Immunologist (char-6) is unchanged: Record Keeper, Architect, Runner, Supplier. Exposure 1/7. Slots full. Architect builds with 4 cards. Runner discards a City card to move from a haven or center to anywhere on the grid.
+Kit is the Sanitation Officer (char-8): Architect, Outrider, Soldier, one slot open, exposure 0/7. Soldier removes one Hollow Man where you stand. Kit can walk into a figure and take it off. Sol's Immunologist is unchanged, exposure 1/7, slots full. Hale has Record Keeper.
 
-Knox (char-1) is exposure 4/7. Slots full: Helmsman, Seasick, Careless, Scout. Do not buy onto Knox.
+Cordon is on Paris infection `inf-paris.103`. When that card is drawn in an infect step, any player may discard a card to stop the rest of the step.
 
-Sanitation Officer (char-8) now has Architect and Outrider. Exposure 0/7. Outrider: no exposure when leaving Hollow Men. Kit means to play them. Hale and Reed still have empty slots.
+Permanent centers, the cap of 6: Washington, London, São Paulo, Istanbul, Atlanta, Paris. Frankfurt, St. Petersburg, and New York were built and did not persist. Towers did not persist. The Northwatch–São Paulo sea lane was charted and should still be on the board.
 
-Both objectives were starred: 3 new supply centers, and one Hollow Man in each of 3 havens at once. We made 2 and 2. Lagos and Frankfurt were the centers. They did not persist. Permanent centers are still only Washington, London, São Paulo, Istanbul, Atlanta, and Paris. That is the cap.
+Northwatch shelter is permanent, population 3. Crosswater (the haven that was Midsea; `city` may still say Midsea) and Southreach are at 1 with no shelter. One Hollow Man there at game end forsakes them. Farwater is 2. A center cancels one population loss. Lagos fell to 4. Antananarivo fell to 0 and is forsaken. Do not restore it. Paris 7, Frankfurt 5, St. Petersburg 3, New York 1. Istanbul, London, Washington, and Atlanta stayed 8. São Paulo stayed 6.
 
-Northwatch's shelter is permanent. A Hollow Man in a haven with no shelter costs that haven a population at game end. Midsea and Southreach each lost one. Build the next shelter on one of those, not on Northwatch. Safe Houses says up to 3 and places 1, then the card is destroyed.
+`buildShelter` is played with a City card and places the shelter in that city. It cannot target a haven. Safe Houses is gone.
 
-Towers did not persist. Rebuild one blue tower. From it, New York or London reaches Northwatch, and Washington reaches Midsea and Southreach. Frankfurt only touches Istanbul, and Frankfurt–Paris is blocked because it would cross a line. A Hollow Man there cannot reach Northwatch. Broadcast is one action, standing in the tower, and the source city has to match the tower's colour.
+Broadcast is one action in a tower. It moves one Hollow Man from a city in range to a linked location, including a new sea lane. The São Paulo tower also reached Lagos. Several Gathers in a row still place one figure. The log repeats the line anyway.
 
-New forsaken, all infested: Tripoli, Buenos Aires (the lab), Baghdad, Riyadh, Kolkata, Jakarta. Antananarivo dropped to 1. Do not restore them. Do not start a turn in one. Only Drive or Ferry works there. Jakarta recon is still printed and is probably illegal until a restore. Skip it.
+Share only the card of the city you both stand in. Transmit, from a tower, sends a card to another seat at any range. Investigator swaps a held City card for any City card in the discard. The Sanitation Officer salvages a City or Produce card from the discard by discarding 2.
 
-Epidemics pull infection cards out of storage, strip the city, and the card comes back into the deck. Inoculate does not stop that. London's Well Stocked card is in storage, and the city panel still lists it. The live Well Stocked card is Washington's. Keep cubes on London anyway. A stored city at 0 just lost us the game.
+Washington Infrastructure counts as 3 of its colour. London Foundations counts as 2. Lagos Eastern Ties also counts as red. Washington's live Well Stocked card removes nothing at 2 or more cubes. London's Well Stocked card is in storage.
 
-Riyadh reached 3 plague and did not outbreak into Tehran. Armor a city at 2 plague anyway. Two Gather flips in a row added one figure. Check the city.
+Setup can place Hollow Men on cities before any Gather is drawn. It happened to Istanbul, São Paulo, and Lagos, and all 8 Gathers were still in the discard. Reported as issue 175. Do not assume the first figures wait for an epidemic.
 
-Up: São Paulo 6, Lagos 5, Atlanta 8, Paris 6. Washington, London, and Istanbul stayed 8. Frankfurt stayed 4. Best third-center sites with population: Lagos 5 and Frankfurt 4.
+Jakarta recon is still printed: 2 red cards and a supply center, in a forsaken city. Surveyor makes it 1 red. Only Drive or Ferry works there. Skip it.
 
-Cordon, wild, Lookout, and Broker are still unbought. Rename, shield, skip, replace, freeEdge, and removeHollow never appeared.
+Lookout, Broker, and wild are still unbought. Saboteur is for sale and unbought. Shield, skip, replace, freeEdge, and removeHollow have still never appeared.
