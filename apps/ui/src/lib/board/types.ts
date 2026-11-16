@@ -11,6 +11,8 @@ export type CityView = {
 	plague: number;
 	hollow: number;
 	population: number;
+	/** Marked with an anchor: only ports start or end sea movement. */
+	port: boolean;
 	/** What stands here, with whether it is printed on the board for good or only lasts this game. */
 	structures: { kind: StructureKind; permanent: boolean }[];
 	infested: boolean;

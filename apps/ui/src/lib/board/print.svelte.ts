@@ -59,9 +59,9 @@ export function printName(name: string, size: number, odds: number | null, faded
 	const oddsFont = `italic 400 ${size * 0.72}px "IM Fell English"`;
 	const oddsText = odds === null ? '' : ` ${Math.round(odds * 100)}%`;
 	const pad = size * 0.3;
-	const nameWidth = measure(font, spacing, name);
+	const lettered = measure(font, spacing, name);
 	const oddsWidth = oddsText ? measure(oddsFont, 0, oddsText) : 0;
-	const width = nameWidth + oddsWidth + pad * 2;
+	const width = lettered + oddsWidth + pad * 2;
 	const height = size * 1.5;
 	return sheet(width, height, context => {
 		const baseline = height / 2 + size * 0.3;
@@ -80,22 +80,46 @@ export function printName(name: string, size: number, odds: number | null, faded
 		context.letterSpacing = '0px';
 		context.font = oddsFont;
 		context.globalAlpha = 0.85;
-		context.strokeText(oddsText, pad + nameWidth, baseline);
+		context.strokeText(oddsText, pad + lettered, baseline);
 		context.globalAlpha = 1;
 		context.fillStyle = odds !== null && odds >= 0.3 ? '#a3301c' : '#8b5a12';
-		context.fillText(oddsText, pad + nameWidth, baseline);
+		context.fillText(oddsText, pad + lettered, baseline);
 	});
 }
 
-/** A large numeral centred on a square sheet, for the top of a city's disc. */
-export function printNumber(value: number, size: number, color: string): Print {
+/**
+ * The face of a city's disc: its population as a large numeral and, for a port, an anchor beneath it, the
+ * way the board marks the places sea movement may start and end.
+ */
+export function printDisc(population: number, port: boolean, size: number, color: string): Print {
 	return sheet(size, size, context => {
-		context.font = `700 ${size * 0.82}px ${NUMBER_FONT}`;
 		context.textAlign = 'center';
 		context.textBaseline = 'middle';
 		context.fillStyle = color;
-		context.fillText(String(value), size / 2, size * 0.54);
+		context.strokeStyle = color;
+		context.font = `700 ${size * (port ? 0.6 : 0.82)}px ${NUMBER_FONT}`;
+		context.fillText(String(population), size / 2, size * (port ? 0.4 : 0.54));
+		if (!port) return;
+		context.translate(size / 2, size * 0.8);
+		context.scale(size * 0.13, size * 0.13);
+		anchor(context);
 	});
+}
+
+/** An anchor about two units tall around the origin, in the context's current colours. */
+function anchor(context: CanvasRenderingContext2D) {
+	context.lineCap = 'round';
+	context.lineWidth = 0.28;
+	context.beginPath();
+	context.arc(0, -0.85, 0.22, 0, Math.PI * 2);
+	context.moveTo(0, -0.63);
+	context.lineTo(0, 0.95);
+	context.moveTo(-0.5, -0.3);
+	context.lineTo(0.5, -0.3);
+	context.moveTo(-0.85, 0.25);
+	context.quadraticCurveTo(-0.7, 0.95, 0, 0.95);
+	context.quadraticCurveTo(0.7, 0.95, 0.85, 0.25);
+	context.stroke();
 }
 
 /**

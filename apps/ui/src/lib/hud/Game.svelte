@@ -74,6 +74,9 @@
 		void game?.active;
 		viewing = null;
 	});
+	// The dock holds up this player's own hand, which on a shared screen is whoever's turn it is, or the hand picked.
+	const home = $derived(game ? (owns(game.active) ? game.active : (game.seats.find(owns) ?? game.active)) : null);
+	const dockSeat = $derived(spectator ? null : (viewing ?? home));
 
 	const actions = $derived(game && snap.phase === 'playing.actions' && canAct ? legalActions(world, game.active) : []);
 	const plays = $derived(playing ? legalPlays(world, snap.phase) : []);
@@ -402,6 +405,7 @@
 						plague: location?.plague ?? 0,
 						hollow: location?.hollow ?? 0,
 						population: record.population,
+						port: city.port,
 						structures: (['center', 'tower', 'shelter'] as const)
 							.filter(kind => location?.[kind] ?? record.permanent.includes(kind))
 							.map(kind => ({ kind, permanent: record.permanent.includes(kind) })),
@@ -517,6 +521,7 @@
 					name={seatName(world, seat)}
 					color={SEAT_COLORS[game.seats.indexOf(seat)]!}
 					selected={viewing === seat}
+					showHand={seat !== dockSeat}
 					action="Show this hand in the dock"
 					selectedTag="Hand shown"
 					onselect={() => (viewing = seat)}
@@ -532,6 +537,8 @@
 	<dl class="legend" aria-label="Map key" in:fly={{ y: 20, duration: 500, delay: 600 }}>
 		<dt><b class="num">3</b></dt>
 		<dd>Population, on the city</dd>
+		<dt><b class="port">⚓</b></dt>
+		<dd>Port, under the population</dd>
 		<dt><b class="cube"></b></dt>
 		<dd>Supply cubes, right</dd>
 		<dt><b class="cube plague"></b></dt>
@@ -776,7 +783,8 @@
 			{snap}
 			{canAct}
 			{owns}
-			{viewing}
+			seat={dockSeat!}
+			home={home!}
 			{actions}
 			{plays}
 			{decides}
@@ -908,6 +916,12 @@
 		font-weight: 700;
 		line-height: 1rem;
 		text-align: center;
+	}
+
+	.legend .port {
+		color: #2f64a3;
+		font-size: 0.8rem;
+		line-height: 1;
 	}
 
 	.legend .cube {

@@ -57,7 +57,7 @@
 				</div>
 
 				{#if info.playerDeck.cards > 0}
-					<div class="stat" title="Cards left in the Player deck">
+					<div class="stat" title="Cards left in the Player deck" data-deck="player">
 						<span class="caption">Player deck</span>
 						{#key info.playerDeck.cards}<strong data-testid="deck-count" in:fly={{ y: -10, duration: 280 }}
 								>{info.playerDeck.cards}</strong

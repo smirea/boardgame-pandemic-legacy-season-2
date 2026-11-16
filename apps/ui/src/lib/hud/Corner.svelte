@@ -1,12 +1,18 @@
 <script lang="ts">
-	import { cityDef, handLimit, pack } from '@repo/game';
-	import type { CardId, SeatId, World } from '@repo/game';
-	import { CITY_COLOR } from '#lib/board/CityMarker.svelte';
+	import { handLimit, pack } from '@repo/game';
+	import type { SeatId, World } from '@repo/game';
 	import { inkOn } from '#lib/color.ts';
-	import { cardName, cityName } from './labels.svelte.ts';
 	import Bubble from '#lib/replay/Bubble.svelte';
 	import type { SaidNote } from '#lib/replay/replay.svelte.ts';
+	import { flip } from 'svelte/animate';
+	import { cubicIn } from 'svelte/easing';
+	import { fly } from 'svelte/transition';
+	import { deal } from './deal.ts';
+	import { cardName, cityName } from './labels.svelte.ts';
+	import { cardColor } from './PlayerCard.svelte';
+	import Portrait from './Portrait.svelte';
 	import type { Place } from './seats.ts';
+	import { turnSteps } from './turn.ts';
 
 	type Props = {
 		/** Who sits here: the player in a replay, the character at a live table. */
@@ -15,11 +21,13 @@
 		color: string;
 		world: World;
 		place: Place;
+		/** False for the hand the dock is already holding up, so it is not shown twice. */
+		showHand?: boolean;
 		notes?: SaidNote[];
 		dimmed?: boolean;
 		/** Followed in a replay, or the hand the dock shows at a live table. */
 		selected: boolean;
-		/** What clicking the slip does, as its tooltip. */
+		/** What clicking the card does, as its tooltip. */
 		action: string;
 		/** Shown while selected, beside the name. */
 		selectedTag?: string;
@@ -35,6 +43,7 @@
 		color,
 		world,
 		place,
+		showHand = true,
 		notes = [],
 		dimmed = false,
 		selected,
@@ -49,98 +58,124 @@
 	const player = $derived(game?.players[seat]);
 	const character = $derived(player ? world.campaign.characters[player.character] : undefined);
 	const job = $derived(pack.jobs.find(candidate => candidate.id === character?.job));
-	// Some characters are named after their job, and at a live table the slip already carries the character's name.
-	const role = $derived(character?.worker ? 'haven worker' : job && job.name !== character?.name ? job.name : null);
-	const who = $derived(
-		[character && character.name !== name ? character.name : null, role].filter(Boolean).join(', ') || null,
+	// At a live table the card is headed with the character's name, so it is not repeated underneath.
+	const subtitle = $derived(
+		[character && character.name !== name ? character.name : null, character?.worker ? 'Haven worker' : null]
+			.filter(Boolean)
+			.join(', '),
 	);
 	const active = $derived(game !== null && game.active === seat && !game.outcome);
 	const top = $derived(place === 'tl' || place === 'tr');
 	const right = $derived(place === 'tr' || place === 'br');
 
-	const CARD_TINT = { epidemic: '#8c1c12', produce: '#5d7a3a', event: '#ece3cf', companion: '#6b5a86' } as const;
-	function tint(id: CardId) {
-		const card = world.campaign.playerCards[id];
-		if (!card) return '#8d8476';
-		if (card.kind === 'city') return CITY_COLOR[cityDef(card.city).color ?? 'haven'];
-		return CARD_TINT[card.kind];
-	}
+	/** The character card, one line each: the job, then every ability and scar written on it. */
+	const traits = $derived.by(() => {
+		if (!character) return [];
+		const lines: { kind: 'job' | 'ability' | 'scar'; name: string; text: string; struck?: boolean }[] = [];
+		if (job) lines.push({ kind: 'job', name: job.name, text: job.text, struck: character.jobScar !== null });
+		if (character.jobScar) {
+			const scar = pack.scars.find(candidate => candidate.id === character.jobScar);
+			if (scar) lines.push({ kind: 'scar', name: scar.name, text: scar.text });
+		}
+		for (const slot of character.slots) {
+			if (!slot) continue;
+			const def =
+				slot.kind === 'ability'
+					? pack.abilities.find(ability => ability.id === slot.id)
+					: pack.scars.find(scar => scar.id === slot.id);
+			if (def) lines.push({ kind: slot.kind, name: def.name, text: def.text });
+		}
+		return lines;
+	});
+
+	const hand = $derived((player?.hand ?? []).flatMap(id => world.campaign.playerCards[id] ?? []));
+	// Cards drawn this turn come from the Player deck. Anything else, such as a shared card, settles in where it lands.
+	const drawnThisTurn = $derived.by(() => {
+		const log = game?.log ?? [];
+		const since = log.slice(log.findLastIndex(entry => entry.t === 'turn') + 1);
+		return new Set(since.flatMap(entry => (entry.t === 'draw' && entry.seat === seat ? [entry.card] : [])));
+	});
+	const steps = $derived(active ? turnSteps(world, seat) : []);
 </script>
 
 <div class="corner {place}" class:dimmed data-testid="corner" data-player={name}>
 	{#if top}
-		{@render slip()}
+		{@render card()}
+		{@render held()}
 		{@render bubbles()}
 	{:else}
 		{@render bubbles()}
-		{@render slip()}
+		{@render held()}
+		{@render card()}
 	{/if}
 </div>
 
-{#snippet slip()}
+{#snippet card()}
 	<div class="seat" style:--seat={color} style:--on={inkOn(color)}>
 		<button class="slip" class:active class:selected onclick={onselect} title={action} aria-pressed={selected}>
-			<span class="head">
-				<span class="pawn"></span>
-				<strong>{name}</strong>
-				{#if active}
-					<span class="turn" data-testid="corner-turn"
-						>Playing{#if game && game.actionsLeft > 0}<span class="pips"
-								>{#each { length: game.actionsLeft } as _, index (index)}<i></i>{/each}</span
-							>{/if}</span
-					>
-				{:else if selected && selectedTag}
-					<span class="turn quiet">{selectedTag}</span>
-				{/if}
+			<span class="portrait">
+				<Portrait
+					id={character?.id ?? seat}
+					{color}
+					hooded={character?.worker ?? false}
+					dead={character?.dead ?? false}
+				/>
 			</span>
-			{#if player && character}
-				<span class="who">
-					<span class="role" class:covered={character.jobScar !== null} title={job?.text}>{who ?? ''}</span>
-					<em>{cityName(player.location)}</em>
-				</span>
-				<span class="hand" title="Cards in hand">
-					{#each player.hand as card (card)}
-						<i style:--card={tint(card)} title={cardName(world, card)}></i>
-					{/each}
-					<b class:over={player.hand.length > handLimit(world, seat)}>{player.hand.length}/{handLimit(world, seat)}</b>
-				</span>
-				<span class="row">
-					<span title="Supply cubes carried">Carrying <b>{player.supplies}</b></span>
-					{#if !character.worker}
-						<span class="exposure" title="Exposure track. A scar or a skull hides under some boxes.">
-							Exposure
-							{#each { length: pack.numbers.exposureBoxes } as _, box (box)}
-								{@const result = box < character.exposure ? character.exposureTrack[box] : undefined}
-								<i
-									class:scratched={box < character.exposure}
-									class:scar={result === 'scar'}
-									class:skull={result === 'skull'}
-								></i>
-							{/each}
+			<span class="body">
+				<span class="head">
+					<strong>{name}</strong>
+					{#if player}
+						<span class="cubes" title="Supply cubes carried">
+							{#each { length: player.supplies } as _, index (index)}<i></i>{/each}
 						</span>
 					{/if}
 				</span>
-				{#if character.jobScar || character.slots.some(slot => slot)}
+				{#if player && character}
+					<span class="where">
+						{#if subtitle}<span class="role">{subtitle}</span>{/if}
+						<em>{cityName(player.location)}</em>
+					</span>
 					<span class="traits">
-						{#if character.jobScar}
-							{@const scar = pack.scars.find(candidate => candidate.id === character.jobScar)}
-							<span class="scar" title={scar?.text}>{scar?.name}</span>
-						{/if}
-						{#each character.slots as slot, index (index)}
-							{#if slot}
-								{@const def =
-									slot.kind === 'ability'
-										? pack.abilities.find(ability => ability.id === slot.id)
-										: pack.scars.find(scar => scar.id === slot.id)}
-								<span class={slot.kind} title={def?.text}>{def?.name}</span>
-							{/if}
+						{#each traits as trait (`${trait.kind}:${trait.name}`)}
+							<span class="trait {trait.kind}" class:struck={trait.struck} title={`${trait.name}: ${trait.text}`}>
+								<b>{trait.name}</b>
+								{trait.text}
+							</span>
 						{/each}
 					</span>
+					<span class="foot">
+						{#if !character.worker}
+							<span class="exposure" title="Exposure track. A scar or a skull hides under some boxes.">
+								{#each { length: pack.numbers.exposureBoxes } as _, box (box)}
+									{@const result = box < character.exposure ? character.exposureTrack[box] : undefined}
+									<i
+										class:scratched={box < character.exposure}
+										class:scar={result === 'scar'}
+										class:skull={result === 'skull'}
+									></i>
+								{/each}
+							</span>
+						{/if}
+						<span
+							class="count"
+							class:over={player.hand.length > handLimit(world, seat)}
+							title="Cards in hand, out of the hand limit">{player.hand.length}/{handLimit(world, seat)} cards</span
+						>
+					</span>
+				{:else}
+					<span class="where">At the table</span>
 				{/if}
-			{:else}
-				<span class="who">At the table</span>
-			{/if}
+			</span>
 		</button>
+		{#if active}
+			<span class="turn" data-testid="corner-turn"
+				>Playing{#if game && game.actionsLeft > 0}<span class="pips"
+						>{#each { length: game.actionsLeft } as _, index (index)}<i></i>{/each}</span
+					>{/if}</span
+			>
+		{:else if selected && selectedTag}
+			<span class="turn quiet">{selectedTag}</span>
+		{/if}
 		{#if claim}
 			<button
 				class="claim"
@@ -150,7 +185,43 @@
 				>{claim.mine ? 'you' : 'claim'}</button
 			>
 		{/if}
+		{#if steps.length}
+			<!-- The turn so far, beside the card on the side facing the board. -->
+			<ol class="steps" data-testid="turn-steps">
+				{#each steps as step, index (step.seq)}
+					<li class={step.kind} in:fly={{ x: right ? 24 : -24, duration: 320 }} animate:flip={{ duration: 260 }}>
+						<i>{index + 1}</i>
+						<b>{step.name}</b>
+						{#if step.detail}<span>{step.detail}</span>{/if}
+					</li>
+				{/each}
+			</ol>
+		{/if}
 	</div>
+{/snippet}
+
+{#snippet held()}
+	{#if showHand && hand.length}
+		<!-- The hand fans along the card's width, each card showing its name down its visible edge. -->
+		<div class="hand" style:--n={hand.length} data-testid="corner-hand">
+			{#each hand as held (held.id)}
+				{@const label = held.kind === 'epidemic' ? 'Epidemic' : cardName(world, held.id)}
+				<button
+					class="mini"
+					style:--band={cardColor(held)}
+					style:--ink={inkOn(cardColor(held))}
+					title={label}
+					onclick={onselect}
+					data-name={label}
+					animate:flip={{ duration: 320 }}
+					in:deal={{ drawn: drawnThisTurn.has(held.id) }}
+					out:fly={{ y: top ? 16 : -16, duration: 220, easing: cubicIn }}
+				>
+					<span>{label}</span>
+				</button>
+			{/each}
+		</div>
+	{/if}
 {/snippet}
 
 {#snippet bubbles()}
@@ -165,7 +236,7 @@
 	.corner {
 		display: flex;
 		flex-direction: column;
-		gap: 0.75rem;
+		gap: 0.45rem;
 		width: 100%;
 		pointer-events: none;
 		transition: opacity 250ms ease;
@@ -180,67 +251,26 @@
 		align-items: flex-end;
 	}
 
+	.dimmed .slip {
+		opacity: 0.55;
+	}
+
 	.seat {
 		position: relative;
 		width: 100%;
 	}
 
-	.claim {
-		position: absolute;
-		right: 0.55rem;
-		bottom: 0.45rem;
-		padding: 0 0.4rem;
-		border: 1px solid color-mix(in srgb, var(--on) 45%, transparent);
-		border-radius: 2px;
-		background: none;
-		color: var(--on);
-		font: inherit;
-		font-size: 0.7rem;
-		cursor: pointer;
-	}
-
-	.claim.on {
-		background: var(--on);
-		color: var(--seat);
-		font-weight: 700;
-	}
-
-	.dimmed .slip {
-		opacity: 0.55;
-	}
-
-	.bubbles {
-		display: flex;
-		flex-direction: column;
-		gap: 0.35rem;
-		width: 19.5rem;
-		max-width: 24vw;
-		pointer-events: none;
-	}
-
-	.bubbles > :global(*) {
-		pointer-events: auto;
-	}
-
-	.tr .bubbles,
-	.br .bubbles {
-		align-items: flex-end;
-	}
-
-	.tl .bubbles,
-	.bl .bubbles {
-		align-items: flex-start;
-	}
-
+	/* A character card laid on the table: the portrait down the left, the card's lines beside it. */
 	.slip {
 		--soft: color-mix(in srgb, var(--on) 74%, transparent);
-		display: flex;
-		flex-direction: column;
-		gap: 0.25rem;
+		display: grid;
+		grid-template-columns: 4.1rem minmax(0, 1fr);
 		width: 100%;
-		padding: 0.45rem 0.65rem 0.5rem;
+		min-height: 6.4rem;
+		padding: 0;
+		overflow: hidden;
 		border: 0;
-		border-radius: 2px;
+		border-radius: 3px;
 		background:
 			radial-gradient(ellipse at 15% 0%, rgb(255 248 228 / 0.2), transparent 65%),
 			linear-gradient(170deg, var(--seat), color-mix(in srgb, var(--seat) 82%, #140c06));
@@ -272,48 +302,181 @@
 		outline-offset: 3px;
 	}
 
+	.portrait {
+		display: block;
+		min-height: 100%;
+		border-right: 1px solid rgb(20 12 4 / 0.35);
+	}
+
+	.body {
+		display: flex;
+		flex-direction: column;
+		gap: 0.2rem;
+		min-width: 0;
+		padding: 0.4rem 0.55rem 0.45rem;
+	}
+
 	.head {
 		display: flex;
 		align-items: center;
-		gap: 0.45rem;
-	}
-
-	.pawn {
-		width: 0.65rem;
-		height: 0.65rem;
-		flex: none;
-		border: 2px solid var(--on);
-		border-radius: 50%;
-	}
-
-	.active .pawn {
-		background: var(--on);
+		gap: 0.5rem;
+		min-height: 1.35rem;
 	}
 
 	strong {
+		overflow: hidden;
 		font-family: var(--font-display);
 		font-size: 1.3rem;
 		font-weight: 400;
 		line-height: 1;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 
+	/* Carried cubes stack two high and grow sideways, so any load fits beside the name. */
+	.cubes {
+		display: grid;
+		grid-auto-flow: column;
+		grid-template-rows: repeat(2, 0.5rem);
+		gap: 2px;
+		margin-left: auto;
+	}
+
+	.cubes i {
+		width: 0.5rem;
+		height: 0.5rem;
+		border: 1px solid rgb(20 12 4 / 0.55);
+		border-radius: 1px;
+		background: linear-gradient(135deg, #fbf5e6, #d9cfb8);
+		box-shadow: 0 1px 0 rgb(20 12 4 / 0.35);
+	}
+
+	.where {
+		display: flex;
+		align-items: baseline;
+		gap: 0.5rem;
+		color: var(--soft);
+		font-size: 0.74rem;
+		white-space: nowrap;
+	}
+
+	.role {
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.where em {
+		flex: none;
+		margin-left: auto;
+		color: var(--on);
+		font-family: var(--font-display);
+		font-size: 0.9rem;
+	}
+
+	.traits {
+		display: flex;
+		flex-direction: column;
+		gap: 1px;
+	}
+
+	.trait {
+		overflow: hidden;
+		padding: 0.05rem 0.3rem;
+		border-left: 2px solid color-mix(in srgb, var(--on) 45%, transparent);
+		background: color-mix(in srgb, var(--on) 10%, transparent);
+		color: var(--soft);
+		font-size: 0.68rem;
+		line-height: 1.35;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.trait b {
+		color: var(--on);
+		font-weight: 700;
+	}
+
+	.trait.struck b {
+		text-decoration: line-through;
+	}
+
+	.trait.scar {
+		border-left-color: #1d140d;
+		background: rgb(20 10 6 / 0.3);
+	}
+
+	.foot {
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
+		margin-top: auto;
+		color: var(--soft);
+		font-size: 0.68rem;
+	}
+
+	.count {
+		margin-left: auto;
+	}
+
+	.count.over {
+		color: var(--on);
+		font-weight: 700;
+		text-decoration: underline wavy;
+	}
+
+	.exposure {
+		display: flex;
+		gap: 2px;
+	}
+
+	.exposure i {
+		width: 0.5rem;
+		height: 0.5rem;
+		border: 1px solid var(--soft);
+		border-radius: 1px;
+	}
+
+	.exposure i.scratched {
+		background: var(--soft);
+	}
+
+	.exposure i.scar {
+		border-color: #f1c35a;
+		background: #f1c35a;
+	}
+
+	.exposure i.skull {
+		border-color: #1d140d;
+		background: #1d140d;
+	}
+
+	/* The turn tab sits on the card's edge facing the board's middle. */
 	.turn {
+		position: absolute;
+		top: -0.6rem;
+		right: 0.5rem;
 		display: flex;
 		align-items: center;
 		gap: 0.35rem;
-		margin-left: auto;
 		padding: 0.05rem 0.45rem;
 		border-radius: 2px;
 		background: var(--slip-ink);
 		color: var(--slip);
-		font-size: 0.72rem;
+		font-size: 0.7rem;
 		font-weight: 700;
+		pointer-events: none;
 		animation: tagged 380ms cubic-bezier(0.2, 1.4, 0.4, 1);
 	}
 
+	.bl .turn,
+	.br .turn {
+		top: auto;
+		bottom: calc(100% - 0.6rem);
+	}
+
 	.turn.quiet {
-		background: none;
-		color: var(--soft);
+		background: color-mix(in srgb, var(--seat) 70%, #140c06);
+		color: var(--on);
 		font-weight: 500;
 	}
 
@@ -336,118 +499,167 @@
 		}
 	}
 
-	.who {
-		display: flex;
-		align-items: baseline;
-		gap: 0.5rem;
-		color: var(--soft);
-		font-size: 0.8rem;
-		white-space: nowrap;
-	}
-
-	.role {
-		overflow: hidden;
-		text-overflow: ellipsis;
-	}
-
-	.role.covered {
-		text-decoration: line-through;
-	}
-
-	.traits {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.25rem;
-		font-size: 0.68rem;
-	}
-
-	.traits span {
-		padding: 0 0.35rem;
+	.claim {
+		position: absolute;
+		right: 0.55rem;
+		bottom: 0.35rem;
+		padding: 0 0.4rem;
+		border: 1px solid color-mix(in srgb, var(--on) 45%, transparent);
 		border-radius: 2px;
-		background: color-mix(in srgb, var(--on) 16%, transparent);
-	}
-
-	.traits .scar {
-		background: rgb(20 10 6 / 0.35);
-		text-decoration: underline dotted;
-	}
-
-	.who em {
-		flex: none;
-		margin-left: auto;
+		background: var(--seat);
 		color: var(--on);
-		font-family: var(--font-display);
-		font-size: 0.92rem;
+		font: inherit;
+		font-size: 0.7rem;
+		cursor: pointer;
 	}
 
-	.hand {
-		display: flex;
-		align-items: center;
-		gap: 3px;
-		min-height: 1rem;
-	}
-
-	.hand i {
-		width: 0.62rem;
-		height: 0.9rem;
-		border: 1px solid rgb(20 12 4 / 0.45);
-		border-radius: 1px;
-		background: var(--card);
-		box-shadow: 0 1px 1px rgb(20 12 4 / 0.3);
-	}
-
-	.hand b,
-	.row b {
-		color: var(--on);
+	.claim.on {
+		background: var(--on);
+		color: var(--seat);
 		font-weight: 700;
 	}
 
-	.hand b {
-		margin-left: 0.3rem;
-		font-size: 0.74rem;
-	}
-
-	.over {
-		text-decoration: underline wavy;
-	}
-
-	.row {
+	/* The active player's turn so far, floating beside the card toward the board. */
+	.steps {
+		position: absolute;
+		top: 0;
+		left: calc(100% + 0.5rem);
 		display: flex;
-		align-items: center;
-		gap: 0.8rem;
-		color: var(--soft);
+		flex-direction: column;
+		gap: 0.25rem;
+		width: max-content;
+		max-width: 14rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		pointer-events: none;
+	}
+
+	.tr .steps,
+	.br .steps {
+		right: calc(100% + 0.5rem);
+		left: auto;
+		align-items: flex-end;
+	}
+
+	.bl .steps,
+	.br .steps {
+		top: auto;
+		bottom: 0;
+	}
+
+	.steps li {
+		display: flex;
+		align-items: baseline;
+		gap: 0.4rem;
+		padding: 0.22rem 0.55rem 0.24rem 0.3rem;
+		border-left: 3px solid var(--seat);
+		border-radius: 2px;
+		background: rgb(240 231 210 / 0.95);
+		box-shadow: var(--slip-shadow);
+		color: var(--slip-ink);
 		font-size: 0.74rem;
+		line-height: 1.25;
+	}
+
+	.steps li.event {
+		border-left-color: #b08628;
+	}
+
+	.steps i {
+		min-width: 1rem;
+		color: rgb(42 32 23 / 0.55);
+		font-style: normal;
+		font-weight: 700;
+		text-align: center;
+	}
+
+	.steps b {
+		font-weight: 700;
+	}
+
+	.steps span {
+		color: rgb(42 32 23 / 0.75);
+	}
+
+	/* Mini cards overlap just enough that the whole hand spans the card's width and no more. */
+	.hand {
+		--card: 2.45rem;
+		display: flex;
+		width: 100%;
+	}
+
+	.tr .hand,
+	.br .hand {
+		justify-content: flex-end;
+	}
+
+	.mini {
+		position: relative;
+		flex: none;
+		width: var(--card);
+		height: 4.3rem;
+		padding: 0.25rem 0 0.25rem 0.18rem;
+		border: 1px solid rgb(20 12 4 / 0.45);
+		border-radius: 3px;
+		background:
+			linear-gradient(90deg, var(--band) 0 0.95rem, color-mix(in srgb, var(--band) 30%, #f1e9d6) 0.95rem), var(--band);
+		box-shadow:
+			-2px 0 4px rgb(20 12 4 / 0.25),
+			0 2px 3px rgb(20 12 4 / 0.3);
+		color: var(--ink);
+		cursor: pointer;
+		transition: translate 160ms ease;
+	}
+
+	.mini + .mini {
+		margin-left: min(0.2rem, calc((100% - var(--n) * var(--card)) / max(1, var(--n) - 1)));
+	}
+
+	.mini:hover {
+		z-index: 2;
+		translate: 0 -0.3rem;
+	}
+
+	.tl .mini:hover,
+	.tr .mini:hover {
+		translate: 0 0.3rem;
+	}
+
+	.mini span {
+		display: block;
+		width: 0.85rem;
+		overflow: hidden;
+		max-height: 100%;
+		font-family: var(--font-display);
+		font-size: 0.64rem;
+		line-height: 0.9rem;
+		text-overflow: ellipsis;
 		white-space: nowrap;
+		writing-mode: vertical-rl;
+		rotate: 180deg;
 	}
 
-	.exposure {
+	.bubbles {
 		display: flex;
-		align-items: center;
-		gap: 2px;
+		flex-direction: column;
+		gap: 0.35rem;
+		width: 19.5rem;
+		max-width: 24vw;
+		pointer-events: none;
 	}
 
-	.exposure i {
-		width: 0.5rem;
-		height: 0.5rem;
-		border: 1px solid var(--soft);
-		border-radius: 1px;
+	.bubbles > :global(*) {
+		pointer-events: auto;
 	}
 
-	.exposure i:first-of-type {
-		margin-left: 0.25rem;
+	.tr .bubbles,
+	.br .bubbles {
+		align-items: flex-end;
 	}
 
-	.exposure i.scratched {
-		background: var(--soft);
-	}
-
-	.exposure i.scar {
-		border-color: #f1c35a;
-		background: #f1c35a;
-	}
-
-	.exposure i.skull {
-		border-color: #1d140d;
-		background: #1d140d;
+	.tl .bubbles,
+	.bl .bubbles {
+		align-items: flex-start;
 	}
 </style>

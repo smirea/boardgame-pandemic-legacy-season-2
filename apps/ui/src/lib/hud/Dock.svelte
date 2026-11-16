@@ -2,7 +2,7 @@
 	import { actionCost, checkAction, handLimit, pack, reject } from '@repo/game';
 	import type { Action, CardId, Command, Decide, Play, PublicState, Purchase, SeatId } from '@repo/game';
 	import { flip } from 'svelte/animate';
-	import { backOut, cubicIn } from 'svelte/easing';
+	import { cubicIn } from 'svelte/easing';
 	import { fade, fly } from 'svelte/transition';
 	import {
 		ACTION_NAMES,
@@ -16,15 +16,17 @@
 		cardName,
 	} from './labels.svelte.ts';
 	import InfectionCard from '#lib/cards/InfectionCard.svelte';
-	import { inkOn } from '#lib/color.ts';
-	import PlayerCard, { cardColor } from './PlayerCard.svelte';
+	import { deal } from './deal.ts';
+	import PlayerCard from './PlayerCard.svelte';
 
 	type Props = {
 		snap: PublicState;
 		canAct: boolean;
 		/** Whether this client plays the seat. Prompts and discards are offered only to whoever they belong to. */
 		owns: (seat: SeatId) => boolean;
-		viewing: SeatId | null;
+		/** The hand held up in the dock, and the hand that is this player's own. */
+		seat: SeatId;
+		home: SeatId;
 		actions: Action[];
 		plays: { seat: SeatId; card: CardId; play: Play }[];
 		decides: Decide[];
@@ -34,7 +36,7 @@
 		onplaycard: (seat: SeatId, card: CardId) => void;
 	};
 
-	let { snap, canAct, owns, viewing, actions, plays, decides, send, onview, ongroup, onplaycard }: Props = $props();
+	let { snap, canAct, owns, seat, home, actions, plays, decides, send, onview, ongroup, onplaycard }: Props = $props();
 
 	const world = $derived(snap.world);
 	const game = $derived(world.game!);
@@ -58,13 +60,13 @@
 	});
 
 	const pending = $derived(game.pending[0]);
-	// The hand held up in front of this player is their own. On a shared screen that is whoever's turn it is.
-	const home = $derived(owns(game.active) ? game.active : (game.seats.find(owns) ?? game.active));
-	const seat = $derived(viewing ?? home);
 	const cardsOf = (other: SeatId) =>
 		(game.players[other]?.hand ?? []).flatMap(id => world.campaign.playerCards[id] ?? []);
 	const handCards = $derived(cardsOf(seat));
-	const others = $derived(game.seats.filter(other => other !== seat));
+	const drawnThisTurn = $derived.by(() => {
+		const since = game.log.slice(game.log.findLastIndex(entry => entry.t === 'turn') + 1);
+		return new Set(since.flatMap(entry => (entry.t === 'draw' && entry.seat === seat ? [entry.card] : [])));
+	});
 	const seatColor = (other: SeatId) => SEAT_COLORS[game.seats.indexOf(other)];
 	// The fan tightens as the hand grows so a full hand still fits between the seats and the prompts.
 	const overlap = $derived(Math.max(0.3, Math.min(2.9, (handCards.length - 3) * 0.55)));
@@ -238,30 +240,8 @@
 				>
 			</div>
 		{:else}
-			<div class="hands">
-				<nav aria-label="Other hands">
-					{#each others as other (other)}
-						<button
-							class:current={other === game.active}
-							style:--seat={seatColor(other)}
-							onclick={() => onview(other)}
-							title={`Show ${seatName(world, other)}'s hand`}
-							animate:flip={{ duration: 300 }}
-						>
-							<span class="who">{seatName(world, other)}</span>
-							<!-- Card names come from data-name so finding a teammate by name never matches one of their cards. -->
-							{#each cardsOf(other) as card (card.id)}
-								<i
-									style:--band={cardColor(card)}
-									style:--on={inkOn(cardColor(card))}
-									data-name={card.kind === 'epidemic' ? 'Epidemic' : cardName(world, card.id)}
-									transition:fade={{ duration: 200 }}
-								></i>
-							{/each}
-						</button>
-					{/each}
-				</nav>
-			</div>
+			<!-- Every other hand is on its seat card, so this column only keeps the held hand near the middle. -->
+			<div class="spacer"></div>
 
 			<div class="held" style:--seat={seatColor(seat)}>
 				<p class="holder">
@@ -277,7 +257,7 @@
 							<div
 								class="slot"
 								animate:flip={{ duration: 320 }}
-								in:fly={{ x: 160, y: -220, duration: 520, easing: backOut }}
+								in:deal={{ drawn: drawnThisTurn.has(card.id) }}
 								out:fly={{ y: -140, duration: 260, easing: cubicIn }}
 							>
 								<div
@@ -569,72 +549,8 @@
 		line-height: 1.25;
 	}
 
-	.hands {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
+	.spacer {
 		min-width: 0;
-	}
-
-	nav {
-		display: flex;
-		flex-direction: column;
-		gap: 0.35rem;
-	}
-
-	nav button {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: 3px;
-		padding: 0.15rem 0 0.15rem 0.55rem;
-		border: 0;
-		border-left: 2px solid var(--seat);
-		background: none;
-		color: var(--muted);
-		font: inherit;
-		font-size: 0.8rem;
-		text-align: left;
-		cursor: pointer;
-		transition: color 150ms ease;
-	}
-
-	nav button:hover,
-	nav button.current {
-		color: var(--ink);
-	}
-
-	.who {
-		margin-right: 0.3rem;
-		color: var(--seat);
-		font-family: var(--font-display);
-		font-size: 1rem;
-	}
-
-	/* Someone else's hand is shown face up but small: a chip per card, in its region's colour, with its name. */
-	nav i {
-		max-width: 4.6rem;
-		padding: 0 0.3rem;
-		overflow: hidden;
-		border-radius: 2px;
-		background: linear-gradient(170deg, var(--band), color-mix(in srgb, var(--band) 78%, #140c06));
-		box-shadow: 0 1px 2px rgb(0 0 0 / 0.45);
-		color: var(--on);
-		font-size: 0.68rem;
-		font-style: normal;
-		font-weight: 600;
-		line-height: 1.15rem;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-		transition: translate 200ms ease;
-	}
-
-	nav i::after {
-		content: attr(data-name);
-	}
-
-	nav button:hover i {
-		translate: 0 -2px;
 	}
 
 	.held {

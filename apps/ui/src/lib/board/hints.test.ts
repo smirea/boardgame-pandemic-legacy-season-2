@@ -11,6 +11,7 @@ const lagos: CityView = {
 	plague: 2,
 	hollow: 1,
 	population: 3,
+	port: true,
 	structures: [
 		{ kind: 'center', permanent: false },
 		{ kind: 'tower', permanent: true },
@@ -28,6 +29,7 @@ describe('board hints', () => {
 			title: 'Lagos',
 			lines: [
 				'Population 3',
+				'Port: sea movement may start or end here',
 				'7 supply cubes',
 				'2 plague cubes',
 				'1 Hollow Man',

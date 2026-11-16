@@ -22,7 +22,7 @@
 	import { anchorOffset, NAME_SIZE } from './labels';
 	import type { Anchor } from './labels';
 	import Pop from './Pop.svelte';
-	import { fonts, printName, printNumber, printSticker } from './print.svelte';
+	import { fonts, printDisc, printName, printSticker } from './print.svelte';
 	import Printed from './Printed.svelte';
 	import type { BoardPoint } from './projection';
 	import { LAND_HEIGHT } from './projection';
@@ -67,7 +67,7 @@
 	const INK = 0.2;
 
 	const name = $derived(fonts.ready ? printName(state.name, NAME_SIZE, state.odds, !state.onGrid) : null);
-	const population = $derived(fonts.ready ? printNumber(state.population, 2.4, inkOn(color)) : null);
+	const face = $derived(fonts.ready ? printDisc(state.population, city.port, 2.8, inkOn(color)) : null);
 	const permanent = $derived(state.structures.filter(structure => structure.permanent));
 	const stickers = $derived(
 		fonts.ready
@@ -170,8 +170,8 @@
 				opacity={state.onGrid ? 0.9 : 0.45}
 			/>
 		</T.Mesh>
-		{#if population}
-			<Printed print={population} position={[0, DISC + 0.03, 0]} opacity={state.onGrid ? 1 : 0.6} order={6} />
+		{#if face}
+			<Printed print={face} position={[0, DISC + 0.03, 0]} opacity={state.onGrid ? 1 : 0.6} order={6} />
 		{/if}
 		{#if state.highlight}
 			<T.Mesh position.y={0.06} rotation.x={-Math.PI / 2}>

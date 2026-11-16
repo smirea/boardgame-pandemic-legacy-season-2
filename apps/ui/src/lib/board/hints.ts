@@ -27,6 +27,7 @@ function structureLine(kind: StructureKind, permanent: boolean) {
 /** Everything at one city, for a hover over its disc. */
 export function cityHint(city: CityView): HintText {
 	const lines = [`Population ${city.population}`];
+	if (city.port) lines.push('Port: sea movement may start or end here');
 	lines.push(city.supplies ? plural(city.supplies, 'supply cube') : 'No supply cubes');
 	if (city.plague) lines.push(plural(city.plague, 'plague cube'));
 	if (city.hollow) lines.push(plural(city.hollow, 'Hollow Man', 'Hollow Men'));

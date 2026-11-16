@@ -213,7 +213,9 @@ try {
 				briefing: Boolean(document.querySelector('.scrim:not([inert]) .briefing')),
 				discards: document.querySelectorAll('[data-testid=hand] .card.discard').length,
 				prompt: (document.querySelector('.dock .prompt') as HTMLElement | null)?.innerText ?? '',
-				tabs: text('.hands nav button'),
+				tabs: [...document.querySelectorAll<HTMLElement>('[data-testid=corner]')].map(
+					node => node.dataset['player'] ?? '',
+				),
 				decisions: text('.middle > .chips:not([data-testid]) button'),
 				chips: text('[data-testid=actions] button:not([disabled])'),
 				rows: document.querySelectorAll('[data-testid=chooser]:not([inert]) .rows button').length,
@@ -255,8 +257,8 @@ try {
 		) {
 			if (view.discards === 0) {
 				const owner = view.tabs.find(tab => view.prompt.includes(tab.split(' ')[0]!));
-				if (owner) await tap(page.locator('.hands nav button', { hasText: owner.split(' ')[0]! }).first());
-				else await tap(page.locator('.hands nav button').nth(idle % Math.max(1, view.tabs.length)));
+				if (owner) await tap(page.locator(`[data-testid=corner][data-player="${owner}"] .slip`));
+				else await tap(page.locator('[data-testid=corner] .slip').nth(idle % Math.max(1, view.tabs.length)));
 			} else {
 				await tap(page.locator('[data-testid=hand] .card.discard').first());
 			}
