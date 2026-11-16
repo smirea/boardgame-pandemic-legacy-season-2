@@ -392,15 +392,23 @@ function outbreak(world: World, origin: CityId) {
 	}
 }
 
+/** Whether the improvement on this Infection card stops it from doing anything. It applies however the card is drawn. */
+function sparedByCard(world: World, city: CityId, cardId: CardId): boolean {
+	const { campaign, game } = world as { campaign: World['campaign']; game: Game };
+	const card = campaign.infectionCards[cardId]!;
+	const improvement = card.kind === 'city' ? card.improvement : null;
+	return (
+		(improvement === 'wellStocked' && game.locations[city]!.supplies >= 2) ||
+		(improvement === 'rebirth' && campaign.locations[city]!.population >= numbers.rebirthPopulation)
+	);
+}
+
 export function infectCity(world: World, city: CityId, cardId: CardId) {
 	const { campaign, game } = world as { campaign: World['campaign']; game: Game };
 	const location = game.locations[city]!;
 	const card = campaign.infectionCards[cardId]!;
 	const improvement = card.kind === 'city' ? card.improvement : null;
-	const spared =
-		(improvement === 'wellStocked' && location.supplies >= 2) ||
-		(improvement === 'rebirth' && campaign.locations[city]!.population >= numbers.rebirthPopulation);
-	if (spared) return log(game, { t: 'infect', city, card: cardId, effect: 'blocked' });
+	if (sparedByCard(world, city, cardId)) return log(game, { t: 'infect', city, card: cardId, effect: 'blocked' });
 	if (location.supplies > 0) {
 		location.supplies -= 1;
 		game.stockpile += 1;
@@ -431,6 +439,8 @@ export function placeHollow(world: World, city: CityId, cardId: CardId) {
 	if (location.hollow >= numbers.maxHollowPerCity) {
 		const record = campaign.locations[city]!;
 		if (!location.shelter) record.population = Math.max(0, record.population - 1);
+		// A city that is forsaken the moment its last person leaves is infested from that moment too.
+		if (isForsaken(campaign, city)) record.infested = true;
 		return;
 	}
 	if (game.pieces.hollow === 0) {
@@ -482,7 +492,8 @@ export function epidemic(world: World) {
 	let removed = 0;
 	if (struck) {
 		const location = game.locations[struck.city]!;
-		removed = hasRule(campaign, 'gentleEpidemic') ? Math.min(1, location.supplies) : location.supplies;
+		if (!sparedByCard(world, struck.city, struck.id))
+			removed = hasRule(campaign, 'gentleEpidemic') ? Math.min(1, location.supplies) : location.supplies;
 		game.stockpile += removed;
 		location.supplies -= removed;
 		game.infectionDiscard.push(struck.id);
@@ -494,8 +505,12 @@ export function epidemic(world: World) {
 			return card?.kind === 'event' && card.event === 'resilience';
 		}),
 	);
-	// Resilience is at its best between the strike and the reshuffle, so a holder gets the chance to play it there.
-	if (resilient && game.infectionDiscard.length > 0) game.pending.push({ t: 'intensify' });
+	const lockable = game.infectionDiscard.some(id => {
+		const card = campaign.infectionCards[id];
+		return card?.kind === 'city' && card.improvement === 'lockdown';
+	});
+	// Resilience and Lockdown both act on the discard pile, which is about to be reshuffled away, so the game waits for them.
+	if ((resilient || lockable) && game.infectionDiscard.length > 0) game.pending.push({ t: 'intensify' });
 	else intensify(world);
 }
 
@@ -513,8 +528,10 @@ export function startDrawStep(world: World) {
 
 export function drawPlayerCard(world: World) {
 	const { campaign, game } = world as { campaign: World['campaign']; game: Game };
-	const id = drawPiled(game.playerDeck, card => campaign.playerCards[card]!.kind === 'epidemic')!;
+	const id = drawPiled(game.playerDeck, card => campaign.playerCards[card]!.kind === 'epidemic');
 	game.drawsLeft -= 1;
+	// An Event played between the two draws can empty the deck. A draw that cannot be made loses the game.
+	if (!id) return setOutcome(world, false, 'The Player deck ran out');
 	log(game, { t: 'draw', seat: game.active, card: id });
 	if (campaign.playerCards[id]!.kind === 'epidemic') {
 		game.playerDiscard.push(id);

@@ -117,7 +117,7 @@ export function reject(world: World, phase: Phase, command: Command): string | n
 			return campaign.month === 0 ? inPhase('lobby') : 'The campaign has already begun';
 		case 'START_GAME': {
 			const picked = command.seating.map(entry => entry.character).filter(id => id !== null);
-			if (command.seating.length < 1 || command.seating.length > 4) return 'Seat 1 to 4 players';
+			if (command.seating.length < 2 || command.seating.length > 4) return 'Seat 2 to 4 players';
 			if (
 				new Set(command.seating.map(entry => entry.seat)).size !== command.seating.length ||
 				new Set(picked).size !== picked.length
@@ -126,7 +126,13 @@ export function reject(world: World, phase: Phase, command: Command): string | n
 			const alive = picked.every(
 				id => campaign.characters[id] && !campaign.characters[id].dead && !campaign.characters[id].worker,
 			);
-			return alive ? inPhase('lobby') : 'Pick living characters';
+			if (!alive) return 'Pick living characters';
+			// A haven worker fills a seat only when every living character is already playing.
+			const spare = Object.values(campaign.characters).some(
+				character => !character.dead && !character.worker && !picked.includes(character.id),
+			);
+			if (spare && command.seating.some(entry => entry.character === null)) return 'A living character is still free';
+			return inPhase('lobby');
 		}
 		case 'ACK_BRIEFING':
 			return null;
@@ -498,6 +504,7 @@ export function parseSave(raw: unknown): Save {
 		throw new Error('That is not a campaign save');
 	const fresh = newCampaign(0);
 	const campaign = { ...fresh, ...save.world.campaign };
+	campaign.results = campaign.results.map(result => ({ ...result, characters: result.characters ?? [] }));
 	campaign.locations = { ...fresh.locations, ...campaign.locations };
 	campaign.characters = Object.fromEntries(
 		Object.entries(campaign.characters).map(([id, character]) => [id, Object.assign({ jobScar: null }, character)]),

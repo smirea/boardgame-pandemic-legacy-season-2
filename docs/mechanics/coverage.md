@@ -50,6 +50,24 @@ A month-by-month review of the content pack against the research (November 2026)
 - **August's free ability units in the UI.** The engine and the playtest lab let the group spend them at setup, as the research says. The game screen still offers them at game end only.
 - **The losing-streak turning point** would count prologue losses. The prologue never records a result, so this cannot happen in play.
 
+## Rules audit
+
+An independent audit (November 2026) checked all 170 interactions against the engine and proved each defect with a test: 135 correct, 12 declared here, 6 the research cannot decide, and 17 wrong or partial, which came down to 13 defects. Twelve are fixed, with tests in `mechanics.test.ts` under "defects found by the rules audit":
+
+- A draw that cannot be made loses the game. Scavenge and Monitor need 4 Player cards left.
+- An Epidemic respects the improvement on the card it strikes with (Well Stocked, Rebirth).
+- No Event may be played while a drawn card is still being resolved. Resilience during an Epidemic is the exception its text grants.
+- An Epidemic also waits before the reshuffle when a Lockdown card is in the discard pile.
+- Taking the sample needs two free slots for the Carrier scar.
+- A city emptied mid-game by a fourth Hollow Man is infested at once.
+- Monitor keeps only cards it revealed.
+- The hand limit waits until both cards of the draw are in hand.
+- A game seats 2 to 4, and a haven worker only when no living character is free.
+- Population is bought in whole steps.
+- A game result records who played.
+
+One is left as it is: **Triangulate needs blue, yellow and black**. The prose catalogue says three different colours and the objective text recorded in `data/legacy-timeline.json` names those three. The engine follows the recorded text.
+
 ## UI simplifications
 
 - Actions that pay with cards (Build Supply Center, Recon) pick the cheapest legal payment for the player.

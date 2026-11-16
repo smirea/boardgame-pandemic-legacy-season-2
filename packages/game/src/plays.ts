@@ -56,6 +56,10 @@ export function checkPlay(world: World, seat: SeatId, card: CardId, play: Play, 
 	if (!owner?.hand.includes(card) || !held) return 'You do not hold that card';
 	const id = held.kind === 'event' ? held.event : held.kind === 'companion' ? held.companion : null;
 	if (id !== play.e) return 'That card does not do that';
+	// No Event may be played between drawing a card and resolving it, except one whose text names that window.
+	const unresolved = game.pending[0]?.t;
+	if (unresolved === 'shield' || unresolved === 'cordon') return 'Resolve the card that was just drawn first';
+	if (unresolved === 'intensify' && play.e !== 'resilience') return 'The Epidemic must finish first';
 	const onGrid = grid(campaign);
 	const here = owner.location;
 	switch (play.e) {
@@ -86,7 +90,7 @@ export function checkPlay(world: World, seat: SeatId, card: CardId, play: Play, 
 		case 'secondWind':
 			return phase === 'playing.actions' ? ok : 'Second Wind is played during the action step';
 		case 'scavenge':
-			return game.playerDeck.order.length > 0 ? ok : 'The Player deck is empty';
+			return game.playerDeck.order.length >= 4 ? ok : 'Fewer than 4 Player cards are left';
 		case 'openWaters':
 			return checkEdge(campaign, play.a, play.b, 'sea', true);
 		case 'safeHouses': {
@@ -289,6 +293,8 @@ export function checkDecide(world: World, decide: Decide): string | null {
 		)
 			return 'Pick cards from that hand';
 		const forced = pending?.t === 'discard' && pending.seat === decide.seat ? pending.count : 0;
+		// The hand limit is applied after both cards of the draw, since the second may change what is worth keeping.
+		if (!forced && game.drawsLeft > 0) return 'Draw both cards first';
 		const excess = Math.max(0, owner.hand.length - handLimit(world, decide.seat));
 		return decide.cards.length <= Math.max(forced, excess) ? ok : 'That is more than you need to discard';
 	}

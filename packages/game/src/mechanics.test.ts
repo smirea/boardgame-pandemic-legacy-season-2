@@ -842,7 +842,16 @@ describe('game end and the campaign', () => {
 		const actor = ended(false, world => {
 			world.campaign.results = world.campaign.results
 				.slice(0, -3)
-				.concat([7, 8, 9].map(month => ({ month, attempt: 2 as const, won: false, gridCities: 40, rationing: 6 })));
+				.concat(
+					[7, 8, 9].map(month => ({
+						month,
+						attempt: 2 as const,
+						won: false,
+						gridCities: 40,
+						rationing: 6,
+						characters: [],
+					})),
+				);
 		});
 		expect(worldOf(actor).campaign.losingStreakBonusGames).toBe(3);
 		send(actor, { type: 'FINISH_UPKEEP' });
@@ -1818,5 +1827,201 @@ describe('found in November', () => {
 		});
 		act(strike, { a: 'strike' });
 		expect(gameOf(strike).log.at(-2)).toMatchObject({ t: 'note' });
+	});
+});
+
+describe('defects found by the rules audit', () => {
+	const epidemicOnTop = (world: World, game: World['game'] & object) => {
+		const epidemic = Object.values(world.campaign.playerCards).find(entry => entry.kind === 'epidemic')!.id;
+		game.playerDeck.order = [epidemic, ...game.playerDeck.order.filter(id => id !== epidemic)];
+		game.playerDeck.piles = [{ size: game.playerDeck.order.length, epidemics: 1 }];
+		game.drawsLeft = 2;
+	};
+	const improve = (world: World, id: string, improvement: 'wellStocked' | 'lockdown') => {
+		const card = world.campaign.infectionCards[infectionCards(world, id)[0]!]!;
+		if (card.kind === 'city') card.improvement = improvement;
+		return card.id;
+	};
+	const onBottom = (game: World['game'] & object, card: CardId) => {
+		game.infectionDeck.order = [...game.infectionDeck.order.filter(id => id !== card), card];
+		game.infectionDeck.strata = [game.infectionDeck.order.toSorted()];
+		game.infectionDiscard = game.infectionDiscard.filter(id => id !== card);
+	};
+
+	test('a draw that cannot be made loses the game, where it used to crash', () => {
+		const actor = late((_, game) => {
+			game.playerDeck.order = game.playerDeck.order.slice(0, 1);
+			game.playerDeck.piles = [{ size: 1, epidemics: 0 }];
+			game.drawsLeft = 2;
+		}, 'playing.draw');
+		send(actor, { type: 'DRAW' });
+		actor.send({ type: 'DRAW' });
+		expect(gameOf(actor).outcome).toEqual({ won: false, reason: 'The Player deck ran out' });
+	});
+
+	test('Scavenge and Monitor need 4 Player cards left to reveal', () => {
+		const actor = late((world, game) => {
+			conjure(world, A, { kind: 'event', event: 'scavenge' });
+			game.locations[game.players[A]!.location]!.tower = true;
+			game.playerDeck.order = game.playerDeck.order.slice(0, 3);
+			game.playerDeck.piles = [{ size: 3, epidemics: 0 }];
+		});
+		expect(legalPlays(worldOf(actor), 'playing.actions').some(option => option.play.e === 'scavenge')).toBe(false);
+		expect(refuses(actor, { a: 'monitor', frequency: 0 })).toBe('Fewer than 4 Player cards are left');
+	});
+
+	test('an Epidemic respects the improvement on the card it strikes with', () => {
+		const actor = late((world, game) => {
+			epidemicOnTop(world, game);
+			onBottom(game, improve(world, 'cairo', 'wellStocked'));
+			game.locations[city('cairo')]!.supplies = 3;
+		}, 'playing.draw');
+		send(actor, { type: 'DRAW' });
+		expect(gameOf(actor).locations[city('cairo')]!.supplies).toBe(3);
+	});
+
+	test('an Epidemic waits before the reshuffle when a Lockdown card is in the discard pile', () => {
+		let card = '' as CardId;
+		const actor = late((world, game) => {
+			epidemicOnTop(world, game);
+			card = improve(world, 'cairo', 'lockdown');
+			onBottom(game, card);
+		}, 'playing.draw');
+		send(actor, { type: 'DRAW' });
+		expect(gameOf(actor).pending[0]).toEqual({ t: 'intensify' });
+		send(actor, { type: 'LOCKDOWN', card });
+		expect(worldOf(actor).campaign.infectionCards[card]).toBeUndefined();
+		send(actor, { type: 'DECIDE', decide: { d: 'skip' } });
+		expect(gameOf(actor).pending).toEqual([]);
+	});
+
+	test('no other Event may be played while a drawn card is still being resolved', () => {
+		const actor = late((world, game) => {
+			conjure(world, A, { kind: 'event', event: 'stockUp' });
+			game.pending = [{ t: 'shield', city: city('cairo'), color: 'black' }];
+		});
+		const card = gameOf(actor).players[A]!.hand.at(-1)!;
+		expect(reject(worldOf(actor), phase(actor), { type: 'PLAY', seat: A, card, play: { e: 'stockUp' } })).toBe(
+			'Resolve the card that was just drawn first',
+		);
+	});
+
+	test('a character needs two free slots to take the sample', () => {
+		const actor = late((world, game) => {
+			if (!world.campaign.rules.includes('carrier')) world.campaign.rules.push('carrier');
+			world.campaign.locations[pack.sampleFrom]!.revealed = true;
+			game.players[A]!.location = pack.sampleFrom;
+			character(world, A).slots = [
+				{ kind: 'scar', id: 'smallHand' },
+				{ kind: 'scar', id: 'reconExtraCard' },
+				{ kind: 'scar', id: 'lineExtraCube' },
+				null,
+			];
+		});
+		expect(refuses(actor, { a: 'selfInject' })).toContain('covers 2 slots');
+	});
+
+	test('a city emptied by a fourth Hollow Man is infested at once', () => {
+		const world = JSON.parse(JSON.stringify(worldOf(late()))) as World;
+		if (!world.campaign.rules.includes('forsaken')) world.campaign.rules.push('forsaken');
+		Object.assign(world.campaign.locations[city('cairo')]!, { population: 1, infested: false });
+		world.game!.locations[city('cairo')]!.hollow = 3;
+		placeHollow(world, city('cairo'), infectionCards(world, 'cairo')[0]!);
+		expect(world.campaign.locations[city('cairo')]).toMatchObject({ population: 0, infested: true });
+	});
+
+	test('Monitor keeps only cards it revealed, never an older discard', () => {
+		const actor = late((world, game) => {
+			game.locations[game.players[A]!.location]!.tower = true;
+			const old = cityCards(world, 'london', 1);
+			give(world, B, old);
+			game.players[B]!.hand = [];
+			game.playerDiscard = old;
+			const epidemics = Object.values(world.campaign.playerCards)
+				.filter(entry => entry.kind === 'epidemic')
+				.map(entry => entry.id);
+			game.playerDeck.order = [
+				...epidemics.slice(0, 4),
+				...game.playerDeck.order.filter(id => !epidemics.includes(id)),
+			];
+			game.playerDeck.piles = [{ size: game.playerDeck.order.length, epidemics: 4 }];
+		});
+		const frequency = pack.frequencies.findIndex(reward => reward && 'take' in reward);
+		act(actor, { a: 'monitor', frequency });
+		expect(gameOf(actor).players[A]!.hand).toEqual([]);
+		expect(gameOf(actor).playerDiscard).toContain(cityCards(worldOf(actor), 'london', 1)[0]!);
+	});
+
+	test('the hand limit waits until both cards of the draw are in hand', () => {
+		const actor = late((world, game) => {
+			give(world, A, [
+				...cityCards(world, 'cairo', 2),
+				...cityCards(world, 'lagos', 2),
+				...cityCards(world, 'london', 2),
+				...cityCards(world, 'tripoli', 2),
+			]);
+			game.drawsLeft = 1;
+		}, 'playing.draw');
+		const card = gameOf(actor).players[A]!.hand[0]!;
+		expect(
+			reject(worldOf(actor), phase(actor), { type: 'DECIDE', decide: { d: 'discard', seat: A, cards: [card] } }),
+		).toBe('Draw both cards first');
+	});
+
+	test('a game needs 2 to 4 seats, and a haven worker only when no living character is free', () => {
+		const save = octoberSave();
+		const actor = createGameActor({ seed: 3, save }).start();
+		const cast = Object.values(worldOf(actor).campaign.characters).filter(entry => !entry.dead && !entry.worker);
+		const start = (seating: { seat: typeof A; character: (typeof cast)[number]['id'] | null }[]) =>
+			reject(worldOf(actor), phase(actor), { type: 'START_GAME', seating });
+		expect(start([{ seat: A, character: cast[0]!.id }])).toBe('Seat 2 to 4 players');
+		expect(
+			start([
+				{ seat: A, character: cast[0]!.id },
+				{ seat: B, character: null },
+			]),
+		).toBe('A living character is still free');
+		expect(
+			start([
+				{ seat: A, character: cast[0]!.id },
+				{ seat: B, character: cast[1]!.id },
+			]),
+		).toBeNull();
+	});
+
+	test('population is bought in whole steps', () => {
+		const actor = late((_, game) => {
+			game.outcome = { won: false, reason: 'test' };
+			game.upkeep = { units: 5, populationChanges: [] };
+		}, 'upkeep');
+		const target = [...grid(worldOf(actor).campaign)].find(
+			id => worldOf(actor).campaign.locations[id]!.population < 6,
+		)!;
+		expect(
+			reject(worldOf(actor), phase(actor), {
+				type: 'PURCHASE',
+				purchase: { t: 'population', city: target, steps: 1.5 },
+			}),
+		).toBe('Population is bought in whole steps');
+	});
+
+	test('a game result records who played', () => {
+		const world = JSON.parse(JSON.stringify(worldOf(late()))) as World;
+		const game = world.game!;
+		game.outcome = { won: true, reason: 'test' };
+		game.upkeep = { units: 0, populationChanges: [] };
+		const seated = game.seats.map(seat => game.players[seat]!.character);
+		closeGame(world);
+		expect(world.campaign.results.at(-1)!.characters).toEqual(seated);
+		expect(
+			parseSave({
+				v: 1,
+				phase: 'lobby',
+				world: {
+					campaign: { ...world.campaign, results: [{ month: 1, attempt: 1, won: true, gridCities: 9, rationing: 4 }] },
+					game: null,
+				},
+			}).world.campaign.results[0]!.characters,
+		).toEqual([]);
 	});
 });

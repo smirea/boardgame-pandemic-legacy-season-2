@@ -402,9 +402,9 @@ describe('between games', () => {
 		const actor = january();
 		const campaign = structuredClone(worldOf(actor).campaign);
 		campaign.results = [
-			{ month: 1, attempt: 1, won: true, gridCities: 9, rationing: 4 },
-			{ month: 2, attempt: 1, won: false, gridCities: 9, rationing: 2 },
-			{ month: 2, attempt: 2, won: true, gridCities: 9, rationing: 4 },
+			{ month: 1, attempt: 1, won: true, gridCities: 9, rationing: 4, characters: [] },
+			{ month: 2, attempt: 1, won: false, gridCities: 9, rationing: 2, characters: [] },
+			{ month: 2, attempt: 2, won: true, gridCities: 9, rationing: 4, characters: [] },
 		];
 		campaign.locations[city('cairo')]!.population = 0;
 		campaign.locations[city('lagos')]!.lab = true;

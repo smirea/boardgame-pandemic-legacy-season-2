@@ -59,6 +59,7 @@ export function campaignAt(month: number, seed = 12): Save {
 			won: true,
 			gridCities: gridCityCount(campaign),
 			rationing: campaign.rationing,
+			characters: [],
 		});
 	}
 	campaign.month = month;
