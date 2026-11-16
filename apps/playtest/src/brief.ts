@@ -103,12 +103,25 @@ export function writeBriefs(input: BriefInput): string[] {
 			'',
 			history.length ? `The year so far: ${history.join(', ')}.` : 'This is the first game of the year.',
 			'',
-			isLead
-				? `**You are the lead this game.** You send the setup and game-end commands: \`do begin\` if the campaign has not started, \`do start\` once all three have picked a character, \`do ack\` after reading a Legacy briefing, supply placement, event picks, \`do continue\` when the game ends, the purchases, and \`do finish-upkeep\`. Ask the table before you spend. Tell the table what each Legacy briefing unlocked.`
-				: `**${lead.name} is the lead this game** and sends the setup and game-end commands. You pick your character, play your turns, answer choices that are yours, and tell the lead what you want bought.`,
-			'',
-			'In the lobby, choose who you play: `chars` lists the characters and the open jobs, `create <job> <haven-id> <name>` makes a new one, `pick <character-id>` takes one. You do not have to play the same character every game.',
-			'',
+			...(player.harness === 'ui'
+				? [
+						isLead
+							? `**You are the lead this game.** You press the buttons that move the table along: Begin January if the campaign has not started, the start button once all three seats are filled, the button that closes a Legacy briefing, supply placement, event picks, the button that ends the game, the purchases, and the button that finishes the game-end step. Ask the table before you spend. Tell the table what each Legacy briefing unlocked.`
+							: `**${lead.name} is the lead this game** and presses the setup and game-end buttons. You fill your seat, play your turns, answer choices that are yours, and tell the lead what you want bought.`,
+						'',
+						'Everything goes through the screen. `look` shows the text on screen and numbers every control. `click <number>` presses a button, `type <number> <text>` fills a field, `choose <number> <entry>` picks from a drop-down, `tap <city-id>` clicks a city on the map, `key <key>` presses a key such as Escape. The numbers change whenever the screen changes, so `look` again before each click. In the lobby, create a character with the Name field, the job and haven drop-downs and Create, then put it in your seat with the drop-down for your seat number. `status`, `board`, `options` and `chars` still work for reading. `do`, `create` and `pick` are off.',
+						'',
+						'If something the game should let you do has no control on screen, `report` it as a bug: that is exactly what this run is looking for.',
+						'',
+					]
+				: [
+						isLead
+							? `**You are the lead this game.** You send the setup and game-end commands: \`do begin\` if the campaign has not started, \`do start\` once all three have picked a character, \`do ack\` after reading a Legacy briefing, supply placement, event picks, \`do continue\` when the game ends, the purchases, and \`do finish-upkeep\`. Ask the table before you spend. Tell the table what each Legacy briefing unlocked.`
+							: `**${lead.name} is the lead this game** and sends the setup and game-end commands. You pick your character, play your turns, answer choices that are yours, and tell the lead what you want bought.`,
+						'',
+						'In the lobby, choose who you play: `chars` lists the characters and the open jobs, `create <job> <haven-id> <name>` makes a new one, `pick <character-id>` takes one. You do not have to play the same character every game.',
+						'',
+					]),
 			...(input.stage
 				? [
 						'## This game is staged',
@@ -139,7 +152,9 @@ export function writeBriefs(input: BriefInput): string[] {
 			input.stage
 				? '- Play in character. Your list comes first, winning second.'
 				: '- Play in character, and play to win.',
-			'- End every `do` with `why:` and one sentence of reasoning. The game is recorded, and the replay shows your reason beside each move.',
+			player.harness === 'ui'
+				? '- Before each move, `say` one sentence on why you are making it. The game is recorded, and the replay shows the table talk beside each move.'
+				: '- End every `do` with `why:` and one sentence of reasoning. The game is recorded, and the replay shows your reason beside each move.',
 			'- `report` every bug, rule surprise and rough edge the moment you meet it.',
 			'- Do not open or edit any file other than the three above and your report file. Do not look at source code. Do not run any command other than `./apps/playtest/play`.',
 			'',

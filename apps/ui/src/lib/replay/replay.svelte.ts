@@ -62,6 +62,12 @@ export function commandLabel(world: World, command: Command | null): { who: stri
 			return { who: null, text: `Haven named ${command.name}` };
 		case 'BEGIN_CAMPAIGN':
 			return { who: null, text: 'The campaign begins' };
+		case 'SEAT': {
+			const seat = command.seat.replace('seat-', 'Seat ');
+			if (command.choice === null) return { who: null, text: `${seat} emptied` };
+			const name = command.choice === 'worker' ? 'a haven worker' : world.campaign.characters[command.choice]?.name;
+			return { who: null, text: `${seat}: ${name ?? 'a character'}` };
+		}
 		case 'START_GAME':
 			return { who: null, text: 'The game is set up' };
 		case 'ACK_BRIEFING':

@@ -116,6 +116,8 @@ export type Campaign = {
 	losingStreakBonusGames: number;
 	owedScars: number;
 	nextCardId: number;
+	/** Who the table has put in which seat for the next game. A null character is a haven worker. */
+	seating: { seat: SeatId; character: CharacterId | null }[];
 };
 
 export type GameLocation = {

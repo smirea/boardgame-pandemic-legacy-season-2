@@ -29,7 +29,9 @@ export {
 	overLimit,
 	passage,
 	regionAt,
+	SEAT_IDS,
 	seaRoute,
+	tableSeating,
 } from './helpers';
 export { freeCharacters, scarTargets } from './flow';
 export { botCommand } from './bot';

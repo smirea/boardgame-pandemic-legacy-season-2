@@ -1,6 +1,6 @@
 import { pack } from './content/pack';
 import type { AbilityId, CityDef, Color, CompanionId, EdgeKind, JobId, RuleId, ScarId } from './content/types';
-import type { CardId, CityId, RegionId, SeatId } from './ids';
+import type { CardId, CharacterId, CityId, RegionId, SeatId } from './ids';
 import { edgeKey } from './ids';
 import type { Campaign, Character, Game, LogInput, Player, PlayerCard, World } from './state';
 
@@ -68,6 +68,25 @@ export const player = (game: Game, seat: SeatId): Player => {
 	if (!found) throw new Error(`no player in seat ${seat}`);
 	return found;
 };
+
+export const SEAT_IDS = ['seat-1', 'seat-2', 'seat-3', 'seat-4'] as SeatId[];
+
+/**
+ * The seats the table has filled for the next game, in seat order. A seat whose character has since
+ * died is empty again. A group that has chosen nothing yet is given its first two living characters.
+ */
+export function tableSeating(campaign: Campaign): Campaign['seating'] {
+	const living = (id: CharacterId) => {
+		const character = campaign.characters[id];
+		return Boolean(character && !character.dead && !character.worker);
+	};
+	const chosen = campaign.seating
+		.filter(entry => entry.character === null || living(entry.character))
+		.toSorted((a, b) => SEAT_IDS.indexOf(a.seat) - SEAT_IDS.indexOf(b.seat));
+	if (chosen.length) return chosen;
+	const first = (Object.keys(campaign.characters) as CharacterId[]).filter(living).slice(0, 2);
+	return first.length === 2 ? first.map((character, index) => ({ seat: SEAT_IDS[index]!, character })) : [];
+}
 
 /**
  * Who sat in `seat` when the log entry numbered `seq` was written: the next character to die in

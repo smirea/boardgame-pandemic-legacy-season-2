@@ -17,7 +17,7 @@ import {
 	startDrawStep,
 	startInfectStep,
 } from './flow';
-import { cityDef, grid, isForsaken, log, overLimit } from './helpers';
+import { cityDef, grid, isForsaken, log, overLimit, SEAT_IDS, tableSeating } from './helpers';
 import type { CardId, CharacterId, CityId, SeatId } from './ids';
 import type { Purchase } from './legacy';
 import {
@@ -41,6 +41,8 @@ export type Command =
 	| { type: 'RENAME_HAVEN'; city: CityId; name: string }
 	/** Leaves the prologue, which may be played any number of times, and starts January. */
 	| { type: 'BEGIN_CAMPAIGN' }
+	/** Puts a character or a haven worker in a seat for the next game, or empties the seat. Every player sees the same seats. */
+	| { type: 'SEAT'; seat: SeatId; choice: CharacterId | 'worker' | null }
 	| { type: 'START_GAME'; seating: Seating[] }
 	| { type: 'ACK_BRIEFING' }
 	| { type: 'PLACE_SUPPLY'; city: CityId; count: number }
@@ -115,6 +117,13 @@ export function reject(world: World, phase: Phase, command: Command): string | n
 		}
 		case 'BEGIN_CAMPAIGN':
 			return campaign.month === 0 ? inPhase('lobby') : 'The campaign has already begun';
+		case 'SEAT': {
+			if (!SEAT_IDS.includes(command.seat)) return 'No such seat';
+			const character = command.choice && command.choice !== 'worker' ? campaign.characters[command.choice] : undefined;
+			if (command.choice && command.choice !== 'worker' && (!character || character.dead || character.worker))
+				return 'Pick a living character';
+			return inPhase('lobby');
+		}
 		case 'START_GAME': {
 			const picked = command.seating.map(entry => entry.character).filter(id => id !== null);
 			if (command.seating.length < 2 || command.seating.length > 4) return 'Seat 2 to 4 players';
@@ -275,7 +284,24 @@ export const gameMachine = setup({
 	},
 	actions: {
 		createCharacter: assign(
-			change((world, event) => void createCharacter(world.campaign, event as Of<'CREATE_CHARACTER'>)),
+			change((world, event) => {
+				const { campaign } = world;
+				const created = createCharacter(campaign, event as Of<'CREATE_CHARACTER'>);
+				// A new character takes the first empty seat, so a new group is seated as it is created.
+				const taken = tableSeating(campaign);
+				const free = SEAT_IDS.find(seat => !taken.some(entry => entry.seat === seat));
+				if (free) campaign.seating = [...taken, { seat: free, character: created.id }];
+			}),
+		),
+		seat: assign(
+			change((world, event) => {
+				const { seat, choice } = event as Of<'SEAT'>;
+				const character = choice === 'worker' ? null : choice;
+				const others = tableSeating(world.campaign).filter(
+					entry => entry.seat !== seat && (character === null || entry.character !== character),
+				);
+				world.campaign.seating = choice === null ? others : [...others, { seat, character }];
+			}),
 		),
 		setRationing: assign(
 			change((world, event) => void (world.campaign.rationing = (event as Of<'SET_RATIONING'>).value)),
@@ -294,6 +320,7 @@ export const gameMachine = setup({
 			change((world, event) => {
 				const home = pack.cities.find(candidate => candidate.kind === 'haven' && !candidate.lost)!.id;
 				readLegacy(world, 'setup');
+				world.campaign.seating = (event as Of<'START_GAME'>).seating.map(entry => ({ ...entry }));
 				const seating = (event as Of<'START_GAME'>).seating.map(({ seat, character }) => ({
 					seat,
 					character:
@@ -379,6 +406,7 @@ export const gameMachine = setup({
 				SET_RATIONING: { guard: { type: 'legal', params: 'lobby' }, actions: 'setRationing' },
 				BEGIN_CAMPAIGN: { guard: { type: 'legal', params: 'lobby' }, actions: 'beginCampaign' },
 				RENAME_HAVEN: { guard: { type: 'legal', params: 'lobby' }, actions: 'renameHaven' },
+				SEAT: { guard: { type: 'legal', params: 'lobby' }, actions: 'seat' },
 				START_GAME: { guard: { type: 'legal', params: 'lobby' }, target: 'setup', actions: 'startGame' },
 			},
 		},

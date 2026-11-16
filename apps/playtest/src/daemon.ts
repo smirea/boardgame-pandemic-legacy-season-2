@@ -19,6 +19,7 @@ import {
 	ruleBriefs,
 	scenarios,
 	startRecord,
+	tableSeating,
 } from '@repo/game';
 import type { CharacterId, Command, GameRecord, PublicState, RecordNote, Save, SeatId } from '@repo/game';
 import { newAudit, observe, renderParity, untouched } from './audit.ts';
@@ -367,8 +368,33 @@ function whoOf(id: string): Who | null {
 	return { index, id, name: config.players[index]!.name, seat: seatOf(index), lead: index === leadIndex };
 }
 
+/** Who plays whom. A click-only player's choice is the seat they filled on screen. */
+const lobbyPicks = () => {
+	const seated = current ? tableSeating(current.world.campaign) : [];
+	return config.players.map((player, index) => ({
+		name: player.name,
+		character:
+			lab.picks[index] ??
+			(player.harness === 'ui' ? (seated.find(entry => entry.seat === seatOf(index))?.character ?? null) : null),
+	}));
+};
+
+/** The same needs, worded for a player who may only use the screen. */
+const forScreen = (line: string) =>
+	line
+		.replace(
+			'`pick <character-id>`, or `create <job> <haven-id> <name>` and then pick it.',
+			'set the drop-down for your seat on screen. Create a character first with the Name field and Create if you need one.',
+		)
+		.replaceAll(/`do [^`]+`/g, 'the matching control on screen (`look` lists them)');
+
 /** What the game is waiting on this player for. Empty means it is someone else's move. */
 function needs(state: PublicState, who: Who): string[] {
+	const lines = needsByKey(state, who);
+	return config.players[who.index]!.harness === 'ui' ? lines.map(forScreen) : lines;
+}
+
+function needsByKey(state: PublicState, who: Who): string[] {
 	const { world, phase } = state;
 	const { campaign, game } = world;
 	if (sessionDone(state))
@@ -632,6 +658,15 @@ async function handle(agent: string, words: string[]): Promise<string> {
 				});
 				return paths.join('\n');
 			}
+			case 'say': {
+				const text = rest.join(' ').trim();
+				if (!text) return 'usage: lab say <text>';
+				lab.chat.push({ at: new Date().toISOString(), from: 'Operator', text });
+				note('chat', 'Operator', text);
+				journal({ kind: 'chat', agent: 'lab', text });
+				persist();
+				return 'Said.';
+			}
 			case 'replays':
 				return replaysUrl(pages.port!, config.run);
 			case 'parity':
@@ -678,7 +713,7 @@ async function handle(agent: string, words: string[]): Promise<string> {
 				setTimeout(() => void shutdown(), 50);
 				return 'Stopping.';
 			default:
-				return 'lab commands: brief · replays · parity · untouched · save <name> · load <path> · tabs · errors · shot [agent] [name] · session · status · board · stop';
+				return 'lab commands: brief · say <text> · replays · parity · untouched · save <name> · load <path> · tabs · errors · shot [agent] [name] · session · status · board · stop';
 		}
 	}
 
@@ -692,13 +727,7 @@ async function handle(agent: string, words: string[]): Promise<string> {
 			return HELP;
 		case 'status': {
 			const lines = [renderStatus(state, who)];
-			if (state.phase === 'lobby')
-				lines.push(
-					...renderLobby(
-						state,
-						config.players.map((player, index) => ({ name: player.name, character: lab.picks[index] ?? null })),
-					),
-				);
+			if (state.phase === 'lobby') lines.push(...renderLobby(state, lobbyPicks()));
 			lines.push('', ...digest(state, who));
 			persist();
 			return lines.join('\n');
@@ -792,10 +821,7 @@ async function handle(agent: string, words: string[]): Promise<string> {
 					.join('\n') || 'No log yet.'
 			);
 		case 'chars':
-			return renderLobby(
-				state,
-				config.players.map((player, index) => ({ name: player.name, character: lab.picks[index] ?? null })),
-			).join('\n');
+			return renderLobby(state, lobbyPicks()).join('\n');
 		case 'say': {
 			const text = rest.join(' ').trim();
 			if (!text) return 'usage: say <text>';
@@ -858,8 +884,7 @@ async function handle(agent: string, words: string[]): Promise<string> {
 				persist();
 				return `You play ${state.world.campaign.characters[parsed.character]!.name} this game.`;
 			}
-			if (harness === 'ui' && verb !== 'raw')
-				return 'You play through the screen this run. Use look, click, tap, choose, type and key.';
+			if (harness === 'ui') return 'You play through the screen this run. Use look, click, tap, choose, type and key.';
 			const denied = mayRaw(state, who, parsed.command);
 			if (denied) return denied;
 			return locked(async () => {

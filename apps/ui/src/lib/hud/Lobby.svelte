@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { pack, score } from '@repo/game';
-	import type { CharacterId, CityId, Command, JobId, PublicState, SeatId } from '@repo/game';
-	import { untrack } from 'svelte';
+	import { pack, score, SEAT_IDS, tableSeating } from '@repo/game';
+	import type { CharacterId, CityId, Command, JobId, PublicState } from '@repo/game';
 	import { cityName, MONTHS } from './labels.svelte.ts';
 
 	type Props = { snap: PublicState; send: (command: Command) => void };
@@ -23,26 +22,16 @@
 	let name = $state('');
 	let job = $state<JobId | ''>('');
 	let home = $state<CityId>(havens[0]!.id);
-	let seats = $state<(CharacterId | 'worker' | '')[]>(['', '', '', '']);
-
 	$effect(() => {
 		if (!job || !freeJobs.some(candidate => candidate.id === job)) job = freeJobs[0]?.id ?? '';
 	});
-	// Seats default to the first living characters so a returning group starts with one click.
-	$effect(() => {
-		const ids = living.map(character => character.id);
-		untrack(() => {
-			let next = seats.map(seat => (seat === '' || seat === 'worker' || ids.includes(seat) ? seat : ''));
-			if (next.every(seat => seat === '') && ids.length >= 2) next = [ids[0]!, ids[1]!, '', ''];
-			if (next.some((seat, index) => seat !== seats[index])) seats = next;
-		});
-	});
 
-	const seating = $derived(
-		seats.flatMap((choice, index) =>
-			choice === '' ? [] : [{ seat: `seat-${index + 1}` as SeatId, character: choice === 'worker' ? null : choice }],
-		),
-	);
+	// Seats live in the game state, so every player's lobby shows the same table.
+	const seating = $derived(tableSeating(campaign));
+	const seated = (index: number): CharacterId | 'worker' | '' => {
+		const entry = seating.find(candidate => candidate.seat === SEAT_IDS[index]);
+		return entry ? (entry.character ?? 'worker') : '';
+	};
 	const startCommand = $derived<Command>({ type: 'START_GAME', seating });
 </script>
 
@@ -120,10 +109,16 @@
 
 			<section>
 				<h2>Seats</h2>
-				{#each seats as _, index (index)}
+				{#each SEAT_IDS as seat, index (seat)}
 					<label>
 						<span>Seat {index + 1}</span>
-						<select bind:value={seats[index]}>
+						<select
+							value={seated(index)}
+							onchange={event => {
+								const choice = event.currentTarget.value as CharacterId | 'worker' | '';
+								send({ type: 'SEAT', seat, choice: choice === '' ? null : choice });
+							}}
+						>
 							<option value="">empty</option>
 							{#each living as character (character.id)}<option value={character.id}>{character.name}</option>{/each}
 							<option value="worker">Haven worker</option>

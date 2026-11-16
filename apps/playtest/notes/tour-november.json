@@ -1,0 +1,57 @@
+{
+	"g10": {
+		"summary": "Tour game. Lost on turn 15 at the eighth incident, one turn before the last Plan recon. Five more mechanics the campaign never reached were played: both new jobs, Facilitate, the blue Plan step and a haven worker's exposure.",
+		"story": "A group reduced to three stood in Shanghai with the Plan ahead. Vex's Scientist burned Shanghai's own Infection card out of the discard pile. Sol's Vector Control Expert raised a shelter there without a card, paid the first Topaz shield, and made the yellow and blue recons in one turn. Kit's Pike, one exposure from death, used Facilitate to take the Scientist's black card, made the black recon, and drove into infested Osaka to die. With nobody left to take the seat it fell to a haven worker, who walked to New York, started a turn beside a plague cube and was sent home with an empty hand. That was the signal for the red recon. The Infect step of that same turn put the eighth incident on an empty Hong Kong, and the game ended with the Plan at three of four.",
+		"highlights": [
+			"Scientist and Vector Control Expert played for the first time, each using the thing only that job can do.",
+			"Facilitate used to assemble the four black cards for a Plan step.",
+			"A death with no free character: the seat became a haven worker, and the worker's exposure sent it home.",
+			"Three of the four Plan steps made in one game, to carry into the second attempt."
+		],
+		"parity": "The November card was read in November: the Plan is the only objective and it is mandatory. No invariant broke after the stage.",
+		"findings": [
+			{
+				"finding": "The stage said every city was topped up to 3 cubes. The reserve ran out long before that, so sixteen cities stood at 0 and the board was weaker than the brief said.",
+				"kind": "lab",
+				"fix": "The stage text now says cities are topped up for as long as the reserve lasts. The loss came from this."
+			},
+			{
+				"finding": "A Topaz shield choice that was passed closed with no line in the log, so players could not tell whether anyone had paid.",
+				"kind": "log",
+				"fix": "A passed choice is logged, and a passed shield names the city."
+			},
+			{
+				"finding": "A hand-limit discard left no line in the log: a drawn card seemed to vanish.",
+				"kind": "log",
+				"fix": "Discards are logged with the player and the cards."
+			},
+			{
+				"finding": "A haven worker's exposure read as a bug: sent home, track 0 of 0.",
+				"kind": "message",
+				"fix": "The log line now says the worker is sent home with an empty hand and has no exposure track."
+			}
+		]
+	},
+	"g11": {
+		"summary": "Tour game, second attempt. Won on turn 3 by the red Plan recon. The last two untouched mechanics were played: the red Plan step and completing the Plan.",
+		"story": "Three Plan steps carried over from the first attempt, so one recon stood between the table and the win. Pike was dead, and Kit sat down with a new character, Lark. The pawns were set in Shanghai and the Scientist held the red cards. Lark went first and shuttled in. Then the Scientist, who had bought Surveyor at the last game end, made the red recon with four cards instead of five. The Plan was complete, Utopia opened as its reward and joined the grid, and the game was won.",
+		"highlights": [
+			"Plan steps made in a lost game carried into the second attempt.",
+			"The fourth Plan recon completed the objective and opened Utopia as an earned reward, with its Infection cards shuffled into the deck.",
+			"Surveyor lowered a Plan recon from five cards to four."
+		],
+		"parity": "November's second attempt started with the Plan at three of four, as the research says for carried steps. Completing it opened Utopia as a reward, not as a forced opening.",
+		"findings": [
+			{
+				"finding": "The city text and the brief said the red recon takes 5 cards. With Surveyor it takes 4, and a 5-card payment was refused.",
+				"kind": "lab",
+				"fix": "The city text now says the count is before abilities and points to `options`, which already listed the 4-card payments."
+			},
+			{
+				"finding": "Status said the Player deck had already given up its Epidemic in a deck that held none.",
+				"kind": "lab",
+				"fix": "A deck with no Epidemics says so."
+			}
+		]
+	}
+}

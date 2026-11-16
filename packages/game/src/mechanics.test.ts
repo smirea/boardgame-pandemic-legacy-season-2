@@ -3,7 +3,7 @@ import { checkEdge } from './actions';
 import { pack } from './content/pack';
 import type { EventId, SearchResult } from './content/types';
 import { bump, epidemicCount, freeCharacters, placeHollow, setupInfection } from './flow';
-import { characterAt, grid, handLimit, hasEdge, isCandidate, passage, segmentsCross } from './helpers';
+import { characterAt, grid, handLimit, hasEdge, isCandidate, passage, segmentsCross, tableSeating } from './helpers';
 import type { BundleId, CardId, CityId } from './ids';
 import { createGameActor, parseSave, reject } from './machine';
 import type { Action } from './actions';
@@ -1044,17 +1044,59 @@ test('the October scenario sets up with Hollow Men, the defection objective, and
 	expect(gameOf(actor).locations[city('tripoli')]!.tower).toBe(true);
 });
 
+describe('seats in the lobby are shared state', () => {
+	const lobby = () => createGameActor({ seed: 2, save: null }).start();
+	const seats = (actor: ReturnType<typeof lobby>) =>
+		tableSeating(worldOf(actor).campaign).map(entry => `${entry.seat}:${entry.character ?? 'worker'}`);
+
+	test('each new character takes the first empty seat', () => {
+		const actor = lobby();
+		const home = city('haven-north-atlantic');
+		send(actor, { type: 'CREATE_CHARACTER', name: 'Ada', job: 'administrator', home });
+		send(actor, { type: 'CREATE_CHARACTER', name: 'Bo', job: 'farmer', home });
+		const [ada, bo] = Object.values(worldOf(actor).campaign.characters);
+		expect(seats(actor)).toEqual([`seat-1:${ada!.id}`, `seat-2:${bo!.id}`]);
+	});
+
+	test('a seat can be changed, emptied or given to a haven worker, and a character sits in one seat only', () => {
+		const actor = lobby();
+		const home = city('haven-north-atlantic');
+		send(actor, { type: 'CREATE_CHARACTER', name: 'Ada', job: 'administrator', home });
+		send(actor, { type: 'CREATE_CHARACTER', name: 'Bo', job: 'farmer', home });
+		const [ada, bo] = Object.values(worldOf(actor).campaign.characters);
+		send(actor, { type: 'SEAT', seat: C, choice: ada!.id });
+		expect(seats(actor)).toEqual([`seat-2:${bo!.id}`, `seat-3:${ada!.id}`]);
+		send(actor, { type: 'SEAT', seat: A, choice: 'worker' });
+		send(actor, { type: 'SEAT', seat: B, choice: null });
+		expect(seats(actor)).toEqual(['seat-1:worker', `seat-3:${ada!.id}`]);
+		expect(reject(worldOf(actor), 'lobby', { type: 'SEAT', seat: A, choice: 'nobody' as never })).toBe(
+			'Pick a living character',
+		);
+	});
+
+	test('the seats a game started with are still set in the next lobby', () => {
+		const actor = lobby();
+		const home = city('haven-north-atlantic');
+		send(actor, { type: 'CREATE_CHARACTER', name: 'Ada', job: 'administrator', home });
+		send(actor, { type: 'CREATE_CHARACTER', name: 'Bo', job: 'farmer', home });
+		const before = seats(actor);
+		send(actor, { type: 'START_GAME', seating: tableSeating(worldOf(actor).campaign) });
+		expect(phase(actor)).toBe('setup.supply');
+		expect(seats(actor)).toEqual(before);
+	});
+});
+
 test('a save written before a field existed still loads and plays', () => {
 	const old = JSON.parse(JSON.stringify(worldOf(late()))) as {
 		campaign: Record<string, unknown>;
 		game: Record<string, unknown>;
 	};
-	for (const field of ['names', 'owedScars', 'losingStreakBonusGames']) delete old.campaign[field];
+	for (const field of ['names', 'owedScars', 'losingStreakBonusGames', 'seating']) delete old.campaign[field];
 	for (const field of ['waived', 'prologueRestore']) delete old.game[field];
 	for (const entry of Object.values(old.campaign['characters'] as Record<string, Record<string, unknown>>))
 		delete entry['jobScar'];
 	const actor = createGameActor({ seed: 1, save: parseSave({ v: 1, phase: 'playing.actions', world: old }) }).start();
-	expect(worldOf(actor).campaign).toMatchObject({ names: {}, owedScars: 0 });
+	expect(worldOf(actor).campaign).toMatchObject({ names: {}, owedScars: 0, seating: [] });
 	expect(gameOf(actor).waived).toEqual([]);
 	expect(character(worldOf(actor), A).jobScar).toBeNull();
 	act(actor, { a: 'makeSupplies' });

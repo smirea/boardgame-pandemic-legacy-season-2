@@ -77,6 +77,7 @@ export function newCampaign(seed: number): Campaign {
 		freeAbilityUnits: 0,
 		frequenciesUsed: [],
 		planRecons: [],
+		seating: [],
 		sampleDelivered: false,
 		losingStreakBonusGames: 0,
 		owedScars: 0,

@@ -358,7 +358,9 @@ export function renderStatus(state: PublicState, who: Who | null): string {
 		const pile = game.playerDeck.piles.find(entry => entry.size > 0);
 		if (pile)
 			lines.push(
-				`Epidemics: the Player deck is stacked in equal piles with one epidemic shuffled into each. The pile being drawn has ${pile.size} card(s) left and ${pile.epidemics ? 'still holds its epidemic' : 'has already given up its epidemic'}.`,
+				game.epidemics === 0 && game.playerDeck.piles.every(entry => entry.epidemics === 0)
+					? 'Epidemics: this Player deck holds none.'
+					: `Epidemics: the Player deck is stacked in equal piles with one epidemic shuffled into each. The pile being drawn has ${pile.size} card(s) left and ${pile.epidemics ? 'still holds its epidemic' : 'has already given up its epidemic'}.`,
 			);
 		const active = seatName(world, game.active);
 		const step =
@@ -456,7 +458,7 @@ export function renderBoard(world: World): string {
 					: null,
 				...routes.map(
 					route =>
-						`RECON here: ${route.count} ${route.color} cards${route.unique ? ' of different cities' : ''}${route.needsCenter ? ', needs a supply center' : ''}`,
+						`RECON here: ${route.count} ${route.color} cards${route.unique ? ' of different cities' : ''}${route.needsCenter ? ', needs a supply center' : ''} (before any ability changes the count: see options for what you can pay)`,
 				),
 			].filter(Boolean);
 			lines.push(
@@ -549,7 +551,7 @@ export function renderCity(world: World, id: CityId): string {
 			)
 			.map(
 				route =>
-					`RECON here: ${route.count} ${route.color} cards${route.unique ? ' of different cities' : ''}${route.needsCenter ? ', needs a supply center' : ''}`,
+					`RECON here: ${route.count} ${route.color} cards${route.unique ? ' of different cities' : ''}${route.needsCenter ? ', needs a supply center' : ''} (before any ability changes the count: see options for what you can pay)`,
 			),
 		`possible new links: ${
 			pack.candidateEdges
