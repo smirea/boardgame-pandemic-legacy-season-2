@@ -1,7 +1,6 @@
 import type { Moment } from './beats.ts';
 import type { SaidNote, TimelineStep } from './replay.svelte.ts';
 
-/** The parts of a loaded recording that pacing reads. */
 export type Paced = { notes: SaidNote[]; timeline: Pick<TimelineStep, 'by' | 'turn' | 'beat'>[] };
 
 /** How many steps a note stays up after it is said, so the moves it explains play under it. */
@@ -27,7 +26,6 @@ export function bubblesAt(loaded: Paced, frame: number, follow: string | null): 
 	return up;
 }
 
-/** Notes said at this exact frame, which autoplay waits for someone to read. */
 export const saidAt = (loaded: Paced, frame: number) => loaded.notes.filter(note => note.frame === frame);
 
 const BUSY = new Set<Moment>(['epidemic', 'incident', 'death', 'end', 'reveal']);

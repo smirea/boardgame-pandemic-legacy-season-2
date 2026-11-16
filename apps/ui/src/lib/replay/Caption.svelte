@@ -34,7 +34,6 @@
 {/if}
 
 <style>
-	/* A typed label slip laid on the bottom edge of the chart, saying what the last step did. */
 	.caption {
 		position: absolute;
 		bottom: 0.8rem;

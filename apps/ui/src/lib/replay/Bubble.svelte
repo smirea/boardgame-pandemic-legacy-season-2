@@ -56,7 +56,6 @@
 		line-clamp: 5;
 	}
 
-	/* A long note reads in full while the pointer rests on it. */
 	.bubble:not(.folded):hover .text {
 		display: block;
 		max-height: 40vh;
@@ -64,7 +63,6 @@
 		scrollbar-width: thin;
 	}
 
-	/* A thought is pencilled in the margin: italic serif on a softer, rounder slip. */
 	.why {
 		border-radius: 1.1rem;
 		background: #f3ead6;

@@ -12,7 +12,6 @@
 		world: World;
 		place: 'tl' | 'tr' | 'bl' | 'br';
 		notes: SaidNote[];
-		/** Another player is being followed, so this one steps back. */
 		dimmed: boolean;
 		followed: boolean;
 		onfollow: () => void;
@@ -189,7 +188,6 @@
 		align-items: flex-start;
 	}
 
-	/* The player's slip is cut from the same card stock as the game's character slips, in their pawn's colour. */
 	.slip {
 		--soft: color-mix(in srgb, var(--on) 74%, transparent);
 		display: flex;

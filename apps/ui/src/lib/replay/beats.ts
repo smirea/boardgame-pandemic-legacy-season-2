@@ -2,7 +2,6 @@ import { edgeKey, pack } from '@repo/game';
 import type { CardId, CityId, Command, LogEntry, PublicState, SeatId, StructureKind } from '@repo/game';
 import type { Travel } from '#lib/board/types.ts';
 
-/** Something a step did at a place on the map. */
 export type Mark =
 	| { k: 'trail'; seat: SeatId; from: CityId; to: CityId; travel: Travel }
 	| { k: 'cubes'; city: CityId; kind: 'supply' | 'plague' | 'hollow'; delta: number }
@@ -11,11 +10,9 @@ export type Mark =
 	| { k: 'hit'; city: CityId; hit: 'infect' | 'plague' | 'outbreak' | 'epidemic' | 'incident' | 'hollow' | 'blocked' }
 	| { k: 'spot'; city: CityId; spot: 'search' | 'target' | 'revealed' | 'connected' | 'death' };
 
-/** The turning points a viewer may want to jump to. */
 export type Moment = 'epidemic' | 'incident' | 'objective' | 'reveal' | 'death' | 'end';
 
 export type Beat = {
-	/** The character whose action this was, when one was. */
 	seat: SeatId | null;
 	marks: Mark[];
 	/** Every city the marks touch, in the order they happened. */

@@ -9,7 +9,6 @@
 		current: string | null;
 		frame: number;
 		tab: PanelTab;
-		/** A note to bring into view, such as one clicked in a bubble. */
 		focus: number | null;
 		follow: string | null;
 		busy: boolean;
