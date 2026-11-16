@@ -396,6 +396,14 @@
 		.hand {
 			--card-size: 0.66rem;
 		}
+
+		.holder small {
+			display: none;
+		}
+
+		.holder {
+			margin-top: 1.6rem;
+		}
 	}
 
 	.frame {
@@ -427,9 +435,10 @@
 		bottom: calc(100% - 2.2rem);
 		left: 50%;
 		display: grid;
-		grid-template-columns: repeat(4, 13.5rem);
+		grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+		width: min(66rem, calc(100vw - 4rem));
 		gap: 0.35rem;
-		max-height: min(24rem, calc(100vh - 16rem));
+		max-height: min(32rem, calc(100vh - 15rem));
 		padding: 0.8rem;
 		overflow: auto;
 		border-radius: 2px;
@@ -475,7 +484,8 @@
 		font-weight: 700;
 	}
 
-	.events strong {
+	.setup .events strong {
+		color: var(--slip-ink);
 		font-family: var(--font-display);
 		font-size: 1rem;
 		font-weight: 400;

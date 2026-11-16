@@ -479,7 +479,7 @@
 			</aside>
 		{/if}
 
-		{#if game && playing}
+		{#if game && playing && !spectator}
 			<!-- The chart's key, printed in its corner: what each mark beside a city name means. -->
 			<dl class="legend" aria-label="Map key" in:fly={{ y: 20, duration: 500, delay: 600 }}>
 				<dt><b class="num">3</b></dt>
@@ -494,6 +494,14 @@
 				<dd>Chance it is infected next</dd>
 				<dt><b class="ring"></b></dt>
 				<dd>Somewhere you can act</dd>
+				<dt><b class="line"></b></dt>
+				<dd>Supply line</dd>
+				<dt><b class="lane"></b></dt>
+				<dd>Sea lane</dd>
+				<dt><b class="haven"></b></dt>
+				<dd>Haven</dd>
+				<dt><b class="pawn"></b></dt>
+				<dd>A character</dd>
 			</dl>
 		{/if}
 		{#if game && snap.phase !== 'upkeep'}
@@ -735,14 +743,15 @@
 		display: grid;
 		grid-template-columns: 1.6rem auto;
 		align-items: center;
-		gap: 0.15rem 0.4rem;
+		gap: 0.05rem 0.4rem;
 		margin: 0;
-		padding: 0.45rem 0.65rem;
+		padding: 0.4rem 0.6rem;
 		border: 1px solid rgb(42 32 23 / 0.35);
 		background: rgb(236 227 207 / 0.92);
 		box-shadow: var(--slip-shadow);
 		color: var(--slip-ink);
-		font-size: 0.72rem;
+		font-size: 0.68rem;
+		line-height: 1.3;
 		rotate: -0.4deg;
 		pointer-events: none;
 	}
@@ -788,6 +797,38 @@
 	.legend .odds {
 		color: #8b5a12;
 		font-style: italic;
+	}
+
+	.legend .line,
+	.legend .lane {
+		width: 1.2rem;
+		min-width: 0;
+		height: 0;
+		padding: 0;
+		border-top: 3px solid #8e3a24;
+		border-radius: 0;
+	}
+
+	.legend .lane {
+		border-top: 2px dashed #2d5873;
+	}
+
+	.legend .haven {
+		width: 0.95rem;
+		height: 0.85rem;
+		min-width: 0;
+		padding: 0;
+		background: #2f8f74;
+		clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
+	}
+
+	.legend .pawn {
+		width: 0.7rem;
+		height: 0.95rem;
+		min-width: 0;
+		padding: 0;
+		background: #d9573f;
+		clip-path: polygon(50% 0, 72% 22%, 60% 40%, 100% 100%, 0 100%, 40% 40%, 28% 22%);
 	}
 
 	.legend .ring {

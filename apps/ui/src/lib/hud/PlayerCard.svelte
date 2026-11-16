@@ -163,12 +163,14 @@
 	}
 
 	.title {
+		display: -webkit-box;
 		font-family: var(--font-display);
 		font-size: 1.18em;
-		line-height: 1.05;
-		white-space: nowrap;
+		line-height: 1.02;
 		overflow: hidden;
-		text-overflow: ellipsis;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
 	}
 
 	.art {

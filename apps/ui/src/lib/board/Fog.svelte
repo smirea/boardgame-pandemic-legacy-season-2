@@ -30,7 +30,7 @@
 		vec2 fogUv = vAlphaMapUv * vec2( uAspect, 1.0 );
 		float mist = fogFbm( fogUv * 5.0 + vec2( uTime * 0.035, uTime * 0.012 ) );
 		float wisp = fogFbm( fogUv * 13.0 - vec2( uTime * 0.05, -uTime * 0.02 ) );
-		diffuseColor.rgb = mix( diffuseColor.rgb, vec3( 0.84, 0.85, 0.83 ), 0.16 + 0.46 * mist );
+		diffuseColor.rgb = mix( diffuseColor.rgb, vec3( 0.84, 0.85, 0.83 ), 0.1 + 0.36 * mist );
 		float fogEdge = smoothstep( 0.02, 0.3, fogMask ) * ( 1.0 - smoothstep( 0.3, 0.8, fogMask ) );
 		diffuseColor.rgb = mix( diffuseColor.rgb, vec3( 0.45, 0.24, 0.09 ), fogEdge * ( 0.15 + 0.65 * uReveal ) );
 		diffuseColor.a *= clamp( fogMask * ( 1.0 + 0.7 * ( wisp - 0.5 ) ), 0.0, 1.0 );

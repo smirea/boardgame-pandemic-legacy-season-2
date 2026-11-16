@@ -36,58 +36,59 @@
 		</div>
 
 		<div class="spacer"></div>
-
-		{#if game && info}
-			<div class="track" title="Infection rate: cards flipped at the end of every turn">
-				<span class="caption">Infection rate</span>
-				{#each rates as rate, index (index)}
-					<span class="pip" class:on={index === game.rateIndex} class:past={index < game.rateIndex}>{rate}</span>
-				{/each}
-			</div>
-
-			<div class="track incidents" title="Incidents: the game is lost when the track is full">
-				<span class="caption">Incidents</span>
-				{#each { length: pack.numbers.incidentLimit } as _, index (index)}
-					<span class="pip" class:on={index < game.incidents} class:last={index === pack.numbers.incidentLimit - 1}
-					></span>
-				{/each}
-				<strong class:hot={game.incidents >= pack.numbers.incidentLimit - 2}
-					>{game.incidents}/{pack.numbers.incidentLimit}</strong
-				>
-			</div>
-
-			{#if info.playerDeck.cards > 0}
-				<div class="stat" title="Cards left in the Player deck">
-					<span class="caption">Player deck</span>
-					{#key info.playerDeck.cards}<strong data-testid="deck-count" in:fly={{ y: -10, duration: 280 }}
-							>{info.playerDeck.cards}</strong
-						>{/key}
+		<div class="stats">
+			{#if game && info}
+				<div class="track" title="Infection rate: cards flipped at the end of every turn">
+					<span class="caption">Infection rate</span>
+					{#each rates as rate, index (index)}
+						<span class="pip" class:on={index === game.rateIndex} class:past={index < game.rateIndex}>{rate}</span>
+					{/each}
 				</div>
-				<div class="stat minor" title="Turns left before the Player deck runs out">
-					<span class="caption">Turns left</span>
-					{#key info.playerDeck.turnsLeft}<strong in:fly={{ y: -10, duration: 280 }}>{info.playerDeck.turnsLeft}</strong
-						>{/key}
-				</div>
-				<div class="stat" title="Chance that the next Player card drawn is an Epidemic">
-					<span class="caption">Epidemic next draw</span>
-					<strong class="warn" class:hot={info.playerDeck.epidemicNextDraw > 0.5}
-						>{percent(info.playerDeck.epidemicNextDraw)}</strong
+
+				<div class="track incidents" title="Incidents: the game is lost when the track is full">
+					<span class="caption">Incidents</span>
+					{#each { length: pack.numbers.incidentLimit } as _, index (index)}
+						<span class="pip" class:on={index < game.incidents} class:last={index === pack.numbers.incidentLimit - 1}
+						></span>
+					{/each}
+					<strong class:hot={game.incidents >= pack.numbers.incidentLimit - 2}
+						>{game.incidents}/{pack.numbers.incidentLimit}</strong
 					>
 				</div>
-				<div class="stat" title="Epidemics drawn so far, out of all in the deck">
-					<span class="caption">Epidemics</span>
-					<strong
-						>{info.playerDeck.epidemicsDrawn}/{info.playerDeck.epidemicsDrawn + info.playerDeck.epidemicsLeft}</strong
-					>
+
+				{#if info.playerDeck.cards > 0}
+					<div class="stat" title="Cards left in the Player deck">
+						<span class="caption">Player deck</span>
+						{#key info.playerDeck.cards}<strong data-testid="deck-count" in:fly={{ y: -10, duration: 280 }}
+								>{info.playerDeck.cards}</strong
+							>{/key}
+					</div>
+					<div class="stat minor" title="Turns left before the Player deck runs out">
+						<span class="caption">Turns left</span>
+						{#key info.playerDeck.turnsLeft}<strong in:fly={{ y: -10, duration: 280 }}
+								>{info.playerDeck.turnsLeft}</strong
+							>{/key}
+					</div>
+					<div class="stat" title="Chance that the next Player card drawn is an Epidemic">
+						<span class="caption">Epidemic next draw</span>
+						<strong class="warn" class:hot={info.playerDeck.epidemicNextDraw > 0.5}
+							>{percent(info.playerDeck.epidemicNextDraw)}</strong
+						>
+					</div>
+					<div class="stat" title="Epidemics drawn so far, out of all in the deck">
+						<span class="caption">Epidemics</span>
+						<strong
+							>{info.playerDeck.epidemicsDrawn}/{info.playerDeck.epidemicsDrawn + info.playerDeck.epidemicsLeft}</strong
+						>
+					</div>
+				{/if}
+
+				<div class="stat" title="Supply cubes left in the stockpile">
+					<span class="caption">Stockpile</span>
+					{#key game.stockpile}<strong in:fly={{ y: -10, duration: 280 }}>{game.stockpile}</strong>{/key}
 				</div>
 			{/if}
-
-			<div class="stat" title="Supply cubes left in the stockpile">
-				<span class="caption">Stockpile</span>
-				{#key game.stockpile}<strong in:fly={{ y: -10, duration: 280 }}>{game.stockpile}</strong>{/key}
-			</div>
-		{/if}
-
+		</div>
 		<div class="right">
 			{#if !solo}
 				<span class="link" class:down={status !== 'connected'} title="Connection to the host"
@@ -129,6 +130,12 @@
 		}
 	}
 
+	@container topbar (width < 1150px) {
+		.stats .stat:nth-last-child(2) {
+			display: none;
+		}
+	}
+
 	@container topbar (width < 1000px) {
 		.bar {
 			gap: 0.8rem;
@@ -161,6 +168,19 @@
 
 	.spacer {
 		flex: 1;
+	}
+
+	/* The figures give way before the controls: Fit map and Menu always stay on screen. */
+	.stats {
+		display: flex;
+		align-items: center;
+		gap: 1.1rem;
+		min-width: 0;
+		overflow: hidden;
+	}
+
+	.stats > * {
+		flex: none;
 	}
 
 	.track,
@@ -252,6 +272,7 @@
 		display: flex;
 		align-items: center;
 		gap: 0.45rem;
+		flex: none;
 		margin-left: auto;
 	}
 

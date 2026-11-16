@@ -576,7 +576,7 @@ export class FogMask {
 		for (const [a, b] of links) stamp(a.at, b.at, Math.min(a.cover, b.cover));
 		const data = this.#image.data;
 		for (let i = 0; i < field.length; i++) {
-			const alpha = Math.max(0, Math.min(1, (field[i]! + 0.5 * (this.#noise[i]! - 0.5) - 0.2) * 4));
+			const alpha = Math.max(0, Math.min(1, (field[i]! + 0.45 * (this.#noise[i]! - 0.5) - 0.24) * 7));
 			const value = alpha * 255;
 			data[i * 4] = value;
 			data[i * 4 + 1] = value;

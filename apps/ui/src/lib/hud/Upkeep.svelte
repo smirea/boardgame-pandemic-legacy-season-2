@@ -244,9 +244,10 @@
 		grid-template-columns: 1fr 1fr;
 		align-content: start;
 		gap: 0.2rem;
-		max-height: 17rem;
-		overflow: auto;
-		scrollbar-color: rgb(42 32 23 / 0.4) transparent;
+	}
+
+	.groups button {
+		padding-block: 0.25rem;
 	}
 
 	.groups button {

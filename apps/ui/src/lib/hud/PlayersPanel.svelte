@@ -46,12 +46,23 @@
 				{#if game.active === seat}<span class="turnmark">Playing</span>{/if}
 			</button>
 			<div class="row">
-				<span title="Supply cubes carried">▪ {player.supplies}</span>
-				<span title="Cards in hand" class:over={player.hand.length > handLimit(world, seat)}
-					>✋ {player.hand.length}/{handLimit(world, seat)}</span
+				<span title="Supply cubes carried">Supplies <b>{player.supplies}</b></span>
+				<span title="Cards in hand, out of the hand limit" class:over={player.hand.length > handLimit(world, seat)}
+					>Cards <b>{player.hand.length}/{handLimit(world, seat)}</b></span
 				>
+				{#if !solo}
+					<button
+						class="claim"
+						class:on={mine.includes(seat)}
+						onclick={() => onclaim(seat)}
+						title={`Mark ${character.name} as the character you play`}>{mine.includes(seat) ? 'you' : 'claim'}</button
+					>
+				{/if}
+			</div>
+			<div class="row">
 				{#if !character.worker}
 					<span class="exposure" title="Exposure track. A scar or a skull hides under some boxes.">
+						Exposure
 						{#each { length: pack.numbers.exposureBoxes } as _, box (box)}
 							{@const result = box < character.exposure ? character.exposureTrack[box] : undefined}
 							<i
@@ -61,14 +72,6 @@
 							></i>
 						{/each}
 					</span>
-				{/if}
-				{#if !solo}
-					<button
-						class="claim"
-						class:on={mine.includes(seat)}
-						onclick={() => onclaim(seat)}
-						title={`Mark ${character.name} as the character you play`}>{mine.includes(seat) ? 'you' : 'claim'}</button
-					>
 				{/if}
 			</div>
 			{#if character.jobScar || character.slots.some(slot => slot)}
@@ -234,8 +237,14 @@
 		text-decoration: underline wavy;
 	}
 
+	.row b {
+		color: var(--on);
+		font-weight: 700;
+	}
+
 	.exposure {
 		display: flex;
+		align-items: center;
 		gap: 2px;
 	}
 

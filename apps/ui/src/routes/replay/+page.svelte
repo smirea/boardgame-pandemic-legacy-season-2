@@ -327,6 +327,13 @@
 		font-variant-numeric: tabular-nums;
 	}
 
+	/* On a smaller laptop the timeline gives the board more of the width. */
+	@media (width < 1400px) {
+		.viewer {
+			--side: 17.5rem;
+		}
+	}
+
 	.viewer.empty {
 		--side: min(30rem, 100vw);
 		display: grid;
