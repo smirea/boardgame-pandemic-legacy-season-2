@@ -57,7 +57,7 @@ function table(save: Save) {
 		},
 		stage(name: string) {
 			const staged = JSON.parse(JSON.stringify(world())) as World;
-			stages[name]!.apply(staged);
+			stages[name]!(staged).apply(staged);
 			const before = state();
 			actor = createGameActor({ seed: 3, save: { v: 1, phase: 'playing.actions', world: staged } }).start();
 			observe(audit, before, state(), null);

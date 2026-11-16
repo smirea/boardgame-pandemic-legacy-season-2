@@ -283,6 +283,14 @@ export type Decide =
 	| { d: 'cordon'; seat: SeatId; card: CardId }
 	| { d: 'skip' };
 
+const PASSED: Partial<Record<string, string>> = {
+	retrieve: 'no card taken back from the discard pile',
+	freeEdge: 'no free line drawn',
+	removeHollow: 'no Hollow Men removed',
+	quarantineCard: 'no Infection card quarantined',
+	cordon: 'the Cordon was not used',
+};
+
 const OPTIONAL = new Set(['retrieve', 'freeEdge', 'removeHollow', 'quarantineCard', 'shield', 'cordon', 'intensify']);
 
 export function checkDecide(world: World, decide: Decide): string | null {
@@ -367,6 +375,10 @@ export function applyDecide(world: World, decide: Decide) {
 	const { campaign, game } = world as { campaign: World['campaign']; game: Game };
 	const pending = game.pending[0];
 	if (decide.d === 'discard') {
+		log(game, {
+			t: 'note',
+			text: `${characterOf(world, decide.seat).name} discarded ${decide.cards.map(card => cardLabel(campaign, card)).join(', ')}`,
+		});
 		for (const card of decide.cards) discardFromHand(game, decide.seat, card);
 		if (pending?.t === 'discard' && pending.seat === decide.seat) {
 			pending.count -= decide.cards.length;
@@ -375,6 +387,14 @@ export function applyDecide(world: World, decide: Decide) {
 		return;
 	}
 	game.pending.shift();
+	if (decide.d === 'skip' && pending && pending.t !== 'intensify')
+		log(game, {
+			t: 'note',
+			text:
+				pending.t === 'shield'
+					? `Nobody discarded a card to keep the cube in ${cityDef(pending.city).name}`
+					: `The choice was passed: ${PASSED[pending.t] ?? pending.t}`,
+		});
 	if (decide.d === 'skip' && pending?.t === 'intensify') intensify(world);
 	if (decide.d === 'skip' || !pending) return;
 	const seat = ('seat' in pending ? pending.seat : null) ?? ('seat' in decide ? decide.seat : null) ?? game.active;

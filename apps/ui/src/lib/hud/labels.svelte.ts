@@ -294,7 +294,7 @@ export function logLine(world: World, entry: LogEntry): { tone: '' | 'head' | 'g
 		case 'exposure':
 			return {
 				tone: entry.result === 'empty' ? '' : 'bad',
-				text: `${who(entry.seat)} is exposed: ${{ empty: 'nothing', scar: 'a scar', skull: 'death', worker: 'sent home' }[entry.result]}`,
+				text: `${who(entry.seat)} is exposed: ${{ empty: 'nothing', scar: 'a scar', skull: 'death', worker: 'sent home with an empty hand' }[entry.result]}`,
 			};
 		case 'connected':
 			return { tone: 'good', text: `${cityName(entry.city)} joins the grid` };

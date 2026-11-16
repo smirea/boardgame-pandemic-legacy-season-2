@@ -107,8 +107,8 @@ const lab: LabState = fresh
 			logSeen: {},
 		});
 const audit: Audit = fresh ? newAudit() : readJson<Audit>(files.audit, newAudit());
-const stage = config.start.stage ? stages[config.start.stage] : null;
-if (config.start.stage && !stage) throw new Error(`unknown stage "${config.start.stage}"`);
+const stageOf = config.start.stage ? stages[config.start.stage] : null;
+if (config.start.stage && !stageOf) throw new Error(`unknown stage "${config.start.stage}"`);
 if (!existsSync(files.audit))
 	for (const run of config.start.coverage ?? [])
 		for (const [key, count] of Object.entries(coverageOfRun(run).audit.exercised))
@@ -335,10 +335,11 @@ async function refresh(command: Command | null = null, agent: string | null = nu
 async function stageIfDue() {
 	const state = current;
 	const game = state?.world.game;
-	if (!stage || !state || !game || state.phase !== 'playing.actions' || game.turn !== 1) return;
+	if (!stageOf || !state || !game || state.phase !== 'playing.actions' || game.turn !== 1) return;
 	const index = gameIndex(state);
 	if (lab.staged?.includes(index)) return;
 	lab.staged = [...(lab.staged ?? []), index];
+	const stage = stageOf(state.world);
 	const world = structuredClone(state.world);
 	stage.apply(world);
 	await loadSave(host, { v: 1, phase: state.phase, world });
@@ -627,7 +628,7 @@ async function handle(agent: string, words: string[]): Promise<string> {
 					dir: dirs.briefs,
 					reports: dirs.reports,
 					leadIndex: lab.session.startIndex % config.players.length,
-					stage,
+					stage: stageOf?.(state.world),
 				});
 				return paths.join('\n');
 			}

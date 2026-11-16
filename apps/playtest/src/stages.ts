@@ -228,6 +228,27 @@ function stageNovember(world: World) {
 	game.pending = [];
 }
 
+const PLAN_COLOURS: Color[] = ['red', 'yellow', 'blue', 'black'];
+
+/** The Plan recons this campaign has not made yet. Finished steps carry over to a second attempt. */
+const planLeft = (world: World) =>
+	PLAN_COLOURS.filter(color => !world.campaign.opened.includes(`plan-${color}` as never));
+
+/** A second attempt at November: only the Plan steps that are still open are dealt, and nothing else is arranged. */
+function stagePlanFinish(world: World) {
+	const game = world.game!;
+	const taken = new Set<CardId>();
+	const left = planLeft(world);
+	const red = left.includes('red') ? cardsOf(world, ['bangkok', 'manila', 'hong-kong', 'seoul', 'tokyo']) : [];
+	for (const card of red) taken.add(card);
+	const cards = (color: Color, count: number) => (left.includes(color) ? spare(world, color, count, taken) : []);
+	deal(world, [red, [...cards('yellow', 3), ...cards('blue', 3)], cards('black', 4)]);
+	for (const seat of game.seats) game.players[seat]!.location = id('shanghai');
+	calm(world, ['shanghai']);
+	tourDeck(world, 40);
+	game.pending = [];
+}
+
 type Stage = {
 	/** Arranges the table. It is given a copy of the world on the first action step of the game. */
 	apply: (world: World) => void;
@@ -237,68 +258,104 @@ type Stage = {
 	seats: string[][];
 };
 
-export const stages: Record<string, Stage> = {
-	'tour-october': {
-		apply: stageOctober,
-		summary:
-			'The lab arranged the table: pawns at Jakarta, Riyadh and Delhi, a chosen hand for each seat, Hong Kong at 3 plague and drawn first, 1 plague in Baghdad, Hollow Men in Osaka and Tokyo, every other city topped up to 3 cubes, and a Player deck of 30 cards with no Epidemics.',
+const october: Stage = {
+	apply: stageOctober,
+	summary:
+		'The lab arranged the table: pawns at Jakarta, Riyadh and Delhi, a chosen hand for each seat, Hong Kong at 3 plague and drawn first, 1 plague in Baghdad, Hollow Men in Osaka and Tokyo, cities topped up toward 3 cubes for as long as the reserve lasted, and a Player deck of 30 cards with no Epidemics.',
+	table: [
+		'This is a **tour game**. A campaign already ran the whole year. This game exists to play the parts that campaign never reached, so finishing your list below matters more than winning. Keep the game going until every list is done.',
+		'Pick these characters in the lobby: seat 1 takes **Rook**, seat 2 takes **Wren**, seat 3 takes **Pike**. Do not create or pick anyone else.',
+		'When the first action step starts, the lab rearranges the table once: it moves the pawns, deals each of you a chosen hand, and sets a few cubes. `wait` shows a chat line starting TABLE STAGED when that has happened. Run `status` and `options` again after it. Do not act before it.',
+		'The Player deck is cut to 30 cards with no Epidemics, so the game ends within about four rounds. Never discard a card your list still needs.',
+		'Many cities here are infested: a pawn that starts its turn in one is exposed. That is expected.',
+	],
+	seats: [
+		[
+			'You are Rook, at Jakarta, with the Saboteur ability. Rook is one exposure from death. Dying is on your list, but last.',
+			'First, as the lead or not, send `waive buildCenters` once. It is a plain command for `play`, not a `do` key. It exercises waiving an objective.',
+			'Turn 1: Recon at Jakarta with the Bangkok and Manila cards. Drive or ferry to the haven that appears. Recon there with the Seoul and Tokyo cards. Use Sabotage: discard the Osaka card to remove the Hollow Man in Osaka.',
+			'Turn 2: go to Ho Chi Minh City (Jakarta, Kolkata, Ho Chi Minh City) and Search there with its card. You get a companion card that places a shelter: play it at once, anywhere.',
+			'Turn 3: drive to Osaka, which is infested, and end your turn there. Rook dies at the start of your next turn. A choice appears: take any free character.',
+		],
+		[
+			'You are Wren, at Riyadh, with the Broker ability.',
+			'Turn 1: Search at Riyadh with its card. It gives a free supply line: answer the choice by picking a city to connect. Drive to Baghdad. Search there with its card. You get a companion card that removes 1 plague cube from where you stand: play it right there, Baghdad has one. Use Broker: discard the Tehran card to take the Istanbul card from the discard pile.',
+			'Turn 2: drive to Cairo, Shuttle to Johannesburg, and Search there with its card.',
+			'Then: help wherever the game needs it.',
+		],
+		[
+			'You are Pike, at Delhi.',
+			'Turn 1: Search at Delhi with its card. You get a companion card that removes a Hollow Man: play it on Tokyo. Drive to Tehran, then Kolkata. Search at Kolkata with its card. You get a companion card that clears a city of plague: play it on Hong Kong, but only after Hong Kong has had its outbreak in the first Infect step.',
+			'Then: help wherever the game needs it.',
+		],
+	],
+};
+
+const november: Stage = {
+	apply: stageNovember,
+	summary:
+		"The lab arranged the table: all pawns at Shanghai, hands holding the cards for the four Plan recons, Shanghai's Infection card in the discard pile, a supplied yellow city drawn first, 1 plague in New York, cities topped up toward 3 cubes for as long as the reserve lasted, and a Player deck of 40 cards with no Epidemics.",
+	table: [
+		'This is a **tour game**. A campaign already ran the whole year. This game exists to play the parts that campaign never reached, so finishing your list below matters more than a fast win. The fourth Plan recon at Shanghai wins the game. **Do not make the red recon until every other list is done**, because it ends the game.',
+		'Pick these characters in the lobby: seat 1 takes the **Scientist**, seat 2 takes the **Vector Control Expert**, seat 3 takes **Pike**. Everyone else in this group is dead.',
+		'When the first action step starts, the lab rearranges the table once: it moves every pawn to Shanghai, deals each of you a chosen hand, and sets a few cubes. `wait` shows a chat line starting TABLE STAGED when that has happened. Run `status` and `options` again after it. Do not act before it.',
+		'The Player deck has 40 cards and no Epidemics. Never discard a card your list still needs: when you are over the hand limit, discard what you drew.',
+		'Shanghai is infested: a pawn that starts its turn there is exposed until the shelter is built.',
+	],
+	seats: [
+		[
+			'You are the Scientist, at Shanghai, holding 5 red cards and 1 black card.',
+			"Turn 1: use the Scientist's free action to destroy Shanghai's Infection card in the discard pile. Keep all your cards: Pike takes your black card with Facilitate.",
+			'After that, keep the board supplied and wait. Hold the red recon (5 red cards at Shanghai) until Pike has died, the haven worker that replaces Pike has been exposed, and the other two lists are done. Then make it. It wins the game.',
+		],
+		[
+			'You are the Vector Control Expert, at Shanghai, holding 4 yellow cards and 3 blue cards.',
+			'After the first Infect step a choice appears: a yellow city lost a cube, and the Topaz shield lets one player discard a yellow card to keep it. Answer it by discarding one yellow card. If it comes up again, skip it: you need the other three.',
+			'Your first turn: Build a Shelter at Shanghai, which needs no card for your job. Recon at Shanghai with 3 yellow cards (the yellow Plan step). Recon at Shanghai with 3 blue cards (the blue Plan step).',
+			'Then: keep the board supplied.',
+		],
+		[
+			'You are Pike, at Shanghai, with the Facilitator ability, holding 3 black cards. Pike is one exposure from death, and dying is on your list.',
+			'Your first turn: Facilitate to take the black card from the Scientist. Recon at Shanghai with 4 black cards (the black Plan step). Drive to Osaka, which is infested, and end your turn there.',
+			'Pike dies at the start of your next turn. A choice appears: nobody is free, so the seat becomes a haven worker at the North Atlantic haven.',
+			'As the haven worker: go to New York, which has plague, and end a turn there. The worker is exposed at the start of the next turn. Say so in chat: that is the signal for the red recon.',
+		],
+	],
+};
+
+const planFinish = (world: World): Stage => {
+	const left = planLeft(world);
+	const holders = [
+		left.includes('red') ? 'Seat 1 holds 5 red cards.' : '',
+		left.includes('yellow') ? 'Seat 2 holds 3 yellow cards.' : '',
+		left.includes('blue') ? 'Seat 2 holds 3 blue cards.' : '',
+		left.includes('black') ? 'Seat 3 holds 4 black cards.' : '',
+	].filter(Boolean);
+	const recon = (color: Color, count: number) =>
+		left.includes(color) ? [`Recon at Shanghai with your ${count} ${color} cards (the ${color} Plan step).`] : [];
+	return {
+		apply: stagePlanFinish,
+		summary: `The lab arranged the table: all pawns at Shanghai and the cards for the Plan steps still open (${left.join(', ')}) dealt out. Player deck of 40 cards with no Epidemics.`,
 		table: [
-			'This is a **tour game**. A campaign already ran the whole year. This game exists to play the parts that campaign never reached, so finishing your list below matters more than winning. Keep the game going until every list is done.',
-			'Pick these characters in the lobby: seat 1 takes **Rook**, seat 2 takes **Wren**, seat 3 takes **Pike**. Do not create or pick anyone else.',
-			'When the first action step starts, the lab rearranges the table once: it moves the pawns, deals each of you a chosen hand, and sets a few cubes. `wait` shows a chat line starting TABLE STAGED when that has happened. Run `status` and `options` again after it. Do not act before it.',
-			'The Player deck is cut to 30 cards with no Epidemics, so the game ends within about four rounds. Never discard a card your list still needs.',
-			'Many cities here are infested: a pawn that starts its turn in one is exposed. That is expected.',
+			`This is a **tour game**, the second attempt at November. The Plan steps made in the first attempt carry over. Still open: **${left.join(', ')}**. The recon that completes the Plan wins the game, so this game is short.`,
+			'Pick these characters in the lobby: seat 1 takes the **Scientist**, seat 2 takes the **Vector Control Expert**. Pike died last game, so seat 3 creates a new character with any open starting job (`chars` lists them) and picks it.',
+			'When the first action step starts, the lab rearranges the table once: it moves every pawn to Shanghai and deals the cards for the open Plan steps. `wait` shows a chat line starting TABLE STAGED when that has happened. Run `status` and `options` again after it. Do not act before it.',
+			`${holders.join(' ')} Never discard them.`,
 		],
 		seats: [
-			[
-				'You are Rook, at Jakarta, with the Saboteur ability. Rook is one exposure from death. Dying is on your list, but last.',
-				'First, as the lead or not, send `waive buildCenters` once. It is a plain command for `play`, not a `do` key. It exercises waiving an objective.',
-				'Turn 1: Recon at Jakarta with the Bangkok and Manila cards. Drive or ferry to the haven that appears. Recon there with the Seoul and Tokyo cards. Use Sabotage: discard the Osaka card to remove the Hollow Man in Osaka.',
-				'Turn 2: go to Ho Chi Minh City (Jakarta, Kolkata, Ho Chi Minh City) and Search there with its card. You get a companion card that places a shelter: play it at once, anywhere.',
-				'Turn 3: drive to Osaka, which is infested, and end your turn there. Rook dies at the start of your next turn. A choice appears: take any free character.',
-			],
-			[
-				'You are Wren, at Riyadh, with the Broker ability.',
-				'Turn 1: Search at Riyadh with its card. It gives a free supply line: answer the choice by picking a city to connect. Drive to Baghdad. Search there with its card. You get a companion card that removes 1 plague cube from where you stand: play it right there, Baghdad has one. Use Broker: discard the Tehran card to take the Istanbul card from the discard pile.',
-				'Turn 2: drive to Cairo, Shuttle to Johannesburg, and Search there with its card.',
-				'Then: help wherever the game needs it.',
-			],
-			[
-				'You are Pike, at Delhi.',
-				'Turn 1: Search at Delhi with its card. You get a companion card that removes a Hollow Man: play it on Tokyo. Drive to Tehran, then Kolkata. Search at Kolkata with its card. You get a companion card that clears a city of plague: play it on Hong Kong, but only after Hong Kong has had its outbreak in the first Infect step.',
-				'Then: help wherever the game needs it.',
-			],
-		],
-	},
-	'tour-november': {
-		apply: stageNovember,
-		summary:
-			"The lab arranged the table: all pawns at Shanghai, hands holding the cards for the four Plan recons, Shanghai's Infection card in the discard pile, a supplied yellow city drawn first, 1 plague in New York, every other city topped up to 3 cubes, and a Player deck of 40 cards with no Epidemics.",
-		table: [
-			'This is a **tour game**. A campaign already ran the whole year. This game exists to play the parts that campaign never reached, so finishing your list below matters more than a fast win. The fourth Plan recon at Shanghai wins the game. **Do not make the red recon until every other list is done**, because it ends the game.',
-			'Pick these characters in the lobby: seat 1 takes the **Scientist**, seat 2 takes the **Vector Control Expert**, seat 3 takes **Pike**. Everyone else in this group is dead.',
-			'When the first action step starts, the lab rearranges the table once: it moves every pawn to Shanghai, deals each of you a chosen hand, and sets a few cubes. `wait` shows a chat line starting TABLE STAGED when that has happened. Run `status` and `options` again after it. Do not act before it.',
-			'The Player deck has 40 cards and no Epidemics. Never discard a card your list still needs: when you are over the hand limit, discard what you drew.',
-			'Shanghai is infested: a pawn that starts its turn there is exposed until the shelter is built.',
-		],
-		seats: [
-			[
-				'You are the Scientist, at Shanghai, holding 5 red cards and 1 black card.',
-				"Turn 1: use the Scientist's free action to destroy Shanghai's Infection card in the discard pile. Keep all your cards: Pike takes your black card with Facilitate.",
-				'After that, keep the board supplied and wait. Hold the red recon (5 red cards at Shanghai) until Pike has died, the haven worker that replaces Pike has been exposed, and the other two lists are done. Then make it. It wins the game.',
-			],
-			[
-				'You are the Vector Control Expert, at Shanghai, holding 4 yellow cards and 3 blue cards.',
-				'After the first Infect step a choice appears: a yellow city lost a cube, and the Topaz shield lets one player discard a yellow card to keep it. Answer it by discarding one yellow card. If it comes up again, skip it: you need the other three.',
-				'Your first turn: Build a Shelter at Shanghai, which needs no card for your job. Recon at Shanghai with 3 yellow cards (the yellow Plan step). Recon at Shanghai with 3 blue cards (the blue Plan step).',
-				'Then: keep the board supplied.',
-			],
-			[
-				'You are Pike, at Shanghai, with the Facilitator ability, holding 3 black cards. Pike is one exposure from death, and dying is on your list.',
-				'Your first turn: Facilitate to take the black card from the Scientist. Recon at Shanghai with 4 black cards (the black Plan step). Drive to Osaka, which is infested, and end your turn there.',
-				'Pike dies at the start of your next turn. A choice appears: nobody is free, so the seat becomes a haven worker at the North Atlantic haven.',
-				'As the haven worker: go to New York, which has plague, and end a turn there. The worker is exposed at the start of the next turn. Say so in chat: that is the signal for the red recon.',
-			],
-		],
-	},
+			['You are the Scientist, at Shanghai.', ...recon('red', 5)],
+			['You are the Vector Control Expert, at Shanghai.', ...recon('yellow', 3), ...recon('blue', 3)],
+			['You play a new character, at Shanghai.', ...recon('black', 4)],
+		].map(lines =>
+			lines.length > 1
+				? lines
+				: [...lines, 'Nothing is left on your list. Keep the board alive until the Plan is complete.'],
+		),
+	};
+};
+
+/** The stage for the game about to be played, by name. A stage may depend on how far the campaign has come. */
+export const stages: Record<string, (world: World) => Stage> = {
+	'tour-october': () => october,
+	'tour-november': world => (planLeft(world).length === PLAN_COLOURS.length ? november : planFinish(world)),
 };

@@ -1,33 +1,33 @@
 # Memory
 
-October first, the tour, was lost. The Player deck ran out. Incidents stopped at 7/8. Hollow Men 1/3. Next lobby is October second at rationing 6.
+November first was lost at 8 incidents. The Plan stopped at 3/4. Next lobby is November second at rationing 6. The fourth recon at Shanghai wins. Do not play the red one until the other recons and every other list are done. The last loss was an empty city flipping on the turn before mine.
 
-Rook (char-1) is dead. Laborer, Saboteur. Do not play Rook. A character at 6/7 dies on the next exposure.
+I am the Scientist (char-3), home Southreach, exposure 1/7. Record Keeper (hand 8), Surveyor (recon costs 1 card fewer), Courier (deliver to an adjacent location). Shanghai still prints 5 red cards. Check options before trusting the discount.
 
-I am the Scientist (char-8), home Southreach, exposure 1/7, one blank from leaving Lima. No bought abilities. Once per turn, free, destroyInfection removes this city's Infection card from the discard. That is not Inoculate. Inoculate stores the card, and an Epidemic can pull a stored card back out.
+Pike (char-1) is dead. Do not play Pike. Immunologist, Captain, and Sanitation Officer are dead. Vector Control Expert (char-6), home Coralhold, Record Keeper, exposure 1/7, builds a shelter with no card in any location. Haven worker (char-7) has no job, home Northwatch, exposure 0/0. Exposure does not scratch them. It sends them home. Open jobs: administrator, radioOperator, laborer, farmer.
 
-Wren (char-2): Radio Operator, Broker, Helmsman, exposure 2/7. Pike (char-3): Instructor, Facilitator, Seasick, Navigator, exposure 2/7. Seasick makes sea lanes cost 1 more cube. Navigator makes one Chart Sea Lane free each turn.
+## Board that carries
 
-Still unplayed: Immunologist, Captain, Sanitation Officer, Vector Control Expert. Vector Control builds a shelter with no card, in any location, including a haven.
+Shanghai: population 2, infested, permanent center, permanent shelter. Infection cards: 0. The destroy stuck. The shelter blocks an infested start.
+
+Forsaken, population 0, infested, infection cards skipped, only Drive or Ferry: Jakarta, Ho Chi Minh City, Hong Kong, Manila, Delhi, Bangkok. Restore costs 2 and they stay infested. Do not restore. Skipping their infections is the point.
+
+Osaka and Tokyo are population 2 and infested, with no shelter. Kolkata is population 2, infested, permanent center. New York is population 2 and not infested. Permanent centers I stood in: Shanghai, Washington, Johannesburg, Cairo, Kolkata.
+
+Cubes, plague, and Hollow Men reset. Permanent shelter, centers, population, forsaken, destroyed infections, and abilities do not.
 
 ## Rules that change the next game
 
-October's starred objective is 3 Hollow Men in different havens at once. Waiving build centers did not win the game by itself.
+destroyInfection removes this city's Infection card from the discard. That is not Inoculate. Inoculate stores the card. Use the free destroy when the card is in the discard.
 
-Broadcast: stand in a tower city and move a Hollow Man from a city of that colour into a neighbour. Los Angeles has a permanent yellow tower. Lima's neighbours include Farwater. One figure in Farwater does not carry over. Figures reset. The tower does not.
+A pawn that starts a turn in a plague city or an infested city is exposed unless a shelter is there. Walking through on your own turn is not exposure. Being moved onto an infested city after the turn has started is not exposure. A shelter also blocks the exposure for leaving Hollow Men. Do not shelter or purge a city where someone still has to be exposed.
 
-Permanent shelters: Tripoli and Baghdad. Coralhold's shelter does not come back. A shelter blocks exposure and blocks the game-end population loss. Tripoli had plague and lost nothing.
+Plan recons at Shanghai: 3 different yellow, 3 different blue, 4 different black, 5 different red. Sail, charter, build shelter, and build center discard cards. Never discard a card the recon still needs. When over the hand limit, discard what you drew.
 
-St. Petersburg is forsaken, population 0, and stays infested even if restored. The briefing says its Infection cards are skipped and only Drive or Ferry works there. I did not restore it. Restore costs 2 and the city stays infested.
+Shield discards a City card of the hit city's colour to keep the cube. The choice can close while you listen, with no skip in the log. If the city would be left at 0, shield immediately.
 
-Infested is permanent at population above 0. Osaka was population 1 and still infested. Starting a turn there exposes you. Walking through on your own turn does not. Leaving a Hollow Man exposes you. A haven has no colour, so Build Shelter cannot target one. Shelter Wright can.
+Quiet Night, played before the infect flips, skips that whole step. Use it at 7 incidents. Supply Drop adds from the reserve. This game the reserve was 0, so it could not add cubes. Do not assume the next Player deck has zero Epidemics. This one had 40 cards and none.
 
-Shield: when infection removes a supply cube, any player may discard a City card of that city's colour to keep it. An empty city takes plague instead, and shield does not open. Quiet Night, played before the first flip, skips that whole infect step. Supply Drop does nothing when the reserve is empty.
+Rationing 6 means six rationed events. A character at 6/7 dies on the next exposure. One exposure can still be a blank, which is what mine was.
 
-A new city joins the grid the moment the line is drawn. Its cards sit out of the decks for that game. Santiago is on the grid from São Paulo. Coralhold linked to Jakarta the moment the recon finished, despite the briefing saying it was off the grid until a line was drawn.
-
-Death's replace choice lists living unused characters. The new pawn starts at its home haven, with no actions left that turn, then draws. The log may rename the death onto the new character. Trust status.
-
-Permanent centers I saw: Jakarta, Washington, Cairo, Johannesburg, Kolkata, Shanghai. That is the cap of 6. Tripoli's tower was already permanent, and Los Angeles is now too.
-
-Rationing 6 means six rationed events. Do not assume the next deck has zero Epidemics. This one was cut to 30 cards and had none.
+No apostrophes or parentheses in say, why, or report. The lead buys. I only say what I want.

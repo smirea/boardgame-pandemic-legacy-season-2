@@ -166,7 +166,7 @@ export function renderLog(world: World, entry: LogEntry): string {
 		case 'incident':
 			return `incident in ${city(entry.city)} (total ${entry.total})`;
 		case 'exposure':
-			return `${seat(entry.seat)} was exposed: ${{ empty: 'a blank box, nothing happens', scar: 'a scar', skull: 'death', worker: 'sent home' }[entry.result]}`;
+			return `${seat(entry.seat)} was exposed: ${{ empty: 'a blank box, nothing happens', scar: 'a scar', skull: 'death', worker: 'sent home with an empty hand (a haven worker has no exposure track)' }[entry.result]}`;
 		case 'death':
 			return `${seat(entry.seat)}'s character died in ${city(entry.at)}`;
 		case 'event':

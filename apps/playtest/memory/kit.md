@@ -1,27 +1,39 @@
 # Memory
 
-October first lost when the Player deck ran out. Incidents 7/8. Hollow Men 1/3, one figure in Farwater. Build centers was waived. Past: Jan W, Feb W, Mar W, Apr W, May W, Jun W, Jul W, Aug W, Sep W, Oct L. Next lobby is October second at rationing 6.
+November first lost at 8 incidents. Hong Kong took the last plague on the haven worker infect, after the exposure signal and before the red recon. The Plan is 3/4. Yellow, blue, and black are done. Red at Shanghai is still the win. Past: Jan W, Feb W, Mar W, Apr W, May W, Jun W, Jul W, Aug W, Sep W, Oct W, Nov L. Next lobby is November second at rationing 6. It already shows Vex on the Scientist, Sol on the Vector Control Expert, and Kit on the haven worker.
 
-Rook (char-1) is dead. Vex is the Scientist (char-8), home Southreach, exposure 1/7, no ability yet. Once per turn, free, the Scientist destroys the Infection card of the city they stand in from the discard. Sol is still Wren (char-2), Broker and Helmsman, exposure 2/7. I am Pike (char-3), Instructor, Facilitator, Navigator, Seasick. Exposure 2/7. Home Southreach. Navigator makes one Chart Sea Lane a turn free, which is how I live with Seasick.
+## Who is alive
 
-## Board that matters
+Pike (char-1) is dead, exposure 7/7, Facilitator buried with him. Immunologist, Captain, and Sanitation Officer are dead too.
 
-Permanent tower in Los Angeles. Permanent shelters in Tripoli and Baghdad. St. Petersburg is forsaken. Farwater lost 1. Washington, Cairo, Johannesburg, Kolkata, Jakarta, and Shanghai each gained 1. Tripoli kept its population because the shelter was there when the plague scored.
+Scientist (char-3) exposure 1/7. Record Keeper, Surveyor, Courier. Home Southreach. Once per turn, free, destroys the Infection card of the city they stand in from the discard. Surveyor recons with 1 card fewer. Courier delivers to an adjacent city. Hand limit 8. Do not assume the red step dropped from 5 until `options` shows it.
 
-Forsaken: that infection card is set aside and another city is flipped, so the hit still lands. Only Drive or Ferry works there. Restore costs 2 and the city stays infested. Do not buy it unless we need the city.
+Vector Control Expert (char-6) exposure 1/7. Record Keeper only. Home Coralhold. Builds a shelter with no card, in any location. Hand limit 8.
+
+Haven worker (char-7) has no job and no exposure boxes. Home Northwatch. Open jobs if we make someone new: administrator, radioOperator, laborer, farmer.
+
+## Board
+
+Shanghai is infested, with a permanent center and a permanent shelter. Starting a turn there is safe. The Plan recons happen there.
+
+Osaka is infested. Game end raised Osaka and Tokyo by 1. Tripoli has a permanent tower. Washington and Cairo have permanent centers. Northwatch drives straight to New York.
+
+Forsaken, and we did not restore them: Jakarta, Ho Chi Minh City, Hong Kong, Manila, Delhi, Bangkok. Their Infection cards are skipped. Only Drive or Ferry works there. Restore costs 2, brings the city back at population 1, and it stays infested. Do not buy it unless we need the city. Leaving them forsaken keeps those cards out of the infect deck.
+
+Other population from the loss: New York -1, Washington +1, Cairo +1, Denver -1, Lima -1, New Mumbai -1, Kolkata +1, Jakarta -1, Bangkok -1, Ho Chi Minh City -1, Manila -1, Hong Kong -1, Shanghai +1. Johannesburg had plague or Hollow Men and lost nothing because its center gained the point back.
 
 ## Rules that change play
 
-Infested cities and plague cities expose you at the start of the turn, before actions. A shelter built that turn is too late. Do not end a turn in an infested city unless it is already sheltered. Seasick does not stop that exposure. Outrider only stops leaving Hollow Men.
+Infested cities and plague cities expose you at the start of the turn, before actions. A shelter built later that turn does not cover the character who just started there. It does cover every later start.
 
-Shield is a discard of a matching colour card to keep the cube an infection just removed. The pay keys show up only for colours in your hand. Answer quickly. The choice closes as soon as someone skips.
+Facilitator takes any card from a player in the same city. That finished the black set: Tripoli, Cairo, Moscow, Istanbul. An Instructor can only give.
 
-Inoculate stores a discarded Infection card for the whole game when no Epidemic will pull it back. Never inoculate a player card that still has a search box.
+A death with nobody free is `decide:replace:null`. The seat becomes a haven worker at Northwatch, with 0 actions that turn, and still draws and infects. Exposure on the worker does not scratch. The log says sent home, the pawn moves to Northwatch, and exposure stays 0/0.
 
-Supply Drop and Stock Up both take cubes from the reserve. The reserve stayed 0 while the stockpile moved, and neither card ever became playable. Do not count on them.
+Quiet Night, played before the first flip, skips that whole Infect step.
 
-Search companions worked and did not write a log line. Check the city before you trust the play. Airlift does log.
+Shield: discard a matching colour card to keep the cube. Pay keys show up only for colours you hold. Skipping closes the choice for everyone. One Istanbul shield closed with no log line. Do not skip when a teammate should pay.
 
-freeEdge never appeared. replace was only the dead player's new character. A shelter still asked for a colour card even after the briefing said it was free.
+Supply Drop adds 4 cubes from the reserve onto a grid location. Stock Up moves 6 cubes from the reserve to the stockpile. Neither appears in `options` while the reserve is 0.
 
-Jakarta recon was used on turn 1 to open Coral Sea. Do not plan on a second route from there.
+At the hand limit, a drawn card can vanish with no discard logged. The Scientist lost a blue London and a second red Osaka that way. After any draw at 7 or 8 cards, read the hand before you trust it.
