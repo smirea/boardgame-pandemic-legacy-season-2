@@ -44,7 +44,7 @@
 - The board is generated, not drawn: `apps/ui/src/lib/board/chart.ts` paints the chart sheet (paper, coasts, graticule, wear) and the faded sheet that shows over unknown regions. `Fog.svelte` masks between them, so a revealed region inks itself in.
 - Card faces are generated, never drawn by hand: `apps/ui/src/lib/cards/mapArt.ts` builds the map-and-pin art for any city, used by `PlayerCard.svelte` and `cards/InfectionCard.svelte`. Check changes at `/debug/cards`.
 - City names, populations and permanent structures are printed on the chart in board units (`apps/ui/src/lib/board/print.svelte.ts`), so pieces stand over them. There is no DOM label: each city keeps an empty `.anchor[data-city][data-name]` at its disc's centre, which the playtest lab and the e2e scripts use to find, read and click cities. Hover text for every piece comes from `board/hints.ts`.
-- Seats sit in the corners in turn order, clockwise, with this browser's player at the bottom right (`hud/seats.ts`). Live play and replays share that layout through `Game.svelte`.
+- Seats sit in the corners in turn order, clockwise, with this browser's player at the bottom right (`hud/seats.ts`). A browser that plays several characters, such as one playing on its own screen, seats whichever of them is active there. Live play and replays share that layout through `Game.svelte`.
 - `/debug/game` runs the real machine and screen on one client. `window.DEBUG` exposes `getState`, `saveState`, `loadState` and `setState`.
 
 - Local web host: boardgame-pandemic-legacy-season-2.localhost -> 6190; browser API calls use the /api proxy.

@@ -74,8 +74,9 @@
 		void game?.active;
 		viewing = null;
 	});
-	// The dock holds up this player's own hand, which on a shared screen is whoever's turn it is, or the hand picked.
-	const home = $derived(game ? (owns(game.active) ? game.active : (game.seats.find(owns) ?? game.active)) : null);
+	// The seat this browser sits at. Playing several characters, on one screen or not, it moves to whoever's turn it is.
+	const me = $derived(game ? (owns(game.active) ? game.active : game.seats.find(owns)) : undefined);
+	const home = $derived(game ? (me ?? game.active) : null);
 	const dockSeat = $derived(spectator ? null : (viewing ?? home));
 
 	const actions = $derived(game && snap.phase === 'playing.actions' && canAct ? legalActions(world, game.active) : []);
@@ -121,12 +122,8 @@
 	let goals = $state<HTMLElement | null>();
 
 	// Everyone sits round the table in turn order, clockwise, with this browser's player at the bottom right.
-	// A replay, or one screen shared by the table, seats the first player there.
-	const seatAt = $derived(
-		game
-			? placeSeats(game.seats, spectator || solo ? game.seats[0] : game.seats.find(seat => mine.includes(seat)))
-			: null,
-	);
+	// A replay seats the first player there.
+	const seatAt = $derived(game ? placeSeats(game.seats, me) : null);
 	// Where the panels on the board's sides sit, so the fitted view keeps cities out from under them.
 	let covered = $state.raw<{ x: number; y: number; width: number; height: number }[]>([]);
 	$effect(() => {
@@ -504,19 +501,23 @@
 			{#if corner}
 				{@render corner(seat, place)}
 			{:else}
-				<Corner
-					{seat}
-					{place}
-					{world}
-					name={seatName(world, seat)}
-					color={SEAT_COLORS[game.seats.indexOf(seat)]!}
-					selected={viewing === seat}
-					showHand={seat !== dockSeat}
-					action="Show this hand in the dock"
-					selectedTag="Hand shown"
-					onselect={() => (viewing = seat)}
-					claim={solo || spectator ? null : { mine: mine.includes(seat), toggle: () => claim(seat) }}
-				/>
+				{#key seat}
+					<div class="seated" in:fly={{ x: place === 'tl' || place === 'bl' ? -32 : 32, duration: 360, delay: 120 }}>
+						<Corner
+							{seat}
+							{place}
+							{world}
+							name={seatName(world, seat)}
+							color={SEAT_COLORS[game.seats.indexOf(seat)]!}
+							selected={viewing === seat}
+							showHand={seat !== dockSeat}
+							action="Show this hand in the dock"
+							selectedTag="Hand shown"
+							onselect={() => (viewing = seat)}
+							claim={solo || spectator ? null : { mine: mine.includes(seat), toggle: () => claim(seat) }}
+						/>
+					</div>
+				{/key}
 			{/if}
 		</div>
 	{/if}
@@ -819,7 +820,8 @@
 		align-items: flex-end;
 	}
 
-	.place {
+	.place,
+	.seated {
 		width: 100%;
 	}
 

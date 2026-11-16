@@ -10,7 +10,7 @@ bun run dev            # UI at http://boardgame-pandemic-legacy-season-2.localho
 
 ## Play
 
-- **On one screen.** Open the UI and choose "Play on this screen", or go to `/debug/game`. This runs the real game with every seat on one client and no networking.
+- **On one screen.** Open the UI and choose "Play on this screen", or go to `/debug/game`. This runs the real game with every seat on one client and no networking, so one person can play a whole campaign. The table turns each turn to seat the active character at the bottom right.
 - **With friends.** Start the signaling Worker, then one player hosts and the others join with the same passphrase.
 
 ```sh
@@ -38,7 +38,7 @@ To try several players in one browser, give each tab its own identity with `?DEB
 - **Cards.** City cards have no hand-made art. `apps/ui/src/lib/cards/mapArt.ts` draws each one from the map data: a crop around the city with a pin on it. `/debug/cards` shows every generated Player and Infection card.
 - **Console helpers.** `window.DEBUG.getState()`, `saveState()`, `loadState()` and `setState(save)` are available while a game is open.
 - **Scenarios.** The menu loads a campaign that stands in the October or December lobby with every region explored (`packages/game/src/scenarios.ts`), for testing late mechanics without playing nine months.
-- **Checking the whole game.** `apps/ui/e2e/october.ts` builds the app and plays a full October game through the UI in a headless browser. Add `--shots` to keep screenshots in `apps/ui/e2e/shots`.
+- **Checking the whole game.** `apps/ui/e2e/october.ts` builds the app and plays a full October game through the UI in a headless browser. `apps/ui/e2e/solo.ts` plays alone through "Play on this screen" and checks that the table follows the active character. Add `--shots` to either to keep screenshots in `apps/ui/e2e/shots`.
 - **Playing a whole campaign with AI players.** `apps/playtest/README.md` covers the lab: configs, saves, player memories, and the parity report.
 - **Replaying a game.** The host records every game as it is played. The menu saves the recording to a file, and `/replay` plays one back on the real game screen, step by step. `apps/ui/e2e/replay.ts` checks it end to end.
 - **Checking the network.** `packages/net/e2e/run.ts` drives three real browser pages through the local signaling Worker.

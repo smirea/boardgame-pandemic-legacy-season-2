@@ -77,8 +77,8 @@
 		<section>
 			<h1>Legacy</h1>
 			<p>
-				A co-op campaign for two to four players. One player hosts and keeps the save. Everyone else joins them
-				directly.
+				A co-op campaign for two to four characters. Play every character yourself on this screen, or play with a group:
+				one player hosts and keeps the save, everyone else joins them directly.
 			</p>
 			<label>Your name <input bind:value={name} maxlength="24" placeholder="Name" data-testid="name" /></label>
 			<label
