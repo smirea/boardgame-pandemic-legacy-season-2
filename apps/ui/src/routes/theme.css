@@ -26,6 +26,11 @@ html[data-theme] {
 	--slip-muted: #6f604c;
 	--slip-line: rgb(60 44 28 / 0.18);
 	--slip-shadow: 0 1px 1px rgb(40 26 12 / 0.35), 0 0.5rem 1.2rem rgb(20 12 4 / 0.35);
+	/* A loose sheet of the same stock as the chart, for the lobby, the briefing and the game-end shop. */
+	--document:
+		radial-gradient(ellipse at 20% 10%, rgb(255 250 236 / 0.5), transparent 60%),
+		radial-gradient(ellipse at 90% 100%, rgb(150 110 60 / 0.16), transparent 55%), #e4d9c0;
+	--document-shadow: 0 2rem 5rem rgb(0 0 0 / 0.6), inset 0 0 4rem rgb(120 86 48 / 0.2);
 	--ink-danger: #a3301c;
 	--ink-good: #3d6b55;
 	--ink-warn: #8b5a12;

@@ -155,38 +155,54 @@
 </div>
 
 <style>
+	/* The game-end requisition: what changed, and what the units left over can buy. */
 	.upkeep {
 		display: flex;
 		flex-direction: column;
-		gap: 0.9rem;
-		width: min(44rem, 92vw);
+		gap: 1rem;
+		width: min(46rem, 92vw);
 		max-height: 100%;
-		padding: 1.3rem 1.5rem;
-		border: 1px solid var(--line);
-		border-radius: 0.9rem;
-		background: var(--panel);
-		backdrop-filter: blur(14px);
-		box-shadow: 0 1.5rem 4rem rgb(0 0 0 / 0.5);
+		padding: 1.4rem 1.7rem 1.4rem;
+		border-radius: 2px;
+		background: var(--document);
+		color: var(--slip-ink);
+		box-shadow: var(--document-shadow);
 		overflow: auto;
+		animation: laid 420ms cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
+	}
+
+	@keyframes laid {
+		from {
+			opacity: 0;
+			translate: 0 1.5rem;
+			rotate: 1deg;
+		}
+	}
+
+	header {
+		padding-bottom: 0.8rem;
+		border-bottom: 1px solid rgb(42 32 23 / 0.25);
 	}
 
 	h1 {
 		margin: 0;
-		font-size: 1.6rem;
+		font-family: var(--font-display);
+		font-size: 2.4rem;
+		font-weight: 400;
+		line-height: 1;
 	}
 
 	header p {
-		margin: 0.2rem 0 0;
-		color: var(--muted);
-		font-size: 0.85rem;
+		margin: 0.35rem 0 0;
+		color: var(--slip-muted);
+		font-size: 0.92rem;
 	}
 
 	h2 {
-		margin: 0 0 0.4rem;
-		color: var(--muted);
-		font-size: 0.65rem;
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
+		margin: 0 0 0.45rem;
+		font-family: var(--font-display);
+		font-size: 1.15rem;
+		font-weight: 400;
 	}
 
 	.changes,
@@ -195,30 +211,30 @@
 		flex-wrap: wrap;
 		gap: 0.3rem;
 		margin: 0;
-		font-size: 0.75rem;
+		font-size: 0.82rem;
 	}
 
 	.changes span {
-		padding: 0.1rem 0.45rem;
-		border-radius: 0.3rem;
-		background: rgb(255 107 107 / 0.16);
-		color: var(--danger);
+		padding: 0.05rem 0.45rem;
+		border: 1px solid rgb(163 48 28 / 0.45);
+		border-radius: 2px;
+		color: var(--ink-danger);
 	}
 
 	.changes span.up {
-		background: rgb(125 252 192 / 0.14);
-		color: var(--accent);
+		border-color: rgb(61 107 85 / 0.55);
+		color: var(--ink-good);
 	}
 
 	.none {
-		color: var(--muted);
-		font-size: 0.8rem;
+		color: var(--slip-muted);
+		font-size: 0.85rem;
 	}
 
 	.shop {
 		display: grid;
 		grid-template-columns: 15rem minmax(0, 1fr);
-		gap: 0.9rem;
+		gap: 1rem;
 		min-height: 0;
 	}
 
@@ -228,6 +244,7 @@
 		gap: 0.2rem;
 		max-height: 15rem;
 		overflow: auto;
+		scrollbar-width: thin;
 	}
 
 	.groups button {
@@ -239,46 +256,58 @@
 	}
 
 	.groups button.on {
-		border-color: var(--accent);
-		background: rgb(125 252 192 / 0.1);
+		border-color: var(--slip-ink);
+		background: rgb(42 32 23 / 0.08);
 	}
 
 	.groups small {
-		color: var(--muted);
+		color: var(--slip-muted);
 		white-space: nowrap;
 	}
 
 	.detail p {
 		margin: 0 0 0.5rem;
-		color: var(--muted);
-		font-size: 0.75rem;
+		color: var(--slip-muted);
+		font-size: 0.85rem;
+		line-height: 1.35;
 	}
 
 	.targets {
 		max-height: 12rem;
 		overflow: auto;
+		scrollbar-width: thin;
 	}
 
 	select,
 	button {
-		padding: 0.35rem 0.55rem;
-		border: 1px solid var(--line);
-		border-radius: 0.4rem;
-		background: rgb(255 255 255 / 0.05);
-		color: var(--ink);
+		padding: 0.32rem 0.55rem;
+		border: 1px solid rgb(42 32 23 / 0.35);
+		border-radius: 2px;
+		background: none;
+		color: var(--slip-ink);
 		font: inherit;
-		font-size: 0.78rem;
+		font-size: 0.85rem;
 		cursor: pointer;
+		transition:
+			background 150ms ease,
+			border-color 150ms ease;
 	}
 
-	.targets button:hover {
-		border-color: var(--accent);
+	button:hover {
+		border-color: var(--slip-ink);
+		background: rgb(42 32 23 / 0.06);
 	}
 
 	.primary {
-		border-color: var(--accent);
-		background: var(--accent);
-		color: #06120c;
+		align-self: flex-start;
+		padding: 0.5rem 1.1rem;
+		border-color: var(--slip-ink);
+		background: var(--slip-ink);
+		color: #efe6d2;
 		font-weight: 700;
+	}
+
+	.primary:hover {
+		background: #3d3022;
 	}
 </style>

@@ -4,6 +4,7 @@
 	import { GameSession } from '#lib/session/session.svelte.ts';
 	import type { Mode } from '#lib/session/session.svelte.ts';
 	import { LS } from '#lib/storage.ts';
+	import Engraving from '#lib/board/Engraving.svelte';
 	import { onDestroy } from 'svelte';
 
 	const browser = typeof window !== 'undefined';
@@ -47,6 +48,7 @@
 
 {#if session?.fatal}
 	<main class="landing">
+		<Engraving />
 		<section>
 			<h1>Disconnected</h1>
 			<p>{session.fatal}</p>
@@ -62,6 +64,7 @@
 	</svelte:boundary>
 {:else if session}
 	<main class="landing">
+		<Engraving />
 		<section>
 			<h1>Looking for the host</h1>
 			<p>Status: {session.status}. The game appears as soon as the host is online.</p>
@@ -70,6 +73,7 @@
 	</main>
 {:else}
 	<main class="landing">
+		<Engraving />
 		<section>
 			<h1>Legacy</h1>
 			<p>
@@ -101,62 +105,95 @@
 		inset: 0;
 		display: grid;
 		place-items: center;
-		background: radial-gradient(ellipse at 50% 30%, #16222e 0%, #070b0f 70%);
-		color: #e9e6dc;
-		font-family: 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
+		background: radial-gradient(ellipse 60% 55% at 50% 50%, rgb(255 226 170 / 0.07), transparent 70%), var(--table);
+		color: var(--ink);
+		font-family: var(--font-ui);
+		overflow: hidden;
 	}
 
 	section {
+		position: relative;
 		display: flex;
 		flex-direction: column;
-		gap: 0.8rem;
+		gap: 0.9rem;
 		width: min(26rem, 90vw);
+		animation: rise 700ms 150ms cubic-bezier(0.2, 0.9, 0.3, 1) both;
+	}
+
+	@keyframes rise {
+		from {
+			opacity: 0;
+			translate: 0 0.8rem;
+		}
 	}
 
 	h1 {
-		margin: 0;
-		font-size: 3rem;
-		font-weight: 650;
-		letter-spacing: -0.02em;
+		margin: 0 0 -0.2rem;
+		font-family: var(--font-display);
+		font-size: 5.5rem;
+		font-weight: 400;
+		line-height: 0.9;
+		letter-spacing: -0.01em;
 	}
 
 	p {
 		margin: 0;
-		color: #8a9aa8;
+		color: var(--muted);
+		font-size: 1rem;
 		line-height: 1.5;
 	}
 
 	label {
 		display: flex;
 		flex-direction: column;
-		gap: 0.3rem;
-		color: #8a9aa8;
-		font-size: 0.75rem;
-		letter-spacing: 0.06em;
-		text-transform: uppercase;
+		gap: 0.2rem;
+		color: var(--muted);
+		font-size: 0.85rem;
 	}
 
-	input,
-	button {
-		padding: 0.6rem 0.8rem;
-		border: 1px solid rgb(255 255 255 / 0.14);
-		border-radius: 0.5rem;
-		background: rgb(255 255 255 / 0.05);
-		color: inherit;
+	input {
+		padding: 0.45rem 0.1rem;
+		border: 0;
+		border-bottom: 1px solid var(--line-strong);
+		background: none;
+		color: var(--ink);
 		font: inherit;
-		font-size: 0.95rem;
-		letter-spacing: normal;
-		text-transform: none;
+		font-size: 1.05rem;
+		transition: border-color 150ms ease;
+	}
+
+	input:focus {
+		outline: none;
+		border-bottom-color: var(--paper);
+	}
+
+	input::placeholder {
+		color: rgb(151 140 121 / 0.6);
 	}
 
 	.buttons {
 		display: flex;
 		gap: 0.5rem;
-		margin-top: 0.4rem;
+		margin-top: 0.5rem;
 	}
 
 	button {
+		padding: 0.55rem 0.9rem;
+		border: 1px solid var(--line-strong);
+		border-radius: 2px;
+		background: none;
+		color: var(--ink);
+		font: inherit;
+		font-size: 0.95rem;
 		cursor: pointer;
+		transition:
+			border-color 150ms ease,
+			background 150ms ease;
+	}
+
+	button:hover:not(:disabled) {
+		border-color: var(--paper);
+		background: var(--wash);
 	}
 
 	button:disabled {
@@ -165,13 +202,17 @@
 	}
 
 	.primary {
-		border-color: #7dfcc0;
-		background: #7dfcc0;
-		color: #06120c;
+		border-color: var(--paper);
+		background: var(--paper);
+		color: var(--paper-ink);
 		font-weight: 700;
 	}
 
+	.primary:hover:not(:disabled) {
+		background: #e9dec5;
+	}
+
 	.error {
-		color: #ff6b6b;
+		color: var(--danger);
 	}
 </style>

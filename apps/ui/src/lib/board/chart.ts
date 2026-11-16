@@ -384,10 +384,10 @@ function paintChart(bounds: BoardBounds): Chart {
 	toBoard(faint);
 	faint.save();
 	faint.clip(sphere);
-	faint.strokeStyle = `rgb(${INK} / 0.17)`;
-	faint.lineWidth = px(1.3);
+	faint.strokeStyle = `rgb(${INK} / 0.3)`;
+	faint.lineWidth = px(1.6);
 	faint.beginPath();
-	for (let x = bounds.minX - (bounds.maxZ - bounds.minZ); x < bounds.maxX; x += px(11)) {
+	for (let x = bounds.minX - (bounds.maxZ - bounds.minZ); x < bounds.maxX; x += px(14)) {
 		faint.moveTo(x, bounds.minZ);
 		faint.lineTo(x + (bounds.maxZ - bounds.minZ), bounds.maxZ);
 	}
@@ -399,9 +399,13 @@ function paintChart(bounds: BoardBounds): Chart {
 	faint.stroke(land);
 	faint.setLineDash([]);
 
-	const finish = (layer: CanvasRenderingContext2D) => {
+	const finish = (layer: CanvasRenderingContext2D, bleach = 0) => {
 		const { canvas, ctx } = sheet(width, height);
 		ctx.drawImage(base, 0, 0);
+		if (bleach) {
+			ctx.fillStyle = `rgb(248 242 226 / ${bleach})`;
+			ctx.fillRect(0, 0, width, height);
+		}
 		ctx.globalCompositeOperation = 'multiply';
 		ctx.drawImage(layer.canvas, 0, 0);
 		ctx.globalCompositeOperation = 'source-over';
@@ -411,7 +415,7 @@ function paintChart(bounds: BoardBounds): Chart {
 		wear(ctx, width, height);
 		return canvas;
 	};
-	return { known: finish(ink), unknown: finish(faint) };
+	return { known: finish(ink), unknown: finish(faint, 0.3) };
 }
 
 /** The neatline around the world, with a ruled border marking every ten degrees. */
@@ -527,7 +531,7 @@ export class FogMask {
 		this.#noise = valueNoise(width, height, random(71));
 	}
 
-	draw(points: FogSource[], links: [FogSource, FogSource][], radius = 10) {
+	draw(points: FogSource[], links: [FogSource, FogSource][], radius = 15) {
 		const field = this.#field;
 		field.fill(0);
 		const { width, height } = this.canvas;
@@ -561,7 +565,7 @@ export class FogMask {
 		for (const [a, b] of links) stamp(a.at, b.at, Math.min(a.cover, b.cover));
 		const data = this.#image.data;
 		for (let i = 0; i < field.length; i++) {
-			const alpha = Math.max(0, Math.min(1, (field[i]! + 0.5 * (this.#noise[i]! - 0.5) - 0.3) * 4.5));
+			const alpha = Math.max(0, Math.min(1, (field[i]! + 0.5 * (this.#noise[i]! - 0.5) - 0.2) * 4));
 			const value = alpha * 255;
 			data[i * 4] = value;
 			data[i * 4 + 1] = value;

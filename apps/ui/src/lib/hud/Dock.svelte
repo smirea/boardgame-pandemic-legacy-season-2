@@ -360,14 +360,21 @@
 
 <style>
 	/* No tray: the dock is the near edge of the table, with the held hand rising out of the bottom of the screen. */
+	/* The dock reaches up over the empty table below the chart, so only its contents take clicks. */
 	.dock {
 		position: relative;
 		z-index: 35;
 		display: grid;
 		grid-template-columns: minmax(8rem, 12rem) minmax(0, 1.35fr) minmax(0, 1fr) 9rem;
 		gap: 1.1rem;
-		height: 9.6rem;
+		height: 10.4rem;
+		margin-top: -2.6rem;
 		padding: 0 0.9rem;
+		pointer-events: none;
+	}
+
+	.dock :is(button, input, .slot, .events, .flipped, .drew, .prompt) {
+		pointer-events: auto;
 	}
 
 	.setup {
@@ -461,12 +468,12 @@
 	.minis {
 		display: flex;
 		gap: 2px;
-		min-height: 0.95rem;
+		min-height: 1.1rem;
 	}
 
 	.minis i {
-		width: 0.62rem;
-		height: 0.95rem;
+		width: 0.75rem;
+		height: 1.1rem;
 		border-radius: 1px;
 		border-top: 3px solid var(--band);
 		background: #e6dcc5;
@@ -527,10 +534,11 @@
 	}
 
 	.hand {
+		--card-size: 0.8rem;
 		display: flex;
 		justify-content: center;
 		min-width: 0;
-		margin-top: 0.45rem;
+		margin-top: 0.4rem;
 		padding-inline: var(--overlap);
 	}
 

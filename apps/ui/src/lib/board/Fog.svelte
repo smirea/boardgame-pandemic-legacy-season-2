@@ -80,7 +80,7 @@
 
 <T.Mesh
 	rotation.x={-Math.PI / 2}
-	position={[(bounds.minX + bounds.maxX) / 2, LAND_HEIGHT + 0.03, (bounds.minZ + bounds.maxZ) / 2]}
+	position={[(bounds.minX + bounds.maxX) / 2, LAND_HEIGHT + 0.12, (bounds.minZ + bounds.maxZ) / 2]}
 	receiveShadow
 >
 	<T.PlaneGeometry args={[bounds.maxX - bounds.minX, bounds.maxZ - bounds.minZ]} />

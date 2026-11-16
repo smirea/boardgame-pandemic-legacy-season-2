@@ -187,7 +187,7 @@
 			/>
 			<div class="where" data-testid="where">
 				<strong>{frame} / {total}</strong>
-				<span>{step ? `turn ${step.turn} · ${clock(step.at)}` : 'start'}</span>
+				<span>{step ? `Turn ${step.turn}, ${clock(step.at)}` : 'start'}</span>
 			</div>
 			<select bind:value={speed} aria-label="Speed">
 				{#each [0.5, 1, 2, 4, 8] as option (option)}<option value={option}>{option}×</option>{/each}
@@ -204,7 +204,7 @@
 				<h1>{gameTitle(loaded.record)}</h1>
 				{#if game?.outcome}
 					<p class="result" class:won={game.outcome.won}>
-						{game.outcome.won ? 'Won' : 'Lost'} · {game.outcome.reason} · {game.turns} turns
+						{game.outcome.won ? 'Won' : 'Lost'} in {game.turns} turns. {game.outcome.reason}
 					</p>
 				{/if}
 			{:else}
@@ -297,7 +297,7 @@
 									>{entry.outcome ? (entry.outcome.won ? 'Won' : 'Lost') : 'In play'}</span
 								>
 								<span class="meta"
-									>{entry.outcome ? `${entry.turns} turns · ` : ''}{entry.steps} steps · {entry.players
+									>{entry.outcome ? `${entry.turns} turns, ` : ''}{entry.steps} steps. {entry.players
 										.map(player => `${player.name} as ${player.character}`)
 										.join(', ')}</span
 								>
@@ -317,15 +317,11 @@
 		--side: 21.5rem;
 		--bar: 3.4rem;
 		--game-inset: 0 var(--side) var(--bar) 0;
-		--ink: #e9e6dc;
-		--muted: #8a9aa8;
-		--accent: #7dfcc0;
-		--line: rgb(255 255 255 / 0.1);
 		position: fixed;
 		inset: 0;
-		background: #070b0f;
+		background: var(--table);
 		color: var(--ink);
-		font-family: 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
+		font-family: var(--font-ui);
 		font-variant-numeric: tabular-nums;
 	}
 
@@ -346,7 +342,7 @@
 		gap: 0.9rem;
 		padding: 0 0.9rem;
 		border-top: 1px solid var(--line);
-		background: #0b1117;
+		background: var(--chrome);
 		z-index: 90;
 	}
 
@@ -372,15 +368,15 @@
 
 	.transport .play {
 		width: 2.6rem;
-		background: var(--accent);
-		border-color: var(--accent);
-		color: #06120c;
+		background: var(--paper);
+		border-color: var(--paper);
+		color: var(--paper-ink);
 		font-weight: 700;
 	}
 
 	.transport input[type='range'] {
 		flex: 1;
-		accent-color: var(--accent);
+		accent-color: var(--paper);
 	}
 
 	.where {
@@ -399,7 +395,7 @@
 		padding: 0.25rem 0.3rem;
 		border: 1px solid var(--line);
 		border-radius: 0.35rem;
-		background: #0b1117;
+		background: var(--chrome);
 		color: var(--ink);
 		font: inherit;
 		font-size: 0.75rem;
@@ -414,7 +410,7 @@
 		display: flex;
 		flex-direction: column;
 		border-left: 1px solid var(--line);
-		background: #0b1117;
+		background: var(--chrome);
 		z-index: 90;
 	}
 
@@ -433,9 +429,7 @@
 	.eyebrow {
 		margin: 0;
 		color: var(--muted);
-		font-size: 0.66rem;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
+		font-size: 0.8rem;
 	}
 
 	.eyebrow a {
@@ -449,13 +443,15 @@
 
 	h1 {
 		margin: 0.15rem 0 0;
-		font-size: 1.15rem;
-		font-weight: 650;
+		font-family: var(--font-display);
+		font-size: 1.45rem;
+		font-weight: 400;
+		line-height: 1.1;
 	}
 
 	.result {
 		margin: 0.2rem 0 0;
-		color: #ff8f8f;
+		color: var(--danger);
 		font-size: 0.74rem;
 	}
 
@@ -465,7 +461,7 @@
 
 	.error {
 		margin: 0 1rem 0.6rem;
-		color: #ff8f8f;
+		color: var(--danger);
 		font-size: 0.78rem;
 	}
 
@@ -479,7 +475,7 @@
 	nav button {
 		padding: 0.3rem 0.7rem;
 		border: 0;
-		border-radius: 999px;
+		border-radius: 2px;
 		background: none;
 		color: var(--muted);
 		font: inherit;
@@ -488,7 +484,7 @@
 	}
 
 	nav button.on {
-		background: rgb(255 255 255 / 0.09);
+		background: rgb(231 220 198 / 0.1);
 		color: var(--ink);
 	}
 
@@ -535,11 +531,10 @@
 		top: -0.6rem;
 		margin: 0.7rem -0.8rem 0.3rem;
 		padding: 0.25rem 0.8rem;
-		background: #0b1117;
-		color: var(--muted);
-		font-size: 0.66rem;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
+		background: var(--chrome);
+		color: var(--ink);
+		font-family: var(--font-display);
+		font-size: 0.95rem;
 		z-index: 1;
 	}
 
@@ -561,17 +556,17 @@
 	}
 
 	.step.past button {
-		color: #c9c6bc;
+		color: #c9bfab;
 	}
 
 	.step.now button {
-		border-left-color: var(--accent);
-		background: rgb(125 252 192 / 0.09);
+		border-left-color: var(--paper);
+		background: rgb(220 207 178 / 0.1);
 		color: var(--ink);
 	}
 
 	.step button:hover {
-		background: rgb(255 255 255 / 0.05);
+		background: var(--wash);
 	}
 
 	.n {
@@ -600,7 +595,7 @@
 	}
 
 	.out.bad {
-		color: #ff8f8f;
+		color: var(--danger);
 	}
 
 	.out.good {
@@ -617,7 +612,7 @@
 		padding: 0.4rem 0.6rem;
 		border-left: 2px solid var(--who);
 		border-radius: 0 0.45rem 0.45rem 0;
-		background: rgb(255 255 255 / 0.045);
+		background: var(--wash);
 		font-size: 0.74rem;
 	}
 
@@ -627,8 +622,8 @@
 	}
 
 	.note.issue {
-		border-left-color: #ffd166;
-		background: rgb(255 209 102 / 0.08);
+		border-left-color: var(--warn);
+		background: rgb(214 165 73 / 0.08);
 	}
 
 	.note .by {
@@ -639,7 +634,7 @@
 	}
 
 	.note.issue .by {
-		color: #ffd166;
+		color: var(--warn);
 	}
 
 	.note .time {
@@ -666,11 +661,10 @@
 
 	.notes h2 {
 		margin: 1rem 0 0.3rem;
-		color: var(--muted);
-		font-size: 0.66rem;
-		font-weight: 600;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
+		color: var(--ink);
+		font-family: var(--font-display);
+		font-size: 1.05rem;
+		font-weight: 400;
 	}
 
 	.notes p {
@@ -701,10 +695,8 @@
 	}
 
 	.finding .kind {
-		color: #ffd166;
-		font-size: 0.64rem;
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
+		color: var(--warn);
+		font-size: 0.75rem;
 	}
 
 	.finding .fix {
@@ -732,30 +724,30 @@
 	}
 
 	.games button.on {
-		border-color: var(--accent);
+		border-color: var(--paper);
 	}
 
 	.games .title {
-		font-size: 0.86rem;
-		font-weight: 650;
+		font-family: var(--font-display);
+		font-size: 1.05rem;
 	}
 
 	.tag {
 		align-self: center;
 		padding: 0.05rem 0.45rem;
-		border-radius: 999px;
-		background: rgb(255 107 107 / 0.16);
-		color: #ff8f8f;
+		border-radius: 2px;
+		background: rgb(207 91 62 / 0.16);
+		color: var(--danger);
 		font-size: 0.66rem;
 	}
 
 	.tag.won {
-		background: rgb(125 252 192 / 0.16);
+		background: rgb(141 181 156 / 0.16);
 		color: var(--accent);
 	}
 
 	.tag.live {
-		background: rgb(255 255 255 / 0.1);
+		background: rgb(231 220 198 / 0.1);
 		color: var(--muted);
 	}
 
@@ -767,6 +759,6 @@
 	}
 
 	.sum {
-		color: #c9c6bc;
+		color: #c9bfab;
 	}
 </style>
