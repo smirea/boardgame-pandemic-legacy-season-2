@@ -4,18 +4,20 @@
 	import { T, useThrelte } from '@threlte/core';
 	import { interactivity, OrbitControls } from '@threlte/extras';
 	import { untrack } from 'svelte';
-	import { MOUSE } from 'three';
+	import { MeshStandardMaterial, MOUSE, SRGBColorSpace, Texture } from 'three';
 	import type { PerspectiveCamera } from 'three';
 	import type { OrbitControls as OrbitControlsImpl } from 'three/examples/jsm/controls/OrbitControls.js';
 	import CityMarker from './CityMarker.svelte';
-	import Cloud from './Cloud.svelte';
-	import { fitBoard } from './fit';
+	import { loadChart } from './chartLoader';
+	import { DEFAULT_TILT, fitBoard } from './fit';
+	import Fog from './Fog.svelte';
 	import { layoutLabels } from './labels';
-	import { buildLandGeometry } from './land';
+	import { buildLandGeometry, mapToSheet } from './land';
 	import Pawn from './Pawn.svelte';
 	import type { BoardBounds, BoardPoint } from './projection';
 	import Pulse from './Pulse.svelte';
 	import RemoteCursor from './RemoteCursor.svelte';
+	import { routeBow } from './routes';
 	import RouteTube from './RouteTube.svelte';
 	import type { BoardView } from './types';
 
@@ -34,8 +36,9 @@
 	interactivity();
 
 	const FOV = 30;
-	const { size } = useThrelte();
+	const { size, renderer, invalidate } = useThrelte();
 	const layout = pack.positions;
+	const BLANK = '#d2c3a1';
 	const landGeometry = buildLandGeometry();
 	const bounds: BoardBounds = (() => {
 		const land = landGeometry.boundingBox!;
@@ -50,6 +53,35 @@
 	})();
 	const boardSize = { width: bounds.maxX - bounds.minX, depth: bounds.maxZ - bounds.minZ };
 	const boardCentre = { x: (bounds.minX + bounds.maxX) / 2, z: (bounds.minZ + bounds.maxZ) / 2 };
+	mapToSheet(landGeometry, bounds);
+	const texture = (bitmap: ImageBitmap) => {
+		const map = new Texture(bitmap);
+		map.colorSpace = SRGBColorSpace;
+		map.flipY = false;
+		map.anisotropy = renderer.capabilities.getMaxAnisotropy();
+		map.needsUpdate = true;
+		return map;
+	};
+	// Until the worker hands the chart back, the board is a blank sheet of the same paper.
+	let sheets = $state.raw<{ known: Texture } | null>(null);
+	loadChart(bounds).then(
+		images => {
+			sheets = { known: texture(images.known) };
+			invalidate();
+		},
+		error => console.error(error),
+	);
+	// The materials stay put and take the chart when it lands; swapping material objects under a mesh loses them.
+	const sheetMaterial = new MeshStandardMaterial({ color: BLANK, alphaTest: 0.5, roughness: 0.92 });
+	const landMaterial = new MeshStandardMaterial({ color: BLANK, roughness: 0.92 });
+	$effect(() => {
+		for (const material of [sheetMaterial, landMaterial]) {
+			material.map = sheets?.known ?? null;
+			material.color.set(sheets ? '#ffffff' : BLANK);
+			material.needsUpdate = true;
+		}
+		invalidate();
+	});
 
 	let camera = $state<PerspectiveCamera>();
 	let controls = $state<OrbitControlsImpl>();
@@ -57,7 +89,31 @@
 	let dragging = false;
 	let lastReset = 0;
 	// `$size` subscribes to the store. Reading `size.current` would not rerun when the canvas is resized.
-	const fit = $derived(fitBoard(bounds, $size.width / Math.max(1, $size.height), FOV));
+	const MARKER_REACH = 2.6;
+	const cityBounds: BoardBounds = (() => {
+		const points = Object.values(layout);
+		return {
+			minX: Math.min(...points.map(point => point.x)) - MARKER_REACH,
+			maxX: Math.max(...points.map(point => point.x)) + MARKER_REACH,
+			minZ: Math.min(...points.map(point => point.z)) - MARKER_REACH,
+			maxZ: Math.max(...points.map(point => point.z)) + MARKER_REACH,
+		};
+	})();
+	const sides = $derived.by(() => {
+		const width = Math.max(1, $size.width);
+		let left = 0;
+		let right = 0;
+		for (const rect of covered) {
+			if (rect.x + rect.width / 2 < width / 2) left = Math.max(left, rect.x + rect.width);
+			else right = Math.max(right, width - rect.x);
+		}
+		// On a narrow stage, such as the replay's, panels may not squeeze the board below 70% of its width.
+		const squeeze = Math.min(1, 0.3 / Math.max(0.001, (left + right) / width));
+		return { left: (left / width) * squeeze, right: (right / width) * squeeze };
+	});
+	const fit = $derived(
+		fitBoard(bounds, $size.width / Math.max(1, $size.height), FOV, DEFAULT_TILT, { bounds: cityBounds, ...sides }),
+	);
 	$effect(() => {
 		if (resetView !== lastReset) {
 			lastReset = resetView;
@@ -73,8 +129,11 @@
 	const routeKey = (route: { a: CityId; b: CityId; kind: string }) => `${route.kind}:${edgeKey(route.a, route.b)}`;
 	const initialEdges = new Set(untrack(() => view.edges.map(routeKey)));
 
+	const bows = $derived.by(() => {
+		const lanes = view.edges.filter(edge => edge.kind === 'sea');
+		return new Map([...view.edges, ...view.ghostEdges].map(route => [routeKey(route), routeBow(route, lanes)]));
+	});
 	const visibleCities = $derived(pack.cities.filter(city => view.cities[city.id]!.revealed));
-	const cloudCities = pack.cities.filter(city => !city.lost);
 	// Board units covered by one screen pixel at the whole-board view, the zoom at which labels are most crowded.
 	const unitsPerPixel = $derived((2 * fit.distance * Math.tan((FOV * Math.PI) / 360)) / Math.max(1, $size.height));
 	const anchors = $derived(
@@ -121,10 +180,11 @@
 	/>
 </T.PerspectiveCamera>
 
-<T.HemisphereLight args={['#dfeaf5', '#1c2630', 1.1]} />
+<T.HemisphereLight args={['#fff4dc', '#3a2e20', 2.6]} />
 <T.DirectionalLight
 	position={[-60, 120, 50]}
-	intensity={2.2}
+	color="#fff1d6"
+	intensity={2.9}
 	castShadow
 	shadow.mapSize={[4096, 4096]}
 	shadow.camera.left={-120}
@@ -135,11 +195,6 @@
 	shadow.bias={-0.0004}
 />
 
-<T.Mesh position={[boardCentre.x, -1.6, boardCentre.z]} receiveShadow>
-	<T.BoxGeometry args={[boardSize.width + 3, 3, boardSize.depth + 3]} />
-	<T.MeshStandardMaterial color="#141a20" roughness={0.9} />
-</T.Mesh>
-
 <T.Mesh
 	rotation.x={-Math.PI / 2}
 	position={[boardCentre.x, 0, boardCentre.z]}
@@ -147,19 +202,27 @@
 	onpointermove={event => onpointer?.({ x: event.point.x, z: event.point.z })}
 >
 	<T.PlaneGeometry args={[boardSize.width, boardSize.depth]} />
-	<T.MeshStandardMaterial color="#143a52" roughness={0.35} metalness={0.15} />
+	<T is={sheetMaterial} />
 </T.Mesh>
 
 <T.Mesh geometry={landGeometry} receiveShadow castShadow>
-	<T.MeshStandardMaterial color="#b3ab8c" roughness={0.95} flatShading />
+	<T is={landMaterial} />
 </T.Mesh>
 
+<Fog {bounds} hidden={city => !view.cities[city]!.revealed} />
+
 {#each view.ghostEdges as route (`ghost:${routeKey(route)}`)}
-	<RouteTube {route} from={layout[route.a]!} to={layout[route.b]!} ghost />
+	<RouteTube {route} from={layout[route.a]!} to={layout[route.b]!} bow={bows.get(routeKey(route)) ?? 0} ghost />
 {/each}
 
 {#each view.edges as route (routeKey(route))}
-	<RouteTube {route} from={layout[route.a]!} to={layout[route.b]!} animate={!initialEdges.has(routeKey(route))} />
+	<RouteTube
+		{route}
+		from={layout[route.a]!}
+		to={layout[route.b]!}
+		bow={bows.get(routeKey(route)) ?? 0}
+		animate={!initialEdges.has(routeKey(route))}
+	/>
 {/each}
 
 {#each visibleCities as city (city.id)}
@@ -170,10 +233,6 @@
 		anchor={anchors.get(city.id) ?? 'n'}
 		onselect={() => oncity?.(city.id)}
 	/>
-{/each}
-
-{#each cloudCities as city, index (city.id)}
-	<Cloud at={layout[city.id]!} seed={index} hidden={!view.cities[city.id]!.revealed} />
 {/each}
 
 {#each pawnSlots as { pawn, slot, at } (pawn.id)}

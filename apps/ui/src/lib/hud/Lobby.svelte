@@ -185,100 +185,130 @@
 </div>
 
 <style>
+	/* The campaign ledger: a loose sheet of chart paper with the roster and the seating on it. */
 	.lobby {
-		width: min(46rem, 92vw);
-		padding: 1.4rem 1.6rem;
-		border: 1px solid var(--line);
-		border-radius: 0.9rem;
-		background: var(--panel);
-		backdrop-filter: blur(14px);
-		box-shadow: 0 1.5rem 4rem rgb(0 0 0 / 0.5);
+		width: min(48rem, 92vw);
+		max-height: 100%;
+		padding: 1.5rem 1.8rem 1.4rem;
+		border-radius: 2px;
+		background: var(--document);
+		color: var(--slip-ink);
+		box-shadow: var(--document-shadow);
+		overflow: auto;
+		animation: laid 420ms cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
+	}
+
+	@keyframes laid {
+		from {
+			opacity: 0;
+			translate: 0 1.5rem;
+			rotate: -1.2deg;
+		}
 	}
 
 	h1 {
 		margin: 0;
-		font-size: 1.7rem;
-		letter-spacing: -0.01em;
+		font-family: var(--font-display);
+		font-size: 2.6rem;
+		font-weight: 400;
+		line-height: 1;
+	}
+
+	header {
+		padding-bottom: 0.9rem;
+		margin-bottom: 1rem;
+		border-bottom: 1px solid rgb(42 32 23 / 0.25);
 	}
 
 	header p {
-		margin: 0.3rem 0 1rem;
-		color: var(--muted);
-		font-size: 0.85rem;
+		margin: 0.35rem 0 0;
+		color: var(--slip-muted);
+		font-size: 0.92rem;
 	}
 
 	h2 {
-		margin: 0 0 0.5rem;
-		color: var(--muted);
-		font-size: 0.65rem;
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
+		margin: 0 0 0.45rem;
+		font-family: var(--font-display);
+		font-size: 1.15rem;
+		font-weight: 400;
 	}
 
 	.columns {
 		display: grid;
-		grid-template-columns: 1.2fr 1fr;
-		gap: 1.6rem;
+		grid-template-columns: 1.15fr 1fr;
+		gap: 2rem;
 	}
 
 	ul {
 		display: flex;
 		flex-direction: column;
-		gap: 0.3rem;
-		margin: 0 0 0.8rem;
+		gap: 0.15rem;
+		margin: 0 0 0.9rem;
 		padding: 0;
 		list-style: none;
-		font-size: 0.82rem;
+		font-size: 0.9rem;
 	}
 
 	li {
 		display: flex;
 		align-items: baseline;
 		gap: 0.5rem;
+		padding: 0.12rem 0;
+		border-bottom: 1px dotted rgb(42 32 23 / 0.2);
+	}
+
+	li strong {
+		font-family: var(--font-display);
+		font-size: 1.02rem;
+		font-weight: 400;
 	}
 
 	li span {
-		color: var(--accent);
-		font-size: 0.72rem;
+		color: var(--ink-good);
+		font-size: 0.8rem;
 	}
 
 	li small,
 	.empty,
 	.jobtext {
-		color: var(--muted);
-		font-size: 0.72rem;
+		color: var(--slip-muted);
+		font-size: 0.8rem;
 	}
 
 	li small {
 		margin-left: auto;
+		font-family: var(--font-display);
+		font-style: italic;
 	}
 
 	li.dead {
-		opacity: 0.5;
+		opacity: 0.55;
 		text-decoration: line-through;
+		text-decoration-color: var(--ink-danger);
 	}
 
 	form {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
-		gap: 0.4rem;
+		gap: 0.45rem;
 	}
 
 	.jobtext {
 		margin: 0.5rem 0 0;
+		line-height: 1.35;
 	}
 
 	label {
 		display: flex;
 		align-items: center;
 		gap: 0.6rem;
-		margin-bottom: 0.4rem;
-		font-size: 0.8rem;
+		margin-bottom: 0.3rem;
+		font-size: 0.88rem;
 	}
 
 	label span {
 		width: 3.2rem;
-		color: var(--muted);
+		color: var(--slip-muted);
 	}
 
 	label select {
@@ -288,17 +318,40 @@
 	input,
 	select,
 	button {
-		padding: 0.4rem 0.55rem;
-		border: 1px solid var(--line);
-		border-radius: 0.4rem;
-		background: rgb(255 255 255 / 0.05);
-		color: var(--ink);
+		padding: 0.35rem 0.45rem;
+		border: 0;
+		border-bottom: 1px solid rgb(42 32 23 / 0.35);
+		border-radius: 0;
+		background: rgb(255 252 242 / 0.35);
+		color: var(--slip-ink);
 		font: inherit;
-		font-size: 0.8rem;
+		font-size: 0.88rem;
+	}
+
+	input::placeholder {
+		color: rgb(42 32 23 / 0.45);
+	}
+
+	input:focus,
+	select:focus {
+		outline: none;
+		border-bottom-color: var(--slip-ink);
+		background: rgb(255 252 242 / 0.6);
 	}
 
 	button {
+		border: 1px solid rgb(42 32 23 / 0.4);
+		border-radius: 2px;
+		background: none;
 		cursor: pointer;
+		transition:
+			background 150ms ease,
+			border-color 150ms ease;
+	}
+
+	button:hover:not(:disabled) {
+		border-color: var(--slip-ink);
+		background: rgb(42 32 23 / 0.06);
 	}
 
 	button:disabled {
@@ -306,18 +359,26 @@
 		cursor: default;
 	}
 
+	.primary {
+		border-color: var(--slip-ink);
+		background: var(--slip-ink);
+		color: #efe6d2;
+		font-weight: 700;
+	}
+
+	.primary:hover:not(:disabled) {
+		background: #3d3022;
+	}
+
 	.buttons {
 		display: flex;
 		gap: 0.5rem;
-		margin: 0.8rem 0 1rem;
+		margin: 0.7rem 0 1rem;
 	}
 
-	.primary {
+	.buttons .primary {
 		flex: 1;
-		border-color: var(--accent);
-		background: var(--accent);
-		color: #06120c;
-		font-weight: 700;
+		padding-block: 0.5rem;
 	}
 
 	.rationing {
@@ -327,15 +388,27 @@
 		margin-bottom: 1rem;
 	}
 
+	.rationing button {
+		width: 1.9rem;
+		padding: 0.2rem 0;
+	}
+
 	.rationing strong {
 		min-width: 1.5rem;
+		font-family: var(--font-display);
+		font-size: 1.3rem;
+		font-weight: 400;
 		text-align: center;
 	}
 
 	.haven {
-		display: block;
-		width: 100%;
-		margin-bottom: 0.3rem;
+		display: inline-block;
+		width: calc(50% - 0.2rem);
+		margin: 0 0.4rem 0.35rem 0;
+	}
+
+	.haven:nth-of-type(2n) {
+		margin-right: 0;
 	}
 
 	.record {
@@ -343,32 +416,37 @@
 		flex-wrap: wrap;
 		gap: 0.25rem;
 		margin: 0;
-		font-size: 0.65rem;
+		font-size: 0.75rem;
 	}
 
 	.record span {
-		padding: 0.05rem 0.35rem;
-		border-radius: 0.25rem;
-		background: rgb(255 107 107 / 0.18);
-		color: var(--danger);
+		padding: 0.02rem 0.35rem;
+		border: 1px solid rgb(163 48 28 / 0.5);
+		border-radius: 2px;
+		color: var(--ink-danger);
 	}
 
 	.record span.won {
-		background: rgb(125 252 192 / 0.16);
-		color: var(--accent);
+		border-color: rgb(61 107 85 / 0.6);
+		color: var(--ink-good);
 	}
 
 	.score {
 		display: grid;
 		grid-template-columns: 1fr auto;
-		gap: 0.3rem 2rem;
+		gap: 0.35rem 2rem;
 		margin: 0;
-		font-size: 0.9rem;
+		font-size: 1rem;
+	}
+
+	.score dt {
+		border-bottom: 1px dotted rgb(42 32 23 / 0.25);
 	}
 
 	.score dd {
 		margin: 0;
-		font-weight: 700;
+		font-family: var(--font-display);
+		font-size: 1.25rem;
 		text-align: right;
 	}
 </style>

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { pack } from '@repo/game';
 	import type { Insights, PublicState } from '@repo/game';
+	import { fly } from 'svelte/transition';
 	import { MONTHS } from './labels.svelte.ts';
 
 	type Props = {
@@ -21,102 +22,169 @@
 	const percent = (value: number) => `${Math.round(value * 100)}%`;
 </script>
 
-<header class="bar">
-	<div class="month">
-		<strong>{MONTHS[campaign.month] ?? 'Campaign over'}</strong>
-		<span
-			>{campaign.month > 0 && campaign.month <= 12
-				? campaign.attempt === 1
-					? 'early attempt'
-					: 'late attempt'
-				: ''}</span
-		>
-	</div>
-
-	<div class="spacer"></div>
-
-	{#if game && info}
-		<div class="track" title="Infection rate: cards flipped at the end of every turn">
-			<span class="caption">Rate</span>
-			{#each rates as rate, index (index)}
-				<span class="pip" class:on={index === game.rateIndex} class:past={index < game.rateIndex}>{rate}</span>
-			{/each}
-		</div>
-
-		<div class="track incidents" title="Incidents: the game is lost at 8">
-			<span class="caption">Incidents</span>
-			{#each { length: pack.numbers.incidentLimit } as _, index (index)}
-				<span class="pip" class:on={index < game.incidents} class:last={index === pack.numbers.incidentLimit - 1}
-				></span>
-			{/each}
-		</div>
-
-		{#if info.playerDeck.cards > 0}
-			<div
-				class="stat"
-				title="Player deck. Turns left before it runs out, and the chance the next draw holds an epidemic."
+<div class="frame">
+	<header class="bar">
+		<div class="month">
+			<strong>{MONTHS[campaign.month] ?? 'Campaign over'}</strong>
+			<span
+				>{campaign.month > 0 && campaign.month <= 12
+					? campaign.attempt === 1
+						? 'early attempt'
+						: 'late attempt'
+					: ''}</span
 			>
-				<span class="caption">Player deck</span>
-				<strong data-testid="deck-count">{info.playerDeck.cards}</strong>
-				<span>{info.playerDeck.turnsLeft} turns</span>
-				<span class="warn" class:hot={info.playerDeck.epidemicNextDraw > 0.5}
-					>epidemic {percent(info.playerDeck.epidemicNextDraw)}</span
+		</div>
+
+		<div class="spacer"></div>
+		<div class="stats">
+			{#if game && info}
+				<div class="track" title="Infection rate: cards flipped at the end of every turn">
+					<span class="caption">Infection rate</span>
+					{#each rates as rate, index (index)}
+						<span class="pip" class:on={index === game.rateIndex} class:past={index < game.rateIndex}>{rate}</span>
+					{/each}
+				</div>
+
+				<div class="track incidents" title="Incidents: the game is lost when the track is full">
+					<span class="caption">Incidents</span>
+					{#each { length: pack.numbers.incidentLimit } as _, index (index)}
+						<span class="pip" class:on={index < game.incidents} class:last={index === pack.numbers.incidentLimit - 1}
+						></span>
+					{/each}
+					<strong class:hot={game.incidents >= pack.numbers.incidentLimit - 2}
+						>{game.incidents}/{pack.numbers.incidentLimit}</strong
+					>
+				</div>
+
+				{#if info.playerDeck.cards > 0}
+					<div class="stat" title="Cards left in the Player deck">
+						<span class="caption">Player deck</span>
+						{#key info.playerDeck.cards}<strong data-testid="deck-count" in:fly={{ y: -10, duration: 280 }}
+								>{info.playerDeck.cards}</strong
+							>{/key}
+					</div>
+					<div class="stat minor" title="Turns left before the Player deck runs out">
+						<span class="caption">Turns left</span>
+						{#key info.playerDeck.turnsLeft}<strong in:fly={{ y: -10, duration: 280 }}
+								>{info.playerDeck.turnsLeft}</strong
+							>{/key}
+					</div>
+					<div class="stat" title="Chance that the next Player card drawn is an Epidemic">
+						<span class="caption">Epidemic next draw</span>
+						<strong class="warn" class:hot={info.playerDeck.epidemicNextDraw > 0.5}
+							>{percent(info.playerDeck.epidemicNextDraw)}</strong
+						>
+					</div>
+					<div class="stat" title="Epidemics drawn so far, out of all in the deck">
+						<span class="caption">Epidemics</span>
+						<strong
+							>{info.playerDeck.epidemicsDrawn}/{info.playerDeck.epidemicsDrawn + info.playerDeck.epidemicsLeft}</strong
+						>
+					</div>
+				{/if}
+
+				<div class="stat" title="Supply cubes left in the stockpile">
+					<span class="caption">Stockpile</span>
+					{#key game.stockpile}<strong in:fly={{ y: -10, duration: 280 }}>{game.stockpile}</strong>{/key}
+				</div>
+			{/if}
+		</div>
+		<div class="right">
+			{#if !solo}
+				<span class="link" class:down={status !== 'connected'} title="Connection to the host"
+					>{status === 'connected' ? `${Math.max(1, players)} online` : status}</span
 				>
-				<span>{info.playerDeck.epidemicsDrawn}/{info.playerDeck.epidemicsDrawn + info.playerDeck.epidemicsLeft}</span>
-			</div>
-		{/if}
-
-		<div class="stat" title="Supply cubes left in the stockpile">
-			<span class="caption">Stockpile</span>
-			<strong>{game.stockpile}</strong>
+			{/if}
+			<button onclick={onreset} title="Show the whole map">Fit map</button>
+			<button onclick={onmenu}>Menu</button>
 		</div>
-	{/if}
-
-	<div class="right">
-		{#if !solo}
-			<span class="link" class:down={status !== 'connected'} title="Connection to the host"
-				>{status === 'connected' ? `${Math.max(1, players)} online` : status}</span
-			>
-		{/if}
-		<button onclick={onreset} title="Show the whole map">Fit map</button>
-		<button onclick={onmenu}>Menu</button>
-	</div>
-</header>
+	</header>
+</div>
 
 <style>
+	.frame {
+		container: topbar / inline-size;
+	}
+
 	.bar {
 		display: flex;
 		align-items: center;
 		gap: 1.1rem;
 		height: 3rem;
 		padding: 0 0.9rem;
-		border-bottom: 1px solid var(--line);
-		background: var(--panel-solid);
-		font-size: 0.74rem;
+		font-size: 0.8rem;
 		white-space: nowrap;
+	}
+
+	/* The bar shares its width with the replay's side panel, so secondary figures give way first. */
+	@container topbar (width < 1560px) {
+		.month span,
+		.minor {
+			display: none;
+		}
+	}
+
+	@container topbar (width < 1300px) {
+		.track .caption {
+			display: none;
+		}
+	}
+
+	@container topbar (width < 1150px) {
+		.stats .stat:nth-last-child(2) {
+			display: none;
+		}
+	}
+
+	@container topbar (width < 1000px) {
+		.bar {
+			gap: 0.8rem;
+		}
+
+		.pip {
+			width: 0.95rem;
+			height: 0.95rem;
+		}
 	}
 
 	.month {
 		display: flex;
-		flex-direction: column;
-		line-height: 1.15;
+		align-items: baseline;
+		gap: 0.55rem;
 	}
 
 	.month strong {
-		font-size: 0.95rem;
-		letter-spacing: 0.01em;
+		font-family: var(--font-display);
+		font-size: 1.45rem;
+		font-weight: 400;
+		line-height: 1;
 	}
 
 	.month span,
 	.caption {
 		color: var(--muted);
-		font-size: 0.6rem;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
+		font-size: 0.82rem;
 	}
 
 	.spacer {
 		flex: 1;
+	}
+
+	/* The figures give way before the controls: Fit map and Menu always stay on screen. */
+	/* Figures that do not fit wrap onto a second line that is never shown, so none is ever cut in half. */
+	.stats {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		align-content: flex-start;
+		column-gap: 1.1rem;
+		height: 1.7rem;
+		min-width: 0;
+		overflow: hidden;
+	}
+
+	.stats > * {
+		flex: none;
 	}
 
 	.track,
@@ -127,78 +195,93 @@
 	}
 
 	.stat {
-		gap: 0.4rem;
+		gap: 0.45rem;
 	}
 
-	.stat strong {
-		font-size: 0.95rem;
+	.stat + .stat {
+		margin-left: -0.5rem;
+		padding-left: 0.8rem;
+		border-left: 1px solid var(--line);
 	}
 
-	.stat span:not(.caption) {
-		color: var(--muted);
+	.stat strong,
+	.track strong {
+		font-size: 1.05rem;
+		font-weight: 600;
+	}
+
+	.track strong {
+		margin-left: 0.4rem;
+	}
+
+	.track strong.hot,
+	.stat .warn.hot {
+		color: var(--danger);
 	}
 
 	.stat .warn {
 		color: var(--warn);
 	}
 
-	.stat .warn.hot {
-		color: var(--danger);
-	}
-
 	.caption {
-		margin-right: 0.25rem;
+		margin-right: 0.3rem;
 	}
 
 	.pip {
 		display: grid;
 		place-items: center;
-		width: 1.05rem;
-		height: 1.05rem;
-		border: 1px solid var(--line);
+		width: 1.1rem;
+		height: 1.1rem;
+		border: 1px solid var(--line-strong);
 		border-radius: 50%;
 		color: var(--muted);
-		font-size: 0.6rem;
-		font-weight: 700;
-		transition: all 300ms ease;
+		font-size: 0.68rem;
+		font-weight: 600;
+		transition:
+			background 300ms ease,
+			color 300ms ease,
+			transform 300ms cubic-bezier(0.3, 1.6, 0.5, 1);
 	}
 
 	.pip.past {
-		opacity: 0.45;
+		opacity: 0.35;
 	}
 
 	.pip.on {
 		border-color: var(--warn);
 		background: var(--warn);
-		color: #1a1300;
+		color: var(--paper-ink);
 		transform: scale(1.15);
 	}
 
+	/* Incidents are kept as a tally: a filled box for each one, the last box ruled in red. */
 	.incidents .pip {
-		width: 0.7rem;
-		height: 0.7rem;
-		border-radius: 0.15rem;
+		width: 0.62rem;
+		height: 0.8rem;
+		border-radius: 1px;
 	}
 
 	.incidents .pip.on {
-		border-color: #7be02a;
-		background: #7be02a;
+		border-color: var(--danger);
+		background: var(--danger);
 		transform: none;
 	}
 
 	.incidents .pip.last {
 		border-color: var(--danger);
+		border-width: 1.5px;
 	}
 
 	.right {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: 0.45rem;
+		flex: none;
 		margin-left: auto;
 	}
 
 	.link {
-		color: var(--accent);
+		color: var(--good);
 	}
 
 	.link.down {
@@ -206,16 +289,17 @@
 	}
 
 	button {
-		padding: 0.25rem 0.6rem;
+		padding: 0.25rem 0.7rem;
 		border: 1px solid var(--line);
-		border-radius: 0.35rem;
+		border-radius: 2px;
 		background: transparent;
 		color: var(--ink);
 		font: inherit;
 		cursor: pointer;
+		transition: border-color 150ms ease;
 	}
 
 	button:hover {
-		border-color: var(--accent);
+		border-color: var(--line-strong);
 	}
 </style>

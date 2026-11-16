@@ -311,6 +311,7 @@ try {
 		await click('ack-briefing');
 	}
 	await page.locator('.upkeep').waitFor();
+	await page.locator('.briefing').waitFor({ state: 'detached' });
 	const units = snap.world.game!.upkeep!.units;
 	const campaignBefore = snap.world.campaign;
 	await shot('6-upkeep');
@@ -369,9 +370,11 @@ try {
 		(sum, location) => sum + location.permanent.length,
 		0,
 	);
-	const standing = Object.values(snap.world.game!.locations).filter(
-		location => location.center || location.tower || location.shelter,
-	).length;
+	// A city can hold more than one permanent structure, so structures are counted, not cities.
+	const standing = Object.values(snap.world.game!.locations).reduce(
+		(sum, location) => sum + Number(location.center) + Number(location.tower) + Number(location.shelter),
+		0,
+	);
 	assert(standing >= permanent && permanent > 0, 'permanent structures are missing from the next setup');
 	ok('the next game sets up with what the campaign kept', `${permanent} permanent structures standing`);
 

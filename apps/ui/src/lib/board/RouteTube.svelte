@@ -21,14 +21,14 @@
 	import type { BoardPoint } from './projection';
 	import { routeCurve } from './routes';
 
-	type Props = { route: EdgeDef; from: BoardPoint; to: BoardPoint; ghost?: boolean; animate?: boolean };
+	type Props = { route: EdgeDef; from: BoardPoint; to: BoardPoint; bow?: number; ghost?: boolean; animate?: boolean };
 
-	let { route, from, to, ghost = false, animate = false }: Props = $props();
+	let { route, from, to, bow = 0, ghost = false, animate = false }: Props = $props();
 
 	const RADIAL = 6;
-	const curve = $derived(routeCurve(route, from, to));
+	const curve = $derived(routeCurve(route, from, to, bow));
 	const segments = $derived(Math.max(16, Math.round(curve.getLength() * 2)));
-	const tube = $derived(new TubeGeometry(curve, segments, ghost ? 0.1 : route.kind === 'sea' ? 0.2 : 0.28, RADIAL));
+	const tube = $derived(new TubeGeometry(curve, segments, ghost ? 0.09 : route.kind === 'sea' ? 0.16 : 0.2, RADIAL));
 	const dashes = $derived(dashTexture(Math.max(3, Math.round(curve.getLength() / 1.6))));
 
 	// A route that appears mid-game draws itself from its first city to its second.
@@ -46,16 +46,10 @@
 
 <T.Mesh geometry={tube} castShadow={!ghost}>
 	{#if ghost}
-		<T.MeshBasicMaterial color="#e8eef2" alphaMap={dashes} alphaTest={0.5} transparent opacity={0.4} />
+		<T.MeshBasicMaterial color="#3a2e22" alphaMap={dashes} alphaTest={0.5} transparent opacity={0.5} />
 	{:else if route.kind === 'sea'}
-		<T.MeshStandardMaterial
-			color="#9ad7f5"
-			emissive="#2a7fa8"
-			emissiveIntensity={0.6}
-			alphaMap={dashes}
-			alphaTest={0.5}
-		/>
+		<T.MeshStandardMaterial color="#2d5873" roughness={0.8} alphaMap={dashes} alphaTest={0.5} />
 	{:else}
-		<T.MeshStandardMaterial color="#f2c178" emissive="#8a5a1c" emissiveIntensity={0.35} roughness={0.5} />
+		<T.MeshStandardMaterial color="#8e3a24" roughness={0.75} />
 	{/if}
 </T.Mesh>

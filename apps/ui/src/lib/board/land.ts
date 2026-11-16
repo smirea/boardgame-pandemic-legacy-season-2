@@ -3,7 +3,7 @@ import { feature } from 'topojson-client';
 import type { Topology } from 'topojson-specification';
 import landTopology from 'world-atlas/land-50m.json';
 import { LAND_HEIGHT, projectPolygons } from './projection';
-import type { Ring } from './projection';
+import type { BoardBounds, Ring } from './projection';
 
 const MIN_ISLAND_AREA = 0.35;
 
@@ -49,12 +49,26 @@ export function buildLandGeometry() {
 	const geometry = new ExtrudeGeometry(shapes, {
 		depth: LAND_HEIGHT,
 		bevelEnabled: true,
-		bevelSize: 0.12,
-		bevelThickness: 0.12,
+		bevelSize: 0.06,
+		bevelThickness: 0.05,
 		bevelSegments: 1,
 		curveSegments: 1,
 	});
 	geometry.rotateX(-Math.PI / 2);
 	geometry.computeBoundingBox();
 	return geometry;
+}
+
+/** Points the land's texture coordinates at the chart sheet, so the raised land shows the chart printed under it. */
+export function mapToSheet(geometry: ExtrudeGeometry, bounds: BoardBounds) {
+	const position = geometry.getAttribute('position');
+	const uv = geometry.getAttribute('uv');
+	for (let i = 0; i < position.count; i++) {
+		uv.setXY(
+			i,
+			(position.getX(i) - bounds.minX) / (bounds.maxX - bounds.minX),
+			1 - (position.getZ(i) - bounds.minZ) / (bounds.maxZ - bounds.minZ),
+		);
+	}
+	uv.needsUpdate = true;
 }

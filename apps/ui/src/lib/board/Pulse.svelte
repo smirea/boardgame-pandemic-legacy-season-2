@@ -2,13 +2,13 @@
 	import type { FxKind } from './types';
 
 	const STYLE: Record<FxKind, { color: string; size: number; duration: number }> = {
-		infect: { color: '#ffd166', size: 5, duration: 900 },
-		plague: { color: '#7be02a', size: 8, duration: 1400 },
-		outbreak: { color: '#ff5d5d', size: 16, duration: 1700 },
-		epidemic: { color: '#ff3b6b', size: 22, duration: 2200 },
-		connected: { color: '#7dfcc0', size: 9, duration: 1500 },
-		build: { color: '#f4f1e8', size: 6, duration: 1000 },
-		hollow: { color: '#b48cff', size: 7, duration: 1300 },
+		infect: { color: '#9a6514', size: 5, duration: 900 },
+		plague: { color: '#5d7a14', size: 8, duration: 1400 },
+		outbreak: { color: '#b0301c', size: 16, duration: 1700 },
+		epidemic: { color: '#8c1c12', size: 22, duration: 2200 },
+		connected: { color: '#2f6e5c', size: 9, duration: 1500 },
+		build: { color: '#2a2017', size: 6, duration: 1000 },
+		hollow: { color: '#4e3b63', size: 7, duration: 1300 },
 	};
 </script>
 

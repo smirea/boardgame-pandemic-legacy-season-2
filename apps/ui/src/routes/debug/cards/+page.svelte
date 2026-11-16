@@ -64,36 +64,47 @@
 	main {
 		min-height: 100vh;
 		padding: 1.5rem 2rem 3rem;
-		background: #0a0f14;
-		color: #e9e6dc;
-		font-family: 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
+		background: var(--table);
+		color: var(--ink);
+		font-family: var(--font-ui);
 	}
 
 	header {
 		display: flex;
-		align-items: center;
+		align-items: baseline;
 		gap: 1.5rem;
-		color: #8a9aa8;
-		font-size: 0.85rem;
+		color: var(--muted);
+		font-size: 0.9rem;
+	}
+
+	header label {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	input[type='range'] {
+		accent-color: var(--paper);
 	}
 
 	h1 {
 		margin: 0;
-		color: #e9e6dc;
-		font-size: 1.6rem;
+		color: var(--ink);
+		font-family: var(--font-display);
+		font-size: 2.2rem;
+		font-weight: 400;
 	}
 
 	h2 {
-		margin: 1.6rem 0 0.7rem;
-		color: #8a9aa8;
-		font-size: 0.7rem;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
+		margin: 1.8rem 0 0.8rem;
+		font-family: var(--font-display);
+		font-size: 1.3rem;
+		font-weight: 400;
 	}
 
 	section {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.7rem;
+		gap: 0.8rem;
 	}
 </style>

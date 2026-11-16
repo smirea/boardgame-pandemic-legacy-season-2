@@ -30,11 +30,9 @@
 <style>
 	.tag {
 		padding: 0.05rem 0.4rem;
-		border-radius: 0.25rem;
-		color: #0b1015;
-		font:
-			700 0.65rem/1.5 system-ui,
-			sans-serif;
+		border-radius: 2px;
+		color: #1a140e;
+		font: 600 0.68rem/1.5 var(--font-ui);
 		white-space: nowrap;
 		transform: translateY(-0.9rem);
 		display: block;
