@@ -188,6 +188,31 @@ function purchaseText(purchase: Purchase): string {
 	}
 }
 
+/**
+ * A choice that takes several targets, written as one key with the targets joined by `+`, such as
+ * `play:safeHouses.241:cairo+lagos+london`. Built from the single-target options it combines.
+ */
+export function composite(options: Option[], key: string): Command | null {
+	const cut = key.lastIndexOf(':');
+	const targets = key.slice(cut + 1).split('+');
+	if (cut < 0 || targets.length < 2) return null;
+	const bases = targets.map(target => options.find(option => option.key === `${key.slice(0, cut)}:${target}`));
+	const first = bases[0]?.command;
+	if (!first || bases.some(base => !base)) return null;
+	const merged = structuredClone(first);
+	const inner = (command: Command) =>
+		(command.type === 'PLAY' ? command.play : command.type === 'DECIDE' ? command.decide : null) as Record<
+			string,
+			unknown
+		> | null;
+	const target = inner(merged);
+	const field =
+		target && Object.keys(target).find(name => Array.isArray(target[name]) && (target[name] as unknown[]).length === 1);
+	if (!target || !field) return null;
+	target[field] = bases.map(base => (inner(base!.command)![field] as unknown[])[0]);
+	return merged;
+}
+
 export type Verb =
 	| { v: 'command'; command: Command }
 	| { v: 'pick'; character: CharacterId }

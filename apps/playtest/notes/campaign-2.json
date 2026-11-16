@@ -512,5 +512,44 @@
 				"fix": "Both as researched: the next city gets one figure, and a monitored Epidemic has no effect."
 			}
 		]
+	},
+	"g11": {
+		"summary": "Lost on turn 14 at eight incidents, with two supply centers built and the Hollow Men not yet turned. The win streak ends at five.",
+		"story": "Kit led with Knox the Laborer, beside the Captain and the Immunologist. October asks for two things, both mandatory: three supply centers, and a Hollow Man standing in each of three different havens, moved there with the new Broadcast action from tower cities. The opening infection placed Hollow Men on Kolkata, Baghdad and Buenos Aires. The Captain played Safe Houses, which was meant to place three shelters and placed one. Towers went up in São Paulo, Antananarivo and Washington, and Knox and the Captain broadcast four times. Centers were built in Lagos and Frankfurt. What broke the table was September's rule: each of the four epidemics pulled an inoculated Infection card back out of storage and struck its city, Istanbul, Antananarivo, London and Lagos in turn, and London's second Plague cube was the eighth incident.",
+		"highlights": [
+			"First Broadcast: Hollow Men moved toward the havens four times, without reaching three of them.",
+			"The cost of inoculating all year: with 25 Infection cards in storage, every Epidemic now strikes one of those cities and puts its card back in the deck.",
+			"Rationing 0 again: no event cards except Safe Houses, the Unrationed reward for reconning East Asia.",
+			"No scar and no forced opening this month, because East Asia was reconned in September.",
+			"Game end: Outrider and a permanent shelter, the first one, newly allowed by October's card."
+		],
+		"parity": "All four checks passed: 2 objectives required, Build 3 supply centers and Turn the Hollow Men both mandatory; supplies 8 + 30 in bonuses = 38. Card 10-01 was read at setup: East Asia's perimeter report found the region open and forced nothing, the September objectives left play, Broadcast and permanent shelters arrived. Card 10-02 was read at game end and added nothing, as researched. Epidemics drew from storage first, which is the September rule the research records.",
+		"findings": [
+			{
+				"finding": "Safe Houses says up to 3 shelters and placed 1, because only single cities could be named.",
+				"kind": "Lab gap",
+				"fix": "A choice with several targets is one key with the targets joined by +. The engine always took up to three cities. Test added."
+			},
+			{
+				"finding": "Epidemics struck cities whose Infection cards were all in storage, and nothing said the card had come from there.",
+				"kind": "Engine gap",
+				"fix": "The log says when an Epidemic pulls a card out of storage. The lab's storage line states the rule once it is in play."
+			},
+			{
+				"finding": "Riyadh reached 3 Plague cubes without an outbreak.",
+				"kind": "Not a bug",
+				"fix": "An outbreak needs a hit on a city already at 3. The guide said it loosely and is corrected."
+			},
+			{
+				"finding": "Two Hollow Men cards in a row placed one figure.",
+				"kind": "Not a bug",
+				"fix": "As researched. The guide now says several in a row place one figure."
+			},
+			{
+				"finding": "The opening infection placed Hollow Men with no Gather card flipped.",
+				"kind": "Not a bug",
+				"fix": "September's rule: the last 3 setup infections place Hollow Men."
+			}
+		]
 	}
 }

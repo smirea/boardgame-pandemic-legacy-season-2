@@ -460,7 +460,13 @@ export function epidemic(world: World) {
 			const card = campaign.infectionCards[id]!;
 			if (card.kind !== 'city') continue;
 			if (isForsaken(campaign, card.city)) game.gameEndArea.push(id);
-			else struck = { id, city: card.city };
+			else {
+				struck = { id, city: card.city };
+				log(game, {
+					t: 'note',
+					text: `The Epidemic pulled ${cityDef(card.city).name}'s Infection card back out of storage`,
+				});
+			}
 		}
 	}
 	struck ??= drawInfectionCard(world, 'bottom');

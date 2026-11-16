@@ -1,47 +1,33 @@
 # Memory
 
-September won at 2 incidents. October is next, rationing 0. Pick no rationed events.
+October lost at 8 incidents. October second is next, rationing 2. Push Scavenge. It has never been played. Safe Houses is gone.
 
-I am the Captain (char-7), exposure 0/7, home Northwatch. Slots: Foreman, Navigator, Surveyor, Investigator.
+I am the Captain (char-7), exposure 2/7, both blanks, no scar, home Northwatch. Slots full: Foreman, Navigator, Surveyor, Investigator. Do not buy onto me.
 
-- Foreman: supply lines cost 1 cube fewer. A tower still cost 2. I never saw the sea-lane price.
-- Navigator: once per turn, Chart Sea Lane costs no cubes.
-- Surveyor: recon with 1 card fewer.
-- Investigator: as an action, swap a City card for any City card in the discard.
-  `captainSail`, from a port, listed every City card I held to every sea-route port. From inland Paris it was absent. I still have not executed one. If a held City card is missing, report it.
+- Foreman: lines cost 1 cube fewer. A tower still costs 2.
+- Navigator: the first Chart Sea Lane each turn is free. Istanbul–Tripoli stuck.
+- Surveyor: recon with 1 card fewer. Not used.
+- Investigator: swap a held City card for any City card in the discard. Listed, never executed.
+- Captain sail discards any City card and moves to a port on the sea route. Leaving Hollow Men this way still exposes you.
 
-Sol's Immunologist (char-6) is unchanged: Record Keeper, Architect, Runner, Supplier. Exposure 1/7. No open slot. Architect is 4 cards. Runner discards any City card to move from a haven or center to anywhere on the grid. Supplier puts 1 reserve cube on a city whose card they hold.
+Sol's Immunologist (char-6) is unchanged: Record Keeper, Architect, Runner, Supplier. Exposure 1/7. Slots full. Architect builds with 4 cards. Runner discards a City card to move from a haven or center to anywhere on the grid.
 
-Knox (char-1) is exposure 4/7 and the slots are full: Helmsman, Seasick, Careless, Scout. Do not buy onto Knox.
+Knox (char-1) is exposure 4/7. Slots full: Helmsman, Seasick, Careless, Scout. Do not buy onto Knox.
 
-- Seasick: sea lanes cost 1 more cube.
-- Careless: discard a card after each search.
-- Scout: recon without a supply center.
-  The scars replaced Record Keeper and Foreman. A shelter let Knox leave Tehran's Hollow Men with no exposure. Shelters are not permanent.
+Sanitation Officer (char-8) now has Architect and Outrider. Exposure 0/7. Outrider: no exposure when leaving Hollow Men. Kit means to play them. Hale and Reed still have empty slots.
 
-Not bought, still the power I want: Outrider (2, no exposure leaving Hollow Men), Lookout (2, search with a discard City card), Broker (2). Kit says Universal is shopped as wild at cost 2. I found no universal or any key (issue 158). Red wild costs 1 and only adds red. Lagos.57 now counts as red.
+Both objectives were starred: 3 new supply centers, and one Hollow Man in each of 3 havens at once. We made 2 and 2. Lagos and Frankfurt were the centers. They did not persist. Permanent centers are still only Washington, London, São Paulo, Istanbul, Atlanta, and Paris. That is the cap.
 
-Permanent centers are still only Washington, London, São Paulo, Istanbul, Atlanta, and Paris. Built this game and not permanent: Frankfurt, Moscow, Lagos. The only structure on offer was the Istanbul tower at 3. We did not buy it. Rebuild a tower to Monitor.
+Northwatch's shelter is permanent. A Hollow Man in a haven with no shelter costs that haven a population at game end. Midsea and Southreach each lost one. Build the next shelter on one of those, not on Northwatch. Safe Houses says up to 3 and places 1, then the card is destroyed.
 
-Monitor in a tower city. Keys monitor:0 through monitor:9 are frequencies 1 through 10. Discards the top 4 Player cards. Used keys disappear.
+Towers did not persist. Rebuild one blue tower. From it, New York or London reaches Northwatch, and Washington reaches Midsea and Southreach. Frankfurt only touches Istanbul, and Frankfurt–Paris is blocked because it would cross a line. A Hollow Man there cannot reach Northwatch. Broadcast is one action, standing in the tower, and the source city has to match the tower's colour.
 
-- monitor:3, frequency 4, opened East Asia.
-- monitor:4, frequency 5, announced Universal.
-- monitor:9, frequency 10, put Lookout on sale.
-  The other seven only return cards. A discarded epidemic does not fire. A drawn one strips a stored city, and 0 cubes means nothing is removed. The reshuffle can then plague that empty city. Paris, London, and São Paulo were the three.
+New forsaken, all infested: Tripoli, Buenos Aires (the lab), Baghdad, Riyadh, Kolkata, Jakarta. Antananarivo dropped to 1. Do not restore them. Do not start a turn in one. Only Drive or Ferry works there. Jakarta recon is still printed and is probably illegal until a restore. Skip it.
 
-East Asia is open. Jakarta is on the grid, red, pop 1, sea-linked to Kolkata. Recon there wants 2 red cards and a center. Surveyor makes it 1 card. Scout makes it no center. Nobody has both. Off grid: Bangkok, Ho Chi Minh City, Manila (infested), Hong Kong, Shanghai (infested), Seoul, Tokyo (infested), Osaka (infested). Lost haven Monsoon Rest is still off grid, by sea from Antananarivo or Jakarta. Navigator makes the first lane free.
+Epidemics pull infection cards out of storage, strip the city, and the card comes back into the deck. Inoculate does not stop that. London's Well Stocked card is in storage, and the city panel still lists it. The live Well Stocked card is Washington's. Keep cubes on London anyway. A stored city at 0 just lost us the game.
 
-Hollow Men and plague reset every game. They cut population at game end. Kinshasa and Riyadh each dropped 1. Kinshasa was pop 1, so expect it forsaken. Riyadh was pop 2, so pop 1. London and São Paulo took a plague cube and were not on the change list. Check their pop at setup. Also up 1: Istanbul, Lagos, Atlanta, Paris, Frankfurt, Moscow.
+Riyadh reached 3 plague and did not outbreak into Tehran. Armor a city at 2 plague anyway. Two Gather flips in a row added one figure. Check the city.
 
-Do not armor a forsaken city. Do not start a turn on plague or in an infested city. Passing through does not expose. Leaving Hollow Men does, unless the city has a shelter or you have Outrider. Three gather lines added one figure (issues 155 and 156).
+Up: São Paulo 6, Lagos 5, Atlanta 8, Paris 6. Washington, London, and Istanbul stayed 8. Frankfurt stayed 4. Best third-center sites with population: Lagos 5 and Frankfurt 4.
 
-Share only in the city on the card. Transmit from a tower sends a card of that city's colour anywhere. I received the Istanbul card in Moscow. Hand-limit key is `decide:discard:seat-1:<card>`. The prompt omits the seat.
-
-Inoculate is free on an Infection card in the discard. A Player-card key costs the table that card. Do not use it.
-
-Well Stocked blocks only at 2 or more cubes. Washington's live card is Well Stocked. Keep it at 2. Epidemics hit stored cards, so cubes on a storage-only city only feed the strip until that card is back.
-
-Cordon is for sale at 2 and has never been used. Rename is a lobby command, `rename <haven-id> <name>`, not a `do` key. Shield, skip, replace, freeEdge, and removeHollow never appeared.
-
-Place every setup cube. Nothing on a forsaken city. The Immunologist spends the reserve. Everyone else spends the stockpile.
+Cordon, wild, Lookout, and Broker are still unbought. Rename, shield, skip, replace, freeEdge, and removeHollow never appeared.

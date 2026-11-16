@@ -22,7 +22,7 @@ import type { CharacterId, Command, GameRecord, PublicState, RecordNote, Save, S
 import { newAudit, observe, renderParity, untouched } from './audit.ts';
 import type { Audit, Issue } from './audit.ts';
 import { writeBriefs } from './brief.ts';
-import { mayRaw, optionsFor, parseVerb, seatOf } from './commands.ts';
+import { composite, mayRaw, optionsFor, parseVerb, seatOf } from './commands.ts';
 import type { Who } from './commands.ts';
 import { loadConfig, repoRoot } from './config.ts';
 import { recordFile, replaysUrl, servePages } from './replays.ts';
@@ -485,7 +485,9 @@ async function doKeys(who: Who, keys: string[]): Promise<string> {
 	for (const key of keys) {
 		await refresh();
 		const state = current!;
-		const option = optionsFor(state, who, lab.picks).find(candidate => candidate.key === key);
+		const offered = optionsFor(state, who, lab.picks);
+		const several = composite(offered, key);
+		const option = offered.find(candidate => candidate.key === key) ?? (several ? { command: several } : undefined);
 		if (!option) {
 			lines.push(`STOPPED at "${key}": not one of your options right now. Run \`options\` to see the exact keys.`);
 			break;
@@ -548,7 +550,9 @@ const HELP = `Commands (run as: ./play <you> <command>):
   supply <city-id> <count>         place setup cubes by hand (lead)
   events <card> <card> ...         pick Rationed Events (lead)
   rename <haven-id> <name>         name a haven (lobby)
-  raw '<json>'        send a command that options does not list, for multi-card choices
+  A choice with several targets takes them joined by +, for example
+    do play:safeHouses.241:cairo+lagos+london   or   do decide:removeHollow:tehran+riyadh
+  raw '<json>'        send a command that options does not list
 UI harness only: look · click <number|text> · tap <city-id> · type <number> <text> · key <key> · shot`;
 
 async function handle(agent: string, words: string[]): Promise<string> {

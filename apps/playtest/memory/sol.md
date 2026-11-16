@@ -1,49 +1,41 @@
 # Memory
 
-September won on turn 12. October is next. The October lobby was already open at rationing 0, so the lead picks no rationed events.
+October first attempt lost at 8 incidents. Centers 2/3, havens 2/3. The eighth was London: one plague cube, no supply cubes, and the Lagos epidemic put its card on top. October replays at rationing 2.
 
-I am the Immunologist, char-6, home Southreach, exposure 1/7. Slots are full: Record Keeper, Architect, Runner, Supplier. Hand limit 8. Architect builds with 4 cards. The key is `buildCenter:a+b+c+d:false`. Supplier places 1 reserve cube on a city whose card I hold, from anywhere. Runner discards any City card to move from a haven or center to anywhere on the grid.
+I am the Immunologist, char-6, exposure 1/7. Slots full: Record Keeper, Architect, Runner, Supplier. Hand limit 8. Architect key is `buildCenter:a+b+c+d:false`. Runner discards one City card to move from a haven or center to anywhere on the grid. Make Supplies and Supplier take cubes from the reserve, not the stockpile.
 
-The Captain has Foreman, Navigator, Surveyor and Investigator. Slots full. Exposure 0/7. Navigator makes one Chart Sea Lane a turn free. Surveyor makes recon cost 1 card fewer. Investigator swaps a City card in hand for any City card in the discard.
-
-Knox is exposure 4/7. Helmsman and Scout remain. Seasick (sea lanes cost 1 more) and Careless (discard a card after each search) replaced Record Keeper and Foreman. Hand limit is 7 again. Do not send Knox through Hollow Men. No open ability slot on Knox or on me.
+Kit plans to play the Sanitation Officer. That character has Architect and Outrider, exposure 0/7. Outrider: no exposure when leaving Hollow Men. The Captain is exposure 2/7, both blanks, slots full. Knox is exposure 4/7. Do not send Knox through Hollow Men.
 
 ## Rules that change play
 
-Monitor is `monitor:0` through `monitor:9`, frequencies 1 through 10. It must be done in a city with a tower and discards the top 4 Player cards. Frequencies 4, 5 and 10 are already used. They opened the East Asia route, Universal, and Lookout. The other seven only return cards. Do not burn four cards for those. A discarded epidemic does not resolve.
+An epidemic can strike a card in storage and strip that city. Inoculate does not make it safe. Cube stored-card cities before the first epidemic. The storage line does not say this.
 
-Kolkata recon is done. Jakarta recon is 2 red cards and wants a center. Scout skips the center. Surveyor makes it 1 red card. lagos.57 is Eastern Ties and counts as red. Manila, Shanghai, Tokyo and Osaka are infested. Do not start a turn in one.
+A haven with a Hollow Man and no shelter loses population at game end. A shelter stops that. Northwatch's shelter is permanent and it is population 3. Midsea and Southreach are population 2. Do not park a figure in an unsheltered haven.
 
-Share is only the card of the city you stand in. Transmit, from a tower, sends a card of that city's colour. The Istanbul tower was not made permanent. Rebuild it before counting on transmit or Monitor.
+Hollow Men and plague each dropped population once per city, not once per cube. New forsaken, all infested: Tripoli, Riyadh, Baghdad, Kolkata, Jakarta, Buenos Aires. Still forsaken: Jacksonville, Denver, San Francisco, Cairo, Mexico City, Los Angeles, Santiago, Chicago, Kinshasa. Do not cube them. Do not start a turn in them. Antananarivo is population 1, not forsaken. London stayed 8 with one plague. Kit said the center saved it.
 
-An epidemic strikes a stored infection card and strips that city. If the city has no cubes it can plague in the same turn. Cube a stored-card city before the epidemic, or immediately if the game lets you. Well Stocked still blocks only at 2 or more cubes. Washington's card did.
+Three plague cubes on Riyadh did not outbreak. Do not trust that. Treat a third cube as a loss anyway.
 
-Do not end a turn on plague, in an infested city, or by leaving Hollow Men. A shelter stops both exposures and stops the population loss. Outrider would stop the Hollow Men exposure. We did not buy it. Driving into Tehran also exposed Knox before they left. Treat arrival as dangerous too.
+Safe Houses placed one shelter and was destroyed. Do not plan on three.
 
-A forsaken city is never infected. The card is set aside and another is flipped. Do not cube one. Only Drive or Ferry works there. Kinshasa is forsaken now. Plague cubes did not lower London or São Paulo at game end. Do not trust a plague cube to change population on the spot, and do not trust game end to do it either. Hollow Men did drop population, once per city, not once per figure.
+Two gather lines in a row made one Hollow Man. Do not count two lines as two figures.
 
-Do not put an apostrophe in a why or a say.
+Share moves only the card of the city you stand in. Transmit sent the Washington card from the Washington tower. I do not know if it sends any card of that colour.
 
-A line costs 2 cubes. Foreman, which only the Captain still has, makes a land line cost 1. It does not cheapen towers or sea lanes. A sea lane costs 2, and 3 for Knox. A tower costs 2 from the character.
+Broadcast moves a Hollow Man from a city of the tower's colour into a neighbour. You must stand in the tower city. New York or London reaches Northwatch in one hop. Frankfurt only reaches Istanbul.
 
-## Campaign state
+No apostrophe in a why or a say.
 
-Permanent centers, the cap of 6: Washington, London, São Paulo, Istanbul, Atlanta, Paris. Frankfurt, Moscow and Lagos had centers this game and lost them. Lagos population went up.
-
-On the grid since this game: Kolkata, black, population 1, infested port, linked to Tehran. Jakarta, red, population 1, port, linked to Kolkata by sea.
-
-Off the grid: the rest of East Asia, all red and population 1. Bangkok, Ho Chi Minh City, Hong Kong and Seoul are not infested. Manila, Shanghai, Tokyo and Osaka are. Also still off: Khartoum, Dar es Salaam, Johannesburg, Delhi, New Mumbai, and the Indian Ocean haven Monsoon Rest. Jakarta can chart to Monsoon Rest, Bangkok, Ho Chi Minh City or Manila.
-
-Forsaken: Jacksonville, Denver, San Francisco, Cairo, Mexico City, Los Angeles, Santiago, Chicago, Kinshasa. Do not restore one unless we must stand there.
-
-Six permanent centers is the cap. The only permanent structure for sale was the Istanbul tower, at 3. We did not buy it.
+A land line costs 2 cubes, or 1 with the Captain's Foreman. A sea lane costs 2, and 3 for Knox. The Captain's first Chart Sea Lane each turn is free. Istanbul to Tripoli is already charted.
 
 ## Next game
 
-Rationing is 0. No Quiet Night, no Card Swap, no Scavenge.
+Rationing 2. Ask for Quiet Night and Scavenge. Scavenge has never been played. Quiet Night would have stopped the London hit.
 
-Keep this character. The Captain should chart the free sea lane and use Investigator to pull a card we actually need out of the discard. Someone has to rebuild a tower before Monitor is available, and the useful frequencies are already spent.
+Keep this character. Kit said they will play the Sanitation Officer. Permanent centers are still capped at 6: Washington, London, Sao Paulo, Istanbul, Atlanta, Paris. Lagos and Frankfurt will not have centers. Lagos is population 5. Paris is 6.
 
-Cube every city that still has a live infection card, including cities whose cards were in storage. An epidemic puts those back. Two cubes on a live card. Nothing on a forsaken city.
+Jakarta recon is still printed, 2 red cards and a center. Jakarta and Kolkata are forsaken. Do not go.
 
-Win the month with the starred objectives first. Do not chase a search or a lost haven once the starred set is enough.
+Still never bought: Lookout, Broker, wild, cordon. Still never done: replace, freeEdge, removeHollow, shield, skip, rename haven.
+
+Cube every live card, including storage, before the epidemic. Two cubes where two cards remain. Nothing on a forsaken city. One more incident loses the month. Build the centers before a walk that is not a new haven.
