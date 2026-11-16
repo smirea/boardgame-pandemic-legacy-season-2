@@ -41,8 +41,10 @@ import {
 	renderStatus,
 } from './render.ts';
 import {
+	chooseOption,
 	click,
 	connection,
+	lastHostStep,
 	launch,
 	loadSave,
 	look,
@@ -266,7 +268,10 @@ function note(kind: RecordNote['kind'], by: string, text: string) {
 	} else earlyNotes.push(entry);
 }
 
-async function ingest(next: PublicState, raw: string, command: Command | null, agent: string | null) {
+async function ingest(next: PublicState, raw: string, sent: Command | null, agent: string | null) {
+	// A change that came from a click has no command here, but the host tab recorded what the click sent and who sent it.
+	const clicked = sent ? null : await lastHostStep(host).catch(() => null);
+	const command = sent ?? clicked?.command ?? null;
 	const previous = current;
 	current = next;
 	currentRaw = raw;
@@ -274,10 +279,18 @@ async function ingest(next: PublicState, raw: string, command: Command | null, a
 	// Once a game is under way the seats are whoever it started with, whatever anyone picked since.
 	if (next.world.game)
 		lab.picks = config.players.map((_, index) => next.world.game!.players[seatOf(index)]?.character ?? null);
-	if (previous) remember(previous, next, command, config.players.find(player => player.id === agent)?.name ?? null);
+	if (previous)
+		remember(previous, next, command, config.players.find(player => player.id === agent)?.name ?? clicked?.by ?? null);
 	const save: Save = { v: 1, phase: next.phase, world: next.world };
 	writeFileSync(files.latest, JSON.stringify(save));
-	if (command) journal({ kind: 'command', agent, phase: previous?.phase, command });
+	if (command)
+		journal({
+			kind: 'command',
+			agent: agent ?? clicked?.by ?? null,
+			via: sent ? 'key' : 'click',
+			phase: previous?.phase,
+			command,
+		});
 	const seen =
 		previous?.world.game && gameIndex(previous) === gameIndex(next) ? (previous.world.game.log.at(-1)?.seq ?? -1) : -1;
 	for (const entry of next.world.game?.log ?? [])
@@ -558,7 +571,7 @@ const HELP = `Commands (run as: ./play <you> <command>):
   A choice with several targets takes them joined by +, for example
     do play:safeHouses.241:cairo+lagos+london   or   do decide:removeHollow:tehran+riyadh
   raw '<json>'        send a command that options does not list
-UI harness only: look · click <number|text> · tap <city-id> · type <number> <text> · key <key> · shot`;
+UI harness only: look · click <number|text> · tap <city-id> · choose <number> <entry> · type <number> <text> · key <key> · shot`;
 
 async function handle(agent: string, words: string[]): Promise<string> {
 	const [verb = 'status', ...rest] = words;
@@ -763,7 +776,7 @@ async function handle(agent: string, words: string[]): Promise<string> {
 			return report(who, agent, severity, text.join(' '));
 		}
 		case 'do':
-			if (harness === 'ui') return 'You play through the screen this run. Use look, click, tap, type and key.';
+			if (harness === 'ui') return 'You play through the screen this run. Use look, click, tap, choose, type and key.';
 			if (!rest.length) return 'usage: do <key> [<key> ...] why: <one sentence>';
 			return locked(() => {
 				// Everything after `why:` is the player's reason, kept with the recording beside the step it explains.
@@ -786,6 +799,8 @@ async function handle(agent: string, words: string[]): Promise<string> {
 			return tapCity(tab, rest[0] ?? '');
 		case 'type':
 			return typeInto(tab, rest[0] ?? '', rest.slice(1).join(' '));
+		case 'choose':
+			return chooseOption(tab, rest[0] ?? '', rest.slice(1).join(' '));
 		case 'key':
 			return pressKey(tab, rest[0] ?? '');
 		case 'shot': {
@@ -808,7 +823,7 @@ async function handle(agent: string, words: string[]): Promise<string> {
 				return `You play ${state.world.campaign.characters[parsed.character]!.name} this game.`;
 			}
 			if (harness === 'ui' && verb !== 'raw')
-				return 'You play through the screen this run. Use look, click, tap, type and key.';
+				return 'You play through the screen this run. Use look, click, tap, choose, type and key.';
 			const denied = mayRaw(state, who, parsed.command);
 			if (denied) return denied;
 			return locked(async () => {

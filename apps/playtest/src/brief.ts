@@ -95,7 +95,7 @@ export function writeBriefs(input: BriefInput): string[] {
 			`./apps/playtest/play ${player.id} <command>`,
 			'```',
 			'',
-			`Your id is \`${player.id}\`. Your seat is \`seat-${index + 1}\`. ${player.harness === 'ui' ? 'This run you play through the real screen: `look` lists what is on screen with numbered controls, `click <number>` presses one, `tap <city-id>` clicks a city on the map. You may still read `status`, `board` and `options`, but `do` is off for you.' : 'You send commands with `do <key>`, using the exact keys that `options` lists.'}`,
+			`Your id is \`${player.id}\`. Your seat is \`seat-${index + 1}\`. ${player.harness === 'ui' ? 'This run you play through the real screen: `look` lists what is on screen with numbered controls, `click <number>` presses one, `choose <number> <entry>` picks from a drop-down, `tap <city-id>` clicks a city on the map. You may still read `status`, `board` and `options`, but `do` is off for you.' : 'You send commands with `do <key>`, using the exact keys that `options` lists.'}`,
 			'',
 			'## This session',
 			'',

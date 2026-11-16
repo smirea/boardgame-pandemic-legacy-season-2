@@ -23,13 +23,13 @@ Watch a live game from your own browser at the address `lab start` prints, with 
 
 - `src/daemon.ts` serves the built app, runs the signaling Worker, and opens one Chromium tab per player. The first player hosts. The others join over WebRTC, so every command a player sends crosses the real session and network code.
 - `play <id> <command>` is the players' command line. `GUIDE.md` is what they are told about it.
-- A player's harness is `api` or `ui`. With `api` they send commands by key (`do drive:london`), which the lab passes to `window.DEBUG.send` in their tab. With `ui` they may only `look`, `click`, `tap`, `type` and `key`, which are real mouse and keyboard input.
+- A player's harness is `api` or `ui`. With `api` they send commands by key (`do drive:london`), which the lab passes to `window.DEBUG.send` in their tab. With `ui` they may only `look`, `click`, `tap`, `choose`, `type` and `key`, which are real mouse and keyboard input. The lab reads what each click sent from the host tab's own recording, so a click-driven game is recorded as fully as a keyed one.
 - Legality is never decided here. The lab lists options with the engine's `legalActions` and friends and checks every command with `reject`.
 - `src/audit.ts` watches every state change. It runs the engine's invariants, checks each month's objectives and supplies against `docs/mechanics/data/legacy-timeline.json`, checks that each Legacy card is read in its own month, and counts which mechanics have happened.
 
 ## Config
 
-`configs/campaign.json` sets the run name, the seed, the starting save or scenario, the ports, and the players. Each player has an id, a persona file, a memory file, a harness, and the model that plays it. Copy the file to try another table.
+`configs/campaign.json` sets the run name, the seed, the starting save or scenario, the ports, and the players. `configs/ui-harness.json` is a two-player example on the click-only harness, starting from the October scenario. Each player has an id, a persona file, a memory file, a harness, and the model that plays it. Copy the file to try another table.
 
 ## What a run leaves behind
 

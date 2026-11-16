@@ -1,6 +1,6 @@
 import { chromium } from 'playwright';
 import type { Browser, BrowserContext, Page } from 'playwright';
-import type { Command, PublicState, Save } from '@repo/game';
+import type { Command, GameRecord, PublicState, Save } from '@repo/game';
 
 type Connection = { mode: string; status: string; peers: number; notice: string | null; fatal: string | null };
 
@@ -10,6 +10,7 @@ declare const window: {
 		setState(state: unknown): void;
 		send(command: Command): string | null;
 		connection(): Connection;
+		getRecord(): GameRecord | null;
 	};
 	__lab?: HTMLElement[];
 };
@@ -60,6 +61,13 @@ export async function openTab(
 }
 
 export const readState = (tab: Tab) => tab.page.evaluate(() => JSON.stringify(window.DEBUG?.getState() ?? null));
+
+/** The last step the host's own recorder kept: what a click sent, and whose tab it came from. */
+export const lastHostStep = (tab: Tab) =>
+	tab.page.evaluate(() => {
+		const step = window.DEBUG?.getRecord()?.steps.at(-1);
+		return step ? { command: step.command, by: step.by } : null;
+	});
 
 export const connection = (tab: Tab) => tab.page.evaluate(() => window.DEBUG?.connection() ?? null);
 
@@ -186,6 +194,16 @@ export async function typeInto(tab: Tab, index: string, text: string): Promise<s
 	await tab.page.keyboard.press('ControlOrMeta+a');
 	await tab.page.keyboard.type(text);
 	return `Typed "${text}".`;
+}
+
+/** Picks an entry of a drop-down from the last `look`, by its visible text. */
+export async function chooseOption(tab: Tab, index: string, label: string): Promise<string> {
+	const handle = await tab.page.evaluateHandle(wanted => (window.__lab ?? [])[Number(wanted)] ?? null, index);
+	const element = handle.asElement();
+	if (!element) return 'No such control now. Run `look` again.';
+	const picked = await element.selectOption({ label }).catch(() => null);
+	await tab.page.waitForTimeout(250);
+	return picked?.length ? `Chose "${label}".` : `That drop-down has no entry "${label}".`;
 }
 
 export async function pressKey(tab: Tab, key: string): Promise<string> {
