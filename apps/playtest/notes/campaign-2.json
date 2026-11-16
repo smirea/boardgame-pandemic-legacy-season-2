@@ -668,5 +668,44 @@
 				"fix": "Setup is not an Infect step, and Shanghai is infested from the start. Regions revealed from now on name their infested cities in the briefing."
 			}
 		]
+	},
+	"g15": {
+		"summary": "Won on turn 15 with seven incidents: the sample was carried from Lake Baikal to Johannesburg. The campaign is complete.",
+		"story": "Vex led with Hale the Radio Operator, back at the table for the last game, beside the Immunologist and the Sanitation Officer. The Plan had not been finished, so December's card opened Utopia for the players, with its eight Infection cards waiting in the discard pile. The Immunologist stored six of them and the Sanitation Officer set two more aside with Resilience, so Utopia never came up. Hale was airlifted to Tehran and drew a supply line straight to Utopia, then on to Lake Baikal, which opened the Pearl lab. On the far side of the map a line from Dar es Salaam reached Johannesburg and a supply center went up there. Hale took the sample on turn 12: three exposure boxes scratched, the third a scar, and the Carrier scar covered two of his abilities. He then drove home across the grid, paying a card of each city's colour to enter it, while the Sanitation Officer struck Hollow Men out of his path. He reached Johannesburg on turn 15 with the incident track one short of full.",
+		"highlights": [
+			"The final objective completed on the first attempt: self-infection at the Pearl lab, the carrier's restricted movement, and delivery to a supply center in Johannesburg.",
+			"Utopia forced open at December setup with its Infection cards in the discard pile, as the research says for an unfinished Plan.",
+			"The carrier died at game end, as the rule says.",
+			"Final score 545: 430 for games won, 80 population, 100 for the sample, 50 for two labs, minus 115 for 23 forsaken cities.",
+			"The year: 16 games, 9 won and 7 lost. January, February, May, June, July, August, September and December were won at the first attempt, October at the second. March, April and November were lost twice."
+		],
+		"parity": "All four checks passed: 1 objective required, Deliver the sample, mandatory; supplies 0 + 30 in bonuses = 30. Card 12-01 was read at setup: it forced Utopia, replaced the Plan with the sample objective, revealed Lake Baikal, added the carrier rule and two Assemble cards. Card 12-02 was read at game end and the campaign was scored. Lake Baikal could be joined only from Utopia, the fix made from the static review. Across the year all 24 Legacy cards were read in their own month.",
+		"findings": [
+			{
+				"finding": "The Carrier scar covered two abilities while two other slots were free.",
+				"kind": "Engine bug",
+				"fix": "Empty slots are covered first. Test added."
+			},
+			{
+				"finding": "The carrier was offered only one card to pay for entering a city, though any card of that colour will do.",
+				"kind": "Engine gap",
+				"fix": "Each matching card is an option. Test added."
+			},
+			{
+				"finding": "Utopia's eight Infection cards were in the discard pile after setup with no explanation.",
+				"kind": "Engine gap",
+				"fix": "The researched rule for a forced Utopia. The log now says so at setup."
+			},
+			{
+				"finding": "A Cordon choice was open to the table, and the active player passed before the others could pay.",
+				"kind": "Process",
+				"fix": "The guide tells the active player to say so and wait once before passing on a table choice."
+			},
+			{
+				"finding": "Taking the sample scratched three exposure boxes. Seat 1 did not take the first turn.",
+				"kind": "Not a bug",
+				"fix": "The research has self-infection scratch boxes until a scar appears. The first player is drawn at random."
+			}
+		]
 	}
 }

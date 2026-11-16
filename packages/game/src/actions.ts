@@ -506,7 +506,8 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 		check(ctx, { frequency }) {
 			if (!ctx.loc.tower) return 'Stand in a city with a tower';
 			const valid = Number.isInteger(frequency) && frequency >= 0 && frequency < pack.frequencies.length;
-			return valid && !ctx.campaign.frequenciesUsed.includes(frequency) ? ok : 'That frequency is used up';
+			if (!valid || ctx.campaign.frequenciesUsed.includes(frequency)) return 'That frequency is used up';
+			return ctx.game.playerDeck.order.length >= 4 ? ok : 'Fewer than 4 Player cards are left';
 		},
 		apply(ctx, { frequency }) {
 			const revealed: CardId[] = [];
@@ -521,12 +522,13 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 			const reward = pack.frequencies[frequency];
 			if (reward && 'bundle' in reward) openBundle(ctx.world, reward.bundle, false);
 			if (reward && 'take' in reward) {
-				// The cards kept are the newest non-Epidemic discards, which are the ones Monitor just revealed.
-				for (let kept = 0, index = ctx.game.playerDiscard.length - 1; index >= 0 && kept < reward.take; index--) {
-					if (ctx.campaign.playerCards[ctx.game.playerDiscard[index]!]?.kind === 'epidemic') continue;
-					ctx.me.hand.push(...ctx.game.playerDiscard.splice(index, 1));
-					kept++;
-				}
+				// Only what this Monitor revealed may be kept, never an older discard.
+				const keep = revealed
+					.filter(id => ctx.campaign.playerCards[id]!.kind !== 'epidemic')
+					.toReversed()
+					.slice(0, reward.take);
+				ctx.game.playerDiscard = ctx.game.playerDiscard.filter(id => !keep.includes(id));
+				ctx.me.hand.push(...keep);
 			}
 		},
 	},
@@ -673,7 +675,11 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 		check(ctx) {
 			const character = characterOf(ctx.world, ctx.seat);
 			if (!hasRule(ctx.campaign, 'carrier') || ctx.here !== pack.sampleFrom) return 'The sample is not here';
-			return character.worker || character.carrier ? 'This character cannot carry the sample' : ok;
+			if (character.worker || character.carrier) return 'This character cannot carry the sample';
+			// The Carrier scar covers 2 slots and may not cover another scar.
+			return character.slots.filter(slot => slot?.kind !== 'scar').length >= 2
+				? ok
+				: 'This character has no room for the Carrier scar, which covers 2 slots';
 		},
 		apply(ctx) {
 			const character = characterOf(ctx.world, ctx.seat);
@@ -685,10 +691,13 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 				if (box !== 'scar') continue;
 				character.carrier = true;
 				log(ctx.game, { t: 'note', text: `${character.name} now carries the sample` });
-				let covered = 0;
-				character.slots = character.slots.map(slot =>
-					slot?.kind !== 'scar' && covered++ < 2 ? { kind: 'scar', id: 'carrier' } : slot,
-				);
+				// The scar covers 2 slots. Empty ones go first, so an ability is lost only when there is no room.
+				const order = character.slots
+					.map((slot, index) => ({ slot, index }))
+					.filter(entry => entry.slot?.kind !== 'scar')
+					.toSorted((a, b) => Number(a.slot !== null) - Number(b.slot !== null))
+					.slice(0, 2);
+				for (const entry of order) character.slots[entry.index] = { kind: 'scar', id: 'carrier' };
 				return;
 			}
 		},

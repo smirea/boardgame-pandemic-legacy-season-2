@@ -62,7 +62,15 @@ export type CampaignLocation = {
 	lab: boolean;
 };
 
-export type GameResult = { month: number; attempt: 1 | 2; won: boolean; gridCities: number; rationing: number };
+export type GameResult = {
+	month: number;
+	attempt: 1 | 2;
+	won: boolean;
+	gridCities: number;
+	rationing: number;
+	/** Who played, in seat order. */
+	characters: CharacterId[];
+};
 
 /** Everything that survives from one game to the next. */
 export type Campaign = {

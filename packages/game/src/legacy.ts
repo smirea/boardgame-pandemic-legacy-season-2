@@ -528,7 +528,8 @@ export function checkPurchase(world: World, purchase: Purchase): string | null {
 		}
 		case 'population': {
 			const record = campaign.locations[purchase.city];
-			if (!record?.revealed || purchase.steps < 1) return 'Pick a revealed location';
+			if (!record?.revealed) return 'Pick a revealed location';
+			if (!Number.isInteger(purchase.steps) || purchase.steps < 1) return 'Population is bought in whole steps';
 			if (cityDef(purchase.city).kind === 'city' && record.population === 0)
 				return 'A forsaken city must be restored first';
 			return record.population + purchase.steps <= 8 ? null : 'Population caps at 8';
@@ -597,6 +598,7 @@ export function closeGame(world: World) {
 		won,
 		gridCities: gridCityCount(campaign),
 		rationing: campaign.rationing,
+		characters: game.seats.map(seat => game.players[seat]!.character),
 	};
 	if (game.prologueRestore) {
 		// Nothing a prologue game does is permanent: scars, deaths, drawn lines and used cards all roll back.

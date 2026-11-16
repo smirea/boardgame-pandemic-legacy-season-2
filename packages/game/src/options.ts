@@ -98,8 +98,12 @@ export function legalActions(world: World, seat: SeatId): Action[] {
 	const candidates: Action[] = [{ a: 'makeSupplies' }, { a: 'buildTower' }, { a: 'selfInject' }];
 
 	for (const to of neighbours(campaign, here)) {
-		const toll = held.find(card => cityDef(card.city).color === cityDef(to).color);
-		candidates.push({ a: 'drive', to, ...(characterOf(world, seat).carrier && toll ? { card: toll.id } : {}) });
+		// The carrier pays to enter a city with any card of its colour, so each such card is its own option.
+		const tolls = characterOf(world, seat).carrier
+			? held.filter(card => cityDef(card.city).color === cityDef(to).color)
+			: [];
+		if (tolls.length === 0) candidates.push({ a: 'drive', to });
+		for (const toll of tolls) candidates.push({ a: 'drive', to, card: toll.id });
 	}
 	for (const card of held) candidates.push({ a: 'sail', card: card.id });
 	const ticket = held.find(card => card.city === here);

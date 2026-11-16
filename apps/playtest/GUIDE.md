@@ -54,6 +54,8 @@ So supply cubes are armour. Your main job between objectives is keeping cubes on
 
 **If the Infection deck runs out** before an Epidemic refills it, its discard pile is reshuffled into a new deck and the infection rate moves one step, with no Epidemic drawn. Inoculating and forsaken cities both thin the deck, so this can happen early.
 
+**Choices open to the table.** Some choices (Cordon, a shield, the pause before an Epidemic reshuffles) may be answered by any player. The active player may pass on them, but first says so with `say` and runs `listen` once, so a teammate who wants to pay has the chance.
+
 **Hand limit** is 7. Over it, you must discard, and the game waits until you do, even on another player's turn. `wait` tells you when that is you.
 
 **Epidemic odds.** The Player deck is stacked in equal piles with one epidemic in each. The chance in `status` follows the pile being drawn, so it is not simply epidemics divided by cards.
