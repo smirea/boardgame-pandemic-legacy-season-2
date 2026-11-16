@@ -281,12 +281,23 @@
 	$effect(() => {
 		const log = game?.log ?? [];
 		const newest = log.at(-1)?.seq ?? 0;
+		// A spectator jumping through a recording skips over events rather than living through each one at once,
+		// and what was announced where they jumped from no longer applies.
+		const jumped = spectator && (newest < lastSeq || newest - lastSeq > 20);
 		if (newest < lastSeq) lastSeq = spectator ? newest : 0;
+		if (jumped) {
+			lastSeq = newest;
+			untrack(() => {
+				toasts = [];
+				banner = null;
+				turnBanner = null;
+				fx = [];
+			});
+			return;
+		}
 		const fresh = log.filter(entry => entry.seq > lastSeq);
 		if (fresh.length === 0) return;
 		lastSeq = newest;
-		// A spectator jumping through a recording skips over events rather than living through each one at once.
-		if (spectator && fresh.length > 20) return;
 		const added: Fx[] = [];
 		const pulse = (city: CityId, kind: FxKind) => added.push({ id: nextFx++, city, kind, delay: added.length * 240 });
 		for (const entry of fresh) {
@@ -616,7 +627,8 @@
 		{/if}
 
 		{#if campaign.briefing.length && briefingRead !== campaign.briefing.join('|')}
-			<div class="scrim" transition:fade={{ duration: 200 }}>
+			<!-- A spectator reads the briefing beside the board instead of in front of it, so what was just revealed stays in view. -->
+			<div class="scrim" class:passive={spectator} transition:fade={{ duration: 200 }}>
 				<div class="briefing" in:fly={{ y: 24, duration: 300 }}>
 					<h2>New this game</h2>
 					<ul>
@@ -1166,6 +1178,24 @@
 		place-items: center;
 		padding: 1rem;
 		background: rgb(12 10 8 / 0.62);
+	}
+
+	.scrim.passive {
+		place-items: start center;
+		padding-top: 3.2rem;
+		background: none;
+		pointer-events: none;
+	}
+
+	.scrim.passive .briefing {
+		width: min(26rem, 90vw);
+		padding: 0.9rem 1.1rem 0.9rem;
+		pointer-events: auto;
+	}
+
+	.scrim.passive .briefing ul {
+		max-height: 30vh;
+		font-size: 0.85rem;
 	}
 
 	.briefing {
