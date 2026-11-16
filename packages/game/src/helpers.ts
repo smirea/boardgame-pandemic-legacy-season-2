@@ -111,6 +111,23 @@ export function cardValue(campaign: Campaign, id: CardId, color: Color, purpose:
 	return 1;
 }
 
+/** A Player card by what is printed on it, for log lines. */
+export function cardLabel(campaign: Campaign, id: CardId): string {
+	const card = playerCard(campaign, id);
+	switch (card.kind) {
+		case 'city':
+			return cityDef(card.city).name;
+		case 'epidemic':
+			return 'an Epidemic';
+		case 'produce':
+			return 'Produce Supplies';
+		case 'event':
+			return pack.events.find(event => event.id === card.event)!.name;
+		case 'companion':
+			return pack.companions.find(companion => companion.id === card.companion)!.name;
+	}
+}
+
 export function log(game: Game, entry: LogInput) {
 	game.log.push({ ...entry, seq: game.nextSeq++ } as Game['log'][number]);
 	if (game.log.length > 400) game.log.splice(0, game.log.length - 400);

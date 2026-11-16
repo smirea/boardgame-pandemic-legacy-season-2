@@ -3,7 +3,17 @@ import { pack } from './content/pack';
 import type { ScarId } from './content/types';
 import { drawPiled } from './decks';
 import { canTakeScar, freeCharacters, hasScar, intensify, movePawn, scarTargets } from './flow';
-import { characterOf, cityDef, discardFromHand, grid, handLimit, log, player, removeFromHand } from './helpers';
+import {
+	cardLabel,
+	characterOf,
+	cityDef,
+	discardFromHand,
+	grid,
+	handLimit,
+	log,
+	player,
+	removeFromHand,
+} from './helpers';
 import type { CardId, CharacterId, CityId, SeatId } from './ids';
 import { createCharacter } from './legacy';
 import type { Phase } from './machine';
@@ -189,10 +199,17 @@ export function applyPlay(world: World, seat: SeatId, card: CardId, play: Play) 
 			game.actionsLeft += 2;
 			return;
 		case 'scavenge':
-			for (let i = 0; i < 4 && game.playerDeck.order.length > 0; i++) {
-				const drawn = drawPiled(game.playerDeck, id => campaign.playerCards[id]!.kind === 'epidemic')!;
-				if (campaign.playerCards[drawn]!.kind === 'city') owner.hand.push(drawn);
-				else game.playerDiscard.push(drawn);
+			{
+				const kept: CardId[] = [];
+				const dropped: CardId[] = [];
+				for (let i = 0; i < 4 && game.playerDeck.order.length > 0; i++) {
+					const drawn = drawPiled(game.playerDeck, id => campaign.playerCards[id]!.kind === 'epidemic')!;
+					(campaign.playerCards[drawn]!.kind === 'city' ? kept : dropped).push(drawn);
+				}
+				owner.hand.push(...kept);
+				game.playerDiscard.push(...dropped);
+				const names = (cards: CardId[]) => cards.map(id => cardLabel(campaign, id)).join(', ') || 'nothing';
+				log(game, { t: 'note', text: `Scavenge kept ${names(kept)} and discarded ${names(dropped)} with no effect` });
 			}
 			return;
 		case 'openWaters':
