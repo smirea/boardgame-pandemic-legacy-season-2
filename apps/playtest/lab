@@ -56,8 +56,8 @@ if (verb === 'review') {
 	if (!file) throw new Error('usage: lab review <config.json>');
 	const config = loadConfig(resolve(file));
 	const { servePages, replaysUrl } = await import('./src/replays.ts');
-	const server = servePages(config);
-	console.log(`Replays for ${config.run}: ${replaysUrl(server.port!)}\nCtrl+C to stop.`);
+	const server = servePages(config.port);
+	console.log(`Replays for ${config.run}: ${replaysUrl(server.port!, config.run)}\nCtrl+C to stop.`);
 	await new Promise(() => {});
 }
 

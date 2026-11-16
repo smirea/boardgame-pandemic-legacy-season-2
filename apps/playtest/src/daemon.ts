@@ -137,7 +137,7 @@ if (built !== `http://127.0.0.1:${config.signalPort}`)
 		`the app is built for the signaling server at ${built}, but this run wants port ${config.signalPort}`,
 	);
 
-const pages = servePages(config);
+const pages = servePages(config.port);
 
 const wranglerLog: string[] = [];
 const wrangler = Bun.spawn(
@@ -572,7 +572,7 @@ async function handle(agent: string, words: string[]): Promise<string> {
 				return paths.join('\n');
 			}
 			case 'replays':
-				return replaysUrl(pages.port!);
+				return replaysUrl(pages.port!, config.run);
 			case 'parity':
 				writeFileSync(files.parity, renderParity(audit, state.world, issues()));
 				return files.parity;
@@ -845,5 +845,5 @@ writeFileSync(
 );
 const ready = current as PublicState | null;
 console.log(
-	`lab ready: run ${config.run} · ${ready ? `${monthName(ready.world.campaign.month)} ${ready.phase}` : 'no state'} · control ${control.port} · watch at ${tabUrl('spectator')} · replays at ${replaysUrl(pages.port!)}`,
+	`lab ready: run ${config.run} · ${ready ? `${monthName(ready.world.campaign.month)} ${ready.phase}` : 'no state'} · control ${control.port} · watch at ${tabUrl('spectator')} · replays at ${replaysUrl(pages.port!, config.run)}`,
 );

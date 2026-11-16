@@ -210,3 +210,6 @@ export type IndexGame = {
 
 /** The list a campaign page is built from: every recorded game of one run, oldest first. */
 export type ReplayIndex = { run: string; title: string; updatedAt: number; games: IndexGame[] };
+
+/** One playtest run as the runs page lists it. */
+export type RunSummary = { run: string; games: number; won: number; lost: number; updatedAt: number };

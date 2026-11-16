@@ -25,6 +25,7 @@
     "apps/server": {
       "name": "@repo/server",
       "dependencies": {
+        "@repo/playtest": "workspace:*",
         "@repo/shared": "workspace:*",
         "es-toolkit": "^1.52.0",
       },

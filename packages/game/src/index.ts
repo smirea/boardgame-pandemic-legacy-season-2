@@ -28,5 +28,14 @@ export {
 export { freeCharacters, scarTargets } from './flow';
 export { botCommand } from './bot';
 export { scenarios } from './scenarios';
-export type { GameNotes, GameRecord, IndexGame, Patch, RecordNote, RecordStep, ReplayIndex } from './record';
+export type {
+	GameNotes,
+	GameRecord,
+	IndexGame,
+	Patch,
+	RecordNote,
+	RecordStep,
+	ReplayIndex,
+	RunSummary,
+} from './record';
 export { applyPatches, diff, framesOf, gameIndexOf, parseRecord, recordStep, startRecord } from './record';

@@ -1,8 +1,7 @@
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import type { GameNotes, IndexGame, ReplayIndex } from '@repo/game';
+import type { GameNotes, IndexGame, ReplayIndex, RunSummary } from '@repo/game';
 import type { Audit } from './audit.ts';
-import type { LabConfig } from './config.ts';
 import { labRoot, repoRoot } from './config.ts';
 
 /** What the lab remembers about each recorded game, kept beside the recordings themselves. */
@@ -16,17 +15,24 @@ export type RecordMeta = {
 
 export const recordFile = (index: number) => `g${String(index).padStart(2, '0')}.json`;
 
-export const notesFile = (config: LabConfig) => join(labRoot, 'notes', `${config.run}.json`);
+export const notesFile = (run: string) => join(labRoot, 'notes', `${run}.json`);
+
+const runsDir = join(labRoot, 'runs');
 
 const readJson = <T>(path: string, fallback: T): T =>
 	existsSync(path) ? (JSON.parse(readFileSync(path, 'utf8')) as T) : fallback;
 
+/** Runs that recorded games. A run from before recording existed has nothing to replay. */
+const recordedRuns = () =>
+	existsSync(runsDir) ? readdirSync(runsDir).filter(run => existsSync(join(runsDir, run, 'records', 'meta.json'))) : [];
+
 /** The campaign page's list: every recorded game of the run, with the operator's notes on each. */
-export function buildIndex(config: LabConfig & { runDir: string }): ReplayIndex {
-	const records = join(config.runDir, 'records');
+export function buildIndex(run: string): ReplayIndex {
+	const runDir = join(runsDir, run);
+	const records = join(runDir, 'records');
 	const meta = readJson<Record<string, RecordMeta>>(join(records, 'meta.json'), {});
-	const audit = readJson<Audit | null>(join(config.runDir, 'audit.json'), null);
-	const notes = readJson<Record<string, GameNotes>>(notesFile(config), {});
+	const audit = readJson<Audit | null>(join(runDir, 'audit.json'), null);
+	const notes = readJson<Record<string, GameNotes>>(notesFile(run), {});
 	const files = existsSync(records)
 		? readdirSync(records)
 				.filter(name => /^g\d+\.json$/.test(name))
@@ -54,30 +60,53 @@ export function buildIndex(config: LabConfig & { runDir: string }): ReplayIndex 
 			},
 		];
 	});
-	return { run: config.run, title: `Playtest ${config.run}`, updatedAt: Date.now(), games };
+	return { run, title: `Playtest ${run}`, updatedAt: Date.now(), games };
 }
 
-/** Serves the built app, and the run's recordings under `/lab/records/`, for the lab and for reviewing a finished run. */
-export function servePages(config: LabConfig & { runDir: string }) {
+export function listRuns(): RunSummary[] {
+	return recordedRuns()
+		.map(run => {
+			const { games } = buildIndex(run);
+			return {
+				run,
+				games: games.length,
+				won: games.filter(game => game.outcome?.won).length,
+				lost: games.filter(game => game.outcome && !game.outcome.won).length,
+				updatedAt: Math.max(statSync(join(runsDir, run, 'records')).mtimeMs, ...games.map(game => game.endedAt)),
+			};
+		})
+		.toSorted((a, b) => b.updatedAt - a.updatedAt);
+}
+
+/** The runs list and each run's recordings, served the same way by the app's server and by the lab. */
+export const runRoutes = {
+	'/api/runs': () => Response.json(listRuns()),
+	'/api/runs/:run/:file': async (request: Bun.BunRequest<'/api/runs/:run/:file'>) => {
+		const { run, file } = request.params;
+		if (!recordedRuns().includes(run)) return Response.json({ ok: false, error: `No run ${run}` }, { status: 404 });
+		if (file === 'index.json') return Response.json(buildIndex(run));
+		const record = Bun.file(join(runsDir, run, 'records', file));
+		return /^g\d+\.json$/.test(file) && (await record.exists())
+			? new Response(record)
+			: Response.json({ ok: false, error: `No recording ${file}` }, { status: 404 });
+	},
+};
+
+/** Serves the built app and the runs' recordings, for the lab and for reviewing a finished run. */
+export function servePages(port: number) {
 	const buildDir = join(repoRoot, 'apps/ui/build');
-	const records = join(config.runDir, 'records');
 	return Bun.serve({
 		hostname: '127.0.0.1',
-		port: config.port,
+		port,
+		routes: runRoutes,
 		async fetch(request) {
 			const path = decodeURIComponent(new URL(request.url).pathname);
-			if (path === '/lab/records/index.json') return Response.json(buildIndex(config));
-			if (path.startsWith('/lab/records/')) {
-				const name = path.slice('/lab/records/'.length);
-				const file = Bun.file(join(records, name));
-				return /^g\d+\.json$/.test(name) && (await file.exists())
-					? new Response(file)
-					: new Response('no such recording', { status: 404 });
-			}
 			const file = Bun.file(join(buildDir, path));
 			return new Response(path !== '/' && (await file.exists()) ? file : Bun.file(join(buildDir, 'index.html')));
 		},
 	});
 }
 
-export const replaysUrl = (port: number) => `http://127.0.0.1:${port}/replay?index=/lab/records/index.json`;
+export const replayPath = (run: string) => `/replay?index=${encodeURIComponent(`/api/runs/${run}/index.json`)}`;
+
+export const replaysUrl = (port: number, run: string) => `http://127.0.0.1:${port}${replayPath(run)}`;

@@ -197,7 +197,9 @@
 
 	<aside class="side">
 		<header>
-			<p class="eyebrow">{index ? index.title : 'Replay'}</p>
+			<p class="eyebrow">
+				{#if index}<a href="/debug/runs" title="All runs">Runs</a> / {index.title}{:else}Replay{/if}
+			</p>
 			{#if loaded}
 				<h1>{gameTitle(loaded.record)}</h1>
 				{#if game?.outcome}
@@ -434,6 +436,15 @@
 		font-size: 0.66rem;
 		letter-spacing: 0.12em;
 		text-transform: uppercase;
+	}
+
+	.eyebrow a {
+		color: inherit;
+		text-decoration: none;
+	}
+
+	.eyebrow a:hover {
+		color: var(--accent);
 	}
 
 	h1 {

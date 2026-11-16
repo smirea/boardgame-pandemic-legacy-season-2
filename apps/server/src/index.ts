@@ -1,3 +1,4 @@
+import { runRoutes } from '@repo/playtest/replays';
 import { config } from './config';
 
 const uiBuildPath = new URL('../../ui/build/', import.meta.url);
@@ -8,6 +9,7 @@ const server = Bun.serve({
 	port: config.port,
 	routes: {
 		'/api/status': Response.json({ ok: true, now: new Date().toISOString() }),
+		...runRoutes,
 	},
 	async fetch(request) {
 		const url = new URL(request.url);

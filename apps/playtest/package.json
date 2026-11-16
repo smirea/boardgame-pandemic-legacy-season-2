@@ -2,6 +2,9 @@
 	"name": "@repo/playtest",
 	"private": true,
 	"type": "module",
+	"exports": {
+		"./replays": "./src/replays.ts"
+	},
 	"scripts": {
 		"typecheck": "bun check"
 	},

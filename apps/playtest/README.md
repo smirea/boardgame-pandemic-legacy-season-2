@@ -46,6 +46,6 @@ Memory files live in `memory/` and are tracked, so a later run starts with what 
 
 ## Replays
 
-The replays page lists every recorded game of the run and plays any of them back on the real game screen: step, scrub, jump by turn, or let it run. The side panel shows each move with the reason the player gave for it, the table talk around it, and what the game logged. `lab start` and `lab replays` print its address.
+The replays page lists every recorded game of the run and plays any of them back on the real game screen: step, scrub, jump by turn, or let it run. The side panel shows each move with the reason the player gave for it, the table talk around it, and what the game logged. `lab start` and `lab replays` print its address. With `bun run dev` running, `/debug/runs` lists every run that recorded a game and opens any of them in the same page. The app's server and the lab serve the recordings through the same `/api/runs` routes in `src/replays.ts`.
 
 The operator's notes on each game (summary, story, highlights, rules check, findings and fixes) live in `notes/<run>.json`, keyed by game (`g00`, `g01`, and so on), and show in the page's Notes tab and games list. They are tracked in git. The recordings are not.
