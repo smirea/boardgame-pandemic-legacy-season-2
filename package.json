@@ -26,7 +26,6 @@
 		"ui:preview": "bun --filter @repo/ui preview"
 	},
 	"devDependencies": {
-		"@stefan.inc/env-manager": "^1.0.0",
 		"@types/bun": "^1.4.4",
 		"@types/node": "^26.6.5",
 		"concurrently": "^10.0.6",
