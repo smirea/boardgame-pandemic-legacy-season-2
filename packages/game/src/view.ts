@@ -17,6 +17,8 @@ export function publicState(snapshot: GameSnapshot): PublicState {
 	return { phase: phaseOf(snapshot), world: snapshot.context.world, canUndo: snapshot.context.undo.length > 0 };
 }
 
+export type PlayerCardsAt = { inDeck: number; inHands: number; discarded: number };
+
 export type Insights = {
 	playerDeck: {
 		cards: number;
@@ -28,6 +30,8 @@ export type Insights = {
 		/** Draws until the next epidemic must have appeared, or null when none remain. */
 		epidemicWithin: number | null;
 		byKind: Record<string, number>;
+		/** Where each city's player cards are: still in the deck, in someone's hand, or discarded. */
+		cities: Record<CityId, PlayerCardsAt>;
 	};
 	infection: {
 		/** True during setup, when the odds describe the opening infection, not a turn's Infect step. */
@@ -46,6 +50,23 @@ export type Insights = {
 	};
 	incidentsLeft: number;
 };
+
+function playerCardsByCity(world: World): Record<CityId, PlayerCardsAt> {
+	const game = world.game!;
+	const counts: Record<string, PlayerCardsAt> = {};
+	const tally = (cards: CardId[], where: keyof PlayerCardsAt) => {
+		for (const id of cards) {
+			const card = world.campaign.playerCards[id];
+			if (card?.kind !== 'city') continue;
+			const at = (counts[card.city] ??= { inDeck: 0, inHands: 0, discarded: 0 });
+			at[where]++;
+		}
+	};
+	tally(game.playerDeck.order, 'inDeck');
+	for (const seat of game.seats) tally(game.players[seat]!.hand, 'inHands');
+	tally(game.playerDiscard, 'discarded');
+	return counts as Record<CityId, PlayerCardsAt>;
+}
 
 const cityOfInfection = (world: World, card: CardId): CityId | 'hollow' => {
 	const found = world.campaign.infectionCards[card];
@@ -108,6 +129,7 @@ export function insights(world: World): Insights | null {
 			epidemicNextDraw: epidemicOdds(game.playerDeck.piles, 2),
 			epidemicWithin: drawsUntilEpidemicCertain(game.playerDeck.piles),
 			byKind,
+			cities: playerCardsByCity(world),
 		},
 		infection: {
 			opening,

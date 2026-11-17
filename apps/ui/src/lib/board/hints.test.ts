@@ -21,29 +21,33 @@ const lagos: CityView = {
 	lab: true,
 	highlight: null,
 	infection: { odds: 0.25, inDeck: 2, discarded: 1 },
+	cards: { inDeck: 1, inHands: 1, discarded: 0 },
 };
 
-const row = (label: string) => cityHint(lagos).rows.find(entry => entry.label === label);
-
 describe('board hints', () => {
-	test('a city lists everything in it as label and value', () => {
+	test('a city lists its cards and conditions as label and value', () => {
 		expect(cityHint(lagos).rows.map(entry => `${entry.label}: ${entry.value}`)).toEqual([
-			'Population: 3',
-			'Supply cubes: 0',
-			'Plague cubes: 2',
-			'Hollow Men: 1',
 			'Infected next: 25%',
 			'Infection cards: 2 in deck, 1 discarded',
-			'Supply center: Temporary',
-			'Satellite tower: Permanent',
+			'Player cards: 1 in deck, 1 in hand, 0 discarded',
 			'Lab: Found',
-			'Port: Sea moves start or end here',
-			'Grid: Connected',
 		]);
 	});
 
-	test('an empty city shows its zero supply cubes as a warning', () => {
-		expect(row('Supply cubes')).toEqual({ label: 'Supply cubes', value: '0', tone: 'bad' });
+	test("a city's heading carries its port and buildings before the name and its cubes after it", () => {
+		expect(cityHint(lagos).marks).toEqual(['port', 'center', 'tower']);
+		expect(cityHint(lagos).counts).toEqual([
+			{ glyph: 'supplies', count: 0, tone: 'bad' },
+			{ glyph: 'plague', count: 2, tone: 'bad' },
+			{ glyph: 'hollow', count: 1, tone: 'bad' },
+		]);
+	});
+
+	test('a quiet city shows only its supply cubes', () => {
+		expect(cityHint({ ...lagos, supplies: 3, plague: 0, hollow: 0, port: false, structures: [] })).toMatchObject({
+			marks: [],
+			counts: [{ glyph: 'supplies', count: 3, tone: null }],
+		});
 	});
 
 	test('a building says whether it stays for good', () => {
@@ -53,14 +57,6 @@ describe('board hints', () => {
 		expect(partHint({ structure: 'center', permanent: false }, lagos).rows).toContainEqual({
 			label: 'Lasts',
 			value: 'This game only',
-		});
-	});
-
-	test('a city off the grid says so', () => {
-		expect(cityHint({ ...lagos, onGrid: false }).rows.at(-1)).toEqual({
-			label: 'Grid',
-			value: 'Not connected',
-			tone: 'bad',
 		});
 	});
 });

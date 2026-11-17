@@ -6,8 +6,16 @@ export type HintTone = 'bad' | 'good' | null;
 /** One line of a hint: a label and its value, set in two aligned columns. */
 export type HintRow = { label: string; value: string; tone?: HintTone };
 
-/** What a hover over the board explains: a heading, aligned rows of facts, and a sentence or two of rules. */
-export type HintText = { title: string; rows: HintRow[]; notes: string[] };
+/** A piece or printed mark drawn as a small glyph, the way the board draws it. */
+export type Glyph = 'port' | StructureKind | 'supplies' | 'plague' | 'hollow';
+
+export type HintCount = { glyph: 'supplies' | 'plague' | 'hollow'; count: number; tone?: HintTone };
+
+/**
+ * What a hover over the board explains: a heading, aligned rows of facts, and a sentence or two of rules.
+ * A city's heading also carries what marks it (port, buildings) before its name and its cubes after it.
+ */
+export type HintText = { title: string; marks?: Glyph[]; counts?: HintCount[]; rows: HintRow[]; notes: string[] };
 
 export type Part = 'city' | 'supplies' | 'plague' | 'hollow' | 'lab' | { structure: StructureKind; permanent: boolean };
 
@@ -24,12 +32,11 @@ const percent = (odds: number) => `${Math.round(odds * 100)}%`;
 
 /** Everything at one city, for a hover over its disc. */
 export function cityHint(city: CityView): HintText {
-	const rows: HintRow[] = [
-		{ label: 'Population', value: String(city.population) },
-		{ label: 'Supply cubes', value: String(city.supplies), tone: city.supplies === 0 ? 'bad' : null },
-		{ label: 'Plague cubes', value: String(city.plague), tone: city.plague > 0 ? 'bad' : null },
-	];
-	if (city.hollow) rows.push({ label: 'Hollow Men', value: String(city.hollow), tone: 'bad' });
+	const marks: Glyph[] = [...(city.port ? ['port' as const] : []), ...city.structures.map(entry => entry.kind)];
+	const counts: HintCount[] = [{ glyph: 'supplies', count: city.supplies, tone: city.supplies === 0 ? 'bad' : null }];
+	if (city.plague) counts.push({ glyph: 'plague', count: city.plague, tone: 'bad' });
+	if (city.hollow) counts.push({ glyph: 'hollow', count: city.hollow, tone: 'bad' });
+	const rows: HintRow[] = [];
 	if (city.infection) {
 		rows.push({
 			label: 'Infected next',
@@ -41,14 +48,15 @@ export function cityHint(city: CityView): HintText {
 			value: `${city.infection.inDeck} in deck, ${city.infection.discarded} discarded`,
 		});
 	}
-	for (const structure of city.structures)
-		rows.push({ label: STRUCTURE_NAME[structure.kind], value: structure.permanent ? 'Permanent' : 'Temporary' });
+	if (city.cards)
+		rows.push({
+			label: 'Player cards',
+			value: `${city.cards.inDeck} in deck, ${city.cards.inHands} in hand, ${city.cards.discarded} discarded`,
+		});
 	if (city.lab) rows.push({ label: 'Lab', value: 'Found', tone: 'good' });
-	if (city.port) rows.push({ label: 'Port', value: 'Sea moves start or end here' });
-	rows.push({ label: 'Grid', value: city.onGrid ? 'Connected' : 'Not connected', tone: city.onGrid ? null : 'bad' });
 	if (city.infested) rows.push({ label: 'Infested', value: 'Yes', tone: 'bad' });
 	if (city.forsaken) rows.push({ label: 'Forsaken', value: 'Yes', tone: 'bad' });
-	return { title: city.name, rows, notes: [] };
+	return { title: city.name, marks, counts, rows, notes: [] };
 }
 
 /** One piece or printed mark beside a city. */

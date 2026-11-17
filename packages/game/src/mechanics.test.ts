@@ -2173,3 +2173,18 @@ describe('found in December', () => {
 		expect(drives.toSorted()).toEqual([...gameOf(actor).players[A]!.hand].toSorted());
 	});
 });
+
+describe('insights', () => {
+	test("a city's player cards are counted where they are: deck, hands or discard", () => {
+		let held = 0;
+		const actor = late((world, game) => {
+			const cards = cityCards(world, 'cairo', 9);
+			give(world, A, cards);
+			held = cards.length - 1;
+			game.playerDiscard.push(game.players[A]!.hand.pop()!);
+		});
+		const cards = insights(worldOf(actor))!.playerDeck.cities;
+		expect(held).toBeGreaterThan(0);
+		expect(cards[city('cairo')]).toEqual({ inDeck: 0, inHands: held, discarded: 1 });
+	});
+});
