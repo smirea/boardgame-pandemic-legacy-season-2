@@ -87,7 +87,7 @@ try {
 		throw new Error('Typing in the feedback editor changed the game');
 	}
 	await field.press('Enter');
-	await page.getByRole('button', { name: 'Share' }).click();
+	await page.getByRole('button', { name: 'Share', exact: true }).click();
 	await page.getByRole('menuitem', { name: 'JSON', exact: true }).click();
 	await page.getByRole('dialog', { name: 'Share JSON' }).waitFor();
 	const json = await page.evaluate(() => window.__feedbackEngine!.lastExport[0]!.blob.text());
