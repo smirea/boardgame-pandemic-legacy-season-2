@@ -124,7 +124,8 @@ async function play(width: number, height: number) {
 	await clickCity(page, here(snap));
 	const ring = page.getByTestId('city-ring');
 	await ring.locator('button').first().waitFor();
-	await page.waitForTimeout(400);
+	// The pills fan out from the city's centre, so they are measured once they have landed.
+	await ring.evaluate(node => Promise.all(node.getAnimations({ subtree: true }).map(animation => animation.finished)));
 	const entries = await ring
 		.locator('button')
 		.evaluateAll(nodes => nodes.map(node => (node as HTMLElement).dataset['action']));
@@ -135,11 +136,11 @@ async function play(width: number, height: number) {
 		entries.toSorted().join() === legal.toSorted().join(),
 		`the ring shows ${entries} where the rules allow ${legal}`,
 	);
+	await shot('3-ring');
 	const slip = await page.getByTestId('board-hint').boundingBox();
 	assert(slip, 'no hover slip beside the open ring');
 	for (const button of await ring.locator('button').all())
 		assert(!overlaps((await button.boundingBox())!, slip), 'an action in the ring lies under the hover slip');
-	await shot('3-ring');
 	await page.keyboard.press('Escape');
 	await ring.waitFor({ state: 'detached' });
 	// A click on one of the ring's actions starts it: Drive / Ferry lights where it goes.
@@ -180,7 +181,28 @@ async function play(width: number, height: number) {
 	// The card rises out of the fan before its tags stand over it.
 	await page.waitForTimeout(600);
 	const tag = card.locator('[data-testid=card-uses] button[data-use=charter]');
-	await tag.waitFor();
+	await tag.waitFor({ timeout: 15_000 }).catch(async error => {
+		await page.screenshot({ path: join(shotsDir, `actions-${width}-tag-failed.png`) });
+		console.log(
+			JSON.stringify(
+				await page.evaluate(
+					([x, y, id]) => {
+						const hit = document.elementFromPoint(x!, y!);
+						const slot = document.querySelector(`[data-card="${id}"]`);
+						return {
+							hit: `${hit?.tagName}.${hit?.className}`,
+							hitSlot: hit?.closest('.slot')?.getAttribute('data-card'),
+							hovered: slot?.matches(':hover'),
+							tags: slot?.querySelector('[data-testid=card-uses]')?.textContent,
+							phase: (window as any).DEBUG.getState().phase,
+						};
+					},
+					[...showing, held] as [number, number, string],
+				),
+			),
+		);
+		throw error;
+	});
 	await page.waitForTimeout(300);
 	await shot('4-card-tag');
 	await page.mouse.move(...xy(await tag.boundingBox()), { steps: 3 });
@@ -218,6 +240,17 @@ async function play(width: number, height: number) {
 		await page.locator('[data-testid=flipped] .flipcard').first().waitFor();
 		const heading = await page.locator('.dock .say strong').innerText();
 		assert(heading === 'Infect cities', `the infect step reads ${heading}`);
+		await shot('5-infect');
+		await page
+			.waitForFunction(
+				() => {
+					const box = document.querySelector('[data-testid=flipped] .flipcard')?.getBoundingClientRect();
+					return box && box.width > 30;
+				},
+				undefined,
+				{ timeout: 10_000 },
+			)
+			.catch(() => undefined);
 		const flippedBox = await page.locator('[data-testid=flipped] .flipcard').first().boundingBox();
 		await page
 			.locator('.dock')
@@ -228,7 +261,6 @@ async function play(width: number, height: number) {
 		);
 		const title = await page.locator('.dock .say strong').boundingBox();
 		assert(title && title.y >= height - 170, 'the infect headline rides up over the chart');
-		await shot('5-infect');
 		ok(`${width}: the infect step shows the drawn and flipped cards`);
 	} else ok(`${width}: the draw ended in a choice, so the infect step is left for another seed`, snap.phase);
 	assert(errors.length === 0, `page errors: ${errors.join(' | ')}`);

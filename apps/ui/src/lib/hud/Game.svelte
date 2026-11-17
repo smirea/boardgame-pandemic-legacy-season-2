@@ -3,6 +3,7 @@
 	import {
 		actionMenu,
 		cardTargets,
+		checkAction,
 		insights,
 		isForsaken,
 		legalDecides,
@@ -310,7 +311,7 @@
 		if (live && seat === game?.active) {
 			for (const choice of actionChoices) {
 				if (!CARD_KINDS.has(choice.a)) continue;
-				const variants = choice.actions.filter(action => 'card' in action && action.card === card);
+				const variants = cardVariants(choice.actions, card);
 				if (!variants.length) continue;
 				const target = variants.length === 1 ? actionTarget(world, variants[0]!) : null;
 				uses.push({
@@ -324,6 +325,24 @@
 		if (plays.some(option => option.seat === seat && option.card === card))
 			uses.push({ key: 'play', label: `Play ${cardName(world, card)}`, icon: null, run: () => playCard(seat, card) });
 		return uses;
+	}
+
+	/**
+	 * The variants that spend this card. The rules offer one copy of a city's card where any copy would do, so a twin
+	 * of that card is offered the same variants, each checked by the rules again.
+	 */
+	function cardVariants(variants: Action[], card: CardId): Action[] {
+		const own = variants.filter(action => 'card' in action && action.card === card);
+		if (own.length) return own;
+		const held = campaign.playerCards[card];
+		if (held?.kind !== 'city') return [];
+		return variants.flatMap(action => {
+			if (!('card' in action) || !action.card) return [];
+			const other = campaign.playerCards[action.card];
+			if (other?.kind !== 'city' || other.city !== held.city) return [];
+			const twin = { ...action, card } as Action;
+			return checkAction(world, game!.active, twin) === null ? [twin] : [];
+		});
 	}
 
 	/** Escape and a right click put down whatever was half-chosen. */
