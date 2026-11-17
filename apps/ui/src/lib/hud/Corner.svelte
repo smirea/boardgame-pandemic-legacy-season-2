@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { getContext } from 'svelte';
+	import type { CardId } from '@repo/game';
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
-	import { handLimit, pack } from '@repo/game';
+	import { pack } from '@repo/game';
 	import type { SeatId, World } from '@repo/game';
 	import { inkOn } from '#lib/color.ts';
 	import Bubble from '#lib/replay/Bubble.svelte';
@@ -9,13 +11,16 @@
 	import { cubicIn } from 'svelte/easing';
 	import { fly } from 'svelte/transition';
 	import { deal } from './deal.ts';
-	import { cardName, cityName } from './labels.svelte.ts';
+	import { cardName } from './labels.svelte.ts';
 	import { cardColor } from './PlayerCard.svelte';
 	import Portrait from './Portrait.svelte';
 	import type { Place } from './seats.ts';
 	import { turnSteps } from './turn.ts';
 
+	const hoverCard = getContext<((card: CardId | null) => void) | undefined>('card-hover');
+
 	type Props = {
+		highlighted?: boolean;
 		/** Who sits here: the player in a replay, the character at a live table. */
 		name: string;
 		seat: SeatId;
@@ -39,6 +44,7 @@
 	};
 
 	let {
+		highlighted = false,
 		name,
 		seat,
 		color,
@@ -59,12 +65,6 @@
 	const player = $derived(game?.players[seat]);
 	const character = $derived(player ? world.campaign.characters[player.character] : undefined);
 	const job = $derived(pack.jobs.find(candidate => candidate.id === character?.job));
-	// At a live table the card is headed with the character's name, so it is not repeated underneath.
-	const subtitle = $derived(
-		[character && character.name !== name ? character.name : null, character?.worker ? 'Haven worker' : null]
-			.filter(Boolean)
-			.join(', '),
-	);
 	const active = $derived(game !== null && game.active === seat && !game.outcome);
 	const top = $derived(place === 'tl' || place === 'tr');
 	const right = $derived(place === 'tr' || place === 'br');
@@ -119,7 +119,15 @@
 
 {#snippet card()}
 	<div class="seat" style:--seat={color} style:--on={inkOn(color)}>
-		<button class="slip" class:active class:selected onclick={onselect} title={action} aria-pressed={selected}>
+		<button
+			class="slip"
+			class:highlighted
+			class:active
+			class:selected
+			onclick={onselect}
+			title={action}
+			aria-pressed={selected}
+		>
 			<span class="portrait">
 				<Portrait
 					id={character?.id ?? seat}
@@ -132,57 +140,29 @@
 				<span class="head">
 					<strong>{name}</strong>
 					{#if player}
-						<span class="cubes" title="Supply cubes carried">
+						<span
+							class="cubes"
+							role="img"
+							aria-label={`${player.supplies} supply cubes carried`}
+							title={`${player.supplies} supply cubes carried`}
+						>
 							{#each { length: player.supplies } as _, index (index)}<i></i>{/each}
 						</span>
 					{/if}
 				</span>
 				{#if player && character}
-					<span class="where">
-						{#if subtitle}<span class="role">{subtitle}</span>{/if}
-						<em>{cityName(player.location)}</em>
-					</span>
 					<span class="traits">
 						{#each traits as trait (`${trait.kind}:${trait.name}`)}
 							<span class="trait {trait.kind}" class:struck={trait.struck} title={`${trait.name}: ${trait.text}`}>
-								<b>{trait.name}</b>
+								<b>{trait.name}:</b>
 								{trait.text}
 							</span>
 						{/each}
 					</span>
-					<span class="foot">
-						{#if !character.worker}
-							<span class="exposure" title="Exposure track. A scar or a skull hides under some boxes.">
-								{#each { length: pack.numbers.exposureBoxes } as _, box (box)}
-									{@const result = box < character.exposure ? character.exposureTrack[box] : undefined}
-									<i
-										class:scratched={box < character.exposure}
-										class:scar={result === 'scar'}
-										class:skull={result === 'skull'}
-									></i>
-								{/each}
-							</span>
-						{/if}
-						<span
-							class="count"
-							class:over={player.hand.length > handLimit(world, seat)}
-							title="Cards in hand, out of the hand limit">{player.hand.length}/{handLimit(world, seat)} cards</span
-						>
-					</span>
-				{:else}
-					<span class="where">At the table</span>
 				{/if}
 			</span>
 		</button>
-		{#if active}
-			<span class="turn" data-testid="corner-turn"
-				>Playing{#if game && game.actionsLeft > 0}<span class="pips"
-						>{#each { length: game.actionsLeft } as _, index (index)}<i></i>{/each}</span
-					>{/if}</span
-			>
-		{:else if selected && selectedTag}
-			<span class="turn quiet">{selectedTag}</span>
-		{/if}
+
 		{#if claim}
 			<button
 				class="claim"
@@ -215,6 +195,10 @@
 				{@const label = held.kind === 'epidemic' ? 'Epidemic' : cardName(world, held.id)}
 				<button
 					class="mini"
+					onmouseenter={() => hoverCard?.(held.id)}
+					onmouseleave={() => hoverCard?.(null)}
+					onfocus={() => hoverCard?.(held.id)}
+					onblur={() => hoverCard?.(null)}
 					style:--band={cardColor(held)}
 					style:--ink={inkOn(cardColor(held))}
 					title={label}
@@ -293,6 +277,7 @@
 	}
 
 	.slip.active {
+		animation: active-border 2s ease-in-out infinite;
 		translate: 0 0.25rem;
 		box-shadow:
 			0 0 0 2px var(--on),
@@ -309,7 +294,13 @@
 		outline-offset: 3px;
 	}
 
+	.slip.highlighted {
+		outline: 3px solid #f7d68b;
+		outline-offset: 3px;
+	}
+
 	.portrait {
+		position: relative;
 		display: block;
 		min-height: 100%;
 		border-right: 1px solid rgb(20 12 4 / 0.35);
@@ -349,35 +340,28 @@
 		margin-left: auto;
 	}
 
+	@keyframes active-border {
+		50% {
+			box-shadow:
+				0 0 0 3px var(--on),
+				0 0 1rem var(--seat);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.slip.active {
+			animation: none;
+		}
+	}
+
 	.cubes i {
 		width: 0.5rem;
 		height: 0.5rem;
 		border: 1px solid rgb(20 12 4 / 0.55);
 		border-radius: 1px;
-		background: linear-gradient(135deg, #fbf5e6, #d9cfb8);
+		background: conic-gradient(from 30deg at 50% 35%, #b1a38a 0deg 120deg, #e0d5bb 120deg 240deg, #fff5dc 240deg);
+		clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
 		box-shadow: 0 1px 0 rgb(20 12 4 / 0.35);
-	}
-
-	.where {
-		display: flex;
-		align-items: baseline;
-		gap: 0.5rem;
-		color: var(--soft);
-		font-size: 0.74rem;
-		white-space: nowrap;
-	}
-
-	.role {
-		overflow: hidden;
-		text-overflow: ellipsis;
-	}
-
-	.where em {
-		flex: none;
-		margin-left: auto;
-		color: var(--on);
-		font-family: var(--font-display);
-		font-size: 0.9rem;
 	}
 
 	.traits {
@@ -410,100 +394,6 @@
 	.trait.scar {
 		border-left-color: #1d140d;
 		background: rgb(20 10 6 / 0.3);
-	}
-
-	.foot {
-		display: flex;
-		align-items: center;
-		gap: 0.6rem;
-		margin-top: auto;
-		color: var(--soft);
-		font-size: 0.68rem;
-	}
-
-	.count {
-		margin-left: auto;
-	}
-
-	.count.over {
-		color: var(--on);
-		font-weight: 700;
-		text-decoration: underline wavy;
-	}
-
-	.exposure {
-		display: flex;
-		gap: 2px;
-	}
-
-	.exposure i {
-		width: 0.5rem;
-		height: 0.5rem;
-		border: 1px solid var(--soft);
-		border-radius: 1px;
-	}
-
-	.exposure i.scratched {
-		background: var(--soft);
-	}
-
-	.exposure i.scar {
-		border-color: #f1c35a;
-		background: #f1c35a;
-	}
-
-	.exposure i.skull {
-		border-color: #1d140d;
-		background: #1d140d;
-	}
-
-	/* The turn tab sits on the card's edge facing the board's middle. */
-	.turn {
-		position: absolute;
-		top: -0.6rem;
-		right: 0.5rem;
-		display: flex;
-		align-items: center;
-		gap: 0.35rem;
-		padding: 0.05rem 0.45rem;
-		border-radius: 2px;
-		background: var(--slip-ink);
-		color: var(--slip);
-		font-size: 0.7rem;
-		font-weight: 700;
-		pointer-events: none;
-		animation: tagged 380ms cubic-bezier(0.2, 1.4, 0.4, 1);
-	}
-
-	.bl .turn,
-	.br .turn {
-		top: auto;
-		bottom: calc(100% - 0.6rem);
-	}
-
-	.turn.quiet {
-		background: color-mix(in srgb, var(--seat) 70%, #140c06);
-		color: var(--on);
-		font-weight: 500;
-	}
-
-	.pips {
-		display: flex;
-		gap: 2px;
-	}
-
-	.pips i {
-		width: 0.38rem;
-		height: 0.38rem;
-		border-radius: 50%;
-		background: var(--slip);
-	}
-
-	@keyframes tagged {
-		from {
-			opacity: 0;
-			translate: 0 0.4rem;
-		}
 	}
 
 	.claim {

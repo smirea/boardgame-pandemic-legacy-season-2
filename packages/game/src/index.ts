@@ -9,7 +9,7 @@ export type { Purchase } from './legacy';
 export { actionBriefs, newCampaign, productionUnits, purchaseCost, ruleBriefs, score } from './legacy';
 export type { Command, GameActor, GameSnapshot, Phase, Save, Seating } from './machine';
 export { createGameActor, gameMachine, parseSave, phaseOf, reject } from './machine';
-export { legalActions, legalDecides, legalPlays, legalPurchases, payColor, payments } from './options';
+export { cardTargets, legalActions, legalDecides, legalPlays, legalPurchases, payColor, payments } from './options';
 export { violations } from './invariants';
 export type { Insights, PlayerCardsAt, PublicState } from './view';
 export { insights, onGrid, publicState } from './view';

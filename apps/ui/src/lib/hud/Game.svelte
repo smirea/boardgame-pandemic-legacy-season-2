@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import {
+		cardTargets,
 		insights,
 		isForsaken,
 		legalActions,
@@ -21,7 +22,7 @@
 	import { presentFeedback } from '#lib/feedback.ts';
 	import { onButton, typing } from '#lib/keys.ts';
 	import { LS } from '#lib/storage.ts';
-	import { untrack } from 'svelte';
+	import { setContext, untrack } from 'svelte';
 	import type { Snippet } from 'svelte';
 	import { backOut } from 'svelte/easing';
 	import { fade, fly, scale } from 'svelte/transition';
@@ -401,8 +402,16 @@
 		if (notice) untrack(() => toast(notice.text, 'bad'));
 	});
 
+	let hoveredCard = $state<CardId | null>(null);
+	setContext('card-hover', (card: CardId | null) => {
+		hoveredCard = card;
+	});
+	const hoveredTargets = $derived(
+		hoveredCard ? cardTargets(world, snap.phase, hoveredCard) : { cities: [], seats: [] },
+	);
+
 	const boardView = $derived.by((): BoardView => {
-		const targets = new Set((targeting?.cities ?? cityOptions).keys());
+		const targets = new Set(hoveredCard ? hoveredTargets.cities : (targeting?.cities ?? cityOptions).keys());
 		const showOdds = playing && info !== null;
 		const cities = Object.fromEntries(
 			pack.cities.map((city): [CityId, CityView] => {
@@ -519,6 +528,7 @@
 				{#key seat}
 					<div class="seated" in:fly={{ x: place === 'tl' || place === 'bl' ? -32 : 32, duration: 360, delay: 120 }}>
 						<Corner
+							highlighted={hoveredTargets.seats.includes(seat)}
 							{seat}
 							{place}
 							{world}
@@ -540,6 +550,8 @@
 
 <div
 	class="game"
+	data-card-cities={hoveredTargets.cities.join(' ')}
+	data-card-seats={hoveredTargets.seats.join(' ')}
 	{@attach feedback('Game', () => ({
 		phase: snap.phase,
 		turn: game?.turn,

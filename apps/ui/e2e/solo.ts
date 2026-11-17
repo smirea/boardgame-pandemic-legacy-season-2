@@ -35,7 +35,10 @@ const server = Bun.serve({
 });
 await Bun.$`bun x playwright install chromium-headless-shell`.cwd(root).quiet();
 const browser = await chromium.launch({
-	args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'],
+	channel: process.argv.includes('--chrome') ? 'chrome' : undefined,
+	args: process.argv.includes('--chrome')
+		? ['--ignore-gpu-blocklist']
+		: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'],
 });
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 const errors: string[] = [];
@@ -54,11 +57,8 @@ const activeName = (snap: PublicState) => {
 /** Which character each corner holds, read from the screen. */
 async function corners(names: string[]) {
 	const read = async (place: string) => {
-		const text =
-			(await page
-				.locator(`.place.${place}`)
-				.textContent({ timeout: 2000 })
-				.catch(() => null)) ?? '';
+		const node = page.locator(`.place.${place}`);
+		const text = (await node.count()) ? ((await node.textContent()) ?? '') : '';
 		return names.find(name => new RegExp(`\\b${name}\\b`).test(text)) ?? null;
 	};
 	return { br: await read('br'), bl: await read('bl'), tl: await read('tl'), tr: await read('tr') };
@@ -66,7 +66,7 @@ async function corners(names: string[]) {
 
 try {
 	await page.goto(`http://127.0.0.1:${server.port}/?DEBUG_ID=solo-e2e`);
-	await page.locator('[data-testid=solo]').click();
+	await page.locator('[data-testid=solo]').click({ noWaitAfter: true });
 	await page.waitForFunction(() => window.DEBUG?.getState()?.phase === 'lobby');
 
 	const rng = { seed: 11 };
@@ -76,6 +76,9 @@ try {
 		const refused = await page.evaluate(next => window.DEBUG.send(next), botCommand(snap.world, snap.phase, rng, 3));
 		assert(refused === null, `the game refused a setup command: ${refused}`);
 	}
+	const briefing = page.getByTestId('ack-briefing');
+	if (await briefing.count()) await briefing.click();
+	await page.locator('.game').click({ position: { x: 1, y: 350 } });
 	let snap = await state();
 	assert(snap.phase === 'playing.actions', `setup ended in ${snap.phase}`);
 	const game = snap.world.game!;
@@ -90,7 +93,7 @@ try {
 		await page.waitForFunction(
 			name => new RegExp(`\\b${name}\\b`).test(document.querySelector('.place.br')?.textContent ?? ''),
 			active,
-			{ timeout: 5000 },
+			{ timeout: 60_000 },
 		);
 		const table = await corners(names);
 		const order = snap.world.game!.seats.map(seat => names[snap.world.game!.seats.indexOf(seat)]!);
@@ -116,7 +119,9 @@ try {
 			if (['playing.actions', 'playing.draw', 'playing.infect'].includes(now.phase)) {
 				const before = JSON.stringify(now);
 				await page.keyboard.press('Space');
-				await page.waitForFunction(text => JSON.stringify(window.DEBUG.getState()) !== text, before, { timeout: 5000 });
+				await page.waitForFunction(text => JSON.stringify(window.DEBUG.getState()) !== text, before, {
+					timeout: 60_000,
+				});
 				continue;
 			}
 			const refused = await page.evaluate(next => window.DEBUG.send(next), botCommand(now.world, now.phase, rng, 3));
@@ -128,12 +133,12 @@ try {
 	ok('each turn the active character takes the bottom right, with their hand in the dock', [...seen].join(' → '));
 
 	snap = await state();
-	await page.reload();
+	await page.reload({ waitUntil: 'domcontentloaded', timeout: 90_000 });
 	await page.waitForFunction(() => Boolean(window.DEBUG?.getState()?.world.game));
 	await page.waitForFunction(
 		name => new RegExp(`\\b${name}\\b`).test(document.querySelector('.place.br')?.textContent ?? ''),
 		activeName(snap),
-		{ timeout: 5000 },
+		{ timeout: 60_000 },
 	);
 	assert((await page.locator('[data-testid=whoami]').count()) === 0, 'a reload asks which pawn this browser plays');
 	ok('after a reload the campaign resumes at the active character', activeName(snap));

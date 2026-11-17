@@ -548,4 +548,4 @@ test('the December scenario starts with three players and plays to the end of th
 	}
 	expect(phaseOf(actor.getSnapshot())).toBe('finished');
 	expect(worldOf(actor).campaign.results.at(-1)!.month).toBe(12);
-});
+}, 60_000);

@@ -29,6 +29,7 @@ export default defineConfig({
 		exclude: ['@tanstack/svelte-query'],
 	},
 	server: {
+		watch: { ignored: ['**/build/**'] },
 		allowedHosts: [uiHost],
 		port: env.UI_PORT,
 		strictPort: true,

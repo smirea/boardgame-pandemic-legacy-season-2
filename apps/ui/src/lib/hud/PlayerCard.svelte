@@ -11,9 +11,13 @@
 </script>
 
 <script lang="ts">
+	import { getContext } from 'svelte';
+	import type { CardId } from '@repo/game';
 	import { pack } from '@repo/game';
 	import MapArt from '#lib/cards/MapArt.svelte';
 	import { inkOn } from '#lib/color.ts';
+
+	const hoverCard = getContext<((card: CardId | null) => void) | undefined>('card-hover');
 
 	type Props = { card: PlayerCard; onclick?: () => void; tone?: 'play' | 'discard' | null; small?: boolean };
 
@@ -67,6 +71,10 @@
 
 <button
 	class="card {card.kind}"
+	onmouseenter={() => hoverCard?.(card.id)}
+	onmouseleave={() => hoverCard?.(null)}
+	onfocus={() => hoverCard?.(card.id)}
+	onblur={() => hoverCard?.(null)}
 	class:small
 	class:play={tone === 'play'}
 	class:discard={tone === 'discard'}
