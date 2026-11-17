@@ -28,11 +28,26 @@ function distanceToLeg(point: Point, [a, b]: readonly [Point, Point]) {
 
 const sameEnd = (p: Point, q: Point) => Math.hypot(p.x - q.x, p.z - q.z) < 1e-6;
 
-/** Whether two courses cross away from a location they share. */
+/** Where two segments cross, or null when they do not. */
+function crossing(a: Point, b: Point, c: Point, d: Point): Point | null {
+	if (!segmentsCross(a, b, c, d)) return null;
+	const denominator = (b.x - a.x) * (d.z - c.z) - (b.z - a.z) * (d.x - c.x);
+	const t = ((c.x - a.x) * (d.z - c.z) - (c.z - a.z) * (d.x - c.x)) / denominator;
+	return { x: a.x + (b.x - a.x) * t, z: a.z + (b.z - a.z) * t };
+}
+
+/** The board draws a line from the rim of its location's disc (`CITY_RADIUS` in `board/routes.ts`), so lines leaving the same location meet unseen within it. */
+const AT_SHARED_END = 1.9;
+
+/** Whether two courses cross anywhere but at a location they share. */
 export function coursesCross(one: Point[], other: Point[]) {
-	const ends = [one[0]!, one.at(-1)!];
-	if (ends.some(end => sameEnd(end, other[0]!) || sameEnd(end, other.at(-1)!))) return false;
-	return legs(one).some(([a, b]) => legs(other).some(([c, d]) => segmentsCross(a, b, c, d)));
+	const shared = [one[0]!, one.at(-1)!].filter(end => sameEnd(end, other[0]!) || sameEnd(end, other.at(-1)!));
+	return legs(one).some(([a, b]) =>
+		legs(other).some(([c, d]) => {
+			const at = crossing(a, b, c, d);
+			return at !== null && shared.every(end => Math.hypot(at.x - end.x, at.z - end.z) >= AT_SHARED_END);
+		}),
+	);
 }
 
 /** Whether one course runs alongside the other for a stretch, away from the ends of both. */

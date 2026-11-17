@@ -211,41 +211,59 @@ for (const edge of [...startingEdges, ...documentedEdges]) {
 	}
 }
 
+/** A course as the generated file stores it: from the lesser id's end, simplified and rounded. */
+function written(key: string, path: Point[]): Point[] {
+	const first = positions[key.split(':')[1]!.split('~')[0] as keyof typeof positions];
+	const forward = Math.hypot(path[0]!.x - first.x, path[0]!.z - first.z) < 1e-6;
+	const round = (value: number) => Math.round(value * 100) / 100;
+	return simplify(forward ? path : path.toReversed(), 0.02).map(point => ({ x: round(point.x), z: round(point.z) }));
+}
+
 // How many of a starting lane's courses, best first, the layout weighs before it gives up on the lane.
 const STARTING_OPTIONS = 60;
 
 /**
- * The starting lanes are printed on the board together, so they are laid out together, the lane with the
- * fewest courses first: each takes its best course that keeps to ground revealed at the start and
- * neither crosses, runs alongside, nor runs over a port of the lanes already laid.
+ * The starting lanes are printed on the board together, so they are laid out together: each takes the
+ * best course it can that keeps to ground revealed at the start and neither crosses, runs alongside, nor
+ * runs over a port of another.
  */
 function layStartingLanes() {
-	const order = (edge: (typeof startingEdges)[number]) => {
+	const ends = (edge: (typeof startingEdges)[number]) => {
 		const [a, b] = [edge.a, edge.b].map(id => cities.findIndex(city => city.id === id)) as [number, number];
 		return a < b ? [cities[a]!, cities[b]!] : [cities[b]!, cities[a]!];
 	};
 	const ports = [...new Set(startingEdges.flatMap(edge => [edge.a, edge.b]))].map(id => positions[id]);
 	const lanes = startingEdges.map(edge => {
-		const [a, b] = order(edge);
+		const [a, b] = ends(edge);
+		const key = routeKey('sea', a.id, b.id);
+		// Laid out as the file stores them, so lanes that only just miss here cannot touch once simplified.
 		const options: Point[][] = [];
 		for (const course of seaCourses(positions[a.id], positions[b.id], arches(a.id, b.id, SEA_BOW), revealedAtStart)) {
-			if (!ports.some(port => runsOver(course, port))) options.push(course);
+			const stored = written(key, course);
+			if (!ports.some(port => runsOver(stored, port))) options.push(stored);
 			if (options.length === STARTING_OPTIONS) break;
 		}
 		if (!options.length) throw new Error(`no water revealed at the start joins ${a.id} and ${b.id}`);
-		return { key: routeKey('sea', a.id, b.id), name: `${a.id}-${b.id}`, options };
+		return { key, options };
 	});
-	const laid = new Map<string, Point[]>();
-	for (const lane of lanes.toSorted((x, y) => x.options.length - y.options.length)) {
-		const course = lane.options.find(option =>
-			[...laid.values()].every(
-				other => !coursesCross(option, other) && !runAlongside(option, other) && !runAlongside(other, option),
-			),
-		);
-		if (!course) throw new Error(`the starting lane ${lane.name} cannot be laid clear of the others`);
-		laid.set(lane.key, course);
-	}
-	return laid;
+	const order = lanes.toSorted((x, y) => x.options.length - y.options.length);
+	const clear = (course: Point[], other: Point[]) =>
+		!coursesCross(course, other) && !runAlongside(course, other) && !runAlongside(other, course);
+	const chosen: Point[][] = [];
+	// Depth first: each lane takes its best option clear of those already laid, and a lane with none sends
+	// the search back to try the previous lane's next option.
+	const lay = (index: number): boolean => {
+		if (index === order.length) return true;
+		for (const option of order[index]!.options) {
+			if (!chosen.every(other => clear(option, other))) continue;
+			chosen.push(option);
+			if (lay(index + 1)) return true;
+			chosen.pop();
+		}
+		return false;
+	};
+	if (!lay(0)) throw new Error('the starting lanes cannot be laid clear of each other');
+	return new Map(order.map((lane, index) => [lane.key, chosen[index]!]));
 }
 const startingCourses = layStartingLanes();
 
@@ -323,13 +341,7 @@ export const routeCourses: Record<string, [number, number][]> = ${JSON.stringify
 	Object.fromEntries(
 		[...courses]
 			.sort(([x], [y]) => x.localeCompare(y))
-			.map(([key, path]) => {
-				const first = positions[key.split(':')[1]!.split('~')[0] as keyof typeof positions];
-				const forward = Math.hypot(path[0]!.x - first.x, path[0]!.z - first.z) < 1e-6;
-				const round = (value: number) => Math.round(value * 100) / 100;
-				const course = simplify(forward ? path : path.toReversed(), 0.02);
-				return [key, course.map(point => [round(point.x), round(point.z)])];
-			}),
+			.map(([key, path]) => [key, written(key, path).map(point => [point.x, point.z])]),
 	),
 )};
 `;
