@@ -41,6 +41,8 @@ const browser = await chromium.launch({
 		: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'],
 });
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+// The board renders WebGL in software here, so a busy machine can take far longer than Playwright's 30 s default.
+page.setDefaultTimeout(90_000);
 const errors: string[] = [];
 page.on('pageerror', error => errors.push(error.message));
 const shot = async (name: string) => {
@@ -85,6 +87,28 @@ try {
 	const names = game.seats.map(seat => snap.world.campaign.characters[game.players[seat]!.character]!.name);
 	assert(names.length === 3, `${names.length} characters at the table`);
 	ok('one browser seats three characters', names.join(', '));
+
+	assert(
+		!(await page.locator('header.bar').textContent())?.includes('Stockpile'),
+		'the top bar still counts the stockpile',
+	);
+	const pile = page.locator('[data-stockpile]');
+	assert(
+		Number(await pile.getAttribute('data-stockpile')) === game.stockpile,
+		"the stockpile on the board does not hold the game's count",
+	);
+	// The camera glides to the fitted view as the panels settle, and the board only notices a pointer that moves,
+	// so the pointer follows the pile until the board reports it under the pointer.
+	const hint = page.locator('[data-testid=board-hint]');
+	let pileHint: string | null = null;
+	for (let tries = 0; tries < 60 && !pileHint?.includes('Stockpile'); tries++) {
+		const box = (await pile.boundingBox())!;
+		await page.mouse.move(box.x + box.width / 2 + (tries % 2), box.y + box.height / 2, { steps: 2 });
+		pileHint = await hint.textContent({ timeout: 1000 }).catch(() => null);
+	}
+	assert(pileHint?.includes(`Supply cubes left ${game.stockpile}`), `the stockpile's hover says ${pileHint}`);
+	await page.mouse.move(5, 450);
+	ok('the stockpile stands on the board and its hover gives the count', String(game.stockpile));
 
 	const seen = new Set<string>();
 	for (let turn = 0; turn < 5; turn++) {

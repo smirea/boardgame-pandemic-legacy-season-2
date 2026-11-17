@@ -2,7 +2,7 @@
 import { describe, expect, test } from 'bun:test';
 import { pack, routeCourse } from '@repo/game';
 import type { CityId, EdgeDef, SeatId } from '@repo/game';
-import { travelOf } from './travel.ts';
+import { follows, travelOf } from './travel.ts';
 
 const city = (id: string) => id as CityId;
 const edge = (a: string, b: string, kind: 'land' | 'sea'): EdgeDef => ({ a: city(a), b: city(b), kind });
@@ -46,4 +46,14 @@ describe('the vehicle a pawn travels in', () => {
 		for (const by of ['shuttle', 'airlift', 'run', 'administrator'])
 			expect(travelOf(move('washington', 'istanbul', by), edges)).toEqual({ travel: 'air', course: null });
 	});
+});
+
+test('a pawn follows its course from any slot, even far off the centre of a crowded city', () => {
+	const course = routeCourse(city('lagos'), city('haven-south-atlantic'), 'sea');
+	const lagos = pack.positions[city('lagos')]!;
+	const haven = pack.positions[city('haven-south-atlantic')]!;
+	expect(follows(course, lagos, haven)).toBe(true);
+	expect(follows(course, haven, lagos)).toBe(false);
+	expect(follows(course, haven, haven)).toBe(false);
+	expect(follows(null, lagos, haven)).toBe(false);
 });

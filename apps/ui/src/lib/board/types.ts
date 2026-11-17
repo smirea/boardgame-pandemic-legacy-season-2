@@ -34,6 +34,10 @@ export type PawnView = {
 	color: string;
 	name: string;
 	active: boolean;
+	/** Picked out on the board, as while the pointer rests on the player's seat. */
+	lit: boolean;
+	/** Supply cubes the character carries. */
+	carried: number;
 	travel: Travel;
 	/** The way the last move went over the board, city to city, when it kept to a road or the sea. */
 	course: BoardPoint[] | null;
@@ -68,6 +72,8 @@ export type BoardView = {
 	/** Candidate lines shown faintly while the player picks where to build one. */
 	ghostEdges: EdgeDef[];
 	pawns: PawnView[];
+	/** Supply cubes left in the stockpile, while a game is played. */
+	stockpile: number | null;
 	cursors: CursorView[];
 	fx: Fx[];
 	marks?: BoardMarks;

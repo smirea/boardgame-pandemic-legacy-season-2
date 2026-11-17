@@ -19,7 +19,6 @@
 	import InfectionCard from '#lib/cards/InfectionCard.svelte';
 	import { deal } from './deal.ts';
 	import PlayerCard from './PlayerCard.svelte';
-	import SupplyTray from './SupplyTray.svelte';
 
 	type Props = {
 		snap: PublicState;
@@ -193,7 +192,12 @@
 	<footer class="dock">
 		{#if snap.phase === 'setup.supply'}
 			<div class="setup">
-				<SupplyTray {game} />
+				<div
+					title="Click a city to place a cube from the stockpile, right-click to take it back."
+					data-testid="supply-left"
+				>
+					<strong>{game.stockpile}</strong> cube{game.stockpile === 1 ? '' : 's'} left to place
+				</div>
 				{#if freeAbilities.length}
 					<details class="free" data-testid="free-abilities">
 						<summary>

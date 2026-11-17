@@ -91,3 +91,13 @@ export function partHint(part: Part, city: CityView): HintText {
 		notes: [part.permanent ? 'Printed on the board, it stands in every game.' : 'Removed when this game ends.'],
 	};
 }
+
+/** The pile of supply cubes not yet on the board. */
+export function stockpileHint(count: number): HintText {
+	return {
+		title: 'Stockpile',
+		marks: ['supplies'],
+		rows: [{ label: 'Supply cubes left', value: String(count), tone: count === 0 ? 'bad' : null }],
+		notes: ['Cubes placed on cities or taken by players come from here, and cubes removed come back.'],
+	};
+}

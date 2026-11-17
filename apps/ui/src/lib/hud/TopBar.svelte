@@ -102,11 +102,6 @@
 						>
 					</div>
 				{/if}
-
-				<div class="stat" title="Supply cubes left in the stockpile">
-					<span class="caption">Stockpile</span>
-					{#key game.stockpile}<strong in:fly={{ y: -10, duration: 280 }}>{game.stockpile}</strong>{/key}
-				</div>
 			{/if}
 		</div>
 		{#if deckTip !== null && info}
