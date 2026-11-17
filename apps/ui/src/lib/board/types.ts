@@ -1,4 +1,4 @@
-import type { CityId, EdgeDef, PlayerCardsAt, StructureKind } from '@repo/game';
+import type { CityId, Color, EdgeDef, PlayerCardsAt, StructureKind } from '@repo/game';
 import type { BoardPoint } from './projection';
 
 export type CityHighlight = 'target' | 'selected' | null;
@@ -66,6 +66,24 @@ export type BoardMarks = {
 	flags: { id: string; city: CityId; text: string; tone: MarkTone }[];
 };
 
+/**
+ * A recon route printed beside its city, pointing into the region it reveals. `ready` when this browser's player can
+ * take it now, `blocked` with the engine's reason when they cannot, `idle` when nobody here acts (a replay).
+ */
+export type ReconBoxView = {
+	route: string;
+	city: CityId;
+	cityName: string;
+	name: string;
+	color: Color;
+	count: number;
+	unique: boolean;
+	needsCenter: boolean;
+	reveals: CityId[];
+	state: 'ready' | 'blocked' | 'idle';
+	reason: string | null;
+};
+
 export type BoardView = {
 	cities: Record<CityId, CityView>;
 	edges: EdgeDef[];
@@ -74,6 +92,7 @@ export type BoardView = {
 	pawns: PawnView[];
 	/** Supply cubes left in the stockpile, while a game is played. */
 	stockpile: number | null;
+	recon: ReconBoxView[];
 	cursors: CursorView[];
 	fx: Fx[];
 	marks?: BoardMarks;

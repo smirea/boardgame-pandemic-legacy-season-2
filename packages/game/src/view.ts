@@ -1,8 +1,11 @@
 import { pack } from './content/pack';
 import { cityDef, grid, isForsaken } from './helpers';
 import type { CardId, CityId } from './ids';
+import type { Action } from './actions';
+import type { ReconRoute } from './content/types';
 import type { GameSnapshot, Phase } from './machine';
-import { phaseOf } from './machine';
+import { phaseOf, reject } from './machine';
+import { legalActions } from './options';
 import { drawOdds, drawsUntilEpidemicCertain, epidemicOdds, expectedDraws } from './odds';
 import type { PlayerCard, World } from './state';
 import type { Color } from './content/types';
@@ -151,3 +154,51 @@ export function insights(world: World): Insights | null {
 }
 
 export const onGrid = (world: World): CityId[] => [...grid(world.campaign)];
+
+/** A recon route still to be taken, as the board prints it beside its city. */
+export type ReconBox = {
+	route: ReconRoute;
+	/** The region the recon reveals, or the package's name when it reveals none. */
+	name: string;
+	/** The locations it reveals, so the box can point at them. */
+	reveals: CityId[];
+	/** Every legal recon of this route for the active player, one per payment. Empty when it cannot be taken now. */
+	actions: Extract<Action, { a: 'recon' }>[];
+	/** Why it cannot be taken now, from the engine, or null when it can. */
+	reason: string | null;
+};
+
+/** Each recon route the players know and have not yet taken, at a city they can see. */
+export function reconBoxes(world: World, phase: Phase): ReconBox[] {
+	const { campaign, game } = world;
+	if (!game) return [];
+	const here = game.players[game.active]!.location;
+	// Listing every legal action is costly, and a route can only be taken from its own city.
+	const legal =
+		phase === 'playing.actions' && pack.reconRoutes.some(route => route.city === here)
+			? legalActions(world, game.active)
+			: [];
+	return pack.reconRoutes.flatMap(route => {
+		const bundle = pack.bundles.find(entry => entry.id === route.opens)!;
+		if (!campaign.routes.includes(route.id) || campaign.opened.includes(route.opens)) return [];
+		if (!campaign.locations[route.city]?.revealed) return [];
+		const regions = bundle.unlocks.flatMap(unlock => (unlock.t === 'region' ? [unlock.region] : []));
+		const havens = new Set(bundle.unlocks.flatMap(unlock => (unlock.t === 'haven' ? [unlock.city] : [])));
+		const actions = legal.filter(
+			(action): action is ReconBox['actions'][number] => action.a === 'recon' && action.route === route.id,
+		);
+		const probe: Action = { a: 'recon', route: route.id, cards: [] };
+		return [
+			{
+				route,
+				name: regions.length ? pack.regions.find(region => region.id === regions[0])!.name : bundle.name,
+				reveals: pack.cities
+					.filter(city => (regions.includes(city.region) && !city.lost) || havens.has(city.id))
+					.filter(city => !campaign.locations[city.id]?.revealed)
+					.map(city => city.id),
+				actions,
+				reason: actions.length ? null : reject(world, phase, { type: 'ACTION', seat: game.active, action: probe }),
+			},
+		];
+	});
+}

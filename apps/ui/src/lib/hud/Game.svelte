@@ -9,6 +9,7 @@
 		legalPlays,
 		onGrid,
 		pack,
+		reconBoxes,
 		reject,
 		scenarios,
 	} from '@repo/game';
@@ -210,6 +211,15 @@
 	function choose(title: string, options: Option[]) {
 		if (options.length === 1) options[0]!.run();
 		else if (options.length > 1) chooser = { title, options };
+	}
+
+	const recons = $derived(reconBoxes(world, snap.phase));
+	/** Takes a recon route from its box on the board, asking how to pay when there is more than one way. */
+	function clickRecon(route: string) {
+		const box = recons.find(entry => entry.route.id === route);
+		if (!box || !canAct) return;
+		targeting = null;
+		choose(`Recon ${box.name}`, box.actions.map(actionOption));
 	}
 
 	function clickCity(city: CityId) {
@@ -461,6 +471,24 @@
 			cities,
 			edges: campaign.edges,
 			ghostEdges,
+			recon: recons.map(box => ({
+				route: box.route.id,
+				city: box.route.city,
+				cityName: cityName(box.route.city),
+				name: box.name,
+				color: box.route.color,
+				count: box.route.count,
+				unique: box.route.unique,
+				needsCenter: box.route.needsCenter,
+				reveals: box.reveals,
+				...(spectator
+					? { state: 'idle' as const, reason: null }
+					: !canAct
+						? { state: 'blocked' as const, reason: 'Not your turn' }
+						: box.reason
+							? { state: 'blocked' as const, reason: box.reason }
+							: { state: 'ready' as const, reason: null }),
+			})),
 			pawns: (game?.seats ?? []).map((seat, index) => ({
 				id: seat,
 				city: game!.players[seat]!.location,
@@ -586,6 +614,7 @@
 		<Board
 			view={boardView}
 			oncity={clickCity}
+			onrecon={clickRecon}
 			oncityback={takeBack}
 			onpointer={point => session.pointer(point)}
 			{resetView}

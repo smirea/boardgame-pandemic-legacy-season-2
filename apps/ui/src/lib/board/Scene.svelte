@@ -25,6 +25,9 @@
 	import { fonts, nameWidth } from './print.svelte';
 	import type { BoardBounds, BoardPoint } from './projection';
 	import Pulse from './Pulse.svelte';
+	import ReconBox from './ReconBox.svelte';
+	import { placeReconBoxes } from './reconLayout';
+	import type { ReconRect } from './reconLayout';
 	import RemoteCursor from './RemoteCursor.svelte';
 	import Ring from './Ring.svelte';
 	import RouteTube from './RouteTube.svelte';
@@ -33,11 +36,13 @@
 	import { PILE, STOCKPILE, STOCKPILE_REACH, supplyMoves } from './stockpile';
 	import type { Holder, SupplySnapshot } from './stockpile';
 	import Trail from './Trail.svelte';
-	import type { BoardView } from './types';
+	import type { BoardView, ReconBoxView } from './types';
 
 	type Props = {
 		view: BoardView;
 		oncity?: (city: CityId) => void;
+		/** A click on a recon route's box. */
+		onrecon?: (route: string) => void;
 		onpointer?: (point: BoardPoint | null) => void;
 		/** Bump to return the camera to the fitted view of everything explored. */
 		resetView?: number;
@@ -58,6 +63,7 @@
 		onpointer,
 		onhint,
 		hoverCity = null,
+		onrecon,
 		onstockpile,
 		hoverStockpile = false,
 		resetView = 0,
@@ -67,6 +73,13 @@
 	interactivity();
 
 	const FOV = 30;
+	const middleOf = (cities: CityId[]) =>
+		cities.length
+			? {
+					x: cities.reduce((sum, city) => sum + pack.positions[city]!.x, 0) / cities.length,
+					z: cities.reduce((sum, city) => sum + pack.positions[city]!.z, 0) / cities.length,
+				}
+			: null;
 	const { size, renderer, invalidate } = useThrelte();
 	const layout = pack.positions;
 	const BLANK = '#d2c3a1';
@@ -150,17 +163,33 @@
 	const visibleCities = $derived(pack.cities.filter(city => view.cities[city.id]!.revealed));
 	// A string, so the fitted view is worked out again only when the set of revealed cities changes.
 	const revealedKey = $derived(visibleCities.map(city => city.id).join());
-	// The fitted view frames what has been explored, and the stockpile while a game is played. Before anything
-	// is explored, it frames every location.
+	// The fitted view frames what has been explored, the recon boxes reaching out of it, and the stockpile while a
+	// game is played. Before anything is explored, it frames every location.
 	const showStockpile = $derived(view.stockpile !== null);
-	const explored: BoardBounds = $derived.by(() => {
+	const reach = (points: BoardPoint[], margin: number): BoardBounds => ({
+		minX: Math.min(...points.map(point => point.x)) - margin,
+		maxX: Math.max(...points.map(point => point.x)) + margin,
+		minZ: Math.min(...points.map(point => point.z)) - margin,
+		maxZ: Math.max(...points.map(point => point.z)) + margin,
+	});
+	const citiesBounds: BoardBounds = $derived.by(() => {
 		const ids = revealedKey ? (revealedKey.split(',') as CityId[]) : pack.cities.map(city => city.id);
-		const points = ids.map(id => layout[id]!);
+		return reach(
+			ids.map(id => layout[id]!),
+			MARKER_REACH,
+		);
+	});
+	const explored: BoardBounds = $derived.by(() => {
+		const corners = [...boxLayout.rects.values()].flatMap(rect => [
+			{ x: rect.x - rect.width / 2, z: rect.z - rect.depth / 2 },
+			{ x: rect.x + rect.width / 2, z: rect.z + rect.depth / 2 },
+		]);
+		const boxes = corners.length ? reach(corners, 1) : citiesBounds;
 		const frame = {
-			minX: Math.min(...points.map(point => point.x)) - MARKER_REACH,
-			maxX: Math.max(...points.map(point => point.x)) + MARKER_REACH,
-			minZ: Math.min(...points.map(point => point.z)) - MARKER_REACH,
-			maxZ: Math.max(...points.map(point => point.z)) + MARKER_REACH,
+			minX: Math.min(citiesBounds.minX, boxes.minX),
+			maxX: Math.max(citiesBounds.maxX, boxes.maxX),
+			minZ: Math.min(citiesBounds.minZ, boxes.minZ),
+			maxZ: Math.max(citiesBounds.maxZ, boxes.maxZ),
 		};
 		if (!showStockpile) return frame;
 		return {
@@ -236,6 +265,7 @@
 		camera.position.lerpVectors(path.from, path.to, t);
 		controls.target.lerpVectors(path.fromTarget, path.toTarget, t);
 		controls.update();
+		trackZoom();
 		invalidate();
 	});
 
@@ -260,6 +290,61 @@
 		for (const flag of view.marks?.flags ?? []) map.set(flag.city, [...(map.get(flag.city) ?? []), flag]);
 		return [...map];
 	});
+	// A box stays mounted after its route is taken, so it can fade out with the fog it pointed into.
+	let printedBoxes = $state.raw<ReconBoxView[]>([]);
+	$effect(() => {
+		const known = new Map(untrack(() => printedBoxes).map(box => [box.route, box]));
+		for (const box of view.recon) known.set(box.route, box);
+		printedBoxes = [...known.values()];
+	});
+	const liveRoutes = $derived(new Set(view.recon.map(box => box.route)));
+	// A string, like `revealedKey`, so boxes are placed again only when one comes or goes.
+	const boxKey = $derived(view.recon.map(box => box.route).join());
+	/** A box's size on screen, in pixels, a little generous for a status line that wraps. */
+	const BOX_PX = { width: 205, height: 120 };
+	const boxLayout = $derived.by(() => {
+		void boxKey;
+		void revealedKey;
+		void anchors;
+		void aspect;
+		void showStockpile;
+		return untrack(() => {
+			// A box keeps one size on screen, so its footprint on the board follows the zoom of the fitted view.
+			const zoom = fitBoard(citiesBounds, aspect, FOV, DEFAULT_TILT, { bounds: citiesBounds, ...insets });
+			// The boxes widen the view a little, which makes them a little larger on the board than this.
+			const plannedDistance = zoom.distance * 1.15;
+			const unitsPerPixel = (2 * plannedDistance * Math.tan((FOV * Math.PI) / 360)) / Math.max(1, $size.height);
+			const taken = visibleCities.flatMap(city => {
+				const at = layout[city.id]!;
+				const name = anchors.get(city.id);
+				if (!name) return [at];
+				const half = nameWidth(view.cities[city.id]!.name, city.port, NAME_SIZE) / 2;
+				return [at, ...[-half, 0, half].map(dx => ({ x: at.x + name.x + dx, z: at.z + name.z }))];
+			});
+			if (showStockpile)
+				for (const x of [-STOCKPILE_REACH.x, 0, STOCKPILE_REACH.x])
+					for (const z of [-STOCKPILE_REACH.north, 0, STOCKPILE_REACH.south])
+						taken.push({ x: STOCKPILE.x + x, z: STOCKPILE.z + z });
+			const rects = placeReconBoxes(
+				view.recon.map(box => ({ route: box.route, from: layout[box.city]!, toward: middleOf(box.reveals) })),
+				taken,
+				{ width: BOX_PX.width * unitsPerPixel, depth: BOX_PX.height * unitsPerPixel },
+			);
+			return { rects, plannedDistance };
+		});
+	});
+	// A taken box fades out where it last stood.
+	const lastRects = new Map<string, ReconRect>();
+	$effect(() => {
+		for (const [route, rect] of boxLayout.rects) lastRects.set(route, rect);
+	});
+	// Boxes were placed for the fitted view's zoom. Zoomed out past it, the map shrinks under them, so they shrink with
+	// it and keep to the ground they were placed on. Zoomed in, they keep their size.
+	let cameraDistance = $state(0);
+	const trackZoom = () => {
+		if (camera && controls) cameraDistance = camera.position.distanceTo(controls.target);
+	};
+	const boxScale = $derived(cameraDistance > 0 ? Math.min(1, boxLayout.plannedDistance / cameraDistance) : 1);
 	const pawnSlots = $derived.by(() => {
 		const perCity = new Map<CityId, number>();
 		for (const pawn of view.pawns) perCity.set(pawn.city, (perCity.get(pawn.city) ?? 0) + 1);
@@ -345,6 +430,7 @@
 		onstart={() => (dragging = true)}
 		onend={() => (dragging = false)}
 		onchange={() => {
+			trackZoom();
 			// A plain click on a city also starts a controls gesture. Only a gesture that moves the camera counts.
 			if (dragging) userMoved = true;
 		}}
@@ -408,6 +494,17 @@
 		landing={landing.get(city.id) ?? 0}
 		onselect={() => oncity?.(city.id)}
 		onhint={(part, event) => onhint?.(city.id, part, event, anchors.get(city.id))}
+	/>
+{/each}
+
+{#each printedBoxes as box (box.route)}
+	<ReconBox
+		{box}
+		from={layout[box.city]!}
+		at={boxLayout.rects.get(box.route) ?? lastRects.get(box.route) ?? layout[box.city]!}
+		shown={liveRoutes.has(box.route)}
+		scale={boxScale}
+		onrecon={() => onrecon?.(box.route)}
 	/>
 {/each}
 

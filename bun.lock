@@ -60,7 +60,7 @@
         "world-atlas": "^2.0.2",
       },
       "devDependencies": {
-        "@stefan.inc/feedback-engine": "^1.6.0",
+        "@stefan.inc/feedback-engine": "^1.6.1",
         "@tailwindcss/vite": "^4.3.3",
         "@types/d3-geo": "^3.1.1",
         "@types/three": "^0.187.0",
@@ -418,7 +418,7 @@
 
     "@standard-schema/spec": ["@standard-schema/spec@1.1.0", "", {}, "sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w=="],
 
-    "@stefan.inc/feedback-engine": ["@stefan.inc/feedback-engine@1.6.0", "", { "dependencies": { "dom-accessibility-api": "^0.7.1", "modern-screenshot": "^4.7.0", "oxc-parser": "^0.158.0" }, "peerDependencies": { "svelte": "^5.29.0" } }, "sha512-qkwM9JKWMuzoN34I2xI+AbmNnMWdiWzl6cOKb3liNMYwazpzbhXgMP8b3YsmUusb/Xchg7AjIsbafzDx14e1Vw=="],
+    "@stefan.inc/feedback-engine": ["@stefan.inc/feedback-engine@1.6.1", "", { "dependencies": { "dom-accessibility-api": "^0.7.1", "modern-screenshot": "^4.7.0", "oxc-parser": "^0.158.0" }, "peerDependencies": { "svelte": "^5.29.0" } }, "sha512-G5+oDgTObH+2ehAYPQqFpnaZO+1yhcUhAEJbkyTPBsw7gMocOYo/+4wUtME761JUYpvjwokgepFWTanmK34ZSQ=="],
 
     "@sveltejs/acorn-typescript": ["@sveltejs/acorn-typescript@1.0.13", "", { "peerDependencies": { "acorn": "^8.9.0" } }, "sha512-wgKggnhZVL9Bfx1OaKKTrYY9BFRk6C8UAkQNUcIv1+llzYrIqy+RZm5HPKzn0NpEBvTVhTqB4kQyllZywsRBRQ=="],
 
