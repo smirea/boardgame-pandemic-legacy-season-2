@@ -3,21 +3,24 @@
 	import type { CardId } from '@repo/game';
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { pack } from '@repo/game';
-	import type { SeatId, World } from '@repo/game';
+	import type { PlayerDeckKind, SeatId, World } from '@repo/game';
 	import { inkOn } from '#lib/color.ts';
 	import Bubble from '#lib/replay/Bubble.svelte';
 	import type { SaidNote } from '#lib/replay/replay.svelte.ts';
 	import { flip } from 'svelte/animate';
 	import { cubicIn } from 'svelte/easing';
-	import { fly } from 'svelte/transition';
+	import { fly, scale } from 'svelte/transition';
+	import { CITY_COLOR } from '#lib/board/CityMarker.svelte';
+	import CardIcon from '#lib/cards/CardIcon.svelte';
 	import { deal } from './deal.ts';
+	import { handGroups } from './handGroups.ts';
 	import { cardName } from './labels.svelte.ts';
-	import { cardColor } from './PlayerCard.svelte';
+	import { KIND_COLOR } from './PlayerCard.svelte';
 	import Portrait from './Portrait.svelte';
 	import type { Place } from './seats.ts';
 	import { turnSteps } from './turn.ts';
 
-	const hoverCard = getContext<((card: CardId | null) => void) | undefined>('card-hover');
+	const hoverCard = getContext<((cards: CardId | CardId[] | null) => void) | undefined>('card-hover');
 
 	type Props = {
 		highlighted?: boolean;
@@ -90,6 +93,9 @@
 	});
 
 	const hand = $derived((player?.hand ?? []).flatMap(id => world.campaign.playerCards[id] ?? []));
+	const groups = $derived(handGroups(hand, card => cardName(world, card.id)));
+	const toneColor = (tone: PlayerDeckKind) =>
+		tone in CITY_COLOR ? CITY_COLOR[tone as keyof typeof CITY_COLOR] : KIND_COLOR[tone as keyof typeof KIND_COLOR];
 	// Cards drawn this turn come from the Player deck. Anything else, such as a shared card, settles in where it lands.
 	const drawnThisTurn = $derived.by(() => {
 		const log = game?.log ?? [];
@@ -189,26 +195,43 @@
 
 {#snippet held()}
 	{#if showHand && hand.length}
-		<!-- The hand fans along the card's width, each card showing its name down its visible edge. -->
-		<div class="hand" style:--n={hand.length} data-testid="corner-hand">
-			{#each hand as held (held.id)}
-				{@const label = held.kind === 'epidemic' ? 'Epidemic' : cardName(world, held.id)}
+		<!-- Interchangeable cards stack into one pile, a card with its own state or ability stands alone. -->
+		<div class="hand" style:--n={groups.length} data-testid="corner-hand">
+			{#each groups as group (group.key)}
+				{@const color = toneColor(group.tone)}
+				{@const ids = group.cards.map(card => card.id)}
 				<button
 					class="mini"
-					onmouseenter={() => hoverCard?.(held.id)}
+					onmouseenter={() => hoverCard?.(ids)}
 					onmouseleave={() => hoverCard?.(null)}
-					onfocus={() => hoverCard?.(held.id)}
+					onfocus={() => hoverCard?.(ids)}
 					onblur={() => hoverCard?.(null)}
-					style:--band={cardColor(held)}
-					style:--ink={inkOn(cardColor(held))}
-					title={label}
+					style:--band={color}
+					style:--ink={inkOn(color)}
+					title={group.title}
+					aria-label={group.title}
 					onclick={onselect}
-					data-name={label}
+					data-group={group.key}
+					data-count={group.cards.length}
 					animate:flip={{ duration: 320 }}
-					in:deal={{ drawn: drawnThisTurn.has(held.id) }}
+					in:deal={{ drawn: group.cards.some(card => drawnThisTurn.has(card.id)) }}
 					out:fly={{ y: top ? 16 : -16, duration: 220, easing: cubicIn }}
 				>
-					<span>{label}</span>
+					{#each group.cards.slice(1) as card, index (card.id)}
+						<i
+							class="sheet"
+							style:--depth={Math.min(index + 1, 3)}
+							in:deal={{ drawn: drawnThisTurn.has(card.id) }}
+							out:fly={{ y: top ? 12 : -12, duration: 220, easing: cubicIn }}
+						></i>
+					{/each}
+					<span class="face">
+						{#if group.icon}<CardIcon path={group.icon} size="0.95rem" />{/if}
+						{#if group.mark}<em>{group.mark}</em>{/if}
+						{#if group.cards.length > 1}
+							{#key group.cards.length}<b in:scale={{ start: 1.6, duration: 260 }}>{group.cards.length}</b>{/key}
+						{/if}
+					</span>
 				</button>
 			{/each}
 		</div>
@@ -494,50 +517,84 @@
 		justify-content: flex-end;
 	}
 
+	/* A pile per group: the top card's face, with a sheet peeking above it for each card beneath. */
 	.mini {
 		position: relative;
 		flex: none;
 		width: var(--card);
 		height: 4.3rem;
-		padding: 0.25rem 0 0.25rem 0.18rem;
-		border: 1px solid rgb(20 12 4 / 0.45);
-		border-radius: 3px;
-		background:
-			linear-gradient(90deg, var(--band) 0 0.95rem, color-mix(in srgb, var(--band) 30%, #f1e9d6) 0.95rem), var(--band);
-		box-shadow:
-			-2px 0 4px rgb(20 12 4 / 0.25),
-			0 2px 3px rgb(20 12 4 / 0.3);
+		padding: 0;
+		border: 0;
+		background: none;
 		color: var(--ink);
 		cursor: pointer;
 		transition: translate 160ms ease;
 	}
 
 	.mini + .mini {
-		margin-left: min(0.2rem, calc((100% - var(--n) * var(--card)) / max(1, var(--n) - 1)));
+		margin-left: min(0.3rem, calc((100% - var(--n) * var(--card)) / max(1, var(--n) - 1)));
 	}
 
-	.mini:hover {
+	.mini:hover,
+	.mini:focus-visible {
 		z-index: 2;
 		translate: 0 -0.3rem;
 	}
 
 	.tl .mini:hover,
-	.tr .mini:hover {
+	.tr .mini:hover,
+	.tl .mini:focus-visible,
+	.tr .mini:focus-visible {
 		translate: 0 0.3rem;
 	}
 
-	.mini span {
-		display: block;
-		width: 0.85rem;
-		overflow: hidden;
-		max-height: 100%;
+	.face,
+	.sheet {
+		position: absolute;
+		inset: 0;
+		border: 1px solid rgb(20 12 4 / 0.45);
+		border-radius: 3px;
+	}
+
+	.sheet {
+		background: color-mix(in srgb, var(--band) 78%, #140c06);
+		box-shadow: 0 1px 2px rgb(20 12 4 / 0.3);
+		translate: calc(var(--depth) * 1px) calc(var(--depth) * -3px);
+	}
+
+	.tl .sheet,
+	.tr .sheet {
+		translate: calc(var(--depth) * 1px) calc(var(--depth) * 3px);
+	}
+
+	.face {
+		z-index: 1;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 0.15rem;
+		background:
+			radial-gradient(ellipse at 30% 0%, rgb(255 248 228 / 0.22), transparent 70%),
+			linear-gradient(172deg, var(--band), color-mix(in srgb, var(--band) 80%, #140c06));
+		box-shadow:
+			inset 0 0 0 2px rgb(255 248 228 / 0.14),
+			-2px 0 4px rgb(20 12 4 / 0.25),
+			0 2px 3px rgb(20 12 4 / 0.3);
+	}
+
+	.face b {
 		font-family: var(--font-display);
-		font-size: 0.64rem;
-		line-height: 0.9rem;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-		writing-mode: vertical-rl;
-		rotate: 180deg;
+		font-size: 1.45rem;
+		font-weight: 400;
+		line-height: 1;
+	}
+
+	.face em {
+		font-size: 0.8rem;
+		font-style: normal;
+		font-weight: 700;
+		line-height: 1;
 	}
 
 	.bubbles {

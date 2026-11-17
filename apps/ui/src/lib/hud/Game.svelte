@@ -414,16 +414,21 @@
 		if (notice) untrack(() => toast(notice.text, 'bad'));
 	});
 
-	let hoveredCard = $state<CardId | null>(null);
-	setContext('card-hover', (card: CardId | null) => {
-		hoveredCard = card;
+	// A seat's hand shows interchangeable cards as one pile, so hovering it lights what every card in it reaches.
+	let hoveredCards = $state<CardId[]>([]);
+	setContext('card-hover', (cards: CardId | CardId[] | null) => {
+		hoveredCards = cards === null ? [] : [cards].flat();
 	});
-	const hoveredTargets = $derived(
-		hoveredCard ? cardTargets(world, snap.phase, hoveredCard) : { cities: [], seats: [] },
-	);
+	const hoveredTargets = $derived.by(() => {
+		const targets = hoveredCards.map(card => cardTargets(world, snap.phase, card));
+		return {
+			cities: [...new Set(targets.flatMap(target => target.cities))],
+			seats: [...new Set(targets.flatMap(target => target.seats))],
+		};
+	});
 
 	const boardView = $derived.by((): BoardView => {
-		const targets = new Set(hoveredCard ? hoveredTargets.cities : (targeting?.cities ?? cityOptions).keys());
+		const targets = new Set(hoveredCards.length ? hoveredTargets.cities : (targeting?.cities ?? cityOptions).keys());
 		const showOdds = playing && info !== null;
 		const cities = Object.fromEntries(
 			pack.cities.map((city): [CityId, CityView] => {
