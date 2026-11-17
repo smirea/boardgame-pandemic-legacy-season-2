@@ -898,6 +898,11 @@
 		pointer-events: auto;
 	}
 
+	/* A seat's character sheet opens over the objectives and the targeting line, which share the layer. */
+	.column:has(:global([data-testid='character-sheet'])) {
+		z-index: 32;
+	}
+
 	/* The dock's cards rise 2.6rem over the stage's bottom edge, and the bottom seats sit above them. */
 	.column.docked {
 		bottom: 3.3rem;

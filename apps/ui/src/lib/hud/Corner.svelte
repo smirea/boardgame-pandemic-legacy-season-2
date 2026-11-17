@@ -8,10 +8,11 @@
 	import Bubble from '#lib/replay/Bubble.svelte';
 	import type { SaidNote } from '#lib/replay/replay.svelte.ts';
 	import { flip } from 'svelte/animate';
-	import { cubicIn } from 'svelte/easing';
+	import { cubicIn, cubicOut } from 'svelte/easing';
 	import { fly, scale } from 'svelte/transition';
 	import { CITY_COLOR } from '#lib/board/CityMarker.svelte';
 	import CardIcon from '#lib/cards/CardIcon.svelte';
+	import { SCAR_ICON } from '#lib/cards/icons.ts';
 	import { deal } from './deal.ts';
 	import { handGroups } from './handGroups.ts';
 	import { cardName } from './labels.svelte.ts';
@@ -103,6 +104,8 @@
 		return new Set(since.flatMap(entry => (entry.t === 'draw' && entry.seat === seat ? [entry.card] : [])));
 	});
 	const steps = $derived(active ? turnSteps(world, seat) : []);
+	let reading = $state(false);
+	const TRAIT_KIND = { job: 'Occupation', ability: 'Ability', scar: 'Scar' } as const;
 </script>
 
 <div
@@ -124,7 +127,17 @@
 </div>
 
 {#snippet card()}
-	<div class="seat" style:--seat={color} style:--on={inkOn(color)}>
+	<div
+		class="seat"
+		style:--seat={color}
+		style:--on={inkOn(color)}
+		onpointerenter={() => (reading = true)}
+		onpointerleave={() => (reading = false)}
+		onfocusin={() => (reading = true)}
+		onfocusout={() => (reading = false)}
+		role="group"
+		aria-label={name}
+	>
 		<button
 			class="slip"
 			class:highlighted
@@ -159,9 +172,9 @@
 				{#if player && character}
 					<span class="traits">
 						{#each traits as trait (`${trait.kind}:${trait.name}`)}
-							<span class="trait {trait.kind}" class:struck={trait.struck} title={`${trait.name}: ${trait.text}`}>
-								<b>{trait.name}:</b>
-								{trait.text}
+							<span class="trait {trait.kind}" class:struck={trait.struck}>
+								{#if trait.kind === 'scar'}<CardIcon path={SCAR_ICON} size="0.75rem" />{/if}
+								<b>{trait.name}</b>
 							</span>
 						{/each}
 					</span>
@@ -177,6 +190,25 @@
 				title={claim.mine ? `Stop playing ${name} on this browser` : `Mark ${name} as the character you play`}
 				>{claim.mine ? 'you' : 'claim'}</button
 			>
+		{/if}
+		{#if reading && traits.length}
+			<!-- The whole character card, readable: beside the seat on the side facing the board. -->
+			<div
+				class="sheet-out"
+				data-testid="character-sheet"
+				transition:fly={{ x: right ? 18 : -18, duration: 200, easing: cubicOut }}
+			>
+				{#each traits as trait (`${trait.kind}:${trait.name}`)}
+					<div class="line {trait.kind}" class:struck={trait.struck}>
+						<span class="kind">
+							{#if trait.kind === 'scar'}<CardIcon path={SCAR_ICON} size="0.85rem" />{/if}
+							{TRAIT_KIND[trait.kind]}{trait.struck ? ', covered by a scar' : ''}
+						</span>
+						<b>{trait.name}</b>
+						<p>{trait.text}</p>
+					</div>
+				{/each}
+			</div>
 		{/if}
 		{#if steps.length}
 			<!-- The turn so far, beside the card on the side facing the board. -->
@@ -276,7 +308,6 @@
 
 	/* A character card laid on the table: the portrait down the left, the card's lines beside it. */
 	.slip {
-		--soft: color-mix(in srgb, var(--on) 74%, transparent);
 		display: grid;
 		grid-template-columns: 4.1rem minmax(0, 1fr);
 		width: 100%;
@@ -397,22 +428,23 @@
 	}
 
 	.trait {
-		display: -webkit-box;
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
 		overflow: hidden;
 		padding: 0.05rem 0.3rem;
 		border-left: 2px solid color-mix(in srgb, var(--on) 45%, transparent);
 		background: color-mix(in srgb, var(--on) 10%, transparent);
-		color: var(--soft);
-		font-size: 0.68rem;
-		line-height: 1.3;
-		-webkit-line-clamp: 3;
-		line-clamp: 3;
-		-webkit-box-orient: vertical;
+		font-size: 0.72rem;
+		line-height: 1.35;
+		white-space: nowrap;
 	}
 
 	.trait b {
+		overflow: hidden;
 		color: var(--on);
 		font-weight: 700;
+		text-overflow: ellipsis;
 	}
 
 	.trait.struck b {
@@ -422,6 +454,71 @@
 	.trait.scar {
 		border-left-color: #1d140d;
 		background: rgb(20 10 6 / 0.3);
+	}
+
+	/* Above the turn's steps, which sit on the same side, while the pointer rests on the card. */
+	.sheet-out {
+		position: absolute;
+		top: 0;
+		left: calc(100% + 0.5rem);
+		z-index: 5;
+		display: flex;
+		flex-direction: column;
+		gap: 0.45rem;
+		width: 20rem;
+		max-width: calc(50vw - 100% - 1rem);
+		padding: 0.6rem 0.75rem 0.7rem;
+		border-left: 4px solid var(--seat);
+		border-radius: 3px;
+		background: rgb(240 231 210 / 0.97);
+		box-shadow: var(--slip-shadow);
+		color: var(--slip-ink);
+		pointer-events: none;
+	}
+
+	.tr .sheet-out,
+	.br .sheet-out {
+		right: calc(100% + 0.5rem);
+		left: auto;
+	}
+
+	.bl .sheet-out,
+	.br .sheet-out {
+		top: auto;
+		bottom: 0;
+	}
+
+	.line .kind {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+		color: rgb(42 32 23 / 0.6);
+		font-size: 0.66rem;
+		font-weight: 700;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+	}
+
+	.line.scar .kind {
+		color: #8a2a1c;
+	}
+
+	.line b {
+		display: block;
+		font-family: var(--font-display);
+		font-size: 1.15rem;
+		font-weight: 400;
+		line-height: 1.15;
+	}
+
+	.line.struck b {
+		text-decoration: line-through;
+	}
+
+	.line p {
+		margin: 0.1rem 0 0;
+		font-size: 0.86rem;
+		line-height: 1.35;
 	}
 
 	.claim {

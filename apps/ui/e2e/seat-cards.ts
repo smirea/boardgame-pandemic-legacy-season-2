@@ -101,6 +101,56 @@ try {
 	});
 	if (!cubesFit) throw Error('Carried cubes overlap the name or escape the seat card');
 	await page.screenshot({ path: '/tmp/seat-table.png' });
+	// Seat cards name their abilities; the full text opens beside the card while the pointer rests on it.
+	const scarred = world.campaign.characters[game.players[game.active]!.character]!;
+	const scar = pack.scars.find(s => s.id === (scarred.slots[0] as { id: string }).id)!;
+	const traitTexts = await page.locator('.slip .trait').allInnerTexts();
+	if (traitTexts.some(text => text.includes(':') || text.length > 40)) throw Error(`Traits print text: ${traitTexts}`);
+	if (!(await page.locator('.slip .trait.scar svg').count())) throw Error('A scar has no icon');
+	for (const s of game.seats) {
+		const seatCorner = page.locator(
+			`[data-testid=corner][data-player="${world.campaign.characters[game.players[s]!.character]!.name}"]`,
+		);
+		const portrait = seatCorner.locator('.portrait');
+		if (!(await portrait.count())) continue;
+		await portrait.hover();
+		const sheet = seatCorner.getByTestId('character-sheet');
+		await sheet.waitFor();
+		await page.waitForFunction(el => el && !el.getAnimations().length, await sheet.elementHandle(), {
+			timeout: 90_000,
+		});
+		const placed = await seatCorner.evaluate(corner => {
+			const card = corner.querySelector('.slip')!.getBoundingClientRect();
+			const box = corner.querySelector('[data-testid=character-sheet]')!.getBoundingClientRect();
+			const onRight = card.left > innerWidth / 2;
+			return {
+				beside: onRight ? box.right <= card.left : box.left >= card.right,
+				inside: box.left >= 0 && box.right <= innerWidth && box.top >= 0 && box.bottom <= innerHeight,
+				text: corner.querySelector('[data-testid=character-sheet]')!.textContent ?? '',
+			};
+		});
+		const covered = await seatCorner.getByTestId('character-sheet').evaluate(box => {
+			// The sheet ignores the pointer, so it is made hit-testable just to ask what lies on top of it.
+			(box as HTMLElement).style.pointerEvents = 'auto';
+			const at = box.getBoundingClientRect();
+			const hits = [0.1, 0.5, 0.9].flatMap(x =>
+				[0.1, 0.5, 0.9].flatMap(y => {
+					const hit = document.elementFromPoint(at.left + at.width * x, at.top + at.height * y);
+					return hit && !box.contains(hit) ? [hit.className] : [];
+				}),
+			);
+			(box as HTMLElement).style.pointerEvents = '';
+			return hits;
+		});
+		if (covered.length) throw Error(`Something covers the character sheet: ${covered.join(', ')}`);
+		if (!placed.beside || !placed.inside) throw Error(`Character sheet misplaced: ${JSON.stringify(placed)}`);
+		if (s === game.active && !(placed.text.includes(scar.text) && placed.text.includes(scar.name)))
+			throw Error(`Sheet lacks the scar: ${placed.text}`);
+		await page.screenshot({ path: `/tmp/seat-sheet-${s}.png` });
+	}
+	await page.mouse.move(700, 450);
+	await page.getByTestId('character-sheet').waitFor({ state: 'detached' });
+	console.log('PASS ability names, scar icon, character sheet on hover');
 	const corner = page.locator(
 		`[data-testid=corner][data-player="${world.campaign.characters[game.players[seat]!.character]!.name}"]`,
 	);
