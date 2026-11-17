@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import { createActor } from 'xstate';
 import { botCommand } from './bot';
+import { pack } from './content/pack';
 import { violations } from './invariants';
 import { gameMachine, phaseOf, reject } from './machine';
 
@@ -21,10 +22,19 @@ function playCampaign(seed: number, seats: number) {
 		const after = actor.getSnapshot();
 		stalled = after.context.world === before.context.world ? stalled + 1 : 0;
 		if (stalled > 50) throw new Error(`stalled in ${phaseOf(after)} after ${JSON.stringify(command)}`);
+		const { campaign } = after.context.world;
+		// The calendar in the top bar shows the board's printed count, so the Legacy cards must arrive at the same one.
+		if (
+			after.context.world.game &&
+			phaseOf(after).startsWith('playing') &&
+			campaign.required !== pack.numbers.requiredByMonth[campaign.month]
+		)
+			throw new Error(
+				`month ${campaign.month} requires ${campaign.required}, the board prints ${pack.numbers.requiredByMonth[campaign.month]}`,
+			);
 		const problems = violations(after.context.world, cubeTotals);
 		if (problems.length) throw new Error(`seed ${seed}, after ${JSON.stringify(command)}: ${problems.join('; ')}`);
 		if (++commands > 400_000) {
-			const { campaign } = after.context.world;
 			throw new Error(
 				`campaign did not finish: month ${campaign.month}, ${campaign.results.length} games, phase ${phaseOf(after)}`,
 			);

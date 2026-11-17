@@ -620,11 +620,12 @@
 	.lift {
 		transform: translateY(var(--drop)) rotate(var(--angle));
 		transform-origin: 50% 140%;
-		transition: transform 260ms cubic-bezier(0.2, 0.9, 0.3, 1.2);
+		transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
 	}
 
+	/* A card pointed at rises out of the fan, mostly straightened and large enough to read. */
 	.slot:hover .lift {
-		transform: translateY(-1.6rem) rotate(0deg) scale(1.08);
+		transform: translateY(-0.6rem) rotate(calc(var(--angle) * 0.2)) scale(1.3);
 	}
 
 	.empty,

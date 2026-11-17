@@ -3,7 +3,14 @@
 	import type { PlayerCard } from '@repo/game';
 	import { CITY_COLOR } from '#lib/board/CityMarker.svelte';
 
-	const KIND_COLOR = { event: '#b08628', companion: '#6f5a96', produce: '#8d8476', epidemic: '#a8261c' } as const;
+	export const KIND_COLOR = {
+		event: '#b08628',
+		companion: '#6f5a96',
+		produce: '#8d8476',
+		epidemic: '#a8261c',
+	} as const;
+
+	export const GLYPH = { event: '✦', companion: '☻', produce: '▦', epidemic: '☣' } as const;
 
 	/** The colour a card is known by at a glance: its city's region, or its kind. */
 	export const cardColor = (card: PlayerCard) =>
@@ -18,8 +25,6 @@
 	type Props = { card: PlayerCard; onclick?: () => void; tone?: 'play' | 'discard' | null; small?: boolean };
 
 	let { card, onclick, tone = null, small = false }: Props = $props();
-
-	const GLYPH = { event: '✦', companion: '☻', produce: '▦', epidemic: '☣' } as const;
 
 	const face = $derived.by(() => {
 		switch (card.kind) {

@@ -1,15 +1,17 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
+	import { pack } from '@repo/game';
 	import type { Campaign } from '@repo/game';
 	import { backOut } from 'svelte/easing';
 	import { scale } from 'svelte/transition';
 	import { MONTHS } from './labels.svelte.ts';
 
-	type Slot = 'won' | 'lost' | 'now' | 'open' | 'skipped';
+	type Slot = 'won' | 'lost' | 'now' | 'open';
 
 	let { campaign }: { campaign: Campaign } = $props();
 
-	const ATTEMPTS = ['early', 'late'] as const;
+	const ATTEMPTS = ['Early', 'Late'] as const;
+	const SAID: Record<Slot, string> = { won: 'won', lost: 'lost', now: 'in play', open: '' };
 
 	const months = $derived(
 		MONTHS.slice(1).map((name, index) => {
@@ -17,23 +19,29 @@
 			const slots = ([1, 2] as const).map((attempt): Slot => {
 				const result = campaign.results.find(entry => entry.month === month && entry.attempt === attempt);
 				if (result) return result.won ? 'won' : 'lost';
-				if (month === campaign.month && attempt === campaign.attempt) return 'now';
-				const wonEarly = campaign.results.some(entry => entry.month === month && entry.attempt === 1 && entry.won);
-				return attempt === 2 && wonEarly ? 'skipped' : 'open';
+				return month === campaign.month && attempt === campaign.attempt ? 'now' : 'open';
 			});
-			const said = slots
-				.map((slot, attempt) =>
-					slot === 'won' || slot === 'lost'
-						? `${ATTEMPTS[attempt]} attempt ${slot}`
-						: slot === 'now'
-							? `${ATTEMPTS[attempt]} attempt in play`
-							: '',
-				)
-				.filter(Boolean);
-			return { month, name, slots, title: said.length ? `${name}: ${said.join(', ')}` : name };
+			const required = pack.numbers.requiredByMonth[month] ?? 0;
+			const cubes = pack.numbers.supplyByMonth[month] ?? 0;
+			const attempts = slots.flatMap((slot, attempt) =>
+				slot === 'open' ? [] : [`${ATTEMPTS[attempt]} attempt ${SAID[slot]}`],
+			);
+			return { month, name, slots, required, cubes, attempts };
 		}),
 	);
 </script>
+
+{#snippet mark(slot: Slot, side: 'early' | 'late')}
+	<i class="mark {side} {slot}" data-slot={slot} data-attempt={side}>
+		{#if slot === 'won'}
+			<svg viewBox="0 0 10 10" in:scale={{ duration: 420, easing: backOut }}><path d="M1.8 5.4 4.1 7.7 8.4 2.4" /></svg>
+		{:else if slot === 'lost'}
+			<svg viewBox="0 0 10 10" in:scale={{ duration: 420, easing: backOut }}
+				><path d="M2.6 2.6 7.4 7.4M7.4 2.6 2.6 7.4" /></svg
+			>
+		{/if}
+	</i>
+{/snippet}
 
 <ol
 	class="calendar"
@@ -49,106 +57,122 @@
 			class="month"
 			class:current={entry.month === campaign.month}
 			class:past={entry.month < campaign.month}
-			title={entry.title}
 			data-month={entry.month}
+			aria-label={[
+				entry.name,
+				`${entry.required} objective${entry.required === 1 ? '' : 's'} required`,
+				`${entry.cubes} supply cubes`,
+				...entry.attempts,
+			].join('. ')}
 		>
-			<span class="initial">{entry.name.slice(0, 3)}</span>
-			<span class="slots">
-				{#each entry.slots as slot, attempt (attempt)}
-					<i class={slot} data-slot={slot}>
-						{#if slot === 'won'}
-							<svg viewBox="0 0 10 10" in:scale={{ duration: 420, easing: backOut }}
-								><path d="M2 5.3 4.2 7.5 8 2.8" /></svg
-							>
-						{:else if slot === 'lost'}
-							<svg viewBox="0 0 10 10" in:scale={{ duration: 420, easing: backOut }}
-								><path d="M2.8 2.8 7.2 7.2M7.2 2.8 2.8 7.2" /></svg
-							>
-						{/if}
-					</i>
-				{/each}
+			<span class="line">
+				{@render mark(entry.slots[0]!, 'early')}
+				<span class="name">{entry.name.slice(0, 3)}</span>
+				{@render mark(entry.slots[1]!, 'late')}
 			</span>
+			<span class="goals" data-required={entry.required}>
+				{#each { length: entry.required } as _, index (index)}<i></i>{/each}
+			</span>
+
+			<!-- The month's printed numbers: what the board says before any Legacy card adds to them. -->
+			<div class="tip" role="tooltip" data-testid="calendar-tip">
+				<strong>{entry.name}</strong>
+				<p class="needs">
+					<span class="goals"
+						>{#each { length: entry.required } as _, index (index)}<i></i>{/each}</span
+					>
+					{entry.required} objective{entry.required === 1 ? '' : 's'} required
+				</p>
+				<p>
+					{entry.cubes ? `${entry.cubes} supply cubes at setup` : 'No supply cubes at setup'}
+				</p>
+				{#if entry.cubes}
+					<span class="cubes" data-cubes={entry.cubes}>
+						{#each { length: entry.cubes } as _, index (index)}<i></i>{/each}
+					</span>
+				{/if}
+				{#each entry.attempts as said (said)}<p class="said">{said}</p>{/each}
+			</div>
 		</li>
 	{/each}
 </ol>
 
 <style>
-	/* Like the box's calendar track: every month has an early and a late box, marked as each game ends. */
+	/* Each month carries its own record: the early attempt's mark on the left of its name, the late one's on the right. */
 	.calendar {
 		display: flex;
-		gap: 0.1rem;
+		gap: 0.05rem;
 		margin: 0;
 		padding: 0;
 		list-style: none;
 	}
 
 	.month {
+		position: relative;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 0.12rem;
-		padding: 0.12rem 0.18rem;
+		gap: 0.18rem;
+		padding: 0.2rem 0.1rem 0.22rem;
 		border-radius: 2px;
+		cursor: default;
 		transition: background 300ms ease;
 	}
 
-	.month.current {
-		background: rgb(231 220 198 / 0.12);
+	.month:hover {
+		background: rgb(231 220 198 / 0.07);
 	}
 
-	.initial {
+	.month.current {
+		background: rgb(231 220 198 / 0.14);
+		box-shadow: inset 0 -2px 0 var(--warn);
+	}
+
+	.line {
+		display: flex;
+		align-items: center;
+		gap: 0.08rem;
+	}
+
+	.name {
+		min-width: 1.55rem;
 		color: var(--muted);
-		font-size: 0.62rem;
+		font-size: 0.68rem;
 		letter-spacing: 0.04em;
 		line-height: 1;
+		text-align: center;
 		text-transform: uppercase;
 	}
 
-	.current .initial {
+	.past .name {
+		opacity: 0.75;
+	}
+
+	.current .name {
 		color: var(--ink);
 		font-weight: 700;
 	}
 
-	.slots {
-		display: flex;
-		gap: 0.1rem;
-	}
-
-	.slots i {
+	.mark {
 		display: grid;
 		place-items: center;
-		width: 0.7rem;
-		height: 0.7rem;
-		border: 1px solid var(--line-strong);
-		border-radius: 1px;
-		transition:
-			background 300ms ease,
-			border-color 300ms ease;
+		width: 0.62rem;
+		height: 0.62rem;
 	}
 
-	.slots i.skipped {
-		border-style: dashed;
-		opacity: 0.3;
-	}
-
-	.slots i.won {
-		border-color: var(--good);
-		background: var(--good);
-	}
-
-	.slots i.lost {
-		border-color: var(--danger);
-		background: var(--danger);
-	}
-
-	.slots i.now {
-		border-color: var(--warn);
+	.mark.now::after {
+		content: '';
+		width: 0.32rem;
+		height: 0.32rem;
+		border-radius: 50%;
+		background: var(--warn);
 		animation: due 1.6s ease-in-out infinite;
 	}
 
 	@keyframes due {
 		50% {
-			background: rgb(227 178 60 / 0.45);
+			opacity: 0.25;
+			transform: scale(0.7);
 		}
 	}
 
@@ -156,9 +180,115 @@
 		width: 100%;
 		height: 100%;
 		fill: none;
-		stroke: var(--paper-ink);
-		stroke-width: 1.8;
+		stroke-width: 2;
 		stroke-linecap: round;
 		stroke-linejoin: round;
+	}
+
+	.won svg {
+		stroke: var(--good);
+	}
+
+	.lost svg {
+		stroke: var(--danger);
+	}
+
+	.goals {
+		display: flex;
+		gap: 0.12rem;
+	}
+
+	/* An objective is a small ringed target, the same mark in the bar and in the tip. */
+	.goals i {
+		width: 0.34rem;
+		height: 0.34rem;
+		border: 1px solid var(--muted);
+		border-radius: 50%;
+		background: radial-gradient(circle, var(--muted) 0 0.06rem, transparent 0.07rem);
+	}
+
+	.current .goals i {
+		border-color: var(--ink);
+		background: radial-gradient(circle, var(--ink) 0 0.06rem, transparent 0.07rem);
+	}
+
+	.tip {
+		position: absolute;
+		top: calc(100% + 0.35rem);
+		left: 0;
+		z-index: 5;
+		display: flex;
+		flex-direction: column;
+		gap: 0.2rem;
+		width: max-content;
+		max-width: 11.5rem;
+		padding: 0.4rem 0.6rem 0.5rem;
+		border-radius: 2px;
+		background: var(--slip);
+		box-shadow: var(--slip-shadow);
+		color: var(--slip-ink);
+		font-size: 0.76rem;
+		line-height: 1.3;
+		white-space: normal;
+		opacity: 0;
+		visibility: hidden;
+		translate: 0 -0.25rem;
+		pointer-events: none;
+		transition:
+			opacity 160ms ease,
+			translate 160ms ease,
+			visibility 0s 160ms;
+	}
+
+	.month:hover .tip {
+		opacity: 1;
+		visibility: visible;
+		translate: 0 0;
+		transition:
+			opacity 160ms ease 120ms,
+			translate 160ms ease 120ms,
+			visibility 0s 120ms;
+	}
+
+	.tip strong {
+		font-family: var(--font-display);
+		font-size: 1.05rem;
+		font-weight: 400;
+	}
+
+	.tip p {
+		margin: 0;
+	}
+
+	.tip .needs {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+	}
+
+	.tip .goals i {
+		width: 0.55rem;
+		height: 0.55rem;
+		border-color: var(--slip-ink);
+		background: radial-gradient(circle, var(--slip-ink) 0 0.1rem, transparent 0.11rem);
+	}
+
+	.tip .said {
+		color: var(--slip-muted);
+	}
+
+	/* The setup stockpile as cubes, twelve to a row, drawn like the cubes on the board. */
+	.cubes {
+		display: grid;
+		grid-template-columns: repeat(12, 0.5rem);
+		gap: 0.15rem;
+		padding: 0.15rem 0 0.1rem;
+	}
+
+	.cubes i {
+		width: 0.5rem;
+		height: 0.5rem;
+		border: 1px solid #2a2017;
+		background: #efe6d2;
 	}
 </style>
