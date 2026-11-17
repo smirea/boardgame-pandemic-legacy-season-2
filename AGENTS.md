@@ -29,7 +29,7 @@
 # Environment
 
 - Environment files are managed by `env-manager`. Keep `.env` tracked with harmless defaults and `.env.local` ignored for local values.
-- Edit root `.env.local`, run `bun run env:generate`, and commit the reader exactly as generated. `local:true` avoids AWS calls and automatic Git updates.
+- Values live in env-manager's `dev` environment. Edit root `.env.local`, run `env-manager up`, then `bun run env:generate`, and commit the reader exactly as generated. A fresh checkout gets the values with `env-manager down`.
 - The server reads settings through `apps/server/src/config.ts`, which fails at startup when production lacks a setting.
 
 # Frontend
