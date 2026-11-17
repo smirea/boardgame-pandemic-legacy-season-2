@@ -331,11 +331,13 @@
 		white-space: nowrap;
 	}
 
-	/* Carried cubes stack two high and grow sideways, so any load fits beside the name. */
+	/* Keep even a full reserve of carried cubes beside the name. */
 	.cubes {
-		display: grid;
-		grid-auto-flow: column;
-		grid-template-rows: repeat(2, 0.5rem);
+		display: flex;
+		flex: none;
+		flex-wrap: wrap;
+		justify-content: flex-end;
+		max-width: 3.75rem;
 		gap: 2px;
 		margin-left: auto;
 	}
@@ -355,6 +357,7 @@
 	}
 
 	.cubes i {
+		flex: none;
 		width: 0.5rem;
 		height: 0.5rem;
 		border: 1px solid rgb(20 12 4 / 0.55);

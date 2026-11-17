@@ -30,6 +30,20 @@ world.campaign.characters[game.players[game.active]!.character]!.slots[0] = { ki
 const extra = Math.min(12, game.reserve);
 game.players[game.active]!.supplies += extra;
 game.reserve -= extra;
+if (process.argv.includes('--max-cubes')) {
+	let supplies = game.reserve + game.stockpile;
+	game.reserve = 0;
+	game.stockpile = 0;
+	for (const location of Object.values(game.locations)) {
+		supplies += location.supplies;
+		location.supplies = 0;
+	}
+	for (const player of Object.values(game.players)) {
+		supplies += player.supplies;
+		player.supplies = 0;
+	}
+	game.players[game.active]!.supplies = supplies;
+}
 const browser = await chromium.launch({
 	channel: process.argv.includes('--chrome') ? 'chrome' : undefined,
 	args: process.argv.includes('--chrome')
@@ -57,6 +71,18 @@ try {
 	if (await page.evaluate(() => document.documentElement.scrollHeight > innerHeight)) throw Error('Page scrolls');
 	const briefing = page.getByTestId('ack-briefing');
 	if (await briefing.count()) await briefing.click();
+	const cubesFit = await page.locator('.slip.active').evaluate(card => {
+		const bounds = card.getBoundingClientRect();
+		const name = card.querySelector('strong')!.getBoundingClientRect();
+		return (
+			name.width > 0 &&
+			[...card.querySelectorAll('.cubes i')].every(cube => {
+				const box = cube.getBoundingClientRect();
+				return box.left >= name.right && box.right <= bounds.right && box.bottom <= bounds.bottom;
+			})
+		);
+	});
+	if (!cubesFit) throw Error('Carried cubes overlap the name or escape the seat card');
 	await page.screenshot({ path: '/tmp/seat-table.png' });
 	const corner = page.locator(
 		`[data-testid=corner][data-player="${world.campaign.characters[game.players[seat]!.character]!.name}"]`,
