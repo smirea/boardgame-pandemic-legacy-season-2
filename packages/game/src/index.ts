@@ -3,13 +3,32 @@ export * from './state';
 export * from './content/types';
 export { pack } from './content/pack';
 export type { Action } from './actions';
-export { actionCost, actionIds, checkAction, checkEdge, routeCost } from './actions';
+export {
+	actionCost,
+	actionGate,
+	actionIds,
+	checkAction,
+	checkEdge,
+	hasAction,
+	isFreeAction,
+	routeCost,
+} from './actions';
 export type { Decide, Play } from './plays';
 export type { Purchase } from './legacy';
 export { actionBriefs, newCampaign, productionUnits, purchaseCost, ruleBriefs, score } from './legacy';
 export type { Command, GameActor, GameSnapshot, Phase, Save, Seating } from './machine';
 export { createGameActor, gameMachine, parseSave, phaseOf, reject } from './machine';
-export { cardTargets, legalActions, legalDecides, legalPlays, legalPurchases, payColor, payments } from './options';
+export {
+	actionMenu,
+	cardTargets,
+	legalActions,
+	legalDecides,
+	legalPlays,
+	legalPurchases,
+	payColor,
+	payments,
+} from './options';
+export type { ActionChoice } from './options';
 export { violations } from './invariants';
 export type { Insights, PlayerCardsAt, PlayerDeckKind, PublicState, ReconBox } from './view';
 export { insights, onGrid, publicState, reconBoxes } from './view';

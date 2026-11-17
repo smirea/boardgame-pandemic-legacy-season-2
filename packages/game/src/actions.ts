@@ -826,6 +826,9 @@ export const actionReveals = (action: Action) => specFor(action).reveals ?? fals
 
 export const actionIds = Object.keys(specs) as Action['a'][];
 
+/** Free actions cost nothing from the turn's actions, whatever their details. */
+export const isFreeAction = (id: ActionId) => (specs[id] as unknown as AnySpec).free ?? false;
+
 export function actionCost(world: World, seat: SeatId, action: Action): number {
 	const spec = specFor(action);
 	return spec.free ? 0 : (spec.cost?.(context(world, seat), action) ?? 1);
@@ -833,27 +836,35 @@ export function actionCost(world: World, seat: SeatId, action: Action): number {
 
 const MOVES = new Set<ActionId>(['sail', 'charter', 'captainSail', 'shuttle', 'run']);
 
-/** Null when the action is legal for the active player right now, otherwise the reason it is not. */
-export function checkAction(world: World, seat: SeatId, action: Action): string | null {
+/** Whether the seat's character has this kind of action at all: a job, an ability, or a campaign unlock. */
+export function hasAction(world: World, seat: SeatId, id: ActionId): boolean {
+	const spec = specs[id] as unknown as AnySpec;
+	if (spec.trait) return has(world, seat, spec.trait);
+	if (spec.rule) return hasRule(world.campaign, spec.rule);
+	return world.campaign.actions.includes(id);
+}
+
+/** What stops the seat taking any action of this kind right now, before its details are looked at. */
+export function actionGate(world: World, seat: SeatId, id: ActionId): string | null {
 	const game = world.game;
 	if (!game || game.outcome) return 'No game in progress';
 	if (seat !== game.active) return 'Not your turn';
 	if (game.pending.length || overLimit(world).length) return 'Resolve the pending choice first';
-	const spec = specFor(action);
-	if (!spec) return 'Unknown action';
-	const ctx = context(world, seat);
+	if (!specs[id]) return 'Unknown action';
 	if (characterOf(world, seat).dead) return 'Choose a new character first';
-	const available = spec.trait
-		? trait(ctx, spec.trait)
-		: spec.rule
-			? hasRule(world.campaign, spec.rule)
-			: world.campaign.actions.includes(action.a);
-	if (!available) return 'That action is not available';
-	if (isForsaken(world.campaign, ctx.here) && action.a !== 'drive')
+	if (!hasAction(world, seat, id)) return 'That action is not available';
+	if (isForsaken(world.campaign, player(game, seat).location) && id !== 'drive')
 		return 'Only Drive or Ferry works in a forsaken city';
-	if (characterOf(world, seat).carrier && MOVES.has(action.a)) return 'The carrier moves only by Drive or Ferry';
-	if (actionCost(world, seat, action) > game.actionsLeft) return 'No actions left';
-	return spec.check(ctx, action);
+	if (characterOf(world, seat).carrier && MOVES.has(id)) return 'The carrier moves only by Drive or Ferry';
+	return null;
+}
+
+/** Null when the action is legal for the active player right now, otherwise the reason it is not. */
+export function checkAction(world: World, seat: SeatId, action: Action): string | null {
+	const gate = actionGate(world, seat, action.a);
+	if (gate) return gate;
+	if (actionCost(world, seat, action) > world.game!.actionsLeft) return 'No actions left';
+	return specFor(action).check(context(world, seat), action);
 }
 
 export function applyAction(world: World, seat: SeatId, action: Action) {

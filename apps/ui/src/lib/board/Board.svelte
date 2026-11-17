@@ -3,8 +3,11 @@
 	import { cityDef } from '@repo/game';
 	import type { CityId } from '@repo/game';
 	import { Canvas } from '@threlte/core';
+	import { untrack } from 'svelte';
 	import { NoToneMapping, WebGLRenderer } from 'three';
 	import { inkOn } from '#lib/color.ts';
+	import ActionIcon from '#lib/hud/ActionIcon.svelte';
+	import type { Action } from '@repo/game';
 	import { CITY_COLOR } from './CityMarker.svelte';
 	import Glyph from './Glyph.svelte';
 	import { partHint, partKey, stockpileHint } from './hints';
@@ -33,9 +36,17 @@
 		onpointer?: (point: BoardPoint | null) => void;
 		resetView?: number;
 		covered?: { x: number; y: number; width: number; height: number }[];
+		/** Actions offered round a city, each starting one kind of action. */
+		ring?: { city: CityId; entries: { key: Action['a']; label: string; detail: string }[] } | null;
+		onring?: (key: Action['a']) => void;
+		/** A right click away from a city, which puts down whatever was half-chosen. True when something was. */
+		oncancel?: () => boolean;
+		/** A click on the board that landed on no city. */
+		onmiss?: () => void;
 	};
 
-	let { view, oncity, onrecon, oncityback, onpointer, resetView, covered }: Props = $props();
+	let { view, oncity, onrecon, oncityback, onpointer, resetView, covered, ring, onring, oncancel, onmiss }: Props =
+		$props();
 
 	let element = $state<HTMLElement>();
 	// Which part of which city the pointer rests on. The text is read from the view, so it follows the game live.
@@ -49,10 +60,63 @@
 		const height = element?.clientHeight ?? 0;
 		const x = hovered?.x ?? 0;
 		const y = hovered?.y ?? 0;
-		const left = x > width - 260 ? true : x < 260 ? false : (name?.x ?? 0) > 1;
 		const up = y > height - 200 ? true : y < 200 ? false : (name?.z ?? 0) > 0;
+		// Over a city with its ring open, the slip keeps to the side the ring left free.
+		if (ringAt && hovered?.city === ring?.city) return { left: !ringAt.left, up };
+		const left = x > width - 260 ? true : x < 260 ? false : (name?.x ?? 0) > 1;
 		return { left, up };
 	});
+
+	// The ring follows its city as the chart pans and zooms, read from the anchor each city keeps over its disc.
+	// It opens on the side away from where the slip opened, so the city's details stay readable beside it.
+	let ringAt = $state.raw<{ x: number; y: number; reach: number; left: boolean } | null>(null);
+	$effect(() => {
+		const city = ring?.city;
+		if (!city || !element) return void (ringAt = null);
+		const board = element;
+		const left = untrack(() => {
+			const width = board.clientWidth;
+			const anchor = board.querySelector(`.anchor[data-city="${city}"]`)?.getBoundingClientRect();
+			const x = anchor ? anchor.x + anchor.width / 2 - board.getBoundingClientRect().x : width / 2;
+			if (x < 300) return false;
+			if (x > width - 300) return true;
+			return hovered?.city === city ? !side.left : x > width / 2;
+		});
+		let frame = 0;
+		const follow = () => {
+			const anchor = board.querySelector(`.anchor[data-city="${city}"]`)?.getBoundingClientRect();
+			const box = board.getBoundingClientRect();
+			if (anchor) {
+				const next = {
+					x: anchor.x + anchor.width / 2 - box.x,
+					y: anchor.y + anchor.height / 2 - box.y,
+					reach: Math.max(30, anchor.width * 0.36) + 14,
+					left,
+				};
+				if (
+					!ringAt ||
+					Math.abs(ringAt.x - next.x) + Math.abs(ringAt.y - next.y) + Math.abs(ringAt.reach - next.reach) > 0.5
+				)
+					ringAt = next;
+			}
+			frame = requestAnimationFrame(follow);
+		};
+		follow();
+		return () => cancelAnimationFrame(frame);
+	});
+	/** Each entry's place on an arc round the disc, the middle one furthest out. */
+	const spots = $derived.by(() => {
+		if (!ring || !ringAt) return [];
+		const gap = 44;
+		const count = ring.entries.length;
+		const bend = Math.max(ringAt.reach, ((count - 1) / 2) * gap + 24);
+		return ring.entries.map((entry, index) => {
+			const dy = (index - (count - 1) / 2) * gap;
+			const dx = Math.sqrt(Math.max(0, bend * bend - dy * dy)) - (bend - ringAt!.reach);
+			return { entry, x: ringAt!.left ? -dx : dx, y: dy };
+		});
+	});
+	let downAt = { x: 0, y: 0 };
 	const hint = $derived.by(() => {
 		if (!hovered) return null;
 		if (!hovered.city) return view.stockpile === null ? null : stockpileHint(view.stockpile);
@@ -89,9 +153,16 @@
 	{@attach feedback(undefined, () => ({ hovered: hovered?.city ?? null }))}
 	bind:this={element}
 	oncontextmenu={event => {
-		if (!hovered?.city || !oncityback) return;
-		event.preventDefault();
-		oncityback(hovered.city);
+		if (hovered?.city && oncityback) {
+			event.preventDefault();
+			oncityback(hovered.city);
+		} else if (oncancel?.()) event.preventDefault();
+	}}
+	onpointerdown={event => (downAt = { x: event.clientX, y: event.clientY })}
+	onclick={event => {
+		// A drag pans the chart, and a click on a city is the city's. Anything else on the board is a miss.
+		const dragged = Math.abs(event.clientX - downAt.x) + Math.abs(event.clientY - downAt.y) > 6;
+		if (!dragged && !hovered?.city && !(event.target as Element).closest('.ring')) onmiss?.();
 	}}
 	onpointerleave={() => {
 		onpointer?.(null);
@@ -112,6 +183,38 @@
 			{covered}
 		/>
 	</Canvas>
+	{#if ring && ringAt}
+		{#key ring.city}
+			<div
+				class="ring"
+				class:left={ringAt.left}
+				style:left={`${ringAt.x}px`}
+				style:top={`${ringAt.y}px`}
+				role="menu"
+				aria-label="Actions here"
+				data-testid="city-ring"
+				data-city={ring.city}
+				{@attach feedback('City actions', () => ({ city: ring?.city, entries: ring?.entries.map(entry => entry.key) }))}
+			>
+				{#each spots as spot, index (spot.entry.key)}
+					<button
+						role="menuitem"
+						style:--x={`${spot.x}px`}
+						style:--y={`${spot.y}px`}
+						style:--i={index}
+						data-action={spot.entry.key}
+						onclick={() => onring?.(spot.entry.key)}
+					>
+						<ActionIcon action={spot.entry.key} size="2.1rem" />
+						<span>
+							<strong>{spot.entry.label}</strong>
+							{#if spot.entry.detail}<small>{spot.entry.detail}</small>{/if}
+						</span>
+					</button>
+				{/each}
+			</div>
+		{/key}
+	{/if}
 	{#if hovered && hint}
 		<div
 			class="hint"
@@ -149,6 +252,77 @@
 </div>
 
 <style>
+	.ring {
+		position: absolute;
+		z-index: 31;
+		width: 0;
+		height: 0;
+	}
+
+	.ring button {
+		position: absolute;
+		left: 0;
+		top: 0;
+		display: flex;
+		align-items: center;
+		gap: 0.45rem;
+		padding: 0.18rem 0.65rem 0.18rem 0.18rem;
+		border: 1px solid rgb(42 32 23 / 0.55);
+		border-radius: 999px;
+		background: rgb(240 231 210 / 0.97);
+		box-shadow: var(--slip-shadow);
+		color: var(--slip-ink);
+		font: inherit;
+		font-family: var(--font-ui);
+		white-space: nowrap;
+		cursor: pointer;
+		translate: var(--x) calc(var(--y) - 50%);
+		animation: open 260ms calc(var(--i) * 35ms) cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+		transition:
+			background 140ms ease,
+			scale 140ms ease;
+	}
+
+	.ring.left button {
+		flex-direction: row-reverse;
+		padding: 0.18rem 0.18rem 0.18rem 0.65rem;
+		translate: calc(var(--x) - 100%) calc(var(--y) - 50%);
+		text-align: right;
+	}
+
+	.ring button:hover {
+		background: #fff8e6;
+		scale: 1.05;
+	}
+
+	.ring button :global(.icon) {
+		border-radius: 50%;
+	}
+
+	.ring span {
+		display: flex;
+		flex-direction: column;
+		line-height: 1.15;
+	}
+
+	.ring strong {
+		font-size: 0.86rem;
+		font-weight: 650;
+	}
+
+	.ring small {
+		color: rgb(42 32 23 / 0.7);
+		font-size: 0.7rem;
+	}
+
+	@keyframes open {
+		from {
+			opacity: 0;
+			translate: 0 -50%;
+			scale: 0.6;
+		}
+	}
+
 	.board {
 		position: relative;
 		width: 100%;

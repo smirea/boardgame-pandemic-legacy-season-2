@@ -127,6 +127,10 @@ export async function look(tab: Tab): Promise<string> {
 			return { index, tag: node.tagName.toLowerCase(), text, disabled: Boolean(field.disabled) };
 		});
 		const cities = [...document.querySelectorAll<HTMLElement>('.anchor[data-city]')].map(node => node.dataset['city']!);
+		// Cities lit as targets for the action or card being played, which a tap on one finishes.
+		const lit = [...document.querySelectorAll<HTMLElement>('.anchor[data-highlight=target]')].map(
+			node => node.dataset['city']!,
+		);
 		// An element on its way out is inert until its exit finishes. A person no longer reads it as part of the screen.
 		const labels = [...document.querySelectorAll<HTMLElement>('[inert]')];
 		for (const label of labels) label.style.display = 'none';
@@ -135,7 +139,7 @@ export async function look(tab: Tab): Promise<string> {
 			.replace(/\s*\n\s*/g, ' | ')
 			.trim();
 		for (const label of labels) label.style.display = '';
-		return { controls, cities, text };
+		return { controls, cities, lit, text };
 	});
 	const controls = (seen.controls as Seen[]).map(
 		control =>
@@ -149,6 +153,7 @@ export async function look(tab: Tab): Promise<string> {
 		...controls,
 		'',
 		`CITIES ON THE BOARD (tap <city-id>): ${seen.cities.join(' ') || 'none'}`,
+		...(seen.lit.length ? [`LIT AS TARGETS (tap one to finish what you chose): ${seen.lit.join(' ')}`] : []),
 	].join('\n');
 }
 
