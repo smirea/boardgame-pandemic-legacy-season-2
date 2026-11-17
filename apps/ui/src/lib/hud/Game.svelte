@@ -578,9 +578,9 @@
 					? { state: 'idle' as const, reason: null }
 					: !canAct
 						? { state: 'blocked' as const, reason: 'Not your turn' }
-						: box.reason
-							? { state: 'blocked' as const, reason: box.reason }
-							: { state: 'ready' as const, reason: null }),
+						: box.actions.length
+							? { state: 'ready' as const, reason: null }
+							: { state: 'blocked' as const, reason: box.reason }),
 			})),
 			pawns: (game?.seats ?? []).map((seat, index) => ({
 				id: seat,
@@ -1010,7 +1010,7 @@
 	}
 
 	/* A seat's character sheet opens over the objectives and the targeting line, which share the layer. */
-	.column:has(:global([data-testid='character-sheet'])) {
+	.column:has(:global([data-testid='character-sheet'], [data-testid='corner-full-hand'])) {
 		z-index: 32;
 	}
 

@@ -21,6 +21,7 @@
 	import { getContext } from 'svelte';
 	import type { CardId } from '@repo/game';
 	import { pack } from '@repo/game';
+	import { fitText } from '#lib/cards/fit.ts';
 	import MapArt from '#lib/cards/MapArt.svelte';
 	import { inkOn } from '#lib/color.ts';
 
@@ -76,6 +77,7 @@
 
 <button
 	class="card {card.kind}"
+	data-card={card.id}
 	onmouseenter={() => hoverCard?.(card.id)}
 	onmouseleave={() => hoverCard?.(null)}
 	onfocus={() => hoverCard?.(card.id)}
@@ -91,7 +93,7 @@
 >
 	<span class="head">
 		<span class="kicker">{face.kicker}</span>
-		<span class="title">{face.title}</span>
+		<span class="title" {@attach fitText(face.title, { max: 1.18, min: 0.7, across: true })}>{face.title}</span>
 	</span>
 	{#if !small}
 		{#if card.kind === 'city'}
@@ -108,8 +110,8 @@
 				{/each}
 			</span>
 		{:else}
-			<span class="glyph">{GLYPH[card.kind]}</span>
-			<span class="text">{face.text}</span>
+			<span class="glyph" aria-hidden="true">{GLYPH[card.kind]}</span>
+			<span class="text" {@attach fitText(face.text, { max: 0.98, min: 0.62 })}>{face.text}</span>
 		{/if}
 	{/if}
 </button>
@@ -176,14 +178,10 @@
 	}
 
 	.title {
-		display: -webkit-box;
 		font-family: var(--font-display);
-		font-size: 1.18em;
 		line-height: 1.02;
 		overflow: hidden;
-		-webkit-box-orient: vertical;
-		-webkit-line-clamp: 2;
-		line-clamp: 2;
+		overflow-wrap: normal;
 	}
 
 	.art {
@@ -240,26 +238,25 @@
 		opacity: 0.35;
 	}
 
+	/* The kind's mark sits behind the text as a watermark, so the text has the whole face. */
 	.glyph {
-		display: grid;
-		place-items: center;
-		flex: 1;
-		min-height: 0;
+		position: absolute;
+		right: 0.2em;
+		bottom: 0.05em;
 		color: var(--on);
-		font-size: 2.3em;
+		font-size: 3.6em;
 		line-height: 1;
-		opacity: 0.9;
+		opacity: 0.16;
+		pointer-events: none;
 	}
 
 	.text {
-		padding: 0.3em 0.6em 0.55em;
-		color: var(--soft);
-		font-size: 0.74em;
-		line-height: 1.25;
-		display: -webkit-box;
-		-webkit-line-clamp: 4;
-		line-clamp: 4;
-		-webkit-box-orient: vertical;
+		position: relative;
+		flex: 1;
+		min-height: 0;
+		padding: 0.15em 0.6em 0.5em;
+		color: color-mix(in srgb, var(--on) 90%, transparent);
+		line-height: 1.22;
 		overflow: hidden;
 	}
 </style>

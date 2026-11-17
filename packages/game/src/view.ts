@@ -1,7 +1,7 @@
 import { pack } from './content/pack';
 import { cityDef, grid, isForsaken } from './helpers';
 import type { CardId, CityId } from './ids';
-import type { Action } from './actions';
+import { AWAY_FROM_ROUTE, type Action } from './actions';
 import type { ReconRoute } from './content/types';
 import type { GameSnapshot, Phase } from './machine';
 import { phaseOf, reject } from './machine';
@@ -164,9 +164,14 @@ export type ReconBox = {
 	reveals: CityId[];
 	/** Every legal recon of this route for the active player, one per payment. Empty when it cannot be taken now. */
 	actions: Extract<Action, { a: 'recon' }>[];
-	/** Why it cannot be taken now, from the engine, or null when it can. */
+	/**
+	 * Why it cannot be taken now, from the engine, or null when it can or when the only reason is where the player
+	 * stands: the box already prints its city, so it does not say so twice.
+	 */
 	reason: string | null;
 };
+
+const unlessAway = (reason: string | null) => (reason === AWAY_FROM_ROUTE ? null : reason);
 
 /** Each recon route the players know and have not yet taken, at a city they can see. */
 export function reconBoxes(world: World, phase: Phase): ReconBox[] {
@@ -197,7 +202,9 @@ export function reconBoxes(world: World, phase: Phase): ReconBox[] {
 					.filter(city => !campaign.locations[city.id]?.revealed)
 					.map(city => city.id),
 				actions,
-				reason: actions.length ? null : reject(world, phase, { type: 'ACTION', seat: game.active, action: probe }),
+				reason: actions.length
+					? null
+					: unlessAway(reject(world, phase, { type: 'ACTION', seat: game.active, action: probe })),
 			},
 		];
 	});

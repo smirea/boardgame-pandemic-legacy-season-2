@@ -2,7 +2,7 @@
 import { chromium } from 'playwright';
 import { botCommand, campaignAt, cityDef, createGameActor, phaseOf, give, pack } from '@repo/game';
 import { conjure } from '../../../packages/game/src/testkit.ts';
-import type { PublicState, SeatId } from '@repo/game';
+import type { CardId, PublicState, SeatId } from '@repo/game';
 declare const window: { DEBUG: { setState(save: unknown): void; getState(): PublicState } };
 import env from '../../../packages/shared/src/env.ts';
 const actor = createGameActor({ seed: 11, save: campaignAt(1, 11) }).start();
@@ -40,8 +40,8 @@ give(world, seat, [city.id, produce.id, twin.id, other.id, improved.id]);
 const supplyDrop = conjure(world, seat, { kind: 'event', event: 'supplyDrop' });
 conjure(world, seat, { kind: 'event', event: 'supplyDrop' });
 give(world, second, hidden ? [hidden.id] : []);
-conjure(world, second, { kind: 'event', event: 'airlift' });
-conjure(world, second, { kind: 'event', event: 'quietNight' });
+const airlift = conjure(world, second, { kind: 'event', event: 'airlift' });
+const quietNight = conjure(world, second, { kind: 'event', event: 'quietNight' });
 const medic = conjure(world, second, { kind: 'companion', companion: 'medic' });
 world.campaign.characters[game.players[game.active]!.character]!.slots[0] = { kind: 'scar', id: pack.scars[0]!.id };
 const extra = Math.min(12, game.reserve);
@@ -68,7 +68,11 @@ const browser = await chromium.launch({
 		: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'],
 });
 try {
-	const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+	// `--laptop` plays it on a 1280×800 screen instead.
+	const laptop = process.argv.includes('--laptop');
+	const page = await browser.newPage({
+		viewport: laptop ? { width: 1280, height: 800 } : { width: 1440, height: 900 },
+	});
 	page.setDefaultTimeout(90_000);
 	await page.goto(`http://127.0.0.1:${env.UI_PORT}/debug/game?DEBUG_ID=seat-cards`, { waitUntil: 'domcontentloaded' });
 	await page.waitForFunction(() => Boolean(window.DEBUG), {}, { timeout: 90_000 });
@@ -178,13 +182,62 @@ try {
 	}
 	if ((await hand.or(secondHand).locator('.mini svg').count()) < 5) throw Error('Events and specials lack icons');
 	await page.screenshot({ path: '/tmp/seat-hand.png' });
-	for (const [key, kind] of [
-		[`color:${color}`, 'city'],
-		[`produce:${produce.kind === 'produce' ? produce.boxesLeft : 0}`, 'city'],
-		['event:airlift:rationed', 'seats'],
-		['event:quietNight:rationed', 'anywhere'],
+	if ((await colorGroup.locator('.face').boundingBox())!.height > 75) throw Error('Seat piles are as tall as before');
+	// Resting on the seat card, or on its piles, lays the whole hand out as real cards in the one hand order, clear of
+	// the character sheet and on screen.
+	const spread = corner.getByTestId('corner-full-hand');
+	for (const target of ['portrait', 'piles'] as const) {
+		await page.mouse.move(700, 450);
+		await spread.waitFor({ state: 'detached' });
+		if (target === 'portrait') await corner.locator('.portrait').hover();
+		else {
+			// The full hand opens over the piles, so the pointer goes to where the pile was, as a player's would.
+			const pile = (await colorGroup.boundingBox())!;
+			await page.mouse.move(pile.x + pile.width / 2, pile.y + pile.height / 2, { steps: 4 });
+		}
+		await spread.waitFor();
+		await page.waitForFunction(el => el && !el.getAnimations().length, await spread.elementHandle(), {
+			timeout: 90_000,
+		});
+		const laid = await corner.evaluate(corner => {
+			const box = (el: Element | null) => el?.getBoundingClientRect() ?? null;
+			const spread = box(corner.querySelector('[data-testid=corner-full-hand]'))!;
+			const sheet = box(corner.querySelector('[data-testid=character-sheet]'));
+			const clear = (a: DOMRect, b: DOMRect | null) =>
+				!b || a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top;
+			const cards = [...corner.querySelectorAll<HTMLElement>('[data-testid=corner-full-hand] .card')];
+			return {
+				ids: cards.map(card => card.dataset['card']!),
+				sheet: Boolean(sheet),
+				clear: clear(spread, sheet),
+				inside: spread.left >= 0 && spread.right <= innerWidth && spread.top >= 0 && spread.bottom <= innerHeight,
+				ellipsis: cards.some(card =>
+					[...card.querySelectorAll('*')].some(el => getComputedStyle(el).textOverflow === 'ellipsis'),
+				),
+			};
+		});
+		const held = game.players[seat]!.hand.length;
+		if (laid.ids.length !== held) throw Error(`The full hand shows ${laid.ids.length} of ${held} cards`);
+		const kinds = laid.ids.map(id => world.campaign.playerCards[id as CardId]!.kind);
+		if (kinds.slice(kinds.findIndex(kind => kind !== 'city')).includes('city'))
+			throw Error(`City cards are not first: ${kinds.join(', ')}`);
+		if (target === 'portrait' && !laid.sheet) throw Error('The character sheet did not open beside the full hand');
+		if (!laid.clear || !laid.inside || laid.ellipsis) throw Error(`Full hand misplaced: ${JSON.stringify(laid)}`);
+		await page.screenshot({ path: `/tmp/seat-full-hand-${target}${laptop ? '-laptop' : ''}.png` });
+		console.log(`PASS resting on the ${target} lays out the whole hand, sorted, clear of the sheet`);
+	}
+	await page.mouse.move(700, 450);
+	await spread.waitFor({ state: 'detached' });
+	// Over the full hand, each card lights where it can be used, as its pile did.
+	for (const [id, owner, kind] of [
+		[city.id, seat, 'city'],
+		[produce.id, seat, 'city'],
+		[airlift, second, 'seats'],
+		[quietNight, second, 'anywhere'],
 	] as const) {
-		await group(key).hover();
+		const at = cornerOf(owner);
+		await at.locator('.portrait').hover();
+		await at.locator(`[data-testid=corner-full-hand] [data-card="${id}"]`).hover();
 		await page.waitForFunction(
 			kind => {
 				const el = document.querySelector('.game')!;
@@ -195,12 +248,12 @@ try {
 			kind,
 			{ timeout: 90_000 },
 		);
-		if (key.startsWith('color:')) {
+		if (id === city.id) {
 			const lit = (await page.locator('.game').getAttribute('data-card-cities'))!.split(' ');
-			if (![city.city, other.city].every(id => lit.includes(id))) throw Error(`Pile lights only ${lit.join(', ')}`);
+			if (!lit.includes(city.city)) throw Error(`The card lights only ${lit.join(', ')}`);
 		}
 		await page.screenshot({ path: `/tmp/seat-${kind}.png` });
-		console.log(`PASS ${key} hover`);
+		console.log(`PASS ${id} hover`);
 	}
 	await page.mouse.move(700, 450);
 	// A fourth card joins the colour pile and one Supply Drop leaves its pile, which then stands as a single card.
@@ -228,7 +281,11 @@ try {
 	// Loading a state shows its briefing again.
 	if (await briefing.count()) await briefing.click();
 	await corner.locator('.slip').click();
-	await page.locator('.dock .card.city').first().hover();
+	// The fan overlaps its cards on a narrow screen, so the pointer rests on the first card's uncovered left edge.
+	await page
+		.locator('.dock .card.city')
+		.first()
+		.hover({ position: { x: 8, y: 30 } });
 	await page.waitForFunction(
 		() => Boolean(document.querySelector('.game')?.getAttribute('data-card-cities')),
 		{},

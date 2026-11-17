@@ -79,7 +79,7 @@ describe('reconHint', () => {
 		needsCenter: true,
 		reveals: [],
 		state: 'blocked',
-		reason: "Stand in the route's city",
+		reason: 'The city needs a supply center',
 	};
 
 	test('prints the cost, the place, and why it cannot be taken now', () => {
@@ -87,7 +87,7 @@ describe('reconHint', () => {
 			title: 'Europe',
 			cost: '4 blue cards, each a different city',
 			where: 'At London, with a supply center',
-			status: "Stand in the route's city",
+			status: 'The city needs a supply center',
 		});
 	});
 

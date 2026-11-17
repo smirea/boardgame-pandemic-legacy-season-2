@@ -1,5 +1,5 @@
-import { cityDef, pack } from '@repo/game';
-import type { CityId, Color, PlayerCard, PlayerDeckKind } from '@repo/game';
+import { pack } from '@repo/game';
+import type { PlayerCard, PlayerDeckKind } from '@repo/game';
 import {
 	COMPANION_ICON,
 	EPIDEMIC_ICON,
@@ -8,6 +8,7 @@ import {
 	PRODUCE_ICON,
 	SEARCH_ICON,
 } from '#lib/cards/icons.ts';
+import { regionOf, sortHand } from './handOrder.ts';
 
 export type HandGroup = {
 	/** Stable while the group exists, so a card joining or leaving animates within it. */
@@ -22,26 +23,20 @@ export type HandGroup = {
 	title: string;
 };
 
-const COLOR_ORDER: (Color | 'haven')[] = ['blue', 'yellow', 'black', 'red', 'haven'];
-const KIND_ORDER: PlayerCard['kind'][] = ['city', 'produce', 'event', 'companion', 'epidemic'];
-
-const regionOf = (city: CityId) => cityDef(city).color ?? 'haven';
-
 /**
  * A hand as the seat card shows it: interchangeable cards stack, and a card that carries its own state or ability
  * stands alone. Plain city cards are interchangeable by colour, since colour is what they pay for building and recon.
  * A city card with an improvement or search boxes, and every companion, is its own card. Events stack only with the
- * same event in the same mode, and Produce Supplies only with the same boxes left.
+ * same event in the same mode, and Produce Supplies only with the same boxes left. Groups follow the hand's one order
+ * (`sortHand`), each where its first card falls.
  */
 export function handGroups(hand: PlayerCard[], name: (card: PlayerCard) => string): HandGroup[] {
 	const groups = new Map<string, PlayerCard[]>();
-	for (const card of hand) {
+	for (const card of sortHand(hand, name)) {
 		const key = keyOf(card);
 		groups.set(key, [...(groups.get(key) ?? []), card]);
 	}
-	return [...groups]
-		.map(([key, cards]) => describe(key, cards, name))
-		.sort((a, b) => rank(a.cards[0]!) - rank(b.cards[0]!) || a.key.localeCompare(b.key));
+	return [...groups].map(([key, cards]) => describe(key, cards, name));
 }
 
 function keyOf(card: PlayerCard): string {
@@ -57,13 +52,6 @@ function keyOf(card: PlayerCard): string {
 		case 'epidemic':
 			return 'epidemic';
 	}
-}
-
-function rank(card: PlayerCard): number {
-	const kind = KIND_ORDER.indexOf(card.kind) * 100;
-	if (card.kind !== 'city') return kind;
-	const unique = card.improvement || card.search.length ? 1 : 0;
-	return kind + COLOR_ORDER.indexOf(regionOf(card.city)) * 2 + unique;
 }
 
 function describe(key: string, cards: PlayerCard[], name: (card: PlayerCard) => string): HandGroup {
