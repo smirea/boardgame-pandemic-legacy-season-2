@@ -362,3 +362,60 @@ export function legalPurchases(world: World): Purchase[] {
 	}
 	return candidates.filter(purchase => checkPurchase(world, purchase) === null);
 }
+
+export function cardTargets(world: World, phase: Phase, card: CardId): { cities: CityId[]; seats: SeatId[] } {
+	const held = world.campaign.playerCards[card];
+	const cities = new Set<CityId>();
+	const seats = new Set<SeatId>();
+	if (held?.kind === 'city') cities.add(held.city);
+	if (held?.kind === 'produce' && world.game) {
+		for (const city of pack.cities)
+			if (grid(world.campaign).has(city.id) && (city.kind === 'haven' || world.game.locations[city.id]?.center))
+				cities.add(city.id);
+	}
+	if (held?.kind === 'event' || held?.kind === 'companion') {
+		for (const entry of legalPlays(world, phase)) {
+			if (entry.card !== card) continue;
+			const play = entry.play;
+			switch (play.e) {
+				case 'secondWind':
+					seats.add(world.game!.active);
+					break;
+				case 'surplus':
+					seats.add(entry.seat);
+					break;
+				case 'medic':
+					cities.add(world.game!.players[entry.seat]!.location);
+					break;
+				case 'airlift':
+					seats.add(play.pawn);
+					break;
+				case 'cardSwap':
+					seats.add(play.a);
+					seats.add(play.b);
+					break;
+				case 'supplyDrop':
+				case 'purge':
+				case 'purifier':
+				case 'shelterWright':
+				case 'marksman':
+					cities.add(play.city);
+					break;
+				case 'safeHouses':
+					for (const city of play.cities) cities.add(city);
+					break;
+				case 'openWaters':
+					cities.add(play.a);
+					cities.add(play.b);
+					break;
+				case 'resilience':
+					for (const id of play.cards) {
+						const infection = world.campaign.infectionCards[id];
+						if (infection?.kind === 'city') cities.add(infection.city);
+					}
+					break;
+			}
+		}
+	}
+	return { cities: [...cities].filter(city => world.campaign.locations[city]?.revealed), seats: [...seats] };
+}

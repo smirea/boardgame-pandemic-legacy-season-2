@@ -30,14 +30,18 @@ if (
 	throw new Error(`No dev server at ${url}. Start it with \`bun run dev\`.`);
 }
 
-const browser = await chromium.launch();
+const browser = await chromium.launch({ channel: process.argv.includes('--chrome') ? 'chrome' : undefined });
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+page.setDefaultTimeout(90_000);
 const errors: string[] = [];
-page.on('pageerror', error => errors.push(error.message));
+page.on('pageerror', error => {
+	errors.push(error.message);
+	console.error(error.message);
+});
 
 try {
-	await page.goto(`${url}/?DEBUG_ID=feedback-e2e-${Date.now()}`);
-	await page.locator('[data-testid=solo]').click();
+	await page.goto(`${url}/?DEBUG_ID=feedback-e2e-${Date.now()}`, { waitUntil: 'domcontentloaded' });
+	await page.locator('[data-testid=solo]').click({ noWaitAfter: true });
 	await page.waitForFunction(() => window.DEBUG?.getState()?.phase === 'lobby');
 
 	const rng = { seed: 7 };
@@ -47,6 +51,8 @@ try {
 		const refused = await page.evaluate(next => window.DEBUG.send(next), botCommand(snap.world, snap.phase, rng, 3));
 		if (refused) throw new Error(`The game refused a bot command: ${refused}`);
 	}
+	const briefing = page.getByTestId('ack-briefing');
+	if (await briefing.count()) await briefing.click();
 	await page.waitForFunction(() => window.__feedbackEngine);
 	// Long enough for pieces to settle after the last move.
 	await page.waitForTimeout(2500);
@@ -62,7 +68,7 @@ try {
 
 	await page.getByRole('button', { name: 'Menu' }).click({ modifiers: ['Alt', 'Meta'] });
 	const field = page.getByRole('textbox', { name: 'Feedback text' });
-	await field.waitFor({ timeout: 30_000 });
+	await field.waitFor({ timeout: 90_000 });
 
 	// A click on a city's disc in the screenshot must select that city, never the board or a neighbour.
 	const shot = (await page.getByRole('img', { name: 'Screenshot' }).boundingBox())!;
