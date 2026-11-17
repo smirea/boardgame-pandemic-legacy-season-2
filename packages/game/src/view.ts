@@ -4,7 +4,8 @@ import type { CardId, CityId } from './ids';
 import type { GameSnapshot, Phase } from './machine';
 import { phaseOf } from './machine';
 import { drawOdds, drawsUntilEpidemicCertain, epidemicOdds, expectedDraws } from './odds';
-import type { World } from './state';
+import type { PlayerCard, World } from './state';
+import type { Color } from './content/types';
 
 export type PublicState = { phase: Phase; world: World; canUndo: boolean };
 
@@ -16,6 +17,8 @@ export type PublicState = { phase: Phase; world: World; canUndo: boolean };
 export function publicState(snapshot: GameSnapshot): PublicState {
 	return { phase: phaseOf(snapshot), world: snapshot.context.world, canUndo: snapshot.context.undo.length > 0 };
 }
+
+export type PlayerDeckKind = Color | 'haven' | Exclude<PlayerCard['kind'], 'city'>;
 
 export type PlayerCardsAt = { inDeck: number; inHands: number; discarded: number };
 
@@ -29,7 +32,8 @@ export type Insights = {
 		epidemicNextDraw: number;
 		/** Draws until the next epidemic must have appeared, or null when none remain. */
 		epidemicWithin: number | null;
-		byKind: Record<string, number>;
+		/** City cards by region colour (havens have none), every other card by its kind. */
+		byKind: Partial<Record<PlayerDeckKind, number>>;
 		/** Where each city's player cards are: still in the deck, in someone's hand, or discarded. */
 		cities: Record<CityId, PlayerCardsAt>;
 	};
@@ -105,10 +109,10 @@ export function insights(world: World): Insights | null {
 	const keyOf = (card: CardId) => cityOfInfection(world, card);
 	const odds = Object.fromEntries(drawOdds(strata, rate, keyOf)) as Record<CityId, number>;
 	const expected = Object.fromEntries(expectedDraws(strata, rate, keyOf)) as Record<CityId, number>;
-	const byKind: Record<string, number> = {};
+	const byKind: Partial<Record<PlayerDeckKind, number>> = {};
 	for (const id of game.playerDeck.order) {
-		const card = world.campaign.playerCards[id];
-		const key = !card ? 'unknown' : card.kind === 'city' ? (cityDef(card.city).color ?? 'city') : card.kind;
+		const card = world.campaign.playerCards[id]!;
+		const key = card.kind === 'city' ? (cityDef(card.city).color ?? 'haven') : card.kind;
 		byKind[key] = (byKind[key] ?? 0) + 1;
 	}
 	const epidemicsLeft = game.playerDeck.piles.reduce((sum, pile) => sum + pile.epidemics, 0);
