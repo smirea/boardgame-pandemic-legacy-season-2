@@ -300,8 +300,8 @@
 	const liveRoutes = $derived(new Set(view.recon.map(box => box.route)));
 	// A string, like `revealedKey`, so boxes are placed again only when one comes or goes.
 	const boxKey = $derived(view.recon.map(box => box.route).join());
-	/** A box's size on screen, in pixels, a little generous for a status line that wraps. */
-	const BOX_PX = { width: 205, height: 120 };
+	/** A box's size on screen in rem, a little generous for a status line that wraps. */
+	const BOX_REM = { width: 12, height: 7.4 };
 	const boxLayout = $derived.by(() => {
 		void boxKey;
 		void revealedKey;
@@ -313,6 +313,7 @@
 			const zoom = fitBoard(citiesBounds, aspect, FOV, DEFAULT_TILT, { bounds: citiesBounds, ...insets });
 			// The boxes widen the view a little, which makes them a little larger on the board than this.
 			const plannedDistance = zoom.distance * 1.15;
+			const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
 			const unitsPerPixel = (2 * plannedDistance * Math.tan((FOV * Math.PI) / 360)) / Math.max(1, $size.height);
 			const taken = visibleCities.flatMap(city => {
 				const at = layout[city.id]!;
@@ -328,7 +329,7 @@
 			const rects = placeReconBoxes(
 				view.recon.map(box => ({ route: box.route, from: layout[box.city]!, toward: middleOf(box.reveals) })),
 				taken,
-				{ width: BOX_PX.width * unitsPerPixel, depth: BOX_PX.height * unitsPerPixel },
+				{ width: BOX_REM.width * rem * unitsPerPixel, depth: BOX_REM.height * rem * unitsPerPixel },
 			);
 			return { rects, plannedDistance };
 		});

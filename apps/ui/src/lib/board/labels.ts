@@ -7,7 +7,7 @@ export type Placement = { x: number; z: number; leader: boolean };
 type Rect = { x: number; z: number; halfWidth: number; halfHeight: number };
 
 /** Cap height of a printed name, in board units. */
-export const NAME_SIZE = 2.3;
+export const NAME_SIZE = 2.7;
 /** The disc's reach, which a leader line starts from. */
 export const DISC_REACH = 2.2;
 
@@ -16,16 +16,16 @@ type Slot = { offset: (width: number) => { x: number; z: number }; cost: number;
 // The pieces around a city have fixed places (cubes east, plague west, buildings on the corners, Hollow Men
 // south), so a name beside the city clears them. Names may still run under pieces, as on a printed board.
 const SLOTS: Slot[] = [
-	{ offset: () => ({ x: 0, z: 3.4 }), cost: 0 },
-	{ offset: () => ({ x: 0, z: -4 }), cost: 0.6 },
-	{ offset: width => ({ x: 1.2 + width / 2, z: 3.6 }), cost: 1, leader: true },
-	{ offset: width => ({ x: -1.2 - width / 2, z: 3.6 }), cost: 1, leader: true },
-	{ offset: width => ({ x: 1.2 + width / 2, z: -4 }), cost: 1.5, leader: true },
-	{ offset: width => ({ x: -1.2 - width / 2, z: -4 }), cost: 1.5, leader: true },
+	{ offset: () => ({ x: 0, z: 3.6 }), cost: 0 },
+	{ offset: () => ({ x: 0, z: -4.2 }), cost: 0.6 },
+	{ offset: width => ({ x: 1.2 + width / 2, z: 3.8 }), cost: 1, leader: true },
+	{ offset: width => ({ x: -1.2 - width / 2, z: 3.8 }), cost: 1, leader: true },
+	{ offset: width => ({ x: 1.2 + width / 2, z: -4.2 }), cost: 1.5, leader: true },
+	{ offset: width => ({ x: -1.2 - width / 2, z: -4.2 }), cost: 1.5, leader: true },
 	{ offset: width => ({ x: 4.4 + width / 2, z: 0.3 }), cost: 2, leader: true },
 	{ offset: width => ({ x: -5.2 - width / 2, z: 0.3 }), cost: 2, leader: true },
-	{ offset: () => ({ x: 0, z: 6 }), cost: 5, leader: true },
-	{ offset: () => ({ x: 0, z: -6.6 }), cost: 5, leader: true },
+	{ offset: () => ({ x: 0, z: 6.2 }), cost: 5, leader: true },
+	{ offset: () => ({ x: 0, z: -6.8 }), cost: 5, leader: true },
 ];
 
 function overlap(a: Rect, b: Rect): number {

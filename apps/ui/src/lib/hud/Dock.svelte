@@ -69,8 +69,22 @@
 		return new Set(since.flatMap(entry => (entry.t === 'draw' && entry.seat === seat ? [entry.card] : [])));
 	});
 	const seatColor = (other: SeatId) => SEAT_COLORS[game.seats.indexOf(other)];
-	// The fan tightens as the hand grows so a full hand still fits between the seats and the prompts.
-	const overlap = $derived(Math.max(0.3, Math.min(2.9, (handCards.length - 3) * 0.55)));
+	// The fan tightens as the hand grows, and further when its column is too narrow, so it never reaches the prompts.
+	let handWidth = $state(0);
+	let hand = $state<HTMLElement>();
+	const cardWidth = $derived.by(() => {
+		void handCards.length;
+		void handWidth;
+		return (hand?.querySelector('.slot') as HTMLElement | null)?.offsetWidth ?? 0;
+	});
+	const rem = () => parseFloat(getComputedStyle(document.documentElement).fontSize);
+	const overlap = $derived.by(() => {
+		const count = handCards.length;
+		const loose = Math.max(0.3, Math.min(2.9, (count - 3) * 0.55));
+		if (count < 2 || !cardWidth || !handWidth) return loose;
+		const room = handWidth - 1.2 * rem();
+		return Math.max(loose, (count * cardWidth - room) / (count - 1) / rem());
+	});
 	const fanAngle = (index: number) => (index - (handCards.length - 1) / 2) * Math.min(4.5, 22 / handCards.length);
 	const mustDiscard = $derived(owns(seat) && decides.some(decide => decide.d === 'discard' && decide.seat === seat));
 	const playable = $derived(new Set(plays.filter(option => option.seat === seat).map(option => option.card)));
@@ -262,7 +276,14 @@
 						>{/if}
 				</p>
 				{#key seat}
-					<div class="hand" data-testid="hand" style:--overlap={`${overlap}rem`} in:fade={{ duration: 220 }}>
+					<div
+						class="hand"
+						data-testid="hand"
+						bind:this={hand}
+						bind:clientWidth={handWidth}
+						style:--overlap={`${overlap}rem`}
+						in:fade={{ duration: 220 }}
+					>
 						{#each handCards as card, index (card.id)}
 							<div
 								class="slot"
@@ -402,7 +423,7 @@
 		position: relative;
 		z-index: 35;
 		display: grid;
-		grid-template-columns: minmax(9rem, 15rem) minmax(0, 1.4fr) minmax(0, 1fr) 9rem;
+		grid-template-columns: minmax(0, 0.5fr) minmax(0, 1.8fr) minmax(15rem, 1fr) 9rem;
 		gap: 1.1rem;
 		height: 10.4rem;
 		margin-top: -2.6rem;
@@ -607,10 +628,11 @@
 	.hand {
 		--card-size: 0.8rem;
 		display: flex;
+		flex: 1;
 		justify-content: center;
 		min-width: 0;
 		margin-top: 1.2rem;
-		padding-inline: var(--overlap);
+		padding-inline: calc(var(--overlap) / 2 + 0.6rem);
 	}
 
 	.slot {

@@ -254,8 +254,8 @@
 	.text {
 		padding: 0.3em 0.6em 0.55em;
 		color: var(--soft);
-		font-size: 0.66em;
-		line-height: 1.3;
+		font-size: 0.74em;
+		line-height: 1.25;
 		display: -webkit-box;
 		-webkit-line-clamp: 4;
 		line-clamp: 4;

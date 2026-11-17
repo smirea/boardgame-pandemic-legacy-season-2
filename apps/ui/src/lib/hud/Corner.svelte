@@ -374,15 +374,17 @@
 	}
 
 	.trait {
+		display: -webkit-box;
 		overflow: hidden;
 		padding: 0.05rem 0.3rem;
 		border-left: 2px solid color-mix(in srgb, var(--on) 45%, transparent);
 		background: color-mix(in srgb, var(--on) 10%, transparent);
 		color: var(--soft);
 		font-size: 0.68rem;
-		line-height: 1.35;
-		text-overflow: ellipsis;
-		white-space: nowrap;
+		line-height: 1.3;
+		-webkit-line-clamp: 3;
+		line-clamp: 3;
+		-webkit-box-orient: vertical;
 	}
 
 	.trait b {

@@ -45,7 +45,7 @@
 			: [],
 	);
 
-	// The figures clip their overflow, so the deck's slip hangs from the bar instead and is placed under the figure.
+	// The deck's slip hangs from the bar, placed under the figure.
 	let bar = $state<HTMLElement>();
 	let deckTip = $state<number | null>(null);
 	const showDeck = (event: PointerEvent) => {
@@ -79,27 +79,29 @@
 				</div>
 
 				{#if info.playerDeck.cards > 0}
-					<div
-						class="stat deck"
-						data-deck="player"
-						aria-label={`Player deck: ${info.playerDeck.cards} cards`}
-						onpointerenter={showDeck}
-						onpointerleave={() => (deckTip = null)}
-						{@attach feedback('Player deck', () => ({
-							cards: info?.playerDeck.cards,
-							byKind: info?.playerDeck.byKind,
-						}))}
-					>
-						{@render cardIcon('#5d5446')}
-						{#key info.playerDeck.cards}<strong data-testid="deck-count" in:fly={{ y: -10, duration: 280 }}
-								>{info.playerDeck.cards}</strong
-							>{/key}
-					</div>
-					<div class="stat" title="Chance that the next Player card drawn is an Epidemic">
-						<span class="caption">Epidemic next draw</span>
-						<strong class="warn" class:hot={info.playerDeck.epidemicNextDraw > 0.5}
-							>{percent(info.playerDeck.epidemicNextDraw)}</strong
+					<div class="row">
+						<div
+							class="stat deck"
+							data-deck="player"
+							aria-label={`Player deck: ${info.playerDeck.cards} cards`}
+							onpointerenter={showDeck}
+							onpointerleave={() => (deckTip = null)}
+							{@attach feedback('Player deck', () => ({
+								cards: info?.playerDeck.cards,
+								byKind: info?.playerDeck.byKind,
+							}))}
 						>
+							{@render cardIcon('#5d5446')}
+							{#key info.playerDeck.cards}<strong data-testid="deck-count" in:fly={{ y: -10, duration: 280 }}
+									>{info.playerDeck.cards}</strong
+								>{/key}
+						</div>
+						<div class="stat" title="Chance that the next Player card drawn is an Epidemic">
+							<span class="caption">Epidemic next draw</span>
+							<strong class="warn" class:hot={info.playerDeck.epidemicNextDraw > 0.5}
+								>{percent(info.playerDeck.epidemicNextDraw)}</strong
+							>
+						</div>
 					</div>
 				{/if}
 			{/if}
@@ -192,21 +194,18 @@
 		flex: 1;
 	}
 
-	/* The figures give way before the controls: Fit map and Menu always stay on screen. */
-	/* Figures that do not fit wrap onto a second line that is never shown, so none is ever cut in half. */
 	.stats {
 		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		align-content: flex-start;
-		column-gap: 1.1rem;
-		height: 1.7rem;
-		min-width: 0;
-		overflow: hidden;
+		flex-direction: column;
+		align-items: flex-end;
+		gap: 0.25rem;
+		flex: none;
+		line-height: 1;
 	}
 
-	.stats > * {
-		flex: none;
+	.row {
+		display: flex;
+		align-items: center;
 	}
 
 	.track,
