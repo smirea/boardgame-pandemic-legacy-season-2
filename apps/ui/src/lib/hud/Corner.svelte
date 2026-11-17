@@ -196,6 +196,11 @@
 			<div
 				class="sheet-out"
 				data-testid="character-sheet"
+				{@attach feedback(undefined, () => ({
+					name,
+					seat,
+					traits: traits.map(trait => `${trait.kind}: ${trait.name}`),
+				}))}
 				transition:fly={{ x: right ? 18 : -18, duration: 200, easing: cubicOut }}
 			>
 				{#each traits as trait (`${trait.kind}:${trait.name}`)}
