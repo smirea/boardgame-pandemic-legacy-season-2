@@ -239,24 +239,14 @@
 	function group(name: Action['a']) {
 		const variants = actions.filter(action => action.a === name);
 		const aimed = variants.filter(action => actionTarget(world, action));
-		if (aimed.length === variants.length && variants.length > 1) {
+		if (aimed.length === variants.length && variants.length > 0) {
 			const cities = new Map<CityId, Option[]>();
 			for (const action of aimed) {
 				const target = actionTarget(world, action)!;
 				cities.set(target, [...(cities.get(target) ?? []), actionOption(action)]);
 			}
-			targeting = { label: `${ACTION_NAMES[name]}: pick a destination on the map or from the list`, cities };
-			// The same destinations as a list, for anyone who would sooner read names than hunt for a city.
-			chooser = {
-				title: ACTION_NAMES[name],
-				options: aimed
-					.map(action => ({
-						label: cityName(actionTarget(world, action)!),
-						detail: actionDetail(world, action),
-						run: () => act(action),
-					}))
-					.sort(byLabel),
-			};
+			targeting = { label: `${ACTION_NAMES[name]}: choose a highlighted city on the map`, cities };
+			chooser = null;
 		} else {
 			choose(ACTION_NAMES[name], variants.map(actionOption));
 		}

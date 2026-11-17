@@ -88,6 +88,26 @@
 	const fanAngle = (index: number) => (index - (handCards.length - 1) / 2) * Math.min(4.5, 22 / handCards.length);
 	const mustDiscard = $derived(owns(seat) && decides.some(decide => decide.d === 'discard' && decide.seat === seat));
 	const playable = $derived(new Set(plays.filter(option => option.seat === seat).map(option => option.card)));
+	const iconCell: Partial<Record<Action['a'], number>> = {
+		drive: 0,
+		sail: 2,
+		charter: 3,
+		captainSail: 1,
+		makeSupplies: 4,
+		produce: 4,
+		pickUp: 5,
+		transfer: 6,
+		share: 15,
+		buildCenter: 7,
+		buildTower: 8,
+		buildShelter: 9,
+		recon: 10,
+		establishLine: 11,
+		chartLane: 2,
+		inoculate: 12,
+		salvage: 13,
+		destroyInfection: 14,
+	};
 	const FREE = new Set(['pickUp', 'transfer', 'inoculate', 'salvage', 'destroyInfection']);
 	// One chip per kind of action. A chip with a single variant says exactly what it will do, so nothing fires blind.
 	const chips = $derived(
@@ -340,9 +360,14 @@
 					{/if}
 				{:else if snap.phase === 'playing.actions'}
 					{#if canAct}
-						<div class="chips" data-testid="actions">
+						<div class="action-list" data-testid="actions">
 							{#each chips as chip, index (chip.name)}
 								<button style:--i={index} onclick={() => ongroup(chip.name)}>
+									<i
+										class="action-icon"
+										style:background-position={`${(((iconCell[chip.name] ?? 10) % 4) * 100) / 3}% ${(Math.floor((iconCell[chip.name] ?? 10) / 4) * 100) / 3}%`}
+										aria-hidden="true"
+									></i>
 									{chip.label}
 									{#if chip.detail}<small>{chip.detail}</small>{/if}
 									{#if chip.free}<small class="free">free</small>{/if}
@@ -417,6 +442,54 @@
 </div>
 
 <style>
+	.action-list {
+		display: grid;
+		gap: 0.35rem;
+		max-height: 18rem;
+		overflow: auto;
+		pointer-events: auto;
+	}
+	.action-list button {
+		display: flex;
+		align-items: center;
+		gap: 0.65rem;
+		padding: 0.5rem 0.7rem;
+		border: 1px solid var(--line);
+		border-radius: 5px;
+		background: var(--panel);
+		color: var(--ink);
+		font: inherit;
+		font-size: 0.95rem;
+		text-align: left;
+		cursor: pointer;
+		transition:
+			background 180ms,
+			opacity 180ms;
+	}
+	.action-list button:hover {
+		background: var(--wash);
+	}
+	.action-list button:disabled {
+		opacity: 0.45;
+		cursor: default;
+	}
+	.action-list small {
+		color: var(--muted);
+		font-size: 0.8rem;
+	}
+	.action-icon {
+		flex: none;
+		width: 2rem;
+		height: 2rem;
+		border-radius: 4px;
+		background-image: url('/actions/chart-icons.png');
+		background-size: 400% 400%;
+	}
+	.middle:has(.action-list) {
+		align-self: end;
+		padding-bottom: 0.5rem;
+	}
+
 	/* No tray: the dock is the near edge of the table, with the held hand rising out of the bottom of the screen. */
 	/* The dock reaches up over the empty table below the chart, so only its contents take clicks. */
 	.dock {
