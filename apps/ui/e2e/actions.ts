@@ -142,7 +142,21 @@ async function play(width: number, height: number) {
 	await shot('3-ring');
 	await page.keyboard.press('Escape');
 	await ring.waitFor({ state: 'detached' });
-	ok(`${width}: the pawn's own city shows its actions round it, beside the hover slip`, entries.join(', '));
+	// A click on one of the ring's actions starts it: Drive / Ferry lights where it goes.
+	await clickCity(page, here(snap));
+	const drive = ring.locator('button[data-action=drive]');
+	await drive.waitFor();
+	await page.waitForTimeout(400);
+	await page.mouse.click(...xy(await drive.boundingBox()));
+	await page.getByTestId('aiming').waitFor();
+	const [hx, hy] = xy(await page.locator(`.anchor[data-city="${here(snap)}"]`).boundingBox());
+	await page.mouse.move(hx, hy, { steps: 2 });
+	await page.mouse.click(hx, hy, { button: 'right' });
+	await page.getByTestId('aiming').waitFor({ state: 'detached' });
+	ok(
+		`${width}: the pawn's own city shows its actions round it, beside the hover slip, and a click on one starts it`,
+		entries.join(', '),
+	);
 
 	// A port's card in hand offers Charter boat as a tag; the tag lights the ports and a click sails there.
 	const { port, card: held } = await arrange(page, charterTable);

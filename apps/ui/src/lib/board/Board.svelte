@@ -117,6 +117,12 @@
 		});
 	});
 	let downAt = { x: 0, y: 0 };
+	// Board pieces stop `pointerdown` natively, before the camera controls can capture the pointer (see AGENTS.md).
+	const keepFromCamera = (node: HTMLElement) => {
+		const stop = (event: PointerEvent) => event.stopPropagation();
+		node.addEventListener('pointerdown', stop);
+		return () => node.removeEventListener('pointerdown', stop);
+	};
 	const hint = $derived.by(() => {
 		if (!hovered) return null;
 		if (!hovered.city) return view.stockpile === null ? null : stockpileHint(view.stockpile);
@@ -194,6 +200,7 @@
 				aria-label="Actions here"
 				data-testid="city-ring"
 				data-city={ring.city}
+				{@attach keepFromCamera}
 				{@attach feedback('City actions', () => ({ city: ring?.city, entries: ring?.entries.map(entry => entry.key) }))}
 			>
 				{#each spots as spot, index (spot.entry.key)}
