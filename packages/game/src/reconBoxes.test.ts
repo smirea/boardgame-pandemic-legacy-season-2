@@ -25,10 +25,10 @@ describe('reconBoxes', () => {
 		expect(reconBoxes(worldOf(actor), 'playing.actions').some(entry => entry.route.id === PLAN)).toBe(false);
 	});
 
-	test('a route that cannot be taken says why, in the engine’s words', () => {
+	test('a route that cannot be taken says why, in the engine’s words, unless it is only where to stand', () => {
 		const box = reconBoxes(worldOf(atShanghai(false)), 'playing.actions').find(entry => entry.route.id === PLAN)!;
 		expect(box.actions).toEqual([]);
-		expect(box.reason).toBe("Stand in the route's city");
+		expect(box.reason).toBeNull();
 		const elsewhere = reconBoxes(worldOf(atShanghai(true)), 'playing.draw').find(entry => entry.route.id === PLAN)!;
 		expect(elsewhere.reason).toBe('Not available right now');
 	});
@@ -53,7 +53,7 @@ describe('reconBoxes', () => {
 		]);
 		for (const box of boxes) {
 			expect(box.reveals.length).toBeGreaterThan(0);
-			expect(box.reason).toBeTruthy();
+			expect(box.reason).not.toBe("Stand in the route's city");
 		}
 	});
 });

@@ -9,6 +9,7 @@
 	import { cityName, decideLabel, decisionTitle, seatName, SEAT_COLORS, cardName } from './labels.svelte.ts';
 	import InfectionCard from '#lib/cards/InfectionCard.svelte';
 	import { deal } from './deal.ts';
+	import { sortHand } from './handOrder.ts';
 	import PlayerCard from './PlayerCard.svelte';
 
 	type Props = {
@@ -58,7 +59,7 @@
 	const pending = $derived(game.pending[0]);
 	const cardsOf = (other: SeatId) =>
 		(game.players[other]?.hand ?? []).flatMap(id => world.campaign.playerCards[id] ?? []);
-	const handCards = $derived(cardsOf(seat));
+	const handCards = $derived(sortHand(cardsOf(seat), card => cardName(world, card.id)));
 	const drawnThisTurn = $derived.by(() => {
 		const since = game.log.slice(game.log.findLastIndex(entry => entry.t === 'turn') + 1);
 		return new Set(since.flatMap(entry => (entry.t === 'draw' && entry.seat === seat ? [entry.card] : [])));

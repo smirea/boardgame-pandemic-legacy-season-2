@@ -91,6 +91,8 @@ type Spec<A> = {
 const numbers = pack.numbers;
 const ok = null;
 
+export const AWAY_FROM_ROUTE = "Stand in the route's city";
+
 function cityCard(ctx: Ctx, id: CardId, where: 'hand' | 'discard' = 'hand') {
 	const pile = where === 'hand' ? ctx.me.hand : ctx.game.playerDiscard;
 	const card = ctx.campaign.playerCards[id];
@@ -403,7 +405,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 			if (!route || !ctx.campaign.routes.includes(routeId)) return 'That recon route is not known';
 			if (ctx.campaign.month === 0) return 'Recon is not available in the prologue';
 			if (ctx.campaign.opened.includes(route.opens)) return 'Already reconned';
-			if (route.city !== ctx.here) return "Stand in the route's city";
+			if (route.city !== ctx.here) return AWAY_FROM_ROUTE;
 			if (route.needsCenter && !ctx.loc.center && !trait(ctx, 'scout')) return 'The city needs a supply center';
 			const needed = Math.max(
 				1,

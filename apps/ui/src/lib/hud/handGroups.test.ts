@@ -54,7 +54,7 @@ describe('handGroups', () => {
 		];
 		const groups = handGroups([improved, city('blue'), searched, ...companions], name);
 		expect(groups.map(group => group.cards.length)).toEqual([1, 1, 1, 1, 1]);
-		expect(groups[0]!.key).toBe('color:blue');
+		expect(groups.filter(group => group.key === 'color:blue')).toHaveLength(1);
 		expect(groups.find(group => group.key === `card:${improved.id}`)!.mark).toBe('×2');
 		expect(groups.find(group => group.key === `card:${searched.id}`)!.icon).toBeDefined();
 	});
@@ -71,13 +71,14 @@ describe('handGroups', () => {
 			],
 			name,
 		);
-		expect(groups.map(group => [group.key, group.cards.length])).toEqual([
-			['color:red', 1],
-			['produce:2', 1],
-			['produce:3', 1],
-			['event:quietNight:rationed', 1],
-			['event:supplyDrop:rationed', 2],
+		expect(groups.map(group => group.key)).toEqual([
+			'color:red',
+			'event:quietNight:rationed',
+			'event:supplyDrop:rationed',
+			expect.stringMatching(/^produce:/),
+			expect.stringMatching(/^produce:/),
 		]);
+		expect(groups[2]!.cards.length).toBe(2);
 		expect(groups.every(group => group.tone)).toBe(true);
 	});
 });

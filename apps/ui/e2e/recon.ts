@@ -92,10 +92,15 @@ try {
 		`January shows ${january.map(box => box.route).join(', ')}`,
 	);
 	assert(
-		january.every(box => box.state === 'blocked' && box.reason === "Stand in the route's city"),
-		`a box away from the pawn is not greyed with the engine's reason: ${JSON.stringify(january)}`,
+		january.every(box => box.state === 'blocked' && !box.reason),
+		`a box away from the pawn is not greyed, or repeats where to stand: ${JSON.stringify(january)}`,
 	);
-	ok("January prints the five recon routes, greyed with the engine's reason", january.map(box => box.route).join(', '));
+	const printed = await page.$$eval('[data-recon]', nodes => nodes.map(node => node.textContent ?? '').join(' '));
+	assert(!printed.includes("Stand in the route's city"), `a box still says where to stand: ${printed}`);
+	ok(
+		'January prints the five recon routes, greyed, without repeating where to stand',
+		january.map(box => box.route).join(', '),
+	);
 	await shot('recon-january');
 
 	await page.locator('[data-recon=europe]').click({ force: true });

@@ -15,8 +15,9 @@
 	import { SCAR_ICON } from '#lib/cards/icons.ts';
 	import { deal } from './deal.ts';
 	import { handGroups } from './handGroups.ts';
+	import { sortHand } from './handOrder.ts';
 	import { cardName } from './labels.svelte.ts';
-	import { KIND_COLOR } from './PlayerCard.svelte';
+	import PlayerCard, { KIND_COLOR } from './PlayerCard.svelte';
 	import Portrait from './Portrait.svelte';
 	import type { Place } from './seats.ts';
 	import { turnSteps } from './turn.ts';
@@ -93,8 +94,14 @@
 		return lines;
 	});
 
-	const hand = $derived((player?.hand ?? []).flatMap(id => world.campaign.playerCards[id] ?? []));
-	const groups = $derived(handGroups(hand, card => cardName(world, card.id)));
+	const named = (card: { id: CardId }) => cardName(world, card.id);
+	const hand = $derived(
+		sortHand(
+			(player?.hand ?? []).flatMap(id => world.campaign.playerCards[id] ?? []),
+			named,
+		),
+	);
+	const groups = $derived(handGroups(hand, named));
 	const toneColor = (tone: PlayerDeckKind) =>
 		tone in CITY_COLOR ? CITY_COLOR[tone as keyof typeof CITY_COLOR] : KIND_COLOR[tone as keyof typeof KIND_COLOR];
 	// Cards drawn this turn come from the Player deck. Anything else, such as a shared card, settles in where it lands.
@@ -105,6 +112,19 @@
 	});
 	const steps = $derived(active ? turnSteps(world, seat) : []);
 	let reading = $state(false);
+
+	// The whole hand opens while the pointer rests anywhere on the seat: its card or its piles. Leaving waits a beat, so
+	// crossing the gap between the card and the piles does not close it.
+	let spread = $state(false);
+	let closing: ReturnType<typeof setTimeout> | undefined;
+	const open = () => {
+		clearTimeout(closing);
+		spread = true;
+	};
+	const close = () => {
+		clearTimeout(closing);
+		closing = setTimeout(() => (spread = false), 160);
+	};
 	const TRAIT_KIND = { job: 'Occupation', ability: 'Ability', scar: 'Scar' } as const;
 </script>
 
@@ -113,6 +133,12 @@
 	class:dimmed
 	data-testid="corner"
 	data-player={name}
+	onpointerenter={open}
+	onpointerleave={close}
+	onfocusin={open}
+	onfocusout={close}
+	role="group"
+	aria-label="{name}'s seat"
 	{@attach feedback(undefined, () => ({ name, seat, place, selected, action, player: world.game?.players[seat] }))}
 >
 	{#if top}
@@ -234,6 +260,20 @@
 	{#if showHand && hand.length}
 		<!-- Interchangeable cards stack into one pile, a card with its own state or ability stands alone. -->
 		<div class="hand" style:--n={groups.length} data-testid="corner-hand">
+			{#if spread}
+				<!-- The whole hand as real cards, laid over the piles and growing away from the seat card. -->
+				<div
+					class="spread"
+					style:--cols={Math.min(3, hand.length)}
+					role="group"
+					aria-label="{name}'s hand"
+					data-testid="corner-full-hand"
+					{@attach feedback(undefined, () => ({ name, seat, hand: hand.map(named) }))}
+					transition:fly={{ y: top ? -10 : 10, duration: 180, easing: cubicOut }}
+				>
+					{#each hand as card (card.id)}<PlayerCard {card} onclick={onselect} />{/each}
+				</div>
+			{/if}
 			{#each groups as group (group.key)}
 				{@const color = toneColor(group.tone)}
 				{@const ids = group.cards.map(card => card.id)}
@@ -612,8 +652,37 @@
 	/* Mini cards overlap just enough that the whole hand spans the card's width and no more. */
 	.hand {
 		--card: 2.45rem;
+		position: relative;
 		display: flex;
 		width: 100%;
+	}
+
+	/* Three real cards to a row, as wide as the seat, so it stays clear of the character sheet beside the card. */
+	.spread {
+		--card-size: 0.6rem;
+		position: absolute;
+		bottom: -0.35rem;
+		left: -0.35rem;
+		z-index: 4;
+		display: grid;
+		grid-template-columns: repeat(var(--cols), max-content);
+		gap: 0.35rem;
+		padding: 0.35rem;
+		border-radius: 4px;
+		background: rgb(20 12 4 / 0.6);
+		box-shadow: var(--slip-shadow);
+	}
+
+	.tl .spread,
+	.tr .spread {
+		top: -0.35rem;
+		bottom: auto;
+	}
+
+	.tr .spread,
+	.br .spread {
+		right: -0.35rem;
+		left: auto;
 	}
 
 	.tr .hand,
@@ -626,7 +695,7 @@
 		position: relative;
 		flex: none;
 		width: var(--card);
-		height: 4.3rem;
+		height: 3.6rem;
 		padding: 0;
 		border: 0;
 		background: none;
