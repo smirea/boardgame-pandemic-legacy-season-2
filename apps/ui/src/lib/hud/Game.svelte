@@ -537,43 +537,6 @@
 	{/if}
 {/snippet}
 
-{#snippet key()}
-	<!-- The chart's key: what each piece and printed mark around a city means. Hovering a city or a piece says more. -->
-	<dl
-		class="legend"
-		aria-label="Map key"
-		{@attach feedback('MapKey', () => undefined)}
-		in:fly={{ y: 20, duration: 500, delay: 600 }}
-	>
-		<dt><b class="num">3</b></dt>
-		<dd>Population, on the city</dd>
-		<dt><b class="port">⚓</b></dt>
-		<dd>Port, before the name</dd>
-		<dt><b class="cube"></b></dt>
-		<dd>Supply cubes, right</dd>
-		<dt><b class="cube plague"></b></dt>
-		<dd>Plague cubes, left</dd>
-		<dt><b class="hollow"></b></dt>
-		<dd>Hollow Men, below</dd>
-		<dt><b class="house"></b></dt>
-		<dd>Supply center, top right</dd>
-		<dt><b class="mast"></b></dt>
-		<dd>Satellite tower, top left</dd>
-		<dt><b class="dome"></b></dt>
-		<dd>Shelter, bottom left</dd>
-		<dt><b class="sticker"></b></dt>
-		<dd>Printed: permanent</dd>
-		<dt><b class="ring"></b></dt>
-		<dd>Somewhere you can act</dd>
-		<dt><b class="line"></b></dt>
-		<dd>Supply line</dd>
-		<dt><b class="lane"></b></dt>
-		<dd>Sea lane</dd>
-		<dt><b class="border"></b></dt>
-		<dd>Region boundary</dd>
-	</dl>
-{/snippet}
-
 <div
 	class="game"
 	{@attach feedback('Game', () => ({
@@ -607,9 +570,6 @@
 		{#if game && seatAt && snap.phase !== 'upkeep'}
 			<div class="column left" class:docked={!spectator} bind:this={leftColumn}>
 				{@render seated('tl')}
-				{#if playing && !spectator}
-					{@render key()}
-				{/if}
 				{@render seated('bl')}
 			</div>
 			<div class="column right" class:docked={!spectator} bind:this={rightColumn}>
@@ -916,133 +876,6 @@
 		left: 50%;
 		z-index: 30;
 		transform: translateX(-50%);
-	}
-
-	.legend {
-		display: grid;
-		grid-template-columns: 1.4rem auto;
-		align-items: center;
-		align-self: flex-start;
-		gap: 0.05rem 0.4rem;
-		min-height: 0;
-		margin: 0;
-		padding: 0.4rem 0.6rem;
-		overflow: hidden;
-		border: 1px solid rgb(42 32 23 / 0.35);
-		background: rgb(236 227 207 / 0.92);
-		box-shadow: var(--slip-shadow);
-		color: var(--slip-ink);
-		font-size: 0.68rem;
-		line-height: 1.3;
-		rotate: -0.4deg;
-		pointer-events: none;
-	}
-
-	.legend dt {
-		display: flex;
-		justify-content: center;
-	}
-
-	.legend dd {
-		margin: 0;
-	}
-
-	.legend b {
-		display: block;
-		font-weight: 600;
-		line-height: 1.2;
-	}
-
-	.legend .num {
-		width: 1rem;
-		height: 1rem;
-		border-radius: 50%;
-		background: #2f64a3;
-		color: #f3ecdc;
-		font-size: 0.68rem;
-		font-weight: 700;
-		line-height: 1rem;
-		text-align: center;
-	}
-
-	.legend .port {
-		color: #2f64a3;
-		font-size: 0.8rem;
-		line-height: 1;
-	}
-
-	.legend .cube {
-		width: 0.6rem;
-		height: 0.6rem;
-		border: 1px solid #2a2017;
-		background: #efe6d2;
-	}
-
-	.legend .cube.plague {
-		width: 0.8rem;
-		height: 0.8rem;
-		border-color: #3b5210;
-		background: #93b236;
-	}
-
-	.legend .hollow {
-		width: 0.6rem;
-		height: 0.85rem;
-		background: #4e3b63;
-		clip-path: polygon(50% 0, 100% 100%, 0 100%);
-	}
-
-	.legend .house {
-		width: 0.8rem;
-		height: 0.8rem;
-		background: #8f4129;
-		clip-path: polygon(50% 0, 100% 45%, 85% 45%, 85% 100%, 15% 100%, 15% 45%, 0 45%);
-	}
-
-	.legend .mast {
-		width: 0.7rem;
-		height: 0.95rem;
-		background:
-			radial-gradient(circle at 50% 18%, #e09a2e 0 0.14rem, transparent 0.15rem),
-			linear-gradient(#5e5a53, #5e5a53) center 0.2rem / 2px 100% no-repeat;
-	}
-
-	.legend .dome {
-		width: 0.85rem;
-		height: 0.45rem;
-		border-radius: 0.45rem 0.45rem 0 0;
-		background: #7a8556;
-	}
-
-	.legend .sticker {
-		width: 0.85rem;
-		height: 0.85rem;
-		border: 2px solid #7a3a22;
-		border-radius: 50%;
-		background: #f1e7cf;
-	}
-
-	.legend .line,
-	.legend .lane,
-	.legend .border {
-		width: 1.2rem;
-		height: 0;
-		border-top: 3px solid #8e3a24;
-	}
-
-	.legend .lane {
-		border-top: 2px dashed #2d5873;
-	}
-
-	.legend .border {
-		border-top: 3px dashed #6e1e14;
-	}
-
-	.legend .ring {
-		width: 0.95rem;
-		height: 0.95rem;
-		border: 2px solid #b5521f;
-		border-radius: 50%;
 	}
 
 	.targeting {

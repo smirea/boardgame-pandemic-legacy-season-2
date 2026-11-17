@@ -26,7 +26,7 @@
 	import type { PublicState } from '@repo/game';
 	import { untrack } from 'svelte';
 	import { backOut } from 'svelte/easing';
-	import { fly } from 'svelte/transition';
+	import { fly, scale } from 'svelte/transition';
 
 	type Props = { snap: PublicState; onwaive: (objective: ObjectiveId) => void };
 
@@ -152,10 +152,7 @@
 		incidents: game?.incidents,
 	}))}
 >
-	<div class="tags">
-		<span class="need" title="Objectives completed out of the number needed to win"
-			>{game?.completed.length ?? 0} / {needed}</span
-		>
+	<div class="tags" title={`Complete ${needed} of these to win`}>
 		{#each objectives as objective, index (objective.id)}
 			{@const progress = game?.progress[objective.id] ?? 0}
 			{@const done = game?.completed.includes(objective.id) ?? false}
@@ -170,16 +167,25 @@
 				title={`${objective.name}. ${objective.rule}${objective.mandatory ? ' Mandatory.' : ''}${progress && objective.target > 1 ? ` ${progress} of ${objective.target} done.` : ''} Click to mark it impossible this game.`}
 				onclick={() => onwaive(objective.id)}
 			>
-				{@render glyph(GLYPH[objective.id])}
-				<span class="name">{objective.name}</span>
-				{#if objective.target > 1}
-					<span class="steps" aria-label={`${progress} of ${objective.target}`}>
-						{#each { length: objective.target } as _, step (step)}
-							<i class:on={step < progress}>{@render glyph(GLYPH[objective.id])}</i>
-						{/each}
-					</span>
-				{:else}
-					<span class="box" class:on={done} aria-label={done ? 'done' : 'not yet'}></span>
+				<span class="face">
+					{@render glyph(GLYPH[objective.id])}
+					<span class="name">{objective.name}</span>
+					{#if done}
+						<svg class="check" viewBox="0 0 16 16" aria-label="done" in:scale={{ duration: 420, easing: backOut }}>
+							<path d="M2.5 8.5 6.2 12 13.5 4" />
+						</svg>
+					{:else if objective.target > 1}
+						<span class="steps" aria-label={`${progress} of ${objective.target}`}>
+							{#each { length: objective.target } as _, step (step)}
+								<i class:on={step < progress}>{@render glyph(GLYPH[objective.id])}</i>
+							{/each}
+						</span>
+					{:else}
+						<span class="box" aria-label="not yet"></span>
+					{/if}
+				</span>
+				{#if objective.mandatory}
+					<span class="must">mandatory</span>
 				{/if}
 			</button>
 		{/each}
@@ -216,22 +222,12 @@
 		gap: 0.35rem;
 	}
 
-	.need {
-		display: flex;
-		align-items: center;
-		padding: 0 0.5rem;
-		border-radius: 2px;
-		background: var(--slip-ink);
-		color: var(--slip);
-		font-weight: 700;
-		box-shadow: var(--slip-shadow);
-	}
-
-	/* Each objective is a paper tag: its symbol, its name, then its track. A finished one gets stamped. */
+	/* Each objective is a paper tag: its symbol, its name, then its track. A finished one turns green and gets a check. */
 	.objective {
 		display: inline-flex;
+		flex-direction: column;
 		align-items: center;
-		gap: 0.4rem;
+		justify-content: center;
 		padding: 0.18rem 0.55rem 0.18rem 0.45rem;
 		border: 0;
 		border-radius: 2px;
@@ -244,6 +240,22 @@
 			translate 300ms cubic-bezier(0.2, 0.9, 0.3, 1.3),
 			background 400ms ease,
 			color 400ms ease;
+	}
+
+	.face {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+	}
+
+	.must {
+		margin-top: -0.05rem;
+		font-size: 0.56rem;
+		font-weight: 700;
+		letter-spacing: 0.12em;
+		line-height: 1.1;
+		text-transform: uppercase;
+		opacity: 0.7;
 	}
 
 	.objective:hover:not(:disabled) {
@@ -259,8 +271,8 @@
 	}
 
 	.objective.done {
-		background: #c9dccd;
-		color: var(--ink-good);
+		background: #a9d0ae;
+		color: #1f5134;
 		animation: stamped 500ms cubic-bezier(0.2, 1.4, 0.4, 1);
 	}
 
@@ -314,9 +326,14 @@
 		opacity: 0.6;
 	}
 
-	.box.on {
-		background: currentcolor;
-		opacity: 1;
+	.check {
+		width: 0.85rem;
+		height: 0.85rem;
+		fill: none;
+		stroke: currentcolor;
+		stroke-width: 2.4;
+		stroke-linecap: round;
+		stroke-linejoin: round;
 	}
 
 	/* Bare diamonds over the chart; the slip and its count appear only under the pointer. */

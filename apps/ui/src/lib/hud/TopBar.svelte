@@ -3,6 +3,7 @@
 	import { pack } from '@repo/game';
 	import type { Insights, PublicState } from '@repo/game';
 	import { fly } from 'svelte/transition';
+	import Calendar from './Calendar.svelte';
 	import { MONTHS } from './labels.svelte.ts';
 
 	type Props = {
@@ -30,13 +31,7 @@
 	<header class="bar">
 		<div class="month">
 			<strong>{MONTHS[campaign.month] ?? 'Campaign over'}</strong>
-			<span
-				>{campaign.month > 0 && campaign.month <= 12
-					? campaign.attempt === 1
-						? 'early attempt'
-						: 'late attempt'
-					: ''}</span
-			>
+			<Calendar {campaign} />
 		</div>
 
 		<div class="spacer"></div>
@@ -111,7 +106,6 @@
 
 	/* The bar shares its width with the replay's side panel, so secondary figures give way first. */
 	@container topbar (width < 1560px) {
-		.month span,
 		.minor {
 			display: none;
 		}
@@ -142,8 +136,8 @@
 
 	.month {
 		display: flex;
-		align-items: baseline;
-		gap: 0.55rem;
+		align-items: center;
+		gap: 0.7rem;
 	}
 
 	.month strong {
@@ -153,7 +147,6 @@
 		line-height: 1;
 	}
 
-	.month span,
 	.caption {
 		color: var(--muted);
 		font-size: 0.82rem;
