@@ -15,7 +15,7 @@
 	import type { Placement } from './labels';
 	import type { BoardPoint } from './projection';
 	import Scene from './Scene.svelte';
-	import type { BoardView } from './types';
+	import type { BoardView, Covered } from './types';
 
 	// The feedback editor (development only) redraws the page, and a WebGL canvas reads blank once its frame is presented.
 	const createRenderer = (canvas: HTMLCanvasElement) =>
@@ -35,7 +35,7 @@
 		oncityback?: (city: CityId) => void;
 		onpointer?: (point: BoardPoint | null) => void;
 		resetView?: number;
-		covered?: { x: number; y: number; width: number; height: number }[];
+		covered?: Covered[];
 		/** Actions offered round a city, each starting one kind of action. */
 		ring?: { city: CityId; entries: { key: Action['a']; label: string; detail: string }[] } | null;
 		onring?: (key: Action['a']) => void;

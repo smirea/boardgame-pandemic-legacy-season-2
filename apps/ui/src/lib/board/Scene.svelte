@@ -36,7 +36,7 @@
 	import { PILE, STOCKPILE, STOCKPILE_REACH, supplyMoves } from './stockpile';
 	import type { Holder, SupplySnapshot } from './stockpile';
 	import Trail from './Trail.svelte';
-	import type { BoardView, ReconBoxView } from './types';
+	import type { BoardView, Covered, ReconBoxView } from './types';
 
 	type Props = {
 		view: BoardView;
@@ -54,7 +54,7 @@
 		onstockpile?: (event: PointerEvent | null) => void;
 		hoverStockpile?: boolean;
 		/** Screen rectangles, in pixels from the canvas corner, that HUD panels cover. The fitted view keeps cities out of them. */
-		covered?: { x: number; y: number; width: number; height: number }[];
+		covered?: Covered[];
 	};
 
 	let {
@@ -206,21 +206,28 @@
 		const height = Math.max(1, $size.height);
 		let left = 0;
 		let right = 0;
+		let firmLeft = 0;
+		let firmRight = 0;
 		let top = 0;
 		let bottom = 0;
 		for (const rect of covered) {
-			if (rect.x < width * 0.25 && rect.x + rect.width < width / 2) left = Math.max(left, rect.x + rect.width);
-			else if (rect.x + rect.width > width * 0.75 && rect.x > width / 2) right = Math.max(right, width - rect.x);
-			else if (rect.y + rect.height / 2 < height / 2) top = Math.max(top, rect.y + rect.height);
+			if (rect.x < width * 0.25 && rect.x + rect.width < width / 2) {
+				if (rect.firm) firmLeft = Math.max(firmLeft, rect.x + rect.width);
+				else left = Math.max(left, rect.x + rect.width);
+			} else if (rect.x + rect.width > width * 0.75 && rect.x > width / 2) {
+				if (rect.firm) firmRight = Math.max(firmRight, width - rect.x);
+				else right = Math.max(right, width - rect.x);
+			} else if (rect.y + rect.height / 2 < height / 2) top = Math.max(top, rect.y + rect.height);
 			else bottom = Math.max(bottom, height - rect.y);
 		}
-		// On a narrow stage, such as the replay's, panels may not squeeze the board below 70% of its width.
+		// On a narrow stage, such as the replay's, panels may not squeeze the board below 70% of its width. The
+		// seats sit in the corners, where the board is mostly open sea, but a firm panel is never slid under.
 		const squeeze = Math.min(1, 0.3 / Math.max(0.001, (left + right) / width));
 		return {
-			left: (left / width) * squeeze,
-			right: (right / width) * squeeze,
+			left: Math.max(left * squeeze, firmLeft) / width,
+			right: Math.max(right * squeeze, firmRight) / width,
 			top: Math.min(0.2, top / height),
-			bottom: Math.min(0.2, bottom / height),
+			bottom: Math.min(0.25, bottom / height),
 		};
 	});
 	// `$size` subscribes to the store. Reading `size.current` would not rerun when the canvas is resized.
@@ -422,7 +429,7 @@
 		enableDamping
 		dampingFactor={0.12}
 		minDistance={25}
-		maxDistance={whole.distance * 1.15}
+		maxDistance={Math.max(whole.distance * 1.15, fit.distance)}
 		minPolarAngle={0.05}
 		maxPolarAngle={1.2}
 		screenSpacePanning={false}

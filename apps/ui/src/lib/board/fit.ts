@@ -21,9 +21,12 @@ export function fitBoard(bounds: BoardBounds, aspect: number, fov: number, tilt 
 	] as const;
 	const point = new Vector3();
 
+	// Panels wider on one side than the other move the camera sideways, so the board sits in the middle of the room
+	// left between them rather than backing off from both sides.
+	let shiftX = 0;
 	const place = (distance: number, targetZ: number) => {
-		probe.position.set(centreX, distance * Math.cos(tilt), targetZ + distance * Math.sin(tilt));
-		probe.lookAt(centreX, 0, targetZ);
+		probe.position.set(centreX + shiftX, distance * Math.cos(tilt), targetZ + distance * Math.sin(tilt));
+		probe.lookAt(centreX + shiftX, 0, targetZ);
 		probe.updateMatrixWorld();
 		probe.updateProjectionMatrix();
 	};
@@ -49,8 +52,18 @@ export function fitBoard(bounds: BoardBounds, aspect: number, fov: number, tilt 
 				[keep.bounds.maxX, keep.bounds.maxZ],
 			] as const)
 		: [];
+	const halfWidth = (distance: number) => distance * Math.tan((fov * Math.PI) / 360) * aspect;
 	const fits = (distance: number) => {
-		place(distance, centre(distance));
+		shiftX = 0;
+		const targetZ = centre(distance);
+		place(distance, targetZ);
+		if (keep && keep.left !== keep.right)
+			for (let i = 0; i < 4; i++) {
+				const xs = kept.map(([x, z]) => point.set(x, 0, z).project(probe).x);
+				const middle = (Math.min(...xs) + Math.max(...xs)) / 2;
+				shiftX += (middle - (keep.left - keep.right)) * halfWidth(distance);
+				place(distance, targetZ);
+			}
 		const sheet = corners.every(([x, z]) => {
 			point.set(x, 0, z).project(probe);
 			return Math.abs(point.x) <= 1 && Math.abs(point.y) <= 1;
@@ -76,7 +89,10 @@ export function fitBoard(bounds: BoardBounds, aspect: number, fov: number, tilt 
 		if (fits(mid)) far = mid;
 		else near = mid;
 	}
-	const targetZ = centre(far);
-	place(far, targetZ);
-	return { position: probe.position.clone(), target: new Vector3(centreX, 0, targetZ), distance: far };
+	fits(far);
+	return {
+		position: probe.position.clone(),
+		target: new Vector3(centreX + shiftX, 0, probe.position.z - far * Math.sin(tilt)),
+		distance: far,
+	};
 }
