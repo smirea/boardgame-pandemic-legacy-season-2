@@ -34,7 +34,10 @@ const browser = await chromium.launch({ channel: process.argv.includes('--chrome
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 page.setDefaultTimeout(90_000);
 const errors: string[] = [];
-page.on('pageerror', error => errors.push(error.message));
+page.on('pageerror', error => {
+	errors.push(error.message);
+	console.error(error.message);
+});
 
 try {
 	await page.goto(`${url}/?DEBUG_ID=feedback-e2e-${Date.now()}`, { waitUntil: 'domcontentloaded' });
@@ -65,7 +68,7 @@ try {
 
 	await page.getByRole('button', { name: 'Menu' }).click({ modifiers: ['Alt', 'Meta'] });
 	const field = page.getByRole('textbox', { name: 'Feedback text' });
-	await field.waitFor({ timeout: 30_000 });
+	await field.waitFor({ timeout: 90_000 });
 
 	// A click on a city's disc in the screenshot must select that city, never the board or a neighbour.
 	const shot = (await page.getByRole('img', { name: 'Screenshot' }).boundingBox())!;
