@@ -11,6 +11,7 @@ Runs AI players through the real game, each in its own browser tab, and keeps a 
 ./apps/playtest/lab replays                                     # prints the address of the replays page
 ./apps/playtest/lab review apps/playtest/configs/campaign.json  # serves a finished run's replays without starting a game
 ./apps/playtest/lab coverage campaign-2 tour-october            # what the named runs exercised, counted from their recordings
+./apps/playtest/lab coverage ~/code/<repo>/apps/playtest/runs/*  # a path counts another checkout's runs
 ./apps/playtest/lab stop
 ```
 

@@ -540,9 +540,10 @@ export function parseSave(raw: unknown): Save {
 	const missing = pack.edges.filter(edge => !hasEdge(campaign, edge.a, edge.b));
 	if (missing.length) {
 		const retired = new Set(retiredStartingEdges.map(edge => edgeKey(edge.a, edge.b)));
+		// Today's lanes go first, so a lane drawn later stays at the end of the list, where a step's new lanes are read.
 		campaign.edges = [
-			...campaign.edges.filter(edge => !(edge.kind === 'sea' && retired.has(edgeKey(edge.a, edge.b)))),
 			...missing.map(edge => ({ ...edge })),
+			...campaign.edges.filter(edge => !(edge.kind === 'sea' && retired.has(edgeKey(edge.a, edge.b)))),
 		];
 	}
 	campaign.characters = Object.fromEntries(

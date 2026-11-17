@@ -49,6 +49,8 @@ test('a campaign begun on a board with the retired starting lanes loads with tod
 	const save = parseSave(written);
 	const keys = (lanes: EdgeDef[]) => lanes.map(lane => `${lane.kind}:${edgeKey(lane.a, lane.b)}`).toSorted();
 	expect(keys(save.world.campaign.edges)).toEqual(keys([...pack.edges, built]));
+	// A recording's step reads the lanes it drew from the end of the list, as `lab coverage` does.
+	expect(save.world.campaign.edges.at(-1)).toEqual(built);
 
 	const resumed = createGameActor({ seed: 999, save }).start();
 	for (let i = 0; i < 40; i++)
