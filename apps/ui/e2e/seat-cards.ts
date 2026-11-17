@@ -175,6 +175,8 @@ try {
 	if ((await group('event:supplyDrop:rationed').getAttribute('data-count')) !== '1')
 		throw Error('The Supply Drop left behind is not a single card');
 	console.log('PASS cards join and leave piles');
+	// Loading a state shows its briefing again.
+	if (await briefing.count()) await briefing.click();
 	await corner.locator('.slip').click();
 	await page.locator('.dock .card.city').first().hover();
 	await page.waitForFunction(
