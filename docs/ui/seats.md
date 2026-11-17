@@ -4,7 +4,9 @@
 
 `cardTargets` in the game package supplies card hover hints. City cards refer to explored locations. Produce Supplies refers to havens and supply centers on the grid. Events and companions use the engine's legal plays for the current phase. Player targets, including the active player and a card's owner, highlight seats. Medic refers to its owner's location. Cards without explicit targets highlight nothing. Card hints replace normal action hints until the pointer leaves the card.
 
-`Game.svelte` shares card hover through Svelte context with corner hands and dock cards. Card hover has its own state so seat hover can still identify a pawn.
+`Game.svelte` shares card hover through Svelte context with corner hands and dock cards. The context takes one card or a list, and a list lights the union of its cards' targets. Card hover has its own state so seat hover can still identify a pawn.
+
+A seat card's hand prints no names. `handGroups` (`hud/handGroups.ts`) stacks interchangeable cards into one pile, with the count large on its face when there is more than one: plain city cards by colour, since colour is what they pay for building and recon; the same event in the same mode; Produce Supplies with the same boxes left. A card with its own state or ability stands alone: a city card with an improvement (its mark, such as ×2 or a star) or search boxes (a magnifier), and every companion. Events, companions, Produce Supplies and epidemics carry line icons from `cards/icons.ts`. The tooltip names every card in the pile, and hovering it lights what all of them reach. A card joining or leaving a pile flies in or out as a sheet beneath its face, and the count pops.
 
 `Portrait.svelte` maps `char-N` to portrait `(N - 1) % 10`. This keeps faces stable across saves and replays without adding stored state. Further characters reuse the ten portraits.
 
@@ -23,4 +25,4 @@ The subjects, in asset order, are:
 9. A stern white woman, 50, with cropped blonde hair and a sailor coat.
 10. A white man with a long auburn beard, a knitted cap, and botanical gear.
 
-`./apps/ui/e2e/seat-cards.ts` checks the four-character table, card hints, dock hover, laptop widths, and reload. `--chrome` uses installed Chrome. The default uses Playwright Chromium with software rendering.
+`./apps/ui/e2e/seat-cards.ts` checks the four-character table, hand piles and their hover, cards joining and leaving piles, card hints, dock hover, laptop widths, and reload. `--chrome` uses installed Chrome. The default uses Playwright Chromium with software rendering.

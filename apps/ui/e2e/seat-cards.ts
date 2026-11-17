@@ -1,8 +1,8 @@
 #!/usr/bin/env bun
 import { chromium } from 'playwright';
-import { botCommand, campaignAt, createGameActor, phaseOf, give, pack } from '@repo/game';
+import { botCommand, campaignAt, cityDef, createGameActor, phaseOf, give, pack } from '@repo/game';
 import { conjure } from '../../../packages/game/src/testkit.ts';
-import type { PublicState } from '@repo/game';
+import type { PublicState, SeatId } from '@repo/game';
 declare const window: { DEBUG: { setState(save: unknown): void; getState(): PublicState } };
 import env from '../../../packages/shared/src/env.ts';
 const actor = createGameActor({ seed: 11, save: campaignAt(1, 11) }).start();
@@ -15,17 +15,34 @@ const productionSite = pack.cities.find(city => city.kind === 'city' && world.ca
 world.game!.locations[productionSite.id]!.center = true;
 world.game!.pieces.center -= 1;
 
-const seat = game.seats.find(s => s !== game.active)!;
-const city = Object.values(world.campaign.playerCards).find(
-	c => c.kind === 'city' && world.campaign.locations[c.city]?.revealed,
-)!;
+// Two hands that each stay within the hand limit, so neither is held up in the dock for a discard.
+const [seat, second] = game.seats.filter(s => s !== game.active) as [SeatId, SeatId];
+for (const s of [seat, second]) {
+	game.playerDiscard.push(...game.players[s]!.hand);
+	game.players[s]!.hand = [];
+}
+const revealedCities = Object.values(world.campaign.playerCards).filter(
+	(c): c is Extract<typeof c, { kind: 'city' }> =>
+		c.kind === 'city' && Boolean(world.campaign.locations[c.city]?.revealed) && cityDef(c.city).color !== null,
+);
+const city = revealedCities[0]!;
+const color = cityDef(city.city).color!;
+const sameColor = revealedCities.filter(c => c !== city && cityDef(c.city).color === color);
+const twin = sameColor.find(c => c.city === city.city) ?? sameColor[0]!;
+const other = sameColor.find(c => c.city !== city.city && c !== twin)!;
+const improved = revealedCities.find(c => ![city, twin, other].includes(c))!;
+improved.improvement = 'double';
 const hidden = Object.values(world.campaign.playerCards).find(
 	c => c.kind === 'city' && !world.campaign.locations[c.city]?.revealed,
 );
 const produce = Object.values(world.campaign.playerCards).find(c => c.kind === 'produce')!;
-give(world, seat, [city.id, produce.id, ...(hidden ? [hidden.id] : [])]);
-conjure(world, seat, { kind: 'event', event: 'airlift' });
-conjure(world, seat, { kind: 'event', event: 'quietNight' });
+give(world, seat, [city.id, produce.id, twin.id, other.id, improved.id]);
+const supplyDrop = conjure(world, seat, { kind: 'event', event: 'supplyDrop' });
+conjure(world, seat, { kind: 'event', event: 'supplyDrop' });
+give(world, second, hidden ? [hidden.id] : []);
+conjure(world, second, { kind: 'event', event: 'airlift' });
+conjure(world, second, { kind: 'event', event: 'quietNight' });
+const medic = conjure(world, second, { kind: 'companion', companion: 'medic' });
 world.campaign.characters[game.players[game.active]!.character]!.slots[0] = { kind: 'scar', id: pack.scars[0]!.id };
 const extra = Math.min(12, game.reserve);
 game.players[game.active]!.supplies += extra;
@@ -87,14 +104,37 @@ try {
 	const corner = page.locator(
 		`[data-testid=corner][data-player="${world.campaign.characters[game.players[seat]!.character]!.name}"]`,
 	);
-	for (const [label, kind] of [
-		[city.kind === 'city' ? pack.cities.find(c => c.id === city.city)!.name : '', 'city'],
-		['Produce Supplies', 'produce'],
-		['Airlift', 'seats'],
-		['Quiet Night', 'anywhere'],
+	const cornerOf = (s: SeatId) =>
+		page.locator(`[data-testid=corner][data-player="${world.campaign.characters[game.players[s]!.character]!.name}"]`);
+	const hand = corner.getByTestId('corner-hand');
+	const secondHand = cornerOf(second).getByTestId('corner-hand');
+	const names = [city, twin, other, improved].map(c => pack.cities.find(p => p.id === c.city)!.name);
+	const printed = await hand.innerText();
+	if (names.some(name => printed.includes(name))) throw Error(`Hand spines still print names: ${printed}`);
+	const group = (key: string) => hand.or(secondHand).locator(`.mini[data-group="${key}"]`);
+	const colorGroup = group(`color:${color}`);
+	if (
+		(await colorGroup.getAttribute('data-count')) !== '3' ||
+		(await colorGroup.locator('.face b').innerText()) !== '3'
+	)
+		throw Error(`The ${color} cities are not one pile of 3`);
+	const colorTitle = (await colorGroup.getAttribute('title')) ?? '';
+	if (![names[0]!, names[2]!].every(name => colorTitle.includes(name))) throw Error(`Pile tooltip: ${colorTitle}`);
+	if ((await group('event:supplyDrop:rationed').locator('.face b').innerText()) !== '2')
+		throw Error('Two Supply Drops are not one pile of 2');
+	for (const key of [`card:${improved.id}`, `card:${medic}`, 'event:airlift:rationed', 'event:quietNight:rationed']) {
+		if ((await group(key).getAttribute('data-count')) !== '1') throw Error(`${key} is not on its own`);
+		if (await group(key).locator('.face b').count()) throw Error(`${key} prints a count of 1`);
+	}
+	if ((await hand.or(secondHand).locator('.mini svg').count()) < 5) throw Error('Events and specials lack icons');
+	await page.screenshot({ path: '/tmp/seat-hand.png' });
+	for (const [key, kind] of [
+		[`color:${color}`, 'city'],
+		[`produce:${produce.kind === 'produce' ? produce.boxesLeft : 0}`, 'city'],
+		['event:airlift:rationed', 'seats'],
+		['event:quietNight:rationed', 'anywhere'],
 	] as const) {
-		const button = corner.locator('.mini').filter({ hasText: label }).first();
-		await button.hover();
+		await group(key).hover();
 		await page.waitForFunction(
 			kind => {
 				const el = document.querySelector('.game')!;
@@ -105,9 +145,38 @@ try {
 			kind,
 			{ timeout: 90_000 },
 		);
+		if (key.startsWith('color:')) {
+			const lit = (await page.locator('.game').getAttribute('data-card-cities'))!.split(' ');
+			if (![city.city, other.city].every(id => lit.includes(id))) throw Error(`Pile lights only ${lit.join(', ')}`);
+		}
 		await page.screenshot({ path: `/tmp/seat-${kind}.png` });
-		console.log(`PASS ${kind} hover`);
+		console.log(`PASS ${key} hover`);
 	}
+	await page.mouse.move(700, 450);
+	// A fourth card joins the colour pile and one Supply Drop leaves its pile, which then stands as a single card.
+	const later = structuredClone(world);
+	const fourth = sameColor.find(c => ![twin, other, improved].includes(c) && !c.improvement && !c.search.length)!;
+	give(later, seat, [fourth.id]);
+	later.game!.players[seat]!.hand = later.game!.players[seat]!.hand.filter(id => id !== supplyDrop);
+	await page.evaluate(save => window.DEBUG.setState(save), { v: 1, phase: 'playing.actions', world: later });
+	await page
+		.waitForFunction(
+			() => document.querySelector('.mini[data-group^="color:"] .face b')?.textContent === '4',
+			{},
+			{ timeout: 90_000 },
+		)
+		.catch(async error => {
+			const piles = await page
+				.locator('.mini')
+				.evaluateAll(els => els.map(el => `${el.getAttribute('data-group')}=${el.getAttribute('data-count')}`));
+			throw Error(`The colour pile did not grow to 4: ${piles.join(' ')}`, { cause: error });
+		});
+	await page.screenshot({ path: '/tmp/seat-regroup.png' });
+	if ((await group('event:supplyDrop:rationed').getAttribute('data-count')) !== '1')
+		throw Error('The Supply Drop left behind is not a single card');
+	console.log('PASS cards join and leave piles');
+	// Loading a state shows its briefing again.
+	if (await briefing.count()) await briefing.click();
 	await corner.locator('.slip').click();
 	await page.locator('.dock .card.city').first().hover();
 	await page.waitForFunction(
