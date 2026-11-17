@@ -1017,7 +1017,8 @@
 	/* The action list sits in whichever side column has room, beside the seats. */
 	.actions-slot {
 		display: flex;
-		width: 17rem;
+		/* As wide as a seat: the fitted view already gives up that much of the board to the seats. */
+		width: 15.5rem;
 		min-height: 0;
 		/* Gives up its height before the insights do, scrolling its rows. */
 		flex: 0 100 auto;

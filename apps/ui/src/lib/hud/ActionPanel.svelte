@@ -223,6 +223,34 @@
 		font-style: italic;
 	}
 
+	/* On a short screen each row is one line, its description running on after the name, so more rows fit. */
+	@media (max-height: 860px) {
+		button {
+			gap: 0.5rem;
+			padding: 0.2rem 0.4rem;
+		}
+
+		button :global(.icon) {
+			--size: 1.55rem !important;
+		}
+
+		.words {
+			flex-direction: row;
+			align-items: baseline;
+			gap: 0.45rem;
+		}
+
+		.name {
+			flex: none;
+			font-size: 0.92rem;
+		}
+
+		.text {
+			min-width: 0;
+			font-size: 0.74rem;
+		}
+	}
+
 	@keyframes rise {
 		from {
 			opacity: 0;

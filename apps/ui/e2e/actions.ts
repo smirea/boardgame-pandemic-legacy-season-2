@@ -10,7 +10,7 @@ import { join } from 'node:path';
 import { chromium } from 'playwright';
 import type { Page } from 'playwright';
 import { actionMenu, botCommand, legalActions, pack } from '@repo/game';
-import type { CityId, Command, PublicState, World } from '@repo/game';
+import type { CardId, CityId, Command, PublicState, World } from '@repo/game';
 import env from '../../../packages/shared/src/env.ts';
 
 declare const window: {
@@ -67,7 +67,7 @@ async function play(width: number, height: number) {
 		if (snap.phase === 'playing.actions') break;
 		await page.evaluate(next => window.DEBUG.send(next), botCommand(snap.world, snap.phase, rng, 3));
 	}
-	await arrange(page, world => world);
+	await arrange(page, world => ({ world }));
 	const fits = await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight + 1);
 	assert(fits, `the page scrolls at ${width}×${height}`);
 
@@ -145,13 +145,26 @@ async function play(width: number, height: number) {
 	ok(`${width}: the pawn's own city shows its actions round it, beside the hover slip`, entries.join(', '));
 
 	// A port's card in hand offers Charter boat as a tag; the tag lights the ports and a click sails there.
-	const port = await arrange(page, charterTable);
+	const { port, card: held } = await arrange(page, charterTable);
 	snap = await state();
 	const ports = legalActions(snap.world, snap.world.game!.active).flatMap(action =>
 		action.a === 'charter' ? [action.to] : [],
 	);
-	const card = page.locator('[data-testid=hand] .slot', { hasText: cityName(port) });
-	await page.mouse.move(...xy(await card.boundingBox()), { steps: 4 });
+	const card = page.locator(`[data-testid=hand] .slot[data-card="${held}"]`);
+	const showing = await card.evaluate(node => {
+		const box = node.getBoundingClientRect();
+		for (const fx of [0.5, 0.3, 0.15, 0.7, 0.85])
+			for (const fy of [0.5, 0.3, 0.7]) {
+				const x = box.x + box.width * fx;
+				const y = box.y + box.height * fy;
+				if (node.contains(document.elementFromPoint(x, y))) return [x, y] as [number, number];
+			}
+		return null;
+	});
+	assert(showing, `no part of ${cityName(port)}'s card shows in the hand`);
+	await page.mouse.move(...showing, { steps: 4 });
+	// The card rises out of the fan before its tags stand over it.
+	await page.waitForTimeout(600);
 	const tag = card.locator('[data-testid=card-uses] button[data-use=charter]');
 	await tag.waitFor();
 	await page.waitForTimeout(300);
@@ -185,7 +198,7 @@ async function play(width: number, height: number) {
 	snap = await state();
 	if (snap.phase === 'playing.infect') {
 		await page.getByTestId('drawn').waitFor();
-		const drawn = await page.locator('[data-testid=drawn] .card').count();
+		const drawn = await page.locator('[data-testid=drawn] .drawn').count();
 		assert(drawn === 2, `${drawn} drawn cards shown in the infect step`);
 		await page.getByTestId('infect').click();
 		await page.locator('[data-testid=flipped] .flipcard').first().waitFor();
@@ -255,7 +268,7 @@ async function settle(page: Page) {
 }
 
 /** Puts the active pawn on a port with sea routes, holding that port's card, so it can charter a boat. */
-function charterTable(world: World): { world: World; port: CityId } | null {
+function charterTable(world: World): { world: World; port: CityId; card: CardId } | null {
 	const game = world.game!;
 	const me = game.players[game.active]!;
 	for (const card of Object.values(world.campaign.playerCards)) {
@@ -268,29 +281,25 @@ function charterTable(world: World): { world: World; port: CityId } | null {
 		player.hand = [...me.hand.filter(id => id !== card.id).slice(0, 3), card.id];
 		player.location = card.city;
 		const charters = legalActions(trial, trial.game!.active).filter(action => action.a === 'charter');
-		if (charters.length > 1) return { world: trial, port: card.city };
+		if (charters.length > 1) return { world: trial, port: card.city, card: card.id };
 	}
 	return null;
 }
 
 /** Rearranges the table through a save, which reloads the page, and waits for the action step to be on screen. */
-async function arrange(
-	page: Page,
-	edit: ((world: World) => World) | ((world: World) => { world: World; port: CityId } | null),
-) {
+async function arrange<T extends { world: World }>(page: Page, edit: (world: World) => T | null): Promise<T> {
 	const snap = await page.evaluate(() => window.DEBUG.getState());
 	const result = edit(snap.world);
 	assert(result, 'no table could be arranged');
-	const world = 'port' in result ? result.world : result;
-	if (world !== snap.world) {
-		await page.evaluate(save => window.DEBUG.setState(save), { v: 1, phase: snap.phase, world });
+	if (result.world !== snap.world) {
+		await page.evaluate(save => window.DEBUG.setState(save), { v: 1, phase: snap.phase, world: result.world });
 		await page.waitForFunction(() => window.DEBUG?.getState()?.phase === 'playing.actions');
 	}
 	const briefing = page.getByTestId('ack-briefing');
 	if (await briefing.count()) await briefing.click();
 	await page.locator('[data-testid=actions]').waitFor();
 	await settle(page);
-	return ('port' in result ? result.port : null) as CityId;
+	return result;
 }
 
 try {

@@ -268,6 +268,7 @@
 						{#each handCards as card, index (card.id)}
 							<div
 								class="slot"
+								data-card={card.id}
 								animate:flip={{ duration: 320 }}
 								in:deal={{ drawn: drawnThisTurn.has(card.id) }}
 								out:fly={{ y: -140, duration: 260, easing: cubicIn }}
