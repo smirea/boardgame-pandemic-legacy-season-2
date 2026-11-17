@@ -1,4 +1,4 @@
-import type { CityId, EdgeDef, StructureKind } from '@repo/game';
+import type { CityId, EdgeDef, PlayerCardsAt, StructureKind } from '@repo/game';
 import type { BoardPoint } from './projection';
 
 export type CityHighlight = 'target' | 'selected' | null;
@@ -21,6 +21,8 @@ export type CityView = {
 	highlight: CityHighlight;
 	/** The city's Infection cards and its chance of being hit in the next Infect step, while a game is played. */
 	infection: { odds: number; inDeck: number; discarded: number } | null;
+	/** Where the city's player cards are, while a game is played. */
+	cards: PlayerCardsAt | null;
 };
 
 /** How a pawn made its last move, which decides the vehicle it travels in. */

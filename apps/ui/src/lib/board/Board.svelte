@@ -1,8 +1,12 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
+	import { cityDef } from '@repo/game';
 	import type { CityId } from '@repo/game';
 	import { Canvas } from '@threlte/core';
 	import { NoToneMapping, WebGLRenderer } from 'three';
+	import { inkOn } from '#lib/color.ts';
+	import { CITY_COLOR } from './CityMarker.svelte';
+	import Glyph from './Glyph.svelte';
 	import { partHint, partKey } from './hints';
 	import type { Part } from './hints';
 	import type { Placement } from './labels';
@@ -50,6 +54,8 @@
 	const hint = $derived(
 		hovered && view.cities[hovered.city] ? partHint(hovered.part, view.cities[hovered.city]!) : null,
 	);
+	// The slip takes the colour of the city it describes, as the city's player card does.
+	const tint = $derived(hovered ? CITY_COLOR[cityDef(hovered.city).color ?? 'haven'] : null);
 
 	function onhint(city: CityId, part: Part, event: PointerEvent | null, name?: Placement) {
 		if (!event) {
@@ -86,16 +92,30 @@
 			class:up={side.up}
 			style:left={`${hovered.x}px`}
 			style:top={`${hovered.y}px`}
+			style:--tint={tint}
+			style:--tint-ink={tint ? inkOn(tint) : null}
 			role="tooltip"
 			data-testid="board-hint"
 		>
-			<strong>{hint.title}</strong>
-			<dl>
-				{#each hint.rows as row (row.label)}
-					<dt>{row.label}</dt>
-					<dd class={row.tone ?? ''}>{row.value}</dd>
-				{/each}
-			</dl>
+			<div class="head">
+				{#each hint.marks ?? [] as mark (mark)}<Glyph glyph={mark} />{/each}
+				<strong>{hint.title}</strong>
+				{#if hint.counts?.length}
+					<span class="counts" data-testid="board-hint-counts">
+						{#each hint.counts as entry (entry.glyph)}
+							<span class={entry.tone ?? ''} data-glyph={entry.glyph}><Glyph glyph={entry.glyph} />{entry.count}</span>
+						{/each}
+					</span>
+				{/if}
+			</div>
+			{#if hint.rows.length}
+				<dl>
+					{#each hint.rows as row (row.label)}
+						<dt>{row.label}</dt>
+						<dd class={row.tone ?? ''}>{row.value}</dd>
+					{/each}
+				</dl>
+			{/if}
 			{#each hint.notes as note, index (index)}<p>{note}</p>{/each}
 		</div>
 	{/if}
@@ -113,7 +133,8 @@
 			radial-gradient(ellipse at 50% 50%, #221e18 0%, var(--table) 78%);
 	}
 
-	/* A paper slip beside the pointer, in the chart's own colours: labels in one column, values in the next. */
+	/* A paper slip beside the pointer, tinted with the city's colour, its heading a band of that colour:
+	   labels in one column, values in the next. */
 	.hint {
 		position: absolute;
 		z-index: 32;
@@ -123,9 +144,9 @@
 		width: max-content;
 		max-width: 17rem;
 		padding: 0.45rem 0.65rem 0.5rem;
-		border: 1px solid rgb(42 32 23 / 0.35);
+		border: 1px solid color-mix(in srgb, var(--tint) 70%, #2a2017);
 		border-radius: 2px;
-		background: rgb(240 231 210 / 0.97);
+		background: color-mix(in srgb, var(--tint) 16%, rgb(240 231 210 / 0.97));
 		box-shadow: var(--slip-shadow);
 		color: var(--slip-ink);
 		font-family: var(--font-ui);
@@ -147,12 +168,44 @@
 		translate: calc(-100% - 1rem) calc(-100% - 1rem);
 	}
 
-	.hint strong {
-		padding-bottom: 0.15rem;
-		border-bottom: 1px solid rgb(42 32 23 / 0.2);
+	.head {
+		display: flex;
+		align-items: center;
+		gap: 0.3rem;
+		margin: -0.45rem -0.65rem 0.05rem;
+		padding: 0.25rem 0.4rem 0.25rem 0.65rem;
+		background: var(--tint);
+		color: var(--tint-ink);
+	}
+
+	.head strong {
+		margin-right: auto;
+		padding-right: 0.6rem;
 		font-family: var(--font-display);
 		font-size: 1.05rem;
 		font-weight: 400;
+	}
+
+	/* Cubes keep their piece colours, so they sit on a scrap of paper whatever the band's colour. */
+	.counts {
+		display: flex;
+		gap: 0.45rem;
+		padding: 0.1rem 0.35rem;
+		border-radius: 2px;
+		background: rgb(240 231 210 / 0.95);
+		color: var(--slip-ink);
+		font-weight: 600;
+		font-variant-numeric: tabular-nums;
+	}
+
+	.counts > span {
+		display: flex;
+		align-items: center;
+		gap: 0.18rem;
+	}
+
+	.counts > .bad {
+		color: #a3301c;
 	}
 
 	.hint dl {

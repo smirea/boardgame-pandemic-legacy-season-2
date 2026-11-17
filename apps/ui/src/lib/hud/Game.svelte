@@ -433,6 +433,7 @@
 									discarded: info!.infection.discard[city.id] ?? 0,
 								}
 							: null,
+						cards: showOdds ? (info!.playerDeck.cities[city.id] ?? { inDeck: 0, inHands: 0, discarded: 0 }) : null,
 					},
 				];
 			}),

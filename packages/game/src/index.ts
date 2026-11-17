@@ -11,7 +11,7 @@ export type { Command, GameActor, GameSnapshot, Phase, Save, Seating } from './m
 export { createGameActor, gameMachine, parseSave, phaseOf, reject } from './machine';
 export { legalActions, legalDecides, legalPlays, legalPurchases, payColor, payments } from './options';
 export { violations } from './invariants';
-export type { Insights, PublicState } from './view';
+export type { Insights, PlayerCardsAt, PublicState } from './view';
 export { insights, onGrid, publicState } from './view';
 export {
 	cardValue,
