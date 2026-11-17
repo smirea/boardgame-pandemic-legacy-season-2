@@ -70,3 +70,18 @@ export function along(course: BoardPoint[]) {
 		},
 	};
 }
+
+/**
+ * Whether a pawn that stood in the city at `home` and now stands in the one at `at` travelled along `course`. It is
+ * judged from the cities, not from where the pawn stands: in a crowded city its slot can be over 3 units off the centre.
+ */
+export const follows = (course: BoardPoint[] | null, home: BoardPoint, at: BoardPoint): course is BoardPoint[] => {
+	const first = course?.[0];
+	const last = course?.at(-1);
+	return Boolean(
+		first &&
+		last &&
+		Math.hypot(first.x - home.x, first.z - home.z) < 0.01 &&
+		Math.hypot(last.x - at.x, last.z - at.z) < 0.01,
+	);
+};

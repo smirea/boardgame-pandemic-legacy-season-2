@@ -5,7 +5,7 @@
 	import { Spring, Tween } from 'svelte/motion';
 	import type { BoardPoint } from './projection';
 	import { CITY_TOP } from './routes';
-	import { along } from './travel';
+	import { along, follows } from './travel';
 	import type { PawnView, Travel } from './types';
 	import Vehicle from './Vehicle.svelte';
 
@@ -47,6 +47,8 @@
 
 	let from = untrack(() => ({ ...target }));
 	let to = untrack(() => ({ ...target }));
+	// The city the pawn stood in, where a course it follows must start.
+	let home = untrack(() => ({ ...at }));
 	let mode = $state<Travel>(untrack(() => pawn.travel));
 	// A shuffle between slots in the same city is a step, not a trip, so it gets no vehicle.
 	let trip = $state(false);
@@ -62,18 +64,13 @@
 			const t = travel.current;
 			from = { x: from.x + (to.x - from.x) * t, z: from.z + (to.z - from.z) * t };
 			to = { ...next };
-			const first = course?.[0];
-			const last = course?.at(-1);
-			const follows =
-				first &&
-				last &&
-				Math.hypot(last.x - at.x, last.z - at.z) < 0.01 &&
-				Math.hypot(first.x - from.x, first.z - from.z) < 3;
-			route = follows
+			const followed = follows(course, home, at);
+			home = { ...at };
+			route = followed
 				? {
-						path: along(course!),
-						start: { x: from.x - first.x, z: from.z - first.z },
-						end: { x: to.x - last.x, z: to.z - last.z },
+						path: along(course),
+						start: { x: from.x - course[0]!.x, z: from.z - course[0]!.z },
+						end: { x: to.x - course.at(-1)!.x, z: to.z - course.at(-1)!.z },
 					}
 				: null;
 			const distance = route ? route.path.total : Math.hypot(to.x - from.x, to.z - from.z);
