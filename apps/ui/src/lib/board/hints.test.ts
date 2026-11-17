@@ -1,7 +1,8 @@
 /// <reference types="bun" />
 import { describe, expect, test } from 'bun:test';
-import { cityHint, partHint, stockpileHint } from './hints.ts';
-import type { CityView } from './types.ts';
+import type { CityId } from '@repo/game';
+import { cityHint, partHint, reconHint, stockpileHint } from './hints.ts';
+import type { CityView, ReconBoxView } from './types.ts';
 
 const lagos: CityView = {
 	name: 'Lagos',
@@ -64,4 +65,36 @@ describe('board hints', () => {
 test('the stockpile says how many cubes are left', () => {
 	expect(stockpileHint(19).rows).toEqual([{ label: 'Supply cubes left', value: '19', tone: null }]);
 	expect(stockpileHint(0).rows[0]!.tone).toBe('bad');
+});
+
+describe('reconHint', () => {
+	const box: ReconBoxView = {
+		route: 'europe',
+		city: 'london' as CityId,
+		cityName: 'London',
+		name: 'Europe',
+		color: 'blue',
+		count: 4,
+		unique: true,
+		needsCenter: true,
+		reveals: [],
+		state: 'blocked',
+		reason: "Stand in the route's city",
+	};
+
+	test('prints the cost, the place, and why it cannot be taken now', () => {
+		expect(reconHint(box)).toEqual({
+			title: 'Europe',
+			cost: '4 blue cards, each a different city',
+			where: 'At London, with a supply center',
+			status: "Stand in the route's city",
+		});
+	});
+
+	test('a box that can be taken invites the click, and one any card pays says so', () => {
+		const ready = reconHint({ ...box, unique: false, needsCenter: false, state: 'ready', reason: null });
+		expect(ready.cost).toBe('Any 4 blue cards');
+		expect(ready.where).toBe('At London');
+		expect(ready.status).toBe('Click to recon');
+	});
 });

@@ -1,5 +1,5 @@
 import type { StructureKind } from '@repo/game';
-import type { CityView } from './types';
+import type { CityView, ReconBoxView } from './types';
 
 export type HintTone = 'bad' | 'good' | null;
 
@@ -99,5 +99,16 @@ export function stockpileHint(count: number): HintText {
 		marks: ['supplies'],
 		rows: [{ label: 'Supply cubes left', value: String(count), tone: count === 0 ? 'bad' : null }],
 		notes: ['Cubes placed on cities or taken by players come from here, and cubes removed come back.'],
+	};
+}
+
+/** What a recon box prints: the region it reveals, what it costs, where it is taken, and why it cannot be now. */
+export function reconHint(box: ReconBoxView): { title: string; cost: string; where: string; status: string | null } {
+	const cards = `${box.count} ${box.color} card${box.count === 1 ? '' : 's'}`;
+	return {
+		title: box.name,
+		cost: box.unique ? `${cards}, each a different city` : `Any ${cards}`,
+		where: box.needsCenter ? `At ${box.cityName}, with a supply center` : `At ${box.cityName}`,
+		status: box.state === 'ready' ? 'Click to recon' : box.reason,
 	};
 }

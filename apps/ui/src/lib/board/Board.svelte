@@ -27,6 +27,7 @@
 	type Props = {
 		view: BoardView;
 		oncity?: (city: CityId) => void;
+		onrecon?: (route: string) => void;
 		/** A right click on a city, which takes back what a click put there. */
 		oncityback?: (city: CityId) => void;
 		onpointer?: (point: BoardPoint | null) => void;
@@ -34,7 +35,7 @@
 		covered?: { x: number; y: number; width: number; height: number }[];
 	};
 
-	let { view, oncity, oncityback, onpointer, resetView, covered }: Props = $props();
+	let { view, oncity, onrecon, oncityback, onpointer, resetView, covered }: Props = $props();
 
 	let element = $state<HTMLElement>();
 	// Which part of which city the pointer rests on. The text is read from the view, so it follows the game live.
@@ -101,6 +102,7 @@
 		<Scene
 			{view}
 			{oncity}
+			{onrecon}
 			{onpointer}
 			{onhint}
 			hoverCity={hovered?.city ?? null}
