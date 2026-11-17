@@ -1,6 +1,6 @@
 /// <reference types="bun" />
 import { describe, expect, test } from 'bun:test';
-import { cityHint, partHint } from './hints.ts';
+import { cityHint, partHint, stockpileHint } from './hints.ts';
 import type { CityView } from './types.ts';
 
 const lagos: CityView = {
@@ -59,4 +59,9 @@ describe('board hints', () => {
 			value: 'This game only',
 		});
 	});
+});
+
+test('the stockpile says how many cubes are left', () => {
+	expect(stockpileHint(19).rows).toEqual([{ label: 'Supply cubes left', value: '19', tone: null }]);
+	expect(stockpileHint(0).rows[0]!.tone).toBe('bad');
 });

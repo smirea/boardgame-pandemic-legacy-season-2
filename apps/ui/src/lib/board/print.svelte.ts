@@ -93,6 +93,86 @@ export function printName(name: string, port: boolean, size: number, faded: bool
 	});
 }
 
+/**
+ * A place on the chart that is not a city, lettered as a cartographer titles a sea: spaced italic between two fine
+ * rules that end in lozenges. A lit title is the one under the pointer.
+ */
+export function printTitle(text: string, size: number, lit: boolean): Print {
+	const font = `${NAME_STYLE} ${size}px ${NAME_FONT}`;
+	const spacing = size * 0.16;
+	const textWidth = measure(font, spacing, text) - spacing;
+	const rule = size * 0.9;
+	const gap = size * 0.35;
+	const width = textWidth + 2 * (rule + gap) + size * 0.4;
+	const height = size * 1.6;
+	return sheet(width, height, context => {
+		const middle = width / 2;
+		const baseline = height / 2 + size * 0.3;
+		const ink = lit ? '#8e2a12' : INK;
+		context.font = font;
+		context.letterSpacing = `${spacing}px`;
+		context.textAlign = 'center';
+		context.lineJoin = 'round';
+		context.strokeStyle = PAPER;
+		context.globalAlpha = lit ? 0.9 : 0.35;
+		context.lineWidth = size * (lit ? 0.3 : 0.14);
+		context.strokeText(text, middle + spacing / 2, baseline);
+		context.globalAlpha = 1;
+		context.fillStyle = ink;
+		context.strokeStyle = ink;
+		context.fillText(text, middle + spacing / 2, baseline);
+		context.lineWidth = size * 0.035;
+		context.strokeText(text, middle + spacing / 2, baseline);
+		const y = height / 2;
+		for (const side of [-1, 1]) {
+			const inner = middle + side * (textWidth / 2 + gap);
+			const outer = inner + side * rule;
+			context.lineWidth = size * 0.05;
+			context.beginPath();
+			context.moveTo(inner, y);
+			context.lineTo(outer - side * size * 0.2, y);
+			context.stroke();
+			const tip = outer - side * size * 0.1;
+			context.beginPath();
+			context.moveTo(tip - size * 0.14, y);
+			context.lineTo(tip, y - size * 0.1);
+			context.lineTo(tip + size * 0.14, y);
+			context.lineTo(tip, y + size * 0.1);
+			context.closePath();
+			context.fill();
+		}
+	});
+}
+
+/** A berth ruled on the chart for a pile of pieces: a double rule with its corners cut. */
+export function printBerth(width: number, height: number): Print {
+	return sheet(width, height, context => {
+		const frame = (inset: number, cut: number) => {
+			const right = width - inset;
+			const bottom = height - inset;
+			context.beginPath();
+			context.moveTo(inset + cut, inset);
+			context.lineTo(right - cut, inset);
+			context.lineTo(right, inset + cut);
+			context.lineTo(right, bottom - cut);
+			context.lineTo(right - cut, bottom);
+			context.lineTo(inset + cut, bottom);
+			context.lineTo(inset, bottom - cut);
+			context.lineTo(inset, inset + cut);
+			context.closePath();
+		};
+		frame(0.1, 0.7);
+		context.fillStyle = 'rgb(233 220 189 / 0.35)';
+		context.fill();
+		context.strokeStyle = INK;
+		context.lineWidth = 0.09;
+		context.stroke();
+		frame(0.32, 0.6);
+		context.lineWidth = 0.035;
+		context.stroke();
+	});
+}
+
 /** The face of a city's disc: its population as a large numeral. */
 export function printDisc(population: number, size: number, color: string): Print {
 	return sheet(size, size, context => {

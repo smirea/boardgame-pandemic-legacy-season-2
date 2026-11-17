@@ -2,26 +2,36 @@
 	import { T } from '@threlte/core';
 	import { untrack } from 'svelte';
 	import { cubicInOut } from 'svelte/easing';
-	import { Tween } from 'svelte/motion';
+	import { Spring, Tween } from 'svelte/motion';
 	import type { BoardPoint } from './projection';
 	import { CITY_TOP } from './routes';
 	import { along } from './travel';
 	import type { PawnView, Travel } from './types';
 	import Vehicle from './Vehicle.svelte';
 
-	type Props = { pawn: PawnView; slot: number; at: BoardPoint };
+	/** `slot` is this pawn's place among the `of` pawns in its city. */
+	type Props = { pawn: PawnView; slot: number; of: number; at: BoardPoint };
 
-	let { pawn, slot, at }: Props = $props();
+	let { pawn, slot, of, at }: Props = $props();
 
-	// Pieces are drawn larger than life so a move reads at the whole-map view.
-	const PAWN_SCALE = 2.2;
+	// Pieces are drawn larger than life so a move reads at the whole-map view. A crowd of three or more stands
+	// a little smaller, so every head stays clear of its neighbours'.
 	const VEHICLE_SCALE = 3.2;
-	const SLOT_ANGLES = [0, 0.75, -0.75, 1.5, -1.5];
+	const PAWN_SCALE = $derived(of >= 3 ? 1.85 : 2.2);
+	// A little wider than a pawn's base, so no two overlap.
+	const SPACING = $derived(PAWN_SCALE * 0.46 * 2 + 0.15);
 
 	const target = $derived.by(() => {
-		// Pawns stand along the back of the disc, so the population printed on its face stays in view.
-		const angle = -Math.PI / 2 + (SLOT_ANGLES[slot % SLOT_ANGLES.length] ?? 0);
-		return { x: at.x + Math.cos(angle) * 1.25, z: at.z + Math.sin(angle) * 1.25 };
+		// Pawns stand in a row along the back of the disc, so the population printed on its face stays in view.
+		// The row bows backwards at its ends, so the camera, looking north, sees each pawn beside the next.
+		const offset = slot - (of - 1) / 2;
+		return { x: at.x + offset * SPACING, z: at.z - 1.25 - 0.22 * offset * offset };
+	});
+
+	// A lit pawn rises and swells, with a halo at its feet, so the eye finds it from the seat card.
+	const glow = new Spring(0, { stiffness: 0.18, damping: 0.5 });
+	$effect(() => {
+		glow.target = pawn.lit ? 1 : 0;
 	});
 
 	// Each mode has its own way of crossing the board: a car keeps to the ground, a boat rides the water
@@ -95,9 +105,10 @@
 	const position = $derived.by(() => {
 		const t = travel.current;
 		const lift = trip ? STYLE[mode].lift(distance) : 0.4;
+		const raised = glow.current * 0.9;
 		const bob = trip && mode === 'sea' ? Math.sin(t * Math.PI * 10) * 0.12 : 0;
 		const base = trip && mode === 'sea' ? CITY_TOP - 0.45 : CITY_TOP;
-		return [ground.x, base + Math.sin(Math.PI * t) * lift + bob, ground.z] as [number, number, number];
+		return [ground.x, base + raised + Math.sin(Math.PI * t) * lift + bob, ground.z] as [number, number, number];
 	});
 	// A plane noses up as it climbs and down as it lands; a boat rolls with the swell.
 	const pitch = $derived(trip && mode === 'air' ? Math.cos(Math.PI * travel.current) * 0.35 : 0);
@@ -106,14 +117,14 @@
 
 <T.Group {position}>
 	{#if morph < 1}
-		<T.Group scale={Math.max(0.001, 1 - morph) * PAWN_SCALE}>
+		<T.Group scale={Math.max(0.001, 1 - morph) * PAWN_SCALE * (1 + glow.current * 0.25)}>
 			<T.Mesh position.y={0.6} castShadow>
 				<T.ConeGeometry args={[0.46, 1.2, 20]} />
 				<T.MeshStandardMaterial
 					color={pawn.color}
 					roughness={0.55}
 					emissive={pawn.color}
-					emissiveIntensity={pawn.active ? 0.35 : 0}
+					emissiveIntensity={Math.max(pawn.active ? 0.35 : 0, glow.current * 0.7)}
 				/>
 			</T.Mesh>
 			<T.Mesh position.y={1.36} castShadow>
@@ -122,9 +133,18 @@
 					color={pawn.color}
 					roughness={0.55}
 					emissive={pawn.color}
-					emissiveIntensity={pawn.active ? 0.35 : 0}
+					emissiveIntensity={Math.max(pawn.active ? 0.35 : 0, glow.current * 0.7)}
 				/>
 			</T.Mesh>
+			{#if glow.current > 0.01}
+				<T.Mesh
+					position.y={0.04 - (glow.current * 0.9) / (PAWN_SCALE * (1 + glow.current * 0.25))}
+					rotation.x={-Math.PI / 2}
+				>
+					<T.RingGeometry args={[0.7, 1.15, 40]} />
+					<T.MeshBasicMaterial color={pawn.color} transparent opacity={glow.current * 0.85} depthWrite={false} />
+				</T.Mesh>
+			{/if}
 			{#if pawn.active}
 				<T.Mesh position.y={0.04} rotation.x={-Math.PI / 2}>
 					<T.RingGeometry args={[0.62, 0.78, 32]} />

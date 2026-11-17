@@ -7,7 +7,7 @@
 	import { inkOn } from '#lib/color.ts';
 	import { CITY_COLOR } from './CityMarker.svelte';
 	import Glyph from './Glyph.svelte';
-	import { partHint, partKey } from './hints';
+	import { partHint, partKey, stockpileHint } from './hints';
 	import type { Part } from './hints';
 	import type { Placement } from './labels';
 	import type { BoardPoint } from './projection';
@@ -38,7 +38,8 @@
 
 	let element = $state<HTMLElement>();
 	// Which part of which city the pointer rests on. The text is read from the view, so it follows the game live.
-	let hovered = $state.raw<{ city: CityId; part: Part; x: number; y: number; name?: Placement } | null>(null);
+	// The stockpile is the one piece on the board that belongs to no city.
+	let hovered = $state.raw<{ city: CityId | null; part: Part; x: number; y: number; name?: Placement } | null>(null);
 	// The slip opens away from the city's printed name, so the name it lights up stays in view, unless the
 	// screen's edge leaves no room on that side.
 	const side = $derived.by(() => {
@@ -51,11 +52,16 @@
 		const up = y > height - 200 ? true : y < 200 ? false : (name?.z ?? 0) > 0;
 		return { left, up };
 	});
-	const hint = $derived(
-		hovered && view.cities[hovered.city] ? partHint(hovered.part, view.cities[hovered.city]!) : null,
+	const hint = $derived.by(() => {
+		if (!hovered) return null;
+		if (!hovered.city) return view.stockpile === null ? null : stockpileHint(view.stockpile);
+		return view.cities[hovered.city] ? partHint(hovered.part, view.cities[hovered.city]!) : null;
+	});
+	// The slip takes the colour of the city it describes, as the city's player card does, and the stockpile's is
+	// plain paper and ink.
+	const tint = $derived(
+		hovered ? (hovered.city ? CITY_COLOR[cityDef(hovered.city).color ?? 'haven'] : '#5a4a36') : null,
 	);
-	// The slip takes the colour of the city it describes, as the city's player card does.
-	const tint = $derived(hovered ? CITY_COLOR[cityDef(hovered.city).color ?? 'haven'] : null);
 
 	function onhint(city: CityId, part: Part, event: PointerEvent | null, name?: Placement) {
 		if (!event) {
@@ -65,6 +71,15 @@
 		const box = element!.getBoundingClientRect();
 		hovered = { city, part, x: event.clientX - box.x, y: event.clientY - box.y, name };
 	}
+
+	function onstockpile(event: PointerEvent | null) {
+		if (!event) {
+			if (hovered && !hovered.city) hovered = null;
+			return;
+		}
+		const box = element!.getBoundingClientRect();
+		hovered = { city: null, part: 'supplies', x: event.clientX - box.x, y: event.clientY - box.y };
+	}
 </script>
 
 <div
@@ -73,7 +88,7 @@
 	{@attach feedback(undefined, () => ({ hovered: hovered?.city ?? null }))}
 	bind:this={element}
 	oncontextmenu={event => {
-		if (!hovered || !oncityback) return;
+		if (!hovered?.city || !oncityback) return;
 		event.preventDefault();
 		oncityback(hovered.city);
 	}}
@@ -83,7 +98,17 @@
 	}}
 >
 	<Canvas toneMapping={NoToneMapping} {createRenderer}>
-		<Scene {view} {oncity} {onpointer} {onhint} hoverCity={hovered?.city ?? null} {resetView} {covered} />
+		<Scene
+			{view}
+			{oncity}
+			{onpointer}
+			{onhint}
+			hoverCity={hovered?.city ?? null}
+			{onstockpile}
+			hoverStockpile={hovered !== null && hovered.city === null}
+			{resetView}
+			{covered}
+		/>
 	</Canvas>
 	{#if hovered && hint}
 		<div

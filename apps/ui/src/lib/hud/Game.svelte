@@ -83,6 +83,8 @@
 	const canAct = $derived(game !== null && owns(game.active));
 	const unclaimed = $derived(game !== null && !spectator && !solo && !game.seats.some(seat => mine.includes(seat)));
 	let viewing = $state<SeatId | null>(null);
+	// The seat the pointer or keyboard focus rests on, whose pawn lights up on the board.
+	let pointedSeat = $state<SeatId | null>(null);
 	$effect(() => {
 		// The dock follows whoever's turn it is, until the player picks a hand to look at.
 		void game?.active;
@@ -465,8 +467,11 @@
 				color: SEAT_COLORS[index]!,
 				name: seatName(world, seat),
 				active: game!.active === seat && playing,
+				lit: pointedSeat === seat,
+				carried: game!.players[seat]!.supplies,
 				...lastMove(seat),
 			})),
+			stockpile: game?.stockpile ?? null,
 			cursors: Object.entries(session.cursors).map(([id, point], index) => ({
 				id,
 				name: session.peers.find(peer => peer.id === id)?.name ?? 'player',
@@ -521,7 +526,14 @@
 {#snippet seated(place: Place)}
 	{@const seat = seatAt?.get(place)}
 	{#if seat && game}
-		<div class="place {place}">
+		<div
+			class="place {place}"
+			role="group"
+			onpointerenter={() => (pointedSeat = seat)}
+			onpointerleave={() => pointedSeat === seat && (pointedSeat = null)}
+			onfocusin={() => (pointedSeat = seat)}
+			onfocusout={() => pointedSeat === seat && (pointedSeat = null)}
+		>
 			{#if corner}
 				{@render corner(seat, place)}
 			{:else}

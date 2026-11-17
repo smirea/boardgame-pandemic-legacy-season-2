@@ -37,12 +37,14 @@
 		placement: Placement;
 		/** Under the pointer, so its printed name lights up. */
 		lit: boolean;
+		/** Supply cubes still flying here, which stand in the block only once they land. */
+		landing?: number;
 		onselect: () => void;
 		/** A pointer over one of the city's parts, or off it when `event` is null. */
 		onhint: (part: Part, event: PointerEvent | null) => void;
 	};
 
-	let { city, at, state, placement, lit, onselect, onhint }: Props = $props();
+	let { city, at, state, placement, lit, landing = 0, onselect, onhint }: Props = $props();
 
 	// Every piece has its own place around the disc, so a glance tells what stands where.
 	const SPOT = {
@@ -112,7 +114,7 @@
 	// Supply cubes stand in a block under the supply center's place, rising in layers as they pile up.
 	const SUPPLY = { size: 0.7, slot: 0.86, columns: 2, rows: 3 };
 	const supplies = $derived(
-		Array.from({ length: Math.min(state.supplies, 18) }, (_, index) => {
+		Array.from({ length: Math.max(0, Math.min(state.supplies - landing, 18)) }, (_, index) => {
 			const perLayer = SUPPLY.columns * SUPPLY.rows;
 			const layer = Math.floor(index / perLayer);
 			const inLayer = index % perLayer;

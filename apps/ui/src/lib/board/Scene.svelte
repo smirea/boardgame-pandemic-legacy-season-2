@@ -19,6 +19,8 @@
 	import { layoutLabels, NAME_SIZE } from './labels';
 	import type { Placement } from './labels';
 	import { buildLandGeometry, mapToSheet } from './land';
+	import { LAND_HEIGHT } from './projection';
+	import FlyingCube from './FlyingCube.svelte';
 	import Pawn from './Pawn.svelte';
 	import { fonts, nameWidth } from './print.svelte';
 	import type { BoardBounds, BoardPoint } from './projection';
@@ -26,6 +28,10 @@
 	import RemoteCursor from './RemoteCursor.svelte';
 	import Ring from './Ring.svelte';
 	import RouteTube from './RouteTube.svelte';
+	import { CITY_RADIUS, CITY_TOP } from './routes';
+	import Stockpile from './Stockpile.svelte';
+	import { PILE, STOCKPILE, STOCKPILE_REACH, supplyMoves } from './stockpile';
+	import type { Holder, SupplySnapshot } from './stockpile';
 	import Trail from './Trail.svelte';
 	import type { BoardView } from './types';
 
@@ -39,11 +45,24 @@
 		onhint?: (city: CityId, part: Part, event: PointerEvent | null, name: Placement | undefined) => void;
 		/** The city under the pointer, whose printed name lights up. */
 		hoverCity?: CityId | null;
+		/** A pointer over the stockpile, or off it when `event` is null. */
+		onstockpile?: (event: PointerEvent | null) => void;
+		hoverStockpile?: boolean;
 		/** Screen rectangles, in pixels from the canvas corner, that HUD panels cover. The fitted view keeps cities out of them. */
 		covered?: { x: number; y: number; width: number; height: number }[];
 	};
 
-	let { view, oncity, onpointer, onhint, hoverCity = null, resetView = 0, covered = [] }: Props = $props();
+	let {
+		view,
+		oncity,
+		onpointer,
+		onhint,
+		hoverCity = null,
+		onstockpile,
+		hoverStockpile = false,
+		resetView = 0,
+		covered = [],
+	}: Props = $props();
 
 	interactivity();
 
@@ -131,15 +150,24 @@
 	const visibleCities = $derived(pack.cities.filter(city => view.cities[city.id]!.revealed));
 	// A string, so the fitted view is worked out again only when the set of revealed cities changes.
 	const revealedKey = $derived(visibleCities.map(city => city.id).join());
-	// The fitted view frames what has been explored. Before anything is, it frames every location.
+	// The fitted view frames what has been explored, and the stockpile while a game is played. Before anything
+	// is explored, it frames every location.
+	const showStockpile = $derived(view.stockpile !== null);
 	const explored: BoardBounds = $derived.by(() => {
 		const ids = revealedKey ? (revealedKey.split(',') as CityId[]) : pack.cities.map(city => city.id);
 		const points = ids.map(id => layout[id]!);
-		return {
+		const frame = {
 			minX: Math.min(...points.map(point => point.x)) - MARKER_REACH,
 			maxX: Math.max(...points.map(point => point.x)) + MARKER_REACH,
 			minZ: Math.min(...points.map(point => point.z)) - MARKER_REACH,
 			maxZ: Math.max(...points.map(point => point.z)) + MARKER_REACH,
+		};
+		if (!showStockpile) return frame;
+		return {
+			minX: Math.min(frame.minX, STOCKPILE.x - STOCKPILE_REACH.x),
+			maxX: Math.max(frame.maxX, STOCKPILE.x + STOCKPILE_REACH.x),
+			minZ: Math.min(frame.minZ, STOCKPILE.z - STOCKPILE_REACH.north),
+			maxZ: Math.max(frame.maxZ, STOCKPILE.z + STOCKPILE_REACH.south),
 		};
 	});
 	// Panels hugging a side push the view in from that side. Anything else, like the objectives along the top or
@@ -234,12 +262,72 @@
 	});
 	const pawnSlots = $derived.by(() => {
 		const perCity = new Map<CityId, number>();
+		for (const pawn of view.pawns) perCity.set(pawn.city, (perCity.get(pawn.city) ?? 0) + 1);
+		const placed = new Map<CityId, number>();
 		return view.pawns.map(pawn => {
-			const slot = perCity.get(pawn.city) ?? 0;
-			perCity.set(pawn.city, slot + 1);
-			return { pawn, slot, at: layout[pawn.city]! };
+			const slot = placed.get(pawn.city) ?? 0;
+			placed.set(pawn.city, slot + 1);
+			return { pawn, slot, of: perCity.get(pawn.city)!, at: layout[pawn.city]! };
 		});
 	});
+
+	// Supply cubes are pieces that travel: each one placed, taken or returned flies between the stockpile, the
+	// cities and the pawns, and joins where it lands only when it lands.
+	type Flight = { id: number; from: Holder; to: Holder; delay: number; fromIndex: number; toIndex: number };
+	let flights = $state.raw<Flight[]>([]);
+	let held: SupplySnapshot | null = null;
+	let nextFlight = 1;
+	const snapshot = $derived.by((): SupplySnapshot | null =>
+		view.stockpile === null
+			? null
+			: {
+					stockpile: view.stockpile,
+					cities: Object.fromEntries(Object.entries(view.cities).map(([id, city]) => [id, city.supplies])),
+					pawns: view.pawns.map(pawn => ({ id: pawn.id, city: pawn.city, carried: pawn.carried })),
+				},
+	);
+	$effect(() => {
+		const now = snapshot;
+		untrack(() => {
+			const before = held;
+			held = now;
+			if (!before || !now) return;
+			const moves = supplyMoves(before, now);
+			// A jump, such as a replay skipping ahead or a new game being dealt, is not a sequence anyone watched.
+			if (moves.length > 60) return;
+			let leaving = 0;
+			let arriving = 0;
+			flights = [
+				...flights,
+				...moves.map((move, index) => ({
+					id: nextFlight++,
+					...move,
+					delay: Math.min(index, 40) * 28,
+					fromIndex: move.from.kind === 'pile' ? before.stockpile - 1 - leaving++ : 0,
+					toIndex: move.to.kind === 'pile' ? before.stockpile + arriving++ : 0,
+				})),
+			];
+		});
+	});
+	const landing = $derived.by(() => {
+		const counts = new Map<string, number>();
+		for (const flight of flights) {
+			const key = flight.to.kind === 'city' ? flight.to.city : flight.to.kind;
+			counts.set(key, (counts.get(key) ?? 0) + 1);
+		}
+		return counts;
+	});
+	function spot(holder: Holder, index: number) {
+		if (holder.kind === 'pile') {
+			const slot = PILE[Math.min(Math.max(0, index), PILE.length - 1)]!;
+			return { x: STOCKPILE.x + slot.x, y: LAND_HEIGHT + slot.y, z: STOCKPILE.z + slot.z };
+		}
+		const at = layout[holder.city]!;
+		// A city's cubes stand in a block east of its disc; a pawn holds its cubes at chest height.
+		return holder.kind === 'city'
+			? { x: at.x + CITY_RADIUS + 1.18, y: LAND_HEIGHT + 0.35, z: at.z - 0.42 }
+			: { x: at.x, y: CITY_TOP + 1.8, z: at.z - 1.25 };
+	}
 </script>
 
 <T.PerspectiveCamera makeDefault fov={FOV} near={1} far={900} bind:ref={camera}>
@@ -317,13 +405,32 @@
 		state={view.cities[city.id]!}
 		placement={anchors.get(city.id) ?? { x: 0, z: 3.4, leader: false }}
 		lit={hoverCity === city.id}
+		landing={landing.get(city.id) ?? 0}
 		onselect={() => oncity?.(city.id)}
 		onhint={(part, event) => onhint?.(city.id, part, event, anchors.get(city.id))}
 	/>
 {/each}
 
-{#each pawnSlots as { pawn, slot, at } (pawn.id)}
-	<Pawn {pawn} {slot} {at} />
+{#each pawnSlots as { pawn, slot, of, at } (pawn.id)}
+	<Pawn {pawn} {slot} {of} {at} />
+{/each}
+
+{#if view.stockpile !== null}
+	<Stockpile
+		count={view.stockpile}
+		shown={view.stockpile - (landing.get('pile') ?? 0)}
+		lit={hoverStockpile}
+		onhint={event => onstockpile?.(event)}
+	/>
+{/if}
+
+{#each flights as flight (flight.id)}
+	<FlyingCube
+		from={spot(flight.from, flight.fromIndex)}
+		to={spot(flight.to, flight.toIndex)}
+		delay={flight.delay}
+		onland={() => (flights = flights.filter(other => other.id !== flight.id))}
+	/>
 {/each}
 
 {#each view.cursors as cursor (cursor.id)}
