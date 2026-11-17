@@ -4,7 +4,8 @@ import type { BoardBounds, BoardPoint } from './projection';
 
 /**
  * The board's partition drawn exactly: the ground that `nearestLocation` assigns to each location is
- * its Voronoi cell over `pack.positions`, so the cells are cut with half-planes rather than sampled.
+ * its cell of the power diagram over `pack.positions` and each location's `groundWeight`, whose edges
+ * are straight, so the cells are cut with half-planes rather than sampled.
  * `partition.test.ts` checks them against `nearestLocation` and `regionAt` themselves.
  */
 
@@ -15,13 +16,16 @@ export type Cell = { id: CityId; outline: BoardPoint[] };
 /** A stretch of region line, between the ground of `a` and of `b`. */
 export type Border = { from: BoardPoint; to: BoardPoint; a: CityId; b: CityId };
 
-const sites = Object.entries(pack.positions) as [CityId, BoardPoint][];
+type Site = { at: BoardPoint; weight: number };
+const sites = (Object.entries(pack.positions) as [CityId, BoardPoint][]).map(
+	([id, at]) => [id, { at, weight: cityDef(id).groundWeight ?? 0 }] as [CityId, Site],
+);
 
-/** Keeps the part of `ring` nearer to `site` than to `other`; the new edge faces `otherId`. */
-function clip(ring: Ring, site: BoardPoint, other: BoardPoint, otherId: CityId): Ring {
+/** Keeps the part of `ring` that belongs to `site` rather than to `other`; the new edge faces `otherId`. */
+function clip(ring: Ring, { at: site, weight }: Site, { at: other, weight: otherWeight }: Site, otherId: CityId): Ring {
 	const nx = other.x - site.x;
 	const nz = other.z - site.z;
-	const limit = (other.x ** 2 + other.z ** 2 - site.x ** 2 - site.z ** 2) / 2;
+	const limit = (other.x ** 2 + other.z ** 2 - site.x ** 2 - site.z ** 2 + weight - otherWeight) / 2;
 	const side = (point: BoardPoint) => point.x * nx + point.z * nz - limit;
 	const cross = (a: BoardPoint, b: BoardPoint) => {
 		const t = side(a) / (side(a) - side(b));

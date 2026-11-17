@@ -10,7 +10,7 @@
 - Cities carry real coordinates, color, starting population, port status, card counts and printed infested markers. The infested markers are kept in `notes`.
 - Havens use approximate open-ocean coordinates read from board photos.
 - Routes come in three groups:
-  - 16 sea lanes printed on the starting board (`startsEstablished: true`). Midsea sits west of Gibraltar and Istanbul is reached through Tripoli, so no two starting lanes cross or run together on this map.
+  - 16 sea lanes printed on the starting board (`startsEstablished: true`). Midsea sits just inside the Strait of Gibraltar and Istanbul is reached through Tripoli, so no two starting lanes cross or run together on this map, and none runs over ground hidden at the start. Boards before this one also started with Washington to Midsea, Washington to Southreach and Midsea to Istanbul; a campaign begun on one trades them for today's lanes when it loads.
   - 9 lines printed on region stickers or packages, which connect when the region opens.
   - 35 routes that players built in documented campaigns.
 

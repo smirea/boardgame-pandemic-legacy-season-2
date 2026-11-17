@@ -129,8 +129,8 @@
 		{
 			"id": "haven-mediterranean",
 			"name": "Mediterranean Haven",
-			"lat": 37,
-			"lon": -14,
+			"lat": 36,
+			"lon": -4,
 			"kind": "haven",
 			"color": null,
 			"region": "atlantic",

@@ -4,6 +4,7 @@ import type { SnapshotFrom } from 'xstate';
 import type { Action } from './actions';
 import { actionReveals, applyAction, checkAction } from './actions';
 import { pack } from './content/pack';
+import { retiredStartingEdges } from './content/world';
 import type { JobId, ObjectiveId } from './content/types';
 import {
 	checkWin,
@@ -17,7 +18,8 @@ import {
 	startDrawStep,
 	startInfectStep,
 } from './flow';
-import { cityDef, grid, isForsaken, log, overLimit, SEAT_IDS, tableSeating } from './helpers';
+import { cityDef, grid, hasEdge, isForsaken, log, overLimit, SEAT_IDS, tableSeating } from './helpers';
+import { edgeKey } from './ids';
 import type { CardId, CharacterId, CityId, SeatId } from './ids';
 import type { Purchase } from './legacy';
 import {
@@ -534,6 +536,15 @@ export function parseSave(raw: unknown): Save {
 	const campaign = { ...fresh, ...save.world.campaign };
 	campaign.results = campaign.results.map(result => ({ ...result, characters: result.characters ?? [] }));
 	campaign.locations = { ...fresh.locations, ...campaign.locations };
+	// No rule removes a lane, so a campaign that lacks one of today's starting lanes began on an older board.
+	const missing = pack.edges.filter(edge => !hasEdge(campaign, edge.a, edge.b));
+	if (missing.length) {
+		const retired = new Set(retiredStartingEdges.map(edge => edgeKey(edge.a, edge.b)));
+		campaign.edges = [
+			...campaign.edges.filter(edge => !(edge.kind === 'sea' && retired.has(edgeKey(edge.a, edge.b)))),
+			...missing.map(edge => ({ ...edge })),
+		];
+	}
 	campaign.characters = Object.fromEntries(
 		Object.entries(campaign.characters).map(([id, character]) => [id, Object.assign({ jobScar: null }, character)]),
 	);

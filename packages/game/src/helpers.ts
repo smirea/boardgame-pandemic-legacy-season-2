@@ -244,18 +244,21 @@ export function crossesEdge(campaign: Campaign, a: CityId, b: CityId, kind: Edge
 	);
 }
 
-const locations = Object.entries(pack.positions) as [CityId, Point][];
+const locations = (Object.entries(pack.positions) as [CityId, Point][]).map(
+	([id, at]) => [id, at, pack.cities.find(city => city.id === id)!.groundWeight ?? 0] as const,
+);
 
 /**
- * The location a point on the board belongs to: the nearest one. This one partition is what the
- * rules mean by "unexplored map" and by region boundaries, and it is what the board draws, so a
- * line that looks like it crosses unknown territory or a region line is one the rules refuse.
+ * The location a point on the board belongs to: the nearest one, weighed by `groundWeight`. This one
+ * partition is what the rules mean by "unexplored map" and by region boundaries, and it is what the
+ * board draws, so a line that looks like it crosses unknown territory or a region line is one the
+ * rules refuse.
  */
 export function nearestLocation(point: Point): CityId {
 	let best = locations[0]![0];
 	let closest = Number.POSITIVE_INFINITY;
-	for (const [id, at] of locations) {
-		const distance = (at.x - point.x) ** 2 + (at.z - point.z) ** 2;
+	for (const [id, at, weight] of locations) {
+		const distance = (at.x - point.x) ** 2 + (at.z - point.z) ** 2 - weight;
 		if (distance < closest) {
 			closest = distance;
 			best = id;

@@ -4,9 +4,11 @@
 // the board. The rules test that course and the board draws it. Rerun after editing content/world.ts.
 import { layoutCities } from '../src/lib/board/projection.ts';
 import { edgeKey } from '../../../packages/game/src/ids.ts';
-import { cities, documentedEdges, startingEdges } from '../../../packages/game/src/content/world.ts';
+import { cities, documentedEdges, regions, startingEdges } from '../../../packages/game/src/content/world.ts';
 // Water is read from the same coastline the board draws, so a line the rules call dry looks dry.
-import { isWater, seaCourse } from './waterways.ts';
+import { isWater, seaCourse, seaCourses } from './waterways.ts';
+import { coursesCross, runAlongside, runsOver } from '../../../packages/game/src/lanes.ts';
+import type { Ground } from './waterways.ts';
 
 const MAX_LAND_LENGTH = 46;
 const MAX_SEA_LENGTH = 66;
@@ -26,6 +28,37 @@ const SEA_BOW = 0.1;
 const positions = layoutCities(cities);
 
 type Point = { x: number; z: number };
+
+/** `nearestLocation` from the rules, over the positions laid out here rather than the ones last generated. */
+function nearest(point: Point) {
+	let best = cities[0]!;
+	let closest = Number.POSITIVE_INFINITY;
+	for (const city of cities) {
+		const at = positions[city.id];
+		const distance = (at.x - point.x) ** 2 + (at.z - point.z) ** 2 - (city.groundWeight ?? 0);
+		if (distance < closest) {
+			closest = distance;
+			best = city;
+		}
+	}
+	return best;
+}
+
+// A starting lane is on the board before anyone explores, so its course keeps to ground revealed at the
+// start: drawn over the fog, it would be a lane the rules refuse to anyone who tried to build it. The fog
+// billows a little past the ground it hides (`Fog.svelte`), so the course also keeps this far from it.
+const FOG_MARGIN = 1;
+const revealedRegions = new Set(regions.filter(region => region.startsRevealed).map(region => region.id));
+const revealed = (point: Point) => {
+	const owner = nearest(point);
+	return revealedRegions.has(owner.region) && !owner.lost;
+};
+const around = Array.from({ length: 8 }, (_, k) => ({
+	x: Math.cos((k * Math.PI) / 4) * FOG_MARGIN,
+	z: Math.sin((k * Math.PI) / 4) * FOG_MARGIN,
+}));
+const revealedAtStart: Ground = point =>
+	revealed(point) && around.every(step => revealed({ x: point.x + step.x, z: point.z + step.z }));
 
 function hash(text: string) {
 	let h = 2166136261;
@@ -178,6 +211,44 @@ for (const edge of [...startingEdges, ...documentedEdges]) {
 	}
 }
 
+// How many of a starting lane's courses, best first, the layout weighs before it gives up on the lane.
+const STARTING_OPTIONS = 60;
+
+/**
+ * The starting lanes are printed on the board together, so they are laid out together, the lane with the
+ * fewest courses first: each takes its best course that keeps to ground revealed at the start and
+ * neither crosses, runs alongside, nor runs over a port of the lanes already laid.
+ */
+function layStartingLanes() {
+	const order = (edge: (typeof startingEdges)[number]) => {
+		const [a, b] = [edge.a, edge.b].map(id => cities.findIndex(city => city.id === id)) as [number, number];
+		return a < b ? [cities[a]!, cities[b]!] : [cities[b]!, cities[a]!];
+	};
+	const ports = [...new Set(startingEdges.flatMap(edge => [edge.a, edge.b]))].map(id => positions[id]);
+	const lanes = startingEdges.map(edge => {
+		const [a, b] = order(edge);
+		const options: Point[][] = [];
+		for (const course of seaCourses(positions[a.id], positions[b.id], arches(a.id, b.id, SEA_BOW), revealedAtStart)) {
+			if (!ports.some(port => runsOver(course, port))) options.push(course);
+			if (options.length === STARTING_OPTIONS) break;
+		}
+		if (!options.length) throw new Error(`no water revealed at the start joins ${a.id} and ${b.id}`);
+		return { key: routeKey('sea', a.id, b.id), name: `${a.id}-${b.id}`, options };
+	});
+	const laid = new Map<string, Point[]>();
+	for (const lane of lanes.toSorted((x, y) => x.options.length - y.options.length)) {
+		const course = lane.options.find(option =>
+			[...laid.values()].every(
+				other => !coursesCross(option, other) && !runAlongside(option, other) && !runAlongside(other, option),
+			),
+		);
+		if (!course) throw new Error(`the starting lane ${lane.name} cannot be laid clear of the others`);
+		laid.set(lane.key, course);
+	}
+	return laid;
+}
+const startingCourses = layStartingLanes();
+
 for (let i = 0; i < cities.length; i++) {
 	for (let j = i + 1; j < cities.length; j++) {
 		const a = cities[i]!;
@@ -196,6 +267,12 @@ for (let i = 0; i < cities.length; i++) {
 		const seaKey = routeKey('sea', a.id, b.id);
 		const listed = candidates.has(seaKey);
 		if (!a.port || !b.port || (!listed && chord > MAX_SEA_LENGTH)) continue;
+		const starting = startingCourses.get(seaKey);
+		if (starting) {
+			candidates.set(seaKey, { a: a.id, b: b.id, kind: 'sea' });
+			courses.set(seaKey, starting);
+			continue;
+		}
 		const course = seaCourse(from, to, arches(a.id, b.id, SEA_BOW));
 		if (!course) {
 			if (listed) throw new Error(`no water joins ${a.id} and ${b.id}`);

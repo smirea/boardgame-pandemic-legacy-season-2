@@ -33,7 +33,7 @@ type CityRow = [
 const cityRows: Record<string, CityRow[]> = {
 	atlantic: [
 		['haven-north-atlantic', 'Northwatch', 45, -40, 'haven', 3, 0, 'pg'],
-		['haven-mediterranean', 'Midsea', 37, -14, 'haven', 3, 0, 'pg'],
+		['haven-mediterranean', 'Midsea', 36, -4, 'haven', 3, 0, 'pg'],
 		['haven-south-atlantic', 'Southreach', 3, -25, 'haven', 3, 0, 'pg'],
 		['new-york', 'New York', 40.71, -74.01, 'blue', 3, 4, 'pg'],
 		['washington', 'Washington', 38.91, -77.04, 'blue', 3, 4, 'pg'],
@@ -113,6 +113,13 @@ export const regions: RegionDef[] = regionRows.map(([id, name, revealed = false]
 	startsRevealed: revealed,
 }));
 
+/**
+ * Paris is the only location between the Channel and the Sahara, so a plain nearest-location split hands
+ * it the Bay of Biscay, Iberia and the western Mediterranean, and fogs the water the starting lanes sail
+ * from Midsea. It claims less, enough to leave that water to the Atlantic.
+ */
+const groundWeights: Record<string, number> = { paris: -16 };
+
 export const cities: CityDef[] = Object.entries(cityRows).flatMap(([region, rows]) =>
 	rows.map(([id, name, lat, lon, color, population, playerCards, flags = '']) => ({
 		id: id as CityId,
@@ -129,6 +136,7 @@ export const cities: CityDef[] = Object.entries(cityRows).flatMap(([region, rows
 		...(flags.includes('l') ? { lost: true } : {}),
 		...(flags.includes('i') ? { startsInfested: true } : {}),
 		...(arrivals[id] ? { arrival: arrivals[id] as BundleId } : {}),
+		...(groundWeights[id] ? { groundWeight: groundWeights[id] } : {}),
 	})),
 );
 
@@ -151,6 +159,17 @@ export const startingEdges: EdgeDef[] = [
 	['haven-south-atlantic', 'lagos'],
 	['haven-south-atlantic', 'sao-paulo'],
 	['lagos', 'sao-paulo'],
+].map(([a, b]) => edge(a!, b!, 'sea'));
+
+/**
+ * Lanes that boards printed before 99a354b started with: they crossed the lanes above. A campaign begun
+ * on one of those boards trades them for today's starting lanes when it loads (`parseSave`). Players may
+ * build some of them today, and a campaign begun on today's board keeps those.
+ */
+export const retiredStartingEdges: EdgeDef[] = [
+	['washington', 'haven-mediterranean'],
+	['washington', 'haven-south-atlantic'],
+	['haven-mediterranean', 'istanbul'],
 ].map(([a, b]) => edge(a!, b!, 'sea'));
 
 /** Routes that documented campaigns drew. They seed the candidate list alongside the geographic scan. */
