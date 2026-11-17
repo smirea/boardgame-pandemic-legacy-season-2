@@ -54,14 +54,6 @@ bun x wrangler dev --var SIGNAL_SECRET:dev-secret
 
 It listens on `ws://127.0.0.1:8787`. To try it by hand, start the demo page with `bun run demo` from this package. It prints a host URL and a peer URL. Open each in its own browser window, and change `id` for every extra peer.
 
-## Run the end-to-end check
-
-```sh
-packages/net/e2e/run.ts
-```
-
-The script starts `wrangler dev` and the demo page on free ports. It then drives one host and two peers in headless Chromium, each in its own browser context. It checks ordered delivery both ways, a 500 KB message, cursor relay and rate, a peer reload, a host reload, a killed host browser, a signaling restart, a second host, and a wrong secret. It installs Playwright's Chromium on first run and cleans up after itself.
-
 ## Deploy the Worker on the free plan
 
 The free Workers plan covers this. Durable Objects with SQLite storage are free up to 100,000 requests a day. An idle hibernating WebSocket costs nothing, and 20 incoming WebSocket messages count as one request. A connection used about 6 signaling messages in the local end-to-end run, and real networks add a few more ICE candidates. The host also sends one keepalive every 30 seconds, which the Worker answers without waking the Durable Object. A long evening of play stays under a hundred requests.

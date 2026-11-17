@@ -54,7 +54,7 @@ Forty-two reports across the four tour games. None was a rule the engine got wro
 - Supply Drop and Stock Up were refused with an empty reserve and gave no reason.
 - Monitor's log said it discarded a card the player had kept.
 
-Each is fixed, with tests in `mechanics.test.ts` where the engine changed.
+Each is fixed, with tests in `machine.test.ts` where the engine changed.
 
 ## A whole game by clicks
 

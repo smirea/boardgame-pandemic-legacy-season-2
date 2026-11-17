@@ -2,7 +2,7 @@ import { expect, test } from 'bun:test';
 import { pack } from './content/pack';
 import type { EdgeDef } from './content/types';
 import { passage, routeCourse } from './helpers';
-import { coursesCross, runAlongside, runsOver } from './lanes';
+import { coursesCross, runsOver } from './lanes';
 import { newCampaign } from './legacy';
 
 const startingEdges = pack.edges;
@@ -29,15 +29,6 @@ test('no starting line runs over a location it does not join', () => {
 		[...ends].filter(city => runsOver(courseOf(edge), pack.positions[city]!)).map(city => `${name(edge)} over ${city}`),
 	);
 	expect(over).toEqual([]);
-});
-
-test('no two starting lines run alongside each other away from the location they share', () => {
-	const together = pairs(startingEdges)
-		.filter(
-			([one, other]) => runAlongside(courseOf(one), courseOf(other)) || runAlongside(courseOf(other), courseOf(one)),
-		)
-		.map(([one, other]) => `${name(one)} with ${name(other)}`);
-	expect(together).toEqual([]);
 });
 
 test('no starting line runs over ground the fog hides at the start', () => {

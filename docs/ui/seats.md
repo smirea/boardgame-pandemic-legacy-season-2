@@ -24,5 +24,3 @@ The subjects, in asset order, are:
 8. An East Asian woman, 45, with short hair and an expedition jacket.
 9. A stern white woman, 50, with cropped blonde hair and a sailor coat.
 10. A white man with a long auburn beard, a knitted cap, and botanical gear.
-
-`./apps/ui/e2e/seat-cards.ts` checks the four-character table, ability names, the scar icon, each seat's character sheet (beside the card, on screen, uncovered), hand piles and their hover, cards joining and leaving piles, card hints, dock hover, laptop widths, and reload. `--chrome` uses installed Chrome. The default uses Playwright Chromium with software rendering.

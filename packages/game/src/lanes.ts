@@ -3,7 +3,7 @@ import type { Point } from './helpers';
 
 /**
  * When lines printed on the board read as tangled. `gen-geometry.ts` lays the starting lanes out so
- * none of this holds, and `board.test.ts` checks the generated board against the same measures.
+ * none of this holds, and `lanes.test.ts` checks the generated board against the same measures.
  */
 
 /** How near a line may pass a location it does not join. */

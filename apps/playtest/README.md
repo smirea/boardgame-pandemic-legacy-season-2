@@ -42,7 +42,7 @@ Watch a live game from your own browser at the address `lab start` prints, with 
 
 A campaign plays one path through the year, so some of the game never comes up: the recon it skipped, the search nobody made, a death. A tour game puts the table next to those parts and lets the players play them.
 
-`src/stages.ts` holds the scenarios and the stages. A scenario is a campaign save in a lobby (`tour-october` is a group that never searched Johannesburg or reconned the Coral Sea). A stage arranges the table once, on the first action step: it moves pawns, deals chosen hands, sets a few cubes and the top of a deck. It keeps the engine's invariants, and after it every move is a real command from a player. The stage also gives each seat a list, which the brief prints. `src/stages.test.ts` plays both lists through the engine, so a stage that no longer fits the rules fails there before any player is started.
+`src/stages.ts` holds the scenarios and the stages. A scenario is a campaign save in a lobby (`tour-october` is a group that never searched Johannesburg or reconned the Coral Sea). A stage arranges the table once, on the first action step: it moves pawns, deals chosen hands, sets a few cubes and the top of a deck. It keeps the engine's invariants, and after it every move is a real command from a player. The stage also gives each seat a list, which the brief prints.
 
 `lab coverage <run> ...` replays the recordings of the named runs through the audit and prints what happened in play across all of them, what each later run added, and what no run has reached.
 

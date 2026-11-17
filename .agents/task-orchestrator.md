@@ -34,8 +34,8 @@ Repo config for the global `task-orchestrator` skill (`~/code/ai-files/skills/ta
 
 ## Verification
 
-- Rules: `bun test` on the files you changed (the pre-commit hook runs the changed tests), and the playtest lab where a mechanic needs real play: `./apps/playtest/lab coverage` must stay at 227 of 227.
-- UI: `bun run dev` in your worktree and drive the real screen with the e2e scripts in `apps/ui/e2e` (`solo.ts`, `october.ts`, `replay.ts`, `feedback.ts`), or T3's preview tools at a laptop width. `window.DEBUG` loads and sets state. A change to a tagged component runs `./apps/ui/e2e/feedback.ts`.
+- Rules: `bun test` (the pre-commit hook runs the whole suite), and the playtest lab where a mechanic needs real play: `./apps/playtest/lab coverage` must stay at 227 of 227.
+- UI: `bun run dev` in your worktree and drive the real screen with T3's preview tools at a laptop width. `window.DEBUG` loads and sets state.
 - Stored data: a change to the state or recordings keeps old saves loading. Prove it with a save and a recording from master, loaded on your build.
 - Before the PR: `bun run lint:ci`, `bun run typecheck`, `bun run test`, and `bun run build`, as CI does.
 

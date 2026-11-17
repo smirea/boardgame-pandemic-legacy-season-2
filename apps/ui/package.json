@@ -31,14 +31,13 @@
 		"world-atlas": "^2.0.2"
 	},
 	"devDependencies": {
-		"@stefan.inc/feedback-engine": "^1.6.1",
+		"@stefan.inc/feedback-engine": "^1.6.2",
 		"@tailwindcss/vite": "^4.3.3",
 		"@types/d3-geo": "^3.1.1",
 		"@types/three": "^0.187.0",
 		"@types/topojson-client": "^3.1.5",
 		"@types/topojson-specification": "^1.0.5",
-		"playwright": "1.65.1",
-		"svelte-check-native": "^1.10.0",
+		"svelte-check-native": "^1.12.1",
 		"tailwindcss": "^4.3.3",
 		"typescript": "^6.0.3"
 	}
