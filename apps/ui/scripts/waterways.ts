@@ -210,11 +210,11 @@ function reach(port: Point) {
 const near = (point: Point, port: Point, radius: number) => Math.hypot(point.x - port.x, point.z - port.z) <= radius;
 
 /** A* over water from one port to another. Cells near a coast cost more, so the lane keeps to open sea. */
-function search(a: Point, b: Point, reachA: number, reachB: number): number[] | null {
+function search(a: Point, b: Point, reachA: number, reachB: number, ground: Ground): number[] | null {
 	const passable = (i: number) => {
-		if (wet[i]) return true;
 		const at = centre(i % columns, Math.floor(i / columns));
-		return near(at, a, reachA) || near(at, b, reachB);
+		if (!ground(at)) return false;
+		return wet[i] === 1 || near(at, a, reachA) || near(at, b, reachB);
 	};
 	const weight = (i: number) => 1 + 2.5 * Math.max(0, 1 - shore[i]! / 2);
 	const start = cellOf(a);
@@ -293,14 +293,15 @@ function openSea(a: Point, b: Point) {
  * Over water from rim to rim, as straight as the coasts allow: the corners of the shortest way, and a
  * test for whether a line between them is still at sea.
  */
-function waterway(a: Point, b: Point): { corners: Point[]; water: (point: Point) => boolean } | null {
+function waterway(a: Point, b: Point, ground: Ground): { corners: Point[]; water: (point: Point) => boolean } | null {
 	const reachA = reach(a);
 	const reachB = reach(b);
-	const cells = search(a, b, reachA, reachB);
+	const cells = search(a, b, reachA, reachB, ground);
 	if (!cells) return null;
 	const visited = new Set(cells);
 	const open = openSea(a, b);
-	const allowed = (point: Point) => open(point) || visited.has(index(cellOf(point).column, cellOf(point).row));
+	const allowed = (point: Point) =>
+		ground(point) && (open(point) || visited.has(index(cellOf(point).column, cellOf(point).row)));
 	const raw = [a, ...cells.slice(1, -1).map(i => centre(i % columns, Math.floor(i / columns))), b];
 	// String pulling: from each corner, run straight to the furthest later point still in open water.
 	const corners = [raw[0]!];
@@ -311,7 +312,7 @@ function waterway(a: Point, b: Point): { corners: Point[]; water: (point: Point)
 		corners.push(raw[to]!);
 		from = to;
 	}
-	return { corners, water: point => allowed(point) || isWater(point) };
+	return { corners, water: point => allowed(point) || (ground(point) && isWater(point)) };
 }
 
 /**
@@ -371,23 +372,43 @@ function sweeps(a: Point, b: Point): Point[][] {
 		.map(({ curve }) => curve);
 }
 
+/** Where a course may go at all, besides the sea: every point it passes must be on this ground. */
+export type Ground = (point: Point) => boolean;
+
 /**
- * The course a sea lane sails between two ports: the first of the `arches` that keeps to open sea, or
- * else the shortest smooth curve that keeps to the sea, either one Bézier sweep or a curve through the
- * corners of the way around the coasts. Null when no water joins them.
+ * The courses a sea lane may sail between two ports, best first: the `arches` that keep to open sea,
+ * then the shortest smooth curve that keeps to the sea (one Bézier sweep or a curve through the corners
+ * of the way around the coasts), then every other curve that keeps to the sea, shortest first. Lazy, so
+ * taking the first costs what it always did. Nothing when no water on `ground` joins them.
  */
-export function seaCourse(a: Point, b: Point, arches: Point[][]): { path: Point[]; length: number } | null {
-	const open = openSea(a, b);
-	const way = waterway(a, b);
-	if (!way) return null;
+export function* seaCourses(a: Point, b: Point, arches: Point[][], ground: Ground = () => true): Generator<Point[]> {
+	const openWater = openSea(a, b);
+	const open = (point: Point) => ground(point) && openWater(point);
+	const way = waterway(a, b, ground);
+	if (!way) return;
+	for (const arch of arches) if (sails(arch, open)) yield rounded(arch);
 	const curves = sweeps(a, b);
-	const smooth = [0.75, 0.5, 0.25].map(reach => spline(way.corners, reach)).find(curve => sails(curve, way.water));
-	const options = [
+	const splines = [0.75, 0.5, 0.25].map(reach => spline(way.corners, reach));
+	const smooth = splines.find(curve => sails(curve, way.water));
+	const best = [
 		curves.find(curve => sails(curve, open)),
 		curves.find(curve => sails(curve, way.water)),
 		smooth ?? way.corners,
-	].filter(curve => curve !== undefined);
-	const path = arches.find(arch => sails(arch, open)) ?? options.toSorted((x, y) => length(x) - length(y))[0]!;
-	const course = rounded(path);
-	return { path: course, length: length(course) };
+	]
+		.filter(curve => curve !== undefined)
+		.toSorted((x, y) => length(x) - length(y))[0]!;
+	yield rounded(best);
+	for (const curve of [...curves, ...splines]) if (curve !== best && sails(curve, way.water)) yield rounded(curve);
+	if (best !== way.corners) yield rounded(way.corners);
+}
+
+/** The best of `seaCourses`, or null when no water on `ground` joins the two ports. */
+export function seaCourse(
+	a: Point,
+	b: Point,
+	arches: Point[][],
+	ground?: Ground,
+): { path: Point[]; length: number } | null {
+	const first = seaCourses(a, b, arches, ground).next();
+	return first.done ? null : { path: first.value, length: length(first.value) };
 }

@@ -1,5 +1,5 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { basename, join, resolve } from 'node:path';
 import { framesOf, parseRecord } from '@repo/game';
 import type { PublicState, World } from '@repo/game';
 import { newAudit, observe, universe } from './audit.ts';
@@ -12,8 +12,10 @@ export type RunCoverage = { run: string; games: number; won: number; audit: Audi
  * Replays every recording of a run through the audit. The recordings hold every state the game went
  * through, so this counts what happened even when the lab that watched the game was restarted mid-run.
  */
-export function coverageOfRun(run: string): RunCoverage {
-	const dir = join(labRoot, 'runs', run, 'records');
+export function coverageOfRun(runOrPath: string): RunCoverage {
+	// A path names a run directory anywhere, such as another checkout's, which a worktree has no runs of its own to count.
+	const run = runOrPath.includes('/') ? basename(resolve(runOrPath)) : runOrPath;
+	const dir = runOrPath.includes('/') ? join(resolve(runOrPath), 'records') : join(labRoot, 'runs', run, 'records');
 	if (!existsSync(dir)) throw new Error(`run "${run}" has no recordings at ${dir}`);
 	const audit = newAudit();
 	let previous: PublicState | null = null;

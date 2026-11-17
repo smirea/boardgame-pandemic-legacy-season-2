@@ -23,6 +23,11 @@ export type CityDef = {
 	startsInfested?: boolean;
 	/** Opened the first time a pawn arrives. */
 	arrival?: BundleId;
+	/**
+	 * How much more ground the location claims than its nearest-location share, in squared board units:
+	 * a point belongs to the location with the least squared distance minus this. Negative claims less.
+	 */
+	groundWeight?: number;
 };
 
 export type EdgeDef = { a: CityId; b: CityId; kind: EdgeKind };
