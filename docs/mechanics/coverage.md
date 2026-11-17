@@ -4,9 +4,8 @@ How `packages/game` covers the 170 interactions in [interactions.md](interaction
 
 ## How it is checked
 
-- `mechanics.test.ts` and `rules.test.ts` drive the real machine. Between them every action, job, ability, scar, event, companion, card improvement, purchase, objective, and campaign rule has at least one test.
-- `campaign.test.ts` plays full campaigns with a random bot and checks invariants after every command: no card in two places, cube totals conserved, piece counts never negative, deck bookkeeping in step. The bot never wins, so it proves the game cannot get stuck or corrupt its state. It does not prove a rule is right.
-- `apps/ui/e2e/october.ts` plays a whole October game through the built UI in a headless browser: lobby, setup, every turn, the game-end spending step, and the next game's setup.
+- `packages/game/src/machine.test.ts` drives the real machine. Every action, job, ability, scar, event, companion, card improvement, purchase, objective, and campaign rule has at least one test.
+- `packages/game/src/bot.test.ts` plays a full campaign with a random bot (`CAMPAIGNS=200` plays more seeds) and checks invariants after every command: no card in two places, cube totals conserved, piece counts never negative, deck bookkeeping in step. The bot never wins, so it proves the game cannot get stuck or corrupt its state. It does not prove a rule is right.
 - Three AI players played the whole year, then four staged tour games for the branches that campaign did not take, and one whole game by clicks alone. Counted from the recordings (`./apps/playtest/lab coverage campaign-2 tour-october tour-november ui-january tour-searches`), all 227 mechanics the lab tracks have happened in play: every action, event, companion, decision, purchase, job, bundle, Legacy card, objective, scar, ability held, kind of search result, infection outcome and exposure outcome. `docs/playtest/campaign-2.md` and `docs/playtest/tour.md` have the detail.
 - An independent review and a three-player playtest each found rule or UI bugs after earlier passes. Those are fixed and have regression tests. Expect more of that kind.
 
@@ -43,7 +42,7 @@ Nothing from the catalogue is left unbuilt. Two things rest on thin sources and 
 
 ## Campaign review
 
-A month-by-month review of the content pack against the research (November 2026) found sixteen differences. Twelve are fixed and tested in `mechanics.test.ts` under "parity gaps found by the static review". The last two fixed were the sea route from Lima to the eastern Pacific haven, which now arrives with South America, and August's free ability units, which the game screen now offers during setup.
+A month-by-month review of the content pack against the research (November 2026) found sixteen differences. Twelve are fixed and tested in `machine.test.ts`. The last two fixed were the sea route from Lima to the eastern Pacific haven, which now arrives with South America, and August's free ability units, which the game screen now offers during setup.
 
 One of the sixteen was not a difference in play: the losing-streak turning point would count prologue losses, but the prologue never records a result.
 
