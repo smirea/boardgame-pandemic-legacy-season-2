@@ -13,7 +13,7 @@
 		reject,
 		scenarios,
 	} from '@repo/game';
-	import type { Action, ActionChoice, CardId, CityId, Command, EdgeDef, Play, SeatId } from '@repo/game';
+	import type { Action, CardId, CityId, Command, EdgeDef, Play, SeatId } from '@repo/game';
 	import Board from '#lib/board/Board.svelte';
 	import type { BoardPoint } from '#lib/board/projection.ts';
 	import { travelOf } from '#lib/board/travel.ts';
