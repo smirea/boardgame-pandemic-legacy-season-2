@@ -347,17 +347,7 @@
 				{/if}
 			</div>
 
-			<div class="turn" style:--seat={seatColor(game.active)}>
-				<p class="whose">
-					<strong>{seatName(world, game.active)}'s turn</strong>
-					<small
-						>{snap.phase === 'playing.actions'
-							? `${game.actionsLeft} action${game.actionsLeft === 1 ? '' : 's'} left`
-							: snap.phase === 'playing.draw'
-								? 'Drawing cards'
-								: 'Infecting cities'}</small
-					>
-				</p>
+			<div class="turn">
 				{#if snap.phase === 'playing.actions'}
 					<div class="pips" title="Actions left">
 						{#each { length: Math.max(pack.numbers.actionsPerTurn, game.actionsLeft) } as _, index (index)}
@@ -789,26 +779,6 @@
 		flex-direction: column;
 		justify-content: center;
 		gap: 0.4rem;
-	}
-
-	.whose {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		margin: 0;
-		line-height: 1.15;
-	}
-
-	.whose strong {
-		color: var(--seat);
-		font-family: var(--font-display);
-		font-size: 1.15rem;
-		font-weight: 400;
-	}
-
-	.whose small {
-		color: var(--muted);
-		font-size: 0.8rem;
 	}
 
 	.pips {

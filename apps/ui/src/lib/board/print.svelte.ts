@@ -86,6 +86,9 @@ export function printName(name: string, port: boolean, size: number, faded: bool
 		context.fillStyle = lit ? '#8e2a12' : INK;
 		context.strokeStyle = context.fillStyle;
 		context.fillText(name, text, baseline);
+		// The face ships in one weight only, so a hairline of ink over the fill is what makes it bolder.
+		context.lineWidth = size * 0.035;
+		context.strokeText(name, text, baseline);
 		glyph(0.2);
 	});
 }
