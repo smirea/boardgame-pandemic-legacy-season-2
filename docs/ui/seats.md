@@ -1,6 +1,6 @@
 # Seat cards
 
-`Corner.svelte` shows the name and carried supply cubes, followed by occupation, abilities, and scars. Descriptions truncate to one line and remain available in each line's tooltip. The active border pulses unless the browser requests reduced motion.
+`Corner.svelte` shows the name and carried supply cubes, followed by the names of the occupation, abilities, and scars, one per line; a scar carries a stitched-cut icon. A pointer or focus resting on the seat opens its character sheet beside it, on the side facing the board: each line in larger type with its kind and full text. Top seats hang it from their top edge and bottom seats raise it from their bottom edge, so it stays on screen. Its column rises above the objectives and the targeting line while it is open. The active border pulses unless the browser requests reduced motion.
 
 `cardTargets` in the game package supplies card hover hints. City cards refer to explored locations. Produce Supplies refers to havens and supply centers on the grid. Events and companions use the engine's legal plays for the current phase. Player targets, including the active player and a card's owner, highlight seats. Medic refers to its owner's location. Cards without explicit targets highlight nothing. Card hints replace normal action hints until the pointer leaves the card.
 
@@ -25,4 +25,4 @@ The subjects, in asset order, are:
 9. A stern white woman, 50, with cropped blonde hair and a sailor coat.
 10. A white man with a long auburn beard, a knitted cap, and botanical gear.
 
-`./apps/ui/e2e/seat-cards.ts` checks the four-character table, hand piles and their hover, cards joining and leaving piles, card hints, dock hover, laptop widths, and reload. `--chrome` uses installed Chrome. The default uses Playwright Chromium with software rendering.
+`./apps/ui/e2e/seat-cards.ts` checks the four-character table, ability names, the scar icon, each seat's character sheet (beside the card, on screen, uncovered), hand piles and their hover, cards joining and leaving piles, card hints, dock hover, laptop widths, and reload. `--chrome` uses installed Chrome. The default uses Playwright Chromium with software rendering.

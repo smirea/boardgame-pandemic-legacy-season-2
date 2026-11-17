@@ -41,3 +41,6 @@ export const IMPROVEMENT_MARK: Record<CityImprovementId, { text?: string; icon?:
 	wild: { icon: WILD_ICON },
 	redWild: { icon: WILD_ICON },
 };
+
+/** A stitched cut, marking a scar on a character card. */
+export const SCAR_ICON = 'M2 12.5 14 3.5M4.2 8.6l2 2.6M7.2 6.4l2 2.6M10.2 4.2l2 2.6';
