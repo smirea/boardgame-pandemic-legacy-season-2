@@ -217,7 +217,16 @@ try {
 					node => node.dataset['player'] ?? '',
 				),
 				decisions: text('.middle > .chips:not([data-testid]) button'),
-				chips: text('[data-testid=actions] button:not([disabled])'),
+				chips: [
+					...document.querySelectorAll<HTMLElement>('[data-testid=actions] button[data-action]:not([disabled])'),
+				].map(node => ({
+					action: node.dataset['action']!,
+					label: node.querySelector('.name')?.textContent?.trim() ?? '',
+				})),
+				aiming: [...document.querySelectorAll<HTMLElement>('.anchor[data-highlight=target]')].map(
+					node => node.dataset['city']!,
+				),
+				waiting: Boolean(document.querySelector('[data-testid=aiming]')),
 				rows: document.querySelectorAll('[data-testid=chooser]:not([inert]) .rows button').length,
 				multi: Boolean(document.querySelector('[data-testid=chooser]:not([inert]) [data-testid=chooser-confirm]')),
 				playable: document.querySelectorAll('[data-testid=hand] .card.play').length,
@@ -235,6 +244,9 @@ try {
 		}
 		if (view.briefing) {
 			await tap(testid('ack-briefing'));
+		} else if (view.waiting && view.aiming.length) {
+			await clickCity(page, pickOne(view.aiming));
+			used.add('a target picked on the map');
 		} else if (view.rows > 0) {
 			const rows = page.locator('[data-testid=chooser]:not([inert]) .rows button');
 			if (view.multi) {
@@ -272,14 +284,14 @@ try {
 		} else if (view.actionsLeft === 0 || view.chips.length === 0 || idle > 5) {
 			await tap(testid('end-actions'));
 		} else {
-			const scored = view.chips.map(label => ({
-				label,
-				weight: Object.entries(WEIGHT).find(([name]) => label.startsWith(name))?.[1] ?? 1,
+			const scored = view.chips.map(chip => ({
+				...chip,
+				weight: Object.entries(WEIGHT).find(([name]) => chip.label.startsWith(name))?.[1] ?? 1,
 			}));
 			let roll = chance() * scored.reduce((sum, chip) => sum + chip.weight, 0);
 			const chosen = scored.find(chip => (roll -= chip.weight) <= 0) ?? scored[0]!;
 			used.add(Object.keys(WEIGHT).find(name => chosen.label.startsWith(name)) ?? chosen.label);
-			await tap(page.locator('[data-testid=actions] button:not([disabled])', { hasText: chosen.label }).first());
+			await tap(page.locator(`[data-testid=actions] button[data-action=${chosen.action}]`));
 		}
 	}
 

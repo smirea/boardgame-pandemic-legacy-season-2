@@ -1,21 +1,12 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
-	import { actionCost, checkAction, handLimit, pack, reject } from '@repo/game';
+	import { handLimit, pack, reject } from '@repo/game';
 	import type { Action, CardId, Command, Decide, Play, PublicState, Purchase, SeatId } from '@repo/game';
 	import { flip } from 'svelte/animate';
 	import { cubicIn } from 'svelte/easing';
 	import { fade, fly } from 'svelte/transition';
-	import {
-		ACTION_NAMES,
-		actionDetail,
-		actionTarget,
-		cityName,
-		decideLabel,
-		decisionTitle,
-		seatName,
-		SEAT_COLORS,
-		cardName,
-	} from './labels.svelte.ts';
+	import ActionIcon from './ActionIcon.svelte';
+	import { cityName, decideLabel, decisionTitle, seatName, SEAT_COLORS, cardName } from './labels.svelte.ts';
 	import InfectionCard from '#lib/cards/InfectionCard.svelte';
 	import { deal } from './deal.ts';
 	import PlayerCard from './PlayerCard.svelte';
@@ -28,16 +19,20 @@
 		/** The hand held up in the dock, and the hand that is this player's own. */
 		seat: SeatId;
 		home: SeatId;
-		actions: Action[];
 		plays: { seat: SeatId; card: CardId; play: Play }[];
 		decides: Decide[];
 		send: (command: Command) => void;
 		onview: (seat: SeatId) => void;
-		ongroup: (name: Action['a']) => void;
+		/** An action or card waiting for a city on the map. */
+		aiming: { label: string; a: Action['a'] | null; count: number } | null;
+		oncancel: () => void;
+		/** The ways to use a card in hand right now, shown as tags over the card. */
+		uses: (seat: SeatId, card: CardId) => { key: string; label: string; icon: Action['a'] | null; run: () => void }[];
 		onplaycard: (seat: SeatId, card: CardId) => void;
 	};
 
-	let { snap, canAct, owns, seat, home, actions, plays, decides, send, onview, ongroup, onplaycard }: Props = $props();
+	let { snap, canAct, owns, seat, home, plays, decides, send, onview, aiming, oncancel, uses, onplaycard }: Props =
+		$props();
 
 	const world = $derived(snap.world);
 	const game = $derived(world.game!);
@@ -88,30 +83,6 @@
 	const fanAngle = (index: number) => (index - (handCards.length - 1) / 2) * Math.min(4.5, 22 / handCards.length);
 	const mustDiscard = $derived(owns(seat) && decides.some(decide => decide.d === 'discard' && decide.seat === seat));
 	const playable = $derived(new Set(plays.filter(option => option.seat === seat).map(option => option.card)));
-	const FREE = new Set(['pickUp', 'transfer', 'inoculate', 'salvage', 'destroyInfection']);
-	// One chip per kind of action. A chip with a single variant says exactly what it will do, so nothing fires blind.
-	const chips = $derived(
-		[...new Set(actions.map(action => action.a))].map(name => {
-			const variants = actions.filter(action => action.a === name);
-			const only = variants.length === 1 ? variants[0]! : null;
-			const target = only ? actionTarget(world, only) : null;
-			return {
-				name,
-				label: ACTION_NAMES[name] + (target ? ` to ${cityName(target)}` : ''),
-				detail: only ? actionDetail(world, only) : '',
-				count: variants.length,
-				free: only !== null && !FREE.has(name) && actionCost(world, game.active, only) === 0,
-			};
-		}),
-	);
-	const noSupplies = $derived(
-		canAct &&
-			snap.phase === 'playing.actions' &&
-			game.actionsLeft > 0 &&
-			!actions.some(action => action.a === 'makeSupplies')
-			? checkAction(world, game.active, { a: 'makeSupplies' })
-			: null,
-	);
 	const decider = $derived(pending && 'seat' in pending && pending.seat ? pending.seat : game.active);
 	// A shared prompt shows each player only their own cards, and the player whose turn it is may pass on it.
 	const choices = $derived(
@@ -173,20 +144,30 @@
 
 {#snippet drew()}
 	{#if drawn.cards.length}
-		<div class="drew" data-testid="drawn">
-			<span>Drew</span>
-			{#each drawn.cards as card (card.id)}
-				<span class="pill" class:epidemic={card.kind === 'epidemic'}
-					>{card.kind === 'epidemic' ? 'Epidemic' : cardName(world, card.id)}</span
-				>
-			{/each}
-			{#each drawn.epidemics as entry (entry.seq)}
-				<span class="pill epidemic">
-					{entry.city
-						? `${cityName(entry.city)} lost ${entry.removed} cube${entry.removed === 1 ? '' : 's'}`
-						: 'No city struck'}, rate {entry.rate}
-				</span>
-			{/each}
+		<div class="group" data-testid="drawn">
+			<div class="cards" title="Drawn this turn">
+				{#each drawn.cards as card (card.id)}
+					{@const struck =
+						card.kind === 'epidemic'
+							? drawn.epidemics[drawn.cards.filter(other => other.kind === 'epidemic').indexOf(card)]
+							: undefined}
+					<div class="drawn" in:fly={{ y: -24, duration: 380 }}>
+						{#if card.kind === 'epidemic'}
+							<!-- The Epidemic card carries what it did, so the draw reads in one glance. -->
+							<div class="epidemic" data-testid="epidemic">
+								<strong>Epidemic</strong>
+								<span>
+									{struck?.city ? `${cityName(struck.city)} −${struck.removed}` : 'No city struck'}{struck
+										? `, rate ${struck.rate}`
+										: ''}
+								</span>
+							</div>
+						{:else}
+							<PlayerCard {card} small />
+						{/if}
+					</div>
+				{/each}
+			</div>
 		</div>
 	{/if}
 {/snippet}
@@ -198,7 +179,7 @@
 		home,
 		canAct,
 		phase: snap.phase,
-		actions: actions.map(action => action.a),
+		aiming: aiming?.label ?? null,
 		plays: plays.length,
 		decides: decides.length,
 	}))}
@@ -287,10 +268,24 @@
 						{#each handCards as card, index (card.id)}
 							<div
 								class="slot"
+								data-card={card.id}
 								animate:flip={{ duration: 320 }}
 								in:deal={{ drawn: drawnThisTurn.has(card.id) }}
 								out:fly={{ y: -140, duration: 260, easing: cubicIn }}
 							>
+								{#if !mustDiscard}
+									{@const tags = uses(seat, card.id)}
+									{#if tags.length}
+										<div class="tags" data-testid="card-uses">
+											{#each tags as tag, order (tag.key)}
+												<button style:--i={order} data-use={tag.key} onclick={tag.run}>
+													{#if tag.icon}<ActionIcon action={tag.icon} size="1.5rem" />{:else}<i class="star">✦</i>{/if}
+													{tag.label}
+												</button>
+											{/each}
+										</div>
+									{/if}
+								{/if}
 								<div
 									class="lift"
 									style:--angle={`${fanAngle(index)}deg`}
@@ -339,35 +334,60 @@
 						<p class="waiting">Waiting for {seatName(world, decider)}.</p>
 					{/if}
 				{:else if snap.phase === 'playing.actions'}
-					{#if canAct}
-						<div class="chips" data-testid="actions">
-							{#each chips as chip, index (chip.name)}
-								<button style:--i={index} onclick={() => ongroup(chip.name)}>
-									{chip.label}
-									{#if chip.detail}<small>{chip.detail}</small>{/if}
-									{#if chip.free}<small class="free">free</small>{/if}
-									{#if chip.count > 1}<small class="count">{chip.count}</small>{/if}
-								</button>
-							{/each}
-							{#if noSupplies}
-								<button disabled title={noSupplies}>Make supplies <small>{noSupplies}</small></button>
-							{/if}
+					{#if canAct && aiming}
+						<div class="step aiming" data-testid="aiming">
+							{#if aiming.a}<ActionIcon action={aiming.a} size="2.8rem" />{/if}
+							<div class="say">
+								<strong>{aiming.label}</strong>
+								<span
+									>{aiming.count === 1 ? 'Click the lit city' : `Click one of the ${aiming.count} lit cities`} on the map.
+									Esc or a right click cancels.</span
+								>
+							</div>
+							<button onclick={oncancel} data-testid="cancel-aim">Cancel</button>
+						</div>
+					{:else if canAct}
+						<div class="step">
+							<div class="say">
+								<strong>{game.actionsLeft} action{game.actionsLeft === 1 ? '' : 's'} left</strong>
+								<span
+									>Choose one from the list, click a city to see what you can do there, or point at a card in your hand.</span
+								>
+							</div>
 						</div>
 					{:else}
-						<p class="prompt">{seatName(world, game.active)} is taking actions.</p>
+						<div class="step">
+							<div class="say"><strong>{seatName(world, game.active)} is taking actions</strong></div>
+						</div>
 					{/if}
 				{:else if snap.phase === 'playing.draw'}
-					<p class="prompt">{seatName(world, game.active)} draws 2 Player cards.</p>
-					{@render drew()}
+					<div class="step">
+						<div class="say line">
+							<strong>Draw Player cards</strong>
+							<span>{seatName(world, game.active)} has <b>{game.drawsLeft}</b> to draw.</span>
+						</div>
+					</div>
+					<div class="tray">{@render drew()}</div>
 				{:else}
-					<p class="prompt">Infect cities: {game.infectionsLeft} card{game.infectionsLeft === 1 ? '' : 's'} to flip.</p>
-					{@render drew()}
-					<div class="flipped" data-testid="flipped">
-						{#each flipped as entry (entry.seq)}
-							<div class="flipcard" animate:flip={{ duration: 300 }}>
-								<InfectionCard card={entry.card} note={entry.note} />
+					<div class="step">
+						<div class="say line">
+							<strong>Infect cities</strong>
+							<span><b>{game.infectionsLeft}</b> left to flip</span>
+						</div>
+					</div>
+					<div class="tray">
+						{@render drew()}
+						{#if flipped.length}
+							<div class="group">
+								<div class="cards flipped" data-testid="flipped" title="Flipped this Infect step">
+									{#each flipped as entry (entry.seq)}
+										<div class="flipcard" animate:flip={{ duration: 300 }}>
+											<InfectionCard card={entry.card} note={entry.note} />
+										</div>
+									{/each}
+								</div>
 							</div>
-						{/each}
+						{/if}
 					</div>
 				{/if}
 			</div>
@@ -417,6 +437,194 @@
 </div>
 
 <style>
+	.step {
+		display: flex;
+		align-items: center;
+		gap: 0.8rem;
+	}
+
+	.say {
+		display: flex;
+		flex-direction: column;
+		gap: 0.15rem;
+		min-width: 0;
+	}
+
+	.say.line {
+		flex-direction: row;
+		flex-wrap: wrap;
+		align-items: baseline;
+		column-gap: 0.7rem;
+	}
+
+	.say strong {
+		font-family: var(--font-display);
+		font-size: 1.55rem;
+		font-weight: 400;
+		line-height: 1.05;
+	}
+
+	.say span {
+		color: var(--muted);
+		font-size: 0.92rem;
+		line-height: 1.3;
+	}
+
+	.say b {
+		color: var(--paper);
+		font-size: 1.05rem;
+	}
+
+	.step.aiming {
+		padding: 0.5rem 0.7rem;
+		border: 1px solid var(--warn);
+		border-radius: 3px;
+		background: rgb(227 178 60 / 0.1);
+		pointer-events: auto;
+	}
+
+	.step.aiming strong {
+		color: var(--warn);
+	}
+
+	.step.aiming button {
+		margin-left: auto;
+		padding: 0.35rem 0.8rem;
+		border: 1px solid var(--line-strong);
+		border-radius: 2px;
+		background: none;
+		color: var(--ink);
+		font: inherit;
+		cursor: pointer;
+	}
+
+	.step.aiming button:hover {
+		border-color: var(--paper);
+		background: var(--wash);
+	}
+
+	.tray {
+		display: flex;
+		align-items: flex-end;
+		gap: 1.2rem;
+		min-width: 0;
+	}
+
+	.group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		min-width: 0;
+	}
+
+	.cards {
+		display: flex;
+		gap: 0.4rem;
+		--card-size: 0.82rem;
+	}
+
+	.epidemic {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		width: 7.6em;
+		height: 3em;
+		padding: 0 0.6em;
+		border: 1px solid #5e140e;
+		border-radius: 0.4em;
+		background: linear-gradient(172deg, #a8261c, #6d150f);
+		color: #fff1e6;
+		font-size: var(--card-size);
+		animation: alarm 900ms ease-out 2;
+	}
+
+	.epidemic strong {
+		font-family: var(--font-display);
+		font-size: 1.12em;
+		font-weight: 400;
+		line-height: 1;
+	}
+
+	.epidemic span {
+		overflow: hidden;
+		font-size: 0.7em;
+		font-weight: 600;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	@keyframes alarm {
+		50% {
+			box-shadow: 0 0 0 0.35rem rgb(207 91 62 / 0.45);
+		}
+	}
+
+	/* Each way to use a card stands as a tag over it once it rises out of the fan. */
+	.tags {
+		position: absolute;
+		bottom: calc(100% + 3.4rem);
+		left: 50%;
+		z-index: 6;
+		display: none;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.25rem;
+		translate: -50% 0;
+	}
+
+	.slot:hover .tags,
+	.slot:focus-within .tags {
+		display: flex;
+	}
+
+	.tags button {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+		padding: 0.15rem 0.7rem 0.15rem 0.15rem;
+		border: 1px solid rgb(42 32 23 / 0.55);
+		border-radius: 999px;
+		background: rgb(240 231 210 / 0.97);
+		box-shadow: var(--slip-shadow);
+		color: var(--slip-ink);
+		font: inherit;
+		font-size: 0.86rem;
+		font-weight: 650;
+		white-space: nowrap;
+		cursor: pointer;
+		animation: tag 220ms calc(var(--i) * 40ms) cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+		transition:
+			background 140ms ease,
+			scale 140ms ease;
+	}
+
+	.tags button:hover {
+		background: #fff8e6;
+		scale: 1.05;
+	}
+
+	.tags :global(.icon) {
+		border-radius: 50%;
+	}
+
+	.star {
+		display: grid;
+		place-items: center;
+		width: 1.5rem;
+		height: 1.5rem;
+		border-radius: 50%;
+		background: #b08628;
+		color: #fff8e6;
+		font-style: normal;
+	}
+
+	@keyframes tag {
+		from {
+			opacity: 0;
+			translate: 0 0.5rem;
+		}
+	}
+
 	/* No tray: the dock is the near edge of the table, with the held hand rising out of the bottom of the screen. */
 	/* The dock reaches up over the empty table below the chart, so only its contents take clicks. */
 	.dock {
@@ -431,14 +639,14 @@
 		pointer-events: none;
 	}
 
-	.dock :is(button, input, summary, .slot, .events, .free-list, .flipped, .drew, .prompt) {
+	.dock :is(button, input, summary, .slot, .events, .free-list, .tray, .step, .prompt) {
 		pointer-events: auto;
 	}
 
 	/* Beside the replay panel the dock is narrower, so the held cards shrink rather than run into the prompts. */
 	@container dock (width < 1100px) {
 		.dock {
-			grid-template-columns: minmax(7rem, 10rem) minmax(0, 1.5fr) minmax(0, 1fr) 8rem;
+			grid-template-columns: minmax(0, 4rem) minmax(0, 1.3fr) minmax(0, 1fr) 8rem;
 		}
 
 		.held .hand {
@@ -636,6 +844,7 @@
 	}
 
 	.slot {
+		position: relative;
 		margin-inline: calc(var(--overlap) / -2);
 	}
 
@@ -665,11 +874,13 @@
 		padding-top: 2rem;
 	}
 
+	/* The step sits low, on the dock's dark band, clear of the chart's light paper above it. */
 	.middle {
 		display: flex;
 		flex-direction: column;
-		justify-content: center;
+		justify-content: flex-end;
 		gap: 0.5rem;
+		padding-bottom: 0.9rem;
 		min-width: 0;
 	}
 
@@ -702,29 +913,8 @@
 		font-size: 0.82rem;
 	}
 
-	.drew {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: 0.3rem;
-		color: var(--muted);
-		font-size: 0.78rem;
-	}
-
-	.pill {
-		padding: 0.05rem 0.5rem;
-		border: 1px solid var(--line);
-		border-radius: 2px;
-		color: var(--ink);
-	}
-
-	.pill.epidemic {
-		border-color: var(--danger);
-		background: rgb(207 91 62 / 0.14);
-		color: #ec8c70;
-	}
-
 	.flipcard {
+		flex: none;
 		animation: turn-over 520ms cubic-bezier(0.2, 0.9, 0.3, 1.15) backwards;
 		transform-origin: left center;
 	}
@@ -740,10 +930,8 @@
 		}
 	}
 
-	.flipped {
-		display: flex;
-		gap: 0.35rem;
-		--card-size: 0.62rem;
+	.cards.flipped {
+		--card-size: 0.5rem;
 		overflow: hidden;
 	}
 

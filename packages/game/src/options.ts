@@ -1,7 +1,7 @@
 import type { Action } from './actions';
-import { checkAction, checkEdge } from './actions';
+import { actionGate, actionIds, checkAction, checkEdge, hasAction, isFreeAction } from './actions';
 import { pack } from './content/pack';
-import type { Color } from './content/types';
+import type { ActionId, Color } from './content/types';
 import { freeCharacters, scarTargets } from './flow';
 import { cardValue, characterOf, cityDef, grid, handLimit, neighbours, player, seaRoute } from './helpers';
 import type { CardId, CityId, SeatId } from './ids';
@@ -86,6 +86,11 @@ export function payments(
 
 /** Concrete legal actions for the seat. Card-paying actions offer every payment that wastes no card. */
 export function legalActions(world: World, seat: SeatId): Action[] {
+	return candidateActions(world, seat).filter(action => checkAction(world, seat, action) === null);
+}
+
+/** Every concrete action worth asking the rules about, legal or not. */
+function candidateActions(world: World, seat: SeatId): Action[] {
 	const { campaign, game } = world;
 	if (!game || game.outcome) return [];
 	const me = player(game, seat);
@@ -196,7 +201,66 @@ export function legalActions(world: World, seat: SeatId): Action[] {
 	for (const other of others)
 		for (const card of player(game, other).hand) candidates.push({ a: 'facilitate', with: other, card });
 
-	return candidates.filter(action => checkAction(world, seat, action) === null);
+	return candidates;
+}
+
+/** What a kind of action needs when the seat's situation offers not even one way to try it. */
+const NEEDS: Partial<Record<ActionId, string>> = {
+	drive: 'No route leads out of here',
+	sail: 'Needs a City card in hand',
+	charter: 'Needs the card of this port in hand',
+	captainSail: 'Needs a City card in hand and a sea route from here',
+	produce: 'Needs a Produce Supplies card',
+	deliver: 'Carry supply cubes first',
+	pickUp: 'No supply cubes here',
+	transfer: 'No one holds cubes to pass',
+	share: 'No one else at the table',
+	buildCenter: 'Not enough City cards of this colour',
+	recon: 'No recon route starts here',
+	establishLine: 'No supply line can be drawn from here',
+	chartLane: 'No sea lane can be charted from here',
+	search: 'Needs a City card with a search box',
+	broadcast: 'No Hollow Men on the board',
+	sabotage: 'Needs a City card and Hollow Men on the board',
+	broker: 'Needs a City card in hand and one in the discard pile',
+	investigate: 'Needs a City card in hand and one in the discard pile',
+	supply: 'Needs a City card in hand',
+	run: 'Needs a City card in hand',
+	inoculate: 'Nothing in the discard piles',
+	destroyInfection: 'Nothing in the discard piles',
+	salvage: 'Needs 2 cards in hand and one in the discard pile',
+	facilitate: 'No one else holds cards',
+	administratorMove: 'No other pawn to move',
+};
+
+export type ActionChoice = {
+	a: ActionId;
+	/** Every legal way to take it right now. */
+	actions: Action[];
+	/** Why there is none, when `actions` is empty. */
+	reason: string | null;
+};
+
+/** Each kind of action the seat's character has, in rule order, with its legal variants or why it has none. */
+export function actionMenu(world: World, seat: SeatId): ActionChoice[] {
+	const game = world.game;
+	if (!game || game.outcome) return [];
+	const candidates = candidateActions(world, seat);
+	return actionIds
+		.filter(id => hasAction(world, seat, id))
+		.map(id => {
+			const gate = actionGate(world, seat, id);
+			if (gate) return { a: id, actions: [], reason: gate };
+			const tried = candidates.filter(action => action.a === id);
+			const verdicts = tried.map(action => ({ action, reason: checkAction(world, seat, action) }));
+			const actions = verdicts.flatMap(verdict => (verdict.reason === null ? [verdict.action] : []));
+			if (actions.length) return { a: id, actions, reason: null };
+			if (!isFreeAction(id) && game.actionsLeft === 0) return { a: id, actions, reason: 'No actions left' };
+			const counts = new Map<string, number>();
+			for (const { reason } of verdicts) counts.set(reason!, (counts.get(reason!) ?? 0) + 1);
+			const common = [...counts].sort((a, b) => b[1] - a[1])[0]?.[0];
+			return { a: id, actions, reason: common ?? NEEDS[id] ?? 'Nothing to do with it here' };
+		});
 }
 
 export function legalPlays(world: World, phase: Phase): { seat: SeatId; card: CardId; play: Play }[] {

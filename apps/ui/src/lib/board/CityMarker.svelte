@@ -235,6 +235,7 @@
 			style:--size="{FOOTPRINT * 2 * HTML_PX}px"
 			data-city={city.id}
 			data-name={state.name}
+			data-highlight={state.highlight}
 			aria-hidden="true"
 			{@attach feedback(state.name, () => ({ id: city.id, ...state }))}
 		></span>
