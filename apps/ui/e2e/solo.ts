@@ -97,9 +97,15 @@ try {
 		Number(await pile.getAttribute('data-stockpile')) === game.stockpile,
 		"the stockpile on the board does not hold the game's count",
 	);
-	const pileBox = (await pile.boundingBox())!;
-	await page.mouse.move(pileBox.x + pileBox.width / 2, pileBox.y + pileBox.height / 2);
-	const pileHint = await page.locator('[data-testid=board-hint]').textContent();
+	// The camera glides to the fitted view as the panels settle, and the board only notices a pointer that moves,
+	// so the pointer follows the pile until the board reports it under the pointer.
+	const hint = page.locator('[data-testid=board-hint]');
+	let pileHint: string | null = null;
+	for (let tries = 0; tries < 60 && !pileHint?.includes('Stockpile'); tries++) {
+		const box = (await pile.boundingBox())!;
+		await page.mouse.move(box.x + box.width / 2 + (tries % 2), box.y + box.height / 2, { steps: 2 });
+		pileHint = await hint.textContent({ timeout: 1000 }).catch(() => null);
+	}
 	assert(pileHint?.includes(`Supply cubes left ${game.stockpile}`), `the stockpile's hover says ${pileHint}`);
 	await page.mouse.move(5, 450);
 	ok('the stockpile stands on the board and its hover gives the count', String(game.stockpile));
