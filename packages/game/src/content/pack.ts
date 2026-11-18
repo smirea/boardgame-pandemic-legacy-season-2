@@ -783,6 +783,7 @@ export const pack: ContentPack = {
 		produceCards: 8,
 		produceBoxes: 2,
 		characterSlots: 4,
+		portraits: 10,
 		exposureBoxes: 7,
 		storageCap: 30,
 		reserve: 40,

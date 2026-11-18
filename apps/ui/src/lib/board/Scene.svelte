@@ -13,7 +13,7 @@
 	import Flags from './Flags.svelte';
 	import { FogMask } from './chart';
 	import { loadChart } from './chartLoader';
-	import { DEFAULT_TILT, fitBoard } from './fit';
+	import { DEFAULT_TILT, fitBoard, focusBoard } from './fit';
 	import Fog from './Fog.svelte';
 	import type { Part } from './hints';
 	import { layoutLabels, NAME_SIZE } from './labels';
@@ -55,6 +55,8 @@
 		hoverStockpile?: boolean;
 		/** Screen rectangles, in pixels from the canvas corner, that HUD panels cover. The fitted view keeps cities out of them. */
 		covered?: Covered[];
+		/** A city to look at closely, landing at `x`, `y` (fractions of the canvas from its top left), in place of the fitted view. */
+		focus?: { city: CityId; x: number; y: number } | null;
 	};
 
 	let {
@@ -68,6 +70,7 @@
 		hoverStockpile = false,
 		resetView = 0,
 		covered = [],
+		focus = null,
 	}: Props = $props();
 
 	interactivity();
@@ -233,6 +236,9 @@
 	const aspect = $derived($size.width / Math.max(1, $size.height));
 	const fit = $derived(fitBoard(explored, aspect, FOV, DEFAULT_TILT, { bounds: explored, ...insets }));
 	const whole = $derived(fitBoard(bounds, aspect, FOV));
+	const FOCUS_ZOOM = 0.6;
+	const aim = $derived(focus ? focusBoard(layout[focus.city]!, focus, aspect, FOV, fit.distance * FOCUS_ZOOM) : fit);
+	let lastFocus: CityId | null = null;
 	// The first view snaps into place. After that, a newly explored region or a reset glides the camera over.
 	const glide = new Tween(1, { duration: 900, easing: cubicInOut });
 	let path: { from: Vector3; to: Vector3; fromTarget: Vector3; toTarget: Vector3 } | null = null;
@@ -241,8 +247,14 @@
 			lastReset = resetView;
 			userMoved = false;
 		}
+		// Asking to look at a city, or to stop, takes the camera back from a drag, as a reset does.
+		const focused = focus?.city ?? null;
+		if (focused !== lastFocus) {
+			lastFocus = focused;
+			userMoved = false;
+		}
 		if (!camera || !controls || userMoved) return;
-		const next = fit;
+		const next = aim;
 		untrack(() => {
 			if (!path) {
 				camera!.position.copy(next.position);

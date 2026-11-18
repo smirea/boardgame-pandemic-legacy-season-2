@@ -96,3 +96,38 @@ export function fitBoard(bounds: BoardBounds, aspect: number, fov: number, tilt 
 		distance: far,
 	};
 }
+
+/**
+ * A close camera on one board point that lands it at `spot`, a place on the screen given as fractions of the width
+ * and height from the top left, so a panel over the middle of the board can leave it in view.
+ */
+export function focusBoard(
+	at: { x: number; z: number },
+	spot: { x: number; y: number },
+	aspect: number,
+	fov: number,
+	distance: number,
+	tilt = DEFAULT_TILT,
+) {
+	const probe = new PerspectiveCamera(fov, aspect, 1, 2000);
+	const target = new Vector3(at.x, 0, at.z);
+	const point = new Vector3();
+	const want = { x: spot.x * 2 - 1, y: 1 - spot.y * 2 };
+	const project = (x: number, z: number) => {
+		probe.position.set(x, distance * Math.cos(tilt), z + distance * Math.sin(tilt));
+		probe.lookAt(x, 0, z);
+		probe.updateMatrixWorld();
+		probe.updateProjectionMatrix();
+		return point.set(at.x, 0, at.z).project(probe);
+	};
+	// Moving the look-at point moves the city across the screen nearly linearly, so a few Newton steps land it.
+	for (let i = 0; i < 6; i++) {
+		const now = project(target.x, target.z).clone();
+		const stepX = project(target.x + 1, target.z).x - now.x;
+		const stepZ = project(target.x, target.z + 1).y - now.y;
+		target.x += (want.x - now.x) / stepX;
+		target.z += (want.y - now.y) / stepZ;
+	}
+	project(target.x, target.z);
+	return { position: probe.position.clone(), target, distance };
+}

@@ -44,6 +44,8 @@ export type Character = {
 	/** The scar covering the job, which switches the job off and applies the scar. */
 	jobScar: ScarId | null;
 	home: CityId;
+	/** Which of the pack's portraits the character wears. */
+	portrait: number;
 	slots: Slot[];
 	/** The hidden scratch-off layout. Peers only ever see the first `exposure` boxes. */
 	exposureTrack: ExposureBox[];

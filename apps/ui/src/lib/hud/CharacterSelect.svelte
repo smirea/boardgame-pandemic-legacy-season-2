@@ -6,7 +6,6 @@
 	import { fly } from 'svelte/transition';
 	import CardIcon from '#lib/cards/CardIcon.svelte';
 	import { SCAR_ICON } from '#lib/cards/icons.ts';
-	import { LS } from '#lib/storage.ts';
 	import { cityName, MONTHS, SEAT_COLORS } from './labels.svelte.ts';
 	import Portrait from './Portrait.svelte';
 	import Ready from './Ready.svelte';
@@ -16,11 +15,12 @@
 		snap: PublicState;
 		player: PlayerId;
 		send: (command: Command) => void;
-		rename: (name: string) => void;
 		onpeek: () => void;
+		/** A haven to look at on the map behind the screen, with the point in the window it should land on. */
+		onfocus: (focus: { city: CityId; x: number; y: number } | null) => void;
 	};
 
-	let { snap, player, send, rename, onpeek }: Props = $props();
+	let { snap, player, send, onpeek, onfocus }: Props = $props();
 
 	const world = $derived(snap.world);
 	const campaign = $derived(world.campaign);
@@ -74,20 +74,41 @@
 	let newName = $state('');
 	let job = $state<JobId | ''>('');
 	let home = $state<CityId>(havens[0]!.id);
+	const portraits = Array.from({ length: pack.numbers.portraits }, (_, index) => index);
+	const worn = $derived(new Set(living.map(character => character.portrait)));
+	let picked = $state<number | null>(null);
+	const portrait = $derived(picked ?? portraits.find(index => !worn.has(index)) ?? 0);
 	$effect(() => {
 		if (!job || !freeJobs.some(candidate => candidate.id === job)) job = freeJobs[0]?.id ?? '';
 	});
 	const create = $derived<Command | null>(
-		job ? { type: 'CREATE_CHARACTER', name: newName.trim(), job, home, player } : null,
+		job ? { type: 'CREATE_CHARACTER', name: newName.trim(), job, home, portrait, player } : null,
 	);
 	const refusal = $derived(create ? reject(world, snap.phase, create) : 'Every starting job is taken');
 
-	let name = $state(LS.get('name', ''));
-	let typing: ReturnType<typeof setTimeout> | undefined;
-	function typed() {
-		clearTimeout(typing);
-		typing = setTimeout(() => name.trim() && rename(name), 450);
+	let screen = $state<HTMLElement>();
+	let cards = $state<HTMLElement>();
+	let form = $state<HTMLElement>();
+	let footer = $state<HTMLElement>();
+	// The map shows through wherever the character cards leave room left of the form: beside them or below them.
+	function look(city: CityId) {
+		if (!screen || !cards || !form || !footer) return;
+		const area = screen.getBoundingClientRect();
+		const top = cards.getBoundingClientRect().top;
+		const wall = form.getBoundingClientRect().left;
+		const floor = footer.getBoundingClientRect().top;
+		const boxes = [...cards.children].map(child => child.getBoundingClientRect());
+		const right = Math.max(area.left, ...boxes.map(box => box.right));
+		const bottom = Math.max(top, ...boxes.map(box => box.bottom));
+		const beside = (wall - right) * (floor - top);
+		const below = (wall - area.left) * (floor - bottom);
+		onfocus(
+			beside > below
+				? { city, x: (right + wall) / 2, y: (top + floor) / 2 }
+				: { city, x: (area.left + wall) / 2, y: (bottom + floor) / 2 },
+		);
 	}
+	$effect(() => () => onfocus(null));
 
 	const exposureShown = (character: Character) =>
 		character.exposureTrack.map((box, index) => (index < character.exposure ? box : 'hidden'));
@@ -105,6 +126,7 @@
 
 <div
 	class="select"
+	bind:this={screen}
 	data-testid="character-select"
 	{@attach feedback('Character select', () => ({
 		month: campaign.month,
@@ -112,120 +134,148 @@
 		ready: table.ready,
 	}))}
 >
-	<header>
-		<div class="heading">
-			<h1>{title}</h1>
-			<p>Choose who you play. Click a card to take it, click it again to let it go.</p>
-		</div>
-		<label class="name">
-			<span>Your name</span>
-			<input
-				bind:value={name}
-				oninput={typed}
-				onchange={() => name.trim() && rename(name)}
-				maxlength="24"
-				placeholder="Your name"
-				data-testid="lobby-name"
-			/>
-		</label>
-	</header>
+	<h1>{title}</h1>
 
-	<div class="cards">
-		{#each shown as character (character.id)}
-			{@const holder = claimant(world, character.id)}
-			{@const color = colorFor(character)}
-			{@const traits = characterTraits(character)}
-			{@const empty = character.slots.filter(slot => slot === null).length}
-			<article
-				class="card"
-				class:mine={holder === player}
-				class:taken={holder !== null && holder !== player}
-				style:--seat={color ?? 'transparent'}
-				animate:flip={{ duration: 260 }}
-			>
-				<div class="claim" aria-live="polite">
-					{#if holder && color}
-						{#key holder}
-							<span class="who" in:fly={{ y: -10, duration: 240 }}>
-								{@render marker(color, holder === player ? `${nameOf(holder)} (you)` : nameOf(holder))}
-							</span>
-						{/key}
-					{:else}
-						<span class="free">Not taken</span>
-					{/if}
-				</div>
-				<button
-					class="face"
-					onclick={() => (holder === player ? release(character) : take(character))}
-					disabled={holder !== null && holder !== player}
-					aria-pressed={holder === player}
-					title={holder === player
-						? 'Let this character go'
-						: holder
-							? `${nameOf(holder)} plays this character`
-							: 'Play this character'}
-					data-testid={`claim-${character.id}`}
+	<div class="row">
+		<div class="cards" bind:this={cards}>
+			{#each shown as character (character.id)}
+				{@const holder = claimant(world, character.id)}
+				{@const color = colorFor(character)}
+				{@const traits = characterTraits(character)}
+				{@const empty = character.slots.filter(slot => slot === null).length}
+				<article
+					class="card"
+					class:mine={holder === player}
+					class:taken={holder !== null && holder !== player}
+					style:--seat={color ?? 'transparent'}
+					animate:flip={{ duration: 260 }}
 				>
-					<span class="top">
-						<span class="portrait"><Portrait id={character.id} color={color ?? '#4a4238'} /></span>
-						<span class="title">
-							<strong>{character.name}</strong>
-							<small>Home: {cityName(character.home)}</small>
-						</span>
-					</span>
-					<span class="traits">
-						{#each traits as trait (`${trait.kind}:${trait.name}`)}
-							<span class="line {trait.kind}" class:struck={trait.struck}>
-								<span class="kind">
-									{#if trait.kind === 'scar'}<CardIcon path={SCAR_ICON} size="0.85rem" />{/if}
-									{TRAIT_KIND[trait.kind]}{trait.struck ? ', covered by a scar' : ''}
+					<div class="claim" aria-live="polite">
+						{#if holder && color}
+							{#key holder}
+								<span class="who" in:fly={{ y: -10, duration: 240 }}>
+									{@render marker(color, holder === player ? `${nameOf(holder)} (you)` : nameOf(holder))}
 								</span>
-								<b>{trait.name}</b>
-								<span class="text">{trait.text}</span>
-							</span>
-						{/each}
-						{#if empty}
-							<span class="slots">{empty} empty slot{empty === 1 ? '' : 's'} for abilities or scars</span>
+							{/key}
+						{:else}
+							<span class="free">Not taken</span>
 						{/if}
-					</span>
-					<span class="exposure" aria-label={`Exposure ${character.exposure} of ${character.exposureTrack.length}`}>
-						<span class="kind">Exposure</span>
-						{#each exposureShown(character) as box, index (index)}
-							<i class={box} title={box === 'hidden' ? 'Not yet scratched' : box}></i>
-						{/each}
-					</span>
-				</button>
-			</article>
-		{/each}
-
-		<article class="card new" data-testid="new-character">
-			<div class="claim"><span class="free">New character</span></div>
+					</div>
+					<button
+						class="face"
+						onclick={() => (holder === player ? release(character) : take(character))}
+						disabled={holder !== null && holder !== player}
+						aria-pressed={holder === player}
+						title={holder === player
+							? 'Let this character go'
+							: holder
+								? `${nameOf(holder)} plays this character`
+								: 'Play this character'}
+						data-testid={`claim-${character.id}`}
+					>
+						<span class="top">
+							<span class="portrait"><Portrait portrait={character.portrait} color={color ?? '#4a4238'} /></span>
+							<span class="title">
+								<strong>{character.name}</strong>
+								<small>Home: {cityName(character.home)}</small>
+							</span>
+						</span>
+						<span class="traits">
+							{#each traits as trait (`${trait.kind}:${trait.name}`)}
+								<span class="line {trait.kind}" class:struck={trait.struck}>
+									<span class="kind">
+										{#if trait.kind === 'scar'}<CardIcon path={SCAR_ICON} size="0.85rem" />{/if}
+										{TRAIT_KIND[trait.kind]}{trait.struck ? ', covered by a scar' : ''}
+									</span>
+									<b>{trait.name}</b>
+									<span class="text">{trait.text}</span>
+								</span>
+							{/each}
+							{#if empty}
+								<span class="slots">{empty} empty slot{empty === 1 ? '' : 's'} for abilities or scars</span>
+							{/if}
+						</span>
+						<span class="exposure" aria-label={`Exposure ${character.exposure} of ${character.exposureTrack.length}`}>
+							<span class="kind">Exposure</span>
+							{#each exposureShown(character) as box, index (index)}
+								<i class={box} title={box === 'hidden' ? 'Not yet scratched' : box}></i>
+							{/each}
+						</span>
+					</button>
+				</article>
+			{/each}
+		</div>
+		<article class="card new" bind:this={form} data-testid="new-character">
 			<form
 				class="face"
+				aria-label="New character"
 				onsubmit={event => {
 					event.preventDefault();
 					if (create && !refusal) send(create);
 					newName = '';
+					picked = null;
 				}}
 			>
 				{#if freeJobs.length}
-					<label
-						>Name<input bind:value={newName} maxlength="24" placeholder="Their name" data-testid="new-name" /></label
-					>
-					<label
-						>Occupation<select bind:value={job} data-testid="new-job">
-							{#each freeJobs as option (option.id)}<option value={option.id}>{option.name}</option>{/each}
-						</select></label
-					>
-					<p class="text">{freeJobs.find(candidate => candidate.id === job)?.text}</p>
-					<label
-						>Home haven<select bind:value={home}>
-							{#each havens as haven (haven.id)}<option value={haven.id}>{cityName(haven.id)}</option>{/each}
-						</select></label
-					>
-					<button class="make" disabled={refusal !== null} title={refusal ?? ''} data-testid="create-character"
-						>Create and take</button
-					>
+					<div class="column">
+						<div class="who-new">
+							<span class="portrait"><Portrait {portrait} color="#4a4238" /></span>
+							<label class="named"
+								>New character<input
+									bind:value={newName}
+									maxlength="24"
+									placeholder="Their name"
+									data-testid="new-name"
+								/></label
+							>
+						</div>
+						<fieldset class="avatars">
+							<legend>Portrait</legend>
+							{#each portraits as index (index)}
+								<label
+									class="avatar"
+									class:worn={worn.has(index)}
+									title={worn.has(index) ? 'Worn by another character' : ''}
+								>
+									<input
+										type="radio"
+										name="portrait"
+										aria-label={`Portrait ${index + 1}`}
+										value={index}
+										checked={portrait === index}
+										onchange={() => (picked = index)}
+									/>
+									<span class="portrait"><Portrait portrait={index} color="#4a4238" /></span>
+								</label>
+							{/each}
+						</fieldset>
+						<fieldset class="choices havens" data-testid="new-home" onpointerleave={() => onfocus(null)}>
+							<legend>Home haven</legend>
+							{#each havens as haven (haven.id)}
+								<label
+									class="choice"
+									onpointerenter={() => look(haven.id)}
+									onfocusin={() => look(haven.id)}
+									onfocusout={() => onfocus(null)}
+								>
+									<input type="radio" name="home" value={haven.id} bind:group={home} />
+									<span><b>{cityName(haven.id)}</b></span>
+								</label>
+							{/each}
+						</fieldset>
+						<button class="make" disabled={refusal !== null} title={refusal ?? ''} data-testid="create-character"
+							>Create and take</button
+						>
+					</div>
+					<fieldset class="choices" data-testid="new-job">
+						<legend>Occupation</legend>
+						{#each freeJobs as option (option.id)}
+							<label class="choice">
+								<input type="radio" name="job" value={option.id} bind:group={job} />
+								<span><b>{option.name}</b><small>{option.text}</small></span>
+							</label>
+						{/each}
+					</fieldset>
 				{:else}
 					<p class="text">
 						Every starting occupation is taken. A seat with no character left gets a haven worker when the game starts.
@@ -243,7 +293,7 @@
 		</p>
 	{/if}
 
-	<footer>
+	<footer bind:this={footer}>
 		<div class="status">
 			{#if choosing.length}
 				<p class="choosing">
@@ -279,15 +329,15 @@
 	.select {
 		display: flex;
 		flex-direction: column;
-		gap: 1.1rem;
+		gap: 0.8rem;
 		width: 100%;
 		height: 100%;
 		padding: 1rem 1.6rem 1rem;
-		border: 1px solid var(--line-strong);
-		border-radius: 6px;
-		background: rgb(20 18 14 / 0.9);
-		box-shadow: 0 2rem 5rem rgb(0 0 0 / 0.6);
 		color: var(--ink);
+		/* No backdrop: the map shows through, so the words standing on it carry their own shadow. */
+		text-shadow:
+			0 0 0.4rem rgb(0 0 0 / 0.9),
+			0 1px 2px rgb(0 0 0 / 0.9);
 		overflow: hidden;
 		animation: rise 420ms cubic-bezier(0.2, 0.9, 0.3, 1.05) both;
 	}
@@ -299,13 +349,6 @@
 		}
 	}
 
-	header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 2rem;
-	}
-
 	h1 {
 		margin: 0;
 		font-family: var(--font-display);
@@ -314,57 +357,18 @@
 		line-height: 1;
 	}
 
-	.heading {
+	.row {
 		display: flex;
-		align-items: baseline;
-		gap: 1.2rem;
-	}
-
-	header p {
-		margin: 0;
-		color: var(--muted);
-		font-size: 1.05rem;
-	}
-
-	.name {
-		display: flex;
-		align-items: baseline;
-		gap: 0.6rem;
-		width: 18rem;
-	}
-
-	.name input {
-		flex: 1;
-		min-width: 0;
-	}
-
-	.name span {
-		color: var(--muted);
-		font-size: 0.78rem;
-		letter-spacing: 0.04em;
-		text-transform: uppercase;
-	}
-
-	.name input {
-		padding: 0.3rem 0.1rem;
-		border: 0;
-		border-bottom: 1px solid var(--line-strong);
-		background: none;
-		color: var(--ink);
-		font-family: var(--font-display);
-		font-size: 1.35rem;
-	}
-
-	.name input:focus {
-		outline: none;
-		border-bottom-color: var(--paper);
+		flex: 1 1 auto;
+		gap: 1.1rem;
+		min-height: 0;
 	}
 
 	/* Every card whole and legible, wrapping into rows. A roster too long for the screen scrolls here, never the page. */
 	.cards {
 		display: grid;
 		flex: 1 1 auto;
-		grid-template-columns: repeat(auto-fill, minmax(15.5rem, 1fr));
+		grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
 		align-content: start;
 		gap: 0.6rem 1.1rem;
 		min-height: 0;
@@ -383,6 +387,21 @@
 		align-items: flex-end;
 		justify-content: center;
 		height: 2.2rem;
+	}
+
+	/* Words standing on the open map get a dark slip of their own, since the map under them may be pale land. */
+	.claim > span,
+	.status {
+		padding: 0.25rem 0.7rem;
+		border-radius: 999px;
+		background: rgb(12 10 8 / 0.72);
+		backdrop-filter: blur(4px);
+	}
+
+	.status {
+		justify-self: start;
+		padding: 0.6rem 1rem;
+		border-radius: 10px;
 	}
 
 	.who {
@@ -419,6 +438,7 @@
 		color: var(--slip-ink);
 		font: inherit;
 		text-align: left;
+		text-shadow: none;
 		transition:
 			border-color 180ms ease,
 			translate 180ms ease,
@@ -570,11 +590,49 @@
 		background: var(--slip-ink);
 	}
 
-	.new form {
-		gap: 0.6rem;
+	.new {
+		flex: none;
+		align-self: flex-start;
+		width: 30rem;
+		max-height: 100%;
 	}
 
-	.new label {
+	.new form {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+		gap: 1rem;
+		align-items: start;
+	}
+
+	.new form > .text {
+		grid-column: 1 / -1;
+	}
+
+	.column {
+		display: flex;
+		flex-direction: column;
+		gap: 0.6rem;
+		height: 100%;
+	}
+
+	.who-new {
+		display: flex;
+		gap: 0.8rem;
+		align-items: center;
+	}
+
+	.who-new .portrait {
+		width: 3.4rem;
+		height: 3.4rem;
+	}
+
+	.named {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.new label,
+	legend {
 		display: flex;
 		flex-direction: column;
 		gap: 0.2rem;
@@ -582,8 +640,9 @@
 		font-size: 0.85rem;
 	}
 
-	.new input,
-	.new select {
+	.named input {
+		width: 100%;
+		min-width: 0;
 		padding: 0.35rem 0.3rem;
 		border: 0;
 		border-bottom: 1px solid rgb(42 32 23 / 0.35);
@@ -593,10 +652,118 @@
 		font-size: 1.05rem;
 	}
 
-	.new input:focus,
-	.new select:focus {
+	.named input:focus {
 		outline: none;
 		border-bottom-color: var(--slip-ink);
+	}
+
+	fieldset {
+		margin: 0;
+		padding: 0;
+		border: 0;
+	}
+
+	legend {
+		margin-bottom: 0.25rem;
+		padding: 0;
+	}
+
+	.avatars {
+		display: grid;
+		grid-template-columns: repeat(5, 1fr);
+		gap: 0.3rem;
+	}
+
+	.avatars legend {
+		grid-column: 1 / -1;
+	}
+
+	.avatar {
+		position: relative;
+		cursor: pointer;
+	}
+
+	.avatar .portrait {
+		width: 100%;
+		height: auto;
+		aspect-ratio: 1;
+		outline: 2px solid transparent;
+		outline-offset: 1px;
+		transition: outline-color 150ms ease;
+	}
+
+	.avatar.worn .portrait {
+		opacity: 0.45;
+	}
+
+	.avatar:hover .portrait {
+		outline-color: rgb(42 32 23 / 0.4);
+	}
+
+	.avatar:has(input:checked) .portrait {
+		opacity: 1;
+		outline-color: var(--slip-ink);
+	}
+
+	.choices {
+		display: grid;
+		gap: 0.2rem;
+	}
+
+	.choices legend {
+		grid-column: 1 / -1;
+	}
+
+	.new .choice {
+		position: relative;
+		flex-direction: row;
+		gap: 0.5rem;
+		align-items: baseline;
+		padding: 0.2rem 0.45rem;
+		border: 1px solid transparent;
+		border-radius: 3px;
+		color: var(--slip-ink);
+		cursor: pointer;
+		transition:
+			background 150ms ease,
+			border-color 150ms ease;
+	}
+
+	.choice:hover {
+		background: rgb(255 252 242 / 0.45);
+	}
+
+	.choice:has(input:checked) {
+		border-color: rgb(42 32 23 / 0.45);
+		background: rgb(255 252 242 / 0.6);
+	}
+
+	.choice span {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.choice b {
+		font-size: 0.95rem;
+	}
+
+	.choice small {
+		color: var(--slip-muted);
+		font-size: 0.78rem;
+		line-height: 1.25;
+	}
+
+	/* The radio itself stays for the keyboard and screen readers; the row is what shows the choice. */
+	.choice input,
+	.avatar input {
+		position: absolute;
+		opacity: 0;
+		pointer-events: none;
+	}
+
+	.choice:has(input:focus-visible),
+	.avatar:has(input:focus-visible) .portrait {
+		outline: 2px solid var(--slip-ink);
 	}
 
 	.make {
@@ -629,7 +796,7 @@
 		grid-template-columns: 1fr auto 1fr;
 		align-items: center;
 		gap: 1.5rem;
-		padding-top: 0.9rem;
+		padding-top: 0.7rem;
 		border-top: 1px solid var(--line);
 	}
 
@@ -665,7 +832,7 @@
 	.hint {
 		margin: 0;
 		color: var(--muted);
-		font-size: 0.92rem;
+		font-size: 0.85rem;
 	}
 
 	.peek {
