@@ -211,13 +211,12 @@
 		let top = 0;
 		let bottom = 0;
 		for (const rect of covered) {
-			if (rect.x < width * 0.25 && rect.x + rect.width < width / 2) {
-				if (rect.firm) firmLeft = Math.max(firmLeft, rect.x + rect.width);
-				else left = Math.max(left, rect.x + rect.width);
-			} else if (rect.x + rect.width > width * 0.75 && rect.x > width / 2) {
-				if (rect.firm) firmRight = Math.max(firmRight, width - rect.x);
-				else right = Math.max(right, width - rect.x);
-			} else if (rect.y + rect.height / 2 < height / 2) top = Math.max(top, rect.y + rect.height);
+			// A firm panel may grow past the middle, so it counts for the side it is anchored to.
+			if (rect.firm && rect.x < width * 0.25) firmLeft = Math.max(firmLeft, rect.x + rect.width);
+			else if (rect.firm && rect.x + rect.width > width * 0.75) firmRight = Math.max(firmRight, width - rect.x);
+			else if (rect.x < width * 0.25 && rect.x + rect.width < width / 2) left = Math.max(left, rect.x + rect.width);
+			else if (rect.x + rect.width > width * 0.75 && rect.x > width / 2) right = Math.max(right, width - rect.x);
+			else if (rect.y + rect.height / 2 < height / 2) top = Math.max(top, rect.y + rect.height);
 			else bottom = Math.max(bottom, height - rect.y);
 		}
 		// On a narrow stage, such as the replay's, panels may not squeeze the board below 70% of its width. The
