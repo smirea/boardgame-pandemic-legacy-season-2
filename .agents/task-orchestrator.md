@@ -36,7 +36,7 @@ Repo config for the global `task-orchestrator` skill (`~/code/ai-files/skills/ta
 
 - Rules: `bun test` (the pre-commit hook runs the whole suite), and the playtest lab where a mechanic needs real play: `./apps/playtest/lab coverage` must stay at 227 of 227.
 - UI: `bun run dev` in your worktree and drive the real screen with T3's preview tools at a laptop width. `window.DEBUG` loads and sets state.
-- Stored data: a change to the state or recordings keeps old saves loading. Prove it with a save and a recording from master, loaded on your build.
+- Stored data: there is no backwards compatibility while the game is in development, so new state needs no default for old saves (`parseSave` refuses them).
 - Before the PR: `bun run lint:ci`, `bun run typecheck`, `bun run test`, and `bun run build`, as CI does.
 
 ## After the merge
