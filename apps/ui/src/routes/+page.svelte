@@ -82,7 +82,8 @@
 			<label
 				>Passphrase <input
 					bind:value={secret}
-					type="password"
+					class="masked"
+					spellcheck="false"
 					placeholder="Shared with your group"
 					data-testid="passphrase"
 				/><small>Needed to host or join. Playing on this screen needs none.</small></label
@@ -169,6 +170,11 @@
 	input:focus {
 		outline: none;
 		border-bottom-color: var(--paper);
+	}
+
+	/* Masked with CSS rather than type="password", which password managers claim whatever the field says. */
+	.masked {
+		-webkit-text-security: disc;
 	}
 
 	input::placeholder {

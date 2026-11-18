@@ -73,7 +73,6 @@
 				onchange={() => name.trim() && rename(name)}
 				maxlength="24"
 				placeholder="Your name"
-				autocomplete="nickname"
 				data-testid="lobby-name"
 			/>
 		</label>

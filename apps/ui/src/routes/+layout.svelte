@@ -2,6 +2,7 @@
 	import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
 	import favicon from '#lib/assets/favicon.svg';
 	import { startFeedback } from '#lib/feedback.ts';
+	import { blockAutofill } from '#lib/noAutofill.ts';
 	import { onMount } from 'svelte';
 	import './layout.css';
 
@@ -16,6 +17,7 @@
 		},
 	});
 
+	onMount(blockAutofill);
 	if (import.meta.env.DEV) onMount(startFeedback);
 </script>
 
