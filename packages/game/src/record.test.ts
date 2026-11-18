@@ -43,15 +43,6 @@ describe('game recordings', () => {
 		}
 	});
 
-	test('a recording made before a field existed plays back with that field filled', () => {
-		const old = JSON.parse(JSON.stringify(records[0]!));
-		delete old.initial.world.campaign.seating;
-		for (const step of old.steps) step.patch = step.patch.filter((patch: Patch) => !patch.p.includes('seating'));
-		const frames = framesOf(parseRecord(old));
-		expect(frames[0]!.world.campaign.seating).toEqual([]);
-		for (const frame of frames) expect(() => tableSeating(frame.world.campaign)).not.toThrow();
-	});
-
 	test('patches cover sets, deletions, growth and shrinkage without touching the original', () => {
 		const before = { a: 1, gone: true, list: [1, 2, 3, 4], nested: { keep: 'x', deep: [{ id: 1 }] } };
 		const after = { a: 2, list: [1, 9], nested: { keep: 'x', deep: [{ id: 1 }, { id: 2 }] }, added: null };

@@ -24,14 +24,10 @@
 	const firstSeat = (who: PlayerId) => table.seats.find(entry => entry.player === who)!;
 	const mine = $derived(table.seats.filter(entry => entry.player === player));
 
-	const starts = $derived<{ start: Start; label: string }[]>(
-		campaign.month === 0
-			? [
-					{ start: 'prologue', label: 'Prologue' },
-					{ start: 'month', label: 'January' },
-				]
-			: [{ start: 'month', label: MONTHS[campaign.month] ?? `Month ${campaign.month}` }],
-	);
+	const starts: { start: Start; label: string }[] = [
+		{ start: 'prologue', label: 'Prologue' },
+		{ start: 'month', label: MONTHS[1]! },
+	];
 	const waitingOn = $derived(players.filter(who => !table.ready[who]).map(who => firstSeat(who).name));
 	const split = $derived(new Set(Object.values(table.ready)).size > 1);
 
@@ -122,7 +118,7 @@
 			{:else if waitingOn.length}
 				Waiting for {waitingOn.join(', ')}.
 			{:else}
-				Starting.
+				Choosing characters.
 			{/if}
 		</p>
 	{/if}

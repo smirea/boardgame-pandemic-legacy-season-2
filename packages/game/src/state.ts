@@ -239,6 +239,8 @@ export type Table = {
 	seats: { seat: SeatId; player: PlayerId; name: string }[];
 	/** Who in the lobby is ready, and for which game. */
 	ready: Partial<Record<PlayerId, Start>>;
+	/** The game everyone at month 0 agreed on, after which the lobby moves on to choosing characters. */
+	start: Start | null;
 };
 
 export type World = { campaign: Campaign; game: Game | null; table: Table };

@@ -161,17 +161,6 @@ export const startingEdges: EdgeDef[] = [
 	['lagos', 'sao-paulo'],
 ].map(([a, b]) => edge(a!, b!, 'sea'));
 
-/**
- * Lanes that boards printed before 99a354b started with: they crossed the lanes above. A campaign begun
- * on one of those boards trades them for today's starting lanes when it loads (`parseSave`). Players may
- * build some of them today, and a campaign begun on today's board keeps those.
- */
-export const retiredStartingEdges: EdgeDef[] = [
-	['washington', 'haven-mediterranean'],
-	['washington', 'haven-south-atlantic'],
-	['haven-mediterranean', 'istanbul'],
-].map(([a, b]) => edge(a!, b!, 'sea'));
-
 /** Routes that documented campaigns drew. They seed the candidate list alongside the geographic scan. */
 export const documentedEdges: EdgeDef[] = [
 	...(

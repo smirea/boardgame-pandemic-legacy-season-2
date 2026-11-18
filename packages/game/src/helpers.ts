@@ -195,7 +195,7 @@ const courses = new Map<string, Course>();
 /**
  * The course a line between two locations takes on the board, from `a` to `b`: the arch or the way
  * around the coasts that `gen-geometry.ts` chose. The rules test this course and the board draws it, so
- * a line that looks clear is clear. A pair with no generated course (a line laid by an older build) is straight.
+ * a line that looks clear is clear.
  */
 export function routeCourse(a: CityId, b: CityId, kind: EdgeKind): Point[] {
 	const course = courseOf(a, b, kind).points;
@@ -206,11 +206,9 @@ function courseOf(a: CityId, b: CityId, kind: EdgeKind): Course {
 	const key = `${kind}:${edgeKey(a, b)}`;
 	const known = courses.get(key);
 	if (known) return known;
-	const [first, second] = a < b ? [a, b] : [b, a];
-	const points = pack.routeCourses[key]?.map(([x, z]) => ({ x, z })) ?? [
-		pack.positions[first]!,
-		pack.positions[second]!,
-	];
+	const generated = pack.routeCourses[key];
+	if (!generated) throw new Error(`No course for ${key}: rerun gen-geometry.ts`);
+	const points = generated.map(([x, z]) => ({ x, z }));
 	const course = {
 		points,
 		min: { x: Math.min(...points.map(point => point.x)), z: Math.min(...points.map(point => point.z)) },

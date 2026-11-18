@@ -25,9 +25,18 @@ function storedId() {
 	return created;
 }
 
+// A save from an older build is dropped for a new campaign: the game keeps no backwards compatibility.
 function storedSave(): Save | null {
 	const raw = LS.get('save');
-	return raw ? parseSave(raw) : null;
+	if (!raw) return null;
+	try {
+		return parseSave(raw);
+	} catch (error) {
+		console.warn('Starting a new campaign:', error);
+		LS.delete('save');
+		LS.delete('record');
+		return null;
+	}
 }
 
 /** The recording kept from an earlier page load, if it is of the game the save is in. */

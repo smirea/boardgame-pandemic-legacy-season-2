@@ -19,7 +19,7 @@ export { actionBriefs, newCampaign, productionUnits, purchaseCost, ruleBriefs, s
 export type { Command, GameActor, GameSnapshot, Phase, Save, Seating } from './machine';
 export { createGameActor, gameMachine, parseSave, phaseOf, reject } from './machine';
 export type { TableCommand } from './table';
-export { claimant, newTable, tablePlayers } from './table';
+export { claimant, newTable, tablePlayers, tableStart } from './table';
 export {
 	actionMenu,
 	cardTargets,

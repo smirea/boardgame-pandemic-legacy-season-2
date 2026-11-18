@@ -13,13 +13,11 @@ import {
 	newCampaign,
 	newTable,
 	overLimit,
-	pack,
 	parseRecord,
 	parseSave,
 	recordStep,
 	reject,
 	ruleBriefs,
-	scenarios,
 	startRecord,
 } from '@repo/game';
 import type { CharacterId, Command, GameRecord, PublicState, RecordNote, Save, SeatId } from '@repo/game';
@@ -401,7 +399,7 @@ function needsByKey(state: PublicState, who: Who): string[] {
 	switch (phase) {
 		case 'lobby':
 			if (config.players[who.index]!.harness === 'ui') {
-				out.push('Ready up on screen: the game starts when everyone has pressed the same one.');
+				out.push('Ready up on screen: everyone picks the same game, then takes a character and presses Ready.');
 				break;
 			}
 			if (!lab.picks[who.index] || campaign.characters[lab.picks[who.index]!]?.dead)

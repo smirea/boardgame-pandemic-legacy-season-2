@@ -3,7 +3,8 @@ import { pack } from './content/pack';
 import type { JobId } from './content/types';
 import type { CityId, PlayerId } from './ids';
 import { createGameActor, reject } from './machine';
-import type { World } from './state';
+import type { Start, World } from './state';
+import { tablePlayers } from './table';
 import { A, act, B, C, gameOf, late, phase, send, worldOf } from './testkit';
 
 const ann = 'ann' as PlayerId;
@@ -20,7 +21,13 @@ function lobby() {
 	return actor;
 }
 
-test('the lobby starts the game once every person at the table is ready for the same one', () => {
+/** Everyone agrees on the game at month 0, then readies again once they have chosen characters. */
+function begin(actor: ReturnType<typeof lobby>, start: Start) {
+	for (let round = 0; round < 2 && phase(actor) === 'lobby'; round++)
+		for (const player of tablePlayers(worldOf(actor).table)) send(actor, { type: 'READY', player, start });
+}
+
+test('the lobby picks the game everyone readies for, then starts it once everyone is ready with characters', () => {
 	const actor = lobby();
 	send(actor, { type: 'READY', player: ann, start: 'prologue' });
 	send(actor, { type: 'READY', player: ben, start: 'month' });
@@ -29,7 +36,16 @@ test('the lobby starts the game once every person at the table is ready for the 
 	expect(worldOf(actor).table.ready).toEqual({});
 	send(actor, { type: 'READY', player: ann, start: 'month' });
 	send(actor, { type: 'READY', player: ben, start: 'month' });
+	expect(phase(actor)).toBe('lobby');
+	expect(worldOf(actor).table).toMatchObject({ start: 'month', ready: {} });
+	expect(reject(worldOf(actor), 'lobby', { type: 'READY', player: ann, start: 'prologue' })).toBe(
+		'The table has chosen its game',
+	);
+	send(actor, { type: 'READY', player: ann, start: 'month' });
+	expect(phase(actor)).toBe('lobby');
+	send(actor, { type: 'READY', player: ben, start: 'month' });
 	expect(phase(actor)).toBe('setup.supply');
+	expect(worldOf(actor).table.start).toBeNull();
 	const world = worldOf(actor);
 	expect(world.campaign.month).toBe(1);
 	expect(gameOf(actor).seats).toEqual([A, B, C]);
@@ -41,8 +57,7 @@ test('the lobby starts the game once every person at the table is ready for the 
 
 test('each person is dealt the character they played last, wherever they now sit', () => {
 	const actor = lobby();
-	send(actor, { type: 'READY', player: ann, start: 'prologue' });
-	send(actor, { type: 'READY', player: ben, start: 'prologue' });
+	begin(actor, 'prologue');
 	const world = worldOf(actor);
 	const played = { ann: world.game!.players[A]!.character, ben: world.game!.players[B]!.character };
 	const swapped = structuredClone(world);
@@ -52,8 +67,7 @@ test('each person is dealt the character they played last, wherever they now sit
 		{ seat: B, player: ann, name: 'Ann' },
 	];
 	const next = createGameActor({ seed: 4, save: { v: 1, phase: 'lobby', world: swapped } }).start();
-	send(next, { type: 'READY', player: ann, start: 'prologue' });
-	send(next, { type: 'READY', player: ben, start: 'prologue' });
+	begin(next, 'prologue');
 	expect(gameOf(next).players[A]!.character).toBe(played.ben);
 	expect(gameOf(next).players[B]!.character).toBe(played.ann);
 });
@@ -72,8 +86,7 @@ test('taking or leaving a seat during a turn keeps the turn and its undo', () =>
 
 test('a player plays the character they claimed, one per seat they hold, and nobody takes another player’s', () => {
 	const actor = lobby();
-	send(actor, { type: 'READY', player: ann, start: 'prologue' });
-	send(actor, { type: 'READY', player: ben, start: 'prologue' });
+	begin(actor, 'prologue');
 	const lobbyAgain = structuredClone(worldOf(actor));
 	lobbyAgain.game = null;
 	const next = createGameActor({ seed: 5, save: { v: 1, phase: 'lobby', world: lobbyAgain } }).start();
@@ -84,8 +97,7 @@ test('a player plays the character they claimed, one per seat they hold, and nob
 	send(next, { type: 'CREATE_CHARACTER', name: 'Ann Two', job: freeJob(worldOf(next)), home: HAVEN, player: ann });
 	const created = Object.values(worldOf(next).campaign.characters).find(entry => entry.name === 'Ann Two')!;
 	expect(worldOf(next).campaign.characters[annChar!]!.player).toBeNull();
-	send(next, { type: 'READY', player: ann, start: 'month' });
-	send(next, { type: 'READY', player: ben, start: 'month' });
+	begin(next, 'month');
 	expect(gameOf(next).players[A]!.character).toBe(created.id);
 	expect(gameOf(next).players[B]!.character).toBe(benChar!);
 });

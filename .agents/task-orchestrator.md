@@ -21,7 +21,7 @@ Repo config for the global `task-orchestrator` skill (`~/code/ai-files/skills/ta
   - the playtest lab: `apps/playtest`.
 - `Game.svelte` is the one screen. Tasks that restructure its layout go in one job; a fix inside one HUD component is its own job.
 - Clients a job can cover: the browser on a laptop only. There is no mobile layout.
-- Usual shared work: a new field in the game state (needs a `parseSave` default and an old-save test), a change to `content/world.ts` (rerun `apps/ui/scripts/gen-geometry.ts`), a new command in the machine that the UI and the bot both use.
+- Usual shared work: a new field in the game state, a change to `content/world.ts` (rerun `apps/ui/scripts/gen-geometry.ts`), a new command in the machine that the UI and the bot both use.
 - Human-only tasks: a real game between several browsers on different machines, and a judgement on how the game feels to play.
 - Known shared failures: none yet.
 

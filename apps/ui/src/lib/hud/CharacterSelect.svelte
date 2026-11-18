@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
-	import { claimant, pack, reject, SEAT_IDS, tablePlayers } from '@repo/game';
-	import type { Character, CharacterId, CityId, Command, JobId, PlayerId, PublicState, Start } from '@repo/game';
+	import { claimant, pack, reject, SEAT_IDS, tablePlayers, tableStart } from '@repo/game';
+	import type { Character, CharacterId, CityId, Command, JobId, PlayerId, PublicState } from '@repo/game';
 	import { flip } from 'svelte/animate';
 	import { fly } from 'svelte/transition';
 	import CardIcon from '#lib/cards/CardIcon.svelte';
@@ -50,16 +50,9 @@
 	const choosing = $derived(players.filter(who => claimedBy(who).length < seatsOf(who).length));
 	const mine = $derived(claimedBy(player));
 
-	const starts = $derived<{ start: Start; label: string }[]>(
-		campaign.month === 0
-			? [
-					{ start: 'prologue', label: 'Prologue' },
-					{ start: 'month', label: 'January' },
-				]
-			: [{ start: 'month', label: `Ready for ${MONTHS[campaign.month]}` }],
-	);
+	const start = $derived(tableStart(world)!);
+	const title = $derived(start === 'prologue' ? 'Prologue' : MONTHS[Math.max(1, campaign.month)]!);
 	const waitingOn = $derived(players.filter(who => !table.ready[who]).map(nameOf));
-	const split = $derived(new Set(Object.values(table.ready)).size > 1);
 
 	function take(character: Character) {
 		const holder = claimant(world, character.id);
@@ -121,7 +114,7 @@
 >
 	<header>
 		<div class="heading">
-			<h1>{MONTHS[campaign.month]}</h1>
+			<h1>{title}</h1>
 			<p>Choose who you play. Click a card to take it, click it again to let it go.</p>
 		</div>
 		<label class="name">
@@ -263,8 +256,6 @@
 			<p class="hint" aria-live="polite">
 				{#if table.seats.length < 2}
 					A game needs two seats.
-				{:else if split}
-					Everyone has to pick the same game.
 				{:else if waitingOn.length}
 					Waiting for {waitingOn.join(', ')}.
 				{:else}
@@ -276,9 +267,7 @@
 			</p>
 		</div>
 		<div class="starts">
-			{#each starts as option (option.start)}
-				<Ready {table} {player} {send} start={option.start} label={option.label} big />
-			{/each}
+			<Ready {table} {player} {send} {start} label={`Ready for ${title}`} big />
 		</div>
 		<div class="side">
 			<button class="peek" onclick={onpeek} data-testid="show-game">Show the board</button>

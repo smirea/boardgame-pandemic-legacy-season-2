@@ -1,10 +1,9 @@
 import { produce } from 'immer';
-import { assign, createActor, setup } from 'xstate';
+import { and, assign, createActor, setup } from 'xstate';
 import type { SnapshotFrom } from 'xstate';
 import type { Action } from './actions';
 import { actionReveals, applyAction, checkAction } from './actions';
 import { pack } from './content/pack';
-import { retiredStartingEdges } from './content/world';
 import type { JobId, ObjectiveId } from './content/types';
 import {
 	checkWin,
@@ -35,7 +34,7 @@ import type { Decide, Play } from './plays';
 import { applyDecide, applyPlay, autoResolve, checkDecide, checkPlay } from './plays';
 import type { World } from './state';
 import type { TableCommand } from './table';
-import { applyTable, claimCharacter, dealTable, newTable, readyStart, rejectTable } from './table';
+import { applyTable, claimCharacter, dealTable, newTable, readyStart, rejectTable, tableStart } from './table';
 
 export type Seating = { seat: SeatId; character: CharacterId | null };
 
@@ -294,8 +293,9 @@ export const gameMachine = setup({
 	},
 	guards: {
 		legal: ({ context, event }: Args, phase: Phase) => reject(context.world, phase, event) === null,
-		readyToStart: ({ context, event }: Args) =>
+		allReady: ({ context, event }: Args) =>
 			reject(context.world, 'lobby', event) === null && readyStart(context.world.table, event as Of<'READY'>) !== null,
+		gameChosen: ({ context }: Args) => tableStart(context.world) !== null,
 		canUndo: ({ context }: Args) => context.undo.length > 0,
 		over: ({ context }: Args) => isOver(context.world),
 		drawsDone: ({ context }: Args) =>
@@ -347,13 +347,20 @@ export const gameMachine = setup({
 				claimCharacter(world, player, character);
 			}),
 		),
+		chooseStart: assign(({ context, event }: Args) => ({
+			world: produce(context.world, draft => {
+				draft.table.start = (event as Of<'READY'>).start;
+				draft.table.ready = {};
+			}),
+		})),
 		table: assign(({ context, event }: Args) => ({
 			world: produce(context.world, draft => applyTable(draft.table, event as TableCommand)),
 		})),
 		startTable: assign(
 			change((world, event) => {
-				if ((event as Of<'READY'>).start === 'month' && world.campaign.month === 0) world.campaign.month = 1;
+				if (tableStart(world) === 'month' && world.campaign.month === 0) world.campaign.month = 1;
 				world.table.ready = {};
+				world.table.start = null;
 				readLegacy(world, 'setup');
 				const seating = dealTable(world);
 				world.campaign.seating = seating;
@@ -463,7 +470,8 @@ export const gameMachine = setup({
 				ADD_SEAT: { guard: { type: 'legal', params: 'lobby' }, actions: 'table' },
 				CLAIM: { guard: { type: 'legal', params: 'lobby' }, actions: 'claim' },
 				READY: [
-					{ guard: 'readyToStart', target: 'setup', actions: 'startTable' },
+					{ guard: and(['allReady', 'gameChosen']), target: 'setup', actions: 'startTable' },
+					{ guard: 'allReady', actions: 'chooseStart' },
 					{ guard: { type: 'legal', params: 'lobby' }, actions: 'table' },
 				],
 			},
@@ -573,58 +581,20 @@ export function createGameActor(options: { seed: number; save?: Save | null }) {
 
 export type GameActor = ReturnType<typeof createGameActor>;
 
-const GAME_DEFAULTS = {
-	waived: [],
-	pending: [],
-	pickedEvents: [],
-	connectedThisGame: [],
-	gameEndArea: [],
-	centersBuilt: 0,
-	searches: 0,
-	skipInfection: false,
-	upkeep: null,
-	prologueRestore: null,
-} satisfies Partial<NonNullable<World['game']>>;
-
 /**
- * Reads a save and fills in whatever the game has gained since it was written, so a campaign begun
- * on an older build keeps loading. A field the save lacks takes the value a new campaign starts with.
+ * Reads a save. The game is in development, so a save from an older build, one whose campaign or table
+ * lacks a field today's has, is refused rather than upgraded.
  */
 export function parseSave(raw: unknown): Save {
 	const save = raw as Partial<Save> | null;
-	if (save?.v !== 1 || typeof save.phase !== 'string' || !save.world?.campaign)
-		throw new Error('That is not a campaign save');
-	const fresh = newCampaign(0);
-	const campaign = { ...fresh, ...save.world.campaign };
-	campaign.results = campaign.results.map(result => ({ ...result, characters: result.characters ?? [] }));
-	campaign.locations = { ...fresh.locations, ...campaign.locations };
-	// No rule removes a lane, so a campaign that lacks one of today's starting lanes began on an older board.
-	const missing = pack.edges.filter(edge => !hasEdge(campaign, edge.a, edge.b));
-	if (missing.length) {
-		const retired = new Set(retiredStartingEdges.map(edge => edgeKey(edge.a, edge.b)));
-		// Today's lanes go first, so a lane drawn later stays at the end of the list, where a step's new lanes are read.
-		campaign.edges = [
-			...missing.map(edge => ({ ...edge })),
-			...campaign.edges.filter(edge => !(edge.kind === 'sea' && retired.has(edgeKey(edge.a, edge.b)))),
-		];
-	}
-	campaign.characters = Object.fromEntries(
-		Object.entries(campaign.characters).map(([id, character]) => [
-			id,
-			Object.assign({ jobScar: null, player: null }, character),
-		]),
-	);
-	const saved = save.world.game;
-	const game = saved ? { ...GAME_DEFAULTS, ...saved, locations: { ...blankLocations(), ...saved.locations } } : null;
-	const table = { ...newTable(), ...save.world.table };
-	return { v: 1, phase: save.phase, world: { campaign, game, table } };
-}
-
-function blankLocations() {
-	return Object.fromEntries(
-		pack.cities.map(city => [
-			city.id,
-			{ supplies: 0, plague: 0, hollow: 0, center: false, tower: false, shelter: false },
-		]),
-	);
+	const lacks = (written: object | undefined, fresh: object) =>
+		!written || Object.keys(fresh).some(key => !(key in written));
+	if (
+		save?.v !== 1 ||
+		typeof save.phase !== 'string' ||
+		lacks(save.world?.campaign, newCampaign(0)) ||
+		lacks(save.world?.table, newTable())
+	)
+		throw new Error('That is not a campaign save from this build');
+	return save as Save;
 }

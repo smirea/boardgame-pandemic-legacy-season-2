@@ -4,7 +4,7 @@ import type { Action } from './actions';
 import { botCommand } from './bot';
 import { pack } from './content/pack';
 import type { EdgeDef, EventId, SearchResult } from './content/types';
-import { edge, retiredStartingEdges } from './content/world';
+import { edge } from './content/world';
 import { bump, epidemicCount, placeHollow, setupInfection } from './flow';
 import { grid, handLimit, hasEdge, isCandidate, passage, segmentsCross, tableSeating } from './helpers';
 import { edgeKey } from './ids';
@@ -1062,29 +1062,6 @@ describe('seats in the lobby are shared state', () => {
 	});
 });
 
-test('a save written before a field existed still loads and plays', () => {
-	const old = JSON.parse(JSON.stringify(worldOf(late()))) as {
-		campaign: Record<string, unknown>;
-		game: Record<string, unknown>;
-		table?: unknown;
-	};
-	delete old.table;
-	for (const field of ['names', 'owedScars', 'losingStreakBonusGames', 'seating']) delete old.campaign[field];
-	for (const field of ['waived', 'prologueRestore']) delete old.game[field];
-	for (const entry of Object.values(old.campaign['characters'] as Record<string, Record<string, unknown>>)) {
-		delete entry['jobScar'];
-		delete entry['player'];
-	}
-	const actor = createGameActor({ seed: 1, save: parseSave({ v: 1, phase: 'playing.actions', world: old }) }).start();
-	expect(worldOf(actor).campaign).toMatchObject({ names: {}, owedScars: 0, seating: [] });
-	expect(gameOf(actor).waived).toEqual([]);
-	expect(character(worldOf(actor), A)).toMatchObject({ jobScar: null, player: null });
-	send(actor, { type: 'TAKE_SEAT', player: 'p1' as PlayerId, name: 'Ada', seat: A });
-	act(actor, { a: 'makeSupplies' });
-	send(actor, { type: 'END_ACTIONS', seat: A });
-	expect(phase(actor)).toBe('playing.draw');
-});
-
 describe('the remaining abilities and the Jade lab', () => {
 	const withAbility = (ability: string, edit?: (world: World) => void) =>
 		late(world => {
@@ -1890,16 +1867,6 @@ test('a game result records who played', () => {
 	const seated = game.seats.map(seat => game.players[seat]!.character);
 	closeGame(world);
 	expect(world.campaign.results.at(-1)!.characters).toEqual(seated);
-	expect(
-		parseSave({
-			v: 1,
-			phase: 'lobby',
-			world: {
-				campaign: { ...world.campaign, results: [{ month: 1, attempt: 1, won: true, gridCities: 9, rationing: 4 }] },
-				game: null,
-			},
-		}).world.campaign.results[0]!.characters,
-	).toEqual([]);
 });
 
 const atSample = (slots: Character['slots'], track: Character['exposureTrack']) =>
@@ -2440,40 +2407,7 @@ test('a plain save resumes mid-game in the same phase and keeps playing identica
 	}
 	expect(resumed.getSnapshot().context.world).toEqual(original.getSnapshot().context.world);
 	expect(() => parseSave({ phase: 'lobby' })).toThrow();
-});
-
-test('a campaign begun on a board with the retired starting lanes loads with today’s, keeping the lanes players built', () => {
-	const actor = createGameActor({ seed: 11 }).start();
-	const rng = { seed: 5 };
-	for (let i = 0; i < 40; i++)
-		actor.send(botCommand(actor.getSnapshot().context.world, phaseOf(actor.getSnapshot()), rng));
-	const state = publicState(actor.getSnapshot());
-	const built = edge('new-york', 'chicago', 'land');
-	const oldBoard = [
-		...pack.edges.filter(lane => edgeKey(lane.a, lane.b) !== edgeKey(city('tripoli'), city('istanbul'))),
-		...retiredStartingEdges,
-		built,
-	];
-	const written = JSON.parse(JSON.stringify({ v: 1, phase: state.phase, world: state.world }));
-	written.world.campaign.edges = oldBoard;
-
-	const save = parseSave(written);
-	const keys = (lanes: EdgeDef[]) => lanes.map(lane => `${lane.kind}:${edgeKey(lane.a, lane.b)}`).toSorted();
-	expect(keys(save.world.campaign.edges)).toEqual(keys([...pack.edges, built]));
-	// A recording's step reads the lanes it drew from the end of the list, as `lab coverage` does.
-	expect(save.world.campaign.edges.at(-1)).toEqual(built);
-
-	const resumed = createGameActor({ seed: 999, save }).start();
-	for (let i = 0; i < 40; i++)
-		resumed.send(botCommand(resumed.getSnapshot().context.world, phaseOf(resumed.getSnapshot()), rng));
-	expect(phaseOf(resumed.getSnapshot())).not.toBe('lobby');
-});
-
-test('a campaign begun on today’s board keeps a lane players built that an older board started with', () => {
-	const actor = createGameActor({ seed: 11 }).start();
-	const state = publicState(actor.getSnapshot());
-	const built = retiredStartingEdges[0]!;
-	const written = JSON.parse(JSON.stringify({ v: 1, phase: state.phase, world: state.world }));
-	written.world.campaign.edges = [...pack.edges, built];
-	expect(parseSave(written).world.campaign.edges).toEqual([...pack.edges, built]);
+	const older = structuredClone(save) as { world: { table: Partial<World['table']> } };
+	delete older.world.table.start;
+	expect(() => parseSave(older)).toThrow('not a campaign save from this build');
 });

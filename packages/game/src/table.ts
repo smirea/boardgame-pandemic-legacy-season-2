@@ -17,7 +17,10 @@ export type TableCommand =
 	/** Takes a character for the next game, or lets go of the ones taken when none is named. */
 	| { type: 'CLAIM'; player: PlayerId; character: CharacterId | null };
 
-export const newTable = (): Table => ({ seats: [], ready: {} });
+export const newTable = (): Table => ({ seats: [], ready: {}, start: null });
+
+/** The game the lobby is choosing characters for. Only month 0 has a choice, made by everyone readying for one. */
+export const tableStart = (world: World): Start | null => (world.campaign.month > 0 ? 'month' : world.table.start);
 
 const bySeat = (a: { seat: SeatId }, b: { seat: SeatId }) => SEAT_IDS.indexOf(a.seat) - SEAT_IDS.indexOf(b.seat);
 const freeSeat = (table: Table) => SEAT_IDS.find(seat => !table.seats.some(entry => entry.seat === seat));
@@ -57,7 +60,10 @@ export function rejectTable(world: World, lobby: boolean, command: TableCommand)
 		case 'READY':
 			if (!lobby) return 'Not available right now';
 			if (!seated(table, command.player)) return 'Sit down first';
-			return command.start === 'prologue' && campaign.month !== 0 ? 'The prologue is over' : null;
+			if (command.start === 'prologue' && campaign.month !== 0) return 'The prologue is over';
+			return command.start && tableStart(world) && command.start !== tableStart(world)
+				? 'The table has chosen its game'
+				: null;
 		case 'CLAIM': {
 			if (!lobby) return 'Characters are chosen before a game';
 			if (!seated(table, command.player)) return 'Sit down first';

@@ -13,6 +13,7 @@
 		reconBoxes,
 		reject,
 		scenarios,
+		tableStart,
 	} from '@repo/game';
 	import type { Action, CardId, CityId, Command, EdgeDef, Play, SeatId } from '@repo/game';
 	import Board from '#lib/board/Board.svelte';
@@ -155,12 +156,8 @@
 		else if (picked.length < chooser.multi.max) picked = [...picked, option];
 	}
 	let menu = $state(false);
-	// Once the campaign has characters, a game is set up by choosing who plays them, over the whole table.
-	const choosingCharacters = $derived(
-		snap.phase === 'lobby' &&
-			!spectator &&
-			Object.values(campaign.characters).some(character => !character.dead && !character.worker),
-	);
+	// Once the table knows which game is next, every game is set up by choosing who plays, over the whole table.
+	const choosingCharacters = $derived(snap.phase === 'lobby' && !spectator && tableStart(snap.world) !== null);
 	/** The character screen and the rest of the interface float away to show the board as it stands. */
 	let peek = $state(false);
 	$effect(() => {
