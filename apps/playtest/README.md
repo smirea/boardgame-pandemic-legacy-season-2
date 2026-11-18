@@ -59,6 +59,19 @@ Everything is under `runs/<run>/`, which git ignores.
 
 Memory files live in `memory/` and are tracked, so a later run starts with what the players learned.
 
+## Idle cost
+
+`./apps/playtest/src/perf.ts` measures what the game costs while nobody touches it. It opens a real, GPU-backed Chromium window on a blank page, the landing page, and a January and a July game standing at an action step, lets each settle, and reads for 15 seconds: animation frames run, frames WebGL drew, draw calls, the CPU time of the renderer and GPU processes, and the machine's GPU load. It needs `bun run dev` running.
+
+```sh
+./apps/playtest/src/perf.ts                                 # every screen, 5 runs each, medians and ranges
+./apps/playtest/src/perf.ts --only january --runs 1         # one screen, once
+./apps/playtest/src/perf.ts --profile /tmp/idle             # also saves a CPU profile per screen
+./apps/playtest/src/perf.ts --css '.panel { backdrop-filter: none }'   # the same with a style changed
+```
+
+Each reading waits for the rest of the machine to go quiet (`--quiet <cores>`, 1.5 by default), because a crowded machine pushes the browser onto its slow cores and inflates the CPU figures, and it prints how busy the machine was. Frame counts do not depend on that. A game at rest must read 0 frames drawn and list no animation still running.
+
 ## Replays
 
 The replays page lists every recorded game of the run and plays any of them back on the real game screen: step, scrub, jump by turn, or let it run. The side panel shows each move with the reason the player gave for it, the table talk around it, and what the game logged. `lab start` and `lab replays` print its address. With `bun run dev` running, `/debug/runs` lists every run that recorded a game and opens any of them in the same page. The app's server and the lab serve the recordings through the same `/api/runs` routes in `src/replays.ts`.
