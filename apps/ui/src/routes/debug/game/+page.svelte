@@ -5,7 +5,7 @@
 	import { onDestroy } from 'svelte';
 
 	// The real machine and the real game screen with every seat on this client and no networking.
-	const session = new GameSession({ mode: 'solo', name: 'Debug', secret: '' });
+	const session = new GameSession({ mode: 'solo', secret: '' });
 	window.DEBUG = session.debugApi();
 	onDestroy(() => {
 		session.close();

@@ -6,6 +6,7 @@ import type { BundleId, CityId } from './ids';
 import { createCharacter, newCampaign, openBundle, readLegacy } from './legacy';
 import type { Save } from './machine';
 import type { World } from './state';
+import { newTable } from './table';
 
 const CAST: [name: string, job: JobId][] = [
 	['Ada', 'administrator'],
@@ -48,7 +49,7 @@ export function campaignAt(
 	seed = 12,
 	{ unexplored = [], cast = CAST }: { unexplored?: string[]; cast?: [name: string, job: JobId][] } = {},
 ): Save {
-	const world: World = { campaign: newCampaign(seed), game: null };
+	const world: World = { campaign: newCampaign(seed), game: null, table: newTable() };
 	const campaign = world.campaign;
 	const havens = pack.cities.filter(city => city.kind === 'haven' && !city.lost).map(city => city.id);
 	cast.forEach(([name, job], index) => createCharacter(campaign, { name, job, home: havens[index % havens.length]! }));

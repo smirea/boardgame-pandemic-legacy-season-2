@@ -1,64 +1,58 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
-	import { pack, score, SEAT_IDS, tableSeating } from '@repo/game';
-	import type { CharacterId, CityId, Command, JobId, PublicState } from '@repo/game';
-	import { cityName, MONTHS } from './labels.svelte.ts';
+	import { score, SEAT_IDS, tablePlayers } from '@repo/game';
+	import type { Command, PlayerId, PublicState, SeatId, Start } from '@repo/game';
+	import { LS } from '#lib/storage.ts';
+	import { MONTHS, SEAT_COLORS } from './labels.svelte.ts';
+	import Ready from './Ready.svelte';
 
-	type Props = { snap: PublicState; send: (command: Command) => void };
+	type Props = {
+		snap: PublicState;
+		player: PlayerId;
+		send: (command: Command) => void;
+		rename: (name: string) => void;
+	};
 
-	let { snap, send }: Props = $props();
+	let { snap, player, send, rename }: Props = $props();
 
 	const campaign = $derived(snap.world.campaign);
-	const living = $derived(Object.values(campaign.characters).filter(character => !character.dead && !character.worker));
-	const fallen = $derived(Object.values(campaign.characters).filter(character => character.dead && !character.worker));
-	const freeJobs = $derived(
-		pack.jobs.filter(
-			job => job.starting && !Object.values(campaign.characters).some(character => character.job === job.id),
-		),
-	);
-	const havens = pack.cities.filter(city => city.kind === 'haven' && !city.lost);
+	const table = $derived(snap.world.table);
 	const finished = $derived(snap.phase === 'finished');
 	const total = $derived(score(campaign));
+	const players = $derived(tablePlayers(table));
+	const colorOf = (seat: SeatId) => SEAT_COLORS[SEAT_IDS.indexOf(seat)]!;
+	const firstSeat = (who: PlayerId) => table.seats.find(entry => entry.player === who)!;
+	const mine = $derived(table.seats.filter(entry => entry.player === player));
 
-	let name = $state('');
-	let job = $state<JobId | ''>('');
-	let home = $state<CityId>(havens[0]!.id);
-	$effect(() => {
-		if (!job || !freeJobs.some(candidate => candidate.id === job)) job = freeJobs[0]?.id ?? '';
-	});
+	const starts = $derived<{ start: Start; label: string }[]>(
+		campaign.month === 0
+			? [
+					{ start: 'prologue', label: 'Prologue' },
+					{ start: 'month', label: 'January' },
+				]
+			: [{ start: 'month', label: MONTHS[campaign.month] ?? `Month ${campaign.month}` }],
+	);
+	const waitingOn = $derived(players.filter(who => !table.ready[who]).map(who => firstSeat(who).name));
+	const split = $derived(new Set(Object.values(table.ready)).size > 1);
 
-	// Seats live in the game state, so every player's lobby shows the same table.
-	const seating = $derived(tableSeating(campaign));
-	const seated = (index: number): CharacterId | 'worker' | '' => {
-		const entry = seating.find(candidate => candidate.seat === SEAT_IDS[index]);
-		return entry ? (entry.character ?? 'worker') : '';
-	};
-	const startCommand = $derived<Command>({ type: 'START_GAME', seating });
+	let name = $state(LS.get('name', ''));
+	let typing: ReturnType<typeof setTimeout> | undefined;
+	function typed() {
+		clearTimeout(typing);
+		typing = setTimeout(() => name.trim() && rename(name), 450);
+	}
 </script>
 
 <div
 	class="lobby"
-	{@attach feedback(undefined, () => ({
-		phase: snap.phase,
-		characters: Object.keys(campaign.characters).length,
-		seating: campaign.seating,
-	}))}
+	{@attach feedback(undefined, () => ({ phase: snap.phase, month: campaign.month, table }))}
+	data-testid="lobby"
 >
-	<header>
-		<h1>{finished ? 'Campaign complete' : (MONTHS[campaign.month] ?? '')}</h1>
-		<p>
-			{#if finished}
-				Final score {total.total}
-			{:else if campaign.month === 0}
-				The prologue is a practice game. Nothing in it is permanent. Play it as often as you like, then begin January.
-			{:else}
-				{campaign.attempt === 1 ? 'Early attempt' : 'Late attempt'}. Rationing {campaign.rationing}.
-			{/if}
-		</p>
-	</header>
-
 	{#if finished}
+		<h1>Campaign complete</h1>
 		<dl class="score">
+			<dt>Final score</dt>
+			<dd>{total.total}</dd>
 			<dt>Months won early</dt>
 			<dd>{total.earlyWins}</dd>
 			<dt>Months won late</dt>
@@ -73,131 +67,78 @@
 			<dd>{total.forsaken}</dd>
 		</dl>
 	{:else}
-		<div class="columns">
-			<section>
-				<h2>Characters</h2>
-				<ul>
-					{#each living as character (character.id)}
-						<li>
-							<strong>{character.name}</strong>
-							<span>{pack.jobs.find(candidate => candidate.id === character.job)?.name}</span>
-							<small>{cityName(character.home)}</small>
-						</li>
-					{:else}
-						<li class="empty">Create at least two characters to begin.</li>
-					{/each}
-					{#each fallen as character (character.id)}
-						<li class="dead">
-							<strong>{character.name}</strong><span
-								>died in {character.diedAt ? cityName(character.diedAt) : 'the field'}</span
-							>
-						</li>
-					{/each}
-				</ul>
-				{#if freeJobs.length}
-					<form
-						onsubmit={event => {
-							event.preventDefault();
-							if (job) send({ type: 'CREATE_CHARACTER', name, job, home });
-							name = '';
-						}}
-					>
-						<input bind:value={name} placeholder="Name" maxlength="24" data-testid="character-name" />
-						<select bind:value={job} title={pack.jobs.find(candidate => candidate.id === job)?.text}>
-							{#each freeJobs as option (option.id)}<option value={option.id}>{option.name}</option>{/each}
-						</select>
-						<select bind:value={home}>
-							{#each havens as haven (haven.id)}<option value={haven.id}>{haven.name}</option>{/each}
-						</select>
-						<button disabled={!name.trim()} data-testid="create-character">Create</button>
-					</form>
-					<p class="jobtext">{pack.jobs.find(candidate => candidate.id === job)?.text}</p>
-				{/if}
-			</section>
+		<h1>{campaign.month === 0 ? 'The table' : MONTHS[campaign.month]}</h1>
 
-			<section>
-				<h2>Seats</h2>
-				{#each SEAT_IDS as seat, index (seat)}
-					<label>
-						<span>Seat {index + 1}</span>
-						<select
-							value={seated(index)}
-							onchange={event => {
-								const choice = event.currentTarget.value as CharacterId | 'worker' | '';
-								send({ type: 'SEAT', seat, choice: choice === '' ? null : choice });
-							}}
-						>
-							<option value="">empty</option>
-							{#each living as character (character.id)}<option value={character.id}>{character.name}</option>{/each}
-							<option value="worker">Haven worker</option>
-						</select>
-					</label>
-				{/each}
-				<div class="buttons">
-					<button
-						class="primary"
-						disabled={seating.length < 2}
-						onclick={() => send(startCommand)}
-						data-testid="start-game"
-					>
-						{campaign.month === 0 ? 'Play the prologue' : `Start ${MONTHS[campaign.month]}`}
-					</button>
-					{#if campaign.month === 0}
-						<button onclick={() => send({ type: 'BEGIN_CAMPAIGN' })} data-testid="begin-campaign">Begin January</button>
-					{/if}
-				</div>
-				<h2>Rationing</h2>
-				<div
-					class="rationing"
-					title="How many Rationed Events go in the deck. It moves by 2 after each game. Change it only to correct a rules mistake."
-				>
-					<button
-						onclick={() => send({ type: 'SET_RATIONING', value: campaign.rationing - 1 })}
-						disabled={campaign.rationing <= 0}>−</button
-					>
-					<strong data-testid="rationing">{campaign.rationing}</strong>
-					<button
-						onclick={() => send({ type: 'SET_RATIONING', value: campaign.rationing + 1 })}
-						disabled={campaign.rationing >= 10}>+</button
-					>
-				</div>
-				<h2>Haven names</h2>
-				{#each pack.cities.filter(entry => entry.kind === 'haven' && campaign.locations[entry.id]?.revealed) as haven (haven.id)}
-					<input
-						class="haven"
-						value={cityName(haven.id)}
-						maxlength="24"
-						onchange={event =>
-							event.currentTarget.value.trim() &&
-							send({ type: 'RENAME_HAVEN', city: haven.id, name: event.currentTarget.value })}
-					/>
-				{/each}
-				{#if campaign.results.length}
-					<h2>Record</h2>
-					<p class="record">
-						{#each campaign.results as result, index (index)}
-							<span class:won={result.won} title={`${MONTHS[result.month]} ${result.attempt === 1 ? 'early' : 'late'}`}
-								>{MONTHS[result.month]!.slice(0, 3)}</span
+		<label class="name">
+			<span>Your name</span>
+			<input
+				bind:value={name}
+				oninput={typed}
+				onchange={() => name.trim() && rename(name)}
+				maxlength="24"
+				placeholder="Your name"
+				autocomplete="nickname"
+				data-testid="lobby-name"
+			/>
+		</label>
+
+		<ol class="seats" aria-label="Seats">
+			{#each SEAT_IDS as seat (seat)}
+				{@const entry = table.seats.find(candidate => candidate.seat === seat)}
+				<li class:open={!entry} class:you={entry?.player === player} style:--seat={colorOf(seat)}>
+					<i></i>
+					{#if entry}
+						<strong>{entry.name}</strong>
+						{#if entry.player === player && mine.length > 1}
+							<button
+								class="drop"
+								aria-label={`Give up this seat`}
+								title="Give up this seat"
+								onclick={() => send({ type: 'LEAVE', player, seat })}>×</button
 							>
-						{/each}
-					</p>
-				{/if}
-			</section>
+						{/if}
+					{:else}
+						<span>Open seat</span>
+					{/if}
+				</li>
+			{/each}
+		</ol>
+		{#if mine.length > 0 && table.seats.length < SEAT_IDS.length}
+			<button class="add" onclick={() => send({ type: 'ADD_SEAT', player })} data-testid="add-seat"
+				>+ Play another seat on this screen</button
+			>
+		{/if}
+
+		<div class="starts">
+			{#each starts as option (option.start)}
+				<Ready {table} {player} {send} start={option.start} label={option.label} />
+			{/each}
 		</div>
+		<p class="hint" aria-live="polite">
+			{#if table.seats.length < 2}
+				A game needs two seats. Others join with your passphrase, or play another seat here.
+			{:else if split}
+				Everyone has to pick the same game.
+			{:else if waitingOn.length}
+				Waiting for {waitingOn.join(', ')}.
+			{:else}
+				Starting.
+			{/if}
+		</p>
 	{/if}
 </div>
 
 <style>
-	/* The campaign ledger: a loose sheet of chart paper with the roster and the seating on it. */
 	.lobby {
-		width: min(48rem, 92vw);
-		max-height: 100%;
-		padding: 1.5rem 1.8rem 1.4rem;
+		display: flex;
+		flex-direction: column;
+		gap: 1.1rem;
+		width: min(26rem, 92vw);
+		padding: 1.6rem 1.8rem 1.4rem;
 		border-radius: 2px;
 		background: var(--document);
 		color: var(--slip-ink);
 		box-shadow: var(--document-shadow);
-		overflow: auto;
 		animation: laid 420ms cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
 	}
 
@@ -212,144 +153,115 @@
 	h1 {
 		margin: 0;
 		font-family: var(--font-display);
-		font-size: 2.6rem;
+		font-size: 2.4rem;
 		font-weight: 400;
 		line-height: 1;
 	}
 
-	header {
-		padding-bottom: 0.9rem;
-		margin-bottom: 1rem;
-		border-bottom: 1px solid rgb(42 32 23 / 0.25);
-	}
-
-	header p {
-		margin: 0.35rem 0 0;
-		color: var(--slip-muted);
-		font-size: 0.92rem;
-	}
-
-	h2 {
-		margin: 0 0 0.45rem;
-		font-family: var(--font-display);
-		font-size: 1.15rem;
-		font-weight: 400;
-	}
-
-	.columns {
-		display: grid;
-		grid-template-columns: 1.15fr 1fr;
-		gap: 2rem;
-	}
-
-	ul {
+	.name {
 		display: flex;
 		flex-direction: column;
-		gap: 0.15rem;
-		margin: 0 0 0.9rem;
-		padding: 0;
-		list-style: none;
-		font-size: 0.9rem;
+		gap: 0.25rem;
 	}
 
-	li {
-		display: flex;
-		align-items: baseline;
-		gap: 0.5rem;
-		padding: 0.12rem 0;
-		border-bottom: 1px dotted rgb(42 32 23 / 0.2);
-	}
-
-	li strong {
-		font-family: var(--font-display);
-		font-size: 1.02rem;
-		font-weight: 400;
-	}
-
-	li span {
-		color: var(--ink-good);
-		font-size: 0.8rem;
-	}
-
-	li small,
-	.empty,
-	.jobtext {
+	.name span {
 		color: var(--slip-muted);
-		font-size: 0.8rem;
+		font-size: 0.78rem;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
 	}
 
-	li small {
-		margin-left: auto;
-		font-family: var(--font-display);
-		font-style: italic;
-	}
-
-	li.dead {
-		opacity: 0.55;
-		text-decoration: line-through;
-		text-decoration-color: var(--ink-danger);
-	}
-
-	form {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 0.45rem;
-	}
-
-	.jobtext {
-		margin: 0.5rem 0 0;
-		line-height: 1.35;
-	}
-
-	label {
-		display: flex;
-		align-items: center;
-		gap: 0.6rem;
-		margin-bottom: 0.3rem;
-		font-size: 0.88rem;
-	}
-
-	label span {
-		width: 3.2rem;
-		color: var(--slip-muted);
-	}
-
-	label select {
-		flex: 1;
-	}
-
-	input,
-	select,
-	button {
-		padding: 0.35rem 0.45rem;
+	input {
+		padding: 0.35rem 0.1rem;
 		border: 0;
 		border-bottom: 1px solid rgb(42 32 23 / 0.35);
-		border-radius: 0;
-		background: rgb(255 252 242 / 0.35);
+		background: none;
 		color: var(--slip-ink);
-		font: inherit;
-		font-size: 0.88rem;
+		font-family: var(--font-display);
+		font-size: 1.35rem;
+	}
+
+	input:focus {
+		outline: none;
+		border-bottom-color: var(--slip-ink);
 	}
 
 	input::placeholder {
-		color: rgb(42 32 23 / 0.45);
+		color: rgb(42 32 23 / 0.4);
 	}
 
-	input:focus,
-	select:focus {
-		outline: none;
-		border-bottom-color: var(--slip-ink);
-		background: rgb(255 252 242 / 0.6);
+	.seats {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 0.4rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.seats li {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		min-height: 2.3rem;
+		padding: 0.3rem 0.55rem;
+		border: 1px solid rgb(42 32 23 / 0.22);
+		border-radius: 2px;
+		font-size: 0.95rem;
+		animation: sit 320ms cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+	}
+
+	@keyframes sit {
+		from {
+			opacity: 0;
+			scale: 0.94;
+		}
+	}
+
+	.seats li i {
+		flex: none;
+		width: 0.7rem;
+		height: 0.7rem;
+		border-radius: 50%;
+		background: var(--seat);
+	}
+
+	.seats li strong {
+		overflow: hidden;
+		font-family: var(--font-display);
+		font-size: 1.08rem;
+		font-weight: 400;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.seats li.you {
+		border-color: var(--slip-ink);
+		box-shadow: inset 3px 0 0 var(--seat);
+	}
+
+	.seats li.open {
+		border-style: dashed;
+		color: var(--slip-muted);
+		font-size: 0.85rem;
+	}
+
+	.seats li.open i {
+		background: none;
+		box-shadow: inset 0 0 0 1.5px rgb(42 32 23 / 0.3);
 	}
 
 	button {
 		border: 1px solid rgb(42 32 23 / 0.4);
 		border-radius: 2px;
 		background: none;
+		color: var(--slip-ink);
+		font: inherit;
 		cursor: pointer;
 		transition:
 			background 150ms ease,
-			border-color 150ms ease;
+			border-color 150ms ease,
+			color 150ms ease;
 	}
 
 	button:hover:not(:disabled) {
@@ -362,76 +274,39 @@
 		cursor: default;
 	}
 
-	.primary {
-		border-color: var(--slip-ink);
-		background: var(--slip-ink);
-		color: #efe6d2;
-		font-weight: 700;
+	.drop {
+		margin-left: auto;
+		padding: 0 0.35rem;
+		border-color: transparent;
+		color: var(--slip-muted);
+		font-size: 1rem;
+		line-height: 1.2;
 	}
 
-	.primary:hover:not(:disabled) {
-		background: #3d3022;
-	}
-
-	.buttons {
-		display: flex;
-		gap: 0.5rem;
-		margin: 0.7rem 0 1rem;
-	}
-
-	.buttons .primary {
-		flex: 1;
-		padding-block: 0.5rem;
-	}
-
-	.rationing {
-		display: flex;
-		align-items: center;
-		gap: 0.6rem;
-		margin-bottom: 1rem;
-	}
-
-	.rationing button {
-		width: 1.9rem;
+	.add {
+		align-self: flex-start;
+		margin-top: -0.6rem;
 		padding: 0.2rem 0;
+		border: 0;
+		color: var(--slip-muted);
+		font-size: 0.82rem;
 	}
 
-	.rationing strong {
-		min-width: 1.5rem;
-		font-family: var(--font-display);
-		font-size: 1.3rem;
-		font-weight: 400;
-		text-align: center;
+	.add:hover:not(:disabled) {
+		background: none;
+		color: var(--slip-ink);
 	}
 
-	.haven {
-		display: inline-block;
-		width: calc(50% - 0.2rem);
-		margin: 0 0.4rem 0.35rem 0;
-	}
-
-	.haven:nth-of-type(2n) {
-		margin-right: 0;
-	}
-
-	.record {
+	.starts {
 		display: flex;
-		flex-wrap: wrap;
-		gap: 0.25rem;
-		margin: 0;
-		font-size: 0.75rem;
+		gap: 0.6rem;
 	}
 
-	.record span {
-		padding: 0.02rem 0.35rem;
-		border: 1px solid rgb(163 48 28 / 0.5);
-		border-radius: 2px;
-		color: var(--ink-danger);
-	}
-
-	.record span.won {
-		border-color: rgb(61 107 85 / 0.6);
-		color: var(--ink-good);
+	.hint {
+		margin: -0.3rem 0 0;
+		color: var(--slip-muted);
+		font-size: 0.85rem;
+		text-align: center;
 	}
 
 	.score {

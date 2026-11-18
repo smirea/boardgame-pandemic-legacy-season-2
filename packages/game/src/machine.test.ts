@@ -8,11 +8,12 @@ import { edge, retiredStartingEdges } from './content/world';
 import { bump, epidemicCount, placeHollow, setupInfection } from './flow';
 import { grid, handLimit, hasEdge, isCandidate, passage, segmentsCross, tableSeating } from './helpers';
 import { edgeKey } from './ids';
-import type { BundleId, CardId, CityId } from './ids';
+import type { BundleId, CardId, CityId, PlayerId } from './ids';
 import { createGameActor, parseSave, phaseOf, reject } from './machine';
 import type { Command, GameActor, Phase, Save } from './machine';
 import { legalActions, legalPlays } from './options';
 import { applyUnlock, closeGame, newCampaign, openBundle, score } from './legacy';
+import { newTable } from './table';
 import { decemberSave, octoberSave } from './scenarios';
 import type { Character, Game, World } from './state';
 import {
@@ -1065,15 +1066,20 @@ test('a save written before a field existed still loads and plays', () => {
 	const old = JSON.parse(JSON.stringify(worldOf(late()))) as {
 		campaign: Record<string, unknown>;
 		game: Record<string, unknown>;
+		table?: unknown;
 	};
+	delete old.table;
 	for (const field of ['names', 'owedScars', 'losingStreakBonusGames', 'seating']) delete old.campaign[field];
 	for (const field of ['waived', 'prologueRestore']) delete old.game[field];
-	for (const entry of Object.values(old.campaign['characters'] as Record<string, Record<string, unknown>>))
+	for (const entry of Object.values(old.campaign['characters'] as Record<string, Record<string, unknown>>)) {
 		delete entry['jobScar'];
+		delete entry['player'];
+	}
 	const actor = createGameActor({ seed: 1, save: parseSave({ v: 1, phase: 'playing.actions', world: old }) }).start();
 	expect(worldOf(actor).campaign).toMatchObject({ names: {}, owedScars: 0, seating: [] });
 	expect(gameOf(actor).waived).toEqual([]);
-	expect(character(worldOf(actor), A).jobScar).toBeNull();
+	expect(character(worldOf(actor), A)).toMatchObject({ jobScar: null, player: null });
+	send(actor, { type: 'TAKE_SEAT', player: 'p1' as PlayerId, name: 'Ada', seat: A });
 	act(actor, { a: 'makeSupplies' });
 	send(actor, { type: 'END_ACTIONS', seat: A });
 	expect(phase(actor)).toBe('playing.draw');
@@ -1258,7 +1264,7 @@ test('Lake Baikal can only be joined to the grid from Utopia', () => {
 });
 
 test('South America arrives with the sea route from Lima to the eastern Pacific haven', () => {
-	const world: World = { campaign: newCampaign(4), game: null };
+	const world: World = { campaign: newCampaign(4), game: null, table: newTable() };
 	openBundle(world, 'south-america' as BundleId, false);
 	const { campaign } = world;
 	expect(campaign.locations[city('haven-eastern-pacific')]!.revealed).toBe(true);

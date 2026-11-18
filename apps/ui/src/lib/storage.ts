@@ -1,4 +1,3 @@
-import type { SeatId } from '@repo/game';
 import { LocalStorage } from './createLocalStorage';
 import { debugIdFromSearch } from './debugId';
 import type { Mode } from './session/session.svelte.ts';
@@ -12,7 +11,6 @@ export const LS = new LocalStorage<{
 	passphrase: string;
 	/** The mode to resume after a reload, cleared when the player leaves. */
 	mode: Mode | null;
-	mySeats: SeatId[];
 	/** The host's campaign save: plain `{ phase, world }` JSON. */
 	save: unknown;
 	debugSnapshot: unknown;
@@ -26,7 +24,6 @@ export const LS = new LocalStorage<{
 		name: '',
 		passphrase: '',
 		mode: null,
-		mySeats: [],
 		save: null,
 		debugSnapshot: null,
 		record: null,

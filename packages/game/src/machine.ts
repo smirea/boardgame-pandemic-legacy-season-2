@@ -20,7 +20,7 @@ import {
 } from './flow';
 import { cityDef, grid, hasEdge, isForsaken, log, overLimit, SEAT_IDS, tableSeating } from './helpers';
 import { edgeKey } from './ids';
-import type { CardId, CharacterId, CityId, SeatId } from './ids';
+import type { CardId, CharacterId, CityId, PlayerId, SeatId } from './ids';
 import type { Purchase } from './legacy';
 import {
 	applyPurchase,
@@ -34,11 +34,14 @@ import {
 import type { Decide, Play } from './plays';
 import { applyDecide, applyPlay, autoResolve, checkDecide, checkPlay } from './plays';
 import type { World } from './state';
+import type { TableCommand } from './table';
+import { applyTable, claimCharacter, dealTable, newTable, readyStart, rejectTable } from './table';
 
 export type Seating = { seat: SeatId; character: CharacterId | null };
 
 export type Command =
-	| { type: 'CREATE_CHARACTER'; name: string; job: JobId; home: CityId }
+	/** Makes a character, taken by `player` for the next game when one is named. */
+	| { type: 'CREATE_CHARACTER'; name: string; job: JobId; home: CityId; player?: PlayerId }
 	| { type: 'SET_RATIONING'; value: number }
 	| { type: 'RENAME_HAVEN'; city: CityId; name: string }
 	/** Leaves the prologue, which may be played any number of times, and starts January. */
@@ -64,7 +67,8 @@ export type Command =
 	| { type: 'UNDO' }
 	| { type: 'CONTINUE' }
 	| { type: 'PURCHASE'; purchase: Purchase }
-	| { type: 'FINISH_UPKEEP' };
+	| { type: 'FINISH_UPKEEP' }
+	| TableCommand;
 
 export type Phase =
 	| 'lobby'
@@ -97,6 +101,15 @@ export function reject(world: World, phase: Phase, command: Command): string | n
 	const { campaign, game } = world;
 	const inPhase = (...phases: Phase[]) => (phases.includes(phase) ? null : 'Not available right now');
 	switch (command.type) {
+		case 'JOIN':
+		case 'ADD_SEAT':
+		case 'TAKE_SEAT':
+		case 'LEAVE':
+		case 'READY':
+		case 'CLAIM':
+			return phase === 'finished' && command.type !== 'LEAVE'
+				? 'The campaign is over'
+				: rejectTable(world, phase === 'lobby', command);
 		case 'CREATE_CHARACTER': {
 			const job = pack.jobs.find(candidate => candidate.id === command.job);
 			const home = pack.cities.find(candidate => candidate.id === command.home);
@@ -265,6 +278,14 @@ const anyStep = (phase: Phase) =>
 		WAIVE_OBJECTIVE: { guard: { type: 'legal', params: phase }, actions: 'waive' },
 	}) as const;
 
+/** Who sits where can change in any phase: a newcomer takes an open seat, anyone gets up. */
+const seatEvents = (phase: Phase) =>
+	({
+		JOIN: { guard: { type: 'legal', params: phase }, actions: 'table' },
+		TAKE_SEAT: { guard: { type: 'legal', params: phase }, actions: 'table' },
+		LEAVE: { guard: { type: 'legal', params: phase }, actions: 'table' },
+	}) as const;
+
 export const gameMachine = setup({
 	types: {
 		context: {} as Context,
@@ -273,6 +294,8 @@ export const gameMachine = setup({
 	},
 	guards: {
 		legal: ({ context, event }: Args, phase: Phase) => reject(context.world, phase, event) === null,
+		readyToStart: ({ context, event }: Args) =>
+			reject(context.world, 'lobby', event) === null && readyStart(context.world.table, event as Of<'READY'>) !== null,
 		canUndo: ({ context }: Args) => context.undo.length > 0,
 		over: ({ context }: Args) => isOver(context.world),
 		drawsDone: ({ context }: Args) =>
@@ -288,7 +311,10 @@ export const gameMachine = setup({
 		createCharacter: assign(
 			change((world, event) => {
 				const { campaign } = world;
-				const created = createCharacter(campaign, event as Of<'CREATE_CHARACTER'>);
+				const { player, ...input } = event as Of<'CREATE_CHARACTER'>;
+				const created = createCharacter(campaign, input);
+				if (player && world.table.seats.some(entry => entry.player === player))
+					claimCharacter(world, player, created.id);
 				// A new character takes the first empty seat, so a new group is seated as it is created.
 				const taken = tableSeating(campaign);
 				const free = SEAT_IDS.find(seat => !taken.some(entry => entry.seat === seat));
@@ -315,6 +341,25 @@ export const gameMachine = setup({
 			}),
 		),
 		beginCampaign: assign(change(world => void (world.campaign.month = 1))),
+		claim: assign(
+			change((world, event) => {
+				const { player, character } = event as Of<'CLAIM'>;
+				claimCharacter(world, player, character);
+			}),
+		),
+		table: assign(({ context, event }: Args) => ({
+			world: produce(context.world, draft => applyTable(draft.table, event as TableCommand)),
+		})),
+		startTable: assign(
+			change((world, event) => {
+				if ((event as Of<'READY'>).start === 'month' && world.campaign.month === 0) world.campaign.month = 1;
+				world.table.ready = {};
+				readLegacy(world, 'setup');
+				const seating = dealTable(world);
+				world.campaign.seating = seating;
+				createGame(world, seating);
+			}),
+		),
 		ackBriefing: assign(({ context }: Args) => ({
 			world: produce(context.world, draft => void (draft.campaign.briefing = [])),
 		})),
@@ -357,7 +402,11 @@ export const gameMachine = setup({
 				undo: actionReveals(action) ? [] : [...context.undo, context.world],
 			};
 		}),
-		undo: assign(({ context }: Args) => ({ world: context.undo.at(-1)!, undo: context.undo.slice(0, -1) })),
+		// Who sits where is not part of a move, so taking one back leaves the table as it is.
+		undo: assign(({ context }: Args) => ({
+			world: { ...context.undo.at(-1)!, table: context.world.table },
+			undo: context.undo.slice(0, -1),
+		})),
 		startDraw: assign(change(startDrawStep)),
 		draw: assign(change(drawPlayerCard)),
 		startInfect: assign(change(startInfectStep)),
@@ -396,7 +445,7 @@ export const gameMachine = setup({
 }).createMachine({
 	id: 'game',
 	context: ({ input }) => ({
-		world: 'world' in input ? input.world : { campaign: newCampaign(input.seed), game: null },
+		world: 'world' in input ? input.world : { campaign: newCampaign(input.seed), game: null, table: newTable() },
 		undo: [],
 	}),
 	initial: 'lobby',
@@ -410,6 +459,13 @@ export const gameMachine = setup({
 				RENAME_HAVEN: { guard: { type: 'legal', params: 'lobby' }, actions: 'renameHaven' },
 				SEAT: { guard: { type: 'legal', params: 'lobby' }, actions: 'seat' },
 				START_GAME: { guard: { type: 'legal', params: 'lobby' }, target: 'setup', actions: 'startGame' },
+				...seatEvents('lobby'),
+				ADD_SEAT: { guard: { type: 'legal', params: 'lobby' }, actions: 'table' },
+				CLAIM: { guard: { type: 'legal', params: 'lobby' }, actions: 'claim' },
+				READY: [
+					{ guard: 'readyToStart', target: 'setup', actions: 'startTable' },
+					{ guard: { type: 'legal', params: 'lobby' }, actions: 'table' },
+				],
 			},
 		},
 		setup: {
@@ -418,6 +474,7 @@ export const gameMachine = setup({
 			states: {
 				supply: {
 					on: {
+						...seatEvents('setup.supply'),
 						PLACE_SUPPLY: { guard: { type: 'legal', params: 'setup.supply' }, actions: 'placeSupply' },
 						AUTO_SUPPLY: { guard: { type: 'legal', params: 'setup.supply' }, actions: 'autoSupply' },
 						PURCHASE: { guard: { type: 'legal', params: 'setup.supply' }, actions: 'purchase' },
@@ -430,6 +487,7 @@ export const gameMachine = setup({
 				},
 				events: {
 					on: {
+						...seatEvents('setup.events'),
 						PICK_EVENTS: { guard: { type: 'legal', params: 'setup.events' }, actions: 'pickEvents' },
 						CONFIRM_EVENTS: {
 							guard: { type: 'legal', params: 'setup.events' },
@@ -447,6 +505,7 @@ export const gameMachine = setup({
 				actions: {
 					on: {
 						...anyStep('playing.actions'),
+						...seatEvents('playing.actions'),
 						ACTION: { guard: { type: 'legal', params: 'playing.actions' }, actions: 'act' },
 						UNDO: { guard: 'canUndo', actions: 'undo' },
 						END_ACTIONS: { guard: { type: 'legal', params: 'playing.actions' }, target: 'draw', actions: 'startDraw' },
@@ -456,6 +515,7 @@ export const gameMachine = setup({
 					always: { guard: 'drawsDone', target: 'infect', actions: 'startInfect' },
 					on: {
 						...anyStep('playing.draw'),
+						...seatEvents('playing.draw'),
 						DRAW: { guard: { type: 'legal', params: 'playing.draw' }, actions: 'draw' },
 					},
 				},
@@ -463,14 +523,16 @@ export const gameMachine = setup({
 					always: { guard: 'infectionsDone', target: 'actions', actions: 'endTurn' },
 					on: {
 						...anyStep('playing.infect'),
+						...seatEvents('playing.infect'),
 						INFECT: { guard: { type: 'legal', params: 'playing.infect' }, actions: 'infect' },
 					},
 				},
 			},
 		},
-		over: { on: { CONTINUE: { target: 'upkeep', actions: 'resolveGameEnd' } } },
+		over: { on: { ...seatEvents('over'), CONTINUE: { target: 'upkeep', actions: 'resolveGameEnd' } } },
 		upkeep: {
 			on: {
+				...seatEvents('upkeep'),
 				PURCHASE: { guard: { type: 'legal', params: 'upkeep' }, actions: 'purchase' },
 				FINISH_UPKEEP: [
 					{ guard: 'campaignEnding', target: 'finished', actions: 'closeGame' },
@@ -478,7 +540,7 @@ export const gameMachine = setup({
 				],
 			},
 		},
-		finished: {},
+		finished: { on: { LEAVE: { guard: { type: 'legal', params: 'finished' }, actions: 'table' } } },
 	},
 });
 
@@ -547,11 +609,15 @@ export function parseSave(raw: unknown): Save {
 		];
 	}
 	campaign.characters = Object.fromEntries(
-		Object.entries(campaign.characters).map(([id, character]) => [id, Object.assign({ jobScar: null }, character)]),
+		Object.entries(campaign.characters).map(([id, character]) => [
+			id,
+			Object.assign({ jobScar: null, player: null }, character),
+		]),
 	);
 	const saved = save.world.game;
 	const game = saved ? { ...GAME_DEFAULTS, ...saved, locations: { ...blankLocations(), ...saved.locations } } : null;
-	return { v: 1, phase: save.phase, world: { campaign, game } };
+	const table = { ...newTable(), ...save.world.table };
+	return { v: 1, phase: save.phase, world: { campaign, game, table } };
 }
 
 function blankLocations() {

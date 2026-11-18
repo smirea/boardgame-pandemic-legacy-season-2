@@ -11,6 +11,7 @@ declare const window: {
 		send(command: Command): string | null;
 		connection(): Connection;
 		getRecord(): GameRecord | null;
+		setName(name: string): void;
 	};
 	__lab?: HTMLElement[];
 	/** What each control said when it was listed, so a click on one that has since changed is refused. */
@@ -29,7 +30,7 @@ export async function launch(headed: boolean): Promise<{ browser: Browser; conte
 	return { browser, context };
 }
 
-/** Opens one player's tab and brings it into the game the way a person would: name, passphrase, Host or Join. */
+/** Opens one player's tab and brings it into the game the way a person would: passphrase, Host or Join, then a name. */
 export async function openTab(
 	context: BrowserContext,
 	options: {
@@ -54,11 +55,11 @@ export async function openTab(
 	await page.goto(options.url);
 	const resumed = await page.evaluate(() => Boolean(window.DEBUG));
 	if (!resumed) {
-		await page.locator('[data-testid=name]').fill(options.name);
 		await page.locator('[data-testid=passphrase]').fill(options.passphrase);
 		await page.locator(`[data-testid=${options.host ? 'host' : 'join'}]`).click();
 	}
 	await page.waitForFunction(() => Boolean(window.DEBUG), null, { timeout: 30_000 });
+	await page.evaluate(name => window.DEBUG!.setName(name), options.name);
 	return tab;
 }
 

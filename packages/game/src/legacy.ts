@@ -151,6 +151,7 @@ export function createCharacter(
 		diedAt: null,
 		worker: input.worker ?? false,
 		carrier: false,
+		player: null,
 	};
 	campaign.characters[id] = character;
 	return character;

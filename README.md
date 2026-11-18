@@ -11,7 +11,7 @@ bun run dev            # UI at http://boardgame-pandemic-legacy-season-2.localho
 ## Play
 
 - **On one screen.** Open the UI and choose "Play on this screen", or go to `/debug/game`. This runs the real game with every seat on one client and no networking, so one person can play a whole campaign. The table turns each turn to seat the active character at the bottom right.
-- **With friends.** Start the signaling Worker, then one player hosts and the others join with the same passphrase.
+- **With friends.** Start the signaling Worker, then one player hosts and the others join with the same passphrase. Everyone is seated as they arrive, and the game starts when all have pressed Ready for the same one. A browser that arrives mid-game picks an open seat, and Vacate my seat in the menu frees yours.
 
 ```sh
 cd apps/signal && bun x wrangler dev --var SIGNAL_SECRET:dev-secret

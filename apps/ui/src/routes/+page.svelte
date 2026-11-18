@@ -9,16 +9,15 @@
 
 	const browser = typeof window !== 'undefined';
 
-	let name = $state(LS.get('name', ''));
 	let secret = $state(LS.get('passphrase', ''));
 	let session = $state<GameSession | null>(null);
 	let error = $state<string | null>(null);
 
 	function start(mode: Mode) {
 		error = null;
-		LS.set({ name, passphrase: secret, mode });
+		LS.set({ passphrase: secret, mode });
 		try {
-			session = new GameSession({ mode, name: name.trim() || 'Player', secret });
+			session = new GameSession({ mode, secret });
 			window.DEBUG = session.debugApi();
 		} catch (cause) {
 			error = cause instanceof Error ? cause.message : String(cause);
@@ -80,7 +79,6 @@
 				A co-op campaign for two to four characters. Play every character yourself on this screen, or play with a group:
 				one player hosts and keeps the save, everyone else joins them directly.
 			</p>
-			<label>Your name <input bind:value={name} maxlength="24" placeholder="Name" data-testid="name" /></label>
 			<label
 				>Passphrase <input
 					bind:value={secret}

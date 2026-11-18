@@ -16,7 +16,7 @@ import type {
 	TurningPointId,
 } from './content/types';
 import type { PiledDeck, StratifiedDeck } from './decks';
-import type { BundleId, CardId, CharacterId, CityId, RegionId, SeatId } from './ids';
+import type { BundleId, CardId, CharacterId, CityId, PlayerId, RegionId, SeatId } from './ids';
 import type { RngState } from './rng';
 
 export type SearchBox = { scope: 'land' | 'sea'; result: SearchResult; scratched: boolean };
@@ -52,6 +52,8 @@ export type Character = {
 	diedAt: CityId | null;
 	worker: boolean;
 	carrier: boolean;
+	/** The person who played the character last, so the table deals it back to them. */
+	player: PlayerId | null;
 };
 
 export type CampaignLocation = {
@@ -226,4 +228,17 @@ export type Game = {
 	prologueRestore: Campaign | null;
 };
 
-export type World = { campaign: Campaign; game: Game | null };
+/** Which game the lobby is getting ready for: the practice prologue, or the campaign's month. */
+export type Start = 'prologue' | 'month';
+
+/**
+ * The people at the table, apart from the campaign: a prologue that rolls the campaign back leaves
+ * them seated, and undo leaves them alone. One person may hold several seats.
+ */
+export type Table = {
+	seats: { seat: SeatId; player: PlayerId; name: string }[];
+	/** Who in the lobby is ready, and for which game. */
+	ready: Partial<Record<PlayerId, Start>>;
+};
+
+export type World = { campaign: Campaign; game: Game | null; table: Table };

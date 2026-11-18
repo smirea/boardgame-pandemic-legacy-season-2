@@ -11,6 +11,7 @@ import {
 	actionBriefs,
 	gameIndexOf,
 	newCampaign,
+	newTable,
 	overLimit,
 	pack,
 	parseRecord,
@@ -20,7 +21,6 @@ import {
 	ruleBriefs,
 	scenarios,
 	startRecord,
-	tableSeating,
 } from '@repo/game';
 import type { CharacterId, Command, GameRecord, PublicState, RecordNote, Save, SeatId } from '@repo/game';
 import { newAudit, observe, renderParity, untouched } from './audit.ts';
@@ -137,7 +137,7 @@ function startingSave(): Save {
 		if (!scenario) throw new Error(`unknown scenario "${config.start.scenario}"`);
 		return scenario(config.seed);
 	}
-	return { v: 1, phase: 'lobby', world: { campaign: newCampaign(config.seed), game: null } };
+	return { v: 1, phase: 'lobby', world: { campaign: newCampaign(config.seed), game: null, table: newTable() } };
 }
 const initialSave = startingSave();
 
@@ -148,9 +148,8 @@ if (!argv.includes('--no-build')) {
 }
 const envFile = (name: string) => (existsSync(join(repoRoot, name)) ? readFileSync(join(repoRoot, name), 'utf8') : '');
 // env-manager quotes the values it writes to `.env.local`.
-const built = (
-	envFile('.env.local').match(/^SIGNAL_URL=['"]?([^\s'"]+)/m) ?? envFile('.env').match(/^SIGNAL_URL=['"]?([^\s'"]+)/m)
-)?.[1];
+const built = (envFile('.env.local').match(/^SIGNAL_URL=['"]?([^\s'"]+)/m) ??
+	envFile('.env').match(/^SIGNAL_URL=['"]?([^\s'"]+)/m))?.[1];
 if (built !== `http://127.0.0.1:${config.signalPort}`)
 	throw new Error(
 		`the app is built for the signaling server at ${built}, but this run wants port ${config.signalPort}`,
@@ -372,25 +371,13 @@ function whoOf(id: string): Who | null {
 	return { index, id, name: config.players[index]!.name, seat: seatOf(index), lead: index === leadIndex };
 }
 
-/** Who plays whom. A click-only player's choice is the seat they filled on screen. */
-const lobbyPicks = () => {
-	const seated = current ? tableSeating(current.world.campaign) : [];
-	return config.players.map((player, index) => ({
-		name: player.name,
-		character:
-			lab.picks[index] ??
-			(player.harness === 'ui' ? (seated.find(entry => entry.seat === seatOf(index))?.character ?? null) : null),
-	}));
-};
+/** Who plays whom. A click-only player is dealt a character when the table readies, so has no pick before. */
+const lobbyPicks = () =>
+	config.players.map((player, index) => ({ name: player.name, character: lab.picks[index] ?? null }));
 
 /** The same needs, worded for a player who may only use the screen. */
 const forScreen = (line: string) =>
-	line
-		.replace(
-			'`pick <character-id>`, or `create <job> <haven-id> <name>` and then pick it.',
-			'set the drop-down for your seat on screen. Create a character first with the Name field and Create if you need one.',
-		)
-		.replaceAll(/`do [^`]+`/g, 'the matching control on screen (`look` lists them)');
+	line.replaceAll(/`do [^`]+`/g, 'the matching control on screen (`look` lists them)');
 
 /** What the game is waiting on this player for. Empty means it is someone else's move. */
 function needs(state: PublicState, who: Who): string[] {
@@ -413,6 +400,10 @@ function needsByKey(state: PublicState, who: Who): string[] {
 	);
 	switch (phase) {
 		case 'lobby':
+			if (config.players[who.index]!.harness === 'ui') {
+				out.push('Ready up on screen: the game starts when everyone has pressed the same one.');
+				break;
+			}
 			if (!lab.picks[who.index] || campaign.characters[lab.picks[who.index]!]?.dead)
 				out.push(
 					'Choose your character for this game: `pick <character-id>`, or `create <job> <haven-id> <name>` and then pick it.',

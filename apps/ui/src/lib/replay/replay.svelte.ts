@@ -1,5 +1,5 @@
 import { framesOf, pack, parseRecord } from '@repo/game';
-import type { CityId, Command, GameRecord, PublicState, RecordNote, SeatId, World } from '@repo/game';
+import type { CityId, Command, GameRecord, PlayerId, PublicState, RecordNote, SeatId, World } from '@repo/game';
 import type { BoardMarks, MarkTone } from '#lib/board/types.ts';
 import { beatOf } from './beats.ts';
 import type { Beat, Mark, Moment } from './beats.ts';
@@ -29,8 +29,10 @@ export class ReplaySession implements SessionView {
 	readonly cursors = {};
 	readonly notice = null;
 	readonly mode = 'join' as const;
+	readonly player = '' as PlayerId;
 
 	send() {}
+	rename() {}
 	pointer() {}
 	importSave() {}
 	newCampaign() {}
@@ -70,6 +72,29 @@ export function commandLabel(world: World, command: Command | null): { who: stri
 		}
 		case 'START_GAME':
 			return { who: null, text: 'The game is set up' };
+		case 'JOIN':
+			return { who: null, text: `${command.name} sits at the table` };
+		case 'ADD_SEAT':
+			return { who: null, text: 'Another seat is played from the same screen' };
+		case 'TAKE_SEAT':
+			return { who: null, text: `${command.name} takes ${seatName(world, command.seat)}'s seat` };
+		case 'LEAVE':
+			return { who: null, text: 'A player gets up from the table' };
+		case 'CLAIM':
+			return {
+				who: null,
+				text: command.character
+					? `${world.campaign.characters[command.character]?.name ?? 'A character'} is taken for the next game`
+					: 'A player lets their character go',
+			};
+		case 'READY':
+			return {
+				who: null,
+				text:
+					command.start === null
+						? 'A player is no longer ready'
+						: `A player is ready for ${command.start === 'prologue' ? 'the prologue' : 'the month'}`,
+			};
 		case 'ACK_BRIEFING':
 			return { who: null, text: 'Legacy briefing read' };
 		case 'PLACE_SUPPLY':

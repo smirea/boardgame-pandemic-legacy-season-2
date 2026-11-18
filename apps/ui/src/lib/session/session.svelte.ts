@@ -8,7 +8,7 @@ import {
 	reject,
 	startRecord,
 } from '@repo/game';
-import type { Command, GameActor, GameRecord, PublicState, Save } from '@repo/game';
+import type { Command, GameActor, GameRecord, PlayerId, PublicState, Save } from '@repo/game';
 import { createHost, createMemoryTransport, createPeerId, createWebRtcTransport, joinHost, peerId } from '@repo/net';
 import type { ConnectionStatus, PeerInfo, Session } from '@repo/net';
 import { LS } from '../storage';
@@ -57,12 +57,16 @@ type DebugApi = {
 		fatal: string | null;
 	};
 	getRecord: () => GameRecord | null;
+	/** Renames this player at the table, as the lobby's name field does. */
+	setName: (name: string) => void;
 };
 
 /** What the game screen needs from a session. A replay supplies the same shape with nothing behind it. */
 export type SessionView = Pick<
 	GameSession,
 	| 'state'
+	| 'player'
+	| 'rename'
 	| 'status'
 	| 'peers'
 	| 'cursors'
@@ -96,22 +100,24 @@ export class GameSession {
 
 	readonly mode: Mode;
 	readonly selfId;
+	/** This browser's person at the table: the same id the connection introduces it by. */
+	readonly player: PlayerId;
 	readonly #net: Session<Msg, Presence>;
-	readonly #name: string;
 	readonly #actor: GameActor | null = null;
 	/** The game in progress, recorded step by step. Only the host keeps one. */
 	#record: GameRecord | null = null;
 	#sender: { command: Command; by: string | null } | null = null;
 
-	constructor(options: { mode: Mode; name: string; secret: string }) {
+	constructor(options: { mode: Mode; secret: string }) {
 		this.mode = options.mode;
-		this.#name = options.name;
 		this.selfId = storedId();
+		this.player = this.selfId as string as PlayerId;
+		const name = LS.get('name', '').trim() || 'Player';
 		const transport =
 			options.mode === 'solo'
 				? createMemoryTransport()
 				: createWebRtcTransport({ signalUrl: __SIGNAL_URL__, secret: options.secret });
-		const config = { selfId: this.selfId, name: options.name, transport, parseMsg, parsePresence };
+		const config = { selfId: this.selfId, name, transport, parseMsg, parsePresence };
 		this.#net = options.mode === 'join' ? joinHost<Msg, Presence>(config) : createHost<Msg, Presence>(config);
 
 		this.#net.on('status', status => (this.status = status));
@@ -120,6 +126,7 @@ export class GameSession {
 			const present = new Set(peers.filter(peer => peer.connected).map(peer => peer.id as string));
 			this.cursors = Object.fromEntries(Object.entries(this.cursors).filter(([id]) => present.has(id)));
 			if (this.#actor && this.state) this.#net.send({ t: 'state', state: this.state });
+			this.#tidyLobby();
 		});
 		this.#net.on('presence', (presence, from) => {
 			const { [from]: _gone, ...rest } = this.cursors;
@@ -130,10 +137,13 @@ export class GameSession {
 			else console.warn(error.code, error.message);
 		});
 		this.#net.on('message', (msg, from) => {
-			if (msg.t === 'state' && !this.#actor) this.state = msg.state;
+			if (msg.t === 'state' && !this.#actor) {
+				this.state = msg.state;
+				this.#sitDown();
+			}
 			if (msg.t === 'rejected') this.#say(msg.reason);
 			if (msg.t === 'command' && this.#actor) {
-				const reason = this.#apply(msg.command, this.peers.find(peer => peer.id === from)?.name ?? null);
+				const reason = this.#apply(msg.command, this.#nameOf(from));
 				if (reason) this.#net.send({ t: 'rejected', reason }, from);
 			}
 		});
@@ -147,11 +157,49 @@ export class GameSession {
 				const before = this.state;
 				this.state = publicState(snapshot);
 				if (before) this.#remember(before, this.state);
+				if (before && before.phase !== 'lobby' && this.state.phase === 'lobby') queueMicrotask(() => this.#tidyLobby());
 				LS.set({ save: this.#save() });
 				if (this.#net.status !== 'closed') this.#net.send({ t: 'state', state: this.state });
 			});
 			this.#actor.start();
+			this.#sitDown();
+			this.#tidyLobby();
 		}
+	}
+
+	#nameOf(player: string): string | null {
+		return (
+			this.state?.world.table.seats.find(entry => entry.player === player)?.name ??
+			this.peers.find(peer => peer.id === player)?.name ??
+			null
+		);
+	}
+
+	/** A player in the lobby is seated as soon as they arrive. Playing on one screen, they hold two seats from the start. */
+	#sitDown() {
+		if (this.state?.phase !== 'lobby') return;
+		const held = () => this.state!.world.table.seats.filter(entry => entry.player === this.player).length;
+		const join: Command = { type: 'JOIN', player: this.player, name: LS.get('name', '').trim() || 'Player' };
+		if (held() === 0 && !this.explain(join)) this.send(join);
+		const another: Command = { type: 'ADD_SEAT', player: this.player };
+		if (this.mode === 'solo' && held() === 1 && !this.explain(another)) this.send(another);
+	}
+
+	/** The host gets up for anyone who left the lobby, so the rest are not left waiting on them to ready. */
+	#tidyLobby() {
+		const state = this.state;
+		if (!this.#actor || this.mode === 'solo' || state?.phase !== 'lobby') return;
+		const here = new Set(this.peers.filter(peer => peer.connected).map(peer => peer.id as string));
+		here.add(this.selfId);
+		const gone = new Set(state.world.table.seats.map(entry => entry.player).filter(player => !here.has(player)));
+		for (const player of gone) this.#apply({ type: 'LEAVE', player }, null);
+	}
+
+	/** Keeps the name for next time and renames this player wherever they sit. */
+	rename(name: string) {
+		LS.set({ name: name.trim() });
+		const join: Command = { type: 'JOIN', player: this.player, name: name.trim() };
+		if (name.trim() && !this.explain(join)) this.send(join);
 	}
 
 	get online() {
@@ -172,7 +220,7 @@ export class GameSession {
 		if (recordStep(this.#record, before, after, entry)) LS.set({ record: this.#record });
 	}
 
-	#apply(command: Command, by: string | null = this.mode === 'solo' ? null : this.#name): string | null {
+	#apply(command: Command, by: string | null = this.mode === 'solo' ? null : this.#nameOf(this.selfId)): string | null {
 		const snapshot = this.#actor!.getSnapshot();
 		const current = publicState(snapshot);
 		const reason =
@@ -258,6 +306,7 @@ export class GameSession {
 				fatal: this.fatal,
 			}),
 			getRecord: () => this.#record,
+			setName: name => this.rename(name),
 		};
 	}
 

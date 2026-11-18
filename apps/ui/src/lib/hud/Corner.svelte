@@ -20,6 +20,7 @@
 	import PlayerCard, { KIND_COLOR } from './PlayerCard.svelte';
 	import Portrait from './Portrait.svelte';
 	import type { Place } from './seats.ts';
+	import { characterTraits, TRAIT_KIND } from './traits.ts';
 	import { turnSteps } from './turn.ts';
 
 	const hoverCard = getContext<((cards: CardId | CardId[] | null) => void) | undefined>('card-hover');
@@ -44,8 +45,6 @@
 		selectedTag?: string;
 		onselect: () => void;
 		onnote?: (note: SaidNote) => void;
-		/** At a networked table, marks which pawn this browser plays. */
-		claim?: { mine: boolean; toggle: () => void } | null;
 	};
 
 	let {
@@ -63,7 +62,6 @@
 		selectedTag,
 		onselect,
 		onnote = () => {},
-		claim = null,
 	}: Props = $props();
 
 	const game = $derived(world.game);
@@ -74,25 +72,7 @@
 	const top = $derived(place === 'tl' || place === 'tr');
 	const right = $derived(place === 'tr' || place === 'br');
 
-	/** The character card, one line each: the job, then every ability and scar written on it. */
-	const traits = $derived.by(() => {
-		if (!character) return [];
-		const lines: { kind: 'job' | 'ability' | 'scar'; name: string; text: string; struck?: boolean }[] = [];
-		if (job) lines.push({ kind: 'job', name: job.name, text: job.text, struck: character.jobScar !== null });
-		if (character.jobScar) {
-			const scar = pack.scars.find(candidate => candidate.id === character.jobScar);
-			if (scar) lines.push({ kind: 'scar', name: scar.name, text: scar.text });
-		}
-		for (const slot of character.slots) {
-			if (!slot) continue;
-			const def =
-				slot.kind === 'ability'
-					? pack.abilities.find(ability => ability.id === slot.id)
-					: pack.scars.find(scar => scar.id === slot.id);
-			if (def) lines.push({ kind: slot.kind, name: def.name, text: def.text });
-		}
-		return lines;
-	});
+	const traits = $derived(character ? characterTraits(character) : []);
 
 	const named = (card: { id: CardId }) => cardName(world, card.id);
 	const hand = $derived(
@@ -125,7 +105,6 @@
 		clearTimeout(closing);
 		closing = setTimeout(() => (spread = false), 160);
 	};
-	const TRAIT_KIND = { job: 'Occupation', ability: 'Ability', scar: 'Scar' } as const;
 </script>
 
 <div
@@ -208,15 +187,6 @@
 			</span>
 		</button>
 
-		{#if claim}
-			<button
-				class="claim"
-				class:on={claim.mine}
-				onclick={claim.toggle}
-				title={claim.mine ? `Stop playing ${name} on this browser` : `Mark ${name} as the character you play`}
-				>{claim.mine ? 'you' : 'claim'}</button
-			>
-		{/if}
 		{#if reading && traits.length}
 			<!-- The whole character card, readable: beside the seat on the side facing the board. -->
 			<div
@@ -564,26 +534,6 @@
 		margin: 0.1rem 0 0;
 		font-size: 0.86rem;
 		line-height: 1.35;
-	}
-
-	.claim {
-		position: absolute;
-		right: 0.55rem;
-		bottom: 0.35rem;
-		padding: 0 0.4rem;
-		border: 1px solid color-mix(in srgb, var(--on) 45%, transparent);
-		border-radius: 2px;
-		background: var(--seat);
-		color: var(--on);
-		font: inherit;
-		font-size: 0.7rem;
-		cursor: pointer;
-	}
-
-	.claim.on {
-		background: var(--on);
-		color: var(--seat);
-		font-weight: 700;
 	}
 
 	/* The active player's turn so far, floating beside the card toward the board. */

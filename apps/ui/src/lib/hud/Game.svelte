@@ -46,7 +46,9 @@
 		setNames,
 	} from './labels.svelte.ts';
 	import Lobby from './Lobby.svelte';
+	import CharacterSelect from './CharacterSelect.svelte';
 	import Objectives from './Objectives.svelte';
+	import SeatPicker from './SeatPicker.svelte';
 	import TopBar from './TopBar.svelte';
 	import Upkeep from './Upkeep.svelte';
 
@@ -79,11 +81,24 @@
 	const playing = $derived(snap.phase.startsWith('playing'));
 	$effect.pre(() => setNames(campaign.names));
 
-	let mine = $state<SeatId[]>(LS.get('mySeats', []));
+	// Which seats are this browser's is game state, keyed by the id the browser keeps, so a reload sits back down.
+	const mine = $derived(world.table.seats.filter(entry => entry.player === session.player).map(entry => entry.seat));
 	const solo = $derived(session.mode === 'solo');
 	const owns = (seat: SeatId) => !spectator && (solo || mine.includes(seat));
 	const canAct = $derived(game !== null && owns(game.active));
-	const unclaimed = $derived(game !== null && !spectator && !solo && !game.seats.some(seat => mine.includes(seat)));
+	const present = $derived(new Set(session.peers.filter(peer => peer.connected).map(peer => peer.id as string)));
+	/** A seat nobody holds, or held by someone no longer connected, such as a player who moved to another browser. */
+	const isOpen = (seat: SeatId) => {
+		const holder = world.table.seats.find(entry => entry.seat === seat);
+		return !holder || (holder.player !== session.player && !present.has(holder.player));
+	};
+	const picking = $derived(
+		game !== null && !spectator && !solo && mine.length === 0 && snap.phase !== 'upkeep' && snap.phase !== 'over',
+	);
+	const openSeats = $derived(picking ? game!.seats.filter(isOpen) : []);
+	function takeSeat(seat: SeatId) {
+		send({ type: 'TAKE_SEAT', player: session.player, name: LS.get('name', '').trim() || 'Player', seat });
+	}
 	let viewing = $state<SeatId | null>(null);
 	// The seat the pointer or keyboard focus rests on, whose pawn lights up on the board.
 	let pointedSeat = $state<SeatId | null>(null);
@@ -140,6 +155,17 @@
 		else if (picked.length < chooser.multi.max) picked = [...picked, option];
 	}
 	let menu = $state(false);
+	// Once the campaign has characters, a game is set up by choosing who plays them, over the whole table.
+	const choosingCharacters = $derived(
+		snap.phase === 'lobby' &&
+			!spectator &&
+			Object.values(campaign.characters).some(character => !character.dead && !character.worker),
+	);
+	/** The character screen and the rest of the interface float away to show the board as it stands. */
+	let peek = $state(false);
+	$effect(() => {
+		if (!choosingCharacters) peek = false;
+	});
 	let stage = $state<HTMLElement | null>();
 	let leftColumn = $state<HTMLElement | null>();
 	let rightColumn = $state<HTMLElement | null>();
@@ -450,12 +476,6 @@
 	// A spectator cannot acknowledge a briefing for the table, so closing it is theirs alone.
 	let briefingRead = $state('');
 
-	function claim(seat: SeatId) {
-		if (spectator) return;
-		mine = mine.includes(seat) ? mine.filter(other => other !== seat) : [...mine, seat];
-		LS.set({ mySeats: mine });
-	}
-
 	let fx = $state.raw<Fx[]>([]);
 	let toasts = $state.raw<{ id: number; text: string; tone: string }[]>([]);
 	let banner = $state.raw<{ id: number; title: string; text: string } | null>(null);
@@ -647,6 +667,7 @@
 		if (event.key === 'Escape') {
 			cancel();
 			menu = false;
+			peek = false;
 		}
 		if (typing(event) || onButton(event) || event.metaKey || event.ctrlKey || !game) return;
 		const key = event.key.toLowerCase();
@@ -705,6 +726,8 @@
 	{#if seat && game}
 		<div
 			class="place {place}"
+			class:open={openSeats.includes(seat)}
+			data-place={place}
 			role="group"
 			onpointerenter={() => (pointedSeat = seat)}
 			onpointerleave={() => pointedSeat === seat && (pointedSeat = null)}
@@ -728,10 +751,18 @@
 							action="Show this hand in the dock"
 							selectedTag="Hand shown"
 							onselect={() => (viewing = seat)}
-							claim={solo || spectator ? null : { mine: mine.includes(seat), toggle: () => claim(seat) }}
 						/>
 					</div>
 				{/key}
+			{/if}
+			{#if openSeats.includes(seat)}
+				<button
+					class="take"
+					style:--seat={SEAT_COLORS[game.seats.indexOf(seat)]}
+					onclick={() => takeSeat(seat)}
+					data-testid={`take-${seat}`}
+					transition:fade={{ duration: 200 }}>Sit here as {seatName(world, seat)}</button
+				>
 			{/if}
 		</div>
 	{/if}
@@ -739,6 +770,7 @@
 
 <div
 	class="game"
+	class:peek
 	style:--left={`${sides.left}px`}
 	style:--right={`${sides.right}px`}
 	data-card-cities={hoveredTargets.cities.join(' ')}
@@ -807,14 +839,18 @@
 			</div>
 		{/if}
 
-		{#if unclaimed}
-			<!-- A networked player has to say which pawn is theirs before any control is offered. Asking beats leaving the dock empty. -->
-			<div class="whoami" data-testid="whoami" transition:fly={{ y: 12, duration: 180 }}>
-				<span>Who do you play?</span>
-				{#each game!.seats as seat (seat)}
-					<button onclick={() => claim(seat)}>{seatName(world, seat)}</button>
-				{/each}
-			</div>
+		{#if picking && stage}
+			<!-- A browser the table does not know yet, such as a new one, picks an open seat before any control is offered. -->
+			<SeatPicker
+				{stage}
+				seats={openSeats.map(seat => ({
+					seat,
+					place: [...seatAt!].find(([, at]) => at === seat)![0],
+					name: seatName(world, seat),
+					color: SEAT_COLORS[game!.seats.indexOf(seat)]!,
+				}))}
+				onpick={takeSeat}
+			/>
 		{/if}
 
 		{#if chooser}
@@ -928,9 +964,35 @@
 					>
 				</div>
 			</div>
+		{:else if choosingCharacters}
+			{#if peek}
+				<button
+					class="unpeek"
+					onclick={() => (peek = false)}
+					transition:fly={{ y: 40, duration: 260 }}
+					data-testid="back-to-table">Back to the table</button
+				>
+			{:else}
+				<div
+					class="scrim"
+					role="dialog"
+					aria-modal="true"
+					aria-label="Choose characters"
+					in:fade={{ duration: 200 }}
+					out:fly={{ y: 120, duration: 360, opacity: 0 }}
+				>
+					<CharacterSelect
+						{snap}
+						{send}
+						player={session.player}
+						rename={name => session.rename(name)}
+						onpeek={() => (peek = true)}
+					/>
+				</div>
+			{/if}
 		{:else if snap.phase === 'lobby' || snap.phase === 'finished'}
 			<div class="scrim" role="dialog" aria-modal="true" aria-label="Lobby" transition:fade={{ duration: 200 }}>
-				<Lobby {snap} {send} />
+				<Lobby {snap} {send} player={session.player} rename={name => session.rename(name)} />
 			</div>
 		{:else if snap.phase === 'upkeep'}
 			<div class="scrim" role="dialog" aria-modal="true" aria-label="Between games" transition:fade={{ duration: 200 }}>
@@ -953,6 +1015,15 @@
 							// The capture waits for the menu's exit transition, so the screenshot shows the table without it.
 							setTimeout(() => void presentFeedback(), 220);
 						}}>Give feedback <kbd>⌥⌘ click</kbd></button
+					>
+				{/if}
+				{#if game && !solo && !spectator && mine.length > 0}
+					<button
+						onclick={() => {
+							menu = false;
+							send({ type: 'LEAVE', player: session.player });
+						}}
+						data-testid="vacate-seat">Vacate my seat</button
 					>
 				{/if}
 				<button onclick={download}>Export campaign save</button>
@@ -1116,35 +1187,42 @@
 		transform: translateX(-50%);
 	}
 
-	.whoami {
-		position: absolute;
-		top: 5.6rem;
-		left: 50%;
-		z-index: 31;
-		display: flex;
-		align-items: center;
-		gap: 0.6rem;
-		padding: 0.5rem 0.9rem;
-		border: 1px solid var(--paper);
-		border-radius: 3px;
-		background: var(--panel-solid);
-		font-size: 0.9rem;
-		transform: translateX(-50%);
-		white-space: nowrap;
+	.place {
+		position: relative;
 	}
 
-	.whoami button {
-		padding: 0.25rem 0.7rem;
-		border: 1px solid var(--line-strong);
-		border-radius: 3px;
-		background: var(--wash);
+	/* An open seat glows in its colour and takes the whole corner as its button. */
+	.place.open > .seated {
+		filter: saturate(0.6) brightness(0.8);
+	}
+
+	.take {
+		position: absolute;
+		inset: 0;
+		z-index: 2;
+		display: grid;
+		place-items: center;
+		min-height: 4rem;
+		border: 2px dashed var(--seat);
+		border-radius: 4px;
+		background: color-mix(in srgb, var(--seat) 16%, rgb(10 8 6 / 0.55));
 		color: var(--paper);
 		font: inherit;
+		font-size: 0.95rem;
+		font-weight: 700;
 		cursor: pointer;
+		animation: beckon 1.6s ease-in-out infinite;
 	}
 
-	.whoami button:hover {
-		border-color: var(--paper);
+	.take:hover {
+		border-style: solid;
+		background: color-mix(in srgb, var(--seat) 32%, rgb(10 8 6 / 0.55));
+	}
+
+	@keyframes beckon {
+		50% {
+			box-shadow: 0 0 1.4rem color-mix(in srgb, var(--seat) 70%, transparent);
+		}
 	}
 
 	.chooser header button {
@@ -1404,6 +1482,48 @@
 	.outcome span {
 		color: var(--ink);
 		font-size: 1rem;
+	}
+
+	.game > :global(:first-child) {
+		position: relative;
+		z-index: 1;
+		grid-row: 1;
+		grid-column: 1;
+		transition:
+			translate 360ms cubic-bezier(0.4, 0, 0.2, 1),
+			opacity 360ms ease;
+	}
+
+	.game.peek .stage {
+		grid-row: 1 / -1;
+	}
+
+	.game.peek > :global(:first-child) {
+		translate: 0 -100%;
+		opacity: 0;
+		pointer-events: none;
+	}
+
+	.unpeek {
+		position: absolute;
+		bottom: 1.4rem;
+		left: 50%;
+		z-index: 60;
+		padding: 0.75rem 2.6rem;
+		border: 1px solid var(--paper);
+		border-radius: 999px;
+		background: var(--paper);
+		box-shadow: 0 1rem 2.5rem rgb(0 0 0 / 0.5);
+		color: var(--paper-ink);
+		font: inherit;
+		font-size: 1.1rem;
+		font-weight: 700;
+		cursor: pointer;
+		translate: -50% 0;
+	}
+
+	.unpeek:hover {
+		background: #e9dec5;
 	}
 
 	.scrim {
