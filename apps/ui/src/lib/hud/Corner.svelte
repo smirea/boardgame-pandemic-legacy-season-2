@@ -2,7 +2,7 @@
 	import { getContext } from 'svelte';
 	import type { CardId } from '@repo/game';
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
-	import { pack } from '@repo/game';
+	import { pack, SEAT_IDS } from '@repo/game';
 	import type { PlayerDeckKind, SeatId, World } from '@repo/game';
 	import { inkOn } from '#lib/color.ts';
 	import Bubble from '#lib/replay/Bubble.svelte';
@@ -154,7 +154,7 @@
 		>
 			<span class="portrait">
 				<Portrait
-					id={character?.id ?? seat}
+					portrait={character?.portrait ?? SEAT_IDS.indexOf(seat)}
 					{color}
 					hooded={character?.worker ?? false}
 					dead={character?.dead ?? false}

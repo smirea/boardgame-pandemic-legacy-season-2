@@ -36,6 +36,7 @@
 		onpointer?: (point: BoardPoint | null) => void;
 		resetView?: number;
 		covered?: Covered[];
+		focus?: { city: CityId; x: number; y: number } | null;
 		/** Actions offered round a city, each starting one kind of action. */
 		ring?: { city: CityId; entries: { key: Action['a']; label: string; detail: string }[] } | null;
 		onring?: (key: Action['a']) => void;
@@ -45,8 +46,20 @@
 		onmiss?: () => void;
 	};
 
-	let { view, oncity, onrecon, oncityback, onpointer, resetView, covered, ring, onring, oncancel, onmiss }: Props =
-		$props();
+	let {
+		view,
+		oncity,
+		onrecon,
+		oncityback,
+		onpointer,
+		resetView,
+		covered,
+		focus,
+		ring,
+		onring,
+		oncancel,
+		onmiss,
+	}: Props = $props();
 
 	let element = $state<HTMLElement>();
 	// Which part of which city the pointer rests on. The text is read from the view, so it follows the game live.
@@ -187,6 +200,7 @@
 			hoverStockpile={hovered !== null && hovered.city === null}
 			{resetView}
 			{covered}
+			{focus}
 		/>
 	</Canvas>
 	{#if ring && ringAt}

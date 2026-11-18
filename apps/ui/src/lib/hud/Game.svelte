@@ -160,6 +160,8 @@
 	const choosingCharacters = $derived(snap.phase === 'lobby' && !spectator && tableStart(snap.world) !== null);
 	/** The character screen and the rest of the interface float away to show the board as it stands. */
 	let peek = $state(false);
+	// A haven the character screen points at, which the camera looks at behind it.
+	let focus = $state.raw<{ city: CityId; x: number; y: number } | null>(null);
 	$effect(() => {
 		if (!choosingCharacters) peek = false;
 	});
@@ -811,6 +813,7 @@
 			onpointer={point => session.pointer(point)}
 			{resetView}
 			{covered}
+			{focus}
 		/>
 
 		{#if game && seatAt && snap.phase !== 'upkeep'}
@@ -971,7 +974,7 @@
 				>
 			{:else}
 				<div
-					class="scrim"
+					class="scrim open"
 					role="dialog"
 					aria-modal="true"
 					aria-label="Choose characters"
@@ -982,8 +985,14 @@
 						{snap}
 						{send}
 						player={session.player}
-						rename={name => session.rename(name)}
 						onpeek={() => (peek = true)}
+						onfocus={look => {
+							const box = stage?.getBoundingClientRect();
+							focus =
+								look && box
+									? { city: look.city, x: (look.x - box.left) / box.width, y: (look.y - box.top) / box.height }
+									: null;
+						}}
 					/>
 				</div>
 			{/if}
@@ -1531,6 +1540,11 @@
 		place-items: center;
 		padding: 1rem;
 		background: rgb(12 10 8 / 0.62);
+	}
+
+	.scrim.open {
+		padding: 0;
+		background: none;
 	}
 
 	.scrim.passive {

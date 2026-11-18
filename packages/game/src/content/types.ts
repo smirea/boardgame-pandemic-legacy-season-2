@@ -317,6 +317,8 @@ export type ContentPack = {
 		produceCards: number;
 		produceBoxes: number;
 		characterSlots: number;
+		/** How many portraits a character can wear, `/portraits/survivor-<n>.webp` in the UI. */
+		portraits: number;
 		exposureBoxes: number;
 		storageCap: number;
 		reserve: number;

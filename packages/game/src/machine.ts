@@ -40,7 +40,7 @@ export type Seating = { seat: SeatId; character: CharacterId | null };
 
 export type Command =
 	/** Makes a character, taken by `player` for the next game when one is named. */
-	| { type: 'CREATE_CHARACTER'; name: string; job: JobId; home: CityId; player?: PlayerId }
+	| { type: 'CREATE_CHARACTER'; name: string; job: JobId; home: CityId; portrait?: number; player?: PlayerId }
 	| { type: 'SET_RATIONING'; value: number }
 	| { type: 'RENAME_HAVEN'; city: CityId; name: string }
 	/** Leaves the prologue, which may be played any number of times, and starts January. */
@@ -116,6 +116,11 @@ export function reject(world: World, phase: Phase, command: Command): string | n
 			if (Object.values(campaign.characters).some(character => character.job === command.job))
 				return 'That job is taken';
 			if (home?.kind !== 'haven' || home.lost) return 'Pick a starting haven as home';
+			if (
+				command.portrait !== undefined &&
+				!(Number.isInteger(command.portrait) && command.portrait >= 0 && command.portrait < pack.numbers.portraits)
+			)
+				return 'Pick one of the portraits';
 			return command.name.trim() ? inPhase('lobby') : 'Give the character a name';
 		}
 		case 'SET_RATIONING':
@@ -585,6 +590,8 @@ export type GameActor = ReturnType<typeof createGameActor>;
  * Reads a save. The game is in development, so a save from an older build, one whose campaign or table
  * lacks a field today's has, is refused rather than upgraded.
  */
+const freshCharacter = createCharacter(newCampaign(0), { name: '', job: null, home: '' as CityId });
+
 export function parseSave(raw: unknown): Save {
 	const save = raw as Partial<Save> | null;
 	const lacks = (written: object | undefined, fresh: object) =>
@@ -593,7 +600,8 @@ export function parseSave(raw: unknown): Save {
 		save?.v !== 1 ||
 		typeof save.phase !== 'string' ||
 		lacks(save.world?.campaign, newCampaign(0)) ||
-		lacks(save.world?.table, newTable())
+		lacks(save.world?.table, newTable()) ||
+		Object.values(save.world!.campaign.characters ?? {}).some(character => lacks(character, freshCharacter))
 	)
 		throw new Error('That is not a campaign save from this build');
 	return save as Save;

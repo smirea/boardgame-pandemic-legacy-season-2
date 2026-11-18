@@ -97,9 +97,14 @@ export async function look(tab: Tab): Promise<string> {
 				box.width > 2 && box.height > 2 && !node.closest('[inert]') && getComputedStyle(node).visibility !== 'hidden'
 			);
 		};
-		const nodes = [
-			...document.querySelectorAll<HTMLElement>('button, input, select, textarea, [role="button"]'),
-		].filter(visible);
+		// A choice drawn as a row hides its radio, so the row's label is what a person reads and presses.
+		const nodes = [...document.querySelectorAll<HTMLElement>('button, input, select, textarea, [role="button"]')]
+			.map(node =>
+				node instanceof HTMLInputElement && (node.type === 'radio' || node.type === 'checkbox')
+					? (node.labels?.[0] ?? node)
+					: node,
+			)
+			.filter(visible);
 		window.__lab = nodes;
 		window.__labText = nodes.map(node => node.innerText);
 		const controls = nodes.map((node, index) => {
@@ -117,6 +122,7 @@ export async function look(tab: Tab): Promise<string> {
 			const text = (
 				node.innerText ||
 				node.getAttribute('aria-label') ||
+				node.querySelector('input[aria-label]')?.getAttribute('aria-label') ||
 				node.title ||
 				field.placeholder ||
 				field.value ||

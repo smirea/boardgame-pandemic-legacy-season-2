@@ -135,15 +135,17 @@ function exposureTrack(campaign: Campaign): ExposureBox[] {
 
 export function createCharacter(
 	campaign: Campaign,
-	input: { name: string; job: JobId | null; home: CityId; worker?: boolean },
+	input: { name: string; job: JobId | null; home: CityId; portrait?: number; worker?: boolean },
 ): Character {
-	const id = `char-${Object.keys(campaign.characters).length + 1}` as CharacterId;
+	const count = Object.keys(campaign.characters).length;
+	const id = `char-${count + 1}` as CharacterId;
 	const character: Character = {
 		id,
 		name: input.name,
 		job: input.job,
 		jobScar: null,
 		home: input.home,
+		portrait: input.portrait ?? count % numbers.portraits,
 		slots: Array.from({ length: numbers.characterSlots }, () => null),
 		exposureTrack: input.worker ? [] : exposureTrack(campaign),
 		exposure: 0,
