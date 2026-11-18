@@ -3,7 +3,7 @@
 	import type { CityId } from '@repo/game';
 	import { T, useThrelte } from '@threlte/core';
 	import { interactivity, OrbitControls } from '@threlte/extras';
-	import { untrack } from 'svelte';
+	import { onDestroy, untrack } from 'svelte';
 	import { cubicInOut } from 'svelte/easing';
 	import { Tween } from 'svelte/motion';
 	import { CanvasTexture, LinearFilter, MeshStandardMaterial, MOUSE, SRGBColorSpace, Texture } from 'three';
@@ -14,6 +14,7 @@
 	import { FogMask } from './chart';
 	import { loadChart } from './chartLoader';
 	import { DEFAULT_TILT, fitBoard, focusBoard } from './fit';
+	import { restWhenStill } from './frameLoop';
 	import Fog from './Fog.svelte';
 	import type { Part } from './hints';
 	import { layoutLabels, NAME_SIZE } from './labels';
@@ -73,6 +74,7 @@
 		focus = null,
 	}: Props = $props();
 
+	onDestroy(restWhenStill(useThrelte().renderer));
 	interactivity();
 
 	const FOV = 30;
@@ -83,7 +85,13 @@
 					z: cities.reduce((sum, city) => sum + pack.positions[city]!.z, 0) / cities.length,
 				}
 			: null;
-	const { size, renderer, invalidate } = useThrelte();
+	const { size, dpr, renderer, invalidate } = useThrelte();
+	// The canvas itself asks for a frame with the scheduler's own `invalidate`, which cannot wake a resting loop.
+	$effect(() => {
+		void $size;
+		void $dpr;
+		invalidate();
+	});
 	const layout = pack.positions;
 	const BLANK = '#d2c3a1';
 	const landGeometry = buildLandGeometry();

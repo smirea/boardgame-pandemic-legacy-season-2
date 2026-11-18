@@ -166,7 +166,7 @@
 		height: 0.32rem;
 		border-radius: 50%;
 		background: var(--warn);
-		animation: due 1.6s ease-in-out infinite;
+		animation: due 1.6s ease-in-out 3;
 	}
 
 	@keyframes due {

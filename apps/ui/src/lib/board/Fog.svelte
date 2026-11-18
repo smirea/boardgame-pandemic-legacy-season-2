@@ -15,9 +15,12 @@
 	 * edge curls over charted ground. A location being explored shrinks its field, and the billows erode
 	 * with it.
 	 */
+	const NOISE_SIZE = 256;
 	const FRAGMENT = /* glsl */ `
+		#define NOISE_SIZE ${NOISE_SIZE}.0
 		uniform sampler2D uMask;
 		uniform sampler2D uField;
+		uniform sampler2D uNoise;
 		uniform float uTime;
 		uniform float uAspect;
 		uniform float uLayer;
@@ -32,13 +35,11 @@
 			return 1.0 - smoothstep( 0.0, 1.0, max( outside.x / room.x, outside.y / room.y ) );
 		}
 
-		float hash( vec2 p ) { return fract( sin( dot( p, vec2( 127.1, 311.7 ) ) ) * 43758.5453 ); }
+		// Value noise read from a sheet of random values: the sampler blends the four corners of a cell in one
+		// read, where hashing each corner in the shader cost most of a frame.
 		float noise( vec2 p ) {
-			vec2 i = floor( p );
 			vec2 f = fract( p );
-			vec2 u = f * f * ( 3.0 - 2.0 * f );
-			return mix( mix( hash( i ), hash( i + vec2( 1.0, 0.0 ) ), u.x ),
-				mix( hash( i + vec2( 0.0, 1.0 ) ), hash( i + vec2( 1.0, 1.0 ) ), u.x ), u.y );
+			return texture2D( uNoise, ( floor( p ) + f * f * ( 3.0 - 2.0 * f ) + 0.5 ) / NOISE_SIZE ).r;
 		}
 		// Each octave is rotated, which hides the grid that value noise otherwise shows.
 		const mat2 turn = mat2( 0.8, 0.6, -0.6, 0.8 );
@@ -103,10 +104,19 @@
 <script lang="ts">
 	import { pack } from '@repo/game';
 	import type { CityId } from '@repo/game';
-	import { T, useTask } from '@threlte/core';
+	import { T, useTask, useThrelte } from '@threlte/core';
 	import { untrack } from 'svelte';
 	import { cubicInOut } from 'svelte/easing';
-	import { CanvasTexture, LinearFilter, ShaderMaterial, Vector2, Vector4 } from 'three';
+	import {
+		CanvasTexture,
+		DataTexture,
+		LinearFilter,
+		RedFormat,
+		RepeatWrapping,
+		ShaderMaterial,
+		Vector2,
+		Vector4,
+	} from 'three';
 	import type { FogMask } from './chart';
 	import { FRAME, LAND_HEIGHT } from './projection';
 	import type { BoardBounds } from './projection';
@@ -121,6 +131,7 @@
 
 	let { bounds, mask: initialMask, hidden, onpaint }: Props = $props();
 
+	const { invalidate, shouldRender } = useThrelte();
 	const REVEAL_SECONDS = 2.6;
 	const area = untrack(() => bounds);
 	const mask = untrack(() => initialMask);
@@ -132,10 +143,25 @@
 	};
 	const maskTexture = texture(mask.canvas);
 	const fieldTexture = texture(mask.field);
+	// The same smoke on every load: the values come from a fixed seed.
+	const noiseTexture = (() => {
+		const values = new Uint8Array(NOISE_SIZE * NOISE_SIZE);
+		let seed = 0x2f6e2b1;
+		for (let index = 0; index < values.length; index++) {
+			seed = (Math.imul(seed, 1664525) + 1013904223) | 0;
+			values[index] = seed >>> 24;
+		}
+		const map = new DataTexture(values, NOISE_SIZE, NOISE_SIZE, RedFormat);
+		map.wrapS = map.wrapT = RepeatWrapping;
+		map.magFilter = map.minFilter = LinearFilter;
+		map.needsUpdate = true;
+		return map;
+	})();
 
 	const uniforms = {
 		uMask: { value: maskTexture },
 		uField: { value: fieldTexture },
+		uNoise: { value: noiseTexture },
 		uTime: { value: 0 },
 		uAspect: { value: (area.maxX - area.minX) / (area.maxZ - area.minZ) },
 		uFrame: {
@@ -175,10 +201,15 @@
 	paint();
 	const foggy = () => [...sources.values()].some(source => source.cover > 0);
 
-	// One clock drifts the smoke while any is left and opens locations as they are explored.
+	// The smoke drifts while the board is alive and comes to rest once nothing on it has changed for a while, so
+	// a table nobody is touching draws nothing. The drift is slow, so it is drawn at half the screen's rate.
+	const REST_AFTER = 6;
+	const SETTLE = 3;
+	const DRIFT_FRAME = 1 / 30;
+	let still = 0;
+	let sinceFrame = 0;
 	const { start, stop } = useTask(
 		delta => {
-			uniforms.uTime.value += delta;
 			let moving = false;
 			for (const source of sources.values()) {
 				if (source.progress === source.target) continue;
@@ -195,9 +226,20 @@
 				source.cover = cubicInOut(source.progress);
 			}
 			if (moving) paint();
-			if (!moving && !foggy()) stop();
+			if (!moving && !foggy()) return stop();
+			// A frame someone else asked for is the board changing: a piece, the camera, a highlight.
+			const alive = moving || shouldRender();
+			still = alive ? 0 : still + delta;
+			const pace = 1 - Math.min(1, Math.max(0, (still - REST_AFTER) / SETTLE));
+			if (pace === 0) return;
+			uniforms.uTime.value += delta * pace;
+			sinceFrame += delta;
+			if (alive || sinceFrame >= DRIFT_FRAME) {
+				sinceFrame = 0;
+				invalidate();
+			}
 		},
-		{ autoStart: false },
+		{ autoStart: false, autoInvalidate: false },
 	);
 	if (foggy()) start();
 

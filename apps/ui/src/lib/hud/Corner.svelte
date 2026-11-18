@@ -345,8 +345,9 @@
 			opacity 250ms ease;
 	}
 
+	/* The pulse announces the turn and then rests: an animation that never ends keeps the whole screen compositing. */
 	.slip.active {
-		animation: active-border 2s ease-in-out infinite;
+		animation: active-border 2s ease-in-out 3;
 		translate: 0 0.25rem;
 		box-shadow:
 			0 0 0 2px var(--on),
