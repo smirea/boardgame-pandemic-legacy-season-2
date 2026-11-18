@@ -98,7 +98,6 @@
 	const discarding = $derived(
 		overLimit.filter(other => decides.some(decide => decide.d === 'discard' && decide.seat === other)),
 	);
-	const refused = (command: Command) => !canAct || reject(world, snap.phase, command) !== null;
 	const rationed = $derived(
 		Object.values(world.campaign.playerCards).filter(card => card.kind === 'event' && card.mode === 'rationed'),
 	);
@@ -246,17 +245,12 @@
 				>
 			</div>
 		{:else}
-			<!-- Every other hand is on its seat card, so this column only keeps the held hand near the middle. -->
-			<div class="spacer"></div>
-
-			<div class="held" style:--seat={seatColor(seat)}>
-				<p class="holder">
-					<strong>{seatName(world, seat)}</strong>
-					<small>{seat === home && owns(seat) ? 'Your hand' : owns(seat) ? 'Also yours' : 'Their hand'}</small>
-					<small>{handCards.length} of {handLimit(world, seat)} cards</small>
-					{#if seat !== home}<button class="back" onclick={() => onview(home)}>Back to {seatName(world, home)}</button
-						>{/if}
-				</p>
+			<div class="held">
+				{#if seat !== home}
+					<button class="back" style:--seat={seatColor(seat)} onclick={() => onview(home)}
+						>{seatName(world, seat)}'s hand. Back to {seatName(world, home)}</button
+					>
+				{/if}
 				{#key seat}
 					<div
 						class="hand"
@@ -312,32 +306,36 @@
 
 			<div class="middle">
 				{#if discarding.length}
-					<p class="prompt">
-						{discarding.map(other => seatName(world, other)).join(', ')} must discard down to the hand limit.
-						{discarding.some(owns) ? 'Click a card in that hand, or play an event.' : 'Waiting for them.'}
-					</p>
+					<div class="slip">
+						<p class="prompt">
+							{discarding.map(other => seatName(world, other)).join(', ')} must discard down to the hand limit.
+							{discarding.some(owns) ? 'Click a card in that hand, or play an event.' : 'Waiting for them.'}
+						</p>
+					</div>
 				{:else if overLimit.length && !pending}
-					<p class="prompt">
-						{overLimit.map(other => seatName(world, other)).join(', ')} is over the hand limit and discards once the draw
-						is finished.
-					</p>
+					<div class="slip">
+						<p class="prompt">
+							{overLimit.map(other => seatName(world, other)).join(', ')} is over the hand limit and discards once the draw
+							is finished.
+						</p>
+					</div>
 				{:else if pending}
-					<p class="prompt">
-						{decisionTitle(world, pending)}
-					</p>
-					{#if choices.length}
-						<div class="chips">
-							{#each choices.slice(0, 24) as decide, index (index)}
-								<button onclick={() => send({ type: 'DECIDE', decide })}>{decideLabel(world, decide)}</button>
-							{/each}
-						</div>
-					{:else}
-						<p class="waiting">Waiting for {seatName(world, decider)}.</p>
-					{/if}
+					<div class="slip">
+						<p class="prompt">{decisionTitle(world, pending)}</p>
+						{#if choices.length}
+							<div class="chips">
+								{#each choices.slice(0, 24) as decide, index (index)}
+									<button onclick={() => send({ type: 'DECIDE', decide })}>{decideLabel(world, decide)}</button>
+								{/each}
+							</div>
+						{:else}
+							<p class="waiting">Waiting for {seatName(world, decider)}.</p>
+						{/if}
+					</div>
 				{:else if snap.phase === 'playing.actions'}
 					{#if canAct && aiming}
-						<div class="step aiming" data-testid="aiming">
-							{#if aiming.a}<ActionIcon action={aiming.a} size="2.8rem" />{/if}
+						<div class="slip step aiming" data-testid="aiming">
+							{#if aiming.a}<ActionIcon action={aiming.a} size="2.4rem" />{/if}
 							<div class="say">
 								<strong>{aiming.label}</strong>
 								<span
@@ -347,90 +345,36 @@
 							</div>
 							<button onclick={oncancel} data-testid="cancel-aim">Cancel</button>
 						</div>
-					{:else if canAct}
-						<div class="step">
-							<div class="say">
-								<strong>{game.actionsLeft} action{game.actionsLeft === 1 ? '' : 's'} left</strong>
-								<span
-									>Choose one from the list, click a city to see what you can do there, or point at a card in your hand.</span
-								>
-							</div>
-						</div>
-					{:else}
-						<div class="step">
-							<div class="say"><strong>{seatName(world, game.active)} is taking actions</strong></div>
-						</div>
 					{/if}
 				{:else if snap.phase === 'playing.draw'}
-					<div class="step">
+					<div class="slip">
 						<div class="say line">
 							<strong>Draw Player cards</strong>
 							<span>{seatName(world, game.active)} has <b>{game.drawsLeft}</b> to draw.</span>
 						</div>
+						{@render drew()}
 					</div>
-					<div class="tray">{@render drew()}</div>
 				{:else}
-					<div class="step">
+					<div class="slip">
 						<div class="say line">
 							<strong>Infect cities</strong>
 							<span><b>{game.infectionsLeft}</b> left to flip</span>
 						</div>
-					</div>
-					<div class="tray">
-						{@render drew()}
-						{#if flipped.length}
-							<div class="group">
-								<div class="cards flipped" data-testid="flipped" title="Flipped this Infect step">
-									{#each flipped as entry (entry.seq)}
-										<div class="flipcard" animate:flip={{ duration: 300 }}>
-											<InfectionCard card={entry.card} note={entry.note} />
-										</div>
-									{/each}
+						<div class="tray">
+							{@render drew()}
+							{#if flipped.length}
+								<div class="group">
+									<div class="cards flipped" data-testid="flipped" title="Flipped this Infect step">
+										{#each flipped as entry (entry.seq)}
+											<div class="flipcard" animate:flip={{ duration: 300 }}>
+												<InfectionCard card={entry.card} note={entry.note} />
+											</div>
+										{/each}
+									</div>
 								</div>
-							</div>
-						{/if}
+							{/if}
+						</div>
 					</div>
-				{/if}
-			</div>
-
-			<div class="turn">
-				{#if snap.phase === 'playing.actions'}
-					<div class="pips" title="Actions left">
-						{#each { length: Math.max(pack.numbers.actionsPerTurn, game.actionsLeft) } as _, index (index)}
-							<i class:on={index < game.actionsLeft}></i>
-						{/each}
-					</div>
-					<button
-						class="primary"
-						disabled={refused({ type: 'END_ACTIONS', seat: game.active })}
-						onclick={() => send({ type: 'END_ACTIONS', seat: game.active })}
-						data-testid="end-actions"
-						title="Space"
-					>
-						{game.actionsLeft > 0 ? 'End actions' : 'Draw cards'}
-					</button>
-					<button
-						disabled={!snap.canUndo || !canAct}
-						onclick={() => send({ type: 'UNDO' })}
-						data-testid="undo"
-						title="Z">Undo</button
-					>
-				{:else if snap.phase === 'playing.draw'}
-					<button
-						class="primary"
-						disabled={refused({ type: 'DRAW' })}
-						onclick={() => send({ type: 'DRAW' })}
-						data-testid="draw"
-						title="Space">Draw card ({game.drawsLeft})</button
-					>
-				{:else}
-					<button
-						class="primary"
-						disabled={refused({ type: 'INFECT' })}
-						onclick={() => send({ type: 'INFECT' })}
-						data-testid="infect"
-						title="Space">Flip infection ({game.infectionsLeft})</button
-					>
 				{/if}
 			</div>
 		{/if}
@@ -438,8 +382,8 @@
 </div>
 
 <style>
-	.step {
-		display: flex;
+	.slip.step {
+		flex-direction: row;
 		align-items: center;
 		gap: 0.8rem;
 	}
@@ -460,7 +404,7 @@
 
 	.say strong {
 		font-family: var(--font-display);
-		font-size: 1.55rem;
+		font-size: 1.35rem;
 		font-weight: 400;
 		line-height: 1.05;
 	}
@@ -477,11 +421,7 @@
 	}
 
 	.step.aiming {
-		padding: 0.5rem 0.7rem;
-		border: 1px solid var(--warn);
-		border-radius: 3px;
-		background: rgb(227 178 60 / 0.1);
-		pointer-events: auto;
+		border-color: var(--warn);
 	}
 
 	.step.aiming strong {
@@ -506,8 +446,9 @@
 
 	.tray {
 		display: flex;
+		flex-wrap: wrap;
 		align-items: flex-end;
-		gap: 1.2rem;
+		gap: 0.6rem 1.2rem;
 		min-width: 0;
 	}
 
@@ -520,6 +461,7 @@
 
 	.cards {
 		display: flex;
+		flex-wrap: wrap;
 		gap: 0.4rem;
 		--card-size: 0.82rem;
 	}
@@ -626,50 +568,39 @@
 		}
 	}
 
-	/* No tray: the dock is the near edge of the table, with the held hand rising out of the bottom of the screen. */
-	/* The dock reaches up over the empty table below the chart, so only its contents take clicks. */
+	/* No tray: the hand and the step's slip float over the bottom of the map, and only they take clicks. The slip
+	   stands beside the hand, never above it, so the band the board leaves free stays the hand's height all turn and
+	   the map holds still from one step to the next. */
 	.dock {
-		position: relative;
-		z-index: 35;
-		display: grid;
-		grid-template-columns: minmax(0, 0.5fr) minmax(0, 1.8fr) minmax(15rem, 1fr) 9rem;
-		gap: 1.1rem;
-		height: 10.4rem;
-		margin-top: -2.6rem;
-		padding: 0 0.9rem;
-		pointer-events: none;
+		display: flex;
+		align-items: flex-end;
+		justify-content: center;
+		gap: 1.2rem;
+		padding-bottom: 0.6rem;
 	}
 
-	.dock :is(button, input, summary, .slot, .events, .free-list, .tray, .step, .prompt) {
+	.dock :is(button, input, summary, .slot, .events, .free-list, .slip, .setup) {
 		pointer-events: auto;
 	}
 
-	/* Beside the replay panel the dock is narrower, so the held cards shrink rather than run into the prompts. */
-	@container dock (width < 1100px) {
-		.dock {
-			grid-template-columns: minmax(0, 4rem) minmax(0, 1.3fr) minmax(0, 1fr) 8rem;
-		}
-
-		.held .hand {
-			--card-size: 0.6rem;
-		}
-
-		.held .holder small {
-			display: none;
-		}
-
-		.held .holder {
-			margin-top: 1.6rem;
-		}
-	}
-
-	.frame {
-		container: dock / inline-size;
+	.slip,
+	.setup {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		min-width: 0;
+		padding: 0.55rem 0.8rem;
+		border: 1px solid var(--line);
+		border-radius: 3px;
+		background: var(--panel);
+		backdrop-filter: blur(10px);
+		box-shadow: 0 0.6rem 1.6rem rgb(0 0 0 / 0.4);
+		animation: rise 320ms cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
 	}
 
 	.setup {
-		grid-column: 1 / -1;
-		display: flex;
+		position: relative;
+		flex-direction: row;
 		align-items: center;
 		justify-content: center;
 		gap: 1.2rem;
@@ -714,7 +645,7 @@
 
 	.events {
 		position: absolute;
-		bottom: calc(100% - 2.2rem);
+		bottom: calc(100% + 0.6rem);
 		left: 50%;
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
@@ -779,68 +710,39 @@
 		line-height: 1.25;
 	}
 
-	.spacer {
-		min-width: 0;
-	}
-
+	/* The fan's overlap is worked out from the room it has, so the hand takes all the width the step's slip leaves. */
 	.held {
 		position: relative;
 		display: flex;
-		align-items: flex-start;
-		justify-content: center;
-		gap: 0.9rem;
-		min-width: 0;
-	}
-
-	/* The holder's name sits beside the fan, outside the space a lifted card sweeps through. */
-	.holder {
-		display: flex;
+		flex: 1 1 0;
 		flex-direction: column;
-		align-items: flex-end;
-		gap: 0.1rem;
-		margin: 2.6rem 0 0;
-		padding-right: 0.7rem;
-		border-right: 2px solid var(--seat);
-		white-space: nowrap;
-	}
-
-	.holder strong {
-		color: var(--seat);
-		font-family: var(--font-display);
-		font-size: 1.2rem;
-		font-weight: 400;
-		line-height: 1.1;
-	}
-
-	.holder small {
-		color: var(--muted);
-		font-size: 0.78rem;
-		line-height: 1.25;
+		min-width: 0;
+		align-items: center;
+		gap: 0.4rem;
 	}
 
 	.back {
-		padding: 0;
-		border: 0;
-		border-bottom: 1px solid var(--line-strong);
-		background: none;
-		color: var(--muted);
+		padding: 0.25rem 0.7rem;
+		border: 1px solid var(--seat);
+		border-radius: 999px;
+		background: var(--panel);
+		box-shadow: 0 0.3rem 0.8rem rgb(0 0 0 / 0.35);
+		color: var(--ink);
 		font: inherit;
-		font-family: var(--font-ui);
-		font-size: 0.75rem;
+		font-size: 0.8rem;
 		cursor: pointer;
 	}
 
 	.back:hover {
-		color: var(--ink);
+		background: var(--wash);
 	}
 
 	.hand {
 		--card-size: 0.8rem;
 		display: flex;
-		flex: 1;
+		align-self: stretch;
 		justify-content: center;
 		min-width: 0;
-		margin-top: 1.2rem;
 		padding-inline: calc(var(--overlap) / 2 + 0.6rem);
 	}
 
@@ -853,7 +755,9 @@
 		z-index: 5;
 	}
 
+	/* No bar behind the hand, so each card carries its own shadow onto the map. */
 	.lift {
+		filter: drop-shadow(0 0.45rem 0.7rem rgb(0 0 0 / 0.5));
 		transform: translateY(var(--drop)) rotate(var(--angle));
 		transform-origin: 50% 140%;
 		transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -875,26 +779,22 @@
 		padding-top: 2rem;
 	}
 
-	/* The step sits low, on the dock's dark band, clear of the chart's light paper above it. */
 	.middle {
 		display: flex;
+		flex: 0 1 auto;
 		flex-direction: column;
 		justify-content: flex-end;
-		gap: 0.5rem;
-		padding-bottom: 0.9rem;
+		max-width: min(30rem, 48%);
 		min-width: 0;
+	}
+
+	.middle:not(:has(.slip)) {
+		display: none;
 	}
 
 	.prompt {
 		color: var(--ink);
 		line-height: 1.35;
-	}
-
-	/* Whatever the dock asks for next rises into place, so a change of step is noticed. */
-	.middle > *,
-	.turn > *,
-	.setup > * {
-		animation: rise 320ms cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
 	}
 
 	.chips > button {
@@ -933,7 +833,6 @@
 
 	.cards.flipped {
 		--card-size: 0.5rem;
-		overflow: hidden;
 	}
 
 	.chips {
@@ -946,8 +845,7 @@
 	}
 
 	.chips button,
-	.setup button,
-	.turn button {
+	.setup button {
 		padding: 0.32rem 0.7rem;
 		border: 1px solid var(--line-strong);
 		border-radius: 2px;
@@ -963,14 +861,12 @@
 	}
 
 	.chips button:hover:not(:disabled),
-	.setup button:hover:not(:disabled),
-	.turn button:hover:not(:disabled) {
+	.setup button:hover:not(:disabled) {
 		border-color: var(--paper);
 		background: var(--wash);
 	}
 
-	.chips button:active:not(:disabled),
-	.turn button:active:not(:disabled) {
+	.chips button:active:not(:disabled) {
 		transform: translateY(1px);
 	}
 
@@ -990,40 +886,7 @@
 		background: rgb(231 220 198 / 0.12);
 	}
 
-	.turn {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		gap: 0.4rem;
-	}
-
-	.pips {
-		display: flex;
-		justify-content: center;
-		gap: 0.35rem;
-	}
-
-	.pips i {
-		width: 0.75rem;
-		height: 0.75rem;
-		border: 1px solid var(--paper);
-		border-radius: 50%;
-		transition:
-			background 250ms ease,
-			transform 250ms ease;
-	}
-
-	.pips i.on {
-		background: var(--paper);
-	}
-
-	.pips i:not(.on) {
-		transform: scale(0.8);
-		opacity: 0.5;
-	}
-
 	button.primary,
-	.turn button.primary,
 	.setup button.primary {
 		border-color: var(--paper);
 		background: var(--paper);

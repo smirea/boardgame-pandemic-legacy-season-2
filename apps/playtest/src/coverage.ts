@@ -41,7 +41,9 @@ export function coverageOfRun(runOrPath: string): RunCoverage {
 
 /** What the named runs have exercised between them, against everything the engine can do. */
 export function renderCoverage(runs: string[]): string {
-	const covered = runs.map(coverageOfRun);
+	// A glob over another checkout's runs takes in runs that recorded nothing, which have nothing to count.
+	const empty = runs.filter(run => run.includes('/') && !existsSync(join(resolve(run), 'records')));
+	const covered = runs.filter(run => !empty.includes(run)).map(coverageOfRun);
 	const world = covered.findLast(entry => entry.world)?.world;
 	if (!world) throw new Error('no recorded game in those runs');
 	const keys = universe(world).map(entry => entry.key);
@@ -49,6 +51,7 @@ export function renderCoverage(runs: string[]): string {
 	const missing = keys.filter(key => !firstSeen(key));
 	const lines = [
 		`Runs: ${covered.map(entry => `${entry.run} (${entry.games} games, ${entry.won} won)`).join(', ')}.`,
+		...(empty.length ? [`Skipped, no recordings: ${empty.map(run => basename(resolve(run))).join(', ')}.`] : []),
 		`${keys.length - missing.length} of ${keys.length} tracked mechanics happened in recorded play.`,
 		'',
 	];

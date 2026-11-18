@@ -3,6 +3,12 @@ import type { BoardPoint } from './projection';
 
 export type CityHighlight = 'target' | 'selected' | null;
 
+/**
+ * A panel lying over the board, in pixels from the stage's top left. The fitted view may slide the board a little
+ * under the side panels on a narrow stage, but never under a firm one.
+ */
+export type Covered = { x: number; y: number; width: number; height: number; firm?: boolean };
+
 export type CityView = {
 	name: string;
 	revealed: boolean;

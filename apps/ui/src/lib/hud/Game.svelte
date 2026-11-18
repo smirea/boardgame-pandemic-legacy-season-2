@@ -18,7 +18,7 @@
 	import Board from '#lib/board/Board.svelte';
 	import type { BoardPoint } from '#lib/board/projection.ts';
 	import { travelOf } from '#lib/board/travel.ts';
-	import type { BoardMarks, BoardView, CityView, Fx, FxKind, Travel } from '#lib/board/types.ts';
+	import type { BoardMarks, BoardView, CityView, Covered, Fx, FxKind, Travel } from '#lib/board/types.ts';
 	import type { SessionView } from '#lib/session/session.svelte.ts';
 	import { inkOn } from '#lib/color.ts';
 	import { presentFeedback } from '#lib/feedback.ts';
@@ -33,7 +33,6 @@
 	import { placeSeats } from './seats.ts';
 	import type { Place } from './seats.ts';
 	import Dock from './Dock.svelte';
-	import InsightsPanel from './InsightsPanel.svelte';
 	import {
 		ACTION_NAMES,
 		actionDetail,
@@ -117,7 +116,6 @@
 		multi?: { max: number; verb: string; confirm: (picked: Option[]) => void };
 	};
 	const byLabel = (a: Option, b: Option) => a.label.localeCompare(b.label);
-	let selected = $state<CityId | null>(null);
 	/** An action or card waiting for its target on the map: its targets are lit and a click on one finishes it. */
 	type Targeting = { label: string; a: Action['a'] | null; cities: Map<CityId, Option[]> };
 	let targeting = $state.raw<Targeting | null>(null);
@@ -151,14 +149,22 @@
 	// A replay seats the first player there.
 	const seatAt = $derived(game ? placeSeats(game.seats, me) : null);
 	// Where the panels on the board's sides sit, so the fitted view keeps cities out from under them.
-	let covered = $state.raw<{ x: number; y: number; width: number; height: number }[]>([]);
+	let covered = $state.raw<Covered[]>([]);
+	// How far the side columns' panels reach in, so the floating hand and the objectives stay between them however
+	// wide they grow.
+	let sides = $state.raw({ left: 0, right: 0 });
+	const listed = $derived(actionChoices.length > 0);
+	let actionColumns = $state(1);
 	$effect(() => {
 		void seatAt;
+		// The Actions panel comes and goes with the turn's steps and grows columns, and is one of the panels measured.
+		void listed;
+		void actionColumns;
 		// `bind:this` hands back null, not undefined, once a column leaves the screen.
 		const columns = [leftColumn, rightColumn].filter((column): column is HTMLElement => column instanceof HTMLElement);
 		if (!stage) return void (covered = []);
 		// The columns run the full height but only their panels cover the board, so the panels are what is measured.
-		// The dock follows the stage and its cards rise over the stage's bottom edge.
+		// The dock layer follows the stage and lies over its bottom edge.
 		const panels = [
 			...columns.flatMap(column => [...column.children]),
 			...[goals, stage.nextElementSibling].filter(element => element instanceof HTMLElement),
@@ -174,15 +180,47 @@
 		};
 		const measure = () => {
 			const origin = stage!.getBoundingClientRect();
-			covered = panels.map(panel => {
+			const next = panels.map(panel => {
 				const box = extent(panel);
-				return { x: box.left - origin.x, y: box.top - origin.y, width: box.width, height: box.height };
+				return {
+					x: box.left - origin.x,
+					y: box.top - origin.y,
+					width: box.width,
+					height: box.height,
+					// The Actions panel stands mid-side over the board and grows a column rather than hide a row, so
+					// the board always makes room for all of it.
+					firm: panel.classList.contains('actions-slot'),
+				};
+			});
+			const reach = (column: HTMLElement | null | undefined, side: 'left' | 'right') =>
+				column instanceof HTMLElement
+					? Math.max(
+							0,
+							...[...column.children].map(child => {
+								const box = child.getBoundingClientRect();
+								return side === 'left' ? box.right - origin.left : origin.right - box.left;
+							}),
+						)
+					: 0;
+			// A new array restarts the camera's glide even when nothing moved, and a glide under a click reads as a drag.
+			const reached = { left: reach(leftColumn, 'left'), right: reach(rightColumn, 'right') };
+			untrack(() => {
+				if (JSON.stringify(next) !== JSON.stringify(covered)) covered = next;
+				if (reached.left !== sides.left || reached.right !== sides.right) sides = reached;
 			});
 		};
-		const observer = new ResizeObserver(measure);
+		// A measure moves the floating hand, so it waits a frame rather than run inside the observer's own delivery.
+		let frame = 0;
+		const observer = new ResizeObserver(() => {
+			cancelAnimationFrame(frame);
+			frame = requestAnimationFrame(measure);
+		});
 		for (const element of [stage, ...panels]) observer.observe(element);
 		measure();
-		return () => observer.disconnect();
+		return () => {
+			cancelAnimationFrame(frame);
+			observer.disconnect();
+		};
 	});
 	let resetView = $state(0);
 
@@ -537,7 +575,7 @@
 						infested: record.infested,
 						forsaken: isForsaken(campaign, city.id),
 						lab: record.lab,
-						highlight: selected === city.id || ring === city.id ? 'selected' : targets.has(city.id) ? 'target' : null,
+						highlight: ring === city.id ? 'selected' : targets.has(city.id) ? 'target' : null,
 						infection: showOdds
 							? {
 									odds: info!.infection.odds[city.id] ?? 0,
@@ -647,13 +685,16 @@
 	{#if game && !spectator && actionChoices.length}
 		<div class="actions-slot">
 			<ActionPanel
-				{world}
+				{snap}
 				seat={game.active}
 				name={seatName(world, game.active)}
 				menu={actionChoices}
 				{live}
+				{canAct}
 				aiming={targeting?.a ?? null}
 				onchoose={choice => start(choice.a, choice.actions)}
+				{send}
+				bind:columns={actionColumns}
 			/>
 		</div>
 	{/if}
@@ -698,6 +739,8 @@
 
 <div
 	class="game"
+	style:--left={`${sides.left}px`}
+	style:--right={`${sides.right}px`}
 	data-card-cities={hoveredTargets.cities.join(' ')}
 	data-card-seats={hoveredTargets.seats.join(' ')}
 	{@attach feedback('Game', () => ({
@@ -742,23 +785,13 @@
 		/>
 
 		{#if game && seatAt && snap.phase !== 'upkeep'}
-			<div class="column left" class:docked={!spectator} bind:this={leftColumn}>
+			<div class="column left" bind:this={leftColumn}>
 				{@render seated('tl')}
 				{#if seatAt.has('tr')}{@render actionPanel()}{/if}
 				{@render seated('bl')}
 			</div>
-			<div class="column right" class:docked={!spectator} bind:this={rightColumn}>
+			<div class="column right" bind:this={rightColumn}>
 				{@render seated('tr')}
-				{#if info && !spectator}
-					<div class="insights">
-						<InsightsPanel
-							{world}
-							{info}
-							onfocus={city => (selected = city)}
-							onlockdown={card => send({ type: 'LOCKDOWN', card })}
-						/>
-					</div>
-				{/if}
 				{#if !seatAt.has('tr')}{@render actionPanel()}{/if}
 				{@render seated('br')}
 			</div>
@@ -954,21 +987,24 @@
 	</main>
 
 	{#if game && snap.phase !== 'upkeep' && !spectator}
-		<Dock
-			{snap}
-			{canAct}
-			{owns}
-			seat={dockSeat!}
-			home={home!}
-			{plays}
-			{decides}
-			{send}
-			onview={seat => (viewing = seat)}
-			aiming={targeting ? { label: targeting.label, a: targeting.a, count: targeting.cities.size } : null}
-			oncancel={cancel}
-			uses={cardUses}
-			onplaycard={playCard}
-		/>
+		<!-- No tray: the hand and whatever the turn asks for float over the bottom of the map. -->
+		<div class="dock-layer">
+			<Dock
+				{snap}
+				{canAct}
+				{owns}
+				seat={dockSeat!}
+				home={home!}
+				{plays}
+				{decides}
+				{send}
+				onview={seat => (viewing = seat)}
+				aiming={targeting ? { label: targeting.label, a: targeting.a, count: targeting.cities.size } : null}
+				oncancel={cancel}
+				uses={cardUses}
+				onplaycard={playCard}
+			/>
+		</div>
 	{/if}
 </div>
 
@@ -978,7 +1014,7 @@
 		/* A page that hosts the game beside something else, such as the replay viewer, sets the inset. */
 		inset: var(--game-inset, 0);
 		display: grid;
-		grid-template-rows: auto minmax(0, 1fr) auto;
+		grid-template-rows: auto minmax(0, 1fr);
 		grid-template-columns: minmax(0, 1fr);
 		background: var(--table);
 		color: var(--ink);
@@ -989,10 +1025,24 @@
 
 	.stage {
 		position: relative;
+		grid-row: 2;
+		grid-column: 1;
 		min-height: 0;
 	}
 
-	/* The seats sit in the corners, with the chart's key and the insights between them on either side. */
+	/* Shares the stage's cell, lying over the bottom of the map between the side columns. */
+	.dock-layer {
+		position: relative;
+		z-index: 35;
+		grid-row: 2;
+		grid-column: 1;
+		align-self: end;
+		margin-left: calc(var(--left) + 0.7rem);
+		margin-right: calc(var(--right) + 0.7rem);
+		pointer-events: none;
+	}
+
+	/* The seats sit in the corners, with the Actions panel between them on one side. */
 	.column {
 		position: absolute;
 		top: 0.7rem;
@@ -1012,11 +1062,6 @@
 	/* A seat's character sheet opens over the objectives and the targeting line, which share the layer. */
 	.column:has(:global([data-testid='character-sheet'], [data-testid='corner-full-hand'])) {
 		z-index: 32;
-	}
-
-	/* The dock's cards rise 2.6rem over the stage's bottom edge, and the bottom seats sit above them. */
-	.column.docked {
-		bottom: 3.3rem;
 	}
 
 	.column.left {
@@ -1039,13 +1084,18 @@
 	}
 
 	/* The action list sits in whichever side column has room, beside the seats. */
+	/* At least as wide as a seat. A list too long for one column grows another, reaching in over the board. */
 	.actions-slot {
 		display: flex;
-		/* As wide as a seat: the fitted view already gives up that much of the board to the seats. */
-		width: 15.5rem;
+		flex-direction: column;
+		width: min-content;
+		min-width: 15.5rem;
 		min-height: 0;
-		/* Gives up its height before the insights do, scrolling its rows. */
-		flex: 0 100 auto;
+		flex: 0 1 auto;
+	}
+
+	.column.left .actions-slot {
+		align-self: flex-start;
 	}
 
 	/* On the right it stands on the player's own seat, above the controls that end the turn. */
@@ -1057,17 +1107,11 @@
 		margin-top: 0;
 	}
 
-	.insights {
-		display: flex;
-		width: 12.5rem;
-		min-height: 0;
-		flex: 0 1 auto;
-	}
-
+	/* Centred over the room between the side panels, where the fitted board sits, so a wide panel never reaches it. */
 	.goals {
 		position: absolute;
 		top: 0.6rem;
-		left: 50%;
+		left: calc((var(--left, 0px) + 100% - var(--right, 0px)) / 2);
 		z-index: 30;
 		transform: translateX(-50%);
 	}
