@@ -61,7 +61,7 @@ Memory files live in `memory/` and are tracked, so a later run starts with what 
 
 ## Idle cost
 
-`./apps/playtest/src/perf.ts` measures what the game costs while nobody touches it. It opens a real, GPU-backed Chromium window on a blank page, the landing page, and a January and a July game standing at an action step, lets each settle, and reads for 15 seconds: animation frames run, frames WebGL drew, draw calls, the CPU time of the renderer and GPU processes, and the machine's GPU load. It needs `bun run dev` running.
+`./apps/playtest/src/perf.ts` measures what the game costs while nobody touches it. It opens a real, GPU-backed Chromium window on a blank page, the landing page, a new campaign's lobby, and a January and a July game standing at an action step, lets each settle, and reads for 15 seconds: animation frames run, frames WebGL drew, draw calls, the CPU time of the renderer and GPU processes, and the machine's GPU load. It needs `bun run dev` running.
 
 ```sh
 ./apps/playtest/src/perf.ts                                 # every screen, 5 runs each, medians and ranges

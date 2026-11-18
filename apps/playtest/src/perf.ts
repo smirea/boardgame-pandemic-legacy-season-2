@@ -52,10 +52,12 @@ function idleSave(month: number): Save {
 	throw new Error(`month ${month} never reached an action step`);
 }
 
-type Scenario = { id: string; path: string; save?: Save };
+type Scenario = { id: string; path: string; save?: Save; settle?: number };
 const scenarios: Scenario[] = [
 	{ id: 'blank', path: 'about:blank' },
 	{ id: 'landing', path: '/?DEBUG_ID=perf-landing' },
+	// A page loaded once keeps compiling in the background for most of a minute, which reads as renderer CPU.
+	{ id: 'lobby', path: '/debug/game?DEBUG_ID=perf-lobby', settle: 50 },
 	{ id: 'january', path: '/debug/game?DEBUG_ID=perf-january', save: idleSave(1) },
 	{ id: 'july', path: '/debug/game?DEBUG_ID=perf-july', save: idleSave(7) },
 ].filter(scenario => !flags.only || flags.only.split(',').includes(scenario.id));
@@ -266,7 +268,7 @@ try {
 			await page.mouse.move(4, 4);
 			if (flags.css) await page.addStyleTag({ content: flags.css });
 			await page.waitForFunction(() => window.__perf.workers === 0, null, { timeout: 120_000 });
-			await sleep(SETTLE * 1000);
+			await sleep(Math.max(SETTLE, scenario.settle ?? 0) * 1000);
 			// Waits out other work on the machine, for up to ten minutes, then measures anyway and says so.
 			for (let calm = 0, waited = 0; calm < 3 && waited < 600; waited++) {
 				calm = otherCpu() < Number(flags.quiet) ? calm + 1 : 0;

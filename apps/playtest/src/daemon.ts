@@ -146,9 +146,8 @@ if (!argv.includes('--no-build')) {
 }
 const envFile = (name: string) => (existsSync(join(repoRoot, name)) ? readFileSync(join(repoRoot, name), 'utf8') : '');
 // env-manager quotes the values it writes to `.env.local`.
-const built = (
-	envFile('.env.local').match(/^SIGNAL_URL=['"]?([^\s'"]+)/m) ?? envFile('.env').match(/^SIGNAL_URL=['"]?([^\s'"]+)/m)
-)?.[1];
+const built = (envFile('.env.local').match(/^SIGNAL_URL=['"]?([^\s'"]+)/m) ??
+	envFile('.env').match(/^SIGNAL_URL=['"]?([^\s'"]+)/m))?.[1];
 if (built !== `http://127.0.0.1:${config.signalPort}`)
 	throw new Error(
 		`the app is built for the signaling server at ${built}, but this run wants port ${config.signalPort}`,
