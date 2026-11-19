@@ -85,6 +85,7 @@ export class InfectionShow {
 		const undone = newest < this.seen;
 		this.seen = newest;
 		if (undone || !live || !before || !this.board) return this.stop();
+		this.reconcile(this.board);
 		const beats = this.beats(world, fresh, before, this.board);
 		if (beats.length === 0) return;
 		if (beats.length > MOST_BEATS) return this.stop();
@@ -130,8 +131,6 @@ export class InfectionShow {
 			else change.cities[city!]![piece] -= amount;
 			return amount ? [{ city, piece, amount }] : [];
 		};
-		const cardOf = (city: CityId) =>
-			Object.values(world.campaign.infectionCards).find(card => card.kind === 'city' && card.city === city);
 		const beats: Beat[] = [];
 		let outbreak: Beat | null = null;
 		for (const entry of fresh) {
@@ -156,8 +155,8 @@ export class InfectionShow {
 				};
 				if (entry.effect === 'outbreak') outbreak ??= beat;
 				beats.push(beat);
-			} else if (entry.t === 'epidemic' && entry.city) {
-				const card = cardOf(entry.city);
+			} else if (entry.t === 'epidemic' && entry.city && entry.card) {
+				const card = world.campaign.infectionCards[entry.card];
 				if (!card) continue;
 				beats.push({
 					seq: entry.seq,
@@ -179,6 +178,26 @@ export class InfectionShow {
 				if (lost < 0) outbreak.strike.push(...take(city, 'supplies', lost), ...take(null, 'stockpile', -lost));
 			}
 		return beats;
+	}
+
+	/**
+	 * A player can take away what a scene still holds back, such as a Purge on a city whose plague cube has not landed
+	 * yet. The scene then shows less, so the board never counts below nothing.
+	 */
+	private reconcile(board: Board) {
+		let changed = false;
+		const shown = (entry: Hidden) =>
+			(entry.piece === 'stockpile' ? board.stockpile : (board.cities[entry.city!]?.[entry.piece] ?? 0)) -
+			this.hidden
+				.filter(other => other.piece === entry.piece && other.city === entry.city)
+				.reduce((sum, other) => sum + other.amount, 0);
+		for (const entry of this.hidden) {
+			const deficit = -shown(entry);
+			if (entry.amount <= 0 || deficit <= 0) continue;
+			entry.amount -= Math.min(entry.amount, deficit);
+			changed = true;
+		}
+		if (changed) this.hidden = [...this.hidden];
 	}
 
 	private reveal(entries: Hidden[]) {

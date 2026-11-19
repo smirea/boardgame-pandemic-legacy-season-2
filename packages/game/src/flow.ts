@@ -503,7 +503,13 @@ export function epidemic(world: World) {
 		location.supplies -= removed;
 		game.infectionDiscard.push(struck.id);
 	}
-	log(game, { t: 'epidemic', city: struck?.city ?? null, rate: numbers.infectionRates[game.rateIndex]!, removed });
+	log(game, {
+		t: 'epidemic',
+		city: struck?.city ?? null,
+		card: struck?.id ?? null,
+		rate: numbers.infectionRates[game.rateIndex]!,
+		removed,
+	});
 	const resilient = game.seats.some(seat =>
 		player(game, seat).hand.some(id => {
 			const card = campaign.playerCards[id];

@@ -170,7 +170,7 @@ export type LogEntry = { seq: number } & (
 	| { t: 'action'; seat: SeatId; action: ActionId; detail: string }
 	| { t: 'move'; seat: SeatId; from: CityId; to: CityId; by: string }
 	| { t: 'draw'; seat: SeatId; card: CardId }
-	| { t: 'epidemic'; city: CityId | null; rate: number; removed: number }
+	| { t: 'epidemic'; city: CityId | null; card: CardId | null; rate: number; removed: number }
 	| {
 			t: 'infect';
 			city: CityId;
