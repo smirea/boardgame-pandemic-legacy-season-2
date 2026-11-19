@@ -55,6 +55,8 @@
 		/** A pointer over the stockpile, or off it when `event` is null. */
 		onstockpile?: (event: PointerEvent | null) => void;
 		hoverStockpile?: boolean;
+		/** A click on a pawn that can be picked. */
+		onpawn?: (id: string) => void;
 		/** Screen rectangles, in pixels from the canvas corner, that HUD panels cover. The fitted view keeps cities out of them. */
 		covered?: Covered[];
 		/**
@@ -74,6 +76,7 @@
 		onrecon,
 		onstockpile,
 		hoverStockpile = false,
+		onpawn,
 		resetView = 0,
 		covered = [],
 		focus = null,
@@ -553,7 +556,7 @@
 {/each}
 
 {#each pawnSlots as { pawn, slot, of, at } (pawn.id)}
-	<Pawn {pawn} {slot} {of} {at} />
+	<Pawn {pawn} {slot} {of} {at} onpick={() => onpawn?.(pawn.id)} />
 {/each}
 
 {#if view.stockpile !== null}

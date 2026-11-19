@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { T } from '@threlte/core';
+	import { feedback } from '@stefan.inc/feedback-engine/svelte';
+	import { HTML } from '@threlte/extras';
 	import { untrack } from 'svelte';
 	import { cubicInOut } from 'svelte/easing';
 	import { Spring, Tween } from 'svelte/motion';
@@ -10,9 +12,17 @@
 	import Vehicle from './Vehicle.svelte';
 
 	/** `slot` is this pawn's place among the `of` pawns in its city. */
-	type Props = { pawn: PawnView; slot: number; of: number; at: BoardPoint };
+	type Props = { pawn: PawnView; slot: number; of: number; at: BoardPoint; onpick: () => void };
 
-	let { pawn, slot, of, at }: Props = $props();
+	let { pawn, slot, of, at, onpick }: Props = $props();
+
+	// The city's hover boxes stand in front of a pawn and take the pointer first, so a pawn that can be picked is
+	// clicked through a button over it. It stops `pointerdown` natively, before the camera controls capture the pointer.
+	const keepFromCamera = (node: HTMLElement) => {
+		const stop = (event: PointerEvent) => event.stopPropagation();
+		node.addEventListener('pointerdown', stop);
+		return () => node.removeEventListener('pointerdown', stop);
+	};
 
 	// Pieces are drawn larger than life so a move reads at the whole-map view. A crowd of three or more stands
 	// a little smaller, so every head stays clear of its neighbours'.
@@ -124,6 +134,27 @@
 					emissiveIntensity={Math.max(pawn.active ? 0.35 : 0, glow.current * 0.7)}
 				/>
 			</T.Mesh>
+			<!-- A mark over the pawn's body, as each city keeps one over its disc, so a script can find it. -->
+			<HTML center position.y={0.75} pointerEvents={pawn.pickable ? 'auto' : 'none'} zIndexRange={[2, 1]}>
+				{#if pawn.pickable}
+					<button
+						class="anchor pick"
+						data-pawn={pawn.id}
+						aria-label={`Pick ${pawn.name}`}
+						title={pawn.name}
+						onclick={onpick}
+						{@attach keepFromCamera}
+						{@attach feedback(pawn.name, () => ({ id: pawn.id, city: pawn.city, pickable: true }))}
+					></button>
+				{:else}
+					<span
+						class="anchor"
+						data-pawn={pawn.id}
+						aria-hidden="true"
+						{@attach feedback(pawn.name, () => ({ id: pawn.id, city: pawn.city, lit: pawn.lit }))}
+					></span>
+				{/if}
+			</HTML>
 			<T.Mesh position.y={1.36} castShadow>
 				<T.SphereGeometry args={[0.33, 20, 16]} />
 				<T.MeshStandardMaterial
@@ -158,3 +189,23 @@
 		</T.Group>
 	{/if}
 </T.Group>
+
+<style>
+	.anchor {
+		display: block;
+		width: 2px;
+		height: 2px;
+		pointer-events: none;
+	}
+
+	.pick {
+		width: 1.6rem;
+		height: 2.2rem;
+		padding: 0;
+		border: 0;
+		border-radius: 0.8rem;
+		background: none;
+		cursor: pointer;
+		pointer-events: auto;
+	}
+</style>

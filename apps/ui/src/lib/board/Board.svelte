@@ -7,6 +7,8 @@
 	import { NoToneMapping, WebGLRenderer } from 'three';
 	import { inkOn } from '#lib/color.ts';
 	import ActionIcon from '#lib/hud/ActionIcon.svelte';
+	import type { Rich } from '#lib/hud/rich.ts';
+	import RichText from '#lib/hud/RichText.svelte';
 	import type { Action } from '@repo/game';
 	import { CITY_COLOR } from './CityMarker.svelte';
 	import Glyph from './Glyph.svelte';
@@ -38,12 +40,14 @@
 		covered?: Covered[];
 		focus?: { city: CityId; x: number; y: number; glide?: number; zoom?: number } | null;
 		/** Actions offered round a city, each starting one kind of action. */
-		ring?: { city: CityId; entries: { key: Action['a']; label: string; detail: string }[] } | null;
+		ring?: { city: CityId; entries: { key: Action['a']; label: string; detail: Rich | string }[] } | null;
 		onring?: (key: Action['a']) => void;
 		/** A right click away from a city, which puts down whatever was half-chosen. True when something was. */
 		oncancel?: () => boolean;
 		/** A click on the board that landed on no city. */
 		onmiss?: () => void;
+		/** A click on a pawn that can be picked. */
+		onpawn?: (id: string) => void;
 	};
 
 	let {
@@ -59,6 +63,7 @@
 		onring,
 		oncancel,
 		onmiss,
+		onpawn,
 	}: Props = $props();
 
 	let element = $state<HTMLElement>();
@@ -198,6 +203,7 @@
 			hoverCity={hovered?.city ?? null}
 			{onstockpile}
 			hoverStockpile={hovered !== null && hovered.city === null}
+			{onpawn}
 			{resetView}
 			{covered}
 			{focus}
@@ -229,7 +235,7 @@
 						<ActionIcon action={spot.entry.key} size="2.1rem" />
 						<span>
 							<strong>{spot.entry.label}</strong>
-							{#if spot.entry.detail}<small>{spot.entry.detail}</small>{/if}
+							{#if spot.entry.detail.length}<small><RichText text={spot.entry.detail} /></small>{/if}
 						</span>
 					</button>
 				{/each}
@@ -263,11 +269,11 @@
 				<dl>
 					{#each hint.rows as row (row.label)}
 						<dt>{row.label}</dt>
-						<dd class={row.tone ?? ''}>{row.value}</dd>
+						<dd class={row.tone ?? ''}><RichText text={row.value} /></dd>
 					{/each}
 				</dl>
 			{/if}
-			{#each hint.notes as note, index (index)}<p>{note}</p>{/each}
+			{#each hint.notes as note, index (index)}<p><RichText text={note} /></p>{/each}
 		</div>
 	{/if}
 </div>

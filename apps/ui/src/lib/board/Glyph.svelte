@@ -2,13 +2,14 @@
 	import type { Glyph } from './hints';
 
 	// Buildings and the anchor take the ink of whatever they sit on; cubes and Hollow Men keep their piece colours.
-	let { glyph }: { glyph: Glyph } = $props();
+	// A card takes the colour it is known by: its city's region, or its kind.
+	let { glyph, color }: { glyph: Glyph; color?: string } = $props();
 </script>
 
 {#if glyph === 'port'}
-	<b class="glyph port" aria-hidden="true">{'⚓\uFE0E'}</b>
+	<b class="glyph port" aria-hidden="true">{'⚓︎'}</b>
 {:else}
-	<b class="glyph {glyph}" aria-hidden="true"></b>
+	<b class="glyph {glyph}" style:--band={color} aria-hidden="true"></b>
 {/if}
 
 <style>
@@ -41,6 +42,27 @@
 		height: 0.8rem;
 		background: #4e3b63;
 		clip-path: polygon(50% 0, 100% 100%, 0 100%);
+	}
+
+	.card,
+	.infection {
+		--band-dark: color-mix(in srgb, var(--band, #8d8476) 55%, #000);
+		border: 1px solid var(--band-dark);
+		border-radius: 2px;
+		box-shadow: inset 0 0 0 1.5px rgb(255 248 228 / 0.18);
+	}
+
+	.card {
+		width: 0.6rem;
+		height: 0.84rem;
+		background: linear-gradient(172deg, var(--band, #8d8476), color-mix(in srgb, var(--band, #8d8476) 80%, #140c06));
+	}
+
+	/* Infection cards lie on their side, dark backed, with their city's colour as a band. */
+	.infection {
+		width: 0.84rem;
+		height: 0.6rem;
+		background: linear-gradient(90deg, var(--band, #8d8476) 0 32%, #2b3a2a 32%);
 	}
 
 	.center {
