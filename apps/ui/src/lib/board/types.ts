@@ -101,5 +101,7 @@ export type BoardView = {
 	recon: ReconBoxView[];
 	cursors: CursorView[];
 	fx: Fx[];
+	/** A skull over a city struck by an incident, about to become the plague cube in slot `at`. */
+	skull: { key: number; city: CityId; at: number } | null;
 	marks?: BoardMarks;
 };

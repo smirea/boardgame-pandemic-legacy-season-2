@@ -219,14 +219,14 @@
 		{:else if snap.phase === 'setup.events'}
 			<div class="setup">
 				<div>Pick <strong>{eventsNeeded}</strong> Rationed Events for the deck. {picked.length} chosen.</div>
-				<!-- A tray of every Rationed Event with its full text, so the choice never depends on remembering the cards. -->
-				<div class="events" in:fly={{ y: 40, duration: 380 }}>
+				<!-- Every Rationed Event as the card a hand holds, with its full text, so the choice never depends on memory. -->
+				<div class="events" data-testid="rationed-events" in:fly={{ y: 40, duration: 380 }}>
 					{#each rationed as card (card.id)}
-						{@const event = card.kind === 'event' ? pack.events.find(item => item.id === card.event) : undefined}
-						<button class="card" class:picked={picked.includes(card.id)} onclick={() => toggleEvent(card.id)}>
-							<strong>{event?.name}</strong>
-							<span>{event?.text}</span>
-						</button>
+						{@const chosen = picked.includes(card.id)}
+						<div class="pick" class:picked={chosen} data-picked={chosen}>
+							<PlayerCard {card} tone={chosen ? 'play' : null} onclick={() => toggleEvent(card.id)} />
+							{#if chosen}<span class="check" aria-label="chosen" in:fly={{ y: -6, duration: 200 }}>✓</span>{/if}
+						</div>
 					{/each}
 				</div>
 				<button
@@ -647,67 +647,53 @@
 		position: absolute;
 		bottom: calc(100% + 0.6rem);
 		left: 50%;
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
-		width: min(66rem, calc(100vw - 4rem));
-		gap: 0.35rem;
-		max-height: min(32rem, calc(100vh - 15rem));
-		padding: 0.8rem;
-		overflow: auto;
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 0.9rem;
+		width: max-content;
+		max-width: min(66rem, calc(100vw - 4rem));
+		padding: 0.9rem 1rem;
 		border-radius: 2px;
 		background: var(--document);
 		box-shadow: var(--document-shadow);
 		translate: -50% 0;
-		scrollbar-width: thin;
+		--card-size: 1rem;
 	}
 
-	.events .card {
+	/* A card not chosen stands back a little; a chosen one lifts and wears a check. */
+	.pick {
 		position: relative;
-		display: flex;
-		flex-direction: column;
-		gap: 0.1rem;
-		padding: 0.4rem 1.6rem 0.45rem 0.55rem;
-		border: 1px solid rgb(42 32 23 / 0.25);
-		border-left: 4px solid #b08628;
-		border-radius: 2px;
-		background: rgb(255 252 242 / 0.35);
-		color: var(--slip-ink);
-		font: inherit;
-		text-align: left;
-		cursor: pointer;
+		opacity: 0.82;
 		transition:
-			background 150ms ease,
-			border-color 150ms ease;
+			opacity 160ms ease,
+			translate 200ms cubic-bezier(0.3, 1.4, 0.5, 1);
 	}
 
-	.events .card:hover {
-		border-color: var(--slip-ink);
+	.pick:hover,
+	.pick.picked {
+		opacity: 1;
 	}
 
-	.events .card.picked {
-		border-color: #b08628;
-		background: #ecd394;
+	.pick.picked {
+		translate: 0 -0.35rem;
 	}
 
-	.events .card.picked::after {
-		content: '✓';
+	.check {
 		position: absolute;
-		top: 0.3rem;
-		right: 0.5rem;
+		top: -0.55rem;
+		right: -0.55rem;
+		display: grid;
+		place-items: center;
+		width: 1.6rem;
+		height: 1.6rem;
+		border: 2px solid var(--document);
+		border-radius: 50%;
+		background: var(--ink-good);
+		color: #f4efe2;
 		font-weight: 700;
-	}
-
-	.setup .events strong {
-		color: var(--slip-ink);
-		font-family: var(--font-display);
-		font-size: 1rem;
-		font-weight: 400;
-	}
-
-	.events span {
-		color: var(--slip-muted);
-		font-size: 0.74rem;
-		line-height: 1.25;
+		box-shadow: 0 2px 4px rgb(0 0 0 / 0.35);
+		pointer-events: none;
 	}
 
 	/* The fan's overlap is worked out from the room it has, so the hand takes all the width the step's slip leaves. */

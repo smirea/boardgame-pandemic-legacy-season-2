@@ -34,6 +34,8 @@
 	import { placeSeats } from './seats.ts';
 	import type { Place } from './seats.ts';
 	import Dock from './Dock.svelte';
+	import InfectionDraw from './InfectionDraw.svelte';
+	import { InfectionShow } from './infectionShow.svelte.ts';
 	import {
 		ACTION_NAMES,
 		actionDetail,
@@ -513,15 +515,11 @@
 		lastSeq = newest;
 		const added: Fx[] = [];
 		const pulse = (city: CityId, kind: FxKind) => added.push({ id: nextFx++, city, kind, delay: added.length * 240 });
+		// Infections pulse their cities from the infection show, each at its own moment.
 		for (const entry of fresh) {
-			if (entry.t === 'infect' && entry.effect !== 'skipped' && entry.effect !== 'blocked') {
-				pulse(entry.city, entry.effect === 'supply' ? 'infect' : entry.effect === 'hollow' ? 'hollow' : entry.effect);
-			} else if (entry.t === 'incident') pulse(entry.city, 'plague');
-			else if (entry.t === 'outbreak') pulse(entry.city, 'outbreak');
-			else if (entry.t === 'connected') pulse(entry.city, 'connected');
+			if (entry.t === 'connected') pulse(entry.city, 'connected');
 			else if (entry.t === 'structure') pulse(entry.city, 'build');
 			else if (entry.t === 'epidemic') {
-				if (entry.city) pulse(entry.city, 'epidemic');
 				const id = nextFx++;
 				banner = {
 					id,
@@ -555,6 +553,34 @@
 		});
 	});
 
+	const show = new InfectionShow((city, kind) => {
+		const id = nextFx++;
+		fx = [...fx, { id, city, kind, delay: 0 }];
+		setTimeout(() => (fx = fx.filter(entry => entry.id !== id)), 4000);
+	});
+	/** The middle of the board left open between the panels, level with the middle of the stage, as fractions. */
+	function openMiddle() {
+		const width = stage?.clientWidth || 1;
+		const y = (stage?.clientHeight ?? 0) * 0.45;
+		let left = 0;
+		let right = width;
+		for (const rect of covered) {
+			if (rect.y > y || rect.y + rect.height < y) continue;
+			if (rect.x + rect.width / 2 < width / 2) left = Math.max(left, rect.x + rect.width);
+			else right = Math.min(right, rect.x);
+		}
+		return { x: (left + right) / 2 / width, y: 0.45 };
+	}
+	// Worked out once per city: a new object restarts the camera's glide, and the panels move while the show plays.
+	const showFocus = $derived(show.focus ? { city: show.focus, ...untrack(openMiddle), glide: 600, zoom: 0.45 } : null);
+	// Before anything draws the new state, so the board and the incident track never show what the show holds back.
+	$effect.pre(() => {
+		const next = world;
+		const lived = !spectator || announce;
+		untrack(() => show.observe(next, lived));
+	});
+	$effect(() => () => show.stop());
+
 	$effect(() => {
 		const notice = session.notice;
 		if (notice) untrack(() => toast(notice.text, 'bad'));
@@ -580,15 +606,16 @@
 			pack.cities.map((city): [CityId, CityView] => {
 				const record = campaign.locations[city.id]!;
 				const location = game?.locations[city.id];
+				const lag = show.lag.cities[city.id];
 				return [
 					city.id,
 					{
 						name: cityName(city.id),
 						revealed: record.revealed,
 						onGrid: gridSet.has(city.id),
-						supplies: location?.supplies ?? 0,
-						plague: location?.plague ?? 0,
-						hollow: location?.hollow ?? 0,
+						supplies: (location?.supplies ?? 0) - (lag?.supplies ?? 0),
+						plague: (location?.plague ?? 0) - (lag?.plague ?? 0),
+						hollow: (location?.hollow ?? 0) - (lag?.hollow ?? 0),
 						population: record.population,
 						port: city.port,
 						structures: (['center', 'tower', 'shelter'] as const)
@@ -652,7 +679,7 @@
 				carried: game!.players[seat]!.supplies,
 				...lastMove(seat),
 			})),
-			stockpile: game?.stockpile ?? null,
+			stockpile: game ? game.stockpile - show.lag.stockpile : null,
 			cursors: Object.entries(session.cursors).map(([id, point], index) => ({
 				id,
 				name: session.peers.find(peer => peer.id === id)?.name ?? 'player',
@@ -660,6 +687,7 @@
 				...point,
 			})),
 			fx,
+			skull: show.skull,
 			marks,
 		};
 	});
@@ -814,7 +842,7 @@
 			onpointer={point => session.pointer(point)}
 			{resetView}
 			{covered}
-			{focus}
+			focus={showFocus ?? focus}
 		/>
 
 		{#if game && seatAt && snap.phase !== 'upkeep'}
@@ -835,6 +863,8 @@
 					{snap}
 					held={briefingOpen &&
 						campaign.briefing.some(entry => entry.t === 'unlock' && entry.unlock.t === 'objectives')}
+					heldIncidents={show.heldIncidents}
+					surge={show.surge}
 					onwaive={objective =>
 						confirm('Mark this objective impossible for this game? The remaining objectives then decide the win.') &&
 						send({ type: 'WAIVE_OBJECTIVE', objective })}
@@ -1064,6 +1094,7 @@
 			/>
 		</div>
 	{/if}
+	<InfectionDraw drawn={show.card} />
 </div>
 
 <style>
@@ -1471,9 +1502,10 @@
 		font-size: 1rem;
 	}
 
+	/* The top bar's slips, such as a deck's, hang over the board's panels. */
 	.game > :global(:first-child) {
 		position: relative;
-		z-index: 1;
+		z-index: 55;
 		grid-row: 1;
 		grid-column: 1;
 	}

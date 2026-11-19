@@ -12,9 +12,13 @@
 		onwaive: (objective: ObjectiveId) => void;
 		/** The briefing is showing these objectives, so they wait there and fly here once it closes. */
 		held?: boolean;
+		/** Incidents the state holds that the infection show has not put on the track yet. */
+		heldIncidents?: number;
+		/** The track is drawn large while the infection show puts a marker on it. */
+		surge?: boolean;
 	};
 
-	let { snap, onwaive, held = false }: Props = $props();
+	let { snap, onwaive, held = false, heldIncidents = 0, surge = false }: Props = $props();
 
 	const campaign = $derived(snap.world.campaign);
 	const game = $derived(snap.world.game);
@@ -23,26 +27,29 @@
 	const needed = $derived(Math.min(campaign.required, open.length));
 	const limit = pack.numbers.incidentLimit;
 
-	// A pip fills when its marker lands, so the track lags the game by the markers still in the air.
+	// A pip fills when its marker lands, so the track lags the game by the markers held back or still in the air.
+	const revealed = $derived(Math.max(0, (game?.incidents ?? 0) - heldIncidents));
 	let flying = $state(0);
-	const filled = $derived(Math.max(0, (game?.incidents ?? 0) - flying));
+	const filled = $derived(Math.max(0, revealed - flying));
 	let pips = $state<HTMLElement[]>([]);
 	let flights = $state.raw<{ id: number; from: DOMRect; to: DOMRect; delay: number }[]>([]);
-	let seen = untrack(() => game?.log.at(-1)?.seq ?? 0);
+	let seen = untrack(() => revealed);
 	let nextId = 1;
+	/** The track flashes red as a marker lands on it. */
+	let flash = $state(0);
 
 	const left = (count: number) =>
 		count <= 0 ? 'The incident track is full' : `${count} incident${count === 1 ? '' : 's'} left`;
 
 	$effect(() => {
-		const log = game?.log ?? [];
-		const newest = log.at(-1)?.seq ?? 0;
+		const now = revealed;
 		untrack(() => {
-			const fresh = newest > seen ? log.filter(entry => entry.seq > seen && entry.t === 'incident') : [];
+			const log = game?.log ?? [];
+			const fresh = log.filter(entry => entry.t === 'incident' && entry.total > seen && entry.total <= now);
 			// A jump through a replay or a reload brings many at once, and those simply fill in.
-			const live = newest >= seen && fresh.length <= 3;
-			seen = newest;
-			if (!live || fresh.length === 0) return;
+			const live = now > seen && now - seen <= 3;
+			seen = now;
+			if (!live) return;
 			const launched = fresh.flatMap((entry, index) => {
 				if (entry.t !== 'incident') return [];
 				const city = document.querySelector(`.anchor[data-city="${entry.city}"]`);
@@ -53,7 +60,7 @@
 						id: nextId++,
 						from: city.getBoundingClientRect(),
 						to: pip.getBoundingClientRect(),
-						delay: 350 + index * 500,
+						delay: (surge ? 0 : 350) + index * 500,
 					},
 				];
 			});
@@ -162,6 +169,7 @@
 	function land(id: number) {
 		flights = flights.filter(flight => flight.id !== id);
 		flying = Math.max(0, flying - 1);
+		flash++;
 	}
 
 	/** Sends a marker from the city it was struck in, up and over the board, into its pip. */
@@ -180,7 +188,7 @@
 				{ transform: at(mid, 1.4, 180), opacity: 1, offset: 0.6 },
 				{ transform: at(to, 1, 360), opacity: 1 },
 			],
-			{ duration: 1300, delay: flight.delay, easing: 'cubic-bezier(0.45, 0, 0.25, 1)', fill: 'both' },
+			{ duration: surge ? 950 : 1300, delay: flight.delay, easing: 'cubic-bezier(0.45, 0, 0.25, 1)', fill: 'both' },
 		);
 		animation.onfinish = () => land(flight.id);
 		return {
@@ -225,7 +233,8 @@
 
 	{#if game}
 		<!-- The incident track: a marker for every incident, and the game is lost when the last is reached. -->
-		<div class="incidents" data-testid="incidents" aria-label={left(limit - filled)}>
+		<div class="incidents" class:surge data-testid="incidents" data-flash={flash} aria-label={left(limit - filled)}>
+			{#key flash}{#if flash}<span class="flash" aria-hidden="true"></span>{/if}{/key}
 			{#each { length: limit } as _, index (index)}
 				<i bind:this={pips[index]} class:on={index < filled} class:last={index === limit - 1} class:away={!dealt}></i>
 			{/each}
@@ -270,9 +279,41 @@
 		gap: 0.45rem;
 		padding: 0.3rem 0.6rem;
 		border-radius: 2px;
+		transform-origin: 50% 0;
 		transition:
 			background 200ms ease,
-			box-shadow 200ms ease;
+			box-shadow 200ms ease,
+			scale 380ms cubic-bezier(0.3, 1.3, 0.5, 1);
+	}
+
+	/* Grown so every eye at the table finds it while a marker goes on, then back to its place. */
+	.incidents.surge {
+		z-index: 30;
+		background: rgb(20 14 10 / 0.72);
+		box-shadow: var(--slip-shadow);
+		scale: 2.4;
+	}
+
+	.flash {
+		position: absolute;
+		inset: 0;
+		border-radius: 2px;
+		background: var(--danger);
+		pointer-events: none;
+		animation: flash 900ms ease-out both;
+	}
+
+	@keyframes flash {
+		0%,
+		60% {
+			opacity: 0.85;
+		}
+		30% {
+			opacity: 0.35;
+		}
+		100% {
+			opacity: 0;
+		}
 	}
 
 	.incidents:hover {
@@ -281,6 +322,7 @@
 	}
 
 	.incidents i {
+		position: relative;
 		width: 0.95rem;
 		height: 0.95rem;
 		margin: 0 0.08rem;
