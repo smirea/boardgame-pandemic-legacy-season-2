@@ -146,8 +146,9 @@ if (!argv.includes('--no-build')) {
 }
 const envFile = (name: string) => (existsSync(join(repoRoot, name)) ? readFileSync(join(repoRoot, name), 'utf8') : '');
 // env-manager quotes the values it writes to `.env.local`.
-const built = (envFile('.env.local').match(/^SIGNAL_URL=['"]?([^\s'"]+)/m) ??
-	envFile('.env').match(/^SIGNAL_URL=['"]?([^\s'"]+)/m))?.[1];
+const built = (
+	envFile('.env.local').match(/^SIGNAL_URL=['"]?([^\s'"]+)/m) ?? envFile('.env').match(/^SIGNAL_URL=['"]?([^\s'"]+)/m)
+)?.[1];
 if (built !== `http://127.0.0.1:${config.signalPort}`)
 	throw new Error(
 		`the app is built for the signaling server at ${built}, but this run wants port ${config.signalPort}`,
@@ -794,12 +795,8 @@ async function handle(agent: string, words: string[]): Promise<string> {
 		case 'actions': {
 			// What every action and rule unlocked so far does, for players who met them months ago.
 			const { campaign } = state.world;
-			const lines = campaign.actions.flatMap(action =>
-				actionBriefs[action] ? [`  ${actionBriefs[action]!.replace(/^New (free )?action: /, '')}`] : [],
-			);
-			const rules = campaign.rules.flatMap(rule =>
-				ruleBriefs[rule] ? [`  ${ruleBriefs[rule]!.replace(/^New rule: /, '')}`] : [],
-			);
+			const lines = campaign.actions.flatMap(action => (actionBriefs[action] ? [`  ${actionBriefs[action]}`] : []));
+			const rules = campaign.rules.flatMap(rule => (ruleBriefs[rule] ? [`  ${ruleBriefs[rule]}`] : []));
 			return ['Unlocked actions:', ...lines, ...(rules.length ? ['Rules added this year:', ...rules] : [])].join('\n');
 		}
 		case 'city':

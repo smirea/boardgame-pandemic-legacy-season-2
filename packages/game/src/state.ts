@@ -1,3 +1,4 @@
+import type { BriefedUnlock } from './briefing';
 import type {
 	AbilityId,
 	ActionId,
@@ -76,6 +77,11 @@ export type GameResult = {
 	characters: CharacterId[];
 };
 
+/** A Legacy card or opened bundle as read, or one thing it unlocked, worded for its heading (`briefingSections`). */
+export type BriefingEntry =
+	| { t: 'card'; title: string; text: string | null }
+	| { t: 'unlock'; unlock: BriefedUnlock; text: string };
+
 /** Everything that survives from one game to the next. */
 export type Campaign = {
 	rng: RngState;
@@ -89,7 +95,7 @@ export type Campaign = {
 	legacyIndex: number;
 	legacyHalt: { kind: 'pause' | 'stop'; month: number } | null;
 	/** Legacy cards revealed since the players last acknowledged, shown as a briefing. */
-	briefing: string[];
+	briefing: BriefingEntry[];
 	opened: BundleId[];
 	forced: BundleId[];
 	routes: string[];

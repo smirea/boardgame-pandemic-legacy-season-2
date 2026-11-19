@@ -48,6 +48,7 @@
 	} from './labels.svelte.ts';
 	import Lobby from './Lobby.svelte';
 	import CharacterSelect from './CharacterSelect.svelte';
+	import Briefing from './Briefing.svelte';
 	import Objectives from './Objectives.svelte';
 	import SeatPicker from './SeatPicker.svelte';
 	import TopBar from './TopBar.svelte';
@@ -474,6 +475,13 @@
 
 	// A spectator cannot acknowledge a briefing for the table, so closing it is theirs alone.
 	let briefingRead = $state('');
+	const briefingKey = $derived(JSON.stringify(campaign.briefing));
+	const briefingOpen = $derived(campaign.briefing.length > 0 && briefingRead !== briefingKey);
+	// The closing dialog keeps what it said while it fades, so its objectives are still there to fly to the board.
+	let shownBriefing = $state.raw(untrack(() => campaign.briefing));
+	$effect.pre(() => {
+		if (campaign.briefing.length) shownBriefing = campaign.briefing;
+	});
 
 	let fx = $state.raw<Fx[]>([]);
 	let toasts = $state.raw<{ id: number; text: string; tone: string }[]>([]);
@@ -832,6 +840,8 @@
 			<div class="goals" bind:this={goals}>
 				<Objectives
 					{snap}
+					held={briefingOpen &&
+						campaign.briefing.some(entry => entry.t === 'unlock' && entry.unlock.t === 'objectives')}
 					onwaive={objective =>
 						confirm('Mark this objective impossible for this game? The remaining objectives then decide the win.') &&
 						send({ type: 'WAIVE_OBJECTIVE', objective })}
@@ -932,7 +942,7 @@
 			</div>
 		{/if}
 
-		{#if campaign.briefing.length && briefingRead !== campaign.briefing.join('|')}
+		{#if briefingOpen}
 			<!-- A spectator reads the briefing beside the board instead of in front of it, so what was just revealed stays in view. -->
 			<div
 				class="scrim"
@@ -942,26 +952,13 @@
 				aria-label="New this game"
 				transition:fade={{ duration: 200 }}
 			>
-				<div
-					class="briefing"
-					{@attach feedback('Briefing', () => ({ briefing: campaign.briefing }))}
-					in:fly={{ y: 24, duration: 300 }}
-				>
-					<h2>New this game</h2>
-					<ul>
-						{#each campaign.briefing as line, index (index)}
-							{@const split = line.indexOf(': ')}
-							<li>
-								{#if split > 0 && split < 48}<strong>{line.slice(0, split)}</strong>
-									{line.slice(split + 2)}{:else}{line}{/if}
-							</li>
-						{/each}
-					</ul>
-					<button
-						class="primary"
-						onclick={() => (spectator ? (briefingRead = campaign.briefing.join('|')) : send({ type: 'ACK_BRIEFING' }))}
-						data-testid="ack-briefing">Continue</button
-					>
+				<div in:fly={{ y: 24, duration: 300 }}>
+					<Briefing
+						briefing={shownBriefing}
+						{campaign}
+						passive={spectator}
+						oncontinue={() => (spectator ? (briefingRead = briefingKey) : send({ type: 'ACK_BRIEFING' }))}
+					/>
 				</div>
 			</div>
 		{:else if choosingCharacters}
@@ -1554,64 +1551,6 @@
 		pointer-events: none;
 	}
 
-	.scrim.passive .briefing {
-		width: min(26rem, 90vw);
-		padding: 0.9rem 1.1rem 0.9rem;
-		pointer-events: auto;
-	}
-
-	.scrim.passive .briefing ul {
-		max-height: 30vh;
-		font-size: 0.85rem;
-	}
-
-	.briefing {
-		width: min(34rem, 90vw);
-		padding: 1.4rem 1.6rem 1.3rem;
-		border-radius: 2px;
-		background: var(--paper);
-		color: var(--paper-ink);
-		box-shadow:
-			0 1.5rem 4rem rgb(0 0 0 / 0.6),
-			inset 0 0 3rem rgb(120 86 48 / 0.18);
-	}
-
-	.briefing h2 {
-		margin: 0 0 0.7rem;
-		font-family: var(--font-display);
-		font-size: 1.7rem;
-		font-weight: 400;
-	}
-
-	.briefing ul {
-		display: flex;
-		flex-direction: column;
-		gap: 0.55rem;
-		max-height: 60vh;
-		margin: 0 0 1.1rem;
-		padding: 0;
-		overflow: auto;
-		list-style: none;
-		font-size: 0.95rem;
-		line-height: 1.45;
-	}
-
-	.briefing li {
-		padding-left: 0.7rem;
-		border-left: 2px solid rgb(42 32 23 / 0.3);
-	}
-
-	.briefing strong {
-		display: block;
-		font-family: var(--font-display);
-		font-size: 1.08rem;
-		font-weight: 400;
-	}
-
-	.briefing li::marker {
-		color: var(--paper-muted);
-	}
-
 	.primary {
 		padding: 0.45rem 1.1rem;
 		border: 1px solid var(--paper);
@@ -1621,12 +1560,6 @@
 		font: inherit;
 		font-weight: 700;
 		cursor: pointer;
-	}
-
-	.briefing .primary {
-		border-color: var(--paper-ink);
-		background: var(--paper-ink);
-		color: var(--paper);
 	}
 
 	.menu {

@@ -1,4 +1,5 @@
 import {
+	briefingSections,
 	characterAt,
 	checkEdge,
 	cityDef,
@@ -332,9 +333,13 @@ export function renderStatus(state: PublicState, who: Who | null): string {
 	const lines = [renderHeader(state)];
 	if (campaign.briefing.length) {
 		lines.push('LEGACY BRIEFING (new this game, the lead acknowledges with `do ack`):');
-		for (const text of campaign.briefing) {
-			lines.push(`  * ${text}`);
-			const flavor = flavorFor(text);
+		for (const section of briefingSections(campaign.briefing)) {
+			if (section.t === 'group') {
+				lines.push(`  ${section.heading}:`, ...section.items.map(item => `    * ${item.text}`));
+				continue;
+			}
+			lines.push(`  * ${section.title}${section.text ? `: ${section.text}` : ''}`);
+			const flavor = flavorFor(section.title);
 			if (flavor) lines.push(`      "${flavor}"`);
 		}
 	}

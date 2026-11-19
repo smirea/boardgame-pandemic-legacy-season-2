@@ -15,7 +15,9 @@ export {
 } from './actions';
 export type { Decide, Play } from './plays';
 export type { Purchase } from './legacy';
-export { actionBriefs, newCampaign, productionUnits, purchaseCost, ruleBriefs, score } from './legacy';
+export { actionBriefs, briefingSections, ruleBriefs } from './briefing';
+export type { BriefedUnlock, BriefingSection } from './briefing';
+export { newCampaign, productionUnits, purchaseCost, score } from './legacy';
 export type { Command, GameActor, GameSnapshot, Phase, Save, Seating } from './machine';
 export { createGameActor, gameMachine, parseSave, phaseOf, reject } from './machine';
 export type { TableCommand } from './table';
