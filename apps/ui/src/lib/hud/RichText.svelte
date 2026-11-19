@@ -11,12 +11,24 @@
 
 {#each parts as part, index (index)}
 	{#if typeof part === 'string'}{part}{:else}<span class="glyphed"
-			><Glyph glyph={part.glyph} color={part.color} />{#if part.text}&#8239;{part.text}{/if}</span
+			><Glyph glyph={part.glyph} color={part.color} />{#if part.text}&#8239;{part.text}{:else if part.alt}<span
+					class="alt">{part.alt}</span
+				>{/if}</span
 		>{/if}
 {/each}
 
 <style>
 	.glyphed {
+		white-space: nowrap;
+	}
+
+	/* Read aloud and copied, never seen: the glyph already shows it. */
+	.alt {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip-path: inset(50%);
 		white-space: nowrap;
 	}
 
