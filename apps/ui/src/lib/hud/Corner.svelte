@@ -156,6 +156,7 @@
 				<Portrait
 					portrait={character?.portrait ?? SEAT_IDS.indexOf(seat)}
 					{color}
+					job={character?.job}
 					hooded={character?.worker ?? false}
 					dead={character?.dead ?? false}
 				/>

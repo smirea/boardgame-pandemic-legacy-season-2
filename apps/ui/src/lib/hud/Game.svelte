@@ -158,13 +158,8 @@
 	let menu = $state(false);
 	// Once the table knows which game is next, every game is set up by choosing who plays, over the whole table.
 	const choosingCharacters = $derived(snap.phase === 'lobby' && !spectator && tableStart(snap.world) !== null);
-	/** The character screen and the rest of the interface float away to show the board as it stands. */
-	let peek = $state(false);
 	// A haven the character screen points at, which the camera looks at behind it.
 	let focus = $state.raw<{ city: CityId; x: number; y: number } | null>(null);
-	$effect(() => {
-		if (!choosingCharacters) peek = false;
-	});
 	let stage = $state<HTMLElement | null>();
 	let leftColumn = $state<HTMLElement | null>();
 	let rightColumn = $state<HTMLElement | null>();
@@ -666,7 +661,6 @@
 		if (event.key === 'Escape') {
 			cancel();
 			menu = false;
-			peek = false;
 		}
 		if (typing(event) || onButton(event) || event.metaKey || event.ctrlKey || !game) return;
 		const key = event.key.toLowerCase();
@@ -769,7 +763,6 @@
 
 <div
 	class="game"
-	class:peek
 	style:--left={`${sides.left}px`}
 	style:--right={`${sides.right}px`}
 	data-card-cities={hoveredTargets.cities.join(' ')}
@@ -965,37 +958,28 @@
 				</div>
 			</div>
 		{:else if choosingCharacters}
-			{#if peek}
-				<button
-					class="unpeek"
-					onclick={() => (peek = false)}
-					transition:fly={{ y: 40, duration: 260 }}
-					data-testid="back-to-table">Back to the table</button
-				>
-			{:else}
-				<div
-					class="scrim open"
-					role="dialog"
-					aria-modal="true"
-					aria-label="Choose characters"
-					in:fade={{ duration: 200 }}
-					out:fly={{ y: 120, duration: 360, opacity: 0 }}
-				>
-					<CharacterSelect
-						{snap}
-						{send}
-						player={session.player}
-						onpeek={() => (peek = true)}
-						onfocus={look => {
-							const box = stage?.getBoundingClientRect();
-							focus =
-								look && box
-									? { city: look.city, x: (look.x - box.left) / box.width, y: (look.y - box.top) / box.height }
-									: null;
-						}}
-					/>
-				</div>
-			{/if}
+			<div
+				class="scrim open"
+				role="dialog"
+				aria-modal="true"
+				aria-label="Choose characters"
+				in:fade={{ duration: 200 }}
+				out:fly={{ y: 120, duration: 360, opacity: 0 }}
+			>
+				<CharacterSelect
+					{snap}
+					{send}
+					player={session.player}
+					rename={name => session.rename(name)}
+					onfocus={look => {
+						const box = stage?.getBoundingClientRect();
+						focus =
+							look && box
+								? { city: look.city, x: (look.x - box.left) / box.width, y: (look.y - box.top) / box.height }
+								: null;
+					}}
+				/>
+			</div>
 		{:else if snap.phase === 'lobby' || snap.phase === 'finished'}
 			<div class="scrim" role="dialog" aria-modal="true" aria-label="Lobby" transition:fade={{ duration: 200 }}>
 				<Lobby {snap} {send} player={session.player} rename={name => session.rename(name)} />
@@ -1495,41 +1479,6 @@
 		z-index: 1;
 		grid-row: 1;
 		grid-column: 1;
-		transition:
-			translate 360ms cubic-bezier(0.4, 0, 0.2, 1),
-			opacity 360ms ease;
-	}
-
-	.game.peek .stage {
-		grid-row: 1 / -1;
-	}
-
-	.game.peek > :global(:first-child) {
-		translate: 0 -100%;
-		opacity: 0;
-		pointer-events: none;
-	}
-
-	.unpeek {
-		position: absolute;
-		bottom: 1.4rem;
-		left: 50%;
-		z-index: 60;
-		padding: 0.75rem 2.6rem;
-		border: 1px solid var(--paper);
-		border-radius: 999px;
-		background: var(--paper);
-		box-shadow: 0 1rem 2.5rem rgb(0 0 0 / 0.5);
-		color: var(--paper-ink);
-		font: inherit;
-		font-size: 1.1rem;
-		font-weight: 700;
-		cursor: pointer;
-		translate: -50% 0;
-	}
-
-	.unpeek:hover {
-		background: #e9dec5;
 	}
 
 	.scrim {

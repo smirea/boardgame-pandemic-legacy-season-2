@@ -6,6 +6,7 @@
 	import { fly } from 'svelte/transition';
 	import CardIcon from '#lib/cards/CardIcon.svelte';
 	import { SCAR_ICON } from '#lib/cards/icons.ts';
+	import OccupationIcon from '#lib/occupations/OccupationIcon.svelte';
 	import { cityName, MONTHS, SEAT_COLORS } from './labels.svelte.ts';
 	import Portrait from './Portrait.svelte';
 	import Ready from './Ready.svelte';
@@ -15,12 +16,13 @@
 		snap: PublicState;
 		player: PlayerId;
 		send: (command: Command) => void;
-		onpeek: () => void;
+		/** Renames this player wherever they sit, and keeps the name for next time. */
+		rename: (name: string) => void;
 		/** A haven to look at on the map behind the screen, with the point in the window it should land on. */
 		onfocus: (focus: { city: CityId; x: number; y: number } | null) => void;
 	};
 
-	let { snap, player, send, onpeek, onfocus }: Props = $props();
+	let { snap, player, send, rename, onfocus }: Props = $props();
 
 	const world = $derived(snap.world);
 	const campaign = $derived(world.campaign);
@@ -65,11 +67,6 @@
 		for (const other of mine) if (other.id !== character.id) send({ type: 'CLAIM', player, character: other.id });
 	}
 
-	const freeJobs = $derived(
-		pack.jobs.filter(
-			job => job.starting && !Object.values(campaign.characters).some(character => character.job === job.id),
-		),
-	);
 	const havens = pack.cities.filter(city => city.kind === 'haven' && !city.lost);
 	let newName = $state('');
 	let job = $state<JobId | ''>('');
@@ -78,13 +75,38 @@
 	const worn = $derived(new Set(living.map(character => character.portrait)));
 	let picked = $state<number | null>(null);
 	const portrait = $derived(picked ?? portraits.find(index => !worn.has(index)) ?? 0);
+	// Every starting occupation is listed and the engine says which can still be taken. It is asked with a
+	// stand-in name, so a blank name field does not cross out the whole list.
+	const jobs = $derived(
+		pack.jobs
+			.filter(option => option.starting)
+			.map(option => ({
+				...option,
+				refusal: reject(world, snap.phase, {
+					type: 'CREATE_CHARACTER',
+					name: option.name,
+					job: option.id,
+					home,
+					portrait,
+					player,
+				}),
+			})),
+	);
+	const anyJob = $derived(jobs.some(option => option.refusal === null));
 	$effect(() => {
-		if (!job || !freeJobs.some(candidate => candidate.id === job)) job = freeJobs[0]?.id ?? '';
+		if (!job || jobs.find(option => option.id === job)?.refusal)
+			job = jobs.find(option => option.refusal === null)?.id ?? '';
 	});
 	const create = $derived<Command | null>(
 		job ? { type: 'CREATE_CHARACTER', name: newName.trim(), job, home, portrait, player } : null,
 	);
 	const refusal = $derived(create ? reject(world, snap.phase, create) : 'Every starting job is taken');
+
+	function renamed(event: Event & { currentTarget: HTMLInputElement }) {
+		const name = event.currentTarget.value.trim();
+		if (name && name !== nameOf(player)) rename(name);
+		else event.currentTarget.value = nameOf(player);
+	}
 
 	let screen = $state<HTMLElement>();
 	let cards = $state<HTMLElement>();
@@ -114,14 +136,40 @@
 		character.exposureTrack.map((box, index) => (index < character.exposure ? box : 'hidden'));
 </script>
 
-{#snippet marker(color: string, label: string)}
+{#snippet pawn(color: string)}
 	<!-- The pawn this player moves on the board, in their colour. -->
 	<svg class="pawn" viewBox="0 0 20 28" style:--seat={color} aria-hidden="true">
 		<circle cx="10" cy="6.5" r="5" />
 		<path d="M10 11.5c-4 0-6.5 4.5-6.5 9.5v1.5h13V21c0-5-2.5-9.5-6.5-9.5z" />
 		<rect x="1.5" y="22.5" width="17" height="4" rx="1.5" />
 	</svg>
+{/snippet}
+
+{#snippet marker(color: string, label: string)}
+	{@render pawn(color)}
 	<b>{label}</b>
+{/snippet}
+
+{#snippet you(color: string)}
+	<!-- Your own name, written where it shows: click it to change it. -->
+	{@render pawn(color)}
+	<label class="me" title="Change your name">
+		<input
+			value={nameOf(player)}
+			maxlength="24"
+			aria-label="Your name"
+			onchange={renamed}
+			onkeydown={event => {
+				if (event.key === 'Enter') event.currentTarget.blur();
+				if (event.key === 'Escape') {
+					event.currentTarget.value = nameOf(player);
+					event.currentTarget.blur();
+				}
+			}}
+			data-testid="my-name"
+		/><span>(you)</span>
+		<svg class="pen" viewBox="0 0 16 16" aria-hidden="true"><path d="M11.3 1.7l3 3-8.6 8.6-3.8.8.8-3.8z" /></svg>
+	</label>
 {/snippet}
 
 <div
@@ -154,7 +202,11 @@
 						{#if holder && color}
 							{#key holder}
 								<span class="who" in:fly={{ y: -10, duration: 240 }}>
-									{@render marker(color, holder === player ? `${nameOf(holder)} (you)` : nameOf(holder))}
+									{#if holder === player}
+										{@render you(color)}
+									{:else}
+										{@render marker(color, nameOf(holder))}
+									{/if}
 								</span>
 							{/key}
 						{:else}
@@ -174,7 +226,9 @@
 						data-testid={`claim-${character.id}`}
 					>
 						<span class="top">
-							<span class="portrait"><Portrait portrait={character.portrait} color={color ?? '#4a4238'} /></span>
+							<span class="portrait"
+								><Portrait portrait={character.portrait} color={color ?? '#4a4238'} job={character.job} /></span
+							>
 							<span class="title">
 								<strong>{character.name}</strong>
 								<small>Home: {cityName(character.home)}</small>
@@ -216,63 +270,69 @@
 					picked = null;
 				}}
 			>
-				{#if freeJobs.length}
-					<div class="column">
-						<div class="who-new">
-							<span class="portrait"><Portrait {portrait} color="#4a4238" /></span>
-							<label class="named"
-								>New character<input
-									bind:value={newName}
-									maxlength="24"
-									placeholder="Their name"
-									data-testid="new-name"
-								/></label
-							>
-						</div>
-						<fieldset class="avatars">
-							<legend>Portrait</legend>
-							{#each portraits as index (index)}
-								<label
-									class="avatar"
-									class:worn={worn.has(index)}
-									title={worn.has(index) ? 'Worn by another character' : ''}
-								>
-									<input
-										type="radio"
-										name="portrait"
-										aria-label={`Portrait ${index + 1}`}
-										value={index}
-										checked={portrait === index}
-										onchange={() => (picked = index)}
-									/>
-									<span class="portrait"><Portrait portrait={index} color="#4a4238" /></span>
-								</label>
-							{/each}
-						</fieldset>
-						<fieldset class="choices havens" data-testid="new-home" onpointerleave={() => onfocus(null)}>
-							<legend>Home haven</legend>
-							{#each havens as haven (haven.id)}
-								<label
-									class="choice"
-									onpointerenter={() => look(haven.id)}
-									onfocusin={() => look(haven.id)}
-									onfocusout={() => onfocus(null)}
-								>
-									<input type="radio" name="home" value={haven.id} bind:group={home} />
-									<span><b>{cityName(haven.id)}</b></span>
-								</label>
-							{/each}
-						</fieldset>
-						<button class="make" disabled={refusal !== null} title={refusal ?? ''} data-testid="create-character"
-							>Create and take</button
+				{#if anyJob}
+					<div class="who-new">
+						<span class="portrait"><Portrait {portrait} color="#4a4238" job={job || null} /></span>
+						<label class="named"
+							>New character<input
+								bind:value={newName}
+								maxlength="24"
+								placeholder="Their name"
+								data-testid="new-name"
+							/></label
 						>
 					</div>
-					<fieldset class="choices" data-testid="new-job">
+					<fieldset class="avatars">
+						<legend>Portrait</legend>
+						{#each portraits as index (index)}
+							<label
+								class="avatar"
+								class:worn={worn.has(index)}
+								title={worn.has(index) ? 'Worn by another character' : ''}
+							>
+								<input
+									type="radio"
+									name="portrait"
+									aria-label={`Portrait ${index + 1}${worn.has(index) ? ', worn by another character' : ''}`}
+									value={index}
+									checked={portrait === index}
+									onchange={() => (picked = index)}
+								/>
+								<span class="portrait"><Portrait portrait={index} color="#4a4238" /></span>
+							</label>
+						{/each}
+					</fieldset>
+					<fieldset class="choices havens" data-testid="new-home" onpointerleave={() => onfocus(null)}>
+						<legend>Home haven</legend>
+						{#each havens as haven (haven.id)}
+							<label
+								class="choice"
+								onpointerenter={() => look(haven.id)}
+								onfocusin={() => look(haven.id)}
+								onfocusout={() => onfocus(null)}
+							>
+								<input type="radio" name="home" value={haven.id} bind:group={home} />
+								<span><b>{cityName(haven.id)}</b></span>
+							</label>
+						{/each}
+					</fieldset>
+					<button class="make" disabled={refusal !== null} title={refusal ?? ''} data-testid="create-character"
+						>Create and take</button
+					>
+					<fieldset class="choices jobs" data-testid="new-job">
 						<legend>Occupation</legend>
-						{#each freeJobs as option (option.id)}
-							<label class="choice">
-								<input type="radio" name="job" value={option.id} bind:group={job} />
-								<span><b>{option.name}</b><small>{option.text}</small></span>
+						{#each jobs as option (option.id)}
+							<label class="choice" class:used={option.refusal !== null} title={option.refusal ?? ''}>
+								<input
+									type="radio"
+									name="job"
+									value={option.id}
+									bind:group={job}
+									disabled={option.refusal !== null}
+									aria-describedby={`job-${option.id}`}
+								/>
+								<span class="mark"><OccupationIcon job={option.id} /></span>
+								<span id={`job-${option.id}`}><b>{option.name}</b><small>{option.text}</small></span>
 							</label>
 						{/each}
 					</fieldset>
@@ -299,7 +359,10 @@
 				<p class="choosing">
 					Still choosing:
 					{#each choosing as who (who)}
-						<span class="who">{@render marker(SEAT_COLORS[SEAT_IDS.indexOf(seatsOf(who)[0]!)]!, nameOf(who))}</span>
+						{@const color = SEAT_COLORS[SEAT_IDS.indexOf(seatsOf(who)[0]!)]!}
+						<span class="who">
+							{#if who === player}{@render you(color)}{:else}{@render marker(color, nameOf(who))}{/if}
+						</span>
 					{/each}
 				</p>
 			{/if}
@@ -318,9 +381,6 @@
 		</div>
 		<div class="starts">
 			<Ready {table} {player} {send} {start} label={`Ready for ${title}`} big />
-		</div>
-		<div class="side">
-			<button class="peek" onclick={onpeek} data-testid="show-game">Show the board</button>
 		</div>
 	</footer>
 </div>
@@ -409,6 +469,50 @@
 		align-items: flex-end;
 		gap: 0.4rem;
 		font-size: 1.1rem;
+	}
+
+	.me {
+		display: inline-flex;
+		align-items: baseline;
+		gap: 0.3rem;
+		cursor: text;
+	}
+
+	/* Reads as the name itself until it is clicked. */
+	.me input {
+		field-sizing: content;
+		min-width: 2ch;
+		max-width: 12rem;
+		padding: 0 0.15rem;
+		border: 0;
+		border-bottom: 1px dashed transparent;
+		background: none;
+		color: inherit;
+		font: inherit;
+		font-weight: 700;
+		text-shadow: inherit;
+	}
+
+	.me:hover input,
+	.me input:focus {
+		border-bottom-color: var(--muted);
+		outline: none;
+	}
+
+	.me span {
+		color: var(--muted);
+	}
+
+	.pen {
+		width: 0.8rem;
+		height: 0.8rem;
+		fill: var(--muted);
+		opacity: 0.6;
+	}
+
+	.me:hover .pen,
+	.me:focus-within .pen {
+		opacity: 1;
 	}
 
 	.pawn {
@@ -590,40 +694,49 @@
 		background: var(--slip-ink);
 	}
 
+	/* The portrait thumbs set the form's width: five to a row, with the preview the same size as one. */
 	.new {
+		--thumb: 4.4rem;
+		--thumb-gap: 0.35rem;
 		flex: none;
 		align-self: flex-start;
-		width: 30rem;
 		max-height: 100%;
 	}
 
 	.new form {
 		display: grid;
-		grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
-		gap: 1rem;
-		align-items: start;
+		grid-template:
+			'who jobs' auto
+			'avatars jobs' auto
+			'havens jobs' auto
+			'make jobs' 1fr
+			/ calc(5 * var(--thumb) + 4 * var(--thumb-gap)) 17rem;
+		gap: 0.7rem 1.2rem;
 	}
 
 	.new form > .text {
 		grid-column: 1 / -1;
 	}
 
-	.column {
-		display: flex;
-		flex-direction: column;
-		gap: 0.6rem;
-		height: 100%;
-	}
-
 	.who-new {
 		display: flex;
+		grid-area: who;
 		gap: 0.8rem;
 		align-items: center;
 	}
 
 	.who-new .portrait {
-		width: 3.4rem;
-		height: 3.4rem;
+		width: var(--thumb);
+		height: var(--thumb);
+	}
+
+	.havens {
+		grid-area: havens;
+		grid-template-columns: repeat(auto-fit, minmax(6rem, 1fr));
+	}
+
+	.jobs {
+		grid-area: jobs;
 	}
 
 	.named {
@@ -670,8 +783,9 @@
 
 	.avatars {
 		display: grid;
-		grid-template-columns: repeat(5, 1fr);
-		gap: 0.3rem;
+		grid-area: avatars;
+		grid-template-columns: repeat(5, var(--thumb));
+		gap: var(--thumb-gap);
 	}
 
 	.avatars legend {
@@ -693,7 +807,33 @@
 	}
 
 	.avatar.worn .portrait {
-		opacity: 0.45;
+		opacity: 0.55;
+	}
+
+	/* Taken already: a red cross over the face, which can still be chosen. */
+	.avatar.worn::after,
+	.choice.used .mark::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background:
+			linear-gradient(
+				to top right,
+				transparent calc(50% - 1.5px),
+				var(--ink-danger) calc(50% - 1.5px) calc(50% + 1.5px),
+				transparent calc(50% + 1.5px)
+			),
+			linear-gradient(
+				to bottom right,
+				transparent calc(50% - 1.5px),
+				var(--ink-danger) calc(50% - 1.5px) calc(50% + 1.5px),
+				transparent calc(50% + 1.5px)
+			);
+		pointer-events: none;
+	}
+
+	.avatar:has(input:checked)::after {
+		opacity: 0.5;
 	}
 
 	.avatar:hover .portrait {
@@ -733,6 +873,39 @@
 		background: rgb(255 252 242 / 0.45);
 	}
 
+	.jobs .choice {
+		align-items: center;
+	}
+
+	.mark {
+		position: relative;
+		flex: none;
+		width: 1.9rem;
+		height: 1.9rem;
+	}
+
+	.choice.used {
+		cursor: default;
+	}
+
+	.choice.used:hover {
+		background: none;
+	}
+
+	.choice.used .mark {
+		opacity: 0.55;
+	}
+
+	.choice.used b {
+		text-decoration: line-through;
+		text-decoration-color: var(--ink-danger);
+		text-decoration-thickness: 2px;
+	}
+
+	.choice.used small {
+		opacity: 0.6;
+	}
+
 	.choice:has(input:checked) {
 		border-color: rgb(42 32 23 / 0.45);
 		background: rgb(255 252 242 / 0.6);
@@ -767,7 +940,8 @@
 	}
 
 	.make {
-		margin-top: auto;
+		grid-area: make;
+		align-self: end;
 		padding: 0.6rem;
 		border: 1px solid var(--slip-ink);
 		border-radius: 2px;
@@ -790,7 +964,7 @@
 		font-size: 0.88rem;
 	}
 
-	/* What moves the table on: who is still choosing, the vote in the middle, and the way out to the board. */
+	/* What moves the table on: who is still choosing, and the vote in the middle. */
 	footer {
 		display: grid;
 		grid-template-columns: 1fr auto 1fr;
@@ -804,11 +978,6 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.4rem;
-	}
-
-	.side {
-		display: flex;
-		justify-content: flex-end;
 	}
 
 	.choosing {
@@ -833,25 +1002,5 @@
 		margin: 0;
 		color: var(--muted);
 		font-size: 0.85rem;
-	}
-
-	.peek {
-		padding: 1rem 2.4rem;
-		border: 1px solid var(--line-strong);
-		border-radius: 999px;
-		background: rgb(10 8 6 / 0.6);
-		color: var(--ink);
-		font: inherit;
-		font-size: 1.25rem;
-		letter-spacing: 0.03em;
-		cursor: pointer;
-		transition:
-			border-color 150ms ease,
-			background 150ms ease;
-	}
-
-	.peek:hover {
-		border-color: var(--paper);
-		background: var(--wash);
 	}
 </style>
