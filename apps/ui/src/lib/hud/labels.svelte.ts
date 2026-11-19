@@ -2,6 +2,7 @@ import { characterAt, cityDef, handLimit, has, pack, routeCost } from '@repo/gam
 import type { Action, CardId, CityId, Decide, Decision, LogEntry, Play, Purchase, SeatId, World } from '@repo/game';
 import { CITY_COLOR } from '#lib/board/CityMarker.svelte';
 import { cardColor } from './PlayerCard.svelte';
+import { HOLLOW_COLOR } from './rich.ts';
 import type { GlyphPart, Rich } from './rich.ts';
 
 export const MONTHS = [
@@ -170,7 +171,6 @@ export function cardRef(world: World, id: CardId): GlyphPart {
 	const color = infection?.kind === 'city' ? CITY_COLOR[cityDef(infection.city).color ?? 'haven'] : HOLLOW_COLOR;
 	return { glyph: 'infection', color, text: cardName(world, id) };
 }
-const HOLLOW_COLOR = '#4e3b63';
 const cardList = (world: World, ids: CardId[]): Rich =>
 	ids.flatMap((id, index) => (index ? [', ', cardRef(world, id)] : [cardRef(world, id)]));
 // The no-break space keeps a count on the same line as its cube.

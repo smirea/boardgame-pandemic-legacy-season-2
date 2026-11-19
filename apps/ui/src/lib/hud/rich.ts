@@ -16,6 +16,9 @@ export const plain = (rich: Rich | string): string =>
 		? rich
 		: rich.map(part => (typeof part === 'string' ? part : (part.text ?? part.alt ?? ''))).join('');
 
+/** The colour of the Hollow Men, their pieces and their Infection cards. */
+export const HOLLOW_COLOR = '#4e3b63';
+
 const COLORS = new Set<string>(['blue', 'yellow', 'black', 'red']);
 
 // The nouns written in rules text and the engine's reasons, each given the glyph of what it names. A colour named
