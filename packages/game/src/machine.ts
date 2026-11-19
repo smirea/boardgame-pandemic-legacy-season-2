@@ -600,6 +600,7 @@ export function parseSave(raw: unknown): Save {
 		save?.v !== 1 ||
 		typeof save.phase !== 'string' ||
 		lacks(save.world?.campaign, newCampaign(0)) ||
+		save.world!.campaign.briefing.some(entry => typeof entry !== 'object') ||
 		lacks(save.world?.table, newTable()) ||
 		Object.values(save.world!.campaign.characters ?? {}).some(character => lacks(character, freshCharacter))
 	)
