@@ -1,36 +1,20 @@
-<script lang="ts" module>
-	import type { ObjectiveId } from '@repo/game';
-
-	type Glyph = 'center' | 'recon' | 'connect' | 'haven' | 'search' | 'tower' | 'figure' | 'plan' | 'vial';
-
-	/** What each objective is about, drawn as a small symbol beside its name and on each step of its track. */
-	const GLYPH: Record<ObjectiveId, Glyph> = {
-		prologueCenters: 'center',
-		buildCenters: 'center',
-		reconRegion: 'recon',
-		reconNewArea: 'recon',
-		reconEastAsia: 'recon',
-		connectCities: 'connect',
-		lostHaven: 'haven',
-		searches: 'search',
-		triangulate: 'tower',
-		defect: 'figure',
-		plan: 'plan',
-		deliverSample: 'vial',
-	};
-</script>
-
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { pack } from '@repo/game';
-	import type { PublicState } from '@repo/game';
+	import type { ObjectiveId, PublicState } from '@repo/game';
 	import { untrack } from 'svelte';
 	import { backOut } from 'svelte/easing';
-	import { fly, scale } from 'svelte/transition';
+	import { fly } from 'svelte/transition';
+	import ObjectiveTag from './ObjectiveTag.svelte';
 
-	type Props = { snap: PublicState; onwaive: (objective: ObjectiveId) => void };
+	type Props = {
+		snap: PublicState;
+		onwaive: (objective: ObjectiveId) => void;
+		/** The briefing is showing these objectives, so they wait there and fly here once it closes. */
+		held?: boolean;
+	};
 
-	let { snap, onwaive }: Props = $props();
+	let { snap, onwaive, held = false }: Props = $props();
 
 	const campaign = $derived(snap.world.campaign);
 	const game = $derived(snap.world.game);
@@ -78,6 +62,103 @@
 		});
 	});
 
+	let slots = $state<Partial<Record<ObjectiveId, HTMLElement>>>({});
+	let inAir = $state.raw<ObjectiveId[]>([]);
+	// The track stays empty while the briefing is open, and its diamonds come in once the objectives have landed.
+	let dealt = $state(untrack(() => !held));
+	let ghosts: Animation[] = [];
+
+	$effect(() => {
+		if (held) {
+			untrack(() => (dealt = false));
+			return;
+		}
+		untrack(() => {
+			if (!dealt) deliver();
+		});
+	});
+
+	$effect(() => () => {
+		for (const ghost of ghosts) ghost.cancel();
+	});
+
+	/** Lifts each objective off the closing briefing and carries it to its place over the board. */
+	function deliver() {
+		const sources = new Map(
+			[...document.querySelectorAll<HTMLElement>('[data-brief-objective]')].map(node => [
+				node.dataset.briefObjective,
+				node,
+			]),
+		);
+		const legs = objectives.flatMap(objective => {
+			const from = sources.get(objective.id);
+			const to = slots[objective.id];
+			return from && to ? [{ id: objective.id, from, to }] : [];
+		});
+		inAir = legs.map(leg => leg.id);
+		if (!legs.length) return deal();
+		legs.forEach((leg, index) => {
+			const from = leg.from.getBoundingClientRect();
+			const to = leg.to.getBoundingClientRect();
+			const ghost = leg.from.cloneNode(true) as HTMLElement;
+			ghost.removeAttribute('data-brief-objective');
+			Object.assign(ghost.style, {
+				position: 'fixed',
+				top: `${from.top}px`,
+				left: `${from.left}px`,
+				width: `${from.width}px`,
+				height: `${from.height}px`,
+				margin: '0',
+				zIndex: '90',
+				pointerEvents: 'none',
+				transformOrigin: '0 0',
+				fontSize: getComputedStyle(leg.from).fontSize,
+			});
+			document.body.append(ghost);
+			const dx = to.left - from.left;
+			const dy = to.top - from.top;
+			const size = to.width / from.width;
+			const at = (x: number, y: number, scale: number, turn: number) =>
+				`translate(${x}px, ${y}px) scale(${scale}) rotate(${turn}deg)`;
+			const flight = ghost.animate(
+				[
+					{ transform: at(0, 0, 1, 0), filter: 'drop-shadow(0 0 0 rgb(0 0 0 / 0))' },
+					{ transform: at(-4, -12, 1.08, -3), filter: 'drop-shadow(0 0.8rem 1rem rgb(0 0 0 / 0.45))', offset: 0.25 },
+					{ transform: at(dx * 0.5, dy * 0.5 - 50, (1 + size) * 0.55, 4), offset: 0.62 },
+					{ transform: at(dx, dy + 3, size * 1.06, 0), offset: 0.88 },
+					{ transform: at(dx, dy, size, 0), filter: 'drop-shadow(0 0 0 rgb(0 0 0 / 0))' },
+				],
+				{ duration: 1250, delay: index * 160, easing: 'cubic-bezier(0.5, 0, 0.25, 1)', fill: 'both' },
+			);
+			ghosts.push(flight);
+			flight.onfinish = () => {
+				ghost.remove();
+				ghosts = ghosts.filter(other => other !== flight);
+				leg.to.animate([{ scale: '1.18' }, { scale: '1' }], {
+					duration: 380,
+					easing: 'cubic-bezier(0.3, 1.6, 0.5, 1)',
+				});
+				inAir = inAir.filter(id => id !== leg.id);
+				if (!inAir.length) deal();
+			};
+			flight.oncancel = () => ghost.remove();
+		});
+	}
+
+	/** Brings the incident diamonds in one at a time. */
+	function deal() {
+		dealt = true;
+		pips.forEach((pip, index) =>
+			pip?.animate(
+				[
+					{ scale: '0', opacity: 0, rotate: '-90deg' },
+					{ scale: '1.5', opacity: 1, rotate: '60deg', offset: 0.6 },
+				],
+				{ duration: 460, delay: 120 + index * 110, easing: 'cubic-bezier(0.3, 1.4, 0.5, 1)', fill: 'backwards' },
+			),
+		);
+	}
+
 	function land(id: number) {
 		flights = flights.filter(flight => flight.id !== id);
 		flying = Math.max(0, flying - 1);
@@ -111,35 +192,6 @@
 	}
 </script>
 
-{#snippet glyph(kind: Glyph)}
-	<svg viewBox="0 0 16 16" aria-hidden="true" class="glyph">
-		{#if kind === 'center'}
-			<path d="M2 8 8 2.5 14 8h-2v5.5H4V8Z" />
-		{:else if kind === 'recon'}
-			<circle cx="8" cy="8" r="5.5" fill="none" stroke-width="1.6" />
-			<path d="M8 3.5 9.6 8 8 12.5 6.4 8Z" />
-		{:else if kind === 'connect'}
-			<circle cx="3.5" cy="12" r="2.2" /><circle cx="12.5" cy="4" r="2.2" />
-			<path d="M3.5 12 12.5 4" fill="none" stroke-width="1.6" />
-		{:else if kind === 'haven'}
-			<path d="M8 1.8 13.4 4.9v6.2L8 14.2 2.6 11.1V4.9Z" />
-		{:else if kind === 'search'}
-			<circle cx="6.8" cy="6.8" r="4" fill="none" stroke-width="1.8" />
-			<path d="m9.8 9.8 4 4" fill="none" stroke-width="2.2" stroke-linecap="round" />
-		{:else if kind === 'tower'}
-			<path d="M8 6 5 14h1.6L8 10l1.4 4H11Z" />
-			<path d="M5 4.5a4 4 0 0 1 6 0M3.2 2.6a6.5 6.5 0 0 1 9.6 0" fill="none" stroke-width="1.3" />
-		{:else if kind === 'figure'}
-			<path d="M8 2 12.5 14h-9Z" />
-		{:else if kind === 'plan'}
-			<path d="M3 2h10v12H3Z" fill="none" stroke-width="1.5" />
-			<path d="M5.5 5.5h5M5.5 8h5M5.5 10.5h3" fill="none" stroke-width="1.3" />
-		{:else}
-			<path d="M6.5 2h3v4.2l3.4 6.2a1.2 1.2 0 0 1-1 1.6H4.1a1.2 1.2 0 0 1-1-1.6l3.4-6.2Z" />
-		{/if}
-	</svg>
-{/snippet}
-
 <section
 	class="objectives"
 	data-testid="objectives"
@@ -154,40 +206,20 @@
 >
 	<div class="tags" title={`Complete ${needed} of these to win`}>
 		{#each objectives as objective, index (objective.id)}
-			{@const progress = game?.progress[objective.id] ?? 0}
-			{@const done = game?.completed.includes(objective.id) ?? false}
-			{@const waived = game?.waived.includes(objective.id) ?? false}
-			<button
+			<span
+				class="slot"
+				class:away={held || inAir.includes(objective.id)}
+				bind:this={slots[objective.id]}
 				in:fly={{ y: -40, duration: 520, delay: 250 + index * 120, easing: backOut }}
-				class="objective"
-				class:done
-				class:waived
-				class:mandatory={objective.mandatory}
-				disabled={!game || done || waived}
-				title={`${objective.name}. ${objective.rule}${objective.mandatory ? ' Mandatory.' : ''}${progress && objective.target > 1 ? ` ${progress} of ${objective.target} done.` : ''} Click to mark it impossible this game.`}
-				onclick={() => onwaive(objective.id)}
 			>
-				<span class="face">
-					{@render glyph(GLYPH[objective.id])}
-					<span class="name">{objective.name}</span>
-					{#if done}
-						<svg class="check" viewBox="0 0 16 16" aria-label="done" in:scale={{ duration: 420, easing: backOut }}>
-							<path d="M2.5 8.5 6.2 12 13.5 4" />
-						</svg>
-					{:else if objective.target > 1}
-						<span class="steps" aria-label={`${progress} of ${objective.target}`}>
-							{#each { length: objective.target } as _, step (step)}
-								<i class:on={step < progress}>{@render glyph(GLYPH[objective.id])}</i>
-							{/each}
-						</span>
-					{:else}
-						<span class="box" aria-label="not yet"></span>
-					{/if}
-				</span>
-				{#if objective.mandatory}
-					<span class="must">mandatory</span>
-				{/if}
-			</button>
+				<ObjectiveTag
+					{objective}
+					progress={game?.progress[objective.id] ?? 0}
+					done={game?.completed.includes(objective.id) ?? false}
+					waived={game?.waived.includes(objective.id) ?? false}
+					onclick={game ? () => onwaive(objective.id) : undefined}
+				/>
+			</span>
 		{/each}
 	</div>
 
@@ -195,7 +227,7 @@
 		<!-- The incident track: a marker for every incident, and the game is lost when the last is reached. -->
 		<div class="incidents" data-testid="incidents" aria-label={left(limit - filled)}>
 			{#each { length: limit } as _, index (index)}
-				<i bind:this={pips[index]} class:on={index < filled} class:last={index === limit - 1}></i>
+				<i bind:this={pips[index]} class:on={index < filled} class:last={index === limit - 1} class:away={!dealt}></i>
 			{/each}
 			<span class="left" class:hot={limit - filled <= 2}>{left(limit - filled)}. The game is lost when it fills.</span>
 		</div>
@@ -222,118 +254,12 @@
 		gap: 0.35rem;
 	}
 
-	/* Each objective is a paper tag: its symbol, its name, then its track. A finished one turns green and gets a check. */
-	.objective {
-		display: inline-flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		padding: 0.18rem 0.55rem 0.18rem 0.45rem;
-		border: 0;
-		border-radius: 2px;
-		background: var(--slip);
-		color: var(--slip-ink);
-		font: inherit;
-		box-shadow: var(--slip-shadow);
-		cursor: pointer;
-		transition:
-			translate 300ms cubic-bezier(0.2, 0.9, 0.3, 1.3),
-			background 400ms ease,
-			color 400ms ease;
-	}
-
-	.face {
+	.slot {
 		display: flex;
-		align-items: center;
-		gap: 0.4rem;
 	}
 
-	.must {
-		margin-top: -0.05rem;
-		font-size: 0.56rem;
-		font-weight: 700;
-		letter-spacing: 0.12em;
-		line-height: 1.1;
-		text-transform: uppercase;
-		opacity: 0.7;
-	}
-
-	.objective:hover:not(:disabled) {
-		translate: 0 2px;
-	}
-
-	.objective:disabled {
-		cursor: default;
-	}
-
-	.objective.mandatory {
-		background: #f0dfb4;
-	}
-
-	.objective.done {
-		background: #a9d0ae;
-		color: #1f5134;
-		animation: stamped 500ms cubic-bezier(0.2, 1.4, 0.4, 1);
-	}
-
-	@keyframes stamped {
-		from {
-			scale: 1.25;
-		}
-	}
-
-	.objective.waived {
-		opacity: 0.45;
-		text-decoration: line-through;
-	}
-
-	.glyph {
-		width: 0.95rem;
-		height: 0.95rem;
-		flex: none;
-		fill: currentcolor;
-		stroke: currentcolor;
-	}
-
-	.steps {
-		display: inline-flex;
-		gap: 1px;
-	}
-
-	.steps i {
-		display: flex;
-		opacity: 0.28;
-		transition:
-			opacity 300ms ease,
-			transform 300ms cubic-bezier(0.3, 1.6, 0.5, 1);
-	}
-
-	.steps i .glyph {
-		width: 0.78rem;
-		height: 0.78rem;
-	}
-
-	.steps i.on {
-		opacity: 1;
-		transform: scale(1.1);
-	}
-
-	.box {
-		width: 0.7rem;
-		height: 0.7rem;
-		border: 1.5px solid currentcolor;
-		border-radius: 1px;
-		opacity: 0.6;
-	}
-
-	.check {
-		width: 0.85rem;
-		height: 0.85rem;
-		fill: none;
-		stroke: currentcolor;
-		stroke-width: 2.4;
-		stroke-linecap: round;
-		stroke-linejoin: round;
+	.slot.away {
+		visibility: hidden;
 	}
 
 	/* Bare diamonds over the chart; the slip and its count appear only under the pointer. */
@@ -372,6 +298,10 @@
 		border-color: var(--danger);
 		background: var(--danger);
 		scale: 1.12;
+	}
+
+	.incidents i.away {
+		visibility: hidden;
 	}
 
 	.incidents i.last {

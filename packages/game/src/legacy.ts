@@ -12,6 +12,7 @@ import type {
 	StructureKind,
 	Unlock,
 } from './content/types';
+import { briefUnlock } from './briefing';
 import { settleGrid } from './flow';
 import { cityDef, grid, gridCityCount, hasEdge, hasRule, isForsaken, log } from './helpers';
 import type { BundleId, CardId, CharacterId, CityId } from './ids';
@@ -167,10 +168,9 @@ export function openBundle(world: World, id: BundleId, forced: boolean) {
 	campaign.opened.push(id);
 	if (forced) campaign.forced.push(id);
 	if (game) log(game, { t: 'unlock', bundle: id, forced });
-	campaign.briefing.push(`${bundle.name}${forced ? ' (opened by a perimeter report)' : ''}`);
+	campaign.briefing.push({ t: 'card', title: bundle.name, text: forced ? 'Opened by a perimeter report.' : null });
 	for (const unlock of [...bundle.unlocks, ...(forced ? [] : (bundle.reward ?? []))]) {
-		const line = unlockLine(campaign, unlock);
-		if (line) campaign.briefing.push(line);
+		briefUnlock(campaign, unlock);
 		applyUnlock(world, unlock);
 	}
 }
@@ -282,135 +282,6 @@ export function applyUnlock(world: World, unlock: Unlock) {
 	}
 }
 
-/** One line on what each unlockable action does, as a briefing announces it. */
-export const actionBriefs: Partial<Record<ActionId, string>> = {
-	recon:
-		'New action: Recon. In a marked city with a supply center, discard the cards its route asks for to reveal a region.',
-	establishLine:
-		'New action: Supply Line. Spend 2 cubes from your character to join your city to a neighbouring one. Lines may not cross each other.',
-	search:
-		"New action: Search. Holding a city's card while in that city, scratch one of the card's search boxes and take what it finds.",
-	shuttle: 'New action: Shuttle Flight. Fly between havens and cities with a supply center.',
-	buildTower: 'New action: Build Tower. Spend 2 cubes from your character to raise a tower in your city.',
-	transmit: "New action: Transmit. In a tower city, send a City card of that city's colour to any player.",
-	buildShelter:
-		"New action: Build Shelter. Discard a card of your city's colour. No one is exposed in or leaving a sheltered city, and it loses no population at game end.",
-	inoculate:
-		"New free action: Inoculate. Move your city's Player card or Infection card from its discard pile into storage, out of the decks.",
-	chartLane:
-		'New action: Sea Lane. Spend 2 cubes from your character to join your port to another. A lane may cross one region boundary.',
-	monitor:
-		'New action: Monitor. In a tower city, tune to a frequency. Four Player cards are discarded and the frequency gives what it holds.',
-	broadcast:
-		"New action: Broadcast. In a tower city, move a Hollow Man out of a city of that city's colour into a neighbouring location.",
-};
-
-export const ruleBriefs: Partial<Record<RuleId, string>> = {
-	forsaken:
-		'New rule: a city at population 0 is forsaken. When one of its Infection cards is flipped it is set aside and another card is flipped in its place, nothing but Drive or Ferry works there, and it becomes infested. Restore at game end brings it back.',
-	epidemicScaling: 'New rule: the number of Epidemics in the deck grows with the number of City cards in it.',
-	hollowSetup:
-		'New rule: the last 3 setup infections place Hollow Men. Running out of Hollow Men figures loses the game.',
-	epidemicFromStorage: 'New rule: an Epidemic strikes a stored Infection card first, if there is one.',
-	topazShield:
-		'New rule: when a city loses a cube to an infection, any player may discard a City card of its colour to keep the cube.',
-	gentleEpidemic: 'New rule: an Epidemic removes 1 cube from the city it strikes, not all of them.',
-	carrier:
-		'New action at Lake Baikal: Take the sample. That character becomes the carrier. The carrier moves only by Drive or Ferry, must discard a City card of the colour of each city it enters, and dies when the game ends.',
-};
-
-const named = <T extends { id: string; name: string; text: string }>(list: T[], id: string) => {
-	const found = list.find(entry => entry.id === id)!;
-	return `${found.name}. ${found.text}`;
-};
-
-/** What a briefing says about an unlock that adds something with a name and a rule of its own. */
-function unlockLine(campaign: Campaign, unlock: Unlock): string | null {
-	switch (unlock.t) {
-		case 'event': {
-			const mode = unlock.mode === 'rationed' ? 'Rationed' : unlock.mode === 'unrationed' ? 'Unrationed' : 'permanent';
-			const owned = Object.values(campaign.playerCards).some(
-				card => card.kind === 'event' && card.event === unlock.event,
-			);
-			const where =
-				unlock.mode === 'rationed'
-					? 'The card joins the Rationed Events the group picks from at each setup, starting next game.'
-					: 'The card is in the Player deck from the next game on.';
-			const event = pack.events.find(entry => entry.id === unlock.event)!;
-			return `${owned ? `Another copy of a ${mode} Event card` : `New ${mode} Event card`}: ${event.name}. ${where} When played it reads: ${event.text}`;
-		}
-		case 'ability':
-			return `New ability for sale: ${named(pack.abilities, unlock.ability)}`;
-		case 'cityImprovement':
-			return `New City card improvement for sale: ${named(pack.cityImprovements, unlock.improvement)}`;
-		case 'infectionImprovement':
-			return `New Infection card improvement for sale: ${named(pack.infectionImprovements, unlock.improvement)}`;
-		case 'scar':
-			return `New scar in the box: ${named(pack.scars, unlock.scar)}`;
-		case 'job':
-			return `A new character has joined the roster with a job nobody had before: ${named(pack.jobs, unlock.job)} That text describes the job, not a new rule for everyone.`;
-		case 'lab':
-			return `A lab was found in ${pack.cities.find(entry => entry.id === unlock.city)!.name}. Every lab found counts toward the final score.`;
-		case 'action':
-			return actionBriefs[unlock.action] ?? null;
-		case 'region': {
-			const infested = pack.cities
-				.filter(city => city.region === unlock.region && city.startsInfested)
-				.map(city => city.name);
-			return infested.length
-				? `Infested from the start, so a character who begins a turn there is exposed: ${infested.join(', ')}.`
-				: null;
-		}
-		case 'objectives': {
-			const names = (ids: ObjectiveId[] = []) =>
-				ids.map(id => pack.objectives.find(entry => entry.id === id)!.name).join(', ');
-			const parts = [
-				unlock.remove?.length ? `Objectives leaving play: ${names(unlock.remove)}.` : '',
-				unlock.add?.length ? `New objectives: ${names(unlock.add)}.` : '',
-			].filter(Boolean);
-			return parts.length ? parts.join(' ') : null;
-		}
-		case 'rule':
-			return ruleBriefs[unlock.rule] ?? null;
-		case 'route': {
-			const route = pack.reconRoutes.find(entry => entry.id === unlock.route);
-			if (!route) return null;
-			const city = pack.cities.find(entry => entry.id === route.city)!.name;
-			return `A recon route is now known: at ${city}, discard ${route.count} ${route.color} cards${route.unique ? ' of different cities' : ''}${route.needsCenter ? '. The city needs a supply center' : ''}.`;
-		}
-		case 'haven': {
-			const reached = pack.bundles.some(
-				bundle =>
-					bundle.unlocks.includes(unlock) &&
-					bundle.unlocks.some(
-						other =>
-							other.t === 'region' && other.connect?.some(edge => edge.a === unlock.city || edge.b === unlock.city),
-					),
-			);
-			const name = pack.cities.find(entry => entry.id === unlock.city)!.name;
-			return reached
-				? `${name} is now on the map, and a line already reaches it.`
-				: `${name} is now on the map. It is not on the grid until a line reaches it.`;
-		}
-		case 'frequencyHint': {
-			const worth = pack.frequencies.flatMap((reward, index) => (reward && 'bundle' in reward ? [index + 1] : []));
-			return `The bearings cross on three Monitor frequencies that open something new: ${worth.join(', ')}. The other seven only return cards.`;
-		}
-		case 'gather':
-			return `Hollow Men: ${unlock.cards} Gather cards join the Infection cards. They start each game in the discard pile and enter the deck with the first Epidemic. When one is flipped, the next city flipped gets a Hollow Man and is not infected. Leaving a location that holds Hollow Men exposes a character.`;
-		case 'assemble':
-			return `Hollow Men: ${unlock.cards} Assemble cards join the Infection cards. They work as Gather cards do.`;
-		case 'freeAbilityUnits':
-			return `${unlock.amount} free production units for character abilities: spend them now, during setup, on abilities that last all year.`;
-		case 'stockpileBonus':
-			return `The stockpile grows by ${unlock.amount} cubes now and at every later setup.`;
-		case 'permanentStructure':
-			return `New at game end: a ${unlock.structure} can be made permanent, so it starts every later game already built.`;
-		default:
-			return null;
-	}
-}
-
 /** Reads Legacy cards in order until one halts. `won` is only known for cards read at game end. */
 export function readLegacy(world: World, phase: 'setup' | 'gameEnd', won?: boolean) {
 	const campaign = world.campaign;
@@ -424,10 +295,9 @@ export function readLegacy(world: World, phase: 'setup' | 'gameEnd', won?: boole
 		campaign.legacyIndex += 1;
 		const applies = !card.when || (card.when === 'won') === won;
 		if (applies) {
-			campaign.briefing.push(`${card.title}: ${card.text}`);
+			campaign.briefing.push({ t: 'card', title: card.title, text: card.text });
 			for (const unlock of card.unlocks) {
-				const line = unlockLine(campaign, unlock);
-				if (line) campaign.briefing.push(line);
+				briefUnlock(campaign, unlock);
 				applyUnlock(world, unlock);
 			}
 		}
@@ -477,9 +347,11 @@ export function resolveGameEnd(world: World) {
 	if (campaign.turningPoints.includes('losingStreak') && lastFour.length === 4 && lastFour.every(result => !result)) {
 		campaign.turningPoints = campaign.turningPoints.filter(id => id !== 'losingStreak');
 		campaign.losingStreakBonusGames = 3;
-		campaign.briefing.push(
-			'Turning point: four games lost in a row. Relief arrives: 10 extra cubes in the stockpile for each of the next 3 games.',
-		);
+		campaign.briefing.push({
+			t: 'card',
+			title: 'Turning point: four games lost in a row',
+			text: 'Relief arrives: 10 extra cubes in the stockpile for each of the next 3 games.',
+		});
 	}
 	for (const character of Object.values(campaign.characters)) {
 		if (character.carrier && !character.dead) {

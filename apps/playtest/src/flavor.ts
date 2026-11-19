@@ -1,5 +1,5 @@
 /**
- * Made-up colour for the playtesters, keyed by the start of a briefing line. The game itself has
+ * Made-up colour for the playtesters, keyed by the start of a briefing card's title. The game itself has
  * no story. These lines only give the players something to react to in character, and none of it
  * comes from any published game.
  */
@@ -55,6 +55,6 @@ const FLAVOR: [prefix: string, line: string][] = [
 	['Utopia opened', 'The harbour at the end of the Plan is real.'],
 ];
 
-export function flavorFor(briefing: string): string | null {
-	return FLAVOR.find(([prefix]) => briefing.startsWith(prefix))?.[1] ?? null;
+export function flavorFor(title: string): string | null {
+	return FLAVOR.find(([prefix]) => title.startsWith(prefix))?.[1] ?? null;
 }

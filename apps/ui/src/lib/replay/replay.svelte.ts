@@ -285,6 +285,13 @@ function markersOf(timeline: TimelineStep[]): Marker[] {
 export function load(raw: unknown, seated: string[] = []): Loaded {
 	const record = parseRecord(typeof raw === 'string' ? JSON.parse(raw) : raw);
 	const frames = framesOf(record);
+	// Recordings play back as written, and those made before the briefing was structured hold it as plain lines.
+	for (const frame of frames) {
+		const campaign = frame.world.campaign;
+		campaign.briefing = campaign.briefing.map(entry =>
+			typeof entry === 'string' ? { t: 'card', title: entry, text: null } : entry,
+		);
+	}
 	const notes = record.notes.toSorted((a, b) => a.at - b.at).map((note, key) => ({ ...note, frame: 0, key }));
 	let next = 0;
 	const timeline = record.steps.map((step, index): TimelineStep => {
