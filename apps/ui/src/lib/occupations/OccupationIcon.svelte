@@ -11,11 +11,12 @@
 </script>
 
 <script lang="ts">
+	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	/** An occupation's mark, drawn in the surrounding text colour. */
 	let { job }: { job: JobId } = $props();
 </script>
 
-<span class="icon" aria-hidden="true">{@html ICONS[job]}</span>
+<span class="icon" aria-hidden="true" {@attach feedback('Occupation icon', () => ({ job }))}>{@html ICONS[job]}</span>
 
 <style>
 	.icon {
