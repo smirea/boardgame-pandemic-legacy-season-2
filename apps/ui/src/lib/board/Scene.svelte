@@ -31,6 +31,7 @@
 	import type { ReconRect } from './reconLayout';
 	import RemoteCursor from './RemoteCursor.svelte';
 	import Ring from './Ring.svelte';
+	import Skull from './Skull.svelte';
 	import RouteTube from './RouteTube.svelte';
 	import { CITY_RADIUS, CITY_TOP } from './routes';
 	import Stockpile from './Stockpile.svelte';
@@ -56,8 +57,12 @@
 		hoverStockpile?: boolean;
 		/** Screen rectangles, in pixels from the canvas corner, that HUD panels cover. The fitted view keeps cities out of them. */
 		covered?: Covered[];
-		/** A city to look at closely, landing at `x`, `y` (fractions of the canvas from its top left), in place of the fitted view. */
-		focus?: { city: CityId; x: number; y: number } | null;
+		/**
+		 * A city to look at closely, landing at `x`, `y` (fractions of the canvas from its top left), in place of the
+		 * fitted view. `glide` is how long the camera takes to get there, in milliseconds. `zoom` sets the distance as a
+		 * share of the whole board's view, which holds still while panels come and go, in place of a share of the fitted one.
+		 */
+		focus?: { city: CityId; x: number; y: number; glide?: number; zoom?: number } | null;
 	};
 
 	let {
@@ -245,10 +250,21 @@
 	const fit = $derived(fitBoard(explored, aspect, FOV, DEFAULT_TILT, { bounds: explored, ...insets }));
 	const whole = $derived(fitBoard(bounds, aspect, FOV));
 	const FOCUS_ZOOM = 0.6;
-	const aim = $derived(focus ? focusBoard(layout[focus.city]!, focus, aspect, FOV, fit.distance * FOCUS_ZOOM) : fit);
+	const aim = $derived(
+		focus
+			? focusBoard(
+					layout[focus.city]!,
+					focus,
+					aspect,
+					FOV,
+					focus.zoom ? whole.distance * focus.zoom : fit.distance * FOCUS_ZOOM,
+				)
+			: fit,
+	);
 	let lastFocus: CityId | null = null;
 	// The first view snaps into place. After that, a newly explored region or a reset glides the camera over.
-	const glide = new Tween(1, { duration: 900, easing: cubicInOut });
+	const GLIDE = 900;
+	const glide = new Tween(1, { duration: GLIDE, easing: cubicInOut });
 	let path: { from: Vector3; to: Vector3; fromTarget: Vector3; toTarget: Vector3 } | null = null;
 	$effect(() => {
 		if (resetView !== lastReset) {
@@ -282,7 +298,8 @@
 				fromTarget: controls!.target.clone(),
 				toTarget: next.target,
 			};
-			void glide.set(0, { duration: 0 }).then(() => glide.set(1));
+			const duration = focus?.glide ?? GLIDE;
+			void glide.set(0, { duration: 0 }).then(() => glide.set(1, { duration }));
 		});
 	});
 	$effect(() => {
@@ -579,6 +596,12 @@
 {#each flagsByCity as [city, flags] (city)}
 	<Flags at={layout[city]!} {flags} name={anchors.get(city)} />
 {/each}
+
+{#if view.skull}
+	{#key view.skull.key}
+		<Skull at={layout[view.skull.city]!} slot={view.skull.at} />
+	{/key}
+{/if}
 
 {#each view.fx as fx (fx.id)}
 	<Pulse at={layout[fx.city]!} kind={fx.kind} delay={fx.delay} />

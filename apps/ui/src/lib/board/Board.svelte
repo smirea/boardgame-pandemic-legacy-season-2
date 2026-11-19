@@ -36,7 +36,7 @@
 		onpointer?: (point: BoardPoint | null) => void;
 		resetView?: number;
 		covered?: Covered[];
-		focus?: { city: CityId; x: number; y: number } | null;
+		focus?: { city: CityId; x: number; y: number; glide?: number; zoom?: number } | null;
 		/** Actions offered round a city, each starting one kind of action. */
 		ring?: { city: CityId; entries: { key: Action['a']; label: string; detail: string }[] } | null;
 		onring?: (key: Action['a']) => void;
