@@ -1,5 +1,9 @@
-import { characterAt, cityDef, handLimit, pack, routeCost } from '@repo/game';
+import { characterAt, cityDef, handLimit, has, pack, routeCost } from '@repo/game';
 import type { Action, CardId, CityId, Decide, Decision, LogEntry, Play, Purchase, SeatId, World } from '@repo/game';
+import { CITY_COLOR } from '#lib/board/CityMarker.svelte';
+import { cardColor } from './PlayerCard.svelte';
+import { HOLLOW_COLOR } from './rich.ts';
+import type { GlyphPart, Rich } from './rich.ts';
 
 export const MONTHS = [
 	'Prologue',
@@ -159,6 +163,22 @@ export function cardName(world: World, id: CardId): string {
 const cubes = (count: number) => `${count} cube${count === 1 ? '' : 's'}`;
 const cards = (world: World, ids: CardId[]) => ids.map(id => cardName(world, id)).join(', ');
 
+/** A card named in a line of text: its glyph in the colour it is known by, then its name. */
+export function cardRef(world: World, id: CardId): GlyphPart {
+	const card = world.campaign.playerCards[id];
+	if (card) return { glyph: 'card', color: cardColor(card), text: cardName(world, id) };
+	const infection = world.campaign.infectionCards[id];
+	const color = infection?.kind === 'city' ? CITY_COLOR[cityDef(infection.city).color ?? 'haven'] : HOLLOW_COLOR;
+	return { glyph: 'infection', color, text: cardName(world, id) };
+}
+const cardList = (world: World, ids: CardId[]): Rich =>
+	ids.flatMap((id, index) => (index ? [', ', cardRef(world, id)] : [cardRef(world, id)]));
+// The no-break space keeps a count on the same line as its cube.
+const cubeCount = (count: number): Rich => [
+	`${count}\u00a0`,
+	{ glyph: 'supplies', alt: count === 1 ? 'cube' : 'cubes' },
+];
+
 /** The city an action is aimed at, when clicking that city on the board should trigger it. */
 export function actionTarget(world: World, action: Action): CityId | null {
 	switch (action.a) {
@@ -187,73 +207,119 @@ export function actionTarget(world: World, action: Action): CityId | null {
 }
 
 /** What sets this variant apart from others of the same action, short enough for a menu row. */
-export function actionDetail(world: World, action: Action): string {
+export function actionDetail(world: World, action: Action): Rich {
+	const game = world.game!;
 	switch (action.a) {
 		case 'drive':
-			return action.card ? `discard ${cardName(world, action.card)}` : '';
+			return action.card ? ['Discard ', cardRef(world, action.card)] : [];
 		case 'establishLine':
 		case 'chartLane': {
-			const cost = routeCost(world, world.game!.active, action.a === 'establishLine' ? 'land' : 'sea');
-			return cost === 0 ? 'free' : cubes(cost);
+			const cost = routeCost(world, game.active, action.a === 'establishLine' ? 'land' : 'sea');
+			return cost === 0 ? ['free'] : cubeCount(cost);
 		}
 		case 'sail':
 		case 'charter':
 		case 'captainSail':
-			return `discard ${cardName(world, action.card)}`;
+		case 'run':
+			return ['Discard ', cardRef(world, action.card)];
+		case 'makeSupplies': {
+			const pile = has(world, game.active, 'immunologist') ? 'reserve' : 'stockpile';
+			return ['Take a ', { glyph: 'supplies', text: 'cube' }, ` from the ${pile}, ${game[pile]} left`];
+		}
 		case 'produce':
-			return action.mode === 'local' ? 'here only' : 'every haven and supply center';
+			return [action.mode === 'local' ? 'Here only' : 'Every haven and supply center'];
 		case 'deliver':
-			return `${cubes(action.count)} ${action.to ? `to ${cityName(action.to)}` : 'here'}`;
-		case 'pickUp':
-			return cubes(action.count);
+			return [...cubeCount(action.count), action.to ? ` to ${cityName(action.to)}` : ' here'];
+		case 'pickUp': {
+			const here = game.locations[game.players[game.active]!.location]!.supplies;
+			return ['Take ', ...cubeCount(action.count), ` of ${here} here`];
+		}
 		case 'transfer':
-			return `${action.give ? 'give' : 'take'} ${cubes(action.count)} ${action.give ? 'to' : 'from'} ${seatName(world, action.with)}`;
+			return [
+				action.give ? 'Give ' : 'Take ',
+				...cubeCount(action.count),
+				` ${action.give ? 'to' : 'from'} ${seatName(world, action.with)}`,
+			];
 		case 'share': {
-			const receiver = action.give ? action.with : world.game!.active;
-			const full = world.game!.players[receiver]!.hand.length >= handLimit(world, receiver);
-			const text = `${action.give ? 'give' : 'take'} ${cardName(world, action.card)} ${action.give ? 'to' : 'from'} ${seatName(world, action.with)}`;
-			return full ? `${text}, who must then discard` : text;
+			const receiver = action.give ? action.with : game.active;
+			const full = game.players[receiver]!.hand.length >= handLimit(world, receiver);
+			return [
+				action.give ? 'Give ' : 'Take ',
+				cardRef(world, action.card),
+				` ${action.give ? 'to' : 'from'} ${seatName(world, action.with)}${full ? ', who must then discard' : ''}`,
+			];
 		}
 		case 'buildCenter':
-			return `${action.laborer ? '2 cubes and ' : ''}${cards(world, action.cards)}${action.moveFrom ? `, moved from ${cityName(action.moveFrom)}` : ''}`;
+			return [
+				...(action.laborer ? [...cubeCount(2), ' and '] : []),
+				...cardList(world, action.cards),
+				action.moveFrom ? `, moved from ${cityName(action.moveFrom)}` : '',
+			];
 		case 'recon': {
 			const route = pack.reconRoutes.find(candidate => candidate.id === action.route)!;
-			return `${pack.bundles.find(bundle => bundle.id === route.opens)!.name}: ${cards(world, action.cards)}`;
+			return [`${pack.bundles.find(bundle => bundle.id === route.opens)!.name}: `, ...cardList(world, action.cards)];
 		}
 		case 'search': {
 			const card = world.campaign.playerCards[action.card];
-			return card?.kind === 'city' ? `${card.search[action.box]!.scope} box` : '';
+			return card?.kind === 'city' ? [cardRef(world, action.card), `, ${card.search[action.box]!.scope} box`] : [];
 		}
 		case 'transmit':
-			return `${cardName(world, action.card)} to ${seatName(world, action.to)}`;
+			return [cardRef(world, action.card), ` to ${seatName(world, action.to)}`];
 		case 'monitor':
-			return `frequency ${action.frequency + 1}`;
+			return [`Frequency ${action.frequency + 1}`];
 		case 'broadcast':
-			return `${cityName(action.from)} to ${cityName(action.to)}`;
+			return [{ glyph: 'hollow', text: 'Hollow Men' }, ` from ${cityName(action.from)} to ${cityName(action.to)}`];
 		case 'buildShelter':
-			return action.card ? `discard ${cardName(world, action.card)}` : '';
+			return action.card ? ['Discard ', cardRef(world, action.card)] : [];
 		case 'administratorMove':
-			return `${seatName(world, action.pawn)} to ${seatName(world, action.to)}`;
+			return [`${seatName(world, action.pawn)} to ${seatName(world, action.to)}`];
 		case 'sabotage':
-			return `${cityName(action.city)}, discard ${cardName(world, action.card)}`;
+			return [{ glyph: 'hollow', text: cityName(action.city) }, ', discard ', cardRef(world, action.card)];
 		case 'broker':
-			return `${cardName(world, action.card)} for ${cardName(world, action.take)}`;
 		case 'investigate':
-			return `${cardName(world, action.card)} for ${cardName(world, action.take)}`;
+			return [cardRef(world, action.card), ' for ', cardRef(world, action.take)];
 		case 'facilitate':
-			return `${cardName(world, action.card)} from ${seatName(world, action.with)}`;
-		case 'run':
-			return `discard ${cardName(world, action.card)}`;
+			return [cardRef(world, action.card), ` from ${seatName(world, action.with)}`];
 		case 'supply':
-			return '1 cube from the reserve';
+			return ['Discard ', cardRef(world, action.card), ' for ', ...cubeCount(1), ' from the reserve'];
 		case 'inoculate':
 		case 'destroyInfection':
-			return cardName(world, action.card);
+			return [cardRef(world, action.card)];
 		case 'salvage':
-			return `discard ${cards(world, action.discard)}, take ${cardName(world, action.take)}`;
+			return ['Discard ', ...cardList(world, action.discard), ', take ', cardRef(world, action.take)];
 		default:
-			return '';
+			return [];
 	}
+}
+
+/** The cards an action discards, for the actions whose cost is cards. */
+function discarded(action: Action): CardId[] {
+	switch (action.a) {
+		case 'drive':
+		case 'buildShelter':
+			return action.card ? [action.card] : [];
+		case 'sail':
+		case 'charter':
+		case 'captainSail':
+		case 'run':
+		case 'sabotage':
+		case 'supply':
+			return [action.card];
+		case 'buildCenter':
+		case 'recon':
+			return action.cards;
+		case 'salvage':
+			return action.discard;
+		default:
+			return [];
+	}
+}
+
+/** What every way of taking an action spends alike, as Charter boat always discards the card of the port it leaves. */
+export function sharedCost(world: World, variants: Action[]): Rich | null {
+	const spent = variants.map(action => discarded(action).toSorted().join(','));
+	if (!spent[0] || spent.some(key => key !== spent[0])) return null;
+	return ['Discard ', ...cardList(world, discarded(variants[0]!))];
 }
 
 export function playTarget(play: Play): CityId | null {

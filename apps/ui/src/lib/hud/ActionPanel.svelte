@@ -4,7 +4,10 @@
 	import type { Action, ActionChoice, Command, PublicState, SeatId } from '@repo/game';
 	import { tick } from 'svelte';
 	import ActionIcon from './ActionIcon.svelte';
-	import { ACTION_NAMES, ACTION_TEXT, actionDetail, actionTarget, cityName } from './labels.svelte.ts';
+	import { ACTION_NAMES, ACTION_TEXT, actionDetail, actionTarget, cityName, sharedCost } from './labels.svelte.ts';
+	import { plain } from './rich.ts';
+	import RichText from './RichText.svelte';
+	import { ways } from './ways.ts';
 
 	type Props = {
 		snap: PublicState;
@@ -32,9 +35,10 @@
 	// Every row is always in view, so the list keeps the engine's order and a row never moves under the pointer.
 	const rows = $derived(
 		menu.map(choice => {
-			const only = choice.actions.length === 1 ? choice.actions[0]! : null;
+			const offered = ways(choice.actions);
+			const only = offered.length === 1 ? offered[0]! : null;
 			const target = only ? actionTarget(world, only) : null;
-			const detail = only ? actionDetail(world, only) : '';
+			const detail = only ? actionDetail(world, only) : sharedCost(world, offered);
 			const free =
 				choice.actions.length > 0 &&
 				(isFreeAction(choice.a) || choice.actions.every(action => actionCost(world, seat, action) === 0));
@@ -42,8 +46,8 @@
 				choice,
 				open: live && choice.actions.length > 0,
 				title: ACTION_NAMES[choice.a] + (target ? ` to ${cityName(target)}` : ''),
-				text: live && choice.reason ? choice.reason : detail || ACTION_TEXT[choice.a],
-				count: choice.actions.length > 1 ? choice.actions.length : null,
+				text: live && choice.reason ? choice.reason : detail?.length ? detail : ACTION_TEXT[choice.a],
+				count: offered.length > 1 ? offered.length : null,
 				free,
 			};
 		}),
@@ -62,7 +66,7 @@
 	// scrolling or cutting its text.
 	let list = $state<HTMLUListElement>();
 	const perColumn = $derived(Math.ceil(rows.length / columns));
-	const contents = $derived(rows.map(row => `${row.title}:${row.text}:${row.count}:${row.free}`).join('|'));
+	const contents = $derived(rows.map(row => `${row.title}:${plain(row.text)}:${row.count}:${row.free}`).join('|'));
 	$effect(() => {
 		void contents;
 		const element = list;
@@ -137,7 +141,7 @@
 							{#if row.free}<em class="free">free</em>{/if}
 							{#if row.count}<em>{row.count}</em>{/if}
 						</span>
-						<span class="text" class:why={live && !row.open}>{row.text}</span>
+						<span class="text" class:why={live && !row.open}><RichText text={row.text} /></span>
 					</span>
 				</button>
 			</li>

@@ -3,6 +3,7 @@ import type { CityId, Command, GameRecord, PlayerId, PublicState, RecordNote, Se
 import type { BoardMarks, MarkTone } from '#lib/board/types.ts';
 import { beatOf } from './beats.ts';
 import type { Beat, Mark, Moment } from './beats.ts';
+import { plain } from '#lib/hud/rich.ts';
 
 export type { GameNotes, IndexGame, ReplayIndex } from '@repo/game';
 import {
@@ -116,7 +117,7 @@ export function commandLabel(world: World, command: Command | null): { who: stri
 		case 'ACTION': {
 			const action = command.action;
 			const target = actionTarget(world, action);
-			const detail = actionDetail(world, action);
+			const detail = plain(actionDetail(world, action));
 			return {
 				who: seatName(world, command.seat),
 				text: [ACTION_NAMES[action.a], target ? `to ${cityName(target)}` : '', detail ? `(${detail})` : '']

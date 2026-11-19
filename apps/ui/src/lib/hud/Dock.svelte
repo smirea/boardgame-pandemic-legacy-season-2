@@ -25,7 +25,8 @@
 		send: (command: Command) => void;
 		onview: (seat: SeatId) => void;
 		/** An action or card waiting for a city on the map. */
-		aiming: { label: string; a: Action['a'] | null; count: number } | null;
+		/** What waits for a click on the map, and what the slip asks for. */
+		aiming: { label: string; a: Action['a'] | null; prompt: string } | null;
 		oncancel: () => void;
 		/** The ways to use a card in hand right now, shown as tags over the card. */
 		uses: (seat: SeatId, card: CardId) => { key: string; label: string; icon: Action['a'] | null; run: () => void }[];
@@ -338,10 +339,7 @@
 							{#if aiming.a}<ActionIcon action={aiming.a} size="2.4rem" />{/if}
 							<div class="say">
 								<strong>{aiming.label}</strong>
-								<span
-									>{aiming.count === 1 ? 'Click the lit city' : `Click one of the ${aiming.count} lit cities`} on the map.
-									Esc or a right click cancels.</span
-								>
+								<span>{aiming.prompt} Esc or a right click cancels.</span>
 							</div>
 							<button onclick={oncancel} data-testid="cancel-aim">Cancel</button>
 						</div>
@@ -421,7 +419,17 @@
 	}
 
 	.step.aiming {
+		flex-wrap: wrap;
 		border-color: var(--warn);
+	}
+
+	/* A slip asking for a click on the map holds its words on a few lines, however little room the hand leaves. */
+	.middle:has(.aiming) {
+		min-width: min(18rem, 48%);
+	}
+
+	.step.aiming .say {
+		flex: 1 1 10rem;
 	}
 
 	.step.aiming strong {

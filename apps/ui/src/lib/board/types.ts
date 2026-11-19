@@ -42,6 +42,8 @@ export type PawnView = {
 	active: boolean;
 	/** Picked out on the board, as while the pointer rests on the player's seat. */
 	lit: boolean;
+	/** A click on it picks it, as for an action that moves another player's pawn. */
+	pickable: boolean;
 	/** Supply cubes the character carries. */
 	carried: number;
 	travel: Travel;

@@ -55,6 +55,10 @@
 	import SeatPicker from './SeatPicker.svelte';
 	import TopBar from './TopBar.svelte';
 	import Upkeep from './Upkeep.svelte';
+	import { plain } from './rich.ts';
+	import type { Rich } from './rich.ts';
+	import RichText from './RichText.svelte';
+	import { ways } from './ways.ts';
 
 	// A spectator owns no seat, whatever this browser claimed in a live game. Replays use it, and draw their own
 	// players and step marks over the board, so the panels a player acts from stay out of the way.
@@ -128,15 +132,25 @@
 		if (owed?.d === 'discard') viewing = owed.seat;
 	});
 
-	type Option = { label: string; detail: string; run: () => void; city?: CityId };
+	type Option = { label: string; detail: Rich | string; run: () => void; city?: CityId };
 	type Chooser = {
 		title: string;
 		options: Option[];
 		multi?: { max: number; verb: string; confirm: (picked: Option[]) => void };
 	};
 	const byLabel = (a: Option, b: Option) => a.label.localeCompare(b.label);
-	/** An action or card waiting for its target on the map: its targets are lit and a click on one finishes it. */
-	type Targeting = { label: string; a: Action['a'] | null; cities: Map<CityId, Option[]> };
+	/**
+	 * An action or card waiting for its target on the map: its targets are lit and a click on one finishes it. One
+	 * that moves a pawn first lights the pawns it can move, with the cities they stand in, and a click on either
+	 * picks the pawn; then `pawn` is the one picked.
+	 */
+	type Targeting = {
+		label: string;
+		a: Action['a'] | null;
+		cities: Map<CityId, Option[]>;
+		pawns?: Map<SeatId, () => void>;
+		pawn?: SeatId;
+	};
 	let targeting = $state.raw<Targeting | null>(null);
 	/** The actions shown round a city that was clicked with nothing chosen. */
 	let ring = $state.raw<CityId | null>(null);
@@ -150,7 +164,7 @@
 	});
 	const shown = $derived(
 		chooser?.options.filter(option =>
-			`${option.label} ${option.detail}`.toLowerCase().includes(filter.trim().toLowerCase()),
+			`${option.label} ${plain(option.detail)}`.toLowerCase().includes(filter.trim().toLowerCase()),
 		) ?? [],
 	);
 	function pick(option: Option) {
@@ -173,9 +187,10 @@
 	const seatAt = $derived(game ? placeSeats(game.seats, me) : null);
 	// Where the panels on the board's sides sit, so the fitted view keeps cities out from under them.
 	let covered = $state.raw<Covered[]>([]);
-	// How far the side columns' panels reach in, so the floating hand and the objectives stay between them however
-	// wide they grow.
-	let sides = $state.raw({ left: 0, right: 0 });
+	// How far the side columns' panels reach in beside the floating hand (`low`) and beside the objectives (`high`),
+	// so each stays between them however wide they grow. Only the panels at its own height count: the Actions panel
+	// stands mid-side, and the hand has the room under it.
+	let sides = $state.raw({ low: { left: 0, right: 0 }, high: { left: 0, right: 0 } });
 	const listed = $derived(actionChoices.length > 0);
 	let actionColumns = $state(1);
 	$effect(() => {
@@ -215,21 +230,30 @@
 					firm: panel.classList.contains('actions-slot'),
 				};
 			});
-			const reach = (column: HTMLElement | null | undefined, side: 'left' | 'right') =>
+			const reach = (column: HTMLElement | null | undefined, side: 'left' | 'right', top: number, bottom: number) =>
 				column instanceof HTMLElement
 					? Math.max(
 							0,
 							...[...column.children].map(child => {
 								const box = child.getBoundingClientRect();
+								if (box.bottom <= top || box.top >= bottom) return 0;
 								return side === 'left' ? box.right - origin.left : origin.right - box.left;
 							}),
 						)
 					: 0;
-			// A new array restarts the camera's glide even when nothing moved, and a glide under a click reads as a drag.
-			const reached = { left: reach(leftColumn, 'left'), right: reach(rightColumn, 'right') };
+			const band = (top: number, bottom: number) => ({
+				left: reach(leftColumn, 'left', top, bottom),
+				right: reach(rightColumn, 'right', top, bottom),
+			});
+			const dock = stage!.nextElementSibling;
+			const reached = {
+				low: band(dock instanceof HTMLElement ? extent(dock).top : origin.bottom, Infinity),
+				high: band(-Infinity, goals instanceof HTMLElement ? extent(goals).top + extent(goals).height : origin.top),
+			};
 			untrack(() => {
+				// A new array restarts the camera's glide even when nothing moved, and a glide under a click reads as a drag.
 				if (JSON.stringify(next) !== JSON.stringify(covered)) covered = next;
-				if (reached.left !== sides.left || reached.right !== sides.right) sides = reached;
+				if (JSON.stringify(reached) !== JSON.stringify(sides)) sides = reached;
 			});
 		};
 		// A measure moves the floating hand, so it waits a frame rather than run inside the observer's own delivery.
@@ -297,11 +321,24 @@
 	 * Starts one kind of action from the panel, a city's ring or a card: a single way to take it happens at once,
 	 * ways that each aim at a city light those cities, and anything else is picked from a list.
 	 */
-	function start(name: Action['a'], variants: Action[]) {
+	function start(name: Action['a'], all: Action[]) {
 		ring = null;
 		chooser = null;
 		targeting = null;
+		const variants = ways(all);
 		if (variants.length === 1) return act(variants[0]!);
+		if (name === 'administratorMove') {
+			const moves = new Map<SeatId, Map<CityId, Option>>();
+			for (const action of variants) {
+				if (action.a !== 'administratorMove') continue;
+				const to = game!.players[action.to]!.location;
+				const byCity = moves.get(action.pawn) ?? new Map<CityId, Option>();
+				// Two pawns standing together are one destination.
+				if (!byCity.has(to)) byCity.set(to, { ...actionOption(action), label: ACTION_NAMES[name] });
+				moves.set(action.pawn, byCity);
+			}
+			return aimPawns(ACTION_NAMES[name], name, moves);
+		}
 		if (variants.length > 1 && variants.every(action => actionTarget(world, action))) {
 			const cities = new Map<CityId, Option[]>();
 			for (const action of variants) {
@@ -314,8 +351,27 @@
 		choose(ACTION_NAMES[name], variants.map(actionOption));
 	}
 
+	/** Lights the pawns that can be moved, then, once one is picked, where it can go. */
+	function aimPawns(label: string, a: Action['a'] | null, moves: Map<SeatId, Map<CityId, Option>>) {
+		const pickPawn = (pawn: SeatId) => {
+			chooser = null;
+			const cities = new Map([...moves.get(pawn)!].map(([city, option]) => [city, [option]]));
+			targeting = { label: `Move ${seatName(world, pawn)} to …`, a, cities, pawn };
+		};
+		const cities = new Map<CityId, Option[]>();
+		for (const pawn of moves.keys()) {
+			const city = game!.players[pawn]!.location;
+			cities.set(city, [
+				...(cities.get(city) ?? []),
+				{ label: seatName(world, pawn), detail: '', run: () => pickPawn(pawn) },
+			]);
+		}
+		if (moves.size === 1) return pickPawn([...moves.keys()][0]!);
+		targeting = { label, a, cities, pawns: new Map([...moves.keys()].map(pawn => [pawn, () => pickPawn(pawn)])) };
+	}
+
 	/** One entry of a city's ring: a kind of action, with the ways to take it that the ring's click starts. */
-	type RingEntry = { a: Action['a']; label: string; detail: string; variants: Action[] };
+	type RingEntry = { a: Action['a']; label: string; detail: Rich | string; variants: Action[] };
 	const here = $derived(game?.players[game.active]?.location ?? null);
 	// Round the pawn's own city, every action it can take; round any other, the actions that end there.
 	const ringEntries = $derived.by((): RingEntry[] => {
@@ -324,7 +380,8 @@
 			const there = choice.actions.filter(action => actionTarget(world, action) === ring);
 			const variants = there.length ? there : ring === here ? choice.actions : [];
 			if (!variants.length) return [];
-			const only = variants.length === 1 ? variants[0]! : null;
+			const offered = ways(variants);
+			const only = offered.length === 1 ? offered[0]! : null;
 			return [
 				{
 					a: choice.a,
@@ -341,7 +398,7 @@
 		if (targeting) {
 			const options = targeting.cities.get(city) ?? [];
 			if (options.length === 0) return;
-			const label = `${targeting.label} to ${cityName(city)}`;
+			const label = targeting.pawns ? targeting.label : `${targeting.label} to ${cityName(city)}`;
 			targeting = null;
 			return choose(label, options);
 		}
@@ -453,9 +510,19 @@
 			};
 			return;
 		}
+		if (variants.length === 1) return run(variants[0]!.play)();
+		if (variants.every(option => option.play.e === 'airlift')) {
+			const moves = new Map<SeatId, Map<CityId, Option>>();
+			for (const { play } of variants) {
+				if (play.e !== 'airlift') continue;
+				const byCity = moves.get(play.pawn) ?? new Map<CityId, Option>();
+				byCity.set(play.to, { label: cardName(world, card), detail: '', run: run(play) });
+				moves.set(play.pawn, byCity);
+			}
+			return aimPawns(cardName(world, card), null, moves);
+		}
 		const groups = [...new Set(variants.map(option => playGroup(world, option.play)))];
 		const aimed = variants.every(option => playTarget(option.play));
-		if (variants.length === 1) return run(variants[0]!.play)();
 		if (aimed && groups.length === 1) return aim(variants, cardName(world, card));
 		chooser = {
 			title: cardName(world, card),
@@ -675,7 +742,8 @@
 				color: SEAT_COLORS[index]!,
 				name: seatName(world, seat),
 				active: game!.active === seat && playing,
-				lit: pointedSeat === seat,
+				lit: pointedSeat === seat || targeting?.pawn === seat || (targeting?.pawns?.has(seat) ?? false),
+				pickable: targeting?.pawns?.has(seat) ?? false,
 				carried: game!.players[seat]!.supplies,
 				...lastMove(seat),
 			})),
@@ -799,8 +867,10 @@
 
 <div
 	class="game"
-	style:--left={`${sides.left}px`}
-	style:--right={`${sides.right}px`}
+	style:--left={`${sides.low.left}px`}
+	style:--right={`${sides.low.right}px`}
+	style:--high-left={`${sides.high.left}px`}
+	style:--high-right={`${sides.high.right}px`}
 	data-card-cities={hoveredTargets.cities.join(' ')}
 	data-card-seats={hoveredTargets.seats.join(' ')}
 	{@attach feedback('Game', () => ({
@@ -829,6 +899,7 @@
 			oncityback={city => cancel() || takeBack(city)}
 			oncancel={cancel}
 			onmiss={() => (ring = null)}
+			onpawn={seat => targeting?.pawns?.get(seat as SeatId)?.()}
 			ring={ring && ringEntries.length
 				? {
 						city: ring,
@@ -900,7 +971,7 @@
 				<div class="rows">
 					{#each shown as option, index (option)}
 						<button style:--i={Math.min(index, 12)} class:picked={picked.includes(option)} onclick={() => pick(option)}
-							><strong>{option.label}</strong><span>{option.detail}</span></button
+							><strong>{option.label}</strong><span><RichText text={option.detail} /></span></button
 						>
 					{:else}
 						<p>Nothing matches.</p>
@@ -1087,7 +1158,17 @@
 				{decides}
 				{send}
 				onview={seat => (viewing = seat)}
-				aiming={targeting ? { label: targeting.label, a: targeting.a, count: targeting.cities.size } : null}
+				aiming={targeting
+					? {
+							label: targeting.label,
+							a: targeting.a,
+							prompt: targeting.pawns
+								? `Click one of the ${targeting.pawns.size} lit pawns on the map.`
+								: targeting.cities.size === 1
+									? 'Click the lit city on the map.'
+									: `Click one of the ${targeting.cities.size} lit cities on the map.`,
+						}
+					: null}
 				oncancel={cancel}
 				uses={cardUses}
 				onplaycard={playCard}
@@ -1200,7 +1281,7 @@
 	.goals {
 		position: absolute;
 		top: 0.6rem;
-		left: calc((var(--left, 0px) + 100% - var(--right, 0px)) / 2);
+		left: calc((var(--high-left, 0px) + 100% - var(--high-right, 0px)) / 2);
 		z-index: 30;
 		transform: translateX(-50%);
 	}

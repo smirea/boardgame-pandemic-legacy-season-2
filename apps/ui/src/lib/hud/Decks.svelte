@@ -1,11 +1,15 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
+	import { cityDef } from '@repo/game';
 	import type { CityId, Insights, PlayerDeckKind } from '@repo/game';
 	import { fade, fly } from 'svelte/transition';
 	import { CITY_COLOR } from '#lib/board/CityMarker.svelte';
 	import { inkOn } from '#lib/color.ts';
 	import { cityName } from './labels.svelte.ts';
 	import { GLYPH, KIND_COLOR } from './PlayerCard.svelte';
+	import { HOLLOW_COLOR } from './rich.ts';
+	import type { Rich } from './rich.ts';
+	import RichText from './RichText.svelte';
 
 	type Props = { info: Insights; dealt: boolean };
 
@@ -33,10 +37,18 @@
 	/** Before the opening infection the deck is not built, but every card of a city on the grid will be in it. */
 	const infectionCards = $derived(infection.opening ? (infection.strata[0]?.size ?? 0) : infection.deck);
 
-	const names = (cities: Partial<Record<CityId | 'hollow', number>>) =>
+	/** Each card in a pile as an Infection card glyph in its city's colour, the most copies first. */
+	const names = (cities: Partial<Record<CityId | 'hollow', number>>): Rich =>
 		(Object.entries(cities) as [CityId | 'hollow', number][])
 			.toSorted((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-			.map(([city, count]) => `${city === 'hollow' ? 'Hollow Men' : cityName(city)}${count > 1 ? ` ×${count}` : ''}`);
+			.flatMap(([city, count], index) => [
+				...(index ? [', '] : []),
+				{
+					glyph: 'infection' as const,
+					color: city === 'hollow' ? HOLLOW_COLOR : CITY_COLOR[cityDef(city).color ?? 'haven'],
+					text: `${city === 'hollow' ? 'Hollow Men' : cityName(city)}${count > 1 ? ` ×${count}` : ''}`,
+				},
+			]);
 	const discard = $derived(names(infection.discard));
 
 	let open = $state<'player' | 'infection' | null>(null);
@@ -137,14 +149,18 @@
 								: 'In the deck, in no known order'}
 						<b>{stratum.size}</b>
 					</h4>
-					<p>{names(stratum.cities).join(', ') || 'empty'}</p>
+					<p>
+						{#if Object.keys(stratum.cities).length}<RichText text={names(stratum.cities)} />{:else}empty{/if}
+					</p>
 				</section>
 			{/each}
 			<section>
 				<h4>
 					Discard pile <b>{infection.opening ? 0 : Object.values(infection.discard).reduce((a, b) => a + b, 0)}</b>
 				</h4>
-				<p>{discard.join(', ') || 'empty'}</p>
+				<p>
+					{#if discard.length}<RichText text={discard} />{:else}empty{/if}
+				</p>
 				{#if discard.length}<p class="note">An Epidemic shuffles these back on top of the deck.</p>{/if}
 			</section>
 			{#if infection.atRisk.length}

@@ -6,8 +6,8 @@ export type HintTone = 'bad' | 'good' | null;
 /** One line of a hint: a label and its value, set in two aligned columns. */
 export type HintRow = { label: string; value: string; tone?: HintTone };
 
-/** A piece or printed mark drawn as a small glyph, the way the board draws it. */
-export type Glyph = 'port' | StructureKind | 'supplies' | 'plague' | 'hollow';
+/** A piece, card or printed mark drawn as a small glyph, the way the table shows it. */
+export type Glyph = 'port' | StructureKind | 'supplies' | 'plague' | 'hollow' | 'card' | 'infection';
 
 export type HintCount = { glyph: 'supplies' | 'plague' | 'hollow'; count: number; tone?: HintTone };
 

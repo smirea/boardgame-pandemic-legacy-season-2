@@ -22,7 +22,8 @@
 
 	const TITLE_SIZE = 1.8;
 	const HTML_PX = 40;
-	const title = $derived(fonts.ready ? printTitle('Stockpile', TITLE_SIZE, lit) : null);
+	// The count is printed with the title, since a small pile reads as no pile from across the table.
+	const title = $derived(fonts.ready ? printTitle(`Stockpile · ${Math.max(0, shown)}`, TITLE_SIZE, lit) : null);
 	// The pile stands on a berth ruled on the chart, so the spot reads as the stockpile's even when it is empty.
 	const berth = printBerth(6.4, 5.6);
 	const cubes = $derived(PILE.slice(0, Math.max(0, shown)));
