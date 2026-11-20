@@ -15,7 +15,7 @@ export type CityDef = {
 	color: Color | null;
 	port: boolean;
 	population: number;
-	/** Copies of the city's Player card. Infection cards equal the starting population. */
+	/** Copies of the city's Player card: 4 for a starting city, otherwise one per starting population. Infection cards equal the starting population. */
 	playerCards: number;
 	startsOnGrid: boolean;
 	/** Hidden until an unlock reveals it by name, whatever its region. */
