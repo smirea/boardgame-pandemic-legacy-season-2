@@ -283,6 +283,15 @@ export type Unlock =
 	/** Forced opening: the explorer's reward is lost and the recon does not count toward an objective. */
 	| { t: 'perimeter'; bundle: BundleId; penalty?: Unlock[] };
 
+/** A door in the dossier, named by the number or letter printed on it. */
+export type DoorId = string;
+
+/**
+ * The physical places the original keeps its content: numbered packages, and dossier sheets of tear-off doors.
+ * Each bundle and Legacy card names the ones it stands for, and opening it opens them.
+ */
+export type DossierDef = { packages: number[]; sheets: DoorId[][] };
+
 /** A package, dossier door, or reward: a named set of unlocks opened as one. */
 export type BundleDef = {
 	id: BundleId;
@@ -290,6 +299,8 @@ export type BundleDef = {
 	unlocks: Unlock[];
 	/** Granted only when the bundle is opened by the players, not forced. */
 	reward?: Unlock[];
+	package?: number;
+	doors?: DoorId[];
 };
 
 export type LegacyCardDef = {
@@ -302,6 +313,7 @@ export type LegacyCardDef = {
 	unlocks: Unlock[];
 	/** Only applies when the month was lost or won, for cards read at game end. */
 	when?: 'won' | 'lost';
+	doors?: DoorId[];
 };
 
 export type JobDef = { id: JobId; name: string; text: string; starting: boolean };
@@ -338,6 +350,7 @@ export type ContentPack = {
 	objectives: ObjectiveDef[];
 	bundles: BundleDef[];
 	legacyDeck: LegacyCardDef[];
+	dossier: DossierDef;
 	/** What each of the ten Monitor frequencies opens. */
 	frequencies: FrequencyReward[];
 	startingEvents: EventId[];

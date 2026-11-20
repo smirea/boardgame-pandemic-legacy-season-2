@@ -87,6 +87,7 @@ A real group's campaign table, between July and August, was read piece by piece 
 - **Printed lines.** The starting lanes follow the printed board: New York has a lane to Jacksonville, and London has none to Midsea. North America's printed line joins Chicago to Washington, and South America's joins Buenos Aires and São Paulo by sea. One printed lane is not drawn: the board has Midsea to Istanbul, which no course on this map can sail without passing over Tripoli, so the engine keeps Tripoli to Istanbul instead. Routes the group drew round Cape Horn (Lima to Lagos) and the Cape of Good Hope (Lagos to Dar es Salaam), and St. Petersburg to Frankfurt, are documented routes with courses on the map.
 - **Costs.** Architect costs 3 and Lockdown 1, as the table's stickers say.
 - **Card improvements.** April's improvement is Cordon, two of them at 1 unit each. Rebirth arrives with East Asia instead.
+- **The box.** The original keeps its content in 8 numbered packages and 6 dossier sheets of numbered and lettered doors. `pack.dossier` lays them out as a real table has them, and each bundle and Legacy card names the package and doors it stands for, so opening it opens them (`campaign.packages`, `campaign.doors`). Doors whose content this pack has not placed yet stay sealed.
 
 ## UI simplifications
 

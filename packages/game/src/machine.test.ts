@@ -1447,6 +1447,14 @@ test('South America leaves the eastern Pacific haven hidden, and sighting the ha
 	).toBe(true);
 });
 
+test('opening a bundle, even by a perimeter report, opens its package and its dossier doors', () => {
+	const world: World = { campaign: newCampaign(4), game: null, table: newTable() };
+	openBundle(world, 'north-america' as BundleId, false);
+	openBundle(world, 'middle-east' as BundleId, true);
+	expect(world.campaign.packages).toEqual([1, 2]);
+	expect(world.campaign.doors).toEqual(['66', 'J', 'L', '62', '53', 'F', '14']);
+});
+
 test('only the North America recon completes the January objective', () => {
 	const counting = pack.reconRoutes.filter(route => route.counts.includes('reconRegion')).map(route => route.id);
 	expect(counting).toEqual(['north-america']);

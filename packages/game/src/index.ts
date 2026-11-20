@@ -15,6 +15,8 @@ export {
 } from './actions';
 export type { Decide, Play } from './plays';
 export type { Purchase } from './legacy';
+export type { DossierSlot, DossierView } from './dossier';
+export { dossierView } from './dossier';
 export { actionBriefs, briefingSections, ruleBriefs } from './briefing';
 export type { BriefedUnlock, BriefingSection } from './briefing';
 export {

@@ -51,6 +51,7 @@
 	import Lobby from './Lobby.svelte';
 	import CharacterSelect from './CharacterSelect.svelte';
 	import Briefing from './Briefing.svelte';
+	import LegacyBox from './LegacyBox.svelte';
 	import Objectives from './Objectives.svelte';
 	import SeatPicker from './SeatPicker.svelte';
 	import TopBar from './TopBar.svelte';
@@ -173,6 +174,7 @@
 		else if (picked.length < chooser.multi.max) picked = [...picked, option];
 	}
 	let menu = $state(false);
+	let boxOpen = $state(false);
 	// Once the table knows which game is next, every game is set up by choosing who plays, over the whole table.
 	const choosingCharacters = $derived(snap.phase === 'lobby' && !spectator && tableStart(snap.world) !== null);
 	// A haven the character screen points at, which the camera looks at behind it.
@@ -957,6 +959,7 @@
 		solo={session.mode === 'solo' || spectator}
 		onreset={() => resetView++}
 		onmenu={() => (menu = !menu)}
+		onbox={() => (boxOpen = !boxOpen)}
 	/>
 
 	<main class="stage" bind:this={stage}>
@@ -1157,6 +1160,20 @@
 		{/if}
 
 		{@render children?.()}
+
+		{#if boxOpen}
+			<div
+				class="scrim box-scrim"
+				role="dialog"
+				aria-modal="true"
+				aria-label="The box"
+				transition:fade={{ duration: 180 }}
+			>
+				<div in:fly={{ y: 24, duration: 300 }}>
+					<LegacyBox {campaign} onclose={() => (boxOpen = false)} />
+				</div>
+			</div>
+		{/if}
 
 		{#if menu}
 			<div
@@ -1668,6 +1685,10 @@
 		place-items: center;
 		padding: 1rem;
 		background: rgb(12 10 8 / 0.62);
+	}
+
+	.scrim.box-scrim {
+		z-index: 70;
 	}
 
 	.scrim.open {

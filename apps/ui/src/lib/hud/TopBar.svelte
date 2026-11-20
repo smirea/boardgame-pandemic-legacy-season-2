@@ -14,9 +14,10 @@
 		solo: boolean;
 		onreset: () => void;
 		onmenu: () => void;
+		onbox: () => void;
 	};
 
-	let { snap, info, status, players, solo, onreset, onmenu }: Props = $props();
+	let { snap, info, status, players, solo, onreset, onmenu, onbox }: Props = $props();
 
 	const campaign = $derived(snap.world.campaign);
 	const game = $derived(snap.world.game);
@@ -54,6 +55,7 @@
 				>
 			{/if}
 			<button onclick={onreset} title="Show the whole map">Fit map</button>
+			<button onclick={onbox} title="The packages and dossier doors opened so far" data-testid="open-box">Box</button>
 			<button onclick={onmenu}>Menu</button>
 		</div>
 	</header>

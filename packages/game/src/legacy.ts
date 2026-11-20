@@ -55,6 +55,8 @@ export function newCampaign(seed: number): Campaign {
 		briefing: [],
 		opened: [],
 		forced: [],
+		doors: [],
+		packages: [],
 		routes: [],
 		regions: pack.regions.filter(region => region.startsRevealed).map(region => region.id),
 		locations: {} as Campaign['locations'],
@@ -173,6 +175,8 @@ export function openBundle(world: World, id: BundleId, forced: boolean) {
 	if (!bundle) throw new Error(`unknown bundle ${id}`);
 	campaign.opened.push(id);
 	if (forced) campaign.forced.push(id);
+	if (bundle.package) pushUnique(campaign.packages, bundle.package);
+	for (const door of bundle.doors ?? []) pushUnique(campaign.doors, door);
 	if (game) log(game, { t: 'unlock', bundle: id, forced });
 	campaign.briefing.push({ t: 'card', title: bundle.name, text: forced ? 'Opened by a perimeter report.' : null });
 	for (const unlock of [...bundle.unlocks, ...(forced ? [] : (bundle.reward ?? []))]) {
@@ -308,6 +312,7 @@ export function readLegacy(world: World, phase: 'setup' | 'gameEnd', won?: boole
 		const applies = !card.when || (card.when === 'won') === won;
 		if (applies) {
 			campaign.briefing.push({ t: 'card', title: card.title, text: card.text });
+			for (const door of card.doors ?? []) pushUnique(campaign.doors, door);
 			for (const unlock of card.unlocks) {
 				briefUnlock(campaign, unlock);
 				applyUnlock(world, unlock);

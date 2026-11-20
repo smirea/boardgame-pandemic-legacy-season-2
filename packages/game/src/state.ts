@@ -5,6 +5,7 @@ import type {
 	CityImprovementId,
 	Color,
 	CompanionId,
+	DoorId,
 	ExposureBox,
 	EdgeDef,
 	EventId,
@@ -106,6 +107,9 @@ export type Campaign = {
 	briefing: BriefingEntry[];
 	opened: BundleId[];
 	forced: BundleId[];
+	/** Dossier doors and packages opened so far, in the order they were opened. */
+	doors: DoorId[];
+	packages: number[];
 	routes: string[];
 	regions: RegionId[];
 	locations: Record<CityId, CampaignLocation>;
