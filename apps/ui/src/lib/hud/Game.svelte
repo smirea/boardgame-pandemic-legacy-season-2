@@ -1188,10 +1188,8 @@
 					<a href="/replay?src=local" target="_blank" data-testid="open-replay">Replay this game</a>
 				{/if}
 				{#if session.mode !== 'join'}
-					<button onclick={() => fileInput?.click()} title="The game's own save, or a Tabletop Simulator save file"
-						>Import campaign save</button
+					<button onclick={() => fileInput?.click()} title="A save exported from this game">Import campaign save</button
 					>
-					<a href="/import" target="_blank" data-testid="import-report">Table import report</a>
 					<button onclick={() => session.importSave(scenarios.october())} data-testid="scenario-october"
 						>Load scenario: October</button
 					>

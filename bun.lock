@@ -45,7 +45,6 @@
         "@fontsource/im-fell-english": "^5.3.0",
         "@repo/game": "workspace:*",
         "@repo/net": "workspace:*",
-        "@repo/tts": "workspace:*",
         "@sveltejs/adapter-static": "^4.0.0",
         "@sveltejs/kit": "^3.0.1",
         "@sveltejs/vite-plugin-svelte": "^7.3.1",
@@ -87,12 +86,6 @@
       "dependencies": {
         "es-toolkit": "^1.52.0",
         "zod": "^4.6.6",
-      },
-    },
-    "packages/tts": {
-      "name": "@repo/tts",
-      "dependencies": {
-        "@repo/game": "workspace:*",
       },
     },
   },
@@ -378,8 +371,6 @@
     "@repo/shared": ["@repo/shared@workspace:packages/shared"],
 
     "@repo/signal": ["@repo/signal@workspace:apps/signal"],
-
-    "@repo/tts": ["@repo/tts@workspace:packages/tts"],
 
     "@repo/ui": ["@repo/ui@workspace:apps/ui"],
 

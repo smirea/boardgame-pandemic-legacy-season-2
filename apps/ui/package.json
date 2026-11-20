@@ -16,7 +16,6 @@
 		"@fontsource/im-fell-english": "^5.3.0",
 		"@repo/game": "workspace:*",
 		"@repo/net": "workspace:*",
-		"@repo/tts": "workspace:*",
 		"@sveltejs/adapter-static": "^4.0.0",
 		"@sveltejs/kit": "^3.0.1",
 		"@sveltejs/vite-plugin-svelte": "^7.3.1",

@@ -72,7 +72,7 @@ The thirteenth was not a defect: **Triangulate needs blue, yellow and black**. T
 
 ## Checked against a real campaign table
 
-A Tabletop Simulator save of a group's campaign, between July and August, was read piece by piece (November 2026): every card, sticker, token, bag and pen stroke. Where the table shows a rule or a count the research did not have, the engine now follows the table. Names and wording stay this project's own.
+A real group's campaign table, between July and August, was read piece by piece (November 2026): every card, sticker, token, bag and pen stroke. Where the table shows a rule or a count the research did not have, the engine now follows the table. Names and wording stay this project's own.
 
 - **Character cards.** The ten Character cards have fixed exposure layouts (`pack.characterCards`), dealt from a shuffled pool. A new character takes the next unused card, and none can be made once all ten are in use. The box that kills is anywhere from the 4th to the 7th.
 - **Player cards per city.** A city outside the starting grid has one Player card per point of its starting population. Lima starts at 1 and the eastern Pacific haven at 3.
