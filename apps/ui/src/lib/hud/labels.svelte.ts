@@ -312,7 +312,10 @@ export function actionDetail(world: World, action: Action): Rich {
 			return [`${seatName(world, action.pawn)} to here`];
 		case 'inoculate':
 		case 'destroyInfection':
-			return [cardRef(world, action.card)];
+			return [
+				cardRef(world, action.card),
+				world.campaign.playerCards[action.card] ? ' from the Player discard' : ' from the Infection discard',
+			];
 		case 'salvage':
 		case 'rehab':
 			return ['Discard ', ...cardList(world, action.discard), ', take ', cardRef(world, action.take)];
