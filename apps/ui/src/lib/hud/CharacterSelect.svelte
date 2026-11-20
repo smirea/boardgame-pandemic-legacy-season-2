@@ -3,6 +3,7 @@
 	import { claimant, pack, reject, SEAT_IDS, tablePlayers, tableStart } from '@repo/game';
 	import type { Character, CharacterId, CityId, Command, JobId, PlayerId, PublicState } from '@repo/game';
 	import { flip } from 'svelte/animate';
+	import { tick } from 'svelte';
 	import { fly } from 'svelte/transition';
 	import CardIcon from '#lib/cards/CardIcon.svelte';
 	import { SCAR_ICON } from '#lib/cards/icons.ts';
@@ -145,6 +146,63 @@
 	let cards = $state<HTMLElement>();
 	let form = $state<HTMLElement>();
 	let footer = $state<HTMLElement>();
+
+	// Size the character grid and card scale to fill the available space without scrolling.
+	let cardCols = $state(3);
+	let cardScale = $state(1);
+	const rosterKey = $derived(
+		shown.map(character => `${character.id}:${character.slots.filter(Boolean).length}`).join('|'),
+	);
+	$effect(() => {
+		void rosterKey;
+		const element = cards;
+		const count = shown.length;
+		if (!element || count === 0) return;
+		let run = 0;
+		const fit = async () => {
+			const mine = ++run;
+			const width = element.clientWidth;
+			const height = element.clientHeight;
+			if (!width || !height) return;
+			const gap = 12;
+			// Pick the column count that gives each card the largest scale inside the container.
+			let bestCols = 1;
+			let bestScale = 0;
+			for (let cols = 1; cols <= count; cols++) {
+				const rows = Math.ceil(count / cols);
+				const cellW = (width - gap * (cols - 1)) / cols;
+				const cellH = (height - gap * (rows - 1)) / rows;
+				const candidate = Math.min(cellW / 205, cellH / 260);
+				if (candidate > bestScale) {
+					bestScale = candidate;
+					bestCols = cols;
+				}
+			}
+			cardCols = bestCols;
+			let next = Math.max(0.75, Math.min(1.85, bestScale));
+			cardScale = Number(next.toFixed(3));
+			await tick();
+			// If a card with many traits still overflows vertically, dial the scale down until everything fits without scroll.
+			for (let step = 0; step < 12 && mine === run; step++) {
+				if (element.scrollHeight <= element.clientHeight + 2 || next <= 0.72) break;
+				next = Math.max(0.72, next * 0.92);
+				cardScale = Number(next.toFixed(3));
+				await tick();
+			}
+		};
+		let frame = 0;
+		const observer = new ResizeObserver(() => {
+			cancelAnimationFrame(frame);
+			frame = requestAnimationFrame(() => void fit());
+		});
+		observer.observe(element);
+		void fit();
+		return () => {
+			run++;
+			cancelAnimationFrame(frame);
+			observer.disconnect();
+		};
+	});
 	// The map shows through wherever the character cards leave room left of the form: beside them or below them.
 	function look(city: CityId) {
 		if (!screen || !cards || !form || !footer) return;
@@ -218,7 +276,7 @@
 	<h1>{title}</h1>
 
 	<div class="row">
-		<div class="cards" bind:this={cards}>
+		<div class="cards" bind:this={cards} style:--cols={cardCols} style:--s={cardScale}>
 			{#each shown as character (character.id)}
 				{@const holder = claimant(world, character.id)}
 				{@const color = colorFor(character)}
@@ -490,32 +548,33 @@
 		min-height: 0;
 	}
 
-	/* Every card whole and equal-sized, wrapping into rows. A roster too long for the screen scrolls here, never the page. */
+	/* Every card whole, equal-sized, and scaled up to fill the available space without scrolling. */
 	.cards {
 		display: grid;
 		flex: 1 1 auto;
-		align-self: flex-start;
-		grid-template-columns: repeat(auto-fill, minmax(10.8rem, 1fr));
+		align-self: stretch;
+		grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr));
 		grid-auto-rows: 1fr;
-		align-content: start;
-		gap: 0.35rem 0.5rem;
-		max-height: 100%;
+		align-content: stretch;
+		gap: calc(0.45rem * var(--s, 1)) calc(0.6rem * var(--s, 1));
+		height: 100%;
 		min-height: 0;
-		padding: 0.1rem 0.15rem 0.15rem 0.1rem;
+		padding: 0.15rem 0.2rem 0.2rem 0.15rem;
 		overflow: hidden auto;
 	}
 
 	.card {
 		display: flex;
 		flex-direction: column;
-		gap: 0.15rem;
+		gap: calc(0.18rem * var(--s, 1));
+		min-height: 0;
 	}
 
 	.claim {
 		display: flex;
 		align-items: flex-end;
 		justify-content: center;
-		height: 1.25rem;
+		height: calc(1.35rem * var(--s, 1));
 	}
 
 	/* Words standing on the open map get a dark slip of their own, since the map under them may be pale land. */
@@ -536,8 +595,8 @@
 	.who {
 		display: inline-flex;
 		align-items: flex-end;
-		gap: 0.25rem;
-		font-size: 0.76rem;
+		gap: calc(0.28rem * var(--s, 1));
+		font-size: calc(0.8rem * var(--s, 1));
 	}
 
 	.me {
@@ -551,7 +610,7 @@
 	.me input {
 		field-sizing: content;
 		min-width: 2ch;
-		max-width: 9rem;
+		max-width: calc(9rem * var(--s, 1));
 		padding: 0 0.15rem;
 		border: 0;
 		border-bottom: 1px dashed transparent;
@@ -573,8 +632,8 @@
 	}
 
 	.pen {
-		width: 0.65rem;
-		height: 0.65rem;
+		width: calc(0.68rem * var(--s, 1));
+		height: calc(0.68rem * var(--s, 1));
 		fill: var(--muted);
 		opacity: 0.6;
 	}
@@ -585,15 +644,15 @@
 	}
 
 	.pawn {
-		width: 0.8rem;
-		height: 1.05rem;
+		width: calc(0.88rem * var(--s, 1));
+		height: calc(1.15rem * var(--s, 1));
 		fill: var(--seat);
 		filter: drop-shadow(0 2px 2px rgb(0 0 0 / 0.6));
 	}
 
 	.free {
 		color: var(--muted);
-		font-size: 0.68rem;
+		font-size: calc(0.72rem * var(--s, 1));
 		font-style: italic;
 	}
 
@@ -601,8 +660,8 @@
 		display: flex;
 		flex: 1;
 		flex-direction: column;
-		gap: 0.28rem;
-		padding: 0.38rem 0.48rem;
+		gap: calc(0.38rem * var(--s, 1));
+		padding: calc(0.5rem * var(--s, 1)) calc(0.6rem * var(--s, 1));
 		border: 2px solid transparent;
 		border-radius: 4px;
 		background: var(--document);
@@ -642,15 +701,15 @@
 
 	.top {
 		display: flex;
-		gap: 0.4rem;
+		gap: calc(0.5rem * var(--s, 1));
 		align-items: center;
 	}
 
 	.portrait {
 		position: relative;
 		flex: none;
-		width: 2.05rem;
-		height: 2.05rem;
+		width: calc(2.45rem * var(--s, 1));
+		height: calc(2.45rem * var(--s, 1));
 		border-radius: 3px;
 		overflow: hidden;
 	}
@@ -658,13 +717,13 @@
 	.title {
 		display: flex;
 		flex-direction: column;
-		gap: 0.04rem;
+		gap: calc(0.06rem * var(--s, 1));
 		min-width: 0;
 	}
 
 	.title strong {
 		font-family: var(--font-display);
-		font-size: 0.96rem;
+		font-size: calc(1.12rem * var(--s, 1));
 		font-weight: 400;
 		line-height: 1.05;
 	}
@@ -672,22 +731,22 @@
 	.title small,
 	.kind {
 		color: var(--slip-muted);
-		font-size: 0.64rem;
+		font-size: calc(0.7rem * var(--s, 1));
 	}
 
 	.traits {
 		display: flex;
 		flex: 1;
 		flex-direction: column;
-		gap: 0.18rem;
+		gap: calc(0.26rem * var(--s, 1));
 	}
 
 	.line {
 		display: block;
-		padding-left: 0.35rem;
-		border-left: 2.5px solid var(--ink-good);
-		font-size: 0.63rem;
-		line-height: 1.18;
+		padding-left: calc(0.42rem * var(--s, 1));
+		border-left: 3px solid var(--ink-good);
+		font-size: calc(0.7rem * var(--s, 1));
+		line-height: 1.24;
 	}
 
 	.line.ability {
@@ -702,8 +761,8 @@
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		width: 0.72rem;
-		height: 0.72rem;
+		width: calc(0.8rem * var(--s, 1));
+		height: calc(0.8rem * var(--s, 1));
 		margin-right: 0.15rem;
 		vertical-align: -0.14em;
 	}
@@ -713,15 +772,15 @@
 	}
 
 	.line b {
-		margin-right: 0.2rem;
-		font-size: 0.67rem;
+		margin-right: 0.22rem;
+		font-size: calc(0.74rem * var(--s, 1));
 		font-weight: 700;
 	}
 
 	.text {
 		margin: 0;
-		font-size: 0.63rem;
-		line-height: 1.18;
+		font-size: calc(0.7rem * var(--s, 1));
+		line-height: 1.24;
 	}
 
 	.line.struck b,
@@ -737,9 +796,9 @@
 
 	.slot-empty {
 		display: block;
-		flex: 1 1 1.05rem;
-		min-height: 1.05rem;
-		max-height: 2.1rem;
+		flex: 1 1 calc(1.1rem * var(--s, 1));
+		min-height: calc(1.1rem * var(--s, 1));
+		max-height: calc(2.6rem * var(--s, 1));
 		border: 1px dashed rgb(42 32 23 / 0.28);
 		border-radius: 2px;
 		background: rgb(42 32 23 / 0.035);
@@ -759,20 +818,20 @@
 	.exposure {
 		display: flex;
 		align-items: center;
-		gap: 0.16rem;
+		gap: calc(0.2rem * var(--s, 1));
 		margin-top: auto;
-		padding-top: 0.24rem;
+		padding-top: calc(0.3rem * var(--s, 1));
 		border-top: 1px dotted rgb(42 32 23 / 0.3);
 	}
 
 	.exposure .kind {
-		margin-right: 0.18rem;
+		margin-right: calc(0.22rem * var(--s, 1));
 	}
 
 	.exposure i {
 		display: block;
-		width: 0.68rem;
-		height: 0.68rem;
+		width: calc(0.78rem * var(--s, 1));
+		height: calc(0.78rem * var(--s, 1));
 		border: 1px solid rgb(42 32 23 / 0.45);
 		border-radius: 2px;
 	}
