@@ -3,6 +3,7 @@ import { pack } from './content/pack';
 import type { EventId, ObjectiveId, ScarId } from './content/types';
 import { drawBottom, drawPiled, drawTop, newDeck, newPiledDeck, stackOnTop } from './decks';
 import {
+	breakthrough,
 	characterOf,
 	cityDef,
 	grid,
@@ -467,7 +468,7 @@ export function infectCity(world: World, city: CityId, cardId: CardId) {
 		game.stockpile += 1;
 		log(game, { t: 'infect', city, card: cardId, effect: 'supply' });
 		const color = cityDef(city).color;
-		if (hasRule(campaign, 'topazShield') && color) {
+		if (breakthrough(campaign, 'topaz') && color) {
 			const canPay = game.seats.some(seat =>
 				player(game, seat).hand.some(id => {
 					const held = campaign.playerCards[id]!;
@@ -553,7 +554,7 @@ export function epidemic(world: World) {
 	if (struck) {
 		const location = game.locations[struck.city]!;
 		if (!sparedByCard(world, struck.city, struck.id))
-			removed = hasRule(campaign, 'gentleEpidemic') ? Math.min(1, location.supplies) : location.supplies;
+			removed = breakthrough(campaign, 'jade') ? Math.min(1, location.supplies) : location.supplies;
 		game.stockpile += removed;
 		location.supplies -= removed;
 		game.infectionDiscard.push(struck.id);

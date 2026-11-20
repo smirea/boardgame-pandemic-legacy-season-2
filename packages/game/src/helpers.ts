@@ -51,6 +51,12 @@ export const reconned = (campaign: Campaign, route: ReconRoute) =>
 	route.opens ? campaign.opened.includes(sealKey(route.opens)) : campaign.planRecons.includes(route.id);
 export const hasRule = (campaign: Campaign, rule: RuleId) => campaign.rules.includes(rule);
 
+/** The labs whose breakthroughs door 13 explains, by the city each stands in. */
+export const LABS = { opal: 'buenos-aires', jade: 'johannesburg', topaz: 'wellington' } as const;
+/** A lab's breakthrough holds once the lab is found and door 13 has explained the breakthroughs. */
+export const breakthrough = (campaign: Campaign, lab: keyof typeof LABS) =>
+	hasRule(campaign, 'labBreakthroughs') && campaign.locations[LABS[lab] as CityId]?.lab === true;
+
 export function neighbours(campaign: Campaign, city: CityId, kind?: EdgeKind): CityId[] {
 	const result: CityId[] = [];
 	for (const edge of campaign.edges) {

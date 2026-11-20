@@ -218,14 +218,13 @@ const seals: SealDef[] = [
 		{ t: 'stockpileBonus', amount: 15 },
 	]),
 	aid('12', 'Forsaken cities legend'),
-	aid('13', 'Lab breakthroughs'),
+	sealed(door('13'), 'Lab breakthroughs', [{ t: 'rule', rule: 'labBreakthroughs' }]),
 	aid('14', 'Infested cities legend'),
 	sealed(door('17'), 'The Hollow Men defect', [...opens('58'), { t: 'turningPoint', id: 'defection', over: true }]),
 	sealed(door('18'), 'The Immunologist', [{ t: 'job', job: 'immunologist', home: city('buenos-aires') }]),
 	sealed(door('19'), 'Topaz lab found', [
 		region('new-zealand', ['haven-coral-sea', 'wellington', 'sea']),
 		{ t: 'lab', city: city('wellington') },
-		{ t: 'rule', rule: 'topazShield' },
 		...opens('41', '61', '13', '30'),
 	]),
 	sealed(door('20'), 'Opal lab found', [{ t: 'lab', city: city('buenos-aires') }, ...opens('18', '61', '30', '13')]),
@@ -274,7 +273,6 @@ const seals: SealDef[] = [
 	sealed(door('46'), 'Jade lab found', [
 		{ t: 'lab', city: city('johannesburg') },
 		{ t: 'job', job: 'scientist', home: city('johannesburg') },
-		{ t: 'rule', rule: 'gentleEpidemic' },
 	]),
 	sealed(door('47'), 'New scars', [
 		{ t: 'scar', scar: 'laneExtraCube' },

@@ -7,6 +7,7 @@ import type { EdgeDef, EventId, ScarId, SearchResult } from './content/types';
 import { edge } from './content/world';
 import { beginTurn, bump, epidemicCount, placeHollow, setupInfection } from './flow';
 import {
+	breakthrough,
 	grid,
 	handLimit,
 	hasEdge,
@@ -142,6 +143,7 @@ describe('supplies', () => {
 			character(world, A).job = 'immunologist';
 			character(world, A).slots[1] = { kind: 'ability', id: 'courier' };
 			game.stockpile = 0;
+			world.campaign.rules = world.campaign.rules.filter(rule => rule !== 'labBreakthroughs');
 		});
 		const reserve = gameOf(actor).reserve;
 		act(actor, { a: 'makeSupplies' });
@@ -662,7 +664,7 @@ describe('storage and shields', () => {
 
 	test('from September an Epidemic strikes a stored Infection card before the bottom of the deck', () => {
 		const actor = late((world, game) => {
-			world.campaign.rules = world.campaign.rules.filter(rule => rule !== 'gentleEpidemic');
+			world.campaign.rules = world.campaign.rules.filter(rule => rule !== 'labBreakthroughs');
 			const epidemic = Object.values(world.campaign.playerCards).find(card => card.kind === 'epidemic')!.id;
 			game.playerDeck.order = [epidemic, ...game.playerDeck.order.filter(card => card !== epidemic)];
 			game.playerDeck.piles = [{ size: game.playerDeck.order.length, epidemics: 10 }];
@@ -900,9 +902,26 @@ describe('events and companions', () => {
 		expect(gameOf(held).epidemics).toBe(1);
 	});
 
+	test('with Opal found and door 13 open, making supplies at a haven or supply center takes 2 cubes, elsewhere 1', () => {
+		const making = (where: string) =>
+			late(world => {
+				world.game!.players[A]!.location = city(where);
+				world.game!.locations[city('cairo')]!.center = false;
+			});
+		const atHaven = making('haven-north-atlantic');
+		act(atHaven, { a: 'makeSupplies' });
+		expect(gameOf(atHaven).players[A]!.supplies).toBe(2);
+		const inCity = making('cairo');
+		act(inCity, { a: 'makeSupplies' });
+		expect(gameOf(inCity).players[A]!.supplies).toBe(1);
+	});
+
 	test('Surplus is played by the active player after they Make Supplies that turn', () => {
 		let card = '' as CardId;
-		const actor = late(world => void (card = conjure(world, A, { kind: 'event', event: 'surplus' })));
+		const actor = late(world => {
+			card = conjure(world, A, { kind: 'event', event: 'surplus' });
+			world.campaign.rules = world.campaign.rules.filter(rule => rule !== 'labBreakthroughs');
+		});
 		const play = { type: 'PLAY', seat: A, card, play: { e: 'surplus' } } as const;
 		expect(reject(worldOf(actor), phase(actor), play)).toBe('Play it after you Make Supplies this turn');
 		act(actor, { a: 'makeSupplies' });
@@ -1202,7 +1221,7 @@ test('a Cordon card lets any player discard to end the Infect step', () => {
 	const actor = late((world, game) => {
 		const [cairo] = infectionCards(world, 'cairo');
 		(world.campaign.infectionCards[cairo!] as { improvement: string }).improvement = 'cordon';
-		world.campaign.rules = world.campaign.rules.filter(rule => rule !== 'topazShield');
+		world.campaign.rules = world.campaign.rules.filter(rule => rule !== 'labBreakthroughs');
 		stackInfection(world, ['cairo', 'lagos']);
 		give(world, C, cityCards(world, 'tokyo'));
 		game.infectionsLeft = 2;
@@ -1507,7 +1526,7 @@ describe('the remaining abilities and the Jade lab', () => {
 			game.locations[bottom.city]!.supplies = 3;
 			game.drawsLeft = 2;
 		}, 'playing.draw');
-		expect(worldOf(actor).campaign.rules).toContain('gentleEpidemic');
+		expect(breakthrough(worldOf(actor).campaign, 'jade')).toBe(true);
 		const struck = (
 			worldOf(actor).campaign.infectionCards[gameOf(actor).infectionDeck.order.at(-1)!] as unknown as { city: CityId }
 		).city;
@@ -2870,7 +2889,10 @@ describe('scars and the sticker pool', () => {
 	});
 
 	test('Wasteful: Make Supplies also moves a cube from the stockpile to the reserve', () => {
-		const actor = late(world => scarred(world, A, 'wasteful'));
+		const actor = late(world => {
+			scarred(world, A, 'wasteful');
+			world.campaign.rules = world.campaign.rules.filter(rule => rule !== 'labBreakthroughs');
+		});
 		const before = gameOf(actor);
 		act(actor, { a: 'makeSupplies' });
 		expect(gameOf(actor).stockpile).toBe(before.stockpile - 2);

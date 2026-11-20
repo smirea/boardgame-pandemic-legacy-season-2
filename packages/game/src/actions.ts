@@ -24,6 +24,7 @@ import {
 	removeFromHand,
 	seaRoute,
 	reconned,
+	breakthrough,
 } from './helpers';
 import type { CardId, CityId, SeatId } from './ids';
 import { isOpen, openSeal } from './legacy';
@@ -301,8 +302,13 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 	makeSupplies: {
 		check: ctx => (ctx.game[trait(ctx, 'immunologist') ? 'reserve' : 'stockpile'] > 0 ? ok : 'No cubes left to take'),
 		apply(ctx) {
-			ctx.game[trait(ctx, 'immunologist') ? 'reserve' : 'stockpile'] -= 1;
+			const source = trait(ctx, 'immunologist') ? 'reserve' : 'stockpile';
+			ctx.game[source] -= 1;
 			ctx.me.supplies += 1;
+			if (breakthrough(ctx.campaign, 'opal') && (ctx.def.kind === 'haven' || ctx.loc.center) && ctx.game[source] > 0) {
+				ctx.game[source] -= 1;
+				ctx.me.supplies += 1;
+			}
 			if (trait(ctx, 'wasteful') && ctx.game.stockpile > 0) {
 				ctx.game.stockpile -= 1;
 				ctx.game.reserve += 1;

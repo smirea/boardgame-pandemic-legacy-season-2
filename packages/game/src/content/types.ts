@@ -200,12 +200,10 @@ export type RuleId =
 	| 'hollowSetup'
 	/** Epidemics infect from the stored Infection cards before the bottom of the deck. */
 	| 'epidemicFromStorage'
-	/** Any player may discard a matching-colour City card to cancel one cube removal. */
-	| 'topazShield'
 	| 'storage'
 	| 'carrier'
-	/** An Epidemic's Infect step removes 1 cube instead of all of them. */
-	| 'gentleEpidemic';
+	/** Each lab found gives its breakthrough (`breakthrough`). */
+	| 'labBreakthroughs';
 
 export type ObjectiveId =
 	| 'prologueCenters'
