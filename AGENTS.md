@@ -77,6 +77,7 @@
   - Agents drive it through `window.STUDIO` (`StudioApi` in `#lib/studio/stage.ts`): `await STUDIO.ready()`, `load(sceneOf(scenarios.october()))`, `send(command)`, `bot(n)`, `pin({x, y})`, `settle()`, `scene()`, `capture(name)`, `export(ids)`, `history()` and `rewind(at)`. A tab in the background draws rarely, so `settle()` after a command can take a couple of seconds there.
 
 - Local web host: boardgame-pandemic-legacy-season-2.localhost -> 6190; browser API calls use the /api proxy.
+- Ports 6190 (UI), 6191 (API) and 6192 (signal) are the owner's own `bun run dev`. Agents never start, stop or open servers on them. An agent runs its own dev server on a block of its own, with exported variables (they override `.env` and `.env.local`): `UI_PORT=6390 PORT=6391 SERVER_URL=http://127.0.0.1:6391 DEV_SIGNAL_PORT=6392 bun run dev`. Take the next free block of 100 (6390, 6490, ...) and stop it when done. A browser keeps `localStorage` per port, so a save made on one port is not on another.
 
 # ProcrastiMate
 
