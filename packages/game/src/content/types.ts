@@ -304,6 +304,8 @@ export type Unlock =
 	| { t: 'lab'; city: CityId }
 	| { t: 'infest'; city: CityId }
 	| { t: 'forsake'; city: CityId }
+	/** The city is gone: covered on the map, its cards and lines destroyed, its ground closed to every line. */
+	| { t: 'destroy'; city: CityId }
 	/** A scar the group must place on a character of its choice when the next game begins. */
 	| { t: 'owedScar' }
 	/** Tells the group which Monitor frequencies open something, the reward for triangulating the signals. */

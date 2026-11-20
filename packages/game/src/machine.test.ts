@@ -539,6 +539,20 @@ describe('Hollow Men and forsaken cities', () => {
 		expect(worldOf(actor).campaign.turningPoints).not.toContain('defection');
 	});
 
+	test('June forces Europe when it was never reconned, and door 21 destroys Frankfurt with its cards and lines', () => {
+		const world: World = { campaign: newCampaign(4), game: null, table: newTable() };
+		const june = pack.legacyDeck.find(card => card.month === 6)!;
+		for (const unlock of june.unlocks) applyUnlock(world, unlock);
+		const { campaign } = world;
+		expect(campaign.forced).toContain('package:4');
+		expect(campaign.opened).toContain('door:21');
+		expect(campaign.locations[city('frankfurt')]!.revealed).toBe(false);
+		expect(campaign.locations[city('paris')]!.revealed).toBe(true);
+		const cards = [...Object.values(campaign.playerCards), ...Object.values(campaign.infectionCards)];
+		expect(cards.some(card => 'city' in card && card.city === 'frankfurt')).toBe(false);
+		expect(campaign.edges.some(edge => edge.a === 'frankfurt' || edge.b === 'frankfurt')).toBe(false);
+	});
+
 	test('November forces the defection when no game ended with Hollow Men in three havens, and two scars are owed', () => {
 		const world: World = { campaign: newCampaign(4), game: null, table: newTable() };
 		const november = pack.legacyDeck.find(card => card.month === 11)!;

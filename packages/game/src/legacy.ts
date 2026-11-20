@@ -310,6 +310,30 @@ export function applyUnlock(world: World, unlock: Unlock, by?: SeatId) {
 			campaign.locations[unlock.city]!.population = 0;
 			campaign.locations[unlock.city]!.infested = true;
 			return;
+		case 'destroy': {
+			const record = campaign.locations[unlock.city]!;
+			Object.assign(record, { revealed: false, population: 0, permanent: [], lab: false });
+			campaign.edges = campaign.edges.filter(edge => edge.a !== unlock.city && edge.b !== unlock.city);
+			const gone = new Set<CardId>(
+				[...Object.values(campaign.playerCards), ...Object.values(campaign.infectionCards)].flatMap(card =>
+					'city' in card && card.city === unlock.city ? [card.id] : [],
+				),
+			);
+			for (const id of gone) {
+				delete campaign.playerCards[id];
+				delete campaign.infectionCards[id];
+			}
+			campaign.stored.player = campaign.stored.player.filter(id => !gone.has(id));
+			campaign.stored.infection = campaign.stored.infection.filter(id => !gone.has(id));
+			if (game) {
+				const keep = (ids: CardId[]) => ids.filter(id => !gone.has(id));
+				for (const seat of game.seats) game.players[seat]!.hand = keep(game.players[seat]!.hand);
+				game.playerDiscard = keep(game.playerDiscard);
+				game.infectionDiscard = keep(game.infectionDiscard);
+				game.gameEndArea = keep(game.gameEndArea);
+			}
+			return;
+		}
 		case 'owedScar':
 			campaign.owedScars += 1;
 			return;

@@ -229,7 +229,7 @@ const seals: SealDef[] = [
 		...opens('41', '61', '13', '30'),
 	]),
 	sealed(door('20'), 'Opal lab found', [{ t: 'lab', city: city('buenos-aires') }, ...opens('18', '61', '30', '13')]),
-	sealed(door('21'), 'Frankfurt lost', [{ t: 'forsake', city: city('frankfurt') }]),
+	sealed(door('21'), 'Frankfurt destroyed', [{ t: 'destroy', city: city('frankfurt') }]),
 	sealed(door('22'), 'Pearl lab reached', [{ t: 'lab', city: city('lake-baikal') }, ...opens('Q', '38', '27', '32')]),
 	aid('23', 'Supply line reference'),
 	aid('24', 'Sea lane reference'),
