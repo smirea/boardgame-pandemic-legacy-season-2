@@ -182,6 +182,8 @@ function candidateActions(world: World, seat: SeatId): Action[] {
 	}
 	for (const route of pack.reconRoutes) {
 		if (route.city !== here || !campaign.routes.includes(route.id)) continue;
+		// Paying nothing is never legal, but its refusal says what this route still needs.
+		candidates.push({ a: 'recon', route: route.id, cards: [] });
 		for (const count of [route.count - 1, route.count, route.count + 1])
 			for (const cards of payments(world, hand, route.color, count, 'recon', route.unique))
 				candidates.push({ a: 'recon', route: route.id, cards });
@@ -291,8 +293,12 @@ export function actionMenu(world: World, seat: SeatId): ActionChoice[] {
 			const actions = verdicts.flatMap(verdict => (verdict.reason === null ? [verdict.action] : []));
 			if (actions.length) return { a: id, actions, reason: null };
 			if (!isFreeAction(id) && game.actionsLeft === 0) return { a: id, actions, reason: 'No actions left' };
+			// A shortfall ("Needs 2 cubes") comes from a target that was otherwise fine, so it says more than the
+			// refusals of targets that were never in reach.
+			const shortfalls = verdicts.filter(({ reason }) => reason!.startsWith('Needs '));
 			const counts = new Map<string, number>();
-			for (const { reason } of verdicts) counts.set(reason!, (counts.get(reason!) ?? 0) + 1);
+			for (const { reason } of shortfalls.length ? shortfalls : verdicts)
+				counts.set(reason!, (counts.get(reason!) ?? 0) + 1);
 			const common = [...counts].sort((a, b) => b[1] - a[1])[0]?.[0];
 			return { a: id, actions, reason: common ?? NEEDS[id] ?? 'Nothing to do with it here' };
 		});

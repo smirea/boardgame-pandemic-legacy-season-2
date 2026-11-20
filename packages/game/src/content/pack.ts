@@ -874,7 +874,7 @@ export const pack: ContentPack = {
 			name: 'Resilience',
 			text: 'Set aside up to 2 discarded Infection cards of one city until game end.',
 		},
-		{ id: 'handout', name: 'Handout', text: 'Move up to 2 cubes from the stockpile to locations on the grid.' },
+		{ id: 'handout', name: 'Handout', text: 'Move up to 2 cubes from the stockpile to any locations on the map.' },
 		{ id: 'cardSwap', name: 'Card Swap', text: 'Two players trade one card each.' },
 		{ id: 'spreadOut', name: 'Spread Out', text: 'Move up to 3 cubes from one haven to locations on the grid.' },
 		{ id: 'cleanse', name: 'Cleanse', text: 'Remove up to 2 Plague cubes from the grid.' },

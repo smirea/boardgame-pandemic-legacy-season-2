@@ -394,7 +394,7 @@ Exact catalog of all **18 regular scars** (+ **4 Carrier** double-slot scars):
 ## L-17. Player card types & complete Event list [R]
 
 - **Rationed Events (15 total):**
-  - Base (4): _Resilient Population_ (1–2 matching city Infection discards to Game End, playable between Epidemic steps 2–3), _Airlift_ (move any 1 pawn anywhere), _Team Bravo_ (up to 2 stockpile cubes to any grid location), _One Quiet Night_ (skip next Infect Cities step).
+  - Base (4): _Resilient Population_ (1–2 matching city Infection discards to Game End, playable between Epidemic steps 2–3), _Airlift_ (move any 1 pawn anywhere), _Team Bravo_ (up to 2 stockpile cubes to any location), _One Quiet Night_ (skip next Infect Cities step).
   - End of Jan (`01-08`..`01-11`, 4): _Data Transfer_, _Dispersal_, _Drastic Measures_, _Extended Forecast_.
   - End of Feb (`02-08`..`02-10`, 3): _Hidden Stockpile_, _It Worked the First Time_, _Extended Time_ (+3 actions).
   - End of Jun (`06-04`..`06-05`, 2): _Inoculation Unit_ (up to 3 Infection discards to Package 6), _Expeditionary Voyage_ (free sea lane ignoring red lines).

@@ -260,7 +260,9 @@ export function actionDetail(world: World, action: Action): Rich {
 			return [
 				action.give ? 'Give ' : 'Take ',
 				cardRef(world, action.card),
-				` ${action.give ? 'to' : 'from'} ${seatName(world, action.with)}${full ? ', who must then discard' : ''}`,
+				` ${action.give ? 'to' : 'from'} ${seatName(world, action.with)}`,
+				// The one who receives the card goes over the limit: the other player on a give, this one on a take.
+				full ? (action.give ? ', who must then discard' : ', then discard') : '',
 			];
 		}
 		case 'buildCenter':
