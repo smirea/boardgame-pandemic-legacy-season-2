@@ -1,5 +1,15 @@
 import { framesOf, pack, parseRecord } from '@repo/game';
-import type { CityId, Command, GameRecord, PlayerId, PublicState, RecordNote, SeatId, World } from '@repo/game';
+import type {
+	BriefingSource,
+	CityId,
+	Command,
+	GameRecord,
+	PlayerId,
+	PublicState,
+	RecordNote,
+	SeatId,
+	World,
+} from '@repo/game';
 import type { BoardMarks, MarkTone } from '#lib/board/types.ts';
 import { beatOf } from './beats.ts';
 import type { Beat, Mark, Moment } from './beats.ts';
@@ -286,11 +296,16 @@ function markersOf(timeline: TimelineStep[]): Marker[] {
 export function load(raw: unknown, seated: string[] = []): Loaded {
 	const record = parseRecord(typeof raw === 'string' ? JSON.parse(raw) : raw);
 	const frames = framesOf(record);
-	// Recordings play back as written, and those made before the briefing was structured hold it as plain lines.
+	// Recordings play back as written. Older ones hold the briefing as plain lines, or cards without their source.
+	const legacy: BriefingSource = { t: 'legacy', doors: [] };
 	for (const frame of frames) {
 		const campaign = frame.world.campaign;
 		campaign.briefing = campaign.briefing.map(entry =>
-			typeof entry === 'string' ? { t: 'card', title: entry, text: null } : entry,
+			typeof entry === 'string'
+				? { t: 'card', title: entry, text: null, from: legacy }
+				: entry.t === 'card' && !entry.from
+					? { ...entry, from: legacy }
+					: entry,
 		);
 	}
 	const notes = record.notes.toSorted((a, b) => a.at - b.at).map((note, key) => ({ ...note, frame: 0, key }));

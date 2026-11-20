@@ -87,8 +87,14 @@ export type GameResult = {
 };
 
 /** A Legacy card or opened bundle as read, or one thing it unlocked, worded for its heading (`briefingSections`). */
+/** What a briefing card came out of: a Legacy card read, a bundle opened (with its package and doors), or a turning point. */
+export type BriefingSource =
+	| { t: 'legacy'; doors: DoorId[] }
+	| { t: 'bundle'; package: number | null; doors: DoorId[] }
+	| { t: 'turningPoint' };
+
 export type BriefingEntry =
-	| { t: 'card'; title: string; text: string | null }
+	| { t: 'card'; title: string; text: string | null; from: BriefingSource }
 	| { t: 'unlock'; unlock: BriefedUnlock; text: string };
 
 /** Everything that survives from one game to the next. */

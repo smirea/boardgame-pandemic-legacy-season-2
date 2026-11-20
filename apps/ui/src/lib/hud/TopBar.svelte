@@ -55,7 +55,12 @@
 				>
 			{/if}
 			<button onclick={onreset} title="Show the whole map">Fit map</button>
-			<button onclick={onbox} title="The packages and dossier doors opened so far" data-testid="open-box">Box</button>
+			<button
+				onclick={onbox}
+				title="The packages and dossier doors opened so far"
+				data-testid="open-box"
+				data-dest="box">Box</button
+			>
 			<button onclick={onmenu}>Menu</button>
 		</div>
 	</header>

@@ -1,19 +1,12 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { briefingSections, pack } from '@repo/game';
-	import type {
-		BriefedUnlock,
-		CityId,
-		InfectionCard as InfectionCardData,
-		BriefingEntry,
-		Campaign,
-		PlayerCard as PlayerCardData,
-	} from '@repo/game';
-	import InfectionCard from '#lib/cards/InfectionCard.svelte';
-	import ActionIcon from './ActionIcon.svelte';
-	import { ACTION_ICON } from './labels.svelte.ts';
+	import type { BriefingEntry, Campaign } from '@repo/game';
+	import BriefPiece from './BriefPiece.svelte';
 	import ObjectiveTag from './ObjectiveTag.svelte';
-	import PlayerCard from './PlayerCard.svelte';
+
+	// Unlocks that show as a card or cubes get a grid, so the pieces line up.
+	const PIECES = new Set(['cityImprovement', 'infectionImprovement', 'event', 'gather', 'assemble', 'stockpileBonus']);
 
 	type Props = { briefing: BriefingEntry[]; campaign: Campaign; passive: boolean; oncontinue: () => void };
 
@@ -21,52 +14,6 @@
 
 	const sections = $derived(briefingSections(briefing));
 	const objectives = $derived(pack.objectives.filter(objective => campaign.objectives.includes(objective.id)));
-
-	// An improvement is bought for any card, so it is shown on a city the group already knows.
-	const known = <T extends { kind: string }>(cards: T[]) =>
-		cards.find(card => 'city' in card && campaign.locations[card.city as CityId]?.revealed) as
-			| Extract<T, { kind: 'city' }>
-			| undefined;
-	const samplePlayer = $derived(known(Object.values(campaign.playerCards)));
-	const sampleInfection = $derived(known(Object.values(campaign.infectionCards)));
-
-	/** The game piece an unlock puts on the table, when it is one. */
-	function piece(
-		unlock: BriefedUnlock,
-	):
-		| { t: 'player'; card: PlayerCardData }
-		| { t: 'infection'; card: InfectionCardData; copies: number }
-		| { t: 'cubes'; count: number }
-		| { t: 'action'; action: keyof typeof ACTION_ICON }
-		| null {
-		switch (unlock.t) {
-			case 'cityImprovement':
-				return samplePlayer
-					? { t: 'player', card: { ...samplePlayer, improvement: unlock.improvement, search: [] } }
-					: null;
-			case 'infectionImprovement':
-				return sampleInfection
-					? { t: 'infection', card: { ...sampleInfection, improvement: unlock.improvement }, copies: 1 }
-					: null;
-			case 'event': {
-				const card = Object.values(campaign.playerCards).find(
-					card => card.kind === 'event' && card.event === unlock.event,
-				);
-				return card ? { t: 'player', card } : null;
-			}
-			case 'gather':
-			case 'assemble': {
-				const card = Object.values(campaign.infectionCards).find(card => card.kind === unlock.t);
-				return card ? { t: 'infection', card, copies: unlock.cards } : null;
-			}
-			case 'stockpileBonus':
-				return { t: 'cubes', count: unlock.amount };
-			case 'action':
-				return unlock.action in ACTION_ICON ? { t: 'action', action: unlock.action as keyof typeof ACTION_ICON } : null;
-			default:
-				return null;
-		}
-	}
 </script>
 
 <div class="briefing" class:passive {@attach feedback('Briefing', () => ({ briefing }))}>
@@ -91,24 +38,10 @@
 							Complete {Math.min(campaign.required, objectives.length)} of {objectives.length} to win.
 						</p>
 					{:else}
-						{@const pieces = section.items.map(item => ({ ...item, piece: piece(item.unlock) }))}
-						<ul class:pieces={pieces.some(item => item.piece && item.piece.t !== 'action')}>
-							{#each pieces as item, index (index)}
+						<ul class:pieces={section.items.some(item => PIECES.has(item.unlock.t))}>
+							{#each section.items as item, index (index)}
 								<li {@attach feedback('Unlock', () => item.unlock)}>
-									{#if item.piece?.t === 'player'}
-										<span class="piece"><PlayerCard card={item.piece.card} /></span>
-									{:else if item.piece?.t === 'infection'}
-										<span class="piece infection">
-											<InfectionCard card={item.piece.card} />
-											{#if item.piece.copies > 1}<b class="copies">×{item.piece.copies}</b>{/if}
-										</span>
-									{:else if item.piece?.t === 'cubes'}
-										<span class="piece cubes" role="img" aria-label={`${item.piece.count} supply cubes`}>
-											{#each { length: item.piece.count } as _, cube (cube)}<i></i>{/each}
-										</span>
-									{:else if item.piece?.t === 'action'}
-										<ActionIcon action={item.piece.action} size="1.9rem" />
-									{/if}
+									<BriefPiece unlock={item.unlock} {campaign} />
 									<p>{item.text}</p>
 								</li>
 							{/each}
@@ -231,41 +164,6 @@
 
 	.passive ul.pieces {
 		grid-template-columns: 1fr;
-	}
-
-	.piece {
-		--card-size: 0.6rem;
-		position: relative;
-		display: flex;
-		flex: none;
-	}
-
-	.piece.infection {
-		--card-size: 0.56rem;
-	}
-
-	.copies {
-		align-self: flex-end;
-		margin-left: 0.3rem;
-		padding: 0 0.35rem;
-		border-radius: 2px;
-		background: var(--paper-ink);
-		color: var(--paper);
-		font-size: 0.8rem;
-	}
-
-	.cubes {
-		flex-wrap: wrap;
-		filter: drop-shadow(0 1px 0.5px rgb(20 12 4 / 0.6));
-		width: 4.6rem;
-		gap: 3px;
-	}
-
-	.cubes i {
-		width: 0.8rem;
-		height: 0.8rem;
-		background: conic-gradient(from 30deg at 50% 35%, #b1a38a 0deg 120deg, #e0d5bb 120deg 240deg, #fff5dc 240deg);
-		clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
 	}
 
 	.primary {

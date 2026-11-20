@@ -51,6 +51,7 @@
 	import Lobby from './Lobby.svelte';
 	import CharacterSelect from './CharacterSelect.svelte';
 	import Briefing from './Briefing.svelte';
+	import Unboxing from './Unboxing.svelte';
 	import LegacyBox from './LegacyBox.svelte';
 	import Objectives from './Objectives.svelte';
 	import SeatPicker from './SeatPicker.svelte';
@@ -962,7 +963,7 @@
 		onbox={() => (boxOpen = !boxOpen)}
 	/>
 
-	<main class="stage" bind:this={stage}>
+	<main class="stage" bind:this={stage} data-dest="map">
 		<Board
 			view={boardView}
 			oncity={clickCity}
@@ -1118,12 +1119,14 @@
 				transition:fade={{ duration: 200 }}
 			>
 				<div in:fly={{ y: 24, duration: 300 }}>
-					<Briefing
-						briefing={shownBriefing}
-						{campaign}
-						passive={spectator}
-						oncontinue={() => (spectator ? (briefingRead = briefingKey) : send({ type: 'ACK_BRIEFING' }))}
-					/>
+					{#if spectator}
+						<Briefing briefing={shownBriefing} {campaign} passive oncontinue={() => (briefingRead = briefingKey)} />
+					{:else}
+						<!-- Each new briefing is unpacked from the start. -->
+						{#key briefingKey}
+							<Unboxing briefing={shownBriefing} {campaign} oncontinue={() => send({ type: 'ACK_BRIEFING' })} />
+						{/key}
+					{/if}
 				</div>
 			</div>
 		{:else if choosingCharacters}

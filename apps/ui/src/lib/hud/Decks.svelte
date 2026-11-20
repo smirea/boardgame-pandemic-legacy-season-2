@@ -61,6 +61,7 @@
 	<div
 		class="deck"
 		data-deck={which}
+		data-dest={which === 'player' ? 'playerDeck' : 'infectionDeck'}
 		role="button"
 		tabindex="0"
 		aria-label={label}

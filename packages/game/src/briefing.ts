@@ -1,6 +1,6 @@
 import { pack } from './content/pack';
 import type { ActionId, RuleId, Unlock } from './content/types';
-import type { BriefingEntry, Campaign } from './state';
+import type { BriefingEntry, BriefingSource, Campaign } from './state';
 
 /** One line on what each unlockable action does, as a briefing announces it under its New actions heading. */
 export const actionBriefs: Partial<Record<ActionId, string>> = {
@@ -84,6 +84,27 @@ export function briefingSections(briefing: BriefingEntry[]): BriefingSection[] {
 		group.items.push({ unlock: entry.unlock, text: entry.text });
 	}
 	return sections;
+}
+
+/** One thing opened and what came out of it, the unit the table unpacks one at a time. */
+export type Opening = {
+	title: string;
+	text: string | null;
+	from: BriefingSource;
+	items: { unlock: BriefedUnlock; text: string }[];
+};
+
+/** A briefing split into what was opened, in the order it was opened. Unlocks before any card belong to the month's setup. */
+export function openings(briefing: BriefingEntry[]): Opening[] {
+	const result: Opening[] = [];
+	for (const entry of briefing) {
+		if (entry.t === 'card') result.push({ title: entry.title, text: entry.text, from: entry.from, items: [] });
+		else {
+			if (!result.length) result.push({ title: 'Setup', text: null, from: { t: 'legacy', doors: [] }, items: [] });
+			result.at(-1)!.items.push({ unlock: entry.unlock, text: entry.text });
+		}
+	}
+	return result;
 }
 
 const named = <T extends { id: string; name: string; text: string }>(list: T[], id: string) => {

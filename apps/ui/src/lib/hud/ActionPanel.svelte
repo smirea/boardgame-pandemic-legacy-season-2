@@ -132,6 +132,7 @@
 	class:live
 	aria-label={`${name}'s actions`}
 	data-testid="actions"
+	data-dest="actions"
 	{@attach feedback('Actions', () => ({
 		seat,
 		live,

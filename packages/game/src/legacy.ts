@@ -178,7 +178,12 @@ export function openBundle(world: World, id: BundleId, forced: boolean) {
 	if (bundle.package) pushUnique(campaign.packages, bundle.package);
 	for (const door of bundle.doors ?? []) pushUnique(campaign.doors, door);
 	if (game) log(game, { t: 'unlock', bundle: id, forced });
-	campaign.briefing.push({ t: 'card', title: bundle.name, text: forced ? 'Opened by a perimeter report.' : null });
+	campaign.briefing.push({
+		t: 'card',
+		title: bundle.name,
+		text: forced ? 'Opened by a perimeter report.' : null,
+		from: { t: 'bundle', package: bundle.package ?? null, doors: bundle.doors ?? [] },
+	});
 	for (const unlock of [...bundle.unlocks, ...(forced ? [] : (bundle.reward ?? []))]) {
 		briefUnlock(campaign, unlock);
 		applyUnlock(world, unlock);
@@ -311,7 +316,12 @@ export function readLegacy(world: World, phase: 'setup' | 'gameEnd', won?: boole
 		campaign.legacyIndex += 1;
 		const applies = !card.when || (card.when === 'won') === won;
 		if (applies) {
-			campaign.briefing.push({ t: 'card', title: card.title, text: card.text });
+			campaign.briefing.push({
+				t: 'card',
+				title: card.title,
+				text: card.text,
+				from: { t: 'legacy', doors: card.doors ?? [] },
+			});
 			for (const door of card.doors ?? []) pushUnique(campaign.doors, door);
 			for (const unlock of card.unlocks) {
 				briefUnlock(campaign, unlock);
@@ -368,6 +378,7 @@ export function resolveGameEnd(world: World) {
 			t: 'card',
 			title: 'Turning point: four games lost in a row',
 			text: 'Relief arrives: 10 extra cubes in the stockpile for each of the next 3 games.',
+			from: { t: 'turningPoint' },
 		});
 	}
 	for (const character of Object.values(campaign.characters)) {

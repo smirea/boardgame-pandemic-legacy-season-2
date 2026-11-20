@@ -2,6 +2,8 @@
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { dossierView } from '@repo/game';
 	import type { Campaign } from '@repo/game';
+	import Crate from './Crate.svelte';
+	import DossierDoor from './DossierDoor.svelte';
 
 	type Props = { campaign: Campaign; onclose: () => void };
 
@@ -43,11 +45,7 @@
 				onpointerenter={() => (pointed = describe('Package', slot))}
 				onpointerleave={() => (pointed = null)}
 			>
-				<span class="crate" aria-hidden="true">
-					<span class="lid"></span>
-					<span class="front"><b>{slot.id}</b></span>
-					{#if !slot.open}<span class="tape"></span>{/if}
-				</span>
+				<span class="crate"><Crate id={slot.id} open={slot.open} /></span>
 				<span class="caption">{slot.open ? (slot.opened ?? 'Opened') : 'Sealed'}</span>
 			</li>
 		{/each}
@@ -66,13 +64,11 @@
 				<ol class="doors" aria-label={`Sheet ${index + 1}`}>
 					{#each sheet as door (door.id)}
 						<li
-							class="door"
-							class:open={door.open}
 							aria-label={describe('Door', door)}
 							onpointerenter={() => (pointed = describe('Door', door))}
 							onpointerleave={() => (pointed = null)}
 						>
-							{door.id}
+							<DossierDoor id={door.id} open={door.open} />
 						</li>
 					{/each}
 				</ol>
@@ -159,72 +155,10 @@
 		min-width: 0;
 	}
 
-	/* A cardboard package, front face and lid. Sealed ones are taped shut; an opened one has its lid lifted. */
 	.crate {
-		position: relative;
 		width: 100%;
 		max-width: 6.5rem;
-		aspect-ratio: 1.25;
-		margin-top: 0.9rem;
-	}
-
-	.front,
-	.lid {
-		position: absolute;
-		left: 0;
-		right: 0;
-		border: 1px solid rgb(70 46 20 / 0.55);
-		background:
-			repeating-linear-gradient(90deg, rgb(255 255 255 / 0.04) 0 3px, transparent 3px 7px),
-			linear-gradient(180deg, #b48a57, #9a7243);
-	}
-
-	.front {
-		top: 22%;
-		bottom: 0;
-		display: grid;
-		place-items: center;
-		border-radius: 0 0 3px 3px;
-		box-shadow: 0 0.4rem 0.8rem rgb(40 24 8 / 0.3);
-	}
-
-	.front b {
-		font-family: var(--font-display);
-		font-size: 2.2rem;
-		font-weight: 400;
-		color: rgb(40 24 8 / 0.75);
-	}
-
-	.lid {
-		top: 6%;
-		height: 22%;
-		z-index: 1;
-		border-radius: 3px 3px 0 0;
-		background: linear-gradient(180deg, #c49b66, #a77d4b);
-		transform-origin: 0 100%;
-		transition: transform 400ms cubic-bezier(0.2, 0.9, 0.3, 1.1);
-	}
-
-	.open .lid {
-		transform: translateY(-38%) rotate(-11deg);
-	}
-
-	/* The inside shows once the lid is off. */
-	.open .front {
-		background:
-			linear-gradient(180deg, rgb(30 18 6 / 0.65), transparent 38%), linear-gradient(180deg, #b48a57, #9a7243);
-	}
-
-	.tape {
-		position: absolute;
-		top: 2%;
-		bottom: 8%;
-		left: 50%;
-		z-index: 2;
-		width: 22%;
-		translate: -50% 0;
-		background: rgb(236 228 206 / 0.82);
-		box-shadow: 0 0 0 1px rgb(60 44 28 / 0.12);
+		font-size: 1rem;
 	}
 
 	.caption {
@@ -275,27 +209,7 @@
 		display: grid;
 		grid-template-columns: repeat(4, 1fr);
 		gap: 0.3rem;
-	}
-
-	/* Sealed: a perforated door with its number. Open: torn out, the hole behind it shows. */
-	.door {
-		display: grid;
-		place-items: center;
-		aspect-ratio: 1;
-		border: 1.5px dashed rgb(90 60 20 / 0.5);
-		border-radius: 2px;
-		background: #ecd9a8;
-		font-weight: 700;
 		font-size: 0.85rem;
-		color: rgb(60 40 10 / 0.85);
-	}
-
-	.door.open {
-		border: 1px solid rgb(40 24 8 / 0.5);
-		background: radial-gradient(ellipse at 50% 30%, #4a3a26, #2b2014);
-		box-shadow: inset 0 0.2rem 0.4rem rgb(0 0 0 / 0.55);
-		color: rgb(236 222 190 / 0.75);
-		font-weight: 500;
 	}
 
 	.count {
