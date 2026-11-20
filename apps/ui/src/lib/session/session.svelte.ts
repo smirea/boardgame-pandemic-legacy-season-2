@@ -167,7 +167,12 @@ export class GameSession {
 				const before = this.state;
 				this.state = publicState(snapshot);
 				if (before) this.#remember(before, this.state);
-				if (before && before.phase !== 'lobby' && this.state.phase === 'lobby') queueMicrotask(() => this.#tidyLobby());
+				// An imported campaign reaches its lobby with nobody seated, so the host sits down there as on arrival.
+				if (before && before.phase !== 'lobby' && this.state.phase === 'lobby')
+					queueMicrotask(() => {
+						this.#tidyLobby();
+						this.#sitDown();
+					});
 				LS.set({ save: this.#save() });
 				if (this.#net.status !== 'closed') this.#net.send({ t: 'state', state: this.state });
 			});

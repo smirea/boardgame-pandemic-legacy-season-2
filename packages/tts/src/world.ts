@@ -376,9 +376,7 @@ export function importReading(reading: Reading, seed = 1): Import {
 			table: `${read.player ?? 'parked'}; ${job}; ${[...read.abilities, ...read.scars].join(', ') || 'no stickers'}; card ${read.card}, ${read.exposure} scratched`,
 			imported: `${read.job ?? 'no job'}; ${stickers.map(sticker => sticker.id).join(', ') || 'no stickers'}; layout ${paddedTrack(pack.characterCards[read.card]!).join(' ')}; exposure ${read.exposure}; home ${home}`,
 			status: read.name.trim() ? 'same' : 'flag',
-			note: read.name.trim()
-				? undefined
-				: 'The card carries no name, so the import names it after its job. Rename it in the game.',
+			note: read.name.trim() ? undefined : 'The card carries no name, so the import names it after its job.',
 			evidence: read.evidence,
 		});
 	}
