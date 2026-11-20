@@ -11,6 +11,7 @@
 	import { deal } from './deal.ts';
 	import { sortHand } from './handOrder.ts';
 	import PlayerCard from './PlayerCard.svelte';
+	import { keep } from './viewState.ts';
 
 	type Props = {
 		snap: PublicState;
@@ -133,6 +134,11 @@
 
 	// The engine only accepts a full pick, so a swap in progress lives here until it is complete again.
 	let draft = $state<CardId[] | null>(null);
+	keep(
+		'dock',
+		() => ({ draft }),
+		saved => (draft = saved.draft),
+	);
 	const picked = $derived(draft ?? game.pickedEvents);
 
 	function toggleEvent(card: CardId) {

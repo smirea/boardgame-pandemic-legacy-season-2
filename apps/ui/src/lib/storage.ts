@@ -17,6 +17,9 @@ export const LS = new LocalStorage<{
 	/** The host's recording of the game in progress, played back at `/replay`. */
 	record: unknown;
 	replay: { speed: number; panel: boolean; bubbles: boolean };
+	/** The studio stage's game (`/debug/studio`), kept apart from the campaign so a reload resumes it. */
+	studio: unknown;
+	studioView: { viewport: { width: number; height: number }; panel: boolean };
 }>({
 	namespace,
 	getDefaults: () => ({
@@ -28,5 +31,7 @@ export const LS = new LocalStorage<{
 		debugSnapshot: null,
 		record: null,
 		replay: { speed: 1, panel: true, bubbles: true },
+		studio: null,
+		studioView: { viewport: { width: 1440, height: 810 }, panel: false },
 	}),
 });

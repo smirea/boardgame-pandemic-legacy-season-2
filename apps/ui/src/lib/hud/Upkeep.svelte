@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
+	import { keep } from './viewState.ts';
 	import { onGrid, pack, purchaseCost, reject } from '@repo/game';
 	import type { CardId, Command, PublicState, Purchase } from '@repo/game';
 	import { cityName, purchaseLabel } from './labels.svelte.ts';
@@ -79,6 +80,14 @@
 	const groups = $derived([...new Set(offers.map(offer => offer.group))]);
 	let group = $state('');
 	let bought = $state.raw<string[]>([]);
+	keep(
+		'upkeep',
+		() => ({ group, bought }),
+		saved => {
+			group = saved.group;
+			bought = saved.bought;
+		},
+	);
 	$effect(() => {
 		if (!groups.includes(group)) group = groups[0] ?? '';
 	});

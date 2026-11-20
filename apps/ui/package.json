@@ -24,6 +24,7 @@
 		"@threlte/extras": "^9.23.1",
 		"d3-geo": "^3.1.2",
 		"es-toolkit": "^1.52.0",
+		"modern-screenshot": "^4.7.0",
 		"svelte": "^5.57.2",
 		"three": "^0.187.0",
 		"topojson-client": "^3.1.0",
@@ -31,7 +32,7 @@
 		"world-atlas": "^2.0.2"
 	},
 	"devDependencies": {
-		"@stefan.inc/feedback-engine": "^1.6.2",
+		"@stefan.inc/feedback-engine": "^1.6.3",
 		"@tailwindcss/vite": "^4.3.3",
 		"@types/d3-geo": "^3.1.1",
 		"@types/three": "^0.187.0",

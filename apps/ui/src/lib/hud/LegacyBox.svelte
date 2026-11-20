@@ -4,6 +4,7 @@
 	import type { Campaign, DossierSlot } from '@repo/game';
 	import Crate from './Crate.svelte';
 	import DossierDoor from './DossierDoor.svelte';
+	import { keep } from './viewState.ts';
 
 	type Props = { campaign: Campaign; onclose: () => void };
 
@@ -28,6 +29,16 @@
 	let pointed = $state<Read | null>(null);
 	let chosen = $state<Read | null>(null);
 	const reading = $derived(pointed ?? chosen);
+	keep(
+		'box',
+		() => ({ tab, chosen: chosen && { kind: chosen.kind, id: chosen.slot.id } }),
+		saved => {
+			tab = saved.tab;
+			const slots: Read['slot'][] = saved.chosen?.kind === 'Package' ? view.packages : doors;
+			const slot = slots.find(entry => entry.id === saved.chosen?.id);
+			chosen = saved.chosen && slot ? { kind: saved.chosen.kind, slot } : null;
+		},
+	);
 	const describe = (kind: Read['kind'], slot: Read['slot']) =>
 		`${kind} ${slot.id}: ${slot.open ? (slot.name ?? 'opened') : 'sealed'}`;
 	const look = (kind: Read['kind'], slot: Read['slot']) => ({

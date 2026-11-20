@@ -39,6 +39,7 @@
 	import type { Holder, SupplySnapshot } from './stockpile';
 	import Trail from './Trail.svelte';
 	import type { BoardView, Covered, ReconBoxView } from './types';
+	import type { CameraPose } from '#lib/studio/scene.ts';
 
 	type Props = {
 		view: BoardView;
@@ -313,6 +314,39 @@
 		controls.update();
 		trackZoom();
 		invalidate();
+	});
+
+	/** Where the camera is now, mid-glide or at rest. */
+	export function where(): CameraPose | null {
+		return camera && controls ? { position: camera.position.toArray(), target: controls.target.toArray() } : null;
+	}
+	/** Where a drag or zoom left the camera, or null while it keeps the fitted view. */
+	export function pose(): CameraPose | null {
+		return userMoved ? where() : null;
+	}
+	// A pose asked for before the camera exists waits for it.
+	let wanted = $state.raw<{ pose: CameraPose | null } | null>(null);
+	/** Puts the camera where a drag left it, or back on the fitted view, at once. */
+	export function setPose(next: CameraPose | null) {
+		wanted = { pose: next };
+	}
+	$effect(() => {
+		if (!wanted || !camera || !controls) return;
+		const next = wanted.pose;
+		untrack(() => {
+			wanted = null;
+			userMoved = next !== null;
+			const position = next ? camera!.position.clone().fromArray(next.position) : aim.position;
+			const target = next ? controls!.target.clone().fromArray(next.target) : aim.target;
+			camera!.position.copy(position);
+			controls!.target.copy(target);
+			path = { from: position, to: position, fromTarget: target, toTarget: target };
+			controls!.enableDamping = false;
+			controls!.update();
+			controls!.enableDamping = true;
+			trackZoom();
+			invalidate();
+		});
 	});
 
 	// Edges present at first render are part of the board. Anything that shows up later draws itself in.

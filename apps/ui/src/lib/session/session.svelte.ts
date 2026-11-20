@@ -117,9 +117,17 @@ export class GameSession {
 	#record: GameRecord | null = null;
 	#sender: { command: Command; by: string | null } | null = null;
 
-	constructor(options: { mode: Mode; secret: string }) {
+	/** False for a session that stands apart from this browser's campaign, which neither reads nor writes storage. */
+	readonly #persist: boolean;
+
+	/**
+	 * `save` starts the game from that state in place of this browser's campaign and keeps it out of storage, and
+	 * `player` sits down as that id, so a state captured in one browser opens the same in another.
+	 */
+	constructor(options: { mode: Mode; secret: string; save?: Save | null; player?: string }) {
 		this.mode = options.mode;
-		this.selfId = storedId();
+		this.#persist = options.save === undefined;
+		this.selfId = options.player ? peerId(options.player) : storedId();
 		this.player = this.selfId as string as PlayerId;
 		const name = LS.get('name', '').trim() || 'Player';
 		const transport =
@@ -159,8 +167,8 @@ export class GameSession {
 		this.status = this.#net.status;
 
 		if (options.mode !== 'join') {
-			const save = storedSave();
-			this.#record = storedRecord(save);
+			const save = options.save === undefined ? storedSave() : options.save;
+			this.#record = this.#persist ? storedRecord(save) : null;
 			this.#actor = createGameActor({ seed: Math.floor(Math.random() * 2 ** 31), save });
 			this.#actor.subscribe(snapshot => {
 				const before = this.state;
@@ -172,7 +180,7 @@ export class GameSession {
 						this.#tidyLobby();
 						this.#sitDown();
 					});
-				LS.set({ save: this.#save() });
+				if (this.#persist) LS.set({ save: this.#save() });
 				if (this.#net.status !== 'closed') this.#net.send({ t: 'state', state: this.state });
 			});
 			this.#actor.start();
@@ -231,7 +239,7 @@ export class GameSession {
 		const sender = this.#sender;
 		this.#sender = null;
 		const entry = { at: Date.now(), by: sender?.by ?? null, command: sender?.command ?? null };
-		if (recordStep(this.#record, before, after, entry)) LS.set({ record: this.#record });
+		if (recordStep(this.#record, before, after, entry) && this.#persist) LS.set({ record: this.#record });
 	}
 
 	#apply(command: Command, by: string | null = this.mode === 'solo' ? null : this.#nameOf(this.selfId)): string | null {

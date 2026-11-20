@@ -26,7 +26,7 @@
 	import { presentFeedback } from '#lib/feedback.ts';
 	import { onButton, typing } from '#lib/keys.ts';
 	import { LS } from '#lib/storage.ts';
-	import { setContext, untrack } from 'svelte';
+	import { setContext, tick, untrack } from 'svelte';
 	import type { Snippet } from 'svelte';
 	import { backOut } from 'svelte/easing';
 	import { fade, fly, scale } from 'svelte/transition';
@@ -62,6 +62,8 @@
 	import type { Rich } from './rich.ts';
 	import RichText from './RichText.svelte';
 	import { ways } from './ways.ts';
+	import { provideViewState } from './viewState.ts';
+	import type { GameUi, UiStep } from '#lib/studio/scene.ts';
 
 	// A spectator owns no seat, whatever this browser claimed in a live game. Replays use it, and draw their own
 	// players and step marks over the board, so the panels a player acts from stay out of the way.
@@ -291,6 +293,7 @@
 		dismiss();
 	}
 	function dismiss() {
+		trail = [];
 		targeting = null;
 		chooser = null;
 		ring = null;
@@ -441,12 +444,17 @@
 					key: choice.a,
 					label: ACTION_NAMES[choice.a] + (target ? ` to ${cityName(target)}` : ''),
 					icon: choice.a,
-					run: () => start(choice.a, variants),
+					run: () => step({ t: 'start', a: choice.a, via: { card } }),
 				});
 			}
 		}
 		if (plays.some(option => option.seat === seat && option.card === card))
-			uses.push({ key: 'play', label: `Play ${cardName(world, card)}`, icon: null, run: () => playCard(seat, card) });
+			uses.push({
+				key: 'play',
+				label: `Play ${cardName(world, card)}`,
+				icon: null,
+				run: () => step({ t: 'play', seat, card }),
+			});
 		return uses;
 	}
 
@@ -466,6 +474,99 @@
 			const twin = { ...action, card } as Action;
 			return checkAction(world, game!.active, twin) === null ? [twin] : [];
 		});
+	}
+
+	// The clicks that led to whatever is half-chosen now, so the studio can write the screen down and make them again.
+	let trail: UiStep[] = [];
+	function perform(click: UiStep): boolean {
+		if (click.t === 'start') {
+			const choice = actionChoices.find(entry => entry.a === click.a);
+			if (!choice || !live) return false;
+			const variants =
+				click.via === 'panel'
+					? choice.actions
+					: click.via === 'ring'
+						? (ringEntries.find(entry => entry.a === click.a)?.variants ?? [])
+						: cardVariants(choice.actions, click.via.card);
+			if (!variants.length) return false;
+			start(click.a, variants);
+		} else if (click.t === 'city') clickCity(click.city);
+		else if (click.t === 'pawn') {
+			const pickPawn = targeting?.pawns?.get(click.seat);
+			if (!pickPawn) return false;
+			pickPawn();
+		} else if (click.t === 'option') {
+			const option = chooser?.options[click.index];
+			if (!option) return false;
+			pick(option);
+		} else if (click.t === 'recon') clickRecon(click.route);
+		else if (click.t === 'play') playCard(click.seat, click.card);
+		else if (click.t === 'lockdown') lockdown(click.card);
+		else chooser = null;
+		return true;
+	}
+	/** Every click that starts, aims or picks goes through here, so the trail is the whole way to what is on screen. */
+	function step(next: UiStep): boolean {
+		if (!targeting && !chooser && !ring) trail = [];
+		const done = perform(next);
+		if (done) trail = [...trail, next];
+		return done;
+	}
+
+	const view = provideViewState();
+	let board = $state<Board>();
+	// Announcements put back by `applyUi` stay up until the game moves on, where live ones time out.
+	let heldAnnouncements = false;
+
+	/** Everything on this screen that the game state does not decide, as plain JSON. */
+	export function ui(): GameUi {
+		return {
+			camera: board?.camera() ?? null,
+			viewing,
+			menu,
+			box: boxOpen,
+			steps: targeting || chooser || ring ? trail : [],
+			filter,
+			toasts: toasts.map(({ text, tone }) => ({ text, tone })),
+			banner: banner && { title: banner.title, text: banner.text },
+			turnBanner: turnBanner && { name: turnBanner.name, color: turnBanner.color },
+			parts: view.read(),
+		};
+	}
+
+	/** Where the board's camera is this instant, for telling when a glide has ended. */
+	export const cameraNow = () => board?.cameraNow() ?? null;
+
+	/**
+	 * Puts the screen the way `ui()` wrote it down, over the game state already loaded. Returns what could not be
+	 * put back, such as a click the rules no longer allow.
+	 */
+	export async function applyUi(next: GameUi): Promise<string[]> {
+		const problems: string[] = [];
+		await tick();
+		dismiss();
+		menu = next.menu;
+		boxOpen = next.box;
+		viewing = next.viewing;
+		heldAnnouncements = next.toasts.length > 0 || next.banner !== null || next.turnBanner !== null;
+		toasts = next.toasts.map(entry => ({ id: nextFx++, ...entry }));
+		banner = next.banner && { id: nextFx++, ...next.banner };
+		turnBanner = next.turnBanner && { id: nextFx++, ...next.turnBanner };
+		view.write(next.parts);
+		board?.setCamera(next.camera);
+		for (const [index, entry] of next.steps.entries()) {
+			// The chooser clears its filter and ticks in an effect, which must run before the next click lands.
+			await tick();
+			if (step(entry)) continue;
+			problems.push(
+				`Step ${index + 1} of ${next.steps.length} (${JSON.stringify(entry)}) is not possible in this state`,
+			);
+			break;
+		}
+		await tick();
+		filter = next.filter;
+		await tick();
+		return problems;
 	}
 
 	/** Escape and a right click put down whatever was half-chosen. */
@@ -651,6 +752,14 @@
 		const fresh = log.filter(entry => entry.seq > lastSeq);
 		if (fresh.length === 0) return;
 		lastSeq = newest;
+		if (heldAnnouncements) {
+			heldAnnouncements = false;
+			untrack(() => {
+				toasts = [];
+				banner = null;
+				turnBanner = null;
+			});
+		}
 		const added: Fx[] = [];
 		const pulse = (city: CityId, kind: FxKind) => added.push({ id: nextFx++, city, kind, delay: added.length * 240 });
 		// Infections pulse their cities from the infection show, each at its own moment.
@@ -881,9 +990,9 @@
 				{live}
 				{canAct}
 				aiming={targeting?.a ?? null}
-				onchoose={choice => start(choice.a, choice.actions)}
+				onchoose={choice => step({ t: 'start', a: choice.a, via: 'panel' })}
 				{send}
-				onlockdown={lockdown}
+				onlockdown={card => step({ t: 'lockdown', card })}
 				bind:columns={actionColumns}
 			/>
 		</div>
@@ -967,22 +1076,20 @@
 	<main class="stage" bind:this={stage} data-dest="map">
 		<Board
 			view={boardView}
-			oncity={clickCity}
-			onrecon={clickRecon}
+			bind:this={board}
+			oncity={city => step({ t: 'city', city })}
+			onrecon={route => step({ t: 'recon', route })}
 			oncityback={city => cancel() || takeBack(city)}
 			oncancel={cancel}
 			onmiss={() => (ring = null)}
-			onpawn={seat => targeting?.pawns?.get(seat as SeatId)?.()}
+			onpawn={seat => step({ t: 'pawn', seat: seat as SeatId })}
 			ring={ring && ringEntries.length
 				? {
 						city: ring,
 						entries: ringEntries.map(entry => ({ key: entry.a, label: entry.label, detail: entry.detail })),
 					}
 				: null}
-			onring={key => {
-				const entry = ringEntries.find(candidate => candidate.a === key);
-				if (entry) start(entry.a, entry.variants);
-			}}
+			onring={key => step({ t: 'start', a: key, via: 'ring' })}
 			onpointer={point => session.pointer(point)}
 			{resetView}
 			{covered}
@@ -1037,13 +1144,18 @@
 				data-testid="chooser"
 				{@attach feedback('Chooser', () => ({ title: chooser?.title, filter, picked }))}
 			>
-				<header>{chooser.title}<button onclick={() => (chooser = null)} aria-label="Close">×</button></header>
+				<header>
+					{chooser.title}<button onclick={() => step({ t: 'closeChooser' })} aria-label="Close">×</button>
+				</header>
 				{#if chooser.options.length > 8}
 					<input bind:value={filter} placeholder="Type to filter" aria-label="Filter the list" />
 				{/if}
 				<div class="rows">
 					{#each shown as option, index (option)}
-						<button style:--i={Math.min(index, 12)} class:picked={picked.includes(option)} onclick={() => pick(option)}
+						<button
+							style:--i={Math.min(index, 12)}
+							class:picked={picked.includes(option)}
+							onclick={() => step({ t: 'option', index: chooser!.options.indexOf(option) })}
 							><strong>{option.label}</strong><span><RichText text={option.detail} /></span></button
 						>
 					{:else}
@@ -1269,7 +1381,7 @@
 					: null}
 				oncancel={cancel}
 				uses={cardUses}
-				onplaycard={playCard}
+				onplaycard={(seat, card) => step({ t: 'play', seat, card })}
 			/>
 		</div>
 	{/if}

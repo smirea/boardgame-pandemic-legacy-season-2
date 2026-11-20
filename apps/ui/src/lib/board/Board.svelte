@@ -18,15 +18,17 @@
 	import type { BoardPoint } from './projection';
 	import Scene from './Scene.svelte';
 	import type { BoardView, Covered } from './types';
+	import type { CameraPose } from '#lib/studio/scene.ts';
 
-	// The feedback editor (development only) redraws the page, and a WebGL canvas reads blank once its frame is presented.
+	// The feedback editor (development only) and the studio's capture redraw the page, and a WebGL canvas reads blank
+	// once its frame is presented.
 	const createRenderer = (canvas: HTMLCanvasElement) =>
 		new WebGLRenderer({
 			canvas,
 			powerPreference: 'high-performance',
 			antialias: true,
 			alpha: true,
-			preserveDrawingBuffer: import.meta.env.DEV,
+			preserveDrawingBuffer: import.meta.env.DEV || location.pathname.startsWith('/debug/'),
 		});
 
 	type Props = {
@@ -67,6 +69,19 @@
 	}: Props = $props();
 
 	let element = $state<HTMLElement>();
+	let scene = $state<Scene>();
+	export const camera = () => scene?.pose() ?? null;
+	export const cameraNow = () => scene?.where() ?? null;
+	// The scene mounts a moment after the board, so a pose set before then waits here.
+	let wanted: { pose: CameraPose | null } | null = null;
+	export function setCamera(pose: CameraPose | null) {
+		if (scene) scene.setPose(pose);
+		else wanted = { pose };
+	}
+	$effect(() => {
+		if (scene && wanted) scene.setPose(wanted.pose);
+		wanted = null;
+	});
 	// Which part of which city the pointer rests on. The text is read from the view, so it follows the game live.
 	// The stockpile is the one piece on the board that belongs to no city.
 	let hovered = $state.raw<{ city: CityId | null; part: Part; x: number; y: number; name?: Placement } | null>(null);
@@ -195,6 +210,7 @@
 >
 	<Canvas toneMapping={NoToneMapping} {createRenderer}>
 		<Scene
+			bind:this={scene}
 			{view}
 			{oncity}
 			{onrecon}

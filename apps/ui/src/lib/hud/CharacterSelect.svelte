@@ -10,6 +10,7 @@
 	import { cityName, MONTHS, SEAT_COLORS } from './labels.svelte.ts';
 	import Portrait from './Portrait.svelte';
 	import Ready from './Ready.svelte';
+	import { keep } from './viewState.ts';
 	import { characterTraits, TRAIT_KIND } from './traits.ts';
 
 	type Props = {
@@ -87,6 +88,16 @@
 	const portraits = Array.from({ length: pack.numbers.portraits }, (_, index) => index);
 	const worn = $derived(new Set(living.map(character => character.portrait)));
 	let picked = $state<number | null>(null);
+	keep(
+		'characters',
+		() => ({ newName, job, home, picked }),
+		saved => {
+			newName = saved.newName;
+			job = saved.job;
+			home = saved.home;
+			picked = saved.picked;
+		},
+	);
 	const portrait = $derived(picked ?? portraits.find(index => !worn.has(index)) ?? 0);
 	// Every starting occupation and every job the group has found is listed, and the engine says which can still be
 	// taken. It is asked with a stand-in name, so a blank name field does not cross out the whole list. A found job

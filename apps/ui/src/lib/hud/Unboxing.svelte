@@ -9,6 +9,7 @@
 	import DossierDoor from './DossierDoor.svelte';
 	import { destination, flyTo } from './flight.ts';
 	import ObjectiveTag from './ObjectiveTag.svelte';
+	import { keep } from './viewState.ts';
 
 	type Props = { briefing: BriefingEntry[]; campaign: Campaign; oncontinue: () => void };
 
@@ -146,6 +147,11 @@
 
 	function next() {
 		if (phase === 'done') return;
+		// A scene put back stands still, so Next plays its step again from the start.
+		if (held) {
+			held = false;
+			return void play(index);
+		}
 		skip = true;
 	}
 	function finish() {
@@ -153,12 +159,25 @@
 		phase = 'done';
 	}
 	function again() {
+		held = false;
 		phase = 'enter';
 		void play(0);
 	}
 
 	let full = $state(false);
-	onMount(() => void play(0));
+	// A scene put back by the studio stands where it was taken, rather than playing from the top.
+	let held = false;
+	keep(
+		'unboxing',
+		() => ({ index, phase, revealed, full }),
+		saved => {
+			run++;
+			held = true;
+			reading = false;
+			({ index, phase, revealed, full } = saved);
+		},
+	);
+	onMount(() => held || void play(0));
 	onDestroy(() => run++);
 </script>
 
