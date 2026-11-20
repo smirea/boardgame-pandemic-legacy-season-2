@@ -7,6 +7,7 @@ import { createCharacter, newCampaign, openBundle, readLegacy } from './legacy';
 import type { Save } from './machine';
 import type { World } from './state';
 import { newTable } from './table';
+import { tabletopSave } from './tabletop';
 
 const CAST: [name: string, job: JobId][] = [
 	['Ada', 'administrator'],
@@ -94,4 +95,4 @@ export function campaignAt(
 export const octoberSave = (seed?: number) => campaignAt(10, seed);
 export const decemberSave = (seed?: number) => campaignAt(12, seed);
 
-export const scenarios = { october: octoberSave, december: decemberSave };
+export const scenarios = { october: octoberSave, december: decemberSave, tabletop: tabletopSave };

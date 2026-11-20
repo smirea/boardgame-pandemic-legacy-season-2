@@ -25,6 +25,8 @@ import { legalActions, legalPlays } from './options';
 import { applyUnlock, closeGame, newCampaign, openBundle, score } from './legacy';
 import { newTable } from './table';
 import { decemberSave, octoberSave } from './scenarios';
+import { tabletopSave } from './tabletop';
+import { violations } from './invariants';
 import type { Character, Game, World } from './state';
 import {
 	A,
@@ -1453,6 +1455,13 @@ test('opening a bundle, even by a perimeter report, opens its package and its do
 	openBundle(world, 'middle-east' as BundleId, true);
 	expect(world.campaign.packages).toEqual([1, 2]);
 	expect(world.campaign.doors).toEqual(['66', 'J', 'L', '62', '53', 'F', '14']);
+});
+
+test('the canonical tabletop campaign still builds against the pack, at the August lobby with no invariant broken', () => {
+	const save = parseSave(JSON.parse(JSON.stringify(tabletopSave())));
+	expect(save.phase).toBe('lobby');
+	expect(save.world.campaign.month).toBe(8);
+	expect(violations(save.world, new Map())).toEqual([]);
 });
 
 test('only the North America recon completes the January objective', () => {
