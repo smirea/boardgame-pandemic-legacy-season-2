@@ -52,6 +52,17 @@
 	const choosing = $derived(players.filter(who => claimedBy(who).length < seatsOf(who).length));
 	const mine = $derived(claimedBy(player));
 
+	// One screen can play several characters: each seat this player holds is one more hand.
+	const hands = $derived(seatsOf(player).length);
+	const addHand: Command = $derived({ type: 'ADD_SEAT', player });
+	const cannotAdd = $derived(reject(world, snap.phase, addHand));
+	function dropHand() {
+		const seat = seatsOf(player).at(-1);
+		if (hands < 2 || !seat) return;
+		if (mine.length >= hands) release(mine.at(-1)!);
+		send({ type: 'LEAVE', player, seat });
+	}
+
 	const start = $derived(tableStart(world)!);
 	const title = $derived(start === 'prologue' ? 'Prologue' : MONTHS[Math.max(1, campaign.month)]!);
 	const waitingOn = $derived(players.filter(who => !table.ready[who]).map(nameOf));
@@ -62,9 +73,11 @@
 		send({ type: 'CLAIM', player, character: holder === player ? null : character.id });
 	}
 	// Letting go of one of several characters goes through the claim rules: take the others again.
+	// Kept is read before sending: on one screen the first CLAIM lands at once and empties `mine`.
 	function release(character: Character) {
+		const kept = mine.filter(other => other.id !== character.id);
 		send({ type: 'CLAIM', player, character: null });
-		for (const other of mine) if (other.id !== character.id) send({ type: 'CLAIM', player, character: other.id });
+		for (const other of kept) send({ type: 'CLAIM', player, character: other.id });
 	}
 
 	const havens = pack.cities.filter(city => city.kind === 'haven' && !city.lost);
@@ -364,6 +377,26 @@
 
 	<footer bind:this={footer}>
 		<div class="status">
+			{#if hands > 0}
+				<div class="hands" role="group" aria-label="Characters played on this screen">
+					<span>Characters on this screen</span>
+					<button
+						onclick={dropHand}
+						disabled={hands < 2}
+						title={hands < 2 ? 'You play at least one character' : 'Play one character fewer here'}
+						aria-label="One character fewer"
+						data-testid="hand-fewer">−</button
+					>
+					<b aria-live="polite">{hands}</b>
+					<button
+						onclick={() => send(addHand)}
+						disabled={cannotAdd !== null}
+						title={cannotAdd ?? 'Play one more character here'}
+						aria-label="One more character"
+						data-testid="hand-more">+</button
+					>
+				</div>
+			{/if}
 			{#if choosing.length}
 				<p class="choosing">
 					Still choosing:
@@ -987,6 +1020,38 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.4rem;
+	}
+
+	.hands {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		color: var(--muted);
+		font-size: 0.9rem;
+	}
+
+	.hands b {
+		min-width: 1ch;
+		color: var(--ink);
+		text-align: center;
+	}
+
+	.hands button {
+		width: 1.7rem;
+		height: 1.7rem;
+		padding: 0;
+		border: 1px solid var(--line-strong);
+		border-radius: 6px;
+		background: rgb(12 10 8 / 0.6);
+		color: var(--ink);
+		font: inherit;
+		line-height: 1;
+		cursor: pointer;
+	}
+
+	.hands button:disabled {
+		opacity: 0.4;
+		cursor: default;
 	}
 
 	.choosing {

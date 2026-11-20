@@ -3,7 +3,7 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"dev": "wrangler dev",
+		"dev": "bun --env-file=../../.env --env-file=../../.env.local scripts/dev.ts",
 		"deploy": "wrangler deploy",
 		"typecheck": "bun check",
 		"types": "wrangler types"

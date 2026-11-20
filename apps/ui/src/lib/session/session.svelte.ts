@@ -126,7 +126,7 @@ export class GameSession {
 		const transport =
 			options.mode === 'solo'
 				? createMemoryTransport()
-				: createWebRtcTransport({ signalUrl: __SIGNAL_URL__, secret: options.secret });
+				: createWebRtcTransport({ signalUrl: new URL(__SIGNAL_URL__, location.href).href, secret: options.secret });
 		const config = { selfId: this.selfId, name, transport, parseMsg, parsePresence };
 		this.#net = options.mode === 'join' ? joinHost<Msg, Presence>(config) : createHost<Msg, Presence>(config);
 

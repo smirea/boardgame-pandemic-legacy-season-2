@@ -7,7 +7,7 @@ import { defineConfig } from 'vite';
 
 const uiHost = new URL(env.UI_URL).hostname;
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
 	plugins: [
 		tailwindcss(),
 		feedbackProcrastimate({ token: env.PROCRASTIMATE_TOKEN, project: 'a/bg-pandemic-2' }),
@@ -22,7 +22,8 @@ export default defineConfig({
 		}),
 	],
 	define: {
-		__SIGNAL_URL__: JSON.stringify(env.SIGNAL_URL),
+		// The dev server passes `/signal` to its own Worker, so a browser on another machine reaches it through the page's host.
+		__SIGNAL_URL__: JSON.stringify(command === 'serve' ? '/signal' : env.SIGNAL_URL),
 	},
 	clearScreen: false,
 	optimizeDeps: {
@@ -39,6 +40,11 @@ export default defineConfig({
 				changeOrigin: true,
 				secure: false,
 			},
+			'/signal': {
+				target: `http://127.0.0.1:${env.DEV_SIGNAL_PORT}`,
+				ws: true,
+				rewrite: path => path.replace(/^\/signal\/?/, '/'),
+			},
 		},
 	},
-});
+}));

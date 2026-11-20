@@ -1,11 +1,13 @@
 import {
 	createGame,
+	createGameActor,
 	newCampaign,
 	newTable,
 	openBundle,
 	pack,
 	paddedTrack,
 	parseSave,
+	phaseOf,
 	readLegacy,
 	SEAT_IDS,
 	violations,
@@ -538,8 +540,9 @@ export function importReading(reading: Reading, seed = 1): Import {
 		topic: 'Spending step',
 		item: 'Units left',
 		table: reading.notes.find(note => /points? left/i.test(note)) ?? 'No note',
-		imported: String(units),
-		status: 'derived',
+		imported: units ? `${units} unspent, the step is closed` : 'Closed',
+		status: units ? 'differs' : 'same',
+		note: "The import opens at the next month's lobby, so units the table had not spent are given up as when the step ends",
 	});
 	row({
 		topic: 'Supplies',
@@ -552,10 +555,16 @@ export function importReading(reading: Reading, seed = 1): Import {
 	for (const problem of reading.problems)
 		row({ topic: 'Reader', item: 'Unsettled', table: problem, imported: 'As described', status: 'flag' });
 
-	const save = parseSave({ v: 1, phase: 'upkeep', world: structuredClone(world) });
-	const broken = violations(save.world, new Map()).filter(problem => !problem.startsWith('cubes leaked'));
+	const upkeep = parseSave({ v: 1, phase: 'upkeep', world: structuredClone(world) });
+	const broken = violations(upkeep.world, new Map()).filter(problem => !problem.startsWith('cubes leaked'));
 	if (broken.length) throw new Error(`The imported game breaks the rules: ${broken.join('; ')}`);
-	return { save, rows };
+	const actor = createGameActor({ seed, save: upkeep }).start();
+	actor.send({ type: 'FINISH_UPKEEP' });
+	const snapshot = actor.getSnapshot();
+	actor.stop();
+	if (phaseOf(snapshot) !== 'lobby')
+		throw new Error(`The imported campaign ended its spending step in ${phaseOf(snapshot)}`);
+	return { save: parseSave({ v: 1, phase: 'lobby', world: snapshot.context.world }), rows };
 }
 
 /** Whether a parsed JSON file is a Tabletop Simulator save rather than one of the game's own. */
