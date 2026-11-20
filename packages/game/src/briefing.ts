@@ -67,12 +67,14 @@ export type BriefingSection =
 	| { t: 'card'; title: string; text: string | null; from: BriefingSource }
 	| { t: 'group'; heading: string; items: { unlock: BriefedUnlock; text: string }[] };
 
-/** A briefing as it is read: each Legacy card on its own, and everything unlocked grouped by kind in order of first mention. */
+/** A briefing as it is read: each Legacy card, then what it unlocked grouped by kind. */
 export function briefingSections(briefing: BriefingEntry[]): BriefingSection[] {
 	const sections: BriefingSection[] = [];
 	const groups = new Map<string, Extract<BriefingSection, { t: 'group' }>>();
 	for (const entry of briefing) {
 		if (entry.t === 'card') {
+			// What a card unlocked stays under that card, so each Rationed Event shows under the card that brought it.
+			groups.clear();
 			sections.push(entry);
 			continue;
 		}

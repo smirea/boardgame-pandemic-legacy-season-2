@@ -131,10 +131,13 @@
 				<div class="detail">
 					<p>{inGroup[0]?.text}</p>
 					<div class="targets">
-						{#each inGroup as offer, index (index)}
+						{#each inGroup as offer (JSON.stringify(offer.purchase))}
 							<button
 								onclick={() => {
-									bought = [...bought, `${group.replace(/ \(\d+\)$/, '')}: ${purchaseLabel(world, offer.purchase)}`];
+									bought = [
+										...bought,
+										`${offer.group.replace(/ \(\d+\)$/, '')}: ${purchaseLabel(world, offer.purchase)}`,
+									];
 									send({ type: 'PURCHASE', purchase: offer.purchase });
 								}}
 								title={`${purchaseCost(offer.purchase)} units`}

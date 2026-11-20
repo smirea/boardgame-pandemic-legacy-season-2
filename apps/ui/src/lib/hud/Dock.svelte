@@ -331,7 +331,7 @@
 						<p class="prompt">{decisionTitle(world, pending)}</p>
 						{#if choices.length}
 							<div class="chips">
-								{#each choices.slice(0, 24) as decide, index (index)}
+								{#each choices as decide, index (index)}
 									<button onclick={() => send({ type: 'DECIDE', decide })}>{decideLabel(world, decide)}</button>
 								{/each}
 							</div>

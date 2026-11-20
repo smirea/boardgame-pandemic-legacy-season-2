@@ -293,7 +293,14 @@ export function checkPlay(world: World, seat: SeatId, card: CardId, play: Play, 
 }
 
 /** What a played event was aimed at, for the log. */
-function playDetail(world: World, play: Play): string {
+/** "Istanbul ×2, Cairo": a city named once, with how many times it was picked. */
+function cityTally(cities: CityId[]): string {
+	return [...tally(cities)]
+		.map(([city, count]) => (count > 1 ? `${cityDef(city).name} ×${count}` : cityDef(city).name))
+		.join(', ');
+}
+
+export function playDetail(world: World, play: Play): string {
 	const { campaign } = world;
 	const who = (seat: SeatId) => characterOf(world, seat).name;
 	const card = (id: CardId) => {
@@ -322,9 +329,9 @@ function playDetail(world: World, play: Play): string {
 		case 'mobileShelters':
 		case 'handout':
 		case 'cleanse':
-			return play.cities.map(id => cityDef(id).name).join(', ');
+			return cityTally(play.cities);
 		case 'spreadOut':
-			return `${cityDef(play.from).name} to ${play.to.map(id => cityDef(id).name).join(', ')}`;
+			return `${cityDef(play.from).name} to ${cityTally(play.to)}`;
 		case 'mentor':
 			return `${who(play.seat)} learns ${pack.abilities.find(entry => entry.id === play.ability)!.name}`;
 		case 'cache':

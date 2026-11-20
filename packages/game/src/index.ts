@@ -14,6 +14,7 @@ export {
 	routeCost,
 } from './actions';
 export type { Decide, Play } from './plays';
+export { playDetail } from './plays';
 export type { Purchase } from './legacy';
 export type { DossierSlot, DossierView } from './dossier';
 export { dossierView, rulebook, stickerStock } from './dossier';

@@ -441,7 +441,7 @@ export function resolveGameEnd(world: World) {
 		campaign.briefing.push({
 			t: 'card',
 			title: 'Turning point: four games lost in a row',
-			text: 'Relief arrives: 10 extra cubes in the stockpile for each of the next 3 games.',
+			text: 'Relief arrives: up to 10 cubes move from the reserve to the stockpile at setup, for each of the next 3 games.',
 			from: { t: 'turningPoint' },
 		});
 	}

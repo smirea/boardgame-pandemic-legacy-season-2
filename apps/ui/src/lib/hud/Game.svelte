@@ -10,6 +10,7 @@
 		legalPlays,
 		onGrid,
 		pack,
+		playDetail,
 		reconBoxes,
 		reject,
 		scenarios,
@@ -598,7 +599,7 @@
 		forecast: { field: 'order', verb: 'Put back, top first', max: 8, repeat: 1 },
 	};
 
-	function pickSeveral(seat: SeatId, card: CardId, variants: { play: Play }[], several: Several) {
+	function pickSeveral(seat: SeatId, card: CardId, variants: { play: Play }[], several: Several, encore?: CardId) {
 		const first = variants[0]!.play as Record<string, unknown>;
 		const items =
 			several.field === 'order'
@@ -606,18 +607,31 @@
 				: variants.map(option => ((option.play as Record<string, unknown>)[several.field] as string[])[0]!);
 		const isCard = several.field === 'cards' || several.field === 'order';
 		const name = (item: string) => (isCard ? cardName(world, item as CardId) : cityName(item as CityId));
+		const wrap = (play: Play): Play => (encore ? { e: 'encore', card: encore, played: play } : play);
+		// A second or third cube on one city is offered only where the engine would take that many there.
+		const takes = (item: string, count: number) =>
+			count === 1 ||
+			reject(world, snap.phase, {
+				type: 'PLAY',
+				seat,
+				card,
+				play: wrap({ ...first, [several.field]: Array<string>(count).fill(item) } as Play),
+			}) === null;
+		const ORDINAL = ['', 'second', 'third'];
 		const options: Option[] = items.flatMap(item =>
-			Array.from({ length: several.repeat }, (_, copy) => ({
-				label: copy ? `${name(item)} (${copy + 1})` : name(item),
-				detail: '',
-				run: () => {},
-				item,
-				...(isCard ? {} : { city: item as CityId }),
-			})),
+			Array.from({ length: several.repeat }, (_, copy) => copy)
+				.filter(copy => takes(item, copy + 1))
+				.map(copy => ({
+					label: copy ? `${name(item)}, ${ORDINAL[copy]} cube` : name(item),
+					detail: '',
+					run: () => {},
+					item,
+					...(isCard ? {} : { city: item as CityId }),
+				})),
 		);
 		targeting = null;
 		chooser = {
-			title: cardName(world, card),
+			title: encore ? `${cardName(world, card)}: ${cardName(world, encore)}` : cardName(world, card),
 			options: several.field === 'order' ? options : options.sort(byLabel),
 			multi: {
 				max: Math.min(several.max, options.length),
@@ -625,7 +639,12 @@
 				confirm: chosen => {
 					const values = chosen.map(option => option.item!);
 					if (several.field === 'order') values.push(...items.filter(item => !values.includes(item)));
-					const command: Command = { type: 'PLAY', seat, card, play: { ...first, [several.field]: values } as Play };
+					const command: Command = {
+						type: 'PLAY',
+						seat,
+						card,
+						play: wrap({ ...first, [several.field]: values } as Play),
+					};
 					const refused = reject(world, snap.phase, command);
 					if (refused) return toast(refused, 'bad');
 					send(command);
@@ -649,6 +668,35 @@
 		chooser = { title: `Lockdown: discard a card to destroy ${cardName(world, card)}`, options };
 	}
 
+	/** Encore picks the event from the discard pile, then aims it the way that event is aimed. */
+	function encoreOf(seat: SeatId, card: CardId, variants: { play: Play }[]) {
+		const targets = [...new Set(variants.flatMap(option => (option.play.e === 'encore' ? [option.play.card] : [])))];
+		const aimTarget = (target: CardId) => {
+			const inner = variants.flatMap(option =>
+				option.play.e === 'encore' && option.play.card === target ? [{ play: option.play.played }] : [],
+			);
+			const held = world.campaign.playerCards[target];
+			const several = held?.kind === 'event' ? SEVERAL[held.event] : undefined;
+			if (several) return pickSeveral(seat, card, inner, several, target);
+			chooser = {
+				title: `${cardName(world, card)}: ${cardName(world, target)}`,
+				options: inner.map(({ play }) => ({
+					label: playDetail(world, play) || cardName(world, target),
+					detail: '',
+					run: () => {
+						send({ type: 'PLAY', seat, card, play: { e: 'encore', card: target, played: play } });
+						dismiss();
+					},
+				})),
+			};
+		};
+		if (targets.length === 1) return aimTarget(targets[0]!);
+		chooser = {
+			title: cardName(world, card),
+			options: targets.map(target => ({ label: cardName(world, target), detail: '', run: () => aimTarget(target) })),
+		};
+	}
+
 	function playCard(seat: SeatId, card: CardId) {
 		const variants = plays.filter(option => option.seat === seat && option.card === card);
 		const run = (play: Play) => () => {
@@ -664,6 +712,7 @@
 			targeting = { label, a: null, cities };
 		};
 		const held = world.campaign.playerCards[card];
+		if (held?.kind === 'event' && held.event === 'encore' && variants.length) return encoreOf(seat, card, variants);
 		const several = held?.kind === 'event' ? SEVERAL[held.event] : undefined;
 		if (several && variants.length) {
 			const froms = [...new Set(variants.map(option => (option.play.e === 'spreadOut' ? option.play.from : '')))];
