@@ -280,8 +280,8 @@ export function importReading(reading: Reading, seed = 1): Import {
 		infectionDiscard: piles.infectionDiscard.map(read => add(read, 'Infection discard pile').id),
 		forsaken: piles.forsaken.map(read => add(read, 'Forsaken cities').id),
 	};
-	for (const read of [...piles.offGrid, ...piles.rationedPool, ...piles.pickedEvents, ...piles.spareEpidemics])
-		add(read, 'Box or reserve');
+	for (const read of [...piles.offGrid, ...piles.rationedPool, ...piles.spareEpidemics]) add(read, 'Box or reserve');
+	const pickedEvents = piles.pickedEvents.map(read => add(read, 'Set out for the game').id);
 	for (const read of piles.stored) {
 		const card = add(read, 'Storage');
 		campaign.stored[card.kind].push(card.id);
@@ -399,7 +399,9 @@ export function importReading(reading: Reading, seed = 1): Import {
 		table: reading.objectives.map(entry => entry.objective).join(', '),
 		imported: campaign.objectives.join(', '),
 		status: triangulated ? 'derived' : 'same',
-		note: triangulated ? 'Triangulate was completed this month, which removes it' : undefined,
+		note: triangulated
+			? 'Its card still lies in the row, but the door it opens on completion is open on the table, so it was completed this month and leaves play'
+			: undefined,
 	});
 	row({
 		topic: 'Objectives',
@@ -506,6 +508,28 @@ export function importReading(reading: Reading, seed = 1): Import {
 	game.rateIndex = reading.tracks.infectionRate;
 	game.incidents = reading.tracks.incidents;
 	game.turn = 1;
+	game.pickedEvents = pickedEvents;
+	for (const { objective, progress } of reading.objectives) {
+		const target = pack.objectives.find(entry => entry.id === objective)!.target;
+		const done = progress !== null ? progress >= target : objective === 'triangulate' && triangulated;
+		if (progress !== null || done) game.progress[objective] = progress ?? target;
+		if (done) game.completed.push(objective);
+		row({
+			topic: 'Objectives',
+			item: objective,
+			table: progress === null ? 'No token' : `Token at ${progress} of ${target}`,
+			imported: `${game.progress[objective] ?? 0} of ${target}${done ? ', completed this game' : ''}`,
+			status: progress === null ? 'derived' : 'same',
+		});
+	}
+	row({
+		topic: 'Characters',
+		item: 'Portraits',
+		table: "The group's own pictures",
+		imported: "One of the game's own portraits each, in table order",
+		status: 'differs',
+		note: 'The game draws its own portraits and does not take pictures from the table',
+	});
 	const units = Number(/(\d+) points? left/i.exec(reading.notes.join('\n'))?.[1] ?? 0);
 	game.outcome = { won: current.at(-1) === 'won', reason: 'Imported from the table' };
 	game.upkeep = { units, populationChanges: [] };
@@ -525,7 +549,7 @@ export function importReading(reading: Reading, seed = 1): Import {
 		note: 'Next game sets both from the supply track',
 	});
 	for (const problem of reading.problems)
-		row({ topic: 'Reader', item: 'Unsettled', table: problem, imported: 'Left out', status: 'flag' });
+		row({ topic: 'Reader', item: 'Unsettled', table: problem, imported: 'As described', status: 'flag' });
 
 	const save = parseSave({ v: 1, phase: 'upkeep', world: structuredClone(world) });
 	const broken = violations(save.world, new Map()).filter(problem => !problem.startsWith('cubes leaked'));

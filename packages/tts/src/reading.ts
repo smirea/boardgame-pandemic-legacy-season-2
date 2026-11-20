@@ -446,6 +446,15 @@ export function read(table: Census): Reading {
 		const decorated = identity && (identity.nickname || identity.decals.length > 0 || identity.attached.length > 0);
 		const told = /(?:state|exposure)\s*(\d+)/i.exec(identity?.description ?? '');
 		const exposure = scratched ? scratched.state! - 1 : told ? Number(told[1]) - (/state/i.test(told[0]) ? 1 : 0) : 0;
+		// The group sometimes glued a scratched copy onto the card and also left another lying near it.
+		const glued = (identity?.attached ?? []).filter(
+			piece => isCharacterCard(piece) && piece.state !== null && piece.state !== 1,
+		);
+		const counts = new Set([...(scratched ? [scratched] : []), ...glued].map(piece => piece.state! - 1));
+		if (counts.size > 1)
+			problems.push(
+				`${identity?.nickname || 'A character'}'s scratched copies disagree: ${[...(scratched ? [scratched] : []), ...glued].map(piece => `${piece.guid} shows ${piece.state! - 1}`).join(', ')}. The import uses ${exposure}.`,
+			);
 		if (!decorated) {
 			spareCharacterCards.push({ card: layout, exposure });
 			continue;
