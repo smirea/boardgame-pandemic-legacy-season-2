@@ -244,10 +244,8 @@ export function applyUnlock(world: World, unlock: Unlock) {
 		case 'permanentStructure':
 			return pushCopies(campaign.permanentForSale, unlock.structure, unlock.copies);
 		case 'job': {
+			// The group makes the character when it wants one, on a free Character card, at the job's own home.
 			campaign.jobsFound.push({ job: unlock.job, home: unlock.home });
-			const job = pack.jobs.find(candidate => candidate.id === unlock.job)!;
-			if (campaign.characterCards.length > 0)
-				createCharacter(campaign, { name: job.name, job: unlock.job, home: unlock.home });
 			return;
 		}
 		case 'gather':

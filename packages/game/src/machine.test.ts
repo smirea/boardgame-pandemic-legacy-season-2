@@ -1197,6 +1197,21 @@ describe('seats in the lobby are shared state', () => {
 		);
 	});
 
+	test("a found job waits for the group to make its character, at the job's own home", () => {
+		const actor = lobby();
+		const world = mutable(actor);
+		applyUnlock(world, { t: 'job', job: 'captain', home: city('haven-north-atlantic') });
+		const before = Object.keys(world.campaign.characters).length;
+		const save = { v: 1 as const, phase: 'lobby' as const, world };
+		const found = createGameActor({ seed: 2, save }).start();
+		expect(Object.keys(worldOf(found).campaign.characters)).toHaveLength(before);
+		const make = (home: string) =>
+			({ type: 'CREATE_CHARACTER', name: 'Cap', job: 'captain', home: city(home) }) as const;
+		expect(reject(worldOf(found), 'lobby', make('haven-mediterranean'))).toContain('lives at');
+		send(found, make('haven-north-atlantic'));
+		expect(Object.values(worldOf(found).campaign.characters).some(entry => entry.job === 'captain')).toBe(true);
+	});
+
 	test('the seats a game started with are still set in the next lobby', () => {
 		const actor = lobby();
 		const home = city('haven-north-atlantic');

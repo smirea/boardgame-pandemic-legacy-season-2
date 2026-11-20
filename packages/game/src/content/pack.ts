@@ -352,7 +352,7 @@ const legacyDeck: LegacyCardDef[] = [
 	card(6, 1, 'pause', 'June', 'Perimeter report on Europe. If it was never reconned, Frankfurt is lost.', [
 		perimeter('europe', [{ t: 'forsake', city: city('frankfurt') }]),
 	]),
-	card(6, 2, 'stop', 'New arrivals', 'Two new characters join. Two new Rationed Events.', [
+	card(6, 2, 'stop', 'New arrivals', 'Two new jobs can be taken by a new character. Two new Rationed Events.', [
 		{ t: 'job', job: 'captain', home: city('haven-north-atlantic') },
 		{ t: 'job', job: 'sanitationOfficer', home: city('haven-mediterranean') },
 		{ t: 'event', event: 'massInoculation', mode: 'rationed' },

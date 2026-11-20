@@ -75,18 +75,23 @@
 	const worn = $derived(new Set(living.map(character => character.portrait)));
 	let picked = $state<number | null>(null);
 	const portrait = $derived(picked ?? portraits.find(index => !worn.has(index)) ?? 0);
-	// Every starting occupation is listed and the engine says which can still be taken. It is asked with a
-	// stand-in name, so a blank name field does not cross out the whole list.
+	// Every starting occupation and every job the group has found is listed, and the engine says which can still be
+	// taken. It is asked with a stand-in name, so a blank name field does not cross out the whole list. A found job
+	// comes with its own home.
+	const homeOf = (id: JobId) =>
+		pack.jobs.find(option => option.id === id)?.starting
+			? null
+			: (world.campaign.jobsFound.find(entry => entry.job === id)?.home ?? null);
 	const jobs = $derived(
 		pack.jobs
-			.filter(option => option.starting)
+			.filter(option => option.starting || world.campaign.jobsFound.some(entry => entry.job === option.id))
 			.map(option => ({
 				...option,
 				refusal: reject(world, snap.phase, {
 					type: 'CREATE_CHARACTER',
 					name: option.name,
 					job: option.id,
-					home,
+					home: homeOf(option.id) ?? home,
 					portrait,
 					player,
 				}),
@@ -97,8 +102,12 @@
 		if (!job || jobs.find(option => option.id === job)?.refusal)
 			job = jobs.find(option => option.refusal === null)?.id ?? '';
 	});
+	$effect(() => {
+		const fixed = job ? homeOf(job) : null;
+		if (fixed && fixed !== home) home = fixed;
+	});
 	const create = $derived<Command | null>(
-		job ? { type: 'CREATE_CHARACTER', name: newName.trim(), job, home, portrait, player } : null,
+		job ? { type: 'CREATE_CHARACTER', name: newName.trim(), job, home: homeOf(job) ?? home, portrait, player } : null,
 	);
 	const refusal = $derived(create ? reject(world, snap.phase, create) : 'Every starting job is taken');
 

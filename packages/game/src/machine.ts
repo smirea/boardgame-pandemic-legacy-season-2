@@ -113,11 +113,14 @@ export function reject(world: World, phase: Phase, command: Command): string | n
 		case 'CREATE_CHARACTER': {
 			const job = pack.jobs.find(candidate => candidate.id === command.job);
 			const home = pack.cities.find(candidate => candidate.id === command.home);
-			if (!job?.starting) return 'Pick a starting job';
+			const found = campaign.jobsFound.find(entry => entry.job === command.job);
+			if (!job || (!job.starting && !found)) return 'Pick a starting job or one the group has found';
 			if (campaign.characterCards.length === 0) return 'Every Character card is in use';
 			if (Object.values(campaign.characters).some(character => character.job === command.job))
 				return 'That job is taken';
-			if (home?.kind !== 'haven' || home.lost) return 'Pick a starting haven as home';
+			if (found && !job.starting) {
+				if (command.home !== found.home) return `${job.name} lives at ${cityDef(found.home).name}`;
+			} else if (home?.kind !== 'haven' || home.lost) return 'Pick a starting haven as home';
 			if (
 				command.portrait !== undefined &&
 				!(Number.isInteger(command.portrait) && command.portrait >= 0 && command.portrait < pack.numbers.portraits)

@@ -177,8 +177,19 @@ export function importReading(reading: Reading, seed = 1): Import {
 			});
 	const edgeKey = (a: string, b: string, kind: string) => `${[a, b].toSorted().join('~')}:${kind}`;
 	const known = new Set(campaign.edges.map(edge => edgeKey(edge.a, edge.b, edge.kind)));
+	const drawable = new Set(
+		Object.keys(pack.routeCourses).map(key => {
+			const [kind, pair] = key.split(':') as [string, string];
+			const [a, b] = pair.split('~') as [string, string];
+			return edgeKey(a, b, kind);
+		}),
+	);
 	for (const line of reading.lines) {
 		const key = edgeKey(line.a, line.b, line.kind);
+		if (!drawable.has(key))
+			throw new Error(
+				`The table has a ${line.kind} route ${line.a} to ${line.b} that the map has no course for (${line.evidence})`,
+			);
 		if (known.has(key)) continue;
 		known.add(key);
 		campaign.edges.push({ a: asCity(line.a), b: asCity(line.b), kind: line.kind });
