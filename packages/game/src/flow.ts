@@ -227,6 +227,10 @@ export function beginTurn(world: World) {
 	current.used = [];
 	log(game, { t: 'turn', seat });
 	const here = game.locations[current.location]!;
+	const lost =
+		(has(world, seat, 'portBound') && !cityDef(current.location).port ? 1 : 0) +
+		(has(world, seat, 'plagueShy') && here.plague > 0 ? 1 : 0);
+	game.actionsLeft = Math.max(0, game.actionsLeft - lost);
 	const infested = campaign.locations[current.location]!.infested && !has(world, seat, 'fieldSurgeon');
 	if ((here.plague > 0 || infested) && !here.shelter) expose(world, seat);
 }
@@ -251,6 +255,19 @@ export function expose(world: World, seat: SeatId) {
 	log(game, { t: 'exposure', seat, result: box });
 	if (box === 'scar' && canTakeScar(world, character)) game.pending.push({ t: 'scar', seat });
 	if (box === 'skull') kill(world, seat);
+}
+
+const CARRY_LIMIT = 3;
+
+/** A frail character carries only so many cubes. Whatever else lands on it goes back to the stockpile. */
+export function settleCarried(world: World) {
+	const game = world.game!;
+	for (const seat of game.seats) {
+		const carrier = player(game, seat);
+		if (carrier.supplies <= CARRY_LIMIT || !has(world, seat, 'frail')) continue;
+		game.stockpile += carrier.supplies - CARRY_LIMIT;
+		carrier.supplies = CARRY_LIMIT;
+	}
 }
 
 export const hasScar = (character: Character, scar: ScarId) =>
@@ -306,6 +323,8 @@ export function movePawn(world: World, seat: SeatId, to: CityId, by: string): bo
 	}
 	current.location = to;
 	log(game, { t: 'move', seat, from, to, by });
+	if (has(world, seat, 'haunted') && cityDef(from).kind === 'city' && leaving.supplies === 0 && current.hand.length > 0)
+		game.pending.push({ t: 'discard', seat, count: 1 });
 	const destination = cityDef(to);
 	if (destination.kind === 'haven' && destination.lost) setProgress(world, 'lostHaven', 1);
 	if (destination.arrival && !campaign.opened.includes(destination.arrival))
@@ -493,6 +512,13 @@ export function epidemic(world: World) {
 			}
 		}
 	}
+	for (const seat of game.seats) {
+		const shaken = player(game, seat);
+		if (!has(world, seat, 'rattled') || shaken.supplies === 0) continue;
+		game.stockpile += shaken.supplies;
+		shaken.supplies = 0;
+		log(game, { t: 'note', text: `${characterOf(world, seat).name} dropped every cube they carried` });
+	}
 	struck ??= drawInfectionCard(world, 'bottom');
 	let removed = 0;
 	if (struck) {
@@ -560,6 +586,9 @@ export function startInfectStep(world: World) {
 
 export function endTurn(world: World) {
 	const game = world.game!;
+	const ending = player(game, game.active);
+	if (has(world, game.active, 'oddHand') && ending.hand.length > 0 && ending.hand.length % 2 === 0)
+		game.pending.push({ t: 'discard', seat: game.active, count: 1 });
 	game.active = nextSeat(game);
 	beginTurn(world);
 }

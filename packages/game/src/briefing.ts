@@ -47,7 +47,6 @@ const HEADING = {
 	cityImprovement: 'New City card improvements for sale',
 	infectionImprovement: 'New Infection card improvements for sale',
 	permanentStructure: 'New at game end',
-	scar: 'New scars in the box',
 	job: 'New characters',
 	lab: 'Labs found',
 	region: 'Infested from the start',
@@ -119,8 +118,6 @@ function unlockLine(campaign: Campaign, unlock: BriefedUnlock): string | null {
 			return named(pack.cityImprovements, unlock.improvement);
 		case 'infectionImprovement':
 			return named(pack.infectionImprovements, unlock.improvement);
-		case 'scar':
-			return named(pack.scars, unlock.scar);
 		case 'job':
 			return `${named(pack.jobs, unlock.job)} A character with a job nobody had before has joined the roster. That text describes the job, not a new rule for everyone.`;
 		case 'lab':

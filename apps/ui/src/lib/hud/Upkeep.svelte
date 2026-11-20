@@ -17,7 +17,7 @@
 	const offers = $derived.by(() => {
 		const grid = onGrid(world);
 		const all: Offer[] = [];
-		for (const ability of campaign.abilitiesForSale) {
+		for (const ability of new Set(campaign.abilitiesForSale)) {
 			const def = pack.abilities.find(candidate => candidate.id === ability)!;
 			for (const character of Object.values(campaign.characters)) {
 				const slot = character.slots.indexOf(null);
@@ -30,7 +30,7 @@
 			}
 		}
 		const seenCity = new Set<string>();
-		for (const improvement of campaign.cityImprovementsForSale) {
+		for (const improvement of new Set(campaign.cityImprovementsForSale)) {
 			const def = pack.cityImprovements.find(candidate => candidate.id === improvement)!;
 			for (const card of Object.values(campaign.playerCards)) {
 				if (card.kind !== 'city' || seenCity.has(`${improvement}:${card.city}`)) continue;
@@ -43,7 +43,7 @@
 			}
 		}
 		const seenInfection = new Set<string>();
-		for (const improvement of campaign.infectionImprovementsForSale) {
+		for (const improvement of new Set(campaign.infectionImprovementsForSale)) {
 			const def = pack.infectionImprovements.find(candidate => candidate.id === improvement)!;
 			for (const card of Object.values(campaign.infectionCards)) {
 				if (card.kind !== 'city' || seenInfection.has(`${improvement}:${card.city}`)) continue;
@@ -66,7 +66,7 @@
 				text: 'Back to population 1. It stays infested.',
 				purchase: { t: 'restore', city },
 			});
-			for (const structure of campaign.permanentForSale) {
+			for (const structure of new Set(campaign.permanentForSale)) {
 				all.push({
 					group: `Permanent ${structure === 'center' ? 'supply center' : structure} (${pack.numbers.costs.permanent[structure]})`,
 					text: 'Standing at the start of every later game.',

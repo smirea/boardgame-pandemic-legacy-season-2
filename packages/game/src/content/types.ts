@@ -76,7 +76,23 @@ export type AbilityId =
 	| 'outrider'
 	| 'soldier';
 
-export type ScarId = 'reconExtraCard' | 'lineExtraCube' | 'laneExtraCube' | 'searchDiscard' | 'smallHand' | 'carrier';
+export type ScarId =
+	| 'reconExtraCard'
+	| 'lineExtraCube'
+	| 'laneExtraCube'
+	| 'searchDiscard'
+	| 'smallHand'
+	| 'wasteful'
+	| 'portBound'
+	| 'oddHand'
+	| 'rattled'
+	| 'plagueShy'
+	| 'frail'
+	| 'haunted'
+	| 'grasping'
+	| 'buildExtraCard'
+	| 'wary'
+	| 'carrier';
 
 export type CompanionId =
 	| 'builder'
@@ -229,11 +245,11 @@ export type Unlock =
 	| { t: 'required'; count: number }
 	| { t: 'turningPoint'; id: TurningPointId }
 	| { t: 'event'; event: EventId; mode: 'rationed' | 'unrationed' | 'permanent'; copies?: number }
-	| { t: 'ability'; ability: AbilityId }
-	| { t: 'cityImprovement'; improvement: CityImprovementId }
-	| { t: 'infectionImprovement'; improvement: InfectionImprovementId }
-	| { t: 'permanentStructure'; structure: StructureKind }
-	| { t: 'scar'; scar: ScarId }
+	/** Stickers: each unlock adds `copies` of one (1 when left out), and a sticker that is placed is gone. */
+	| { t: 'ability'; ability: AbilityId; copies?: number }
+	| { t: 'cityImprovement'; improvement: CityImprovementId; copies?: number }
+	| { t: 'infectionImprovement'; improvement: InfectionImprovementId; copies?: number }
+	| { t: 'permanentStructure'; structure: StructureKind; copies?: number }
 	| { t: 'job'; job: JobId; home: CityId }
 	| { t: 'gather'; cards: number }
 	| { t: 'assemble'; cards: number }

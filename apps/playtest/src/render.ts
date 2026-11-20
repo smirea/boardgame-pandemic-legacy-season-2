@@ -306,12 +306,15 @@ function renderUpkeep(state: PublicState): string[] {
 		);
 	const shop = world.campaign;
 	const costly = [
-		...shop.abilitiesForSale.map(id => ({
+		...[...new Set(shop.abilitiesForSale)].map(id => ({
 			...pack.abilities.find(entry => entry.id === id)!,
 			free: shop.freeAbilityUnits,
 		})),
-		...shop.cityImprovementsForSale.map(id => ({ ...pack.cityImprovements.find(entry => entry.id === id)!, free: 0 })),
-		...shop.infectionImprovementsForSale.map(id => ({
+		...[...new Set(shop.cityImprovementsForSale)].map(id => ({
+			...pack.cityImprovements.find(entry => entry.id === id)!,
+			free: 0,
+		})),
+		...[...new Set(shop.infectionImprovementsForSale)].map(id => ({
 			...pack.infectionImprovements.find(entry => entry.id === id)!,
 			free: 0,
 		})),

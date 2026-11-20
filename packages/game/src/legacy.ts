@@ -73,7 +73,7 @@ export function newCampaign(seed: number): Campaign {
 		cityImprovementsForSale: [],
 		infectionImprovementsForSale: [],
 		permanentForSale: [],
-		scars: [],
+		scars: pack.scars.filter(scar => scar.id !== 'carrier').map(scar => scar.id),
 		jobsFound: [],
 		stockpileBonus: 0,
 		freeAbilityUnits: 0,
@@ -184,6 +184,15 @@ const pushUnique = <T>(list: T[], value: T) => {
 	if (!list.includes(value)) list.push(value);
 };
 
+const pushCopies = <T>(list: T[], value: T, copies = 1) => {
+	for (let i = 0; i < copies; i++) list.push(value);
+};
+
+function takeOne<T>(list: T[], value: T) {
+	const index = list.indexOf(value);
+	if (index >= 0) list.splice(index, 1);
+}
+
 export function applyUnlock(world: World, unlock: Unlock) {
 	const { campaign, game } = world;
 	switch (unlock.t) {
@@ -226,15 +235,13 @@ export function applyUnlock(world: World, unlock: Unlock) {
 		case 'event':
 			return addEvent(campaign, unlock.event, unlock.mode, unlock.copies);
 		case 'ability':
-			return pushUnique(campaign.abilitiesForSale, unlock.ability);
+			return pushCopies(campaign.abilitiesForSale, unlock.ability, unlock.copies);
 		case 'cityImprovement':
-			return pushUnique(campaign.cityImprovementsForSale, unlock.improvement);
+			return pushCopies(campaign.cityImprovementsForSale, unlock.improvement, unlock.copies);
 		case 'infectionImprovement':
-			return pushUnique(campaign.infectionImprovementsForSale, unlock.improvement);
+			return pushCopies(campaign.infectionImprovementsForSale, unlock.improvement, unlock.copies);
 		case 'permanentStructure':
-			return pushUnique(campaign.permanentForSale, unlock.structure);
-		case 'scar':
-			return pushUnique(campaign.scars, unlock.scar);
+			return pushCopies(campaign.permanentForSale, unlock.structure, unlock.copies);
 		case 'job': {
 			campaign.jobsFound.push({ job: unlock.job, home: unlock.home });
 			const job = pack.jobs.find(candidate => candidate.id === unlock.job)!;
@@ -442,14 +449,9 @@ export function checkPurchase(world: World, purchase: Purchase): string | null {
 				: 'Pick a forsaken city';
 		}
 		case 'permanent': {
-			if (!campaign.permanentForSale.includes(purchase.structure)) return 'Permanent structures are not available yet';
+			if (!campaign.permanentForSale.includes(purchase.structure)) return 'No sticker of that kind is left';
 			if (!game.locations[purchase.city]?.[purchase.structure]) return 'The structure must be standing at game end';
-			if (campaign.locations[purchase.city]!.permanent.includes(purchase.structure)) return 'Already permanent';
-			const limit = purchase.structure === 'center' ? 6 : numbers.pieces[purchase.structure];
-			const placed = Object.values(campaign.locations).filter(record =>
-				record.permanent.includes(purchase.structure),
-			).length;
-			return placed < limit ? null : 'No stickers left';
+			return campaign.locations[purchase.city]!.permanent.includes(purchase.structure) ? 'Already permanent' : null;
 		}
 	}
 }
@@ -465,15 +467,18 @@ export function applyPurchase(world: World, purchase: Purchase) {
 	if (game.upkeep) game.upkeep.units -= cost;
 	switch (purchase.t) {
 		case 'ability':
+			takeOne(campaign.abilitiesForSale, purchase.ability);
 			campaign.characters[purchase.character]!.slots[purchase.slot] = { kind: 'ability', id: purchase.ability };
 			return;
 		case 'cityImprovement': {
 			const card = campaign.playerCards[purchase.card]!;
+			takeOne(campaign.cityImprovementsForSale, purchase.improvement);
 			if (card.kind === 'city') card.improvement = purchase.improvement;
 			return;
 		}
 		case 'infectionImprovement': {
 			const card = campaign.infectionCards[purchase.card]!;
+			takeOne(campaign.infectionImprovementsForSale, purchase.improvement);
 			if (card.kind === 'city') card.improvement = purchase.improvement;
 			return;
 		}
@@ -484,6 +489,7 @@ export function applyPurchase(world: World, purchase: Purchase) {
 			campaign.locations[purchase.city]!.population = 1;
 			return;
 		case 'permanent':
+			takeOne(campaign.permanentForSale, purchase.structure);
 			campaign.locations[purchase.city]!.permanent.push(purchase.structure);
 			return;
 	}

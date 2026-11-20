@@ -2,7 +2,7 @@ import { addEdge, checkEdge } from './actions';
 import { pack } from './content/pack';
 import type { ScarId } from './content/types';
 import { drawPiled } from './decks';
-import { canTakeScar, freeCharacters, hasScar, intensify, movePawn, scarTargets } from './flow';
+import { canTakeScar, freeCharacters, hasScar, intensify, movePawn, scarTargets, settleCarried } from './flow';
 import {
 	cardLabel,
 	characterOf,
@@ -165,6 +165,11 @@ function playDetail(world: World, play: Play): string {
 }
 
 export function applyPlay(world: World, seat: SeatId, card: CardId, play: Play) {
+	resolvePlay(world, seat, card, play);
+	settleCarried(world);
+}
+
+function resolvePlay(world: World, seat: SeatId, card: CardId, play: Play) {
 	const { campaign, game } = world as { campaign: World['campaign']; game: Game };
 	const held = campaign.playerCards[card]!;
 	const owner = player(game, seat);
@@ -401,6 +406,7 @@ export function applyDecide(world: World, decide: Decide) {
 	switch (decide.d) {
 		case 'scar': {
 			const character = characterOf(world, seat);
+			campaign.scars.splice(campaign.scars.indexOf(decide.scar), 1);
 			if (decide.target === 'job') character.jobScar = decide.scar;
 			else character.slots[decide.target] = { kind: 'scar', id: decide.scar };
 			return;

@@ -43,7 +43,7 @@
 		const { campaign } = world;
 		const offers: Extract<Purchase, { t: 'ability' }>[] = [];
 		if (snap.phase !== 'setup.supply' || campaign.freeAbilityUnits <= 0) return offers;
-		for (const ability of campaign.abilitiesForSale)
+		for (const ability of new Set(campaign.abilitiesForSale))
 			for (const character of Object.values(campaign.characters)) {
 				const purchase = {
 					t: 'ability' as const,

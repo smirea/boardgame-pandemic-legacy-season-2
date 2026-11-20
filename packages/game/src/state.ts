@@ -115,10 +115,12 @@ export type Campaign = {
 	required: number;
 	carriedProgress: Partial<Record<ObjectiveId, number>>;
 	turningPoints: TurningPointId[];
+	/** The stickers the group has not placed yet, one entry for each sticker, so an id may repeat. */
 	abilitiesForSale: AbilityId[];
 	cityImprovementsForSale: CityImprovementId[];
 	infectionImprovementsForSale: InfectionImprovementId[];
 	permanentForSale: StructureKind[];
+	/** The scar stickers nobody carries yet. */
 	scars: ScarId[];
 	jobsFound: { job: JobId; home: CityId }[];
 	stockpileBonus: number;

@@ -359,7 +359,7 @@ export function legalDecides(world: World): Decide[] {
 		switch (pending.t) {
 			case 'scar':
 				for (const seat of pending.seat ? [pending.seat] : game.seats) {
-					for (const scar of campaign.scars) {
+					for (const scar of new Set(campaign.scars)) {
 						for (const target of scarTargets(characterOf(world, seat)))
 							candidates.push({ d: 'scar', scar, target, ...(pending.seat ? {} : { seat }) });
 					}
@@ -408,21 +408,21 @@ export function legalPurchases(world: World): Purchase[] {
 	const onGrid = [...grid(campaign)];
 	const candidates: Purchase[] = [];
 	for (const character of Object.values(campaign.characters)) {
-		for (const ability of campaign.abilitiesForSale) {
+		for (const ability of new Set(campaign.abilitiesForSale)) {
 			character.slots.forEach((_, slot) => candidates.push({ t: 'ability', ability, character: character.id, slot }));
 		}
 	}
-	for (const improvement of campaign.cityImprovementsForSale) {
+	for (const improvement of new Set(campaign.cityImprovementsForSale)) {
 		for (const card of Object.keys(campaign.playerCards) as CardId[])
 			candidates.push({ t: 'cityImprovement', improvement, card });
 	}
-	for (const improvement of campaign.infectionImprovementsForSale) {
+	for (const improvement of new Set(campaign.infectionImprovementsForSale)) {
 		for (const card of Object.keys(campaign.infectionCards) as CardId[])
 			candidates.push({ t: 'infectionImprovement', improvement, card });
 	}
 	for (const city of onGrid) {
 		candidates.push({ t: 'population', city, steps: 1 }, { t: 'restore', city });
-		for (const structure of campaign.permanentForSale) candidates.push({ t: 'permanent', structure, city });
+		for (const structure of new Set(campaign.permanentForSale)) candidates.push({ t: 'permanent', structure, city });
 	}
 	return candidates.filter(purchase => checkPurchase(world, purchase) === null);
 }

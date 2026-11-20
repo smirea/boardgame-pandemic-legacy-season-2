@@ -1,7 +1,7 @@
 import { pack } from './content/pack';
 import type { ActionId, CityDef, CompanionId, EdgeKind, RuleId, SearchResult } from './content/types';
 import { drawPiled } from './decks';
-import { bump, havensWithHollow, kill, movePawn, setProgress, settleGrid, towerColours } from './flow';
+import { bump, havensWithHollow, kill, movePawn, setProgress, settleCarried, settleGrid, towerColours } from './flow';
 import {
 	cardLabel,
 	cardValue,
@@ -130,7 +130,8 @@ function centerCost(ctx: Ctx, laborer: boolean) {
 	return (
 		(laborer ? numbers.costs.center - 1 : numbers.costs.center) -
 		(trait(ctx, 'architect') ? 1 : 0) -
-		(trait(ctx, 'builder') ? 1 : 0)
+		(trait(ctx, 'builder') ? 1 : 0) +
+		(trait(ctx, 'buildExtraCard') ? 1 : 0)
 	);
 }
 
@@ -294,6 +295,10 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 		apply(ctx) {
 			ctx.game[trait(ctx, 'immunologist') ? 'reserve' : 'stockpile'] -= 1;
 			ctx.me.supplies += 1;
+			if (trait(ctx, 'wasteful') && ctx.game.stockpile > 0) {
+				ctx.game.stockpile -= 1;
+				ctx.game.reserve += 1;
+			}
 			useOnce(ctx, 'farmerReady');
 		},
 	},
@@ -333,6 +338,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 		cost: ctx => (trait(ctx, 'farmer') && ctx.me.used.at(-1) === 'farmerReady' && unused(ctx, 'farmer') ? 0 : 1),
 		check(ctx, { count, to }) {
 			if (!Number.isInteger(count) || count < 1 || count > ctx.me.supplies) return 'You do not hold that many cubes';
+			if (trait(ctx, 'grasping') && ctx.me.supplies - count < 2) return 'This character keeps its last 2 cubes';
 			if (!to || to === ctx.here) return ok;
 			return trait(ctx, 'courier') && neighbours(ctx.campaign, ctx.here).includes(to)
 				? ok
@@ -476,8 +482,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 			log(ctx.game, { t: 'search', seat: ctx.seat, city: ctx.here, result: target.result.t });
 			resolveSearch(ctx, target.result);
 			bump(ctx.world, 'searches');
-			if (trait(ctx, 'searchDiscard') && ctx.me.hand.length > 0)
-				ctx.game.pending.push({ t: 'discard', seat: ctx.seat, count: 1 });
+			if (trait(ctx, 'searchDiscard') && ctx.me.hand.includes(card)) discardFromHand(ctx.game, ctx.seat, card);
 		},
 	},
 	shuttle: {
@@ -838,6 +843,17 @@ export function actionCost(world: World, seat: SeatId, action: Action): number {
 
 const MOVES = new Set<ActionId>(['sail', 'charter', 'captainSail', 'shuttle', 'run']);
 
+/** A wary character will not walk out of a haven it could have stocked. */
+function staysToStock(world: World, seat: SeatId): boolean {
+	const me = player(world.game!, seat);
+	return (
+		has(world, seat, 'wary') &&
+		cityDef(me.location).kind === 'haven' &&
+		world.game!.locations[me.location]!.supplies === 0 &&
+		me.supplies > 0
+	);
+}
+
 /** Whether the seat's character has this kind of action at all: a job, an ability, or a campaign unlock. */
 export function hasAction(world: World, seat: SeatId, id: ActionId): boolean {
 	const spec = specs[id] as unknown as AnySpec;
@@ -858,6 +874,8 @@ export function actionGate(world: World, seat: SeatId, id: ActionId): string | n
 	if (isForsaken(world.campaign, player(game, seat).location) && id !== 'drive')
 		return 'Only Drive or Ferry works in a forsaken city';
 	if (characterOf(world, seat).carrier && MOVES.has(id)) return 'The carrier moves only by Drive or Ferry';
+	if ((MOVES.has(id) || id === 'drive') && staysToStock(world, seat))
+		return 'This character will not leave a haven that holds no cubes while carrying some';
 	return null;
 }
 
@@ -877,6 +895,7 @@ export function applyAction(world: World, seat: SeatId, action: Action) {
 		ctx.me.used = ctx.me.used.filter(key => key !== 'farmerReady' || action.a === 'deliver');
 	specFor(action).apply(ctx, action);
 	if (action.a === 'deliver') ctx.me.used = ctx.me.used.filter(key => key !== 'farmerReady');
+	settleCarried(world);
 	log(ctx.game, { t: 'action', seat, action: action.a, detail: '' });
 }
 

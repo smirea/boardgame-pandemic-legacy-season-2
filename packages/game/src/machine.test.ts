@@ -3,7 +3,7 @@ import { checkEdge } from './actions';
 import type { Action } from './actions';
 import { botCommand } from './bot';
 import { pack } from './content/pack';
-import type { EdgeDef, EventId, SearchResult } from './content/types';
+import type { EdgeDef, EventId, ScarId, SearchResult } from './content/types';
 import { edge } from './content/world';
 import { bump, epidemicCount, placeHollow, setupInfection } from './flow';
 import { grid, handLimit, hasEdge, isCandidate, passage, segmentsCross, tableSeating } from './helpers';
@@ -2410,4 +2410,150 @@ test('a plain save resumes mid-game in the same phase and keeps playing identica
 	const older = structuredClone(save) as { world: { table: Partial<World['table']> } };
 	delete older.world.table.start;
 	expect(() => parseSave(older)).toThrow('not a campaign save from this build');
+});
+
+describe('scars and the sticker pool', () => {
+	const scarred = (world: World, seat: typeof A, id: ScarId) =>
+		void (character(world, seat).slots[3] = { kind: 'scar', id });
+	/** The turn of seat A ends with one Infection card, so seat B begins a turn. */
+	const nextTurn = (edit: (world: World, game: Game) => void) => {
+		const actor = late((world, game) => {
+			stackInfection(world, ['lagos']);
+			game.infectionsLeft = 1;
+			edit(world, game);
+		}, 'playing.infect');
+		send(actor, { type: 'INFECT' });
+		return actor;
+	};
+
+	test('a scar a character takes leaves the pool, and a sticker that is bought leaves the shop', () => {
+		const actor = late((world, game) => {
+			world.campaign.scars = ['smallHand', 'frail'];
+			game.pending = [{ t: 'scar', seat: A }];
+		});
+		send(actor, { type: 'DECIDE', decide: { d: 'scar', scar: 'smallHand', target: 1 } });
+		expect(worldOf(actor).campaign.scars).toEqual(['frail']);
+
+		const shop = late(world => {
+			world.campaign.month = 10;
+			world.game!.outcome = { won: true, reason: 'test' };
+			world.campaign.abilitiesForSale = ['architect', 'scout'];
+		}, 'over');
+		send(shop, { type: 'CONTINUE' });
+		const buyer = Object.values(worldOf(shop).campaign.characters)[0]!.id;
+		const purchase = { t: 'ability', ability: 'architect', character: buyer, slot: 1 } as const;
+		send(shop, { type: 'PURCHASE', purchase });
+		expect(worldOf(shop).campaign.abilitiesForSale).toEqual(['scout']);
+		const second = Object.values(worldOf(shop).campaign.characters)[1]!.id;
+		expect(reject(worldOf(shop), 'upkeep', { type: 'PURCHASE', purchase: { ...purchase, character: second } })).toBe(
+			'That ability is not available yet',
+		);
+	});
+
+	test('Wasteful: Make Supplies also moves a cube from the stockpile to the reserve', () => {
+		const actor = late(world => scarred(world, A, 'wasteful'));
+		const before = gameOf(actor);
+		act(actor, { a: 'makeSupplies' });
+		expect(gameOf(actor).stockpile).toBe(before.stockpile - 2);
+		expect(gameOf(actor).reserve).toBe(before.reserve + 1);
+	});
+
+	test('Landsick and Squeamish each cost an action at the start of a turn', () => {
+		const actor = nextTurn((world, game) => {
+			scarred(world, B, 'portBound');
+			character(world, B).slots[2] = { kind: 'scar', id: 'plagueShy' };
+			game.players[B]!.location = city('chicago');
+			game.locations[city('chicago')]!.plague = 1;
+		});
+		expect(gameOf(actor).active).toBe(B);
+		expect(gameOf(actor).actionsLeft).toBe(pack.numbers.actionsPerTurn - 2);
+	});
+
+	test('Fixated: a turn that ends on an even hand costs a card', () => {
+		const actor = nextTurn(world => {
+			scarred(world, A, 'oddHand');
+			give(world, A, cityCards(world, 'london', 2));
+		});
+		expect(gameOf(actor).pending).toContainEqual({ t: 'discard', seat: A, count: 1 });
+	});
+
+	test('Rattled: an Epidemic sends the cubes a character carries back to the stockpile', () => {
+		const actor = late((world, game) => {
+			scarred(world, B, 'rattled');
+			game.players[B]!.supplies = 3;
+			const epidemic = Object.values(world.campaign.playerCards).find(card => card.kind === 'epidemic')!.id;
+			const rest = game.playerDeck.order.filter(id => id !== epidemic);
+			game.playerDeck = { order: [epidemic, ...rest], piles: [{ size: rest.length + 1, epidemics: 1 }] };
+			game.drawsLeft = 2;
+		}, 'playing.draw');
+		send(actor, { type: 'DRAW' });
+		expect(gameOf(actor).players[B]!.supplies).toBe(0);
+	});
+
+	test('Frail: a character carries at most 3 cubes, and the rest go back to the stockpile', () => {
+		const actor = late((world, game) => {
+			scarred(world, A, 'frail');
+			game.players[A]!.supplies = 3;
+		});
+		const stockpile = gameOf(actor).stockpile;
+		act(actor, { a: 'makeSupplies' });
+		expect(gameOf(actor).players[A]!.supplies).toBe(3);
+		expect(gameOf(actor).stockpile).toBe(stockpile);
+	});
+
+	test('Haunted: leaving a city that holds no cubes costs a card', () => {
+		const actor = late((world, game) => {
+			scarred(world, A, 'haunted');
+			game.players[A]!.location = city('new-york');
+			game.locations[city('new-york')]!.supplies = 0;
+			give(world, A, cityCards(world, 'london', 1));
+		});
+		act(actor, { a: 'drive', to: city('washington') });
+		expect(gameOf(actor).pending).toEqual([{ t: 'discard', seat: A, count: 1 }]);
+	});
+
+	test('Grasping: the last 2 cubes a character carries cannot be delivered', () => {
+		const actor = late((world, game) => {
+			scarred(world, A, 'grasping');
+			game.players[A]!.supplies = 3;
+		});
+		expect(refuses(actor, { a: 'deliver', count: 2 })).toContain('last 2');
+		expect(refuses(actor, { a: 'deliver', count: 1 })).toBeNull();
+	});
+
+	test('Exacting: a supply center needs 1 more card', () => {
+		const actor = late((world, game) => {
+			scarred(world, A, 'buildExtraCard');
+			game.players[A]!.location = city('chicago');
+			give(world, A, [...cityCards(world, 'new-york', 4), ...cityCards(world, 'washington', 2)]);
+		});
+		const hand = gameOf(actor).players[A]!.hand;
+		expect(refuses(actor, { a: 'buildCenter', cards: hand.slice(0, 5) })).toContain('Needs 6');
+		expect(refuses(actor, { a: 'buildCenter', cards: hand })).toBeNull();
+	});
+
+	test('Wary: a character carrying cubes will not leave a haven that holds none', () => {
+		const actor = late((world, game) => {
+			scarred(world, A, 'wary');
+			const haven = city('haven-north-atlantic');
+			game.players[A]!.location = haven;
+			game.players[A]!.supplies = 1;
+			game.locations[haven]!.supplies = 0;
+		});
+		expect(refuses(actor, { a: 'drive', to: city('new-york') })).toContain('haven');
+		act(actor, { a: 'deliver', count: 1 });
+		expect(refuses(actor, { a: 'drive', to: city('new-york') })).toBeNull();
+	});
+
+	test('Careless: the City card that was searched is discarded', () => {
+		const actor = late((world, game) => {
+			scarred(world, A, 'searchDiscard');
+			game.players[A]!.location = city('chicago');
+			give(world, A, cityCards(world, 'chicago', 1));
+		});
+		const card = gameOf(actor).players[A]!.hand[0]!;
+		act(actor, { a: 'search', card, box: 0 });
+		expect(gameOf(actor).players[A]!.hand).not.toContain(card);
+		expect(gameOf(actor).playerDiscard).toContain(card);
+	});
 });
