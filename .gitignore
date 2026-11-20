@@ -26,3 +26,6 @@ build
 
 # task-orchestrator session files
 .orchestrator
+
+# the deployed site, assembled by apps/signal/scripts/site.ts
+apps/signal/site

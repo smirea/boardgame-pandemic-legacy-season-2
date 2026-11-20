@@ -77,13 +77,16 @@ for (const [sheet, ids] of pack.dossier.sheets.entries()) {
 		const dir = `dossiers/folder-${sheet + 1}/door-${id}`;
 		if (!(await exists(`${dir}/door.json`))) throw new Error(`No scan for door ${id} in ${dir}`);
 		const def = await json(`${dir}/door.json`);
-		const scans: Scan[] = [{ title: `Door ${id}`, src: `${dir}/${def.frontImage}` }];
+		// Some sidecars name an image from the archive's root, others from the door's folder.
+		const image = async (name: string) => {
+			const src = (await exists(name)) ? name : `${dir}/${name}`;
+			if (!(await exists(src))) throw new Error(`Door ${id} names a missing image ${name}`);
+			return src;
+		};
+		const scans: Scan[] = [{ title: `Door ${id}`, src: await image(def.frontImage) }];
 		for (const item of (def.items ?? []) as { image?: string; title?: string; category?: string }[]) {
 			if (!item.image || item.category === 'instruction') continue;
-			// Some sidecars name the image from the archive's root, others from the door's folder.
-			const src = (await exists(item.image)) ? item.image : `${dir}/${item.image}`;
-			if (!(await exists(src))) throw new Error(`Door ${id} names a missing image ${item.image}`);
-			scans.push({ title: item.title ?? `Door ${id}`, src });
+			scans.push({ title: item.title ?? `Door ${id}`, src: await image(item.image) });
 		}
 		doors[id] = scans;
 	}

@@ -4,7 +4,8 @@
 	"type": "module",
 	"scripts": {
 		"dev": "bun --env-file=../../.env --env-file=../../.env.local scripts/dev.ts",
-		"deploy": "wrangler deploy",
+		"site": "scripts/site.ts",
+		"deploy": "scripts/site.ts && wrangler deploy --env production",
 		"typecheck": "bun check",
 		"types": "wrangler types"
 	},

@@ -63,7 +63,8 @@ export class SignalRoom extends DurableObject<Env> {
 export default {
 	async fetch(request, env): Promise<Response> {
 		const url = new URL(request.url);
-		if (url.pathname !== '/') return new Response('Not found', { status: 404 });
+		// `/signal` is where the deployed site, which shares this Worker with the UI, sends players.
+		if (url.pathname !== '/' && url.pathname !== '/signal') return new Response('Not found', { status: 404 });
 		if (request.headers.get('Upgrade')?.toLowerCase() !== 'websocket')
 			return new Response('Expected a WebSocket upgrade', { status: 426 });
 
