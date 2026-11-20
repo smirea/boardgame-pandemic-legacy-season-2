@@ -52,6 +52,17 @@ type CharacterFact = {
  * ran in a physics sandbox, so they kept some rules with workarounds; these facts record the game state each
  * workaround stood for, never the workaround. The calendar is replayed through our Legacy schedule, then every fact
  * here replaces what the replay produced, and anything the replay disagrees with fails loudly.
+ *
+ * Where the table and the rules part, the rules win, and these are the readings taken:
+ * - Rationing is 0: the rule gives 0 after July's win, and the die beside the board has no 0 face, so it showed 1.
+ * - Purge is still owned. Played one-shot cards went to the retired-components bag; it lay in the bag for inactive
+ *   pieces, which is not that.
+ * - Doors 44 and 49 create the Sanitation Officer and the Captain at once. The table had not made them yet, so they
+ *   join the roster on the next two clean Character cards.
+ * - Jacksonville keeps its third Infection card. One copy was missing from the table with no rule that removes it.
+ * - The Antananarivo lane is Lagos to Antananarivo: its pen stroke stops short, and the city's cards are in play.
+ * - Tib's exposure is 2, as the loose copy and his scar show; the glued copy was stale. E. Holmes has no job: both
+ *   unused starting job stickers are still on the shelf.
  */
 const TABLE = {
 	/** Prologue, then January to July: each month's games in order. */
@@ -292,7 +303,7 @@ const TABLE = {
 		{ city: 'denver', copies: 2, improvement: 'cordon' },
 		{ city: 'frankfurt', copies: 2, stored: true },
 		{ city: 'istanbul', copies: 3 },
-		{ city: 'jacksonville', copies: 2 },
+		{ city: 'jacksonville', copies: 3 },
 		{ city: 'johannesburg', copies: 2 },
 		{ city: 'khartoum' },
 		{ city: 'kinshasa' },
@@ -334,6 +345,7 @@ const TABLE = {
 		{ event: 'secondWind', mode: 'rationed' },
 		{ event: 'spreadOut', mode: 'rationed' },
 		{ event: 'stockUp', mode: 'unrationed' },
+		{ event: 'purge', mode: 'unrationed' },
 		{ event: 'surplus', mode: 'permanent', copies: 3 },
 	] as { event: EventId; mode: 'rationed' | 'unrationed' | 'permanent'; copies?: number }[],
 	produce: [1, 1, 2, 2, 2, 3],
@@ -382,11 +394,27 @@ const TABLE = {
 			slots: [{ scar: 'plagueShy' }, { ability: 'recordKeeper' }, { ability: 'supplier' }, { ability: 'outrider' }],
 			played: true,
 		},
+		{
+			name: 'Sanitation Officer',
+			job: 'sanitationOfficer',
+			home: 'haven-mediterranean',
+			card: 2,
+			exposure: 0,
+			slots: [null, null, null, null],
+			played: false,
+		},
+		{
+			name: 'Captain',
+			job: 'captain',
+			home: 'haven-north-atlantic',
+			card: 7,
+			exposure: 0,
+			slots: [null, null, null, null],
+			played: false,
+		},
 	] as CharacterFact[],
 	spareCharacterCards: [
 		{ card: 5, exposure: 2 },
-		{ card: 2, exposure: 0 },
-		{ card: 7, exposure: 0 },
 		{ card: 6, exposure: 0 },
 		{ card: 0, exposure: 0 },
 		{ card: 8, exposure: 0 },
