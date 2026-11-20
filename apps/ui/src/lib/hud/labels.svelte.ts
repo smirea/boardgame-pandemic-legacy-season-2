@@ -1,4 +1,4 @@
-import { characterAt, cityDef, handLimit, has, pack, routeCost, sealDef } from '@repo/game';
+import { characterAt, cityDef, handLimit, has, pack, routeCost, sealDef, suppliesMade } from '@repo/game';
 import type { Action, CardId, CityId, Decide, Decision, LogEntry, Play, Purchase, SeatId, World } from '@repo/game';
 import { CITY_COLOR } from '#lib/board/CityMarker.svelte';
 import { cardColor } from './PlayerCard.svelte';
@@ -238,7 +238,12 @@ export function actionDetail(world: World, action: Action): Rich {
 			return ['Discard ', cardRef(world, action.card)];
 		case 'makeSupplies': {
 			const pile = has(world, game.active, 'immunologist') ? 'reserve' : 'stockpile';
-			return ['Take a ', { glyph: 'supplies', text: 'cube' }, ` from the ${pile}, ${game[pile]} left`];
+			const made = suppliesMade(world, game.active);
+			return [
+				made > 1 ? `Take ${made} ` : 'Take a ',
+				{ glyph: 'supplies', text: made > 1 ? 'cubes' : 'cube' },
+				` from the ${pile}, ${game[pile]} left`,
+			];
 		}
 		case 'produce':
 			return [action.mode === 'local' ? 'Here only' : 'Every haven and supply center'];

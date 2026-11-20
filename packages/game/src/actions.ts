@@ -321,7 +321,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 			const source = trait(ctx, 'immunologist') && ctx.game.reserve > 0 ? 'reserve' : 'stockpile';
 			ctx.game[source] -= 1;
 			ctx.me.supplies += 1;
-			if (breakthrough(ctx.campaign, 'opal') && (ctx.def.kind === 'haven' || ctx.loc.center) && ctx.game[source] > 0) {
+			if (opalBonus(ctx) && ctx.game[source] > 0) {
 				ctx.game[source] -= 1;
 				ctx.me.supplies += 1;
 			}
@@ -943,6 +943,16 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 		},
 	},
 };
+
+/** The Opal lab's breakthrough: Make Supplies in a haven or supply center takes a second cube. */
+const opalBonus = (ctx: Ctx) => breakthrough(ctx.campaign, 'opal') && (ctx.def.kind === 'haven' || ctx.loc.center);
+
+/** How many cubes one Make Supplies would take here, as far as the pile allows. */
+export function suppliesMade(world: World, seat: SeatId): number {
+	const ctx = context(world, seat);
+	const source = trait(ctx, 'immunologist') && ctx.game.reserve > 0 ? 'reserve' : 'stockpile';
+	return Math.min(ctx.game[source], opalBonus(ctx) ? 2 : 1);
+}
 
 function context(world: World, seat: SeatId): Ctx {
 	const game = world.game!;

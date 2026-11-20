@@ -12,6 +12,7 @@ export {
 	hasAction,
 	isFreeAction,
 	routeCost,
+	suppliesMade,
 } from './actions';
 export type { Decide, Play } from './plays';
 export { playDetail } from './plays';
