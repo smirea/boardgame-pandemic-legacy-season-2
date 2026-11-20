@@ -267,6 +267,20 @@ export type Game = {
 export type Start = 'prologue' | 'month';
 
 /**
+ * Interactive Legacy deck / package unboxing progress on the table, synced across all players.
+ */
+export type TableBriefing = {
+	/** How many steps of `openings(campaign.briefing)` have been drawn onto the table. */
+	drawn: number;
+	/** Whether the most recently drawn card, package or door has been flipped or opened. */
+	flipped: boolean;
+	/** Players who clicked Done once everything is drawn and opened. */
+	ready: PlayerId[];
+	/** True once everyone agreed on Done, while clients play the put-away sequence before `ACK_BRIEFING`. */
+	stowing: boolean;
+};
+
+/**
  * The people at the table, apart from the campaign: a prologue that rolls the campaign back leaves
  * them seated, and undo leaves them alone. One person may hold several seats.
  */
@@ -274,8 +288,9 @@ export type Table = {
 	seats: { seat: SeatId; player: PlayerId; name: string }[];
 	/** Who in the lobby is ready, and for which game. */
 	ready: Partial<Record<PlayerId, Start>>;
-	/** The game everyone at month 0 agreed on, after which the lobby moves on to choosing characters. */
+	/** The game everyone agreed on in the lobby, after which the lobby moves on to choosing characters. */
 	start: Start | null;
+	briefing: TableBriefing;
 };
 
 export type World = { campaign: Campaign; game: Game | null; table: Table };

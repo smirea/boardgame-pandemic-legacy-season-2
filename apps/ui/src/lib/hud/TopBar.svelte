@@ -14,13 +14,15 @@
 		status: string;
 		players: number;
 		solo: boolean;
+		/** True while the Legacy deck is lifted out onto the table during an interactive briefing. */
+		legacyOut?: boolean;
 		onreset: () => void;
 		onmenu: () => void;
 		onbox: () => void;
 		ondeck: () => void;
 	};
 
-	let { snap, info, status, players, solo, onreset, onmenu, onbox, ondeck }: Props = $props();
+	let { snap, info, status, players, solo, legacyOut = false, onreset, onmenu, onbox, ondeck }: Props = $props();
 
 	const campaign = $derived(snap.world.campaign);
 	const game = $derived(snap.world.game);
@@ -66,13 +68,14 @@
 				data-testid="open-box"
 				data-dest="box">Box</button
 			>
-			<button onclick={onmenu}>Menu</button>
 			<button
 				class="legacy"
+				class:out={legacyOut}
 				onclick={ondeck}
 				aria-label={`Legacy deck, ${legacyLeft} cards left`}
 				title="The Legacy deck: the cards read so far, and when the next one is read"
 				data-testid="open-legacy-deck"
+				data-dest="legacyDeck"
 				{@attach scan(
 					() => (nextLegacy ? [{ title: 'Top of the Legacy deck', src: legacyScans[nextLegacy.id]!.back! }] : []),
 					'legacy-pile',
@@ -81,6 +84,7 @@
 				{#if nextLegacy}<img src={scanUrl(legacyScans[nextLegacy.id]!.back!)} alt="" />{/if}
 				<span>{legacyLeft}</span>
 			</button>
+			<button onclick={onmenu}>Menu</button>
 		</div>
 	</header>
 </div>
@@ -91,6 +95,11 @@
 		align-items: center;
 		gap: 0.35rem;
 		padding-left: 0.3rem;
+	}
+
+	.legacy.out {
+		visibility: hidden;
+		pointer-events: none;
 	}
 
 	.legacy img {

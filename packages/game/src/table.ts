@@ -1,8 +1,9 @@
+import { openings } from './briefing';
 import { pack } from './content/pack';
 import { SEAT_IDS } from './helpers';
 import type { CharacterId, PlayerId, SeatId } from './ids';
 import { createCharacter } from './legacy';
-import type { Start, Table, World } from './state';
+import type { Start, Table, TableBriefing, World } from './state';
 
 export type TableCommand =
 	/** Sits a person down in the lobby, or renames them wherever they sit. */
@@ -15,9 +16,14 @@ export type TableCommand =
 	| { type: 'LEAVE'; player: PlayerId; seat?: SeatId }
 	| { type: 'READY'; player: PlayerId; start: Start | null }
 	/** Takes a character for the next game, or lets go of the ones taken when none is named. */
-	| { type: 'CLAIM'; player: PlayerId; character: CharacterId | null };
+	| { type: 'CLAIM'; player: PlayerId; character: CharacterId | null }
+	/** Draws the next Legacy card / package / door onto the table, or flips/opens the one just drawn. */
+	| { type: 'BRIEFING_STEP' }
+	/** Votes Done once everything in the current Legacy briefing has been drawn and opened. */
+	| { type: 'BRIEFING_READY'; player: PlayerId; ready: boolean };
 
-export const newTable = (): Table => ({ seats: [], ready: {}, start: null });
+export const newTableBriefing = (): TableBriefing => ({ drawn: 0, flipped: false, ready: [], stowing: false });
+export const newTable = (): Table => ({ seats: [], ready: {}, start: null, briefing: newTableBriefing() });
 
 /** The game the lobby is choosing characters for, set once everyone readies in the lobby. */
 export const tableStart = (world: World): Start | null => world.table.start;
@@ -72,6 +78,18 @@ export function rejectTable(world: World, lobby: boolean, command: TableCommand)
 			if (!character || character.dead || character.worker) return 'Pick a living character';
 			const holder = claimant(world, command.character);
 			return holder && holder !== command.player ? 'Another player has that character' : null;
+		}
+		case 'BRIEFING_STEP': {
+			const total = openings(campaign.briefing).length;
+			if (total === 0 || table.briefing.stowing) return 'Nothing to draw';
+			return table.briefing.drawn >= total && table.briefing.flipped ? 'Everything is already drawn' : null;
+		}
+		case 'BRIEFING_READY': {
+			const total = openings(campaign.briefing).length;
+			if (total === 0 || table.briefing.stowing) return 'Nothing to confirm';
+			if (table.briefing.drawn < total || !table.briefing.flipped) return 'Draw and flip every card first';
+			if (table.seats.length > 0 && !seated(table, command.player)) return 'Sit down first';
+			return null;
 		}
 	}
 }
@@ -153,11 +171,40 @@ export function applyTable(world: World, command: TableCommand) {
 			table.seats = table.seats.filter(
 				entry => entry.player !== command.player || (command.seat !== undefined && entry.seat !== command.seat),
 			);
+			table.briefing.ready = table.briefing.ready.filter(player => player !== command.player);
+			if (
+				!table.briefing.stowing &&
+				table.briefing.ready.length > 0 &&
+				tablePlayers(table).length > 0 &&
+				tablePlayers(table).every(player => table.briefing.ready.includes(player))
+			)
+				table.briefing.stowing = true;
 			break;
 		case 'READY':
 			if (command.start) table.ready[command.player] = command.start;
 			else delete table.ready[command.player];
 			return;
+		case 'BRIEFING_STEP': {
+			const state = table.briefing;
+			if (state.drawn === 0 || state.flipped) {
+				state.drawn += 1;
+				state.flipped = false;
+			} else {
+				state.flipped = true;
+			}
+			state.ready = [];
+			return;
+		}
+		case 'BRIEFING_READY': {
+			const state = table.briefing;
+			state.ready = command.ready
+				? [...new Set([...state.ready, command.player])]
+				: state.ready.filter(player => player !== command.player);
+			const players = tablePlayers(table);
+			if (players.length === 0 ? command.ready : players.every(player => state.ready.includes(player)))
+				state.stowing = true;
+			return;
+		}
 	}
 	table.seats.sort(bySeat);
 	table.ready = {};

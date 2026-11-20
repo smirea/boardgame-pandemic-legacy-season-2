@@ -108,6 +108,10 @@ export function commandLabel(world: World, command: Command | null): { who: stri
 			};
 		case 'ACK_BRIEFING':
 			return { who: null, text: 'Legacy briefing read' };
+		case 'BRIEFING_STEP':
+			return { who: null, text: 'Drew or flipped a Legacy card' };
+		case 'BRIEFING_READY':
+			return { who: null, text: command.ready ? 'Ready to put Legacy cards away' : 'No longer ready' };
 		case 'PLACE_SUPPLY':
 			return {
 				who: null,

@@ -182,6 +182,7 @@
 	let menu = $state(false);
 	let boxOpen = $state(false);
 	let deckOpen = $state(false);
+	let legacyDeckOut = $state(false);
 	// Once the table knows which game is next, every game is set up by choosing who plays, over the whole table.
 	const choosingCharacters = $derived(snap.phase === 'lobby' && !spectator && tableStart(snap.world) !== null);
 	// A haven the character screen points at, which the camera looks at behind it.
@@ -1121,6 +1122,7 @@
 		status={session.status}
 		players={session.peers.filter(peer => peer.connected).length}
 		solo={session.mode === 'solo' || spectator}
+		legacyOut={legacyDeckOut}
 		onreset={() => resetView++}
 		onmenu={() => (menu = !menu)}
 		onbox={() => (boxOpen = !boxOpen)}
@@ -1280,21 +1282,30 @@
 			<div
 				class="scrim"
 				class:passive={spectator}
+				class:tabletop={!spectator}
 				role="dialog"
 				aria-modal={!spectator}
 				aria-label="New this game"
 				transition:fade={{ duration: 200 }}
 			>
-				<div in:fly={{ y: 24, duration: 300 }}>
-					{#if spectator}
+				{#if spectator}
+					<div in:fly={{ y: 24, duration: 300 }}>
 						<Briefing briefing={shownBriefing} {campaign} passive oncontinue={() => (briefingRead = briefingKey)} />
-					{:else}
-						<!-- Each new briefing is unpacked from the start. -->
-						{#key briefingKey}
-							<Unboxing briefing={shownBriefing} {campaign} oncontinue={() => send({ type: 'ACK_BRIEFING' })} />
-						{/key}
-					{/if}
-				</div>
+					</div>
+				{:else}
+					<!-- Each new briefing is unpacked interactively over the map. -->
+					{#key briefingKey}
+						<Unboxing
+							briefing={shownBriefing}
+							{campaign}
+							table={world.table}
+							player={session.player}
+							{solo}
+							{send}
+							ondeckout={out => (legacyDeckOut = out)}
+						/>
+					{/key}
+				{/if}
 			</div>
 		{:else if choosingCharacters}
 			<div
@@ -1877,6 +1888,12 @@
 		place-items: center;
 		padding: 1rem;
 		background: rgb(12 10 8 / 0.62);
+	}
+
+	.scrim.tabletop {
+		display: block;
+		padding: 0;
+		background: radial-gradient(ellipse at 50% 45%, rgb(12 10 8 / 0.3), rgb(10 8 6 / 0.68));
 	}
 
 	.scrim.box-scrim {

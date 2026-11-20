@@ -34,7 +34,16 @@ import type { Decide, Play } from './plays';
 import { applyDecide, applyPlay, autoResolve, checkDecide, checkPlay } from './plays';
 import type { World } from './state';
 import type { TableCommand } from './table';
-import { applyTable, claimCharacter, dealTable, newTable, readyStart, rejectTable, tableStart } from './table';
+import {
+	applyTable,
+	claimCharacter,
+	dealTable,
+	newTable,
+	newTableBriefing,
+	readyStart,
+	rejectTable,
+	tableStart,
+} from './table';
 
 export type Seating = { seat: SeatId; character: CharacterId | null };
 
@@ -107,7 +116,12 @@ export function reject(world: World, phase: Phase, command: Command): string | n
 		case 'LEAVE':
 		case 'READY':
 		case 'CLAIM':
-			return phase === 'finished' && command.type !== 'LEAVE'
+		case 'BRIEFING_STEP':
+		case 'BRIEFING_READY':
+			return phase === 'finished' &&
+				command.type !== 'LEAVE' &&
+				command.type !== 'BRIEFING_STEP' &&
+				command.type !== 'BRIEFING_READY'
 				? 'The campaign is over'
 				: rejectTable(world, phase === 'lobby', command);
 		case 'CREATE_CHARACTER': {
@@ -380,7 +394,10 @@ export const gameMachine = setup({
 			}),
 		),
 		ackBriefing: assign(({ context }: Args) => ({
-			world: produce(context.world, draft => void (draft.campaign.briefing = [])),
+			world: produce(context.world, draft => {
+				draft.campaign.briefing = [];
+				draft.table.briefing = newTableBriefing();
+			}),
 		})),
 		startGame: assign(
 			change((world, event) => {
@@ -471,7 +488,11 @@ export const gameMachine = setup({
 		undo: [],
 	}),
 	initial: 'lobby',
-	on: { ACK_BRIEFING: { actions: 'ackBriefing' } },
+	on: {
+		ACK_BRIEFING: { actions: 'ackBriefing' },
+		BRIEFING_STEP: { guard: { type: 'legal', params: 'lobby' }, actions: 'table' },
+		BRIEFING_READY: { guard: { type: 'legal', params: 'lobby' }, actions: 'table' },
+	},
 	states: {
 		lobby: {
 			on: {
