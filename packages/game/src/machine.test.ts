@@ -1286,14 +1286,20 @@ describe('seats in the lobby are shared state', () => {
 		);
 	});
 
-	test("a found job waits for the group to make its character, at the job's own home", () => {
-		const actor = lobby();
-		const world = mutable(actor);
+	test("a found job's character joins at once at the job's home, or waits for a free Character card", () => {
+		const world = mutable(lobby());
 		applyUnlock(world, { t: 'job', job: 'captain', home: city('haven-north-atlantic') });
-		const before = Object.keys(world.campaign.characters).length;
-		const save = { v: 1 as const, phase: 'lobby' as const, world };
-		const found = createGameActor({ seed: 2, save }).start();
-		expect(Object.keys(worldOf(found).campaign.characters)).toHaveLength(before);
+		expect(Object.values(world.campaign.characters).find(entry => entry.job === 'captain')).toMatchObject({
+			name: 'Captain',
+			home: 'haven-north-atlantic',
+		});
+
+		const full = mutable(lobby());
+		full.campaign.characterCards = [];
+		applyUnlock(full, { t: 'job', job: 'captain', home: city('haven-north-atlantic') });
+		expect(full.campaign.jobsFound).toEqual([{ job: 'captain', home: city('haven-north-atlantic') }]);
+		full.campaign.characterCards = mutable(lobby()).campaign.characterCards;
+		const found = createGameActor({ seed: 2, save: { v: 1 as const, phase: 'lobby' as const, world: full } }).start();
 		const make = (home: string) =>
 			({ type: 'CREATE_CHARACTER', name: 'Cap', job: 'captain', home: city(home) }) as const;
 		expect(reject(worldOf(found), 'lobby', make('haven-mediterranean'))).toContain('lives at');

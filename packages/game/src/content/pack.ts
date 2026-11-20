@@ -221,7 +221,7 @@ const seals: SealDef[] = [
 	aid('13', 'Lab breakthroughs'),
 	aid('14', 'Infested cities legend'),
 	sealed(door('17'), 'The Hollow Men defect', [...opens('58'), { t: 'turningPoint', id: 'defection', over: true }]),
-	sealed(door('18'), 'The Immunologist', [{ t: 'job', job: 'immunologist', home: city('haven-south-atlantic') }]),
+	sealed(door('18'), 'The Immunologist', [{ t: 'job', job: 'immunologist', home: city('buenos-aires') }]),
 	sealed(door('19'), 'Topaz lab found', [
 		region('new-zealand', ['haven-coral-sea', 'wellington', 'sea']),
 		{ t: 'lab', city: city('wellington') },
@@ -264,7 +264,7 @@ const seals: SealDef[] = [
 	aid('38', 'Self-Infect reference'),
 	aid('39', 'Search reference'),
 	aid('40', 'Summit'),
-	sealed(door('41'), 'Vector Control', [{ t: 'job', job: 'vectorControl', home: city('haven-coral-sea') }]),
+	sealed(door('41'), 'Vector Control', [{ t: 'job', job: 'vectorControl', home: city('wellington') }]),
 	sealed(door('42'), 'Broken Link', [{ t: 'infectionImprovement', improvement: 'cordon', copies: 2 }]),
 	sealed(door('43'), 'Decryption Key', [{ t: 'cityImprovement', improvement: 'wild' }]),
 	sealed(door('44'), 'The Sanitation Officer', [
@@ -273,7 +273,7 @@ const seals: SealDef[] = [
 	sealed(door('45'), 'Local Operatives', [{ t: 'cityImprovement', improvement: 'redWild', copies: 2 }]),
 	sealed(door('46'), 'Jade lab found', [
 		{ t: 'lab', city: city('johannesburg') },
-		{ t: 'job', job: 'scientist', home: city('haven-south-atlantic') },
+		{ t: 'job', job: 'scientist', home: city('johannesburg') },
 		{ t: 'rule', rule: 'gentleEpidemic' },
 	]),
 	sealed(door('47'), 'New scars', [

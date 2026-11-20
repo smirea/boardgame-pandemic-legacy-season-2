@@ -271,8 +271,15 @@ export function applyUnlock(world: World, unlock: Unlock, by?: SeatId) {
 		case 'scar':
 			return pushCopies(campaign.scars, unlock.scar, unlock.copies);
 		case 'job': {
-			// The group makes the character when it wants one, on a free Character card, at the job's own home.
-			campaign.jobsFound.push({ job: unlock.job, home: unlock.home });
+			// The door creates the character at once, on the next free Character card, at the job's own home. With no
+			// card left the job waits for the group to make one when a card is free again.
+			if (campaign.characterCards.length === 0) campaign.jobsFound.push({ job: unlock.job, home: unlock.home });
+			else
+				createCharacter(campaign, {
+					name: pack.jobs.find(job => job.id === unlock.job)!.name,
+					job: unlock.job,
+					home: unlock.home,
+				});
 			return;
 		}
 		case 'gather':
