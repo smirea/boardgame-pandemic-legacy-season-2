@@ -63,6 +63,8 @@ function aimedAt(state: PublicState, command: Command | null): CityId[] {
 			return cardCity(action.card);
 		case 'sabotage':
 			return [action.city];
+		case 'misinform':
+			return [action.to];
 		case 'broadcast':
 			return [action.from, action.to];
 		case 'recon': {

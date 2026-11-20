@@ -218,11 +218,7 @@ const seals: SealDef[] = [
 	aid('12', 'Forsaken cities legend'),
 	aid('13', 'Lab breakthroughs'),
 	aid('14', 'Infested cities legend'),
-	sealed(door('17'), 'The Hollow Men defect', [
-		...opens('58'),
-		{ t: 'ability', ability: 'saboteur' },
-		{ t: 'ability', ability: 'soldier' },
-	]),
+	sealed(door('17'), 'The Hollow Men defect', [...opens('58'), { t: 'turningPoint', id: 'defection', over: true }]),
 	sealed(door('18'), 'The Immunologist', [{ t: 'job', job: 'immunologist', home: city('haven-south-atlantic') }]),
 	sealed(door('19'), 'Topaz lab found', [
 		region('new-zealand', ['haven-coral-sea', 'wellington', 'sea']),
@@ -238,11 +234,15 @@ const seals: SealDef[] = [
 	aid('25', 'Monitor reference'),
 	aid('26', 'Summit'),
 	aid('27', 'Carrier stickers'),
-	sealed(door('28'), 'New abilities'),
+	sealed(door('28'), 'New abilities', [
+		{ t: 'ability', ability: 'misinformationSpecialist' },
+		{ t: 'ability', ability: 'saboteur' },
+		{ t: 'ability', ability: 'rehabNurse' },
+	]),
 	sealed(door('29'), 'New abilities', [
-		{ t: 'ability', ability: 'navigator' },
 		{ t: 'ability', ability: 'investigator' },
-		{ t: 'ability', ability: 'surveyor' },
+		{ t: 'ability', ability: 'soldier' },
+		{ t: 'ability', ability: 'navigator' },
 	]),
 	aid('30', 'Lab markers'),
 	sealed(door('31'), 'New abilities', [
@@ -447,18 +447,27 @@ const legacyDeck: LegacyCardDef[] = [
 			perimeter(pkg(3), [{ t: 'owedScar' }]),
 			{ t: 'objectives', remove: ['reconEastAsia', 'connectCities', 'searches'], add: ['defect'] },
 			{ t: 'required', count: 2 },
+			{ t: 'turningPoint', id: 'defection' },
 			...opens('P', '37'),
 		],
 	),
 	card(10, 2, 'stop', 'Know your enemy', 'New abilities and card improvements.', opens('28', '45')),
-	card(11, 1, 'stop', 'November', 'Complete the Plan: four recons at Shanghai.', [
-		{ t: 'objectives', remove: ['buildCenters', 'defect'], add: ['plan'] },
-		{ t: 'required', count: 1 },
-		{ t: 'route', route: 'hidden:plan-red' },
-		{ t: 'route', route: 'hidden:plan-black' },
-		{ t: 'route', route: 'hidden:plan-yellow' },
-		{ t: 'route', route: 'hidden:plan-blue' },
-	]),
+	card(
+		11,
+		1,
+		'stop',
+		'November',
+		'Complete the Plan: four recons at Shanghai. If the Hollow Men never defected, they are forced to.',
+		[
+			perimeter(door('17'), [{ t: 'owedScar' }, { t: 'owedScar' }]),
+			{ t: 'objectives', remove: ['buildCenters', 'defect'], add: ['plan'] },
+			{ t: 'required', count: 1 },
+			{ t: 'route', route: 'hidden:plan-red' },
+			{ t: 'route', route: 'hidden:plan-black' },
+			{ t: 'route', route: 'hidden:plan-yellow' },
+			{ t: 'route', route: 'hidden:plan-blue' },
+		],
+	),
 	card(
 		12,
 		1,
@@ -542,12 +551,6 @@ export const pack: ContentPack = {
 		{ id: 'architect', name: 'Architect', text: 'Build a supply center with 1 card fewer.', cost: 3 },
 		{ id: 'courier', name: 'Courier', text: 'Deliver supplies to an adjacent location.', cost: 3 },
 		{ id: 'scout', name: 'Scout', text: 'Recon without a supply center.', cost: 2 },
-		{
-			id: 'surveyor',
-			name: 'Surveyor',
-			text: 'No exposure when leaving a location that holds Hollow Men.',
-			cost: 2,
-		},
 		{ id: 'navigator', name: 'Navigator', text: 'Once per turn, Chart Sea Lane costs no cubes.', cost: 1 },
 		{
 			id: 'lookout',
@@ -570,8 +573,8 @@ export const pack: ContentPack = {
 		{
 			id: 'investigator',
 			name: 'Investigator',
-			text: 'As an action, swap a City card in your hand for any City card in the discard pile.',
-			cost: 2,
+			text: 'Once per turn, as an action, discard a Player card to take any City card from the discard pile.',
+			cost: 3,
 		},
 		{
 			id: 'supplier',
@@ -593,7 +596,24 @@ export const pack: ContentPack = {
 		},
 		{ id: 'foreman', name: 'Foreman', text: 'Supply lines cost 1 cube fewer.', cost: 2 },
 		{ id: 'outrider', name: 'Outrider', text: 'Recon with 1 card fewer.', cost: 3 },
-		{ id: 'soldier', name: 'Soldier', text: 'As an action, remove 1 Hollow Man from your location.', cost: 2 },
+		{
+			id: 'soldier',
+			name: 'Soldier',
+			text: 'Leaving a location that holds Hollow Men, discard a City card of its colour instead of being exposed.',
+			cost: 2,
+		},
+		{
+			id: 'misinformationSpecialist',
+			name: 'Misinformation Specialist',
+			text: 'As an action, move a Hollow Man from your city to a neighbouring city that holds 2 or fewer.',
+			cost: 2,
+		},
+		{
+			id: 'rehabNurse',
+			name: 'Rehab Nurse',
+			text: 'As an action, discard 2 Player cards to take any stored City card into your hand.',
+			cost: 1,
+		},
 		{
 			id: 'coordinator',
 			name: 'Coordinator',
@@ -881,7 +901,6 @@ export const pack: ContentPack = {
 			target: 3,
 			mandatory: true,
 			carriesOver: true,
-			reward: door('17'),
 		},
 		{
 			id: 'plan',

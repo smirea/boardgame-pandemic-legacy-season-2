@@ -331,9 +331,21 @@ export function movePawn(world: World, seat: SeatId, to: CityId, by: string): bo
 	const current = player(game, seat);
 	const from = current.location;
 	const leaving = game.locations[from]!;
-	if (leaving.hollow > 0 && !leaving.shelter && !has(world, seat, 'surveyor')) {
-		expose(world, seat);
-		if (characterOf(world, seat).dead || current.location !== from) return false;
+	if (leaving.hollow > 0 && !leaving.shelter) {
+		const guard = has(world, seat, 'soldier')
+			? current.hand.find(id => {
+					const card = campaign.playerCards[id];
+					return card?.kind === 'city' && cityDef(card.city).color === cityDef(from).color;
+				})
+			: undefined;
+		if (guard) {
+			current.hand = current.hand.filter(id => id !== guard);
+			game.playerDiscard.push(guard);
+			log(game, { t: 'note', text: `${characterOf(world, seat).name} discarded a card to slip past the Hollow Men` });
+		} else {
+			expose(world, seat);
+			if (characterOf(world, seat).dead || current.location !== from) return false;
+		}
 	}
 	current.location = to;
 	log(game, { t: 'move', seat, from, to, by });

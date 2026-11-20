@@ -59,7 +59,8 @@ export type Action =
 	| { a: 'supply'; card: CardId }
 	| { a: 'facilitate'; with: SeatId; card: CardId }
 	| { a: 'run'; card: CardId; to: CityId }
-	| { a: 'strike' }
+	| { a: 'misinform'; to: CityId }
+	| { a: 'rehab'; discard: CardId[]; take: CardId }
 	| { a: 'coordinate'; pawn: SeatId }
 	| { a: 'smuggle'; card: CardId }
 	| { a: 'selfInject' }
@@ -680,11 +681,13 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 	investigate: {
 		trait: 'investigator',
 		check(ctx, { card, take }) {
-			return cityCard(ctx, card) && cityCard(ctx, take, 'discard')
+			if (!unused(ctx, 'investigator')) return 'Once per turn';
+			return ctx.me.hand.includes(card) && cityCard(ctx, take, 'discard')
 				? ok
-				: 'Swap a City card in hand for a City card in the discard pile';
+				: 'Discard a card from your hand for a City card in the discard pile';
 		},
 		apply(ctx, { card, take }) {
+			useOnce(ctx, 'investigator');
 			ctx.game.playerDiscard.splice(ctx.game.playerDiscard.indexOf(take), 1);
 			discardFromHand(ctx.game, ctx.seat, card);
 			ctx.me.hand.push(take);
@@ -756,13 +759,33 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 			movePawn(ctx.world, ctx.seat, to, 'run');
 		},
 	},
-	strike: {
-		trait: 'soldier',
-		check: ctx => (ctx.loc.hollow > 0 ? ok : 'No Hollow Men here'),
-		apply(ctx) {
+	misinform: {
+		trait: 'misinformationSpecialist',
+		check(ctx, { to }) {
+			if (ctx.loc.hollow === 0) return 'No Hollow Men here';
+			if (!neighbours(ctx.campaign, ctx.here).includes(to) || cityDef(to).kind !== 'city')
+				return 'Pick a neighbouring city';
+			return ctx.game.locations[to]!.hollow <= 2 ? ok : 'That city already holds 3 Hollow Men';
+		},
+		apply(ctx, { to }) {
 			ctx.loc.hollow -= 1;
-			ctx.game.pieces.hollow += 1;
-			log(ctx.game, { t: 'note', text: `A Hollow Man was removed from ${ctx.def.name}` });
+			ctx.game.locations[to]!.hollow += 1;
+			log(ctx.game, { t: 'note', text: `A Hollow Man was led from ${ctx.def.name} to ${cityDef(to).name}` });
+		},
+	},
+	rehab: {
+		trait: 'rehabNurse',
+		check(ctx, { discard, take }) {
+			if (discard.length !== 2 || !distinct(discard) || !discard.every(card => ctx.me.hand.includes(card)))
+				return 'Discard 2 cards from your hand';
+			return ctx.campaign.stored.player.includes(take) && ctx.campaign.playerCards[take]?.kind === 'city'
+				? ok
+				: 'Pick a stored City card';
+		},
+		apply(ctx, { discard, take }) {
+			for (const card of discard) discardFromHand(ctx.game, ctx.seat, card);
+			ctx.campaign.stored.player = ctx.campaign.stored.player.filter(card => card !== take);
+			ctx.me.hand.push(take);
 		},
 	},
 	selfInject: {

@@ -65,7 +65,6 @@ export type AbilityId =
 	| 'courier'
 	| 'broker'
 	| 'scout'
-	| 'surveyor'
 	| 'lookout'
 	| 'navigator'
 	| 'saboteur'
@@ -76,6 +75,8 @@ export type AbilityId =
 	| 'foreman'
 	| 'outrider'
 	| 'soldier'
+	| 'misinformationSpecialist'
+	| 'rehabNurse'
 	| 'coordinator'
 	| 'smuggler';
 
@@ -173,7 +174,8 @@ export type ActionId =
 	| 'supply'
 	| 'facilitate'
 	| 'run'
-	| 'strike'
+	| 'misinform'
+	| 'rehab'
 	| 'coordinate'
 	| 'smuggle'
 	| 'trade'
@@ -243,7 +245,7 @@ export type SearchBoxDef = { scope: 'land' | 'sea'; result: SearchResult };
 /** What a Monitor frequency gives: a door to open, or cards kept from the top of the Player discard pile. */
 export type FrequencyReward = { seal: Seal } | { take: number } | null;
 
-export type TurningPointId = 'firstForsaken' | 'losingStreak';
+export type TurningPointId = 'firstForsaken' | 'losingStreak' | 'defection';
 
 export type PurchaseId =
 	| { t: 'ability'; ability: AbilityId }
@@ -262,7 +264,8 @@ export type Unlock =
 	| { t: 'route'; route: string }
 	| { t: 'objectives'; add?: ObjectiveId[]; remove?: ObjectiveId[] }
 	| { t: 'required'; count: number }
-	| { t: 'turningPoint'; id: TurningPointId }
+	/** Puts a turning point in play, or with `over` resolves one. */
+	| { t: 'turningPoint'; id: TurningPointId; over?: true }
 	| { t: 'event'; event: EventId; mode: 'rationed' | 'unrationed' | 'permanent'; copies?: number }
 	/** Stickers: each unlock adds `copies` of one (1 when left out), and a sticker that is placed is gone. */
 	| { t: 'ability'; ability: AbilityId; copies?: number }

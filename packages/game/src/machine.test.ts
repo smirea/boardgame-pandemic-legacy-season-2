@@ -454,6 +454,8 @@ describe('Hollow Men and forsaken cities', () => {
 		late((world, game) => {
 			world.campaign.objectives = ['defect'];
 			world.campaign.required = 1;
+			world.campaign.opened = world.campaign.opened.filter(key => key !== 'door:17' && key !== 'door:58');
+			world.campaign.turningPoints.push('defection');
 			game.players[A]!.location = city('tripoli');
 			game.locations[city('tripoli')]!.tower = true;
 			game.locations[city('tripoli')]!.hollow = 3;
@@ -471,11 +473,22 @@ describe('Hollow Men and forsaken cities', () => {
 		expect(gameOf(actor).outcome).toBeNull();
 	});
 
-	test('a Hollow Man in each of three different havens completes the October objective', () => {
+	test('a Hollow Man in each of three different havens completes the October objective, and the game end opens door 17', () => {
 		const actor = defectScene(['haven-north-atlantic', 'haven-south-atlantic']);
 		act(actor, { a: 'broadcast', from: city('tripoli'), to: city('haven-mediterranean') });
 		expect(gameOf(actor).outcome).toMatchObject({ won: true });
-		expect(worldOf(actor).campaign.opened).toContain('door:17');
+		expect(worldOf(actor).campaign.opened).not.toContain('door:17');
+		send(actor, { type: 'CONTINUE' });
+		expect(worldOf(actor).campaign.opened).toEqual(expect.arrayContaining(['door:17', 'door:58']));
+		expect(worldOf(actor).campaign.turningPoints).not.toContain('defection');
+	});
+
+	test('November forces the defection when no game ended with Hollow Men in three havens, and two scars are owed', () => {
+		const world: World = { campaign: newCampaign(4), game: null, table: newTable() };
+		const november = pack.legacyDeck.find(card => card.month === 11)!;
+		for (const unlock of november.unlocks) applyUnlock(world, unlock);
+		expect(world.campaign.forced).toContain('door:17');
+		expect(world.campaign.owedScars).toBe(2);
 	});
 
 	test('the Saboteur discards a card to remove a Hollow Man from a city of its colour', () => {
@@ -938,14 +951,11 @@ describe('game end and the campaign', () => {
 			game.locations[city('tehran')]!.shelter = true;
 			game.locations[city('london')]!.center = true;
 			world.campaign.locations[city('frankfurt')]!.population = 0;
-			world.campaign.freeAbilityUnits = 2;
-			world.campaign.abilitiesForSale.push('scout');
 		});
 		const { campaign } = worldOf(actor);
 		const units = gameOf(actor).upkeep!.units;
 		const ada = Object.values(campaign.characters)[0]!.id;
 		const purchases = [
-			{ t: 'ability', ability: 'scout', character: ada, slot: 1 },
 			{ t: 'cityImprovement', improvement: 'double', card: cityCards(worldOf(actor), 'london')[0]! },
 			{ t: 'infectionImprovement', improvement: 'wellStocked', card: infectionCards(worldOf(actor), 'cairo')[0]! },
 			{ t: 'population', city: city('lagos'), steps: 1 },
@@ -955,8 +965,6 @@ describe('game end and the campaign', () => {
 		for (const purchase of purchases) send(actor, { type: 'PURCHASE', purchase });
 		const after = worldOf(actor).campaign;
 		expect(gameOf(actor).upkeep!.units).toBe(units - 1 - 1 - 1 - 2 - 2);
-		expect(after.freeAbilityUnits).toBe(0);
-		expect(after.characters[ada]!.slots[1]).toEqual({ kind: 'ability', id: 'scout' });
 		expect(after.locations[city('frankfurt')]!.population).toBe(1);
 		expect(after.locations[city('lagos')]!.population).toBe(campaign.locations[city('lagos')]!.population + 1);
 		send(actor, { type: 'FINISH_UPKEEP' });
@@ -1234,15 +1242,19 @@ describe('the remaining abilities and the Jade lab', () => {
 			edit?.(world);
 		});
 
-	test('the Investigator swaps a City card for any City card in the discard pile', () => {
+	test('the Investigator discards any card for a City card from the discard pile, once per turn', () => {
 		const actor = withAbility('investigator', world => {
-			give(world, A, cityCards(world, 'cairo'));
-			world.game!.playerDiscard.push(...cityCards(world, 'london'));
+			give(world, A, cityCards(world, 'cairo', 2));
+			world.game!.playerDiscard.push(...cityCards(world, 'london', 2));
 		});
-		const london = cityCards(worldOf(actor), 'london')[0]!;
-		act(actor, { a: 'investigate', card: gameOf(actor).players[A]!.hand[0]!, take: london });
-		expect(gameOf(actor).players[A]!.hand).toEqual([london]);
-		expect(gameOf(actor).playerDiscard).toContain(cityCards(worldOf(actor), 'cairo')[0]!);
+		const [first, second] = cityCards(worldOf(actor), 'london', 2);
+		const cairo = gameOf(actor).players[A]!.hand[0]!;
+		act(actor, { a: 'investigate', card: cairo, take: first! });
+		expect(gameOf(actor).players[A]!.hand).toContain(first);
+		expect(gameOf(actor).playerDiscard).toContain(cairo);
+		expect(refuses(actor, { a: 'investigate', card: gameOf(actor).players[A]!.hand[0]!, take: second! })).toBe(
+			'Once per turn',
+		);
 	});
 
 	test('the Supplier moves a stockpile cube to a city whose card they hold, once per turn', () => {
@@ -1326,25 +1338,44 @@ describe('the remaining abilities and the Jade lab', () => {
 		expect(gameOf(actor).players[A]!.supplies).toBe(0);
 	});
 
-	test('the Surveyor leaves Hollow Men behind without exposure', () => {
-		const actor = withAbility('surveyor', world => {
-			world.game!.players[A]!.location = city('cairo');
-			world.game!.locations[city('cairo')]!.hollow = 2;
-		});
-		act(actor, { a: 'drive', to: city('tripoli') });
-		expect(character(worldOf(actor), A).exposure).toBe(0);
+	test('the Soldier discards a card of the colour to leave Hollow Men unexposed, and is exposed without one', () => {
+		const leaving = (card: boolean) =>
+			withAbility('soldier', world => {
+				world.game!.players[A]!.location = city('cairo');
+				world.game!.locations[city('cairo')]!.hollow = 2;
+				give(world, A, card ? cityCards(world, 'baghdad') : cityCards(world, 'london'));
+			});
+		const guarded = leaving(true);
+		act(guarded, { a: 'drive', to: city('tripoli') });
+		expect(character(worldOf(guarded), A).exposure).toBe(0);
+		expect(gameOf(guarded).players[A]!.hand).toEqual([]);
+		const caught = leaving(false);
+		act(caught, { a: 'drive', to: city('tripoli') });
+		expect(character(worldOf(caught), A).exposure).toBe(1);
 	});
 
-	test('the Soldier removes a Hollow Man from their own location', () => {
-		const actor = withAbility('soldier', world => {
+	test('the Misinformation Specialist leads a Hollow Man to a neighbouring city holding 2 or fewer', () => {
+		const actor = withAbility('misinformationSpecialist', world => {
 			world.game!.players[A]!.location = city('cairo');
 			world.game!.locations[city('cairo')]!.hollow = 2;
+			world.game!.locations[city('tripoli')]!.hollow = 3;
 		});
-		const figures = gameOf(actor).pieces.hollow;
-		act(actor, { a: 'strike' });
+		expect(refuses(actor, { a: 'misinform', to: city('tripoli') })).toBe('That city already holds 3 Hollow Men');
+		const before = gameOf(actor).locations[city('baghdad')]!.hollow;
+		act(actor, { a: 'misinform', to: city('baghdad') });
 		expect(gameOf(actor).locations[city('cairo')]!.hollow).toBe(1);
-		expect(gameOf(actor).pieces.hollow).toBe(figures + 1);
-		expect(refuses(withAbility('soldier'), { a: 'strike' })).toBe('No Hollow Men here');
+		expect(gameOf(actor).locations[city('baghdad')]!.hollow).toBe(before + 1);
+	});
+
+	test('the Rehab Nurse discards 2 cards to take a stored City card into hand', () => {
+		const actor = withAbility('rehabNurse', world => {
+			give(world, A, cityCards(world, 'cairo', 2));
+			world.campaign.stored.player.push(cityCards(world, 'london')[0]!);
+		});
+		const stored = cityCards(worldOf(actor), 'london')[0]!;
+		act(actor, { a: 'rehab', discard: cityCards(worldOf(actor), 'cairo', 2), take: stored });
+		expect(gameOf(actor).players[A]!.hand).toContain(stored);
+		expect(worldOf(actor).campaign.stored.player).not.toContain(stored);
 	});
 
 	test('with the Jade lab found, an Epidemic removes 1 cube from the struck city instead of all', () => {
@@ -1524,7 +1555,7 @@ test('the final score counts population on the grid only', () => {
 	expect(score(campaign).population).toBe(expected);
 });
 
-test('free ability units are spent at setup, and nothing else can be bought then', () => {
+test('free ability units are spent at setup on abilities only, and what is left is lost once the supplies go out', () => {
 	const save = octoberSave();
 	save.world.campaign.freeAbilityUnits = 2;
 	save.world.campaign.abilitiesForSale = ['scout'];
@@ -1545,6 +1576,15 @@ test('free ability units are spent at setup, and nothing else can be bought then
 	send(actor, { type: 'PURCHASE', purchase: { t: 'ability', ability: 'scout', character: cast[2]!.id, slot: 3 } });
 	expect(worldOf(actor).campaign.characters[cast[2]!.id]!.slots[3]).toEqual({ kind: 'ability', id: 'scout' });
 	expect(worldOf(actor).campaign.freeAbilityUnits).toBe(0);
+
+	const unspent = createGameActor({ seed: 3, save: { ...save, world: { ...save.world } } }).start();
+	unspent.send({
+		type: 'START_GAME',
+		seating: cast.map((entry, index) => ({ seat: [A, B, C][index]!, character: entry.id })),
+	});
+	send(unspent, { type: 'AUTO_SUPPLY' });
+	send(unspent, { type: 'CONFIRM_SUPPLY' });
+	expect(worldOf(unspent).campaign.freeAbilityUnits).toBe(0);
 });
 
 test('Utopia forced open at December setup puts its Infection cards in the discard pile', () => {

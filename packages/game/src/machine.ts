@@ -405,6 +405,8 @@ export const gameMachine = setup({
 		autoSupply: assign(change(autoSupply)),
 		confirmSupply: assign(
 			change(world => {
+				// August's free units are spent before the supplies go out, or not at all.
+				world.campaign.freeAbilityUnits = 0;
 				setupInfection(world);
 				world.game!.pickedEvents = rationedEvents(world).slice(0, eventsToPick(world));
 			}),

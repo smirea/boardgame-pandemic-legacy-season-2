@@ -3,7 +3,18 @@ import { actionGate, actionIds, checkAction, checkEdge, hasAction, isFreeAction 
 import { pack } from './content/pack';
 import type { ActionId, Color } from './content/types';
 import { freeCharacters, scarTargets } from './flow';
-import { cardValue, characterOf, cityDef, grid, handLimit, isHaven, neighbours, player, seaRoute } from './helpers';
+import {
+	cardValue,
+	characterOf,
+	cityDef,
+	grid,
+	handLimit,
+	has,
+	isHaven,
+	neighbours,
+	player,
+	seaRoute,
+} from './helpers';
 import type { CardId, CityId, SeatId } from './ids';
 import type { Purchase } from './legacy';
 import { checkPurchase } from './legacy';
@@ -196,12 +207,15 @@ function candidateActions(world: World, seat: SeatId): Action[] {
 		for (const [index, first] of hand.entries())
 			for (const second of hand.slice(index + 1))
 				for (const take of game.playerDiscard) candidates.push({ a: 'salvage', discard: [first, second], take });
-	candidates.push({ a: 'strike' });
-	for (const card of held) {
-		candidates.push({ a: 'supply', card: card.id });
-		for (const take of cityCards(world, game.playerDiscard))
-			candidates.push({ a: 'investigate', card: card.id, take: take.id });
-	}
+	for (const to of neighbours(campaign, here)) candidates.push({ a: 'misinform', to });
+	if (has(world, seat, 'rehabNurse'))
+		for (const [index, first] of hand.entries())
+			for (const second of hand.slice(index + 1))
+				for (const take of world.campaign.stored.player)
+					candidates.push({ a: 'rehab', discard: [first, second], take });
+	for (const card of held) candidates.push({ a: 'supply', card: card.id });
+	for (const card of hand)
+		for (const take of cityCards(world, game.playerDiscard)) candidates.push({ a: 'investigate', card, take: take.id });
 	for (const card of held) for (const to of grid(campaign)) candidates.push({ a: 'run', card: card.id, to });
 	for (const other of others) {
 		candidates.push({ a: 'coordinate', pawn: other });
@@ -231,7 +245,9 @@ const NEEDS: Partial<Record<ActionId, string>> = {
 	broadcast: 'No Hollow Men on the board',
 	sabotage: 'Needs a City card and Hollow Men on the board',
 	broker: 'Needs a City card in hand and one in the discard pile',
-	investigate: 'Needs a City card in hand and one in the discard pile',
+	investigate: 'Needs a card in hand and a City card in the discard pile',
+	misinform: 'No Hollow Men here',
+	rehab: 'Needs 2 cards in hand and a stored City card',
 	supply: 'Needs a City card in hand',
 	run: 'Needs a City card in hand',
 	inoculate: 'Nothing in the discard piles',

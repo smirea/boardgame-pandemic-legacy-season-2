@@ -236,7 +236,7 @@ function unlockLine(campaign: Campaign, unlock: BriefedUnlock): string | null {
 		case 'assemble':
 			return `${unlock.cards} Assemble cards join the Infection cards. They work as Gather cards do.`;
 		case 'freeAbilityUnits':
-			return `${unlock.amount} free production units for character abilities: spend them now, during setup, on abilities that last all year.`;
+			return `${unlock.amount} free production units for character abilities. Spend them now, before the supplies go out: what is left then is lost.`;
 		case 'stockpileBonus':
 			return `The stockpile grows by ${unlock.amount} cubes now and at every later setup.`;
 		case 'permanentStructure':

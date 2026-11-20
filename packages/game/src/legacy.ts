@@ -242,7 +242,9 @@ export function applyUnlock(world: World, unlock: Unlock) {
 			campaign.required = unlock.count;
 			return;
 		case 'turningPoint':
-			return pushUnique(campaign.turningPoints, unlock.id);
+			if (unlock.over) campaign.turningPoints = campaign.turningPoints.filter(id => id !== unlock.id);
+			else pushUnique(campaign.turningPoints, unlock.id);
+			return;
 		case 'event':
 			return addEvent(campaign, unlock.event, unlock.mode, unlock.copies);
 		case 'ability':
@@ -363,6 +365,8 @@ export function resolveGameEnd(world: World) {
 		campaign.turningPoints = campaign.turningPoints.filter(id => id !== 'firstForsaken');
 		openSeal(world, { t: 'door', id: 'A' }, false);
 	}
+	const havensHeld = pack.cities.filter(city => city.kind === 'haven' && game.locations[city.id]!.hollow > 0).length;
+	if (campaign.turningPoints.includes('defection') && havensHeld >= 3) openSeal(world, { t: 'door', id: '17' }, false);
 	if (hasRule(campaign, 'forsaken')) {
 		for (const city of pack.cities) if (isForsaken(campaign, city.id)) campaign.locations[city.id]!.infested = true;
 	}

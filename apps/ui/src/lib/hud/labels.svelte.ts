@@ -56,7 +56,8 @@ export const ACTION_NAMES: Record<Action['a'], string> = {
 	supply: 'Supply a city',
 	facilitate: 'Take a card',
 	run: 'Run',
-	strike: 'Remove Hollow Man',
+	misinform: 'Misinform',
+	rehab: 'Rehab',
 	coordinate: 'Call a pawn over',
 	smuggle: 'Smuggle a cube',
 	trade: 'Trade a card',
@@ -91,7 +92,8 @@ export const ACTION_TEXT: Record<Action['a'], string> = {
 	supply: "Show a grid city's card to supply it",
 	facilitate: 'Take a card from a player here',
 	run: 'Discard a City card to reach the grid',
-	strike: 'Remove a Hollow Man here',
+	misinform: 'Lead a Hollow Man to a neighbouring city',
+	rehab: 'Discard 2 cards to take a stored City card',
 	selfInject: 'Carry the sample, taking a scar',
 	pickUp: 'Take cubes from this city',
 	transfer: 'Pass cubes to or from a player',
@@ -132,7 +134,8 @@ export const ACTION_ICON: Record<Action['a'], number> = {
 	supply: 4,
 	facilitate: 15,
 	run: 0,
-	strike: 13,
+	misinform: 8,
+	rehab: 12,
 	selfInject: 12,
 	pickUp: 5,
 	transfer: 6,
@@ -304,7 +307,10 @@ export function actionDetail(world: World, action: Action): Rich {
 		case 'destroyInfection':
 			return [cardRef(world, action.card)];
 		case 'salvage':
+		case 'rehab':
 			return ['Discard ', ...cardList(world, action.discard), ', take ', cardRef(world, action.take)];
+		case 'misinform':
+			return [{ glyph: 'hollow', text: 'A Hollow Man' }, ` to ${cityName(action.to)}`];
 		default:
 			return [];
 	}
@@ -327,7 +333,10 @@ function discarded(action: Action): CardId[] {
 		case 'recon':
 			return action.cards;
 		case 'salvage':
+		case 'rehab':
 			return action.discard;
+		case 'investigate':
+			return [action.card];
 		default:
 			return [];
 	}
