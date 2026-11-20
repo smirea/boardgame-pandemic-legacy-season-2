@@ -521,6 +521,9 @@ export function closeGame(world: World) {
 	}
 	campaign.results.push(result);
 	campaign.carriedProgress = {};
+	campaign.objectives = campaign.objectives.filter(
+		id => !(game.completed.includes(id) && pack.objectives.find(objective => objective.id === id)!.destroyOnComplete),
+	);
 	if (campaign.month > 0) campaign.rationing = Math.max(0, Math.min(10, campaign.rationing + (won ? -2 : 2)));
 	if (campaign.month === 0) {
 		// The prologue repeats until the players choose to begin.

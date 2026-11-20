@@ -279,15 +279,23 @@ function card(
 }
 
 const legacyDeck: LegacyCardDef[] = [
-	card(1, 1, 'pause', 'January', 'Build 3 supply centers and recon a region. Recon is now available.', [
-		{ t: 'objectives', remove: ['prologueCenters'], add: ['buildCenters', 'reconRegion'] },
-		{ t: 'required', count: 2 },
-		{ t: 'action', action: 'recon' },
-		{ t: 'cityImprovement', improvement: 'double', copies: 3 },
-		{ t: 'cityImprovement', improvement: 'triple' },
-		{ t: 'infectionImprovement', improvement: 'wellStocked', copies: 2 },
-		{ t: 'infectionImprovement', improvement: 'lockdown', copies: 2 },
-	]),
+	card(
+		1,
+		1,
+		'pause',
+		'January',
+		'Build 3 supply centers and recon a region, which is required and carries over. Recon is now available. A turning point watches for a city at population 0.',
+		[
+			{ t: 'objectives', remove: ['prologueCenters'], add: ['buildCenters', 'reconRegion'] },
+			{ t: 'required', count: 2 },
+			{ t: 'action', action: 'recon' },
+			{ t: 'turningPoint', id: 'firstForsaken' },
+			{ t: 'cityImprovement', improvement: 'double', copies: 3 },
+			{ t: 'cityImprovement', improvement: 'triple' },
+			{ t: 'infectionImprovement', improvement: 'wellStocked', copies: 2 },
+			{ t: 'infectionImprovement', improvement: 'lockdown', copies: 2 },
+		],
+	),
 	card(1, 2, 'stop', 'Supplies arrive', 'Four new Rationed Events join the reserve.', [
 		{ t: 'event', event: 'cardSwap', mode: 'rationed' },
 		{ t: 'event', event: 'spreadOut', mode: 'rationed' },
@@ -302,21 +310,13 @@ const legacyDeck: LegacyCardDef[] = [
 		'Perimeter report on North America. New objectives: recon a new area, connect 2 new cities.',
 		[perimeter('north-america'), { t: 'objectives', remove: ['reconRegion'], add: ['reconNewArea', 'connectCities'] }],
 	),
-	card(
-		2,
-		2,
-		'stop',
-		'Putting down roots',
-		'Supply centers can be made permanent. Three new Rationed Events. A turning point watches for a city at population 0.',
-		[
-			{ t: 'permanentStructure', structure: 'center', copies: 6 },
-			{ t: 'event', event: 'cache', mode: 'rationed' },
-			{ t: 'event', event: 'encore', mode: 'rationed' },
-			{ t: 'event', event: 'secondWind', mode: 'rationed' },
-			{ t: 'turningPoint', id: 'firstForsaken' },
-			{ t: 'turningPoint', id: 'losingStreak' },
-		],
-	),
+	card(2, 2, 'stop', 'Putting down roots', 'Supply centers can be made permanent. Three new Rationed Events.', [
+		{ t: 'permanentStructure', structure: 'center', copies: 6 },
+		{ t: 'event', event: 'cache', mode: 'rationed' },
+		{ t: 'event', event: 'encore', mode: 'rationed' },
+		{ t: 'event', event: 'secondWind', mode: 'rationed' },
+		{ t: 'turningPoint', id: 'losingStreak' },
+	]),
 	card(
 		3,
 		1,
@@ -787,8 +787,8 @@ export const pack: ContentPack = {
 			name: 'Recon a region',
 			rule: 'Recon any unexplored region.',
 			target: 1,
-			mandatory: false,
-			carriesOver: false,
+			mandatory: true,
+			carriesOver: true,
 		},
 		{
 			id: 'reconNewArea',
@@ -821,6 +821,7 @@ export const pack: ContentPack = {
 			target: 1,
 			mandatory: false,
 			carriesOver: false,
+			destroyOnComplete: true,
 		},
 		{
 			id: 'triangulate',

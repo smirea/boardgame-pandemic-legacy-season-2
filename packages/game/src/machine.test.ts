@@ -902,6 +902,21 @@ describe('game end and the campaign', () => {
 		return actor;
 	};
 
+	test('a completed lost-haven objective leaves play, and a recon of a region carries into the second attempt', () => {
+		const actor = ended(false, world => {
+			world.campaign.attempt = 1;
+			world.campaign.objectives.push('lostHaven', 'reconRegion');
+			world.game!.completed.push('lostHaven', 'reconRegion');
+			world.game!.progress.reconRegion = 1;
+		});
+		send(actor, { type: 'FINISH_UPKEEP' });
+		const { campaign } = worldOf(actor);
+		expect(campaign.objectives).not.toContain('lostHaven');
+		expect(campaign.objectives).toContain('reconRegion');
+		expect(campaign.carriedProgress.reconRegion).toBe(1);
+		expect(pack.objectives.find(objective => objective.id === 'reconRegion')!.mandatory).toBe(true);
+	});
+
 	test('every purchase applies, and permanent structures stand at the next setup', () => {
 		const actor = ended(false, world => {
 			const game = world.game!;
