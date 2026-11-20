@@ -141,6 +141,8 @@ export type Campaign = {
 	freeAbilityUnits: number;
 	frequenciesUsed: number[];
 	planRecons: string[];
+	/** Self-Infect doses used. Pearl has 4 for the whole campaign, and a dose ending in a skull is used too. */
+	dosesUsed: number;
 	sampleDelivered: boolean;
 	losingStreakBonusGames: number;
 	owedScars: number;

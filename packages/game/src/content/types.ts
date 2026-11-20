@@ -382,6 +382,8 @@ export type ContentPack = {
 	dossier: DossierDef;
 	/** What each of the ten Monitor frequencies opens. */
 	frequencies: FrequencyReward[];
+	/** The scanner's printed frequency for each box, in the same order. */
+	frequencyLabels: string[];
 	startingEvents: EventId[];
 	/** The ability stickers in the box when the campaign begins, one of each. */
 	startingAbilities: AbilityId[];
@@ -405,6 +407,7 @@ export type ContentPack = {
 		/** How many portraits a character can wear, `/portraits/survivor-<n>.webp` in the UI. */
 		portraits: number;
 		exposureBoxes: number;
+		selfInfectDoses: number;
 		storageCap: number;
 		rebirthPopulation: number;
 		startingRationing: number;

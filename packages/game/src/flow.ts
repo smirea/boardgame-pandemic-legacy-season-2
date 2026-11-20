@@ -639,8 +639,10 @@ export function settleGrid(world: World, before: Set<CityId>, countsForObjective
 		log(game, { t: 'connected', city });
 		for (const card of Object.values(campaign.playerCards))
 			if (card.kind === 'city' && card.city === city) game.playerDiscard.push(card.id);
+		// Utopia's report puts its Infection cards in the discard pile, where the next Epidemic shuffles them in.
+		const pile = cityDef(city).region === UTOPIA_REGION ? game.infectionDiscard : game.gameEndArea;
 		for (const card of Object.values(campaign.infectionCards))
-			if (card.kind === 'city' && card.city === city) game.gameEndArea.push(card.id);
+			if (card.kind === 'city' && card.city === city) pile.push(card.id);
 		if (countsForObjective && cityDef(city).kind === 'city') bump(world, 'connectCities');
 	}
 }

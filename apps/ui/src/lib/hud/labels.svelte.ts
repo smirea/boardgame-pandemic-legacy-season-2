@@ -280,7 +280,7 @@ export function actionDetail(world: World, action: Action): Rich {
 		case 'transmit':
 			return [cardRef(world, action.card), ` to ${seatName(world, action.to)}`];
 		case 'monitor':
-			return [`Frequency ${action.frequency + 1}`];
+			return [`Frequency ${pack.frequencyLabels[action.frequency]}`];
 		case 'broadcast':
 			return [{ glyph: 'hollow', text: 'Hollow Men' }, ` from ${cityName(action.from)} to ${cityName(action.to)}`];
 		case 'buildShelter':

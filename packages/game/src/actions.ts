@@ -818,6 +818,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 			const character = characterOf(ctx.world, ctx.seat);
 			if (!hasRule(ctx.campaign, 'carrier') || ctx.here !== pack.sampleFrom) return 'The sample is not here';
 			if (character.worker || character.carrier) return 'This character cannot carry the sample';
+			if (ctx.campaign.dosesUsed >= numbers.selfInfectDoses) return 'Every dose of the sample is used';
 			// The Carrier scar covers 2 slots and may not cover another scar.
 			return character.slots.filter(slot => slot?.kind !== 'scar').length >= 2
 				? ok
@@ -825,6 +826,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 		},
 		apply(ctx) {
 			const character = characterOf(ctx.world, ctx.seat);
+			ctx.campaign.dosesUsed += 1;
 			for (;;) {
 				const box = character.exposureTrack[character.exposure] ?? 'skull';
 				character.exposure += 1;

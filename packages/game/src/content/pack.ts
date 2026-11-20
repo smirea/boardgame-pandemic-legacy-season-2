@@ -988,6 +988,7 @@ export const pack: ContentPack = {
 		{ take: 1 },
 		{ seal: door('43') },
 	],
+	frequencyLabels: ['8.24', '8.81', '9.1', '9.2', '9.31', '9.58', '9.75', '10.31', '10.57', '11.88'],
 	startingEvents: ['airlift', 'quietNight', 'resilience', 'handout'],
 	startingAbilities: [
 		'architect',
@@ -1030,6 +1031,7 @@ export const pack: ContentPack = {
 		portraits: 10,
 		exposureBoxes: 7,
 		storageCap: 30,
+		selfInfectDoses: 4,
 		rebirthPopulation: 6,
 		startingRationing: 4,
 		epidemicTable: [
