@@ -108,6 +108,8 @@ export type InfectionImprovementId = 'wellStocked' | 'lockdown' | 'rebirth' | 'c
 
 export type StructureKind = 'center' | 'tower' | 'shelter';
 
+export type ExposureBox = 'empty' | 'scar' | 'skull';
+
 export type ActionId =
 	| 'drive'
 	| 'sail'
@@ -293,6 +295,11 @@ export type ContentPack = {
 	scars: ScarDef[];
 	companions: CompanionDef[];
 	events: EventDef[];
+	/**
+	 * The hidden layout under each Character card's scratch-off boxes, box 1 first, ending at the box that
+	 * kills. A campaign has this many Character cards and no more.
+	 */
+	characterCards: ExposureBox[][];
 	cityImprovements: CityImprovementDef[];
 	infectionImprovements: InfectionImprovementDef[];
 	objectives: ObjectiveDef[];

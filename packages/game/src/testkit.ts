@@ -1,6 +1,7 @@
 import type { Action } from './actions';
 import type { CardId, CityId, SeatId } from './ids';
 import type { Command, GameActor, Phase } from './machine';
+import { paddedTrack } from './legacy';
 import { createGameActor, phaseOf, reject } from './machine';
 import { decemberSave } from './scenarios';
 import type { Game, World } from './state';
@@ -93,6 +94,7 @@ export function stackInfection(world: World, cities: string[]) {
 /**
  * A three-player December game on its first action step: every region explored, every action
  * unlocked, calm board. Seats A, B, C are Ada (administrator), Bo (farmer), Cy (instructor).
+ * Every character holds the same Character card, so a first exposure never asks for a scar.
  */
 export function late(edit?: (world: World, game: Game) => void, at: Phase = 'playing.actions'): GameActor {
 	const actor = createGameActor({ seed: 21, save: decemberSave() }).start();
@@ -113,6 +115,8 @@ export function late(edit?: (world: World, game: Game) => void, at: Phase = 'pla
 	game.stockpile = 20;
 	for (const location of Object.values(game.locations)) Object.assign(location, { supplies: 2, plague: 0, hollow: 0 });
 	for (const seat of seats) emptyHand(world, seat);
+	for (const entry of Object.values(world.campaign.characters))
+		if (!entry.worker) entry.exposureTrack = paddedTrack(['empty', 'scar', 'empty', 'scar', 'empty', 'skull']);
 	edit?.(world, game);
 	return createGameActor({ seed: 1, save: { v: 1, phase: at, world } }).start();
 }

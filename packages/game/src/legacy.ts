@@ -61,6 +61,7 @@ export function newCampaign(seed: number): Campaign {
 		edges: pack.edges.map(edge => ({ ...edge })),
 		names: {},
 		characters: {},
+		characterCards: [],
 		playerCards: {},
 		infectionCards: {},
 		stored: { player: [], infection: [] },
@@ -84,6 +85,10 @@ export function newCampaign(seed: number): Campaign {
 		owedScars: 0,
 		nextCardId: 1,
 	};
+	campaign.characterCards = shuffle(campaign.rng, pack.characterCards).map(layout => ({
+		track: paddedTrack(layout),
+		exposure: 0,
+	}));
 	const revealedRegions = new Set(campaign.regions);
 	for (const city of pack.cities) {
 		campaign.locations[city.id] = {
@@ -126,13 +131,11 @@ export function newCampaign(seed: number): Campaign {
 	return campaign;
 }
 
-function exposureTrack(campaign: Campaign): ExposureBox[] {
-	const middle: ExposureBox[] = shuffle(campaign.rng, [
-		...Array<ExposureBox>(3).fill('scar'),
-		...Array<ExposureBox>(numbers.exposureBoxes - 5).fill('empty'),
-	]);
-	return ['empty', ...middle, 'skull'];
-}
+/** Every card shows the same number of boxes, so the boxes past the one that kills are blank and never reached. */
+export const paddedTrack = (layout: readonly ExposureBox[]): ExposureBox[] => [
+	...layout,
+	...Array<ExposureBox>(Math.max(0, numbers.exposureBoxes - layout.length)).fill('empty'),
+];
 
 export function createCharacter(
 	campaign: Campaign,
@@ -140,6 +143,8 @@ export function createCharacter(
 ): Character {
 	const count = Object.keys(campaign.characters).length;
 	const id = `char-${count + 1}` as CharacterId;
+	const card = input.worker ? null : campaign.characterCards.shift();
+	if (!input.worker && !card) throw new Error('No Character card is left for a new character');
 	const character: Character = {
 		id,
 		name: input.name,
@@ -148,8 +153,8 @@ export function createCharacter(
 		home: input.home,
 		portrait: input.portrait ?? count % numbers.portraits,
 		slots: Array.from({ length: numbers.characterSlots }, () => null),
-		exposureTrack: input.worker ? [] : exposureTrack(campaign),
-		exposure: 0,
+		exposureTrack: card?.track ?? [],
+		exposure: card?.exposure ?? 0,
 		dead: false,
 		diedAt: null,
 		worker: input.worker ?? false,
@@ -233,7 +238,8 @@ export function applyUnlock(world: World, unlock: Unlock) {
 		case 'job': {
 			campaign.jobsFound.push({ job: unlock.job, home: unlock.home });
 			const job = pack.jobs.find(candidate => candidate.id === unlock.job)!;
-			createCharacter(campaign, { name: job.name, job: unlock.job, home: unlock.home });
+			if (campaign.characterCards.length > 0)
+				createCharacter(campaign, { name: job.name, job: unlock.job, home: unlock.home });
 			return;
 		}
 		case 'gather':

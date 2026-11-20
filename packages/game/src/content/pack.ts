@@ -613,6 +613,18 @@ export const pack: ContentPack = {
 		{ id: 'cardSwap', name: 'Card Swap', text: 'Two players trade one card each.' },
 		{ id: 'surplus', name: 'Surplus', text: 'Take up to 3 cubes from the stockpile onto your character.' },
 	],
+	characterCards: [
+		['scar', 'empty', 'empty', 'scar', 'skull'],
+		['empty', 'empty', 'scar', 'scar', 'empty', 'skull'],
+		['empty', 'scar', 'empty', 'scar', 'empty', 'skull'],
+		['scar', 'empty', 'scar', 'empty', 'skull'],
+		['empty', 'empty', 'scar', 'scar', 'skull'],
+		['empty', 'scar', 'scar', 'empty', 'skull'],
+		['scar', 'empty', 'scar', 'empty', 'scar', 'empty', 'skull'],
+		['empty', 'scar', 'empty', 'empty', 'scar', 'scar', 'skull'],
+		['scar', 'empty', 'scar', 'empty', 'scar', 'skull'],
+		['empty', 'scar', 'empty', 'skull'],
+	],
 	cityImprovements: [
 		{
 			id: 'double',

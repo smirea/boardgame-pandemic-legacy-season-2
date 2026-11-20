@@ -5,6 +5,7 @@ import type {
 	CityImprovementId,
 	Color,
 	CompanionId,
+	ExposureBox,
 	EdgeDef,
 	EventId,
 	InfectionImprovementId,
@@ -36,7 +37,7 @@ export type InfectionCard =
 
 export type Slot = { kind: 'ability'; id: AbilityId } | { kind: 'scar'; id: ScarId } | null;
 
-export type ExposureBox = 'empty' | 'scar' | 'skull';
+export type { ExposureBox };
 
 export type Character = {
 	id: CharacterId;
@@ -105,6 +106,8 @@ export type Campaign = {
 	/** Names the group gave to havens, over the defaults. */
 	names: Partial<Record<CityId, string>>;
 	characters: Record<CharacterId, Character>;
+	/** The Character cards nobody has used yet, next one first. A card may come with boxes already scratched. */
+	characterCards: { track: ExposureBox[]; exposure: number }[];
 	playerCards: Record<CardId, PlayerCard>;
 	infectionCards: Record<CardId, InfectionCard>;
 	stored: { player: CardId[]; infection: CardId[] };
