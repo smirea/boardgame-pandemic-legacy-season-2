@@ -297,7 +297,7 @@ export function load(raw: unknown, seated: string[] = []): Loaded {
 	const record = parseRecord(typeof raw === 'string' ? JSON.parse(raw) : raw);
 	const frames = framesOf(record);
 	// Recordings play back as written. Older ones hold the briefing as plain lines, or cards without their source.
-	const legacy: BriefingSource = { t: 'legacy', doors: [] };
+	const legacy: BriefingSource = { t: 'legacy', card: '' };
 	for (const frame of frames) {
 		const campaign = frame.world.campaign;
 		campaign.briefing = campaign.briefing.map(entry =>

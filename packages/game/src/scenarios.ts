@@ -1,9 +1,10 @@
 import { pack } from './content/pack';
-import type { JobId } from './content/types';
+import type { JobId, Seal, SealKey } from './content/types';
+import { sealKey } from './content/types';
 import { documentedEdges } from './content/world';
 import { gridCityCount, hasEdge } from './helpers';
-import type { BundleId, CityId } from './ids';
-import { createCharacter, newCampaign, openBundle, readLegacy } from './legacy';
+import type { CityId } from './ids';
+import { createCharacter, newCampaign, openSeal, readLegacy } from './legacy';
 import type { Save } from './machine';
 import type { World } from './state';
 import { newTable } from './table';
@@ -18,16 +19,18 @@ const CAST: [name: string, job: JobId][] = [
 ];
 
 /** What a group that explored on schedule would have opened, by the month they opened it. */
-const EXPLORED: Record<number, string[]> = {
-	1: ['north-america'],
-	3: ['south-america', 'opal'],
-	4: ['find-eastern-pacific', 'arrive-eastern-pacific'],
-	5: ['europe'],
-	6: ['africa', 'jade'],
-	7: ['middle-east', 'find-indian-ocean', 'arrive-indian-ocean'],
-	9: ['east-asia', 'coral-sea'],
-	10: ['new-zealand', 'defection'],
-	11: ['utopia'],
+const pkg = (id: number): Seal => ({ t: 'package', id });
+const door = (id: string): Seal => ({ t: 'door', id });
+const EXPLORED: Record<number, Seal[]> = {
+	1: [pkg(1)],
+	3: [pkg(5), door('20')],
+	4: [door('60'), pkg(6)],
+	5: [pkg(4)],
+	6: [pkg(7), door('46')],
+	7: [pkg(2), door('65'), door('11')],
+	9: [pkg(3), door('59')],
+	10: [door('19'), door('17')],
+	11: [pkg(8)],
 };
 
 const PERMANENT: [city: string, structure: 'center' | 'tower' | 'shelter'][] = [
@@ -48,7 +51,7 @@ const PERMANENT: [city: string, structure: 'center' | 'tower' | 'shelter'][] = [
 export function campaignAt(
 	month: number,
 	seed = 12,
-	{ unexplored = [], cast = CAST }: { unexplored?: string[]; cast?: [name: string, job: JobId][] } = {},
+	{ unexplored = [], cast = CAST }: { unexplored?: SealKey[]; cast?: [name: string, job: JobId][] } = {},
 ): Save {
 	const world: World = { campaign: newCampaign(seed), game: null, table: newTable() };
 	const campaign = world.campaign;
@@ -58,8 +61,7 @@ export function campaignAt(
 	for (let played = 1; played < month; played++) {
 		campaign.month = played;
 		readLegacy(world, 'setup');
-		for (const bundle of EXPLORED[played] ?? [])
-			if (!unexplored.includes(bundle)) openBundle(world, bundle as BundleId, false);
+		for (const seal of EXPLORED[played] ?? []) if (!unexplored.includes(sealKey(seal))) openSeal(world, seal, false);
 		readLegacy(world, 'gameEnd', true);
 		campaign.results.push({
 			month: played,

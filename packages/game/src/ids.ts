@@ -7,6 +7,5 @@ export type SeatId = Brand<string, 'SeatId'>;
 export type PlayerId = Brand<string, 'PlayerId'>;
 export type CharacterId = Brand<string, 'CharacterId'>;
 export type CardId = Brand<string, 'CardId'>;
-export type BundleId = Brand<string, 'BundleId'>;
 
 export const edgeKey = (a: CityId, b: CityId): string => (a < b ? `${a}~${b}` : `${b}~${a}`);

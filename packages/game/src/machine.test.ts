@@ -18,11 +18,11 @@ import {
 	tableSeating,
 } from './helpers';
 import { edgeKey } from './ids';
-import type { BundleId, CardId, CityId, PlayerId } from './ids';
+import type { CardId, CityId, PlayerId } from './ids';
 import { createGameActor, parseSave, phaseOf, reject } from './machine';
 import type { Command, GameActor, Phase, Save } from './machine';
 import { legalActions, legalPlays } from './options';
-import { applyUnlock, closeGame, newCampaign, openBundle, score } from './legacy';
+import { applyUnlock, closeGame, newCampaign, openSeal, score } from './legacy';
 import { newTable } from './table';
 import { decemberSave, octoberSave } from './scenarios';
 import { tabletopSave } from './tabletop';
@@ -235,7 +235,7 @@ describe('building', () => {
 			world.campaign.objectives.push('triangulate');
 			world.campaign.frequenciesUsed = [];
 			world.campaign.routes = world.campaign.routes.filter(route => route !== 'hidden:east-asia');
-			world.campaign.opened = world.campaign.opened.filter(bundle => bundle !== 'frequency-route');
+			world.campaign.opened = world.campaign.opened.filter(key => key !== 'door:52');
 			game.players[A]!.location = city('lagos');
 			game.players[A]!.supplies = 2;
 			give(world, A, [...cityCards(world, 'lagos'), ...cityCards(world, 'london')]);
@@ -336,7 +336,7 @@ describe('exploring', () => {
 		const searched = worldOf(found).campaign.playerCards[gameOf(found).players[A]!.hand[0]!];
 		expect(searched).toMatchObject({ kind: 'city', city: 'denver', companion: 'medic' });
 		expect(worldOf(searching({ t: 'infest' })).campaign.locations[city('denver')]!.infested).toBe(true);
-		const repeat = searching({ t: 'discover', bundle: 'opal' as never });
+		const repeat = searching({ t: 'discover', seal: { t: 'door', id: '20' } });
 		expect(gameOf(repeat).actionsLeft).toBe(4);
 		expect(refuses(repeat, { a: 'search', card: gameOf(repeat).players[A]!.hand[0]!, box: 0 })).toContain('used up');
 	});
@@ -422,7 +422,7 @@ describe('exploring', () => {
 			'different city',
 		);
 		act(plain, { a: 'recon', route: 'hidden:plan-blue', cards: [london, newYork, washington] });
-		expect(worldOf(plain).campaign.opened as string[]).toContain('plan-blue');
+		expect(worldOf(plain).campaign.planRecons).toContain('hidden:plan-blue');
 		expect(refuses(plain, { a: 'recon', route: 'hidden:plan-blue', cards: [london2, paris] })).toBe('Already reconned');
 
 		const outrider = at(world => void (character(world, A).slots[1] = { kind: 'ability', id: 'outrider' }));
@@ -435,7 +435,7 @@ describe('exploring', () => {
 
 		const scout = (ability: boolean) =>
 			late((world, game) => {
-				world.campaign.opened = world.campaign.opened.filter(bundle => bundle !== 'coral-sea');
+				world.campaign.opened = world.campaign.opened.filter(key => key !== 'door:59');
 				if (ability) character(world, A).slots[1] = { kind: 'ability', id: 'scout' };
 				game.players[A]!.location = city('jakarta');
 				give(world, A, [...cityCards(world, 'jakarta'), ...cityCards(world, 'tokyo')]);
@@ -445,7 +445,7 @@ describe('exploring', () => {
 		).toContain('supply center');
 		const scouting = scout(true);
 		act(scouting, { a: 'recon', route: 'coral-sea', cards: gameOf(scouting).players[A]!.hand });
-		expect(worldOf(scouting).campaign.opened as string[]).toContain('coral-sea');
+		expect(worldOf(scouting).campaign.opened).toContain('door:59');
 	});
 });
 
@@ -475,7 +475,7 @@ describe('Hollow Men and forsaken cities', () => {
 		const actor = defectScene(['haven-north-atlantic', 'haven-south-atlantic']);
 		act(actor, { a: 'broadcast', from: city('tripoli'), to: city('haven-mediterranean') });
 		expect(gameOf(actor).outcome).toMatchObject({ won: true });
-		expect(worldOf(actor).campaign.opened as string[]).toContain('defection');
+		expect(worldOf(actor).campaign.opened).toContain('door:17');
 	});
 
 	test('the Saboteur discards a card to remove a Hollow Man from a city of its colour', () => {
@@ -688,6 +688,7 @@ describe('exposure and the carrier', () => {
 	test('taking the sample scars the carrier, who then walks, pays to enter cities, and wins on arrival', () => {
 		const actor = late((world, game) => {
 			world.campaign.edges.push({ a: city('utopia'), b: city('lake-baikal'), kind: 'land' });
+			openSeal(world, { t: 'door', id: '22' }, false);
 			character(world, A).exposureTrack = ['empty', 'scar', 'skull'];
 			game.players[A]!.location = city('lake-baikal');
 			give(world, A, cityCards(world, 'tokyo'));
@@ -1106,7 +1107,7 @@ test('Monitor frequencies that keep cards take the newest non-Epidemic discards'
 	const top = gameOf(actor)
 		.playerDeck.order.slice(0, 4)
 		.filter(id => worldOf(actor).campaign.playerCards[id]!.kind !== 'epidemic');
-	act(actor, { a: 'monitor', frequency: 2 });
+	act(actor, { a: 'monitor', frequency: 4 });
 	expect(gameOf(actor).players[A]!.hand).toHaveLength(Math.min(2, top.length));
 	expect(top).toEqual(expect.arrayContaining(gameOf(actor).players[A]!.hand));
 });
@@ -1365,8 +1366,8 @@ describe('the remaining abilities and the Jade lab', () => {
 		expect(gameOf(actor).locations[struck]!.supplies).toBe(2);
 	});
 
-	test('every ability the game defines is in the box from the start or unlocked by a Legacy card or a bundle', () => {
-		const unlocks = [...pack.legacyDeck, ...pack.bundles].flatMap(source => [
+	test('every ability the game defines is in the box from the start or unlocked by a Legacy card, package or door', () => {
+		const unlocks = [...pack.legacyDeck, ...pack.seals].flatMap(source => [
 			...source.unlocks,
 			...('reward' in source ? (source.reward ?? []) : []),
 		]);
@@ -1437,10 +1438,10 @@ test('Lake Baikal can only be joined to the grid from Utopia', () => {
 
 test('South America leaves the eastern Pacific haven hidden, and sighting the haven draws its sea route from Lima', () => {
 	const world: World = { campaign: newCampaign(4), game: null, table: newTable() };
-	openBundle(world, 'south-america' as BundleId, false);
+	openSeal(world, { t: 'package', id: 5 }, false);
 	const { campaign } = world;
 	expect(campaign.locations[city('haven-eastern-pacific')]!.revealed).toBe(false);
-	openBundle(world, 'find-eastern-pacific' as BundleId, false);
+	openSeal(world, { t: 'door', id: '60' }, false);
 	expect(campaign.locations[city('haven-eastern-pacific')]!.revealed).toBe(true);
 	expect(
 		campaign.edges.some(
@@ -1449,12 +1450,24 @@ test('South America leaves the eastern Pacific haven hidden, and sighting the ha
 	).toBe(true);
 });
 
-test('opening a bundle, even by a perimeter report, opens its package and its dossier doors', () => {
+test('opening a package, even by a perimeter report, opens the doors its report names', () => {
 	const world: World = { campaign: newCampaign(4), game: null, table: newTable() };
-	openBundle(world, 'north-america' as BundleId, false);
-	openBundle(world, 'middle-east' as BundleId, true);
-	expect(world.campaign.packages).toEqual([1, 2]);
-	expect(world.campaign.doors).toEqual(['66', 'J', 'L', '62', '53', 'F', '14']);
+	openSeal(world, { t: 'package', id: 1 }, false);
+	openSeal(world, { t: 'package', id: 2 }, true);
+	expect(world.campaign.opened).toEqual([
+		'package:1',
+		'door:66',
+		'door:J',
+		'door:23',
+		'door:L',
+		'door:39',
+		'package:2',
+		'door:62',
+		'door:53',
+		'door:F',
+		'door:14',
+	]);
+	expect(world.campaign.forced).toEqual(['package:2']);
 });
 
 test('the canonical tabletop campaign still builds against the pack, at the August lobby with no invariant broken', () => {
@@ -1536,7 +1549,7 @@ test('free ability units are spent at setup, and nothing else can be bought then
 
 test('Utopia forced open at December setup puts its Infection cards in the discard pile', () => {
 	const world = mutable(late());
-	world.campaign.forced.push('utopia' as never);
+	world.campaign.forced.push('package:8');
 	world.campaign.attempt = 1;
 	setupInfection(world);
 	const cards = infectionCards(world, 'utopia', 9);
@@ -1565,7 +1578,7 @@ test('Triangulate needs towers in blue, yellow and black, and a red tower does n
 	const black = scene('cairo');
 	act(black, { a: 'buildTower' });
 	expect(gameOf(black).completed).toContain('triangulate');
-	expect(worldOf(black).campaign.opened as string[]).toContain('signal-hint');
+	expect(worldOf(black).campaign.opened).toContain('door:35');
 });
 
 test('a lost early attempt carries completed objectives and Plan steps, not partial progress', () => {
@@ -1588,7 +1601,7 @@ test('a recon objective with no recon left is dropped, and the rest decide the w
 	const { campaign } = save.world;
 	campaign.objectives = ['buildCenters', 'reconRegion'];
 	campaign.required = 2;
-	expect(campaign.opened as string[]).toContain('north-america');
+	expect(campaign.opened).toContain('package:1');
 	const actor = createGameActor({ seed: 3, save }).start();
 	const cast = Object.values(worldOf(actor).campaign.characters).slice(0, 3);
 	actor.send({
@@ -2476,7 +2489,7 @@ describe('between games', () => {
 		expect(worldOf(next).campaign.month).toBe(2);
 		send(next, { type: 'START_GAME', seating });
 		const { campaign } = worldOf(next);
-		expect(campaign.forced as string[]).toContain('north-america');
+		expect(campaign.forced).toContain('package:1');
 		expect(campaign.objectives).toEqual(expect.arrayContaining(['reconNewArea', 'connectCities']));
 		expect(Object.values(campaign.playerCards).some(card => card.kind === 'event' && card.mode === 'unrationed')).toBe(
 			false,

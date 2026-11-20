@@ -27,7 +27,7 @@ function tourCast(save: Save) {
 
 /** October for a group that never searched Johannesburg and never reconned the Coral Sea, with a cast of three. */
 export function tourOctober(seed?: number): Save {
-	const save = campaignAt(10, seed, { unexplored: ['coral-sea', 'jade'], cast: CAST });
+	const save = campaignAt(10, seed, { unexplored: ['door:59', 'door:46'], cast: CAST });
 	const { campaign } = save.world;
 	tourCast(save);
 	const refused = checkEdge(campaign, id('baghdad'), id('riyadh'), 'land');
@@ -308,7 +308,7 @@ const PLAN_COLOURS: Color[] = ['red', 'yellow', 'blue', 'black'];
 
 /** The Plan recons this campaign has not made yet. Finished steps carry over to a second attempt. */
 const planLeft = (world: World) =>
-	PLAN_COLOURS.filter(color => !world.campaign.opened.includes(`plan-${color}` as never));
+	PLAN_COLOURS.filter(color => !world.campaign.planRecons.includes(`hidden:plan-${color}`));
 
 /** A second attempt at November: only the Plan steps that are still open are dealt, and nothing else is arranged. */
 function stagePlanFinish(world: World) {

@@ -1,5 +1,5 @@
 import { pack } from './content/pack';
-import { cityDef, grid, isForsaken } from './helpers';
+import { cityDef, grid, isForsaken, reconned, sealDef, unlocksBehind } from './helpers';
 import type { CardId, CityId } from './ids';
 import { AWAY_FROM_ROUTE, type Action } from './actions';
 import type { ReconRoute } from './content/types';
@@ -184,11 +184,11 @@ export function reconBoxes(world: World, phase: Phase): ReconBox[] {
 			? legalActions(world, game.active)
 			: [];
 	return pack.reconRoutes.flatMap(route => {
-		const bundle = pack.bundles.find(entry => entry.id === route.opens)!;
-		if (!campaign.routes.includes(route.id) || campaign.opened.includes(route.opens)) return [];
+		if (!campaign.routes.includes(route.id) || reconned(campaign, route)) return [];
 		if (!campaign.locations[route.city]?.revealed) return [];
-		const regions = bundle.unlocks.flatMap(unlock => (unlock.t === 'region' ? [unlock.region] : []));
-		const havens = new Set(bundle.unlocks.flatMap(unlock => (unlock.t === 'haven' ? [unlock.city] : [])));
+		const inside = route.opens ? unlocksBehind(route.opens) : [];
+		const regions = inside.flatMap(unlock => (unlock.t === 'region' ? [unlock.region] : []));
+		const havens = new Set(inside.flatMap(unlock => (unlock.t === 'haven' ? [unlock.city] : [])));
 		const actions = legal.filter(
 			(action): action is ReconBox['actions'][number] => action.a === 'recon' && action.route === route.id,
 		);
@@ -196,7 +196,11 @@ export function reconBoxes(world: World, phase: Phase): ReconBox[] {
 		return [
 			{
 				route,
-				name: regions.length ? pack.regions.find(region => region.id === regions[0])!.name : bundle.name,
+				name: regions.length
+					? pack.regions.find(region => region.id === regions[0])!.name
+					: route.opens
+						? sealDef(route.opens).name
+						: 'The Plan',
 				reveals: pack.cities
 					.filter(city => (regions.includes(city.region) && !city.lost) || havens.has(city.id))
 					.filter(city => !campaign.locations[city.id]?.revealed)

@@ -1,4 +1,4 @@
-import { actionIds, grid, gridCityCount, pack, violations } from '@repo/game';
+import { actionIds, grid, gridCityCount, isOpen, pack, sealKey, violations } from '@repo/game';
 import type { Command, ObjectiveId, PublicState, World } from '@repo/game';
 import timeline from '../../../docs/mechanics/data/legacy-timeline.json';
 import { monthName } from './names.ts';
@@ -102,7 +102,7 @@ function setupChecks(world: World, supplies: number): Check[] {
 	// The reverse also holds: one this group completed early has left play, while the research group still had it.
 	const retired = (id: string) => {
 		const objective = pack.objectives.find(candidate => candidate.id === id);
-		return Boolean(objective?.reward && !objective.mandatory && campaign.opened.includes(objective.reward));
+		return Boolean(objective?.reward && !objective.mandatory && isOpen(campaign, objective.reward));
 	};
 	const expected = [
 		...new Set([
@@ -236,13 +236,15 @@ export function observe(audit: Audit, previous: PublicState | null, next: Public
 			});
 	}
 	const opened = new Set(previous?.world.campaign.opened ?? campaign.opened);
-	for (const bundle of campaign.opened) {
-		if (opened.has(bundle)) continue;
-		const forced = campaign.forced.includes(bundle);
-		bump(audit, `bundle:${bundle}`);
+	for (const key of campaign.opened) {
+		if (opened.has(key)) continue;
+		const forced = campaign.forced.includes(key);
+		bump(audit, key);
 		if (forced) bump(audit, 'forcedOpening');
-		(record ?? audit.games.at(-1))?.opened.push({ bundle, forced });
+		(record ?? audit.games.at(-1))?.opened.push({ bundle: key, forced });
 	}
+	const planned = new Set(previous?.world.campaign.planRecons ?? campaign.planRecons);
+	for (const step of campaign.planRecons) if (!planned.has(step)) bump(audit, `plan:${step}`);
 	for (const rule of campaign.rules) if (!previous?.world.campaign.rules.includes(rule)) bump(audit, `rule:${rule}`);
 	if (previous)
 		for (const card of Object.values(campaign.playerCards))
@@ -338,7 +340,9 @@ export function universe(world: World): { key: string; live: boolean }[] {
 			key: `job:${job.id}`,
 			live: job.starting || campaign.jobsFound.some(found => found.job === job.id),
 		})),
-		...pack.bundles.map(bundle => ({ key: `bundle:${bundle.id}`, live: true })),
+		// The four summit doors have no trigger anywhere in the game.
+		...pack.seals.map(def => ({ key: sealKey(def.seal), live: def.name !== 'Summit' })),
+		...pack.reconRoutes.filter(route => !route.opens).map(route => ({ key: `plan:${route.id}`, live: true })),
 		...pack.companions.map(companion => ({ key: `found:companion:${companion.id}`, live: true })),
 		...pack.scars.map(scar => ({ key: `scar:${scar.id}`, live: campaign.scars.includes(scar.id) })),
 		...pack.abilities.map(ability => ({

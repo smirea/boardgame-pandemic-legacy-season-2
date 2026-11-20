@@ -1,22 +1,26 @@
-import type { BundleId, CityId, RegionId } from '../ids';
+import type { CityId, RegionId } from '../ids';
 import { candidateEdges, positions, routeCourses } from './geometry.generated';
+import { sealKey } from './types';
 import type {
-	BundleDef,
 	Color,
+	DoorId,
 	DossierDef,
 	ContentPack,
 	LegacyCardDef,
 	ObjectiveId,
 	ReconRoute,
 	SearchBoxDef,
+	SealDef,
 	SearchResult,
+	Seal,
 	Unlock,
 } from './types';
 import { cities, edge, regions, startingEdges } from './world';
 
 const city = (id: string) => id as CityId;
-const bundleId = (id: string) => id as BundleId;
-const open = (id: string): Unlock => ({ t: 'open', bundle: bundleId(id) });
+const pkg = (id: number): Seal => ({ t: 'package', id });
+const door = (id: DoorId): Seal => ({ t: 'door', id });
+const opens = (...doors: DoorId[]): Unlock[] => doors.map(id => ({ t: 'open', seal: door(id) }));
 
 function route(
 	id: string,
@@ -24,58 +28,58 @@ function route(
 	color: Color,
 	count: number,
 	unique: boolean,
-	opens: string,
+	opens: Seal | null,
 	counts: ObjectiveId[],
 	needsCenter = true,
 ): ReconRoute {
-	return { id, city: city(at), color, count, unique, opens: bundleId(opens), needsCenter, counts };
+	return { id, city: city(at), color, count, unique, opens, needsCenter, counts };
 }
 
 const reconRoutes: ReconRoute[] = [
-	route('north-america', 'washington', 'blue', 3, false, 'north-america', ['reconRegion', 'reconNewArea']),
-	route('south-america', 'sao-paulo', 'yellow', 4, false, 'south-america', ['reconNewArea']),
-	route('europe', 'london', 'blue', 4, true, 'europe', ['reconNewArea']),
-	route('africa', 'lagos', 'yellow', 5, true, 'africa', ['reconNewArea']),
-	route('middle-east', 'cairo', 'black', 4, true, 'middle-east', ['reconNewArea']),
+	route('north-america', 'washington', 'blue', 3, false, pkg(1), ['reconRegion', 'reconNewArea']),
+	route('south-america', 'sao-paulo', 'yellow', 4, false, pkg(5), ['reconNewArea']),
+	route('europe', 'london', 'blue', 4, true, pkg(4), ['reconNewArea']),
+	route('africa', 'lagos', 'yellow', 5, true, pkg(7), ['reconNewArea']),
+	route('middle-east', 'cairo', 'black', 4, true, pkg(2), ['reconNewArea']),
 	// Hidden until a Monitor frequency or the October perimeter report reveals it.
-	route('hidden:east-asia', 'kolkata', 'black', 3, true, 'east-asia', ['reconNewArea', 'reconEastAsia']),
-	route('coral-sea', 'jakarta', 'red', 2, false, 'coral-sea', ['reconNewArea']),
-	route('new-zealand', 'haven-coral-sea', 'red', 2, false, 'new-zealand', ['reconNewArea'], false),
-	route('hidden:plan-red', 'shanghai', 'red', 5, true, 'plan-red', ['plan'], false),
-	route('hidden:plan-black', 'shanghai', 'black', 4, true, 'plan-black', ['plan'], false),
-	route('hidden:plan-yellow', 'shanghai', 'yellow', 3, true, 'plan-yellow', ['plan'], false),
-	route('hidden:plan-blue', 'shanghai', 'blue', 3, true, 'plan-blue', ['plan'], false),
+	route('hidden:east-asia', 'kolkata', 'black', 3, true, pkg(3), ['reconNewArea', 'reconEastAsia']),
+	route('coral-sea', 'jakarta', 'red', 2, false, door('59'), ['reconNewArea']),
+	route('new-zealand', 'haven-coral-sea', 'red', 2, false, door('19'), ['reconNewArea'], false),
+	route('hidden:plan-red', 'shanghai', 'red', 5, true, null, ['plan'], false),
+	route('hidden:plan-black', 'shanghai', 'black', 4, true, null, ['plan'], false),
+	route('hidden:plan-yellow', 'shanghai', 'yellow', 3, true, null, ['plan'], false),
+	route('hidden:plan-blue', 'shanghai', 'blue', 3, true, null, ['plan'], false),
 ];
 
 const land = (result: SearchResult): SearchBoxDef => ({ scope: 'land', result });
 const sea = (result: SearchResult): SearchBoxDef => ({ scope: 'sea', result });
-const discover = (id: string): SearchResult => ({ t: 'discover', bundle: bundleId(id) });
+const discover = (seal: Seal): SearchResult => ({ t: 'discover', seal });
 
 const searches: Record<string, SearchBoxDef[]> = {
 	chicago: [land({ t: 'supplies', amount: 2, from: 'stockpile' })],
-	'san-francisco': [land({ t: 'supplies', amount: 3, from: 'reserve' }), sea(discover('find-eastern-pacific'))],
+	'san-francisco': [land({ t: 'supplies', amount: 3, from: 'reserve' }), sea(discover(door('60')))],
 	denver: [land({ t: 'companion', companion: 'lineman' })],
 	atlanta: [land({ t: 'quarantineCard' })],
-	'los-angeles': [land({ t: 'stockpile', amount: 4 }), sea(discover('find-eastern-pacific'))],
+	'los-angeles': [land({ t: 'stockpile', amount: 4 }), sea(discover(door('60')))],
 	'mexico-city': [land({ t: 'companion', companion: 'trader' })],
 	bogota: [land({ t: 'quarantineCard' })],
-	lima: [land({ t: 'companion', companion: 'medic' }), sea(discover('find-eastern-pacific'))],
+	lima: [land({ t: 'companion', companion: 'medic' }), sea(discover(door('60')))],
 	santiago: [land({ t: 'stockpile', amount: 4 })],
-	'buenos-aires': [land(discover('opal')), sea({ t: 'supplies', amount: 3, from: 'reserve' })],
+	'buenos-aires': [land(discover(door('20'))), sea({ t: 'supplies', amount: 3, from: 'reserve' })],
 	paris: [land({ t: 'companion', companion: 'builder' })],
 	frankfurt: [land({ t: 'companion', companion: 'porter' })],
 	'st-petersburg': [land({ t: 'companion', companion: 'rigger' }), sea({ t: 'freeEdge', kind: 'sea' })],
 	moscow: [land({ t: 'nothing' })],
 	kinshasa: [land({ t: 'supplies', amount: 2, from: 'stockpile' })],
 	khartoum: [land({ t: 'retrieve' })],
-	'dar-es-salaam': [land({ t: 'companion', companion: 'fieldSurgeon' }), sea(discover('find-indian-ocean'))],
-	antananarivo: [land({ t: 'supplies', amount: 2, from: 'stockpile' }), sea(discover('find-indian-ocean'))],
-	johannesburg: [land(discover('jade'))],
+	'dar-es-salaam': [land({ t: 'companion', companion: 'fieldSurgeon' }), sea(discover(door('65')))],
+	antananarivo: [land({ t: 'supplies', amount: 2, from: 'stockpile' }), sea(discover(door('65')))],
+	johannesburg: [land(discover(door('46')))],
 	baghdad: [land({ t: 'companion', companion: 'medic' })],
 	riyadh: [land({ t: 'freeEdge', kind: 'land' })],
 	tehran: [land({ t: 'removeHollow', amount: 2 })],
 	delhi: [land({ t: 'companion', companion: 'marksman' })],
-	'new-mumbai': [land({ t: 'companion', companion: 'purifier' }), sea(discover('find-indian-ocean'))],
+	'new-mumbai': [land({ t: 'companion', companion: 'purifier' }), sea(discover(door('65')))],
 	jakarta: [land({ t: 'companion', companion: 'tracker' })],
 	bangkok: [land({ t: 'supplies', amount: 3, from: 'reserve' })],
 	'ho-chi-minh-city': [land({ t: 'companion', companion: 'shelterWright' })],
@@ -111,191 +115,198 @@ const dossier: DossierDef = {
 	],
 };
 
-const bundles: BundleDef[] = [
-	{
-		id: bundleId('north-america'),
-		package: 1,
-		doors: ['66', 'J', 'L'],
-		name: 'North America revealed',
-		unlocks: [
-			region('north-america', ['chicago', 'washington', 'land']),
-			{ t: 'action', action: 'establishLine' },
-			{ t: 'action', action: 'search' },
+const sealed = (seal: Seal, name: string, unlocks: Unlock[] = [], reward?: Unlock[]): SealDef => ({
+	seal,
+	name,
+	unlocks,
+	...(reward ? { reward } : {}),
+});
+/** A door that only holds a reminder for the player aid or the board, with no rule of its own. */
+const aid = (id: DoorId, name: string) => sealed(door(id), name);
+
+/**
+ * What each package and dossier door holds, as `docs/mechanics/box-contents.md` records it. A package's report opens
+ * the doors that carry its map, actions and rules, so the box shows exactly what the table has torn open.
+ */
+const seals: SealDef[] = [
+	sealed(
+		pkg(1),
+		'North America',
+		[
+			...opens('66', 'J', '23', 'L', '39'),
+			{ t: 'scar', scar: 'frail' },
+			{ t: 'scar', scar: 'searchDiscard' },
+			{ t: 'scar', scar: 'lineExtraCube' },
 		],
-		reward: [{ t: 'event', event: 'purge', mode: 'unrationed' }],
-	},
-	{
-		id: bundleId('south-america'),
-		package: 5,
-		doors: ['67', '23', '39'],
-		name: 'South America revealed',
-		unlocks: [
-			region('south-america', ['buenos-aires', 'sao-paulo', 'sea']),
-			{ t: 'action', action: 'establishLine' },
-			{ t: 'action', action: 'search' },
+		[{ t: 'event', event: 'purge', mode: 'unrationed' }],
+	),
+	sealed(
+		pkg(2),
+		'Middle East and South Asia',
+		[...opens('62', '53', 'F', '14'), { t: 'gather', cards: 4 }],
+		[{ t: 'event', event: 'mentor', mode: 'unrationed' }],
+	),
+	sealed(
+		pkg(3),
+		'East Asia',
+		[
+			...opens('56', '63'),
+			{ t: 'gather', cards: 4 },
+			{ t: 'action', action: 'buildShelter' },
+			{ t: 'permanentStructure', structure: 'shelter', copies: 5 },
+			{ t: 'infectionImprovement', improvement: 'rebirth', copies: 2 },
 		],
-		reward: [{ t: 'event', event: 'stockUp', mode: 'unrationed' }],
-	},
-	{
-		id: bundleId('europe'),
-		package: 4,
-		doors: ['64'],
-		name: 'Europe revealed',
-		unlocks: [region('europe', ['paris', 'london', 'land']), { t: 'action', action: 'shuttle' }],
-		reward: [{ t: 'event', event: 'exile', mode: 'unrationed' }],
-	},
-	{
-		id: bundleId('africa'),
-		package: 7,
-		doors: ['57'],
-		name: 'Africa revealed',
-		unlocks: [
-			region('africa', ['kinshasa', 'lagos', 'land']),
+		[{ t: 'event', event: 'safeHouses', mode: 'unrationed' }],
+	),
+	sealed(
+		pkg(4),
+		'Europe',
+		[...opens('64'), { t: 'action', action: 'shuttle' }],
+		[{ t: 'event', event: 'exile', mode: 'unrationed' }],
+	),
+	sealed(
+		pkg(5),
+		'South America',
+		[
+			...opens('67', 'J', '23', 'L', '39'),
+			{ t: 'ability', ability: 'facilitator' },
+			{ t: 'ability', ability: 'outrider' },
+			{ t: 'ability', ability: 'foreman' },
+		],
+		[{ t: 'event', event: 'stockUp', mode: 'unrationed' }],
+	),
+	sealed(pkg(6), 'Eastern Pacific haven reached', [
+		{ t: 'action', action: 'inoculate' },
+		{ t: 'rule', rule: 'storage' },
+		{ t: 'stockpileBonus', amount: 15 },
+		{ t: 'event', event: 'surplus', mode: 'permanent', copies: 3 },
+	]),
+	sealed(
+		pkg(7),
+		'Africa',
+		[
+			...opens('57', 'F', '14'),
 			{ t: 'action', action: 'buildTower' },
 			{ t: 'action', action: 'transmit' },
 			{ t: 'permanentStructure', structure: 'tower', copies: 4 },
 		],
-		reward: [{ t: 'event', event: 'antidote', mode: 'unrationed' }],
-	},
-	{
-		id: bundleId('middle-east'),
-		package: 2,
-		doors: ['62', '53', 'F', '14'],
-		name: 'Middle East and South Asia revealed',
-		unlocks: [region('middle-east', ['baghdad', 'cairo', 'land']), { t: 'gather', cards: 4 }],
-		reward: [{ t: 'event', event: 'mentor', mode: 'unrationed' }],
-	},
-	{
-		id: bundleId('east-asia'),
-		package: 3,
-		doors: ['56', '63'],
-		name: 'East Asia revealed',
-		unlocks: [
-			region('east-asia', ['jakarta', 'kolkata', 'sea']),
-			{ t: 'gather', cards: 4 },
-			{ t: 'action', action: 'buildShelter' },
-			{ t: 'cityImprovement', improvement: 'wild' },
-			{ t: 'cityImprovement', improvement: 'redWild' },
-			{ t: 'infectionImprovement', improvement: 'rebirth' },
-		],
-		reward: [{ t: 'event', event: 'safeHouses', mode: 'unrationed' }],
-	},
-	{
-		id: bundleId('coral-sea'),
-		doors: ['19'],
-		name: 'Coral Sea haven found',
-		unlocks: [
-			{ t: 'haven', city: city('haven-coral-sea') },
-			{ t: 'region', region: 'coral-sea' as RegionId, connect: [edge('jakarta', 'haven-coral-sea', 'sea')] },
-		],
-	},
-	{
-		id: bundleId('new-zealand'),
-		name: 'Wellington and the Topaz lab found',
-		unlocks: [
-			region('new-zealand', ['haven-coral-sea', 'wellington', 'sea']),
-			{ t: 'lab', city: city('wellington') },
-			{ t: 'rule', rule: 'topazShield' },
-			{ t: 'job', job: 'vectorControl', home: city('haven-coral-sea') },
-		],
-	},
-	{
-		id: bundleId('find-eastern-pacific'),
-		doors: ['60'],
-		name: 'Eastern Pacific haven sighted',
-		unlocks: [
-			{ t: 'haven', city: city('haven-eastern-pacific') },
-			{ t: 'edge', edge: edge('lima', 'haven-eastern-pacific', 'sea') },
-		],
-	},
-	{
-		id: bundleId('arrive-eastern-pacific'),
-		name: 'Eastern Pacific haven reached',
-		unlocks: [
-			{ t: 'action', action: 'inoculate' },
-			{ t: 'rule', rule: 'storage' },
-			{ t: 'stockpileBonus', amount: 15 },
-			{ t: 'event', event: 'surplus', mode: 'permanent', copies: 3 },
-		],
-	},
-	{
-		id: bundleId('find-indian-ocean'),
-		name: 'Indian Ocean haven sighted',
-		unlocks: [{ t: 'haven', city: city('haven-indian-ocean') }],
-	},
-	{
-		id: bundleId('arrive-indian-ocean'),
-		doors: ['65'],
-		name: 'Indian Ocean haven reached',
-		unlocks: [{ t: 'stockpileBonus', amount: 15 }],
-	},
-	{
-		id: bundleId('opal'),
-		package: 6,
-		name: 'Opal lab found',
-		unlocks: [
-			{ t: 'lab', city: city('buenos-aires') },
-			{ t: 'job', job: 'immunologist', home: city('haven-south-atlantic') },
-		],
-	},
-	{
-		id: bundleId('jade'),
-		name: 'Jade lab found',
-		unlocks: [
-			{ t: 'lab', city: city('johannesburg') },
-			{ t: 'job', job: 'scientist', home: city('haven-south-atlantic') },
-			{ t: 'rule', rule: 'gentleEpidemic' },
-		],
-	},
-	{ id: bundleId('arrive-pearl'), name: 'Pearl lab reached', unlocks: [{ t: 'lab', city: city('lake-baikal') }] },
-	{
-		id: bundleId('forsaken'),
-		doors: ['50', 'A'],
-		name: 'Forsaken cities',
-		unlocks: [{ t: 'rule', rule: 'forsaken' }],
-	},
-	{
-		id: bundleId('signal-hint'),
-		doors: ['35'],
-		name: 'Signals triangulated',
-		unlocks: [{ t: 'objectives', remove: ['triangulate'] }, { t: 'frequencyHint' }],
-	},
-	{
-		id: bundleId('frequency-route'),
-		name: 'A route into East Asia',
-		unlocks: [{ t: 'route', route: 'hidden:east-asia' }],
-	},
-	{
-		id: bundleId('frequency-design'),
-		name: 'New card improvements',
-		unlocks: [{ t: 'cityImprovement', improvement: 'wild' }],
-	},
-	{ id: bundleId('frequency-training'), name: 'New training', unlocks: [{ t: 'ability', ability: 'surveyor' }] },
-	{
-		id: bundleId('defection'),
-		doors: ['17', '58'],
-		name: 'The Hollow Men defect',
-		unlocks: [
-			{ t: 'ability', ability: 'saboteur' },
-			{ t: 'ability', ability: 'soldier' },
-		],
-	},
-	{ id: bundleId('plan-red'), name: 'Plan step: red', unlocks: [] },
-	{ id: bundleId('plan-black'), name: 'Plan step: black', unlocks: [] },
-	{ id: bundleId('plan-yellow'), name: 'Plan step: yellow', unlocks: [] },
-	{ id: bundleId('plan-blue'), name: 'Plan step: blue', unlocks: [] },
-	{
-		id: bundleId('utopia'),
-		package: 8,
-		name: 'Utopia opened',
-		unlocks: [region('utopia', ['shanghai', 'utopia', 'land'])],
-		reward: [{ t: 'event', event: 'resilience', mode: 'unrationed' }],
-	},
+		[{ t: 'event', event: 'antidote', mode: 'unrationed' }],
+	),
+	sealed(
+		pkg(8),
+		'Utopia',
+		[region('utopia', ['shanghai', 'utopia', 'land']), { t: 'gather', cards: 4 }, ...opens('61')],
+		[{ t: 'event', event: 'resilience', mode: 'unrationed' }],
+	),
+
+	sealed(door('A'), 'Forsaken cities', [{ t: 'rule', rule: 'forsaken' }, ...opens('12', '50')]),
+	sealed(door('D'), 'Hollow Men at setup', [{ t: 'rule', rule: 'hollowSetup' }]),
+	sealed(door('E'), 'More Epidemics', [{ t: 'rule', rule: 'epidemicScaling' }]),
+	sealed(door('F'), 'Infested cities'),
+	sealed(door('J'), 'Establish Supply Line', [{ t: 'action', action: 'establishLine' }]),
+	sealed(door('K'), 'Chart Sea Lane', [{ t: 'action', action: 'chartLane' }]),
+	sealed(door('L'), 'Search', [{ t: 'action', action: 'search' }]),
+	sealed(door('M'), 'Monitor', [{ t: 'action', action: 'monitor' }]),
+	sealed(door('P'), 'Broadcast Misinformation', [{ t: 'action', action: 'broadcast' }]),
+	sealed(door('Q'), 'Self-Infect', [{ t: 'rule', rule: 'carrier' }]),
+	sealed(door('R'), 'Epidemics strike storage', [{ t: 'rule', rule: 'epidemicFromStorage' }]),
+	sealed(door('U'), 'Out of Hollow Men'),
+	aid('Y', 'Hollow Men setup marker'),
+	aid('Z', 'Summit'),
+
+	sealed(door('11'), 'Indian Ocean haven reached', [{ t: 'stockpileBonus', amount: 15 }]),
+	aid('12', 'Forsaken cities legend'),
+	aid('13', 'Lab breakthroughs'),
+	aid('14', 'Infested cities legend'),
+	sealed(door('17'), 'The Hollow Men defect', [
+		...opens('58'),
+		{ t: 'ability', ability: 'saboteur' },
+		{ t: 'ability', ability: 'soldier' },
+	]),
+	sealed(door('18'), 'The Immunologist', [{ t: 'job', job: 'immunologist', home: city('haven-south-atlantic') }]),
+	sealed(door('19'), 'Topaz lab found', [
+		region('new-zealand', ['haven-coral-sea', 'wellington', 'sea']),
+		{ t: 'lab', city: city('wellington') },
+		{ t: 'rule', rule: 'topazShield' },
+		...opens('41', '61', '13', '30'),
+	]),
+	sealed(door('20'), 'Opal lab found', [{ t: 'lab', city: city('buenos-aires') }, ...opens('18', '61', '30', '13')]),
+	sealed(door('21'), 'Frankfurt lost', [{ t: 'forsake', city: city('frankfurt') }]),
+	sealed(door('22'), 'Pearl lab reached', [{ t: 'lab', city: city('lake-baikal') }, ...opens('Q', '38', '27', '32')]),
+	aid('23', 'Supply line reference'),
+	aid('24', 'Sea lane reference'),
+	aid('25', 'Monitor reference'),
+	aid('26', 'Summit'),
+	aid('27', 'Carrier stickers'),
+	sealed(door('28'), 'New abilities'),
+	sealed(door('29'), 'New abilities', [
+		{ t: 'ability', ability: 'navigator' },
+		{ t: 'ability', ability: 'investigator' },
+		{ t: 'ability', ability: 'surveyor' },
+	]),
+	aid('30', 'Lab markers'),
+	sealed(door('31'), 'New abilities', [
+		{ t: 'ability', ability: 'lookout' },
+		{ t: 'ability', ability: 'scout' },
+		{ t: 'ability', ability: 'smuggler' },
+	]),
+	aid('32', 'Carrier stickers'),
+	sealed(door('33'), 'More Infection card improvements'),
+	sealed(door('34'), 'Permanent supply centers', [{ t: 'permanentStructure', structure: 'center', copies: 6 }]),
+	sealed(door('35'), 'Signals triangulated', [{ t: 'frequencyHint' }]),
+	sealed(door('36'), 'More permanent supply centers'),
+	aid('37', 'Broadcast reference'),
+	aid('38', 'Self-Infect reference'),
+	aid('39', 'Search reference'),
+	aid('40', 'Summit'),
+	sealed(door('41'), 'Vector Control', [{ t: 'job', job: 'vectorControl', home: city('haven-coral-sea') }]),
+	sealed(door('42'), 'Broken Link', [{ t: 'infectionImprovement', improvement: 'cordon', copies: 2 }]),
+	sealed(door('43'), 'Decryption Key', [{ t: 'cityImprovement', improvement: 'wild' }]),
+	sealed(door('44'), 'The Sanitation Officer', [
+		{ t: 'job', job: 'sanitationOfficer', home: city('haven-mediterranean') },
+	]),
+	sealed(door('45'), 'Local Operatives', [{ t: 'cityImprovement', improvement: 'redWild' }]),
+	sealed(door('46'), 'Jade lab found', [
+		{ t: 'lab', city: city('johannesburg') },
+		{ t: 'job', job: 'scientist', home: city('haven-south-atlantic') },
+		{ t: 'rule', rule: 'gentleEpidemic' },
+	]),
+	sealed(door('47'), 'New scars', [
+		{ t: 'scar', scar: 'laneExtraCube' },
+		{ t: 'scar', scar: 'portBound' },
+		{ t: 'scar', scar: 'wasteful' },
+	]),
+	sealed(door('48'), 'More scars'),
+	sealed(door('49'), 'The Captain', [{ t: 'job', job: 'captain', home: city('haven-north-atlantic') }]),
+	sealed(door('50'), 'Infestation', [...opens('F', '14')]),
+	sealed(door('51'), 'Wellington'),
+	sealed(door('52'), 'A route into East Asia', [{ t: 'route', route: 'hidden:east-asia' }]),
+	sealed(door('53'), 'The way east is unknown'),
+	aid('54', 'Summit'),
+	aid('55', 'Epidemic reference'),
+	sealed(door('56'), 'North East Asia'),
+	sealed(door('57'), 'Africa map', [region('africa', ['kinshasa', 'lagos', 'land'])]),
+	sealed(door('58'), 'A gap in the wall'),
+	sealed(door('59'), 'Coral Sea haven', [
+		{ t: 'haven', city: city('haven-coral-sea') },
+		{ t: 'region', region: 'coral-sea' as RegionId, connect: [edge('jakarta', 'haven-coral-sea', 'sea')] },
+	]),
+	sealed(door('60'), 'Eastern Pacific haven', [
+		{ t: 'haven', city: city('haven-eastern-pacific') },
+		{ t: 'edge', edge: edge('lima', 'haven-eastern-pacific', 'sea') },
+	]),
+	sealed(door('61'), 'Lake Baikal', [{ t: 'haven', city: city('lake-baikal') }]),
+	sealed(door('62'), 'Middle East map', [region('middle-east', ['baghdad', 'cairo', 'land'])]),
+	sealed(door('63'), 'South East Asia map', [region('east-asia', ['jakarta', 'kolkata', 'sea'])]),
+	sealed(door('64'), 'Europe map', [region('europe', ['paris', 'london', 'land'])]),
+	sealed(door('65'), 'Indian Ocean haven', [{ t: 'haven', city: city('haven-indian-ocean') }]),
+	sealed(door('66'), 'North America map', [region('north-america', ['chicago', 'washington', 'land'])]),
+	sealed(door('67'), 'South America map', [region('south-america', ['buenos-aires', 'sao-paulo', 'sea'])]),
 ];
 
-const perimeter = (id: string, penalty?: Unlock[]): Unlock => ({
+const perimeter = (seal: Seal, penalty?: Unlock[]): Unlock => ({
 	t: 'perimeter',
-	bundle: bundleId(id),
+	seal,
 	...(penalty ? { penalty } : {}),
 });
 
@@ -346,15 +357,18 @@ const legacyDeck: LegacyCardDef[] = [
 		1,
 		'pause',
 		'February',
-		'Perimeter report on North America. New objectives: recon a new area, connect 2 new cities.',
-		[perimeter('north-america'), { t: 'objectives', remove: ['reconRegion'], add: ['reconNewArea', 'connectCities'] }],
+		'Perimeter report on North America. New objectives: recon a new area, connect 2 new cities. A turning point watches for four games lost in a row.',
+		[
+			perimeter(pkg(1)),
+			{ t: 'objectives', remove: ['reconRegion'], add: ['reconNewArea', 'connectCities'] },
+			{ t: 'turningPoint', id: 'losingStreak' },
+		],
 	),
 	card(2, 2, 'stop', 'Putting down roots', 'Supply centers can be made permanent. Three new Rationed Events.', [
-		{ t: 'permanentStructure', structure: 'center', copies: 6 },
+		...opens('34'),
 		{ t: 'event', event: 'cache', mode: 'rationed' },
 		{ t: 'event', event: 'encore', mode: 'rationed' },
 		{ t: 'event', event: 'secondWind', mode: 'rationed' },
-		{ t: 'turningPoint', id: 'losingStreak' },
 	]),
 	card(
 		3,
@@ -367,104 +381,77 @@ const legacyDeck: LegacyCardDef[] = [
 			{ t: 'objectives', add: ['searches', 'lostHaven'] },
 		],
 	),
-	{
-		...card(
-			3,
-			2,
-			'stop',
-			'Stretched too thin',
-			'Chart Sea Lane is available. The epidemic count now grows with the Player deck.',
-			[
-				{ t: 'action', action: 'chartLane' },
-				{ t: 'rule', rule: 'epidemicScaling' },
-			],
-		),
-		doors: ['K', '24', '47', 'E'],
-	},
-	card(4, 1, 'pause', 'April', 'Perimeter report on South America.', [perimeter('south-america')]),
-	{
-		...card(4, 2, 'stop', 'Rebuilding', 'A new Infection card improvement is for sale.', [
-			{ t: 'infectionImprovement', improvement: 'cordon', copies: 2 },
-		]),
-		doors: ['42'],
-	},
-	card(5, 1, 'pause', 'May', 'Perimeter report on the eastern Pacific.', [perimeter('find-eastern-pacific')]),
-	card(5, 2, 'stop', 'Experience', 'New character abilities are for sale.', [
-		{ t: 'ability', ability: 'lookout' },
-		{ t: 'ability', ability: 'scout' },
-		{ t: 'ability', ability: 'smuggler' },
-	]),
+	card(
+		3,
+		2,
+		'stop',
+		'Stretched too thin',
+		'Chart Sea Lane is available. The epidemic count now grows with the Player deck. New scars.',
+		opens('K', '24', '47', 'E'),
+	),
+	card(4, 1, 'pause', 'April', 'Perimeter report on South America.', [perimeter(pkg(5))]),
+	card(4, 2, 'stop', 'Rebuilding', 'A new Infection card improvement is for sale.', opens('42')),
+	card(5, 1, 'pause', 'May', 'Perimeter report on the eastern Pacific.', [perimeter(door('60'))]),
+	card(
+		5,
+		2,
+		'stop',
+		'Experience',
+		'New character abilities are for sale. More supply centers can be made permanent.',
+		opens('31', '36'),
+	),
 	card(6, 1, 'pause', 'June', 'Perimeter report on Europe. If it was never reconned, Frankfurt is lost.', [
-		perimeter('europe', [{ t: 'forsake', city: city('frankfurt') }]),
+		perimeter(pkg(4), opens('21')),
 	]),
-	card(6, 2, 'stop', 'New arrivals', 'Two new jobs can be taken by a new character. Two new Rationed Events.', [
-		{ t: 'job', job: 'captain', home: city('haven-north-atlantic') },
-		{ t: 'job', job: 'sanitationOfficer', home: city('haven-mediterranean') },
+	card(6, 2, 'stop', 'New arrivals', 'Two new characters join. Two new Rationed Events.', [
+		...opens('44', '49'),
 		{ t: 'event', event: 'massInoculation', mode: 'rationed' },
 		{ t: 'event', event: 'openWaters', mode: 'rationed' },
 	]),
-	card(7, 1, 'pause', 'July', 'Perimeter report on Africa. New objective: towers in 3 cities of different colours.', [
-		perimeter('africa'),
+	card(7, 1, 'stop', 'July', 'Perimeter report on Africa. New objective: towers in 3 cities of different colours.', [
+		perimeter(pkg(7)),
 		{ t: 'objectives', add: ['triangulate'] },
 	]),
-	card(7, 2, 'stop', 'Listening', 'Nothing new this month.', []),
-	{
-		...card(
-			8,
-			1,
-			'pause',
-			'August',
-			'Perimeter report on the Middle East. Monitor is available. Spend up to 2 free units on abilities now, during setup. What is not spent then can still be spent at this game end.',
-			[perimeter('middle-east'), { t: 'action', action: 'monitor' }, { t: 'freeAbilityUnits', amount: 2 }],
-		),
-		doors: ['M'],
-	},
-	card(8, 2, 'stop', 'Hard lessons', 'New abilities.', [
-		{ t: 'ability', ability: 'surveyor' },
-		{ t: 'ability', ability: 'navigator' },
-		{ t: 'ability', ability: 'investigator' },
+	card(
+		8,
+		1,
+		'pause',
+		'August',
+		'Perimeter report on the Middle East. Monitor is available. Spend up to 3 free units on abilities now, before the supplies go out.',
+		[perimeter(pkg(2)), { t: 'freeAbilityUnits', amount: 3 }, ...opens('M', '25')],
+	),
+	card(8, 2, 'stop', 'Hard lessons', 'New abilities and new scars.', opens('29', '48')),
+	card(
+		9,
+		1,
+		'pause',
+		'September',
+		'Recon East Asia is mandatory. Epidemics now strike stored cards first. The last 3 setup infections place Hollow Men.',
+		[
+			{ t: 'objectives', remove: ['reconNewArea'], add: ['reconEastAsia'] },
+			perimeter(door('65')),
+			...opens('R', '55', 'D', 'Y', 'U'),
+		],
+	),
+	card(9, 2, 'stop', 'Closing in', 'More Infection card improvements. A new Rationed Event.', [
+		...opens('33'),
+		{ t: 'event', event: 'scavenge', mode: 'rationed' },
 	]),
-	{
-		...card(
-			9,
-			1,
-			'pause',
-			'September',
-			'Recon East Asia is mandatory. Epidemics now strike stored cards first. The last 3 setup infections place Hollow Men.',
-			[
-				{ t: 'objectives', remove: ['reconNewArea'], add: ['reconEastAsia'] },
-				perimeter('find-indian-ocean', [open('arrive-indian-ocean')]),
-				{ t: 'rule', rule: 'epidemicFromStorage' },
-				{ t: 'rule', rule: 'hollowSetup' },
-				{ t: 'event', event: 'scavenge', mode: 'rationed' },
-			],
-		),
-		doors: ['R', 'D', 'U', '33'],
-	},
-	card(9, 2, 'stop', 'Closing in', 'Nothing new this month.', []),
-	{
-		...card(
-			10,
-			1,
-			'pause',
-			'October',
-			'Perimeter report on East Asia. Get 3 Hollow Men into havens. Broadcast Misinformation is available. Shelters can be made permanent.',
-			[
-				perimeter('east-asia', [{ t: 'owedScar' }]),
-				{
-					t: 'objectives',
-					remove: ['reconEastAsia', 'connectCities', 'searches', 'lostHaven', 'triangulate'],
-					add: ['defect'],
-				},
-				{ t: 'required', count: 2 },
-				{ t: 'action', action: 'broadcast' },
-				{ t: 'permanentStructure', structure: 'shelter', copies: 5 },
-			],
-		),
-		doors: ['P', '37'],
-	},
-	card(10, 2, 'stop', 'A gap in the wall', 'Nothing new this month.', []),
-	card(11, 1, 'pause', 'November', 'Complete the Plan: four recons at Shanghai.', [
+	card(
+		10,
+		1,
+		'pause',
+		'October',
+		'Perimeter report on East Asia. Get 3 Hollow Men into havens. Broadcast Misinformation is available.',
+		[
+			perimeter(pkg(3), [{ t: 'owedScar' }]),
+			{ t: 'objectives', remove: ['reconEastAsia', 'connectCities', 'searches'], add: ['defect'] },
+			{ t: 'required', count: 2 },
+			...opens('P', '37'),
+		],
+	),
+	card(10, 2, 'stop', 'Know your enemy', 'New abilities and card improvements.', opens('28', '45')),
+	card(11, 1, 'stop', 'November', 'Complete the Plan: four recons at Shanghai.', [
 		{ t: 'objectives', remove: ['buildCenters', 'defect'], add: ['plan'] },
 		{ t: 'required', count: 1 },
 		{ t: 'route', route: 'hidden:plan-red' },
@@ -472,21 +459,13 @@ const legacyDeck: LegacyCardDef[] = [
 		{ t: 'route', route: 'hidden:plan-yellow' },
 		{ t: 'route', route: 'hidden:plan-blue' },
 	]),
-	card(11, 2, 'stop', 'Almost there', 'Nothing new this month.', []),
 	card(
 		12,
 		1,
 		'pause',
 		'December',
 		'Deliver the sample from Lake Baikal to a supply center in Johannesburg. A character must infect themself to carry it.',
-		[
-			perimeter('utopia'),
-			{ t: 'objectives', remove: ['plan'], add: ['deliverSample'] },
-			{ t: 'required', count: 1 },
-			{ t: 'rule', rule: 'carrier' },
-			{ t: 'haven', city: city('lake-baikal') },
-			{ t: 'assemble', cards: 2 },
-		],
+		[perimeter(pkg(8)), { t: 'objectives', remove: ['plan'], add: ['deliverSample'] }, { t: 'required', count: 1 }],
 	),
 	card(12, 2, 'stop', 'The final reckoning', 'The campaign is scored.', []),
 ];
@@ -884,7 +863,8 @@ export const pack: ContentPack = {
 			target: 3,
 			mandatory: false,
 			carriesOver: false,
-			reward: bundleId('signal-hint'),
+			reward: door('35'),
+			destroyOnComplete: true,
 		},
 		{
 			id: 'reconEastAsia',
@@ -901,7 +881,7 @@ export const pack: ContentPack = {
 			target: 3,
 			mandatory: true,
 			carriesOver: true,
-			reward: bundleId('defection'),
+			reward: door('17'),
 		},
 		{
 			id: 'plan',
@@ -911,7 +891,7 @@ export const pack: ContentPack = {
 			mandatory: true,
 			carriesOver: true,
 			stepsCarry: true,
-			reward: bundleId('utopia'),
+			reward: pkg(8),
 		},
 		{
 			id: 'deliverSample',
@@ -922,20 +902,20 @@ export const pack: ContentPack = {
 			carriesOver: false,
 		},
 	],
-	bundles,
+	seals,
 	legacyDeck,
 	dossier,
 	frequencies: [
 		{ take: 1 },
 		{ take: 1 },
-		{ take: 2 },
-		{ bundle: bundleId('frequency-route') },
-		{ bundle: bundleId('frequency-design') },
 		{ take: 1 },
+		{ seal: door('52') },
 		{ take: 2 },
-		null,
 		{ take: 1 },
-		{ bundle: bundleId('frequency-training') },
+		{ take: 1 },
+		{ take: 1 },
+		{ take: 1 },
+		{ seal: door('43') },
 	],
 	startingEvents: ['airlift', 'quietNight', 'resilience', 'handout'],
 	startingAbilities: [
@@ -945,11 +925,20 @@ export const pack: ContentPack = {
 		'courier',
 		'broker',
 		'supplier',
-		'facilitator',
 		'runner',
-		'foreman',
-		'outrider',
 		'coordinator',
+	],
+	// Package 1 and doors 47 and 48 bring the rest.
+	startingScars: [
+		'reconExtraCard',
+		'smallHand',
+		'oddHand',
+		'rattled',
+		'plagueShy',
+		'haunted',
+		'grasping',
+		'buildExtraCard',
+		'wary',
 	],
 	sampleFrom: city('lake-baikal'),
 	sampleTo: city('johannesburg'),
@@ -1001,11 +990,13 @@ export const pack: ContentPack = {
 	},
 };
 
-for (const holder of [...bundles, ...legacyDeck]) {
-	const where = 'name' in holder ? holder.name : holder.id;
-	for (const door of holder.doors ?? [])
-		if (!dossier.sheets.some(sheet => sheet.includes(door)))
-			throw new Error(`${where} opens door ${door}, on no sheet`);
-	if ('package' in holder && holder.package && !dossier.packages.includes(holder.package))
-		throw new Error(`${where} opens package ${holder.package}, not in the box`);
-}
+// Every package and door in the box has its contents, and every opening names one that exists.
+const contents = new Set(seals.map(def => sealKey(def.seal)));
+for (const id of dossier.packages) if (!contents.has(`package:${id}`)) throw new Error(`Package ${id} holds nothing`);
+for (const id of dossier.sheets.flat()) if (!contents.has(`door:${id}`)) throw new Error(`Door ${id} holds nothing`);
+for (const unlock of [...seals, ...legacyDeck].flatMap(holder => [
+	...holder.unlocks,
+	...('reward' in holder ? (holder.reward ?? []) : []),
+]))
+	if ((unlock.t === 'open' || unlock.t === 'perimeter') && !contents.has(sealKey(unlock.seal)))
+		throw new Error(`An opening names ${sealKey(unlock.seal)}, which is not in the box`);

@@ -1,5 +1,5 @@
-import type { BundleId, CityId, RegionId } from '../ids';
-import type { CityDef, Color, EdgeDef, EdgeKind, RegionDef } from './types';
+import type { CityId, RegionId } from '../ids';
+import type { CityDef, Color, EdgeDef, EdgeKind, RegionDef, Seal } from './types';
 
 type RegionRow = [id: string, name: string, revealed?: boolean];
 
@@ -101,10 +101,11 @@ const cityRows: Record<string, CityRow[]> = {
 	],
 };
 
-const arrivals: Record<string, string> = {
-	'haven-eastern-pacific': 'arrive-eastern-pacific',
-	'haven-indian-ocean': 'arrive-indian-ocean',
-	'lake-baikal': 'arrive-pearl',
+/** What the first pawn to arrive opens. */
+const arrivals: Record<string, Seal> = {
+	'haven-eastern-pacific': { t: 'package', id: 6 },
+	'haven-indian-ocean': { t: 'door', id: '11' },
+	'lake-baikal': { t: 'door', id: '22' },
 };
 
 export const regions: RegionDef[] = regionRows.map(([id, name, revealed = false]) => ({
@@ -135,7 +136,7 @@ export const cities: CityDef[] = Object.entries(cityRows).flatMap(([region, rows
 		startsOnGrid: flags.includes('g'),
 		...(flags.includes('l') ? { lost: true } : {}),
 		...(flags.includes('i') ? { startsInfested: true } : {}),
-		...(arrivals[id] ? { arrival: arrivals[id] as BundleId } : {}),
+		...(arrivals[id] ? { arrival: arrivals[id] } : {}),
 		...(groundWeights[id] ? { groundWeight: groundWeights[id] } : {}),
 	})),
 );

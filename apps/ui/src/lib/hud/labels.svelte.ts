@@ -1,4 +1,4 @@
-import { characterAt, cityDef, handLimit, has, pack, routeCost } from '@repo/game';
+import { characterAt, cityDef, handLimit, has, pack, routeCost, sealDef } from '@repo/game';
 import type { Action, CardId, CityId, Decide, Decision, LogEntry, Play, Purchase, SeatId, World } from '@repo/game';
 import { CITY_COLOR } from '#lib/board/CityMarker.svelte';
 import { cardColor } from './PlayerCard.svelte';
@@ -268,7 +268,7 @@ export function actionDetail(world: World, action: Action): Rich {
 			];
 		case 'recon': {
 			const route = pack.reconRoutes.find(candidate => candidate.id === action.route)!;
-			return [`${pack.bundles.find(bundle => bundle.id === route.opens)!.name}: `, ...cardList(world, action.cards)];
+			return [`${route.opens ? sealDef(route.opens).name : 'The Plan'}: `, ...cardList(world, action.cards)];
 		}
 		case 'search': {
 			const card = world.campaign.playerCards[action.card];

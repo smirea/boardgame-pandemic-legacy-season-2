@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { dossierView } from '@repo/game';
-	import type { Campaign } from '@repo/game';
+	import type { Campaign, DossierSlot } from '@repo/game';
 	import Crate from './Crate.svelte';
 	import DossierDoor from './DossierDoor.svelte';
 
@@ -14,10 +14,19 @@
 	const openDoors = $derived(doors.filter(door => door.open).length);
 	const openPackages = $derived(view.packages.filter(slot => slot.open).length);
 
-	/** What the pointer rests on, read out under the sheets. */
-	let pointed = $state<string | null>(null);
-	const describe = (kind: 'Package' | 'Door', slot: { id: string | number; open: boolean; opened: string | null }) =>
-		`${kind} ${slot.id}: ${slot.open ? (slot.opened ?? 'opened') : 'sealed'}`;
+	type Read = { kind: 'Package' | 'Door'; slot: DossierSlot<number | string> };
+	/** What the pointer rests on, or else what was last clicked, read out in full under the sheets. */
+	let pointed = $state<Read | null>(null);
+	let chosen = $state<Read | null>(null);
+	const reading = $derived(pointed ?? chosen);
+	const describe = (kind: Read['kind'], slot: Read['slot']) =>
+		`${kind} ${slot.id}: ${slot.open ? (slot.name ?? 'opened') : 'sealed'}`;
+	const look = (kind: Read['kind'], slot: Read['slot']) => ({
+		onpointerenter: () => (pointed = { kind, slot }),
+		onpointerleave: () => (pointed = null),
+		onfocus: () => (chosen = { kind, slot }),
+		onclick: () => (chosen = { kind, slot }),
+	});
 </script>
 
 <svelte:window onkeydown={event => event.key === 'Escape' && onclose()} />
@@ -38,15 +47,11 @@
 	<h3>Packages</h3>
 	<ol class="packages" {@attach feedback('Packages', () => ({ open: openPackages }))}>
 		{#each view.packages as slot (slot.id)}
-			<li
-				class="package"
-				class:open={slot.open}
-				aria-label={describe('Package', slot)}
-				onpointerenter={() => (pointed = describe('Package', slot))}
-				onpointerleave={() => (pointed = null)}
-			>
-				<span class="crate"><Crate id={slot.id} open={slot.open} /></span>
-				<span class="caption">{slot.open ? (slot.opened ?? 'Opened') : 'Sealed'}</span>
+			<li class="package" class:open={slot.open}>
+				<button aria-label={describe('Package', slot)} {...look('Package', slot)}>
+					<span class="crate"><Crate id={slot.id} open={slot.open} /></span>
+					<span class="caption">{slot.open ? slot.name : 'Sealed'}</span>
+				</button>
 			</li>
 		{/each}
 	</ol>
@@ -63,12 +68,10 @@
 				<span class="tab">Sheet {index + 1}</span>
 				<ol class="doors" aria-label={`Sheet ${index + 1}`}>
 					{#each sheet as door (door.id)}
-						<li
-							aria-label={describe('Door', door)}
-							onpointerenter={() => (pointed = describe('Door', door))}
-							onpointerleave={() => (pointed = null)}
-						>
-							<DossierDoor id={door.id} open={door.open} />
+						<li>
+							<button aria-label={describe('Door', door)} {...look('Door', door)}>
+								<DossierDoor id={door.id} open={door.open} />
+							</button>
 						</li>
 					{/each}
 				</ol>
@@ -77,9 +80,25 @@
 		{/each}
 	</ol>
 
-	<p class="pointed" aria-live="polite">
-		{pointed ?? 'Rest the pointer on a package or a door to see what it opened.'}
-	</p>
+	<div class="reading" aria-live="polite" {@attach feedback('Box reading', () => reading)}>
+		{#if !reading}
+			<p class="hint">Point at a package or a door, or click one, to read what it held.</p>
+		{:else if !reading.slot.open}
+			<p><b>{reading.kind} {reading.slot.id}</b> is still sealed.</p>
+		{:else}
+			<p>
+				<b>{reading.kind} {reading.slot.id}: {reading.slot.name}</b>
+				{#if reading.slot.forced}<span class="forced">forced open by a perimeter report</span>{/if}
+			</p>
+			{#if reading.slot.contents.length}
+				<ul>
+					{#each reading.slot.contents as line, index (index)}<li>{line}</li>{/each}
+				</ul>
+			{:else}
+				<p class="hint">A reference for the board or the player aid, with no rule of its own.</p>
+			{/if}
+		{/if}
+	</div>
 </section>
 
 <style>
@@ -217,9 +236,43 @@
 		color: rgb(60 40 10 / 0.7);
 	}
 
-	.pointed {
-		min-height: 1.3rem;
-		margin: 0.9rem 0 0;
+	button {
+		display: block;
+		width: 100%;
+		padding: 0;
+		border: 0;
+		background: none;
+		color: inherit;
+		font: inherit;
+		cursor: pointer;
+	}
+
+	.reading {
+		height: 7.5rem;
+		margin-top: 0.9rem;
+		padding: 0.6rem 0.8rem;
+		overflow: auto;
+		border-top: 1px solid var(--slip-line);
+		font-size: 0.9rem;
+		line-height: 1.35;
+	}
+
+	.reading p {
+		margin: 0 0 0.3rem;
+	}
+
+	.reading ul {
+		margin: 0;
+		padding-left: 1.1rem;
+	}
+
+	.hint,
+	.forced {
 		color: var(--paper-muted);
+	}
+
+	.forced {
+		margin-left: 0.5rem;
+		font-style: italic;
 	}
 </style>

@@ -1,5 +1,6 @@
 import { pack } from './content/pack';
-import type { ActionId, RuleId, Unlock } from './content/types';
+import type { ActionId, RuleId, Seal, Unlock } from './content/types';
+import { sealKey } from './content/types';
 import type { BriefingEntry, BriefingSource, Campaign } from './state';
 
 /** One line on what each unlockable action does, as a briefing announces it under its New actions heading. */
@@ -44,6 +45,7 @@ const HEADING = {
 	rule: 'New rules',
 	event: 'New Event cards',
 	ability: 'New abilities for sale',
+	scar: 'New scars',
 	cityImprovement: 'New City card improvements for sale',
 	infectionImprovement: 'New Infection card improvements for sale',
 	permanentStructure: 'New at game end',
@@ -86,23 +88,59 @@ export function briefingSections(briefing: BriefingEntry[]): BriefingSection[] {
 	return sections;
 }
 
-/** One thing opened and what came out of it, the unit the table unpacks one at a time. */
+/**
+ * One thing opened and what came out of it, the unit the table unpacks one at a time. A door that a Legacy card or a
+ * package's report opens is unpacked with it, so `seals` lists the package or door first and then those doors.
+ */
 export type Opening = {
 	title: string;
 	text: string | null;
 	from: BriefingSource;
+	seals: Seal[];
 	items: { unlock: BriefedUnlock; text: string }[];
 };
 
-/** A briefing split into what was opened, in the order it was opened. Unlocks before any card belong to the month's setup. */
+const opensFrom = (unlocks: Unlock[]) => unlocks.flatMap(unlock => (unlock.t === 'open' ? [sealKey(unlock.seal)] : []));
+function opensOf(from: BriefingSource): string[] {
+	if (from.t === 'legacy') return opensFrom(pack.legacyDeck.find(card => card.id === from.card)?.unlocks ?? []);
+	if (from.t === 'seal') {
+		const def = pack.seals.find(candidate => sealKey(candidate.seal) === sealKey(from.seal));
+		return opensFrom(def?.unlocks ?? []);
+	}
+	return [];
+}
+
+/** A briefing split into what was opened, in order. Unlocks before any card belong to the month's setup. */
 export function openings(briefing: BriefingEntry[]): Opening[] {
 	const result: Opening[] = [];
+	let opens: string[] = [];
 	for (const entry of briefing) {
-		if (entry.t === 'card') result.push({ title: entry.title, text: entry.text, from: entry.from, items: [] });
-		else {
-			if (!result.length) result.push({ title: 'Setup', text: null, from: { t: 'legacy', doors: [] }, items: [] });
-			result.at(-1)!.items.push({ unlock: entry.unlock, text: entry.text });
+		const current = result.at(-1);
+		if (entry.t === 'unlock') {
+			if (current) current.items.push({ unlock: entry.unlock, text: entry.text });
+			else
+				result.push({
+					title: 'Setup',
+					text: null,
+					from: { t: 'legacy', card: '' },
+					seals: [],
+					items: [{ unlock: entry.unlock, text: entry.text }],
+				});
+			continue;
 		}
+		if (current && entry.from.t === 'seal' && opens.includes(sealKey(entry.from.seal))) {
+			current.seals.push(entry.from.seal);
+			opens.push(...opensOf(entry.from));
+			continue;
+		}
+		result.push({
+			title: entry.title,
+			text: entry.text,
+			from: entry.from,
+			seals: entry.from.t === 'seal' ? [entry.from.seal] : [],
+			items: [],
+		});
+		opens = opensOf(entry.from);
 	}
 	return result;
 }
@@ -119,6 +157,11 @@ export function briefUnlock(campaign: Campaign, unlock: Unlock) {
 	if (text !== null) campaign.briefing.push({ t: 'unlock', unlock: unlock as BriefedUnlock, text });
 }
 
+/** What an unlock means, worded as a briefing words it, or null for one the table does not hear about. */
+export function unlockText(campaign: Campaign, unlock: Unlock): string | null {
+	return unlock.t in HEADING ? unlockLine(campaign, unlock as BriefedUnlock) : null;
+}
+
 function unlockLine(campaign: Campaign, unlock: BriefedUnlock): string | null {
 	switch (unlock.t) {
 		case 'event': {
@@ -131,10 +174,13 @@ function unlockLine(campaign: Campaign, unlock: BriefedUnlock): string | null {
 					? 'It joins the Rationed Events the group picks from at each setup, starting next game.'
 					: 'It is in the Player deck from the next game on.';
 			const event = pack.events.find(entry => entry.id === unlock.event)!;
-			return `${event.name}, ${owned ? `another copy of a ${mode} Event` : `a ${mode} Event`}. ${where} When played it reads: ${event.text}`;
+			const article = mode === 'Unrationed' ? 'an' : 'a';
+			return `${event.name}, ${owned ? `another copy of ${article} ${mode} Event` : `${article} ${mode} Event`}. ${where} When played it reads: ${event.text}`;
 		}
 		case 'ability':
 			return named(pack.abilities, unlock.ability);
+		case 'scar':
+			return `${named(pack.scars, unlock.scar)} A character can be given this scar from now on.`;
 		case 'cityImprovement':
 			return named(pack.cityImprovements, unlock.improvement);
 		case 'infectionImprovement':
@@ -168,10 +214,10 @@ function unlockLine(campaign: Campaign, unlock: BriefedUnlock): string | null {
 			return `At ${city}, discard ${route.count} ${route.color} cards${route.unique ? ' of different cities' : ''}${route.needsCenter ? '. The city needs a supply center' : ''}.`;
 		}
 		case 'haven': {
-			const reached = pack.bundles.some(
-				bundle =>
-					bundle.unlocks.includes(unlock) &&
-					bundle.unlocks.some(
+			const reached = pack.seals.some(
+				def =>
+					def.unlocks.includes(unlock) &&
+					def.unlocks.some(
 						other =>
 							other.t === 'region' && other.connect?.some(edge => edge.a === unlock.city || edge.b === unlock.city),
 					),
@@ -182,7 +228,7 @@ function unlockLine(campaign: Campaign, unlock: BriefedUnlock): string | null {
 				: `${name} is now on the map. It is not on the grid until a line reaches it.`;
 		}
 		case 'frequencyHint': {
-			const worth = pack.frequencies.flatMap((reward, index) => (reward && 'bundle' in reward ? [index + 1] : []));
+			const worth = pack.frequencies.flatMap((reward, index) => (reward && 'seal' in reward ? [index + 1] : []));
 			return `The bearings cross on three Monitor frequencies that open something new: ${worth.join(', ')}. The other seven only return cards.`;
 		}
 		case 'gather':

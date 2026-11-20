@@ -7,8 +7,8 @@ import { newCampaign } from './legacy';
 
 const startingEdges = pack.edges;
 /** Every sea lane the Legacy deck lays itself when a region opens, which no rule checks for crossings. */
-const deckEdges = pack.bundles.flatMap(bundle =>
-	bundle.unlocks.flatMap(unlock => (unlock.t === 'region' ? (unlock.connect ?? []) : [])),
+const deckEdges = pack.seals.flatMap(def =>
+	def.unlocks.flatMap(unlock => (unlock.t === 'region' ? (unlock.connect ?? []) : [])),
 );
 const name = (edge: EdgeDef) => `${edge.a}-${edge.b}`;
 const courseOf = (edge: EdgeDef) => routeCourse(edge.a, edge.b, edge.kind);

@@ -13,6 +13,7 @@
 		reconBoxes,
 		reject,
 		scenarios,
+		sealKey,
 		tableStart,
 	} from '@repo/game';
 	import type { Action, CardId, CityId, Command, EdgeDef, EventId, Play, SeatId } from '@repo/game';
@@ -676,7 +677,7 @@
 				setTimeout(() => turnBanner?.id === id && (turnBanner = null), 1900);
 			} else if (entry.t === 'objective') toast('Objective complete', 'good');
 			else if (entry.t === 'unlock')
-				toast(`Opened: ${pack.bundles.find(bundle => bundle.id === entry.bundle)?.name}`, 'good');
+				toast(`Opened: ${pack.seals.find(def => sealKey(def.seal) === entry.seal)?.name}`, 'good');
 			else if (entry.t === 'death')
 				toast(`${campaign.characters[entry.character]?.name} died in ${cityName(entry.at)}`, 'bad');
 			else if (entry.t === 'exposure' && entry.result === 'scar')

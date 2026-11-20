@@ -9,17 +9,21 @@ import type {
 	JobId,
 	ObjectiveId,
 	ScarId,
+	Seal,
 	StructureKind,
 	TurningPointId,
 } from './content/types';
+import { sealKey } from './content/types';
 import { gridCityCount, isForsaken } from './helpers';
-import type { BundleId, CardId, CharacterId, CityId } from './ids';
-import { newCampaign, openBundle, paddedTrack, readLegacy } from './legacy';
+import type { CardId, CharacterId, CityId } from './ids';
+import { newCampaign, openSeal, paddedTrack, readLegacy } from './legacy';
 import type { Save } from './machine';
 import type { Character, World } from './state';
 import { newTable } from './table';
 
 type Result = 'won' | 'lost';
+const pkg = (id: number): Seal => ({ t: 'package', id });
+const door = (id: DoorId): Seal => ({ t: 'door', id });
 type CityCardFact = {
 	city: string;
 	copies?: number;
@@ -61,15 +65,17 @@ const TABLE = {
 		['lost', 'won'],
 		['won'],
 	] as Result[][],
-	/** When the group opened each region and find, as our pack names them. */
+	/**
+	 * What the group opened themselves, by the month. May's perimeter report forced the eastern Pacific haven onto
+	 * the map; everything else was earned. The first forsaken city opened A at a game end, by July at the latest.
+	 */
 	openedByMonth: {
-		1: ['north-america'],
-		3: ['south-america'],
-		4: ['find-eastern-pacific'],
-		5: ['europe'],
-		6: ['africa'],
-		7: ['middle-east', 'arrive-eastern-pacific', 'forsaken', 'signal-hint'],
-	} as Partial<Record<number, string[]>>,
+		1: [pkg(1)],
+		3: [pkg(5)],
+		5: [pkg(4)],
+		6: [pkg(7)],
+		7: [pkg(2), pkg(6), door('A'), door('35')],
+	} as Partial<Record<number, Seal[]>>,
 	doors: [
 		'L',
 		'J',
@@ -440,7 +446,7 @@ export function tabletopSave(seed = 7): Save {
 		campaign.month = month;
 		campaign.attempt = 1;
 		readLegacy(world, 'setup');
-		for (const bundle of TABLE.openedByMonth[month] ?? []) openBundle(world, bundle as BundleId, false);
+		for (const seal of TABLE.openedByMonth[month] ?? []) openSeal(world, seal, false);
 		readLegacy(world, 'gameEnd', games[0] === 'won');
 		for (const [index, result] of games.entries()) {
 			campaign.results.push({
@@ -474,8 +480,11 @@ export function tabletopSave(seed = 7): Save {
 	campaign.briefing = [];
 	campaign.carriedProgress = {};
 	campaign.freeAbilityUnits = 0;
-	campaign.doors = [...TABLE.doors];
-	campaign.packages = [...TABLE.packages];
+	differs('opened packages and doors', campaign.opened, [
+		...TABLE.packages.map(id => sealKey(pkg(id))),
+		...TABLE.doors.map(id => sealKey(door(id))),
+	]);
+	differs('forced packages and doors', campaign.forced, [sealKey(door('60'))]);
 	campaign.objectives = [...TABLE.objectives];
 	campaign.turningPoints = [...TABLE.turningPoints];
 	campaign.abilitiesForSale = [...TABLE.forSale.abilities];

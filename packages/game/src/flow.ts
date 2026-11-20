@@ -2,9 +2,21 @@ import { current, isDraft } from 'immer';
 import { pack } from './content/pack';
 import type { EventId, ObjectiveId, ScarId } from './content/types';
 import { drawBottom, drawPiled, drawTop, newDeck, newPiledDeck, stackOnTop } from './decks';
-import { characterOf, cityDef, grid, has, hasRule, isForsaken, isHaven, log, neighbours, player } from './helpers';
-import type { BundleId, CardId, CharacterId, CityId, RegionId, SeatId } from './ids';
-import { openBundle } from './legacy';
+import {
+	characterOf,
+	cityDef,
+	grid,
+	has,
+	hasRule,
+	isForsaken,
+	isHaven,
+	log,
+	neighbours,
+	player,
+	reconned,
+} from './helpers';
+import type { CardId, CharacterId, CityId, RegionId, SeatId } from './ids';
+import { openSeal } from './legacy';
 import { nextInt, shuffle } from './rng';
 import type { Character, Game, GameLocation, World } from './state';
 
@@ -20,7 +32,6 @@ export function setOutcome(world: World, won: boolean, reason: string) {
 
 export const isOver = (world: World) => world.game?.outcome != null;
 
-const UTOPIA = 'utopia' as BundleId;
 const UTOPIA_REGION = 'utopia' as RegionId;
 /**
  * Recon objectives that no recon is left to complete, such as January's replayed after its region
@@ -32,7 +43,7 @@ function impossibleObjectives(campaign: World['campaign']): ObjectiveId[] {
 		.filter(objective => (campaign.carriedProgress[objective.id] ?? 0) < objective.target)
 		.filter(objective => {
 			const routes = pack.reconRoutes.filter(route => route.counts.includes(objective.id));
-			return routes.length > 0 && routes.every(route => campaign.opened.includes(route.opens));
+			return routes.length > 0 && routes.every(route => reconned(campaign, route));
 		})
 		.map(objective => objective.id);
 }
@@ -73,7 +84,7 @@ export function setProgress(world: World, id: ObjectiveId, value: number) {
 	if (game.progress[id]! < objective.target) return;
 	game.completed.push(id);
 	log(game, { t: 'objective', objective: id });
-	if (objective.reward && !campaign.opened.includes(objective.reward)) openBundle(world, objective.reward, false);
+	if (objective.reward) openSeal(world, objective.reward, false);
 	checkWin(world);
 }
 
@@ -170,7 +181,7 @@ export function setupInfection(world: World) {
 	const { campaign, game } = world as { campaign: World['campaign']; game: Game };
 	const cards = onGridCards(world);
 	// Utopia forced open at December setup arrives through the discard pile, so its cards wait for the first epidemic.
-	const forcedLate = campaign.month === 12 && campaign.attempt === 1 && campaign.forced.includes(UTOPIA);
+	const forcedLate = campaign.month === 12 && campaign.attempt === 1 && campaign.forced.includes('package:8');
 	const late = cards.infection.filter(id => {
 		const card = campaign.infectionCards[id]!;
 		return forcedLate && card.kind === 'city' && cityDef(card.city).region === UTOPIA_REGION;
@@ -330,8 +341,7 @@ export function movePawn(world: World, seat: SeatId, to: CityId, by: string): bo
 		game.pending.push({ t: 'discard', seat, count: 1 });
 	const destination = cityDef(to);
 	if (destination.kind === 'haven' && destination.lost) setProgress(world, 'lostHaven', 1);
-	if (destination.arrival && !campaign.opened.includes(destination.arrival))
-		openBundle(world, destination.arrival, false);
+	if (destination.arrival) openSeal(world, destination.arrival, false);
 	if (characterOf(world, seat).carrier && to === pack.sampleTo && game.locations[to]!.center) {
 		campaign.sampleDelivered = true;
 		setProgress(world, 'deliverSample', 1);

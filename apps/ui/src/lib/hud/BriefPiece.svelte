@@ -17,6 +17,7 @@
 	const STICKER: Partial<Record<BriefedUnlock['t'], string>> = {
 		rule: 'Rule',
 		ability: 'Ability',
+		scar: 'Scar',
 		cityImprovement: 'Upgrade',
 		infectionImprovement: 'Upgrade',
 		permanentStructure: 'Permanent',

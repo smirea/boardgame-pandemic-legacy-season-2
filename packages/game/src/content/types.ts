@@ -1,4 +1,4 @@
-import type { BundleId, CityId, RegionId } from '../ids';
+import type { CityId, RegionId } from '../ids';
 
 export type Color = 'blue' | 'yellow' | 'black' | 'red';
 export type EdgeKind = 'land' | 'sea';
@@ -22,7 +22,7 @@ export type CityDef = {
 	lost?: boolean;
 	startsInfested?: boolean;
 	/** Opened the first time a pawn arrives. */
-	arrival?: BundleId;
+	arrival?: Seal;
 	/**
 	 * How much more ground the location claims than its nearest-location share, in squared board units:
 	 * a point belongs to the location with the least squared distance minus this. Negative claims less.
@@ -39,7 +39,8 @@ export type ReconRoute = {
 	count: number;
 	/** Every discarded card must name a different city. */
 	unique: boolean;
-	opens: BundleId;
+	/** What the recon opens, or null for a step of the Plan, which only counts toward it. */
+	opens: Seal | null;
 	needsCenter: boolean;
 	/** Objectives a successful recon of this route advances. */
 	counts: ObjectiveId[];
@@ -219,7 +220,7 @@ export type ObjectiveDef = {
 	/** Each step is permanent, so partial progress carries over too. */
 	stepsCarry?: boolean;
 	/** Opened once, the first time the objective completes. */
-	reward?: BundleId;
+	reward?: Seal;
 	destroyOnComplete?: boolean;
 };
 
@@ -231,15 +232,16 @@ export type SearchResult =
 	| { t: 'quarantineCard' }
 	| { t: 'removeHollow'; amount: number }
 	| { t: 'freeEdge'; kind: EdgeKind }
-	| { t: 'discover'; bundle: BundleId }
+	/** Opens a door or package, or gives 1 action when it is already open. */
+	| { t: 'discover'; seal: Seal }
 	| { t: 'companion'; companion: CompanionId }
 	| { t: 'infest' }
 	| { t: 'nothing' };
 
 export type SearchBoxDef = { scope: 'land' | 'sea'; result: SearchResult };
 
-/** What a Monitor frequency gives: a bundle to open, or cards kept from the top of the Player discard pile. */
-export type FrequencyReward = { bundle: BundleId } | { take: number } | null;
+/** What a Monitor frequency gives: a door to open, or cards kept from the top of the Player discard pile. */
+export type FrequencyReward = { seal: Seal } | { take: number } | null;
 
 export type TurningPointId = 'firstForsaken' | 'losingStreak';
 
@@ -264,6 +266,7 @@ export type Unlock =
 	| { t: 'event'; event: EventId; mode: 'rationed' | 'unrationed' | 'permanent'; copies?: number }
 	/** Stickers: each unlock adds `copies` of one (1 when left out), and a sticker that is placed is gone. */
 	| { t: 'ability'; ability: AbilityId; copies?: number }
+	| { t: 'scar'; scar: ScarId; copies?: number }
 	| { t: 'cityImprovement'; improvement: CityImprovementId; copies?: number }
 	| { t: 'infectionImprovement'; improvement: InfectionImprovementId; copies?: number }
 	| { t: 'permanentStructure'; structure: StructureKind; copies?: number }
@@ -279,28 +282,29 @@ export type Unlock =
 	| { t: 'owedScar' }
 	/** Tells the group which Monitor frequencies open something, the reward for triangulating the signals. */
 	| { t: 'frequencyHint' }
-	| { t: 'open'; bundle: BundleId }
-	/** Forced opening: the explorer's reward is lost and the recon does not count toward an objective. */
-	| { t: 'perimeter'; bundle: BundleId; penalty?: Unlock[] };
+	/** Opens a door or package, when it is still sealed. */
+	| { t: 'open'; seal: Seal }
+	/** Forced opening, when still sealed: the explorer's reward is lost and nothing counts toward an objective. */
+	| { t: 'perimeter'; seal: Seal; penalty?: Unlock[] };
 
 /** A door in the dossier, named by the number or letter printed on it. */
 export type DoorId = string;
 
-/**
- * The physical places the original keeps its content: numbered packages, and dossier sheets of tear-off doors.
- * Each bundle and Legacy card names the ones it stands for, and opening it opens them.
- */
+/** Where the original keeps sealed content: a numbered package or a tear-off dossier door. */
+export type Seal = { t: 'package'; id: number } | { t: 'door'; id: DoorId };
+export type SealKey = `package:${number}` | `door:${string}`;
+export const sealKey = (seal: Seal): SealKey => `${seal.t}:${seal.id}` as SealKey;
+
+/** The packages and the dossier sheets, laid out as the box has them. */
 export type DossierDef = { packages: number[]; sheets: DoorId[][] };
 
-/** A package, dossier door, or reward: a named set of unlocks opened as one. */
-export type BundleDef = {
-	id: BundleId;
+/** What a package or door holds. Opening it applies its unlocks, which may open further doors. */
+export type SealDef = {
+	seal: Seal;
 	name: string;
 	unlocks: Unlock[];
-	/** Granted only when the bundle is opened by the players, not forced. */
+	/** Granted only when the players open it, not when a perimeter report forces it. */
 	reward?: Unlock[];
-	package?: number;
-	doors?: DoorId[];
 };
 
 export type LegacyCardDef = {
@@ -313,7 +317,6 @@ export type LegacyCardDef = {
 	unlocks: Unlock[];
 	/** Only applies when the month was lost or won, for cards read at game end. */
 	when?: 'won' | 'lost';
-	doors?: DoorId[];
 };
 
 export type JobDef = { id: JobId; name: string; text: string; starting: boolean };
@@ -348,7 +351,7 @@ export type ContentPack = {
 	cityImprovements: CityImprovementDef[];
 	infectionImprovements: InfectionImprovementDef[];
 	objectives: ObjectiveDef[];
-	bundles: BundleDef[];
+	seals: SealDef[];
 	legacyDeck: LegacyCardDef[];
 	dossier: DossierDef;
 	/** What each of the ten Monitor frequencies opens. */
@@ -356,6 +359,7 @@ export type ContentPack = {
 	startingEvents: EventId[];
 	/** The ability stickers in the box when the campaign begins, one of each. */
 	startingAbilities: AbilityId[];
+	startingScars: ScarId[];
 	sampleFrom: CityId;
 	sampleTo: CityId;
 	numbers: {

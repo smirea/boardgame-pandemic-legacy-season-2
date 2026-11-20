@@ -1,5 +1,19 @@
 import { pack } from './content/pack';
-import type { AbilityId, CityDef, Color, CompanionId, EdgeKind, JobId, RuleId, ScarId } from './content/types';
+import type {
+	AbilityId,
+	CityDef,
+	Color,
+	CompanionId,
+	EdgeKind,
+	JobId,
+	ReconRoute,
+	RuleId,
+	ScarId,
+	Seal,
+	SealDef,
+	Unlock,
+} from './content/types';
+import { sealKey } from './content/types';
 import type { CardId, CharacterId, CityId, RegionId, SeatId } from './ids';
 import { edgeKey } from './ids';
 import type { Campaign, Character, Game, LogInput, Player, PlayerCard, World } from './state';
@@ -13,6 +27,28 @@ export function cityDef(id: CityId): CityDef {
 }
 
 export const isHaven = (id: CityId) => cityDef(id).kind === 'haven';
+
+export function sealDef(seal: Seal): SealDef {
+	const key = sealKey(seal);
+	const def = pack.seals.find(candidate => sealKey(candidate.seal) === key);
+	if (!def) throw new Error(`nothing is behind ${key}`);
+	return def;
+}
+
+/** Everything a package or door holds, with what the doors it opens hold in turn, rewards included. */
+export function unlocksBehind(seal: Seal, seen = new Set<string>()): Unlock[] {
+	const key = sealKey(seal);
+	if (seen.has(key)) return [];
+	seen.add(key);
+	const def = sealDef(seal);
+	return [...def.unlocks, ...(def.reward ?? [])].flatMap(unlock =>
+		unlock.t === 'open' ? [unlock, ...unlocksBehind(unlock.seal, seen)] : [unlock],
+	);
+}
+
+/** Whether a recon has been done: what it opens is open, or, for a step of the Plan, the step is checked off. */
+export const reconned = (campaign: Campaign, route: ReconRoute) =>
+	route.opens ? campaign.opened.includes(sealKey(route.opens)) : campaign.planRecons.includes(route.id);
 export const hasRule = (campaign: Campaign, rule: RuleId) => campaign.rules.includes(rule);
 
 export function neighbours(campaign: Campaign, city: CityId, kind?: EdgeKind): CityId[] {

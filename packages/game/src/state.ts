@@ -5,7 +5,6 @@ import type {
 	CityImprovementId,
 	Color,
 	CompanionId,
-	DoorId,
 	ExposureBox,
 	EdgeDef,
 	EventId,
@@ -14,12 +13,14 @@ import type {
 	ObjectiveId,
 	RuleId,
 	ScarId,
+	Seal,
+	SealKey,
 	SearchResult,
 	StructureKind,
 	TurningPointId,
 } from './content/types';
 import type { PiledDeck, StratifiedDeck } from './decks';
-import type { BundleId, CardId, CharacterId, CityId, PlayerId, RegionId, SeatId } from './ids';
+import type { CardId, CharacterId, CityId, PlayerId, RegionId, SeatId } from './ids';
 import type { RngState } from './rng';
 
 export type SearchBox = { scope: 'land' | 'sea'; result: SearchResult; scratched: boolean };
@@ -88,10 +89,7 @@ export type GameResult = {
 
 /** A Legacy card or opened bundle as read, or one thing it unlocked, worded for its heading (`briefingSections`). */
 /** What a briefing card came out of: a Legacy card read, a bundle opened (with its package and doors), or a turning point. */
-export type BriefingSource =
-	| { t: 'legacy'; doors: DoorId[] }
-	| { t: 'bundle'; package: number | null; doors: DoorId[] }
-	| { t: 'turningPoint' };
+export type BriefingSource = { t: 'legacy'; card: string } | { t: 'seal'; seal: Seal } | { t: 'turningPoint' };
 
 export type BriefingEntry =
 	| { t: 'card'; title: string; text: string | null; from: BriefingSource }
@@ -111,11 +109,10 @@ export type Campaign = {
 	legacyHalt: { kind: 'pause' | 'stop'; month: number } | null;
 	/** Legacy cards revealed since the players last acknowledged, shown as a briefing. */
 	briefing: BriefingEntry[];
-	opened: BundleId[];
-	forced: BundleId[];
-	/** Dossier doors and packages opened so far, in the order they were opened. */
-	doors: DoorId[];
-	packages: number[];
+	/** Packages and dossier doors opened so far, in the order they were opened. */
+	opened: SealKey[];
+	/** The ones a perimeter report forced open. */
+	forced: SealKey[];
 	routes: string[];
 	regions: RegionId[];
 	locations: Record<CityId, CampaignLocation>;
@@ -210,7 +207,7 @@ export type LogEntry = { seq: number } & (
 	| { t: 'connected'; city: CityId }
 	| { t: 'structure'; city: CityId; structure: StructureKind }
 	| { t: 'reveal'; region: RegionId }
-	| { t: 'unlock'; bundle: BundleId; forced: boolean }
+	| { t: 'unlock'; seal: SealKey; forced: boolean }
 	| { t: 'objective'; objective: ObjectiveId }
 	| { t: 'search'; seat: SeatId; city: CityId; result: SearchResult['t'] }
 	| { t: 'note'; text: string }

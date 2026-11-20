@@ -17,14 +17,15 @@ export type { Decide, Play } from './plays';
 export type { Purchase } from './legacy';
 export type { DossierSlot, DossierView } from './dossier';
 export { dossierView } from './dossier';
-export { actionBriefs, briefingSections, openings, ruleBriefs } from './briefing';
+export { actionBriefs, briefingSections, openings, ruleBriefs, unlockText } from './briefing';
 export type { Opening } from './briefing';
 export type { BriefedUnlock, BriefingSection } from './briefing';
 export {
 	closeGame,
 	createCharacter,
 	newCampaign,
-	openBundle,
+	isOpen,
+	openSeal,
 	paddedTrack,
 	productionUnits,
 	purchaseCost,
@@ -67,9 +68,12 @@ export {
 	passage,
 	regionAt,
 	routeCourse,
+	reconned,
+	sealDef,
 	SEAT_IDS,
 	seaRoute,
 	tableSeating,
+	unlocksBehind,
 } from './helpers';
 export { freeCharacters, scarTargets } from './flow';
 export { botCommand } from './bot';

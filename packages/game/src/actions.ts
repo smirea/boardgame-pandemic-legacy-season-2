@@ -23,9 +23,10 @@ import {
 	player,
 	removeFromHand,
 	seaRoute,
+	reconned,
 } from './helpers';
 import type { CardId, CityId, SeatId } from './ids';
-import { openBundle } from './legacy';
+import { isOpen, openSeal } from './legacy';
 import type { Campaign, Game, GameLocation, Player, World } from './state';
 
 export type Action =
@@ -219,10 +220,10 @@ function resolveSearch(ctx: Ctx, result: SearchResult, card: CardId) {
 			game.pending.push({ t: 'freeEdge', seat: ctx.seat, kind: result.kind, ignoreRegions: false });
 			return;
 		case 'discover':
-			if (campaign.opened.includes(result.bundle)) {
+			if (isOpen(campaign, result.seal)) {
 				game.actionsLeft += 1;
 				log(game, { t: 'note', text: 'That lead was already followed: 1 extra action this turn' });
-			} else openBundle(ctx.world, result.bundle, false);
+			} else openSeal(ctx.world, result.seal, false);
 			return;
 		case 'companion': {
 			const searched = campaign.playerCards[card]!;
@@ -415,7 +416,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 			const route = pack.reconRoutes.find(candidate => candidate.id === routeId);
 			if (!route || !ctx.campaign.routes.includes(routeId)) return 'That recon route is not known';
 			if (ctx.campaign.month === 0) return 'Recon is not available in the prologue';
-			if (ctx.campaign.opened.includes(route.opens)) return 'Already reconned';
+			if (reconned(ctx.campaign, route)) return 'Already reconned';
 			if (route.city !== ctx.here) return AWAY_FROM_ROUTE;
 			if (route.needsCenter && !ctx.loc.center && !trait(ctx, 'scout')) return 'The city needs a supply center';
 			const needed = Math.max(
@@ -434,7 +435,8 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 			const route = pack.reconRoutes.find(candidate => candidate.id === routeId)!;
 			for (const card of cards) discardFromHand(ctx.game, ctx.seat, card);
 			const connectedBefore = ctx.game.connectedThisGame.length;
-			openBundle(ctx.world, route.opens, false);
+			if (route.opens) openSeal(ctx.world, route.opens, false);
+			else ctx.campaign.planRecons.push(route.id);
 			for (const objective of route.counts) bump(ctx.world, objective);
 			const joined = ctx.game.connectedThisGame
 				.slice(connectedBefore)
@@ -562,7 +564,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 				t: 'note',
 				text: `Monitor revealed ${names(revealed)}${keep.length ? `. ${characterOf(ctx.world, ctx.seat).name} kept ${names(keep)}` : ''}. The rest went to the discard pile. An Epidemic revealed this way has no effect`,
 			});
-			if (reward && 'bundle' in reward) openBundle(ctx.world, reward.bundle, false);
+			if (reward && 'seal' in reward) openSeal(ctx.world, reward.seal, false);
 			ctx.game.playerDiscard = ctx.game.playerDiscard.filter(id => !keep.includes(id));
 			ctx.me.hand.push(...keep);
 		},

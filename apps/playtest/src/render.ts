@@ -12,6 +12,8 @@ import {
 	neighbours,
 	pack,
 	score,
+	reconned,
+	sealKey,
 } from '@repo/game';
 import type { CardId, CityId, Decision, LogEntry, PublicState, SeatId, World } from '@repo/game';
 import type { Option, Who } from './commands.ts';
@@ -183,7 +185,7 @@ export function renderLog(world: World, entry: LogEntry): string {
 		case 'reveal':
 			return `REGION REVEALED: ${entry.region}`;
 		case 'unlock':
-			return `UNLOCKED: ${pack.bundles.find(bundle => bundle.id === entry.bundle)?.name ?? entry.bundle}${entry.forced ? ' (forced by a perimeter report)' : ''}`;
+			return `OPENED ${entry.seal}: ${pack.seals.find(def => sealKey(def.seal) === entry.seal)?.name}${entry.forced ? ' (forced by a perimeter report)' : ''}`;
 		case 'objective':
 			return `OBJECTIVE COMPLETE: ${objectiveDef(entry.objective).name}`;
 		case 'search':
@@ -450,7 +452,7 @@ export function renderBoard(world: World): string {
 				record.lab ? 'lab' : null,
 			].filter(Boolean);
 			const routes = pack.reconRoutes.filter(
-				route => route.city === city.id && campaign.routes.includes(route.id) && !campaign.opened.includes(route.opens),
+				route => route.city === city.id && campaign.routes.includes(route.id) && !reconned(campaign, route),
 			);
 			const parts = [
 				city.kind === 'haven' ? 'haven' : `${city.color} pop ${record.population}`,
@@ -556,9 +558,7 @@ export function renderCity(world: World, id: CityId): string {
 			: '',
 		`links: ${neighbours(campaign, id).join(', ') || 'none'}`,
 		...pack.reconRoutes
-			.filter(
-				route => route.city === id && campaign.routes.includes(route.id) && !campaign.opened.includes(route.opens),
-			)
+			.filter(route => route.city === id && campaign.routes.includes(route.id) && !reconned(campaign, route))
 			.map(
 				route =>
 					`RECON here: ${route.count} ${route.color} cards${route.unique ? ' of different cities' : ''}${route.needsCenter ? (location?.center ? ', and its supply center is built' : ', needs a supply center') : ''} (before any ability changes the count: see options for what you can pay)`,

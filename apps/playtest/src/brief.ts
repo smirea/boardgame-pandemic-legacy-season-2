@@ -1,6 +1,6 @@
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { pack } from '@repo/game';
+import { pack, reconned } from '@repo/game';
 import type { PublicState } from '@repo/game';
 import { untouched } from './audit.ts';
 import type { Audit } from './audit.ts';
@@ -43,9 +43,7 @@ function toTry(audit: Audit, state: PublicState): string[] {
 		lines.push(
 			`Objectives never completed: ${objectives.map(id => pack.objectives.find(objective => objective.id === id)?.name ?? id).join(', ')}.`,
 		);
-	const unopened = pack.reconRoutes.filter(
-		route => campaign.routes.includes(route.id) && !campaign.opened.includes(route.opens),
-	);
+	const unopened = pack.reconRoutes.filter(route => campaign.routes.includes(route.id) && !reconned(campaign, route));
 	if (unopened.length)
 		lines.push(
 			`Recon still open: ${unopened.map(route => `${route.city} (${route.count} ${route.color} cards)`).join(', ')}.`,

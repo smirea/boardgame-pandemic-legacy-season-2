@@ -1,4 +1,5 @@
 import { pack } from './content/pack';
+import { sealKey } from './content/types';
 import type {
 	AbilityId,
 	ActionId,
@@ -9,13 +10,14 @@ import type {
 	ObjectiveId,
 	RuleId,
 	SearchBoxDef,
+	Seal,
 	StructureKind,
 	Unlock,
 } from './content/types';
 import { briefUnlock } from './briefing';
 import { settleGrid } from './flow';
-import { cityDef, grid, gridCityCount, hasEdge, hasRule, isForsaken, log } from './helpers';
-import type { BundleId, CardId, CharacterId, CityId } from './ids';
+import { cityDef, grid, gridCityCount, hasEdge, hasRule, isForsaken, log, sealDef } from './helpers';
+import type { CardId, CharacterId, CityId } from './ids';
 import { shuffle } from './rng';
 import type { Campaign, Character, ExposureBox, World } from './state';
 
@@ -55,8 +57,6 @@ export function newCampaign(seed: number): Campaign {
 		briefing: [],
 		opened: [],
 		forced: [],
-		doors: [],
-		packages: [],
 		routes: [],
 		regions: pack.regions.filter(region => region.startsRevealed).map(region => region.id),
 		locations: {} as Campaign['locations'],
@@ -75,7 +75,7 @@ export function newCampaign(seed: number): Campaign {
 		cityImprovementsForSale: [],
 		infectionImprovementsForSale: [],
 		permanentForSale: [],
-		scars: pack.scars.filter(scar => scar.id !== 'carrier').map(scar => scar.id),
+		scars: [...pack.startingScars],
 		jobsFound: [],
 		stockpileBonus: 0,
 		freeAbilityUnits: 0,
@@ -168,23 +168,24 @@ export function createCharacter(
 	return character;
 }
 
-export function openBundle(world: World, id: BundleId, forced: boolean) {
+export const isOpen = (campaign: Campaign, seal: Seal) => campaign.opened.includes(sealKey(seal));
+
+/** Opens a package or door that is still sealed, and everything its contents open in turn. */
+export function openSeal(world: World, seal: Seal, forced: boolean) {
 	const { campaign, game } = world;
-	if (campaign.opened.includes(id)) return;
-	const bundle = pack.bundles.find(candidate => candidate.id === id);
-	if (!bundle) throw new Error(`unknown bundle ${id}`);
-	campaign.opened.push(id);
-	if (forced) campaign.forced.push(id);
-	if (bundle.package) pushUnique(campaign.packages, bundle.package);
-	for (const door of bundle.doors ?? []) pushUnique(campaign.doors, door);
-	if (game) log(game, { t: 'unlock', bundle: id, forced });
+	if (isOpen(campaign, seal)) return;
+	const def = sealDef(seal);
+	const key = sealKey(seal);
+	campaign.opened.push(key);
+	if (forced) campaign.forced.push(key);
+	if (game) log(game, { t: 'unlock', seal: key, forced });
 	campaign.briefing.push({
 		t: 'card',
-		title: bundle.name,
+		title: def.name,
 		text: forced ? 'Opened by a perimeter report.' : null,
-		from: { t: 'bundle', package: bundle.package ?? null, doors: bundle.doors ?? [] },
+		from: { t: 'seal', seal },
 	});
-	for (const unlock of [...bundle.unlocks, ...(forced ? [] : (bundle.reward ?? []))]) {
+	for (const unlock of [...def.unlocks, ...(forced ? [] : (def.reward ?? []))]) {
 		briefUnlock(campaign, unlock);
 		applyUnlock(world, unlock);
 	}
@@ -252,6 +253,8 @@ export function applyUnlock(world: World, unlock: Unlock) {
 			return pushCopies(campaign.infectionImprovementsForSale, unlock.improvement, unlock.copies);
 		case 'permanentStructure':
 			return pushCopies(campaign.permanentForSale, unlock.structure, unlock.copies);
+		case 'scar':
+			return pushCopies(campaign.scars, unlock.scar, unlock.copies);
 		case 'job': {
 			// The group makes the character when it wants one, on a free Character card, at the job's own home.
 			campaign.jobsFound.push({ job: unlock.job, home: unlock.home });
@@ -294,10 +297,10 @@ export function applyUnlock(world: World, unlock: Unlock) {
 		case 'frequencyHint':
 			return;
 		case 'open':
-			return openBundle(world, unlock.bundle, false);
+			return openSeal(world, unlock.seal, false);
 		case 'perimeter':
-			if (campaign.opened.includes(unlock.bundle)) return;
-			openBundle(world, unlock.bundle, true);
+			if (isOpen(campaign, unlock.seal)) return;
+			openSeal(world, unlock.seal, true);
 			for (const penalty of unlock.penalty ?? []) applyUnlock(world, penalty);
 			return;
 	}
@@ -316,13 +319,7 @@ export function readLegacy(world: World, phase: 'setup' | 'gameEnd', won?: boole
 		campaign.legacyIndex += 1;
 		const applies = !card.when || (card.when === 'won') === won;
 		if (applies) {
-			campaign.briefing.push({
-				t: 'card',
-				title: card.title,
-				text: card.text,
-				from: { t: 'legacy', doors: card.doors ?? [] },
-			});
-			for (const door of card.doors ?? []) pushUnique(campaign.doors, door);
+			campaign.briefing.push({ t: 'card', title: card.title, text: card.text, from: { t: 'legacy', card: card.id } });
 			for (const unlock of card.unlocks) {
 				briefUnlock(campaign, unlock);
 				applyUnlock(world, unlock);
@@ -364,7 +361,7 @@ export function resolveGameEnd(world: World) {
 		pack.cities.some(city => city.kind === 'city' && campaign.locations[city.id]!.population === 0)
 	) {
 		campaign.turningPoints = campaign.turningPoints.filter(id => id !== 'firstForsaken');
-		openBundle(world, 'forsaken' as BundleId, false);
+		openSeal(world, { t: 'door', id: 'A' }, false);
 	}
 	if (hasRule(campaign, 'forsaken')) {
 		for (const city of pack.cities) if (isForsaken(campaign, city.id)) campaign.locations[city.id]!.infested = true;

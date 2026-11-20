@@ -26,6 +26,7 @@
 		rule: ['box'],
 		event: ['playerDeck', 'box'],
 		ability: ['box'],
+		scar: ['box'],
 		cityImprovement: ['box'],
 		infectionImprovement: ['box'],
 		permanentStructure: ['box'],
@@ -59,13 +60,10 @@
 	let trash = $state<HTMLElement>();
 
 	const current = $derived<Opening | undefined>(steps[index]);
-	const containers = $derived.by(() => {
-		const from = current?.from;
-		if (!from) return [];
-		const doors = 'doors' in from ? from.doors.map(id => ({ t: 'door' as const, id })) : [];
-		const box = from.t === 'bundle' && from.package ? [{ t: 'package' as const, id: from.package }] : [];
-		return from.t === 'legacy' ? [{ t: 'card' as const }, ...doors] : [...doors, ...box];
-	});
+	// The package first, then the doors it or the Legacy card opened, each torn as the scene opens.
+	const containers = $derived<({ t: 'card' } | { t: 'package'; id: number } | { t: 'door'; id: string })[]>(
+		current ? [...(current.from.t === 'legacy' ? [{ t: 'card' as const }] : []), ...current.seals] : [],
+	);
 	const shown = $derived(current?.items.filter(item => item.unlock.t !== 'objectives') ?? []);
 
 	// The sequence is one async run; a new run (Watch again) or leaving cancels the one before it.
