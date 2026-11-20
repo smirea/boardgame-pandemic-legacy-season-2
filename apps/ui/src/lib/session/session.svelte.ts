@@ -11,6 +11,7 @@ import {
 import type { Command, GameActor, GameRecord, PlayerId, PublicState, Save } from '@repo/game';
 import { createHost, createMemoryTransport, createPeerId, createWebRtcTransport, joinHost, peerId } from '@repo/net';
 import type { ConnectionStatus, PeerInfo, Session } from '@repo/net';
+import { importTabletop, isTabletopSave } from '@repo/tts';
 import { LS } from '../storage';
 import { parseMsg, parsePresence } from './protocol';
 import type { Msg, Presence } from './protocol';
@@ -281,11 +282,21 @@ export class GameSession {
 		return this.#record ? JSON.stringify(this.#record) : null;
 	}
 
-	/** Replaces the campaign with a save. The page reloads so the actor restarts from it. */
+	/**
+	 * Replaces the campaign with a save, the game's own or a Tabletop Simulator table, which is read and imported first.
+	 * The page reloads so the actor restarts from it.
+	 */
 	importSave(raw: unknown) {
 		if (!this.#actor) throw new Error('Only the host can load a campaign');
+		const parsed: unknown = typeof raw === 'string' ? JSON.parse(raw) : raw;
+		let save = parsed;
+		if (isTabletopSave(parsed)) {
+			const imported = importTabletop(parsed);
+			save = imported.save;
+			LS.set({ tableImport: { name: imported.name, date: imported.date, at: Date.now(), rows: imported.rows } });
+		}
 		LS.delete('record');
-		LS.set({ save: parseSave(typeof raw === 'string' ? JSON.parse(raw) : raw) });
+		LS.set({ save: parseSave(save) });
 		location.reload();
 	}
 

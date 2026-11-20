@@ -1,5 +1,6 @@
 import { LocalStorage } from './createLocalStorage';
 import { debugIdFromSearch } from './debugId';
+import type { ImportRow } from '@repo/tts';
 import type { Mode } from './session/session.svelte.ts';
 
 export const DEBUG_ID = typeof location === 'undefined' ? null : debugIdFromSearch(location.search);
@@ -17,6 +18,8 @@ export const LS = new LocalStorage<{
 	/** The host's recording of the game in progress, played back at `/replay`. */
 	record: unknown;
 	replay: { speed: number; panel: boolean; bubbles: boolean };
+	/** What the last Tabletop Simulator import settled, shown at `/import`. */
+	tableImport: { name: string; date: string; at: number; rows: ImportRow[] } | null;
 }>({
 	namespace,
 	getDefaults: () => ({
@@ -28,5 +31,6 @@ export const LS = new LocalStorage<{
 		debugSnapshot: null,
 		record: null,
 		replay: { speed: 1, panel: true, bubbles: true },
+		tableImport: null,
 	}),
 });

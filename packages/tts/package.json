@@ -1,0 +1,12 @@
+{
+	"name": "@repo/tts",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts",
+		"./package.json": "./package.json"
+	},
+	"dependencies": {
+		"@repo/game": "workspace:*"
+	}
+}
