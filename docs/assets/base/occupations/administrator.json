@@ -1,0 +1,15 @@
+{
+	"id": "administrator",
+	"name": "Administrator",
+	"category": "occupation",
+	"costProductionUnits": null,
+	"copies": 1,
+	"image": "administrator.jpg",
+	"text": "Administrator: Once on your turn, as an action,\nmove a pawn to any other pawn.",
+	"mechanics": {
+		"timing": "action",
+		"trigger": "Once on your turn",
+		"effect": "As an action, move a pawn to any other pawn.",
+		"restrictions": ["Once on your turn"]
+	}
+}

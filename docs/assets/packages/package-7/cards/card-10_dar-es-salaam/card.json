@@ -1,0 +1,38 @@
+{
+	"package": 7,
+	"index": 10,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P7-10b"
+	},
+	"title": "Dar es Salaam",
+	"category": "infection-card",
+	"city": "Dar es Salaam",
+	"color": "yellow",
+	"copies": 1,
+	"hasImprovementSlot": true,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"text": "Infection card back. No text."
+	},
+	"sideB": {
+		"text": "DAR ES SALAAM\n\nYellow city art with a white upgrade panel and a green ring. No other text.",
+		"searchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"opensDoors": [],
+		"rules": [
+			"Yellow Infection card for Dar es Salaam. Same face as P7-09b except the printed code.",
+			"The white center panel is the infection-card upgrade slot."
+		],
+		"notes": [
+			"Card id 10709.",
+			"Printed P7-10b, not a duplicate of the P7-09b code.",
+			"Goes to the reserve when the package is opened."
+		]
+	}
+}

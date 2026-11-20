@@ -1,0 +1,40 @@
+{
+	"package": 3,
+	"index": 10,
+	"cardId": 10709,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P3-10b"
+	},
+	"title": "Manila",
+	"category": "player-card",
+	"city": "Manila",
+	"color": "red",
+	"coordinates": "14°35'58\"N 120°59'3\"E",
+	"port": true,
+	"copies": 1,
+	"hasImprovementSlot": false,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideASummary": "Player deck back. Dark blue sunburst around a haven on the water. No text and no printed code.",
+	"sideBSummary": "Manila, red Player card. Coordinates 14°35'58\"N 120°59'3\"E. The compass has an anchor, so the city is a port. The map has a target marker and no scratch-off box. The city name and coordinates repeat upside down along the bottom. Printed code P3-10b.",
+	"searchBoxes": [],
+	"states": [],
+	"mechanics": {
+		"opensDoors": [],
+		"destroys": false,
+		"rules": [
+			"Red Player card for Manila.",
+			"Port city: the compass is marked with an anchor.",
+			"No search box. Nothing on this card is scratched.",
+			"No improvement slot is printed on this face."
+		],
+		"notes": [
+			"Card id 10709. One copy.",
+			"Printed code P3-10b is on side B only.",
+			"Goes to the reserve when Package 3 is opened. Jakarta is the only city this report places immediately."
+		]
+	}
+}

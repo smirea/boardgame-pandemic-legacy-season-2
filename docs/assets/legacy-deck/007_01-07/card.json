@@ -1,0 +1,48 @@
+{
+	"sequence": 7,
+	"folder": "007_01-07",
+	"cardCode": "01-07",
+	"printedCodes": {
+		"sideA": "01-07a",
+		"sideB": "01-07b"
+	},
+	"title": "PAUSE",
+	"category": "legacy_pause",
+	"month": "january",
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"stopOrPause": "PAUSE",
+		"header": "PAUSE",
+		"trigger": "DRAW THIS CARD AND READ THE OTHER SIDE DURING STEP 2 AT THE END OF YOUR FIRST GAME IN JANUARY.",
+		"text": "PAUSE\n\nDRAW THIS CARD AND READ THE OTHER SIDE DURING STEP 2 AT THE END OF YOUR FIRST GAME IN JANUARY.",
+		"footer": ""
+	},
+	"sideB": {
+		"header": "",
+		"text": "New Rationed Event cards follow.\nKeep these cards in the reserve.\nThese add to the pool of Rationed Event cards you can select from at the beginning of each game.",
+		"footer": "",
+		"scratchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"whenRead": "Stop drawing when you reach this card during January setup. Draw it and read the other side during step 2 at the end of the first game in January.",
+		"triggers": ["Step 2 at the end of the first game in January"],
+		"opensDoors": [],
+		"opensPackages": [],
+		"destroys": [],
+		"addsToPool": [
+			"Data Transfer (01-08)",
+			"Dispersal (01-09)",
+			"Drastic Measures (01-10)",
+			"Extended Forecast (01-11)"
+		],
+		"rules": [
+			"The new Rationed Event cards that follow (01-08 through 01-11) are kept in the reserve.",
+			"They join the pool of Rationed Event cards you can select from at the beginning of each game."
+		],
+		"notes": ""
+	}
+}

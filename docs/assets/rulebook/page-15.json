@@ -1,0 +1,47 @@
+{
+	"file": "page-15.jpg",
+	"printedPageNumber": 15,
+	"headings": ["INSTRUCTIONS FOR A BETTER LIFE ON THE HAVENS", "GAME END", "TRACKING YOUR CAMPAIGN"],
+	"ruleStickerSlots": [
+		{
+			"slot": "U",
+			"context": "GAME END, dashed box under the two loss bullets: RULE STICKER U"
+		}
+	],
+	"sections": [
+		{
+			"heading": "GAME END",
+			"text": "You win as soon as you complete the necessary number of objectives (which must include all mandatory objectives) or you trigger a losing condition. The game ends immediately, even if it is the middle of a player’s turn or a series of outbreaks. You cannot finish out your turn after you win or lose, even if you would like to.\n\nThere are multiple ways for the game to end in a loss:\n\n• Immediately when the Incident marker reaches the last space of the Incident track.\n• If a player cannot draw 2 player cards after their actions.\n\nRULE STICKER U\n\nWin or lose, first return all City and Infection cards in players’ hands and the discard piles to their respective decks. Then, there is a series of Game End steps that must be followed at the end of each game to see how the just-played game changed the world, your characters, and the grid.\n\nThe Game End steps are covered in detail on the last page of this manual. We recommend reading them after finishing your first prologue game to get an idea of how each game impacts the following games in the campaign."
+		},
+		{
+			"heading": "TRACKING YOUR CAMPAIGN",
+			"text": "Use the game calendar on page 18 to record your progress, wins and losses, players involved, your current rationing level, and the size of the grid. Page 19 will help you track which cities are part of the the grid.\n\nLaura and her friends completed their first game (the Prologue) and filled in the corresponding row of the game calendar."
+		}
+	],
+	"tables": [
+		{
+			"title": "Sample game-calendar row (filled in as an example)",
+			"headers": [
+				"Month",
+				"",
+				"Rationing",
+				"Date Played",
+				"Players and Characters",
+				"Win or Lose?",
+				"Cities on the Grid"
+			],
+			"rows": [["Prologue", "", "4", "Nov. 18", "Laura/Anna, Alice/Adele, Ollie/Newt", "W", "9"]],
+			"notes": "The second column is the Early/Late column and is blank for Prologue. Names, the 4, Nov. 18, W, and 9 are written in script as a filled-in example. W means win."
+		}
+	],
+	"diagramsAndCallouts": [
+		"Running header: INSTRUCTIONS FOR A BETTER LIFE ON THE HAVENS.",
+		"The banner and the section heading are both GAME END.",
+		"Empty dashed box: RULE STICKER U.",
+		"Printed typo, kept verbatim: “part of the the grid.”",
+		"Example calendar caption, italic: Laura and her friends completed their first game (the Prologue) and filled in the corresponding row of the game calendar.",
+		"Pilot illustration in the lower right has no rules text.",
+		"Printed page number 15, bottom right."
+	],
+	"fullText": "INSTRUCTIONS FOR A BETTER LIFE ON THE HAVENS\n\nGAME END\n\nYou win as soon as you complete the necessary number of objectives (which must include all mandatory objectives) or you trigger a losing condition. The game ends immediately, even if it is the middle of a player’s turn or a series of outbreaks. You cannot finish out your turn after you win or lose, even if you would like to.\n\nThere are multiple ways for the game to end in a loss:\n\n• Immediately when the Incident marker reaches the last space of the Incident track.\n• If a player cannot draw 2 player cards after their actions.\n\nRULE STICKER U\n\nWin or lose, first return all City and Infection cards in players’ hands and the discard piles to their respective decks. Then, there is a series of Game End steps that must be followed at the end of each game to see how the just-played game changed the world, your characters, and the grid.\n\nThe Game End steps are covered in detail on the last page of this manual. We recommend reading them after finishing your first prologue game to get an idea of how each game impacts the following games in the campaign.\n\nTRACKING YOUR CAMPAIGN\n\nUse the game calendar on page 18 to record your progress, wins and losses, players involved, your current rationing level, and the size of the grid. Page 19 will help you track which cities are part of the the grid.\n\nLaura and her friends completed their first game (the Prologue) and filled in the corresponding row of the game calendar.\n\nSample game-calendar row (filled in as an example)\n\nMonth | (no header) | Rationing | Date Played | Players and Characters | Win or Lose? | Cities on the Grid\n\nPrologue |  | 4 | Nov. 18 | Laura/Anna, Alice/Adele, Ollie/Newt | W | 9"
+}

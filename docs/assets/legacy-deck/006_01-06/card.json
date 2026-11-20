@@ -1,0 +1,43 @@
+{
+	"sequence": 6,
+	"folder": "006_01-06",
+	"cardCode": "01-06",
+	"printedCodes": {
+		"sideA": "01-06a",
+		"sideB": "01-06b"
+	},
+	"title": "Forsaken Cities",
+	"category": "turning_point",
+	"month": "january",
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"stopOrPause": "NONE",
+		"header": "TURNING POINT",
+		"trigger": "",
+		"text": "This is your first Turning Point card.\nAfter reading it, place it into the Game End area.",
+		"footer": ""
+	},
+	"sideB": {
+		"header": "Turning Point #1",
+		"text": "FORSAKEN CITIES\n\nIf there is at least one city with 0 population, open A 12 and destroy this card.\n\nPut this card into the Game End area each game until it is destroyed.",
+		"footer": "Put this card into the Game End area each game until it is destroyed.",
+		"scratchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"whenRead": "Drawn during the January setup draw, after the two mandatory objectives and before the January Pause. After reading it, put it in the Game End area.",
+		"triggers": ["Each game, at Game End, if at least one city has 0 population"],
+		"opensDoors": ["A", "12"],
+		"opensPackages": [],
+		"destroys": ["this card, when the 0-population condition is met"],
+		"addsToPool": [],
+		"rules": [
+			"Place this card in the Game End area after reading it, and again each game until it is destroyed.",
+			"If there is at least one city with 0 population, open A 12 and destroy this card."
+		],
+		"notes": "The thing to open is printed as two separate cream badges with red characters: the letter A, then the number 12. 'A' and '12' are not one glyph."
+	}
+}

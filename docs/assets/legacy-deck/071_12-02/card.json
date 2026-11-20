@@ -1,0 +1,45 @@
+{
+	"sequence": 71,
+	"folder": "071_12-02",
+	"cardCode": "12-02",
+	"printedCodes": {
+		"sideA": "12-02a",
+		"sideB": "12-02b"
+	},
+	"title": "Journal Entry",
+	"category": "legacy_journal",
+	"month": "december",
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"stopOrPause": "NONE",
+		"header": "Journal Entry",
+		"trigger": "",
+		"summary": "Supplies are almost gone. The world is reconnected, and the remaining hope is a cure: reach Lake Baikal, find the PEARL lab, take what they made, and bring it to Johannesburg. There will not be another chance. Missing it this month loses everything.",
+		"text": "Supplies are almost gone after reconnecting the world. The hope now is a cure: reach Lake Baikal, find the PEARL lab, take what they created, and bring it to Johannesburg. This month is the last chance. Missing it means all is lost.",
+		"footer": ""
+	},
+	"sideB": {
+		"header": "FROM THE ARCHIVES",
+		"summary": "Archive, December, Year 70. Last note before the exodus to Utopia. The havens, the labs, and the writers all failed. They had hoped the Faded could hold the world together, and the havens end quietly. Those left behind will be lost. The world's fate is in Utopia's hands, and the writers march there for salvation.",
+		"text": "DECEMBER, YEAR 70\nFinal note before the exodus to Utopia. The havens failed, the labs did not do their jobs, and neither did the writers. They had hoped the Faded could hold the world together. The havens end quietly. Pity for the people left on the havens, who will be lost. The fate of the world is in Utopia's hands. They march to Utopia, and to salvation.",
+		"footer": "Keep papers like this in the reserve.",
+		"scratchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"whenRead": "Next card after the December Stop (12-01), read while drawing through the first December setup.",
+		"triggers": [],
+		"opensDoors": [],
+		"opensPackages": [],
+		"destroys": [],
+		"addsToPool": [],
+		"rules": [
+			"No board effect. The archive side says to keep papers like this in the reserve.",
+			"The journal names the route the last objective uses: Lake Baikal and the PEARL lab, then Johannesburg."
+		],
+		"notes": "Side B quotes the havens ending \"not with a bang, but with a whimper.\" The signature is illegible. Flavor above is paraphrased. The journal does not itself reveal Baikal or grant the delivery."
+	}
+}

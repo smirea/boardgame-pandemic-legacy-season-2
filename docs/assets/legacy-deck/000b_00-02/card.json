@@ -1,0 +1,43 @@
+{
+	"sequence": 0,
+	"folder": "000b_00-02",
+	"cardCode": "00-02",
+	"printedCodes": {
+		"sideA": "00-02a",
+		"sideB": "00-02b"
+	},
+	"title": "Build 3 supply centers",
+	"category": "objective",
+	"month": "prologue",
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"stopOrPause": "NONE",
+		"header": "",
+		"trigger": "",
+		"text": "",
+		"footer": ""
+	},
+	"sideB": {
+		"header": "MANDATORY OBJECTIVE",
+		"text": "Build 3 supply centers.\n\n0\n1\n2\n3",
+		"footer": "",
+		"scratchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"whenRead": "The Prologue Objective card, in play during the Prologue. Destroyed, with 00-01, when the campaign starts.",
+		"triggers": [],
+		"opensDoors": [],
+		"opensPackages": [],
+		"destroys": ["this card, when the campaign starts (see 00-01)"],
+		"addsToPool": [],
+		"rules": [
+			"Mandatory objective: build 3 supply centers.",
+			"Vertical progress track of four circles, numbered 0, 1, 2, 3 from bottom to top. Mark a circle for each supply center built."
+		],
+		"notes": "Side A is the objective-card back (haven star on black) with no rules text. Red star and red 'MANDATORY OBJECTIVE' label on side B."
+	}
+}

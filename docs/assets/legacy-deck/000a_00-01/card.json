@@ -1,0 +1,44 @@
+{
+	"sequence": 0,
+	"folder": "000a_00-01",
+	"cardCode": "00-01",
+	"printedCodes": {
+		"sideA": "00-01b",
+		"sideB": "00-01a"
+	},
+	"title": "PROLOGUE",
+	"category": "prologue",
+	"month": "prologue",
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"stopOrPause": "NONE",
+		"header": "PROLOGUE",
+		"trigger": "",
+		"text": "PLAY USING ALL THE RULES EXCEPT:\n• Do not open the Legacy deck.\n• Your character cannot get exposed.\n• You cannot do the Recon action.\n• You cannot do System-Wide Production when you play Produce Supplies cards.\n• Do not do Game End steps.\n\nWHEN YOU HAVE PLAYED THE PROLOGUE ENOUGH TIMES TO FEEL COMFORTABLE:\n• Destroy this card and the Prologue Objective card.\n• Open the Legacy deck.\n• Start your campaign.",
+		"footer": ""
+	},
+	"sideB": {
+		"header": "Journal Entry",
+		"text": "Priorities: We need to complete the following mandatory objective:\n• Build 3 supply centers\n\nWe've barely got our heads around this mess, and yet we now find ourselves in charge. We're covering ourselves up and heading out on supply runs to see the front lines and gauge how bad things are.\n\nThings are going to get real very soon. The Hollow Men will tear down our supply centers almost as soon as we build them but we've got to start restoring our presence on the mainland.",
+		"footer": "Keep journal entries like this in the reserve in case you want to reference them in the future.",
+		"scratchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"whenRead": "Before the campaign. Play the Prologue with this card in effect. It is not drawn from the Legacy deck.",
+		"triggers": [],
+		"opensDoors": [],
+		"opensPackages": [],
+		"destroys": ["this card (00-01)", "Prologue Objective card (00-02)"],
+		"addsToPool": [],
+		"rules": [
+			"Prologue uses every rule except: do not open the Legacy deck; characters cannot get exposed; no Recon action; no System-Wide Production when playing Produce Supplies; do not do Game End steps.",
+			"When the players are comfortable, destroy this card and the Prologue Objective card, open the Legacy deck, and start the campaign.",
+			"Keep the journal side in the reserve if you want to reread it."
+		],
+		"notes": "File side-a.jpg is printed 00-01b (the PROLOGUE rules). File side-b.jpg is printed 00-01a (the journal). The priority line 'Build 3 supply centers' has no period. The journal footer is red on a black brush stroke."
+	}
+}

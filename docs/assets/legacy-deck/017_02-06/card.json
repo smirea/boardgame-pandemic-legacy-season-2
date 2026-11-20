@@ -1,0 +1,61 @@
+{
+	"sequence": 17,
+	"folder": "017_02-06",
+	"cardCode": "02-06",
+	"printedCodes": {
+		"sideA": "02-06a",
+		"sideB": "02-06b"
+	},
+	"title": "Give Us the Tools and We Will Finish the Job!",
+	"category": "turning_point",
+	"month": "february",
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"stopOrPause": "NONE",
+		"header": "TURNING POINT",
+		"trigger": "",
+		"text": "After reading this turning point, place it into the Game End area.",
+		"footer": ""
+	},
+	"sideB": {
+		"header": "Turning Point #2",
+		"text": "GIVE US THE TOOLS AND WE WILL FINISH THE JOB!\n\nIf you have lost 4 games in a row, scratch this box:\n\nPut this card into the Game End area each game until it is destroyed.",
+		"footer": "Put this card into the Game End area each game until it is destroyed.",
+		"scratchBoxes": [
+			{
+				"condition": "If you have lost 4 games in a row, scratch this box:",
+				"revealedInState": 2
+			}
+		]
+	},
+	"states": [
+		{
+			"state": 2,
+			"images": {
+				"sideA": "state-2-side-a.jpg",
+				"sideB": "state-2-side-b.jpg"
+			},
+			"revealedCondition": "If you have lost 4 games in a row, scratch this box:",
+			"revealedText": "Each game, during step 1 of setup, you may cross out a stockpile bonus below to add up to 10 Supply cubes from the reserve to the stockpile. Destroy this card after all 3 stockpile bonuses have been crossed out.\n\n10\n10\n10"
+		}
+	],
+	"mechanics": {
+		"whenRead": "Drawn during the first February setup, after the new objectives and before the February Pause. Place it in the Game End area.",
+		"triggers": ["Scratch if the players have lost 4 games in a row"],
+		"opensDoors": [],
+		"opensPackages": [],
+		"destroys": ["this card, after all 3 stockpile bonuses have been crossed out"],
+		"addsToPool": [],
+		"rules": [
+			"After reading, place this card in the Game End area, and return it there each game until it is destroyed.",
+			"If the players have lost 4 games in a row, scratch the box.",
+			"Revealed: each game, during step 1 of setup, you may cross out one stockpile bonus to add up to 10 Supply cubes from the reserve to the stockpile.",
+			"There are 3 bonuses, each a supply-cube icon labeled 10.",
+			"Destroy this card after all 3 bonuses have been crossed out."
+		],
+		"notes": "state-2-side-a.jpg matches side-a.jpg. The scratch contents are only on state-2-side-b.jpg. 'bonuses' is printed without an accent; a speck on the scan can look like one."
+	}
+}

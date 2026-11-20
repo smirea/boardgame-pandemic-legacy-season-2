@@ -1,0 +1,32 @@
+{
+	"door": "D",
+	"folder": 1,
+	"frontImage": "front.jpg",
+	"frontText": "D",
+	"items": [
+		{
+			"id": "item-01_rule-d",
+			"image": "item-01_rule-d.jpg",
+			"count": 1,
+			"printedCode": "D",
+			"category": "rule_sticker",
+			"title": "Infect the Grid",
+			"placementTarget": "Rulebook page 8, slot D (replaces setup step 4, Infect the Grid)",
+			"text": "[4 in a red circle] INFECT THE GRID\nShuffle the Infection cards and flip over 6 of them. Move 1 Supply cube from the city matching each flipped card back to the stockpile. If a card is flipped over and there are no supply cubes in the city, instead place a Plague cube and move the Incident marker forward 1 space on the Incident track.\nFlip 3 more Infection cards. For each card, place 1 Hollow Men figure in the matching city.\nPlace these 9 cards into the Infection discard pile.",
+			"tables": [],
+			"mechanics": {
+				"opensDoors": [],
+				"opensPackages": [],
+				"rules": [
+					"Setup step 4 starts by shuffling the Infection cards.",
+					"Flip 6 cards. Each one returns 1 supply cube from that city to the stockpile.",
+					"If that city has no supply cubes, place 1 plague cube there and advance the Incident marker 1 space instead.",
+					"Flip 3 more Infection cards. Place 1 Hollow Men figure in each matching city.",
+					"All 9 flipped cards go to the Infection discard pile."
+				],
+				"effect": "Replaces the original nine-flip cube strip with a 6-cube strip plus 3 Hollow Men placements."
+			}
+		}
+	],
+	"summary": "Replaces setup step 4. Six infection flips strip one supply cube (or add a plague and advance the incident track). Three more flips each place one Hollow Men figure. All nine cards go to the infection discard."
+}

@@ -1,0 +1,32 @@
+{
+	"door": "J",
+	"folder": 1,
+	"frontImage": "front.jpg",
+	"frontText": "J",
+	"items": [
+		{
+			"id": "item-01_rule-j",
+			"image": "item-01_rule-j.jpg",
+			"count": 1,
+			"printedCode": "J",
+			"category": "action_sticker",
+			"title": "Establish Supply Line",
+			"placementTarget": "Rulebook page 12, slot J (New Actions, left column, top)",
+			"text": "ESTABLISH SUPPLY LINE\nSpend 2 Supply cubes from your Character card to draw a supply line from the center of your city to the center of another city.\nUse a pen or marker. The line must be straight and cannot cross water, unexplored areas, another city, or another supply line.\nWhen you connect a city to the grid with a supply line, take the matching City card(s) from the reserve and put them into the Player discard pile. Take the matching Infection card(s) and put them into the Game End area.\nYou cannot do the Sail action or Charter Boat action along a supply line. (Boats can't travel over land.)",
+			"tables": [],
+			"mechanics": {
+				"opensDoors": [],
+				"opensPackages": [],
+				"rules": [
+					"Costs 2 supply cubes from your character card.",
+					"Draw a straight line from city center to city center.",
+					"The line cannot cross water, unexplored areas, another city, or another supply line.",
+					"Connecting a city to the grid moves its City cards from the reserve to the Player discard and its Infection cards from the reserve to the Game End area.",
+					"Sail and Charter Boat cannot be traced along a supply line."
+				],
+				"effect": "Permanent land connection. Two cities joined by the line are adjacent for Drive/Ferry."
+			}
+		}
+	],
+	"summary": "Action: spend 2 supply cubes to draw a straight supply line to another city. A city newly joined to the grid puts its city cards in the player discard and its infection cards in the Game End area. Sail and Charter Boat cannot use a supply line."
+}

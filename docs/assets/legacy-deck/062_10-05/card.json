@@ -1,0 +1,44 @@
+{
+	"sequence": 62,
+	"folder": "062_10-05",
+	"cardCode": "10-05",
+	"printedCodes": {
+		"sideA": "10-05a",
+		"sideB": "10-05b"
+	},
+	"title": "Hollow Men Have Defected",
+	"category": "turning_point",
+	"month": "october",
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"stopOrPause": "NONE",
+		"header": "TURNING POINT",
+		"trigger": "",
+		"text": "After reading this turning point, place it into the Game End area.",
+		"footer": ""
+	},
+	"sideB": {
+		"header": "Turning Point #3",
+		"text": "HOLLOW MEN HAVE DEFECTED\n\nIf there is at least 1 Hollow Men figure on 3 different havens at the end of the game, open door 17 and destroy this card.\n\nPut this card into the Game End area each game until it is destroyed.",
+		"footer": "Put this card into the Game End area each game until it is destroyed.",
+		"scratchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"whenRead": "Continue the October setup Legacy-deck reading, after 10-04. After reading it, place it in the Game End area.",
+		"triggers": ["End of a game: at least 1 Hollow Men figure on 3 different havens."],
+		"opensDoors": ["17, at game end, if at least 1 Hollow Men figure is on 3 different havens"],
+		"opensPackages": [],
+		"destroys": ["This card, when the end-of-game condition is met, after opening door 17."],
+		"addsToPool": [],
+		"rules": [
+			"After reading it, place it in the Game End area.",
+			"Put it in the Game End area each game until it is destroyed.",
+			"If, at the end of the game, there is at least 1 Hollow Men figure on 3 different havens, open door 17 and destroy this card."
+		],
+		"notes": "The title is yellow. 17 is in a red box. There is no scratch box on this card. The haven count matches mandatory objective 10-04, but this check is specifically at the end of the game and is what opens door 17."
+	}
+}

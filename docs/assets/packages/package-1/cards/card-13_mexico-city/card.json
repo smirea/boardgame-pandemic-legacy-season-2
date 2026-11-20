@@ -1,0 +1,59 @@
+{
+	"package": 1,
+	"index": 13,
+	"cardId": 912,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P1-15b"
+	},
+	"title": "Mexico City",
+	"category": "player-card",
+	"city": "Mexico City",
+	"color": "yellow",
+	"coordinates": "19°25'57\"N 99°7'60\"W",
+	"copies": 1,
+	"hasImprovementSlot": false,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideASummary": "Player deck back. No text and no printed code.",
+	"sideBSummary": "Yellow Mexico City Player card, 19°25'57\"N 99°7'60\"W. One covered SEARCH box. Not a port. This is Mexico City's only Player card. Code P1-15b.",
+	"searchBoxes": [
+		{
+			"type": "land",
+			"stateRevealed": 2,
+			"isCompanion": true,
+			"companionName": "Scout",
+			"opensDoors": [],
+			"effectSummary": "While this card is in your hand, as an action you may discard a City card, including this card, to draw a City card of the same color from the Player discard pile."
+		}
+	],
+	"states": [
+		{
+			"state": 2,
+			"cardId": 1007,
+			"images": {
+				"sideB": "state-2-side-b.jpg"
+			},
+			"summary": "Companion: Scout. As an action, discard a City card (including this card) to draw a City card of the same color from the Player discard pile, if you have this card in your hand."
+		}
+	],
+	"mechanics": {
+		"opensDoors": [],
+		"destroys": [],
+		"rules": [
+			"Yellow Player card for Mexico City. One land search box, labeled SEARCH. No anchor.",
+			"The scratch reveals the Scout companion.",
+			"While the card is in your hand, you may spend an action to discard a City card and draw a City card of the same color from the Player discard pile.",
+			"The discarded City card may be this card.",
+			"The power lasts for later games while the card is held. Discarding this card spends the companion.",
+			"This is Mexico City's only Player card. It goes to the reserve until the city joins the grid."
+		],
+		"notes": [
+			"Card id 912. Scratched face card id 1007. Printed code P1-15b.",
+			"Coordinates are printed 19°25'57\"N 99°7'60\"W, including 60 arcseconds.",
+			"No state side A."
+		]
+	}
+}

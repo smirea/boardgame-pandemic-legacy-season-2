@@ -1,0 +1,25 @@
+{
+	"id": "sticker-01_facilitator",
+	"package": 5,
+	"guid": "b36383",
+	"printedCode": null,
+	"name": "Facilitator",
+	"category": "ability",
+	"placementTarget": "Character card",
+	"costProductionUnits": 2,
+	"copies": 1,
+	"image": "sticker-01_facilitator.jpg",
+	"text": "Facilitator: Once on your turn, as an action, you may take any 1 Player card from a character in your location.",
+	"mechanics": {
+		"timing": "action",
+		"effect": "Once on your turn, as an action, take any 1 Player card from a character in your location.",
+		"restrictions": [
+			"Once on your turn",
+			"Costs an action",
+			"The character must be in your location",
+			"The card taken must be a Player card"
+		],
+		"opensDoors": [],
+		"notes": "The production cost is not printed on the sticker. The package manifest lists it as 2 Production Units."
+	}
+}

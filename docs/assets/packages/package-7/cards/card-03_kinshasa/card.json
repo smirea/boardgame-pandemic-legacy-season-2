@@ -1,0 +1,57 @@
+{
+	"package": 7,
+	"index": 3,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P7-03b"
+	},
+	"title": "Kinshasa",
+	"category": "player-card",
+	"city": "Kinshasa",
+	"color": "yellow",
+	"copies": 1,
+	"hasImprovementSlot": false,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"text": "Player card back. No text."
+	},
+	"sideB": {
+		"text": "KINSHASA\n4°26'31\"S 15°15'59\"E\n\nSEARCH:\n[covered]\n\nThe bottom edge repeats KINSHASA and 4°26'31\"S 15°15'59\"E upside down.",
+		"searchBoxes": [
+			{
+				"id": "search",
+				"label": "SEARCH:",
+				"initially": "covered",
+				"revealedInState": 2
+			}
+		]
+	},
+	"states": [
+		{
+			"state": 2,
+			"images": {
+				"sideA": "state-2-side-a.jpg",
+				"sideB": "state-2-side-b.jpg"
+			},
+			"revealedText": "SEARCH:\nCompanion:\nTechnician\n\nWhen doing the Build\nSatellite Tower action, spend\n1 fewer Supply cube if you\nhave this card in your hand.",
+			"effect": "While this card is in your hand, the Build Satellite Tower action costs 1 fewer Supply cube. The card is not discarded to use it. Scratching reveals the Companion Technician."
+		}
+	],
+	"mechanics": {
+		"opensDoors": [],
+		"rules": [
+			"Yellow Player card for Kinshasa. Not a port. No anchor on the compass.",
+			"One SEARCH box. State 2 is the scratched face. State side A is the unchanged player-card back.",
+			"Companion Technician: when you do Build Satellite Tower, spend 1 fewer Supply cube if this card is in your hand."
+		],
+		"notes": [
+			"Card id 10702. Scratch state card id 10718.",
+			"Printed code P7-03b stays on the scratched face.",
+			"The recon report puts this Player card in the Player discard pile when the package is opened. There is no second Kinshasa Player card.",
+			"No bullseye sticker circle is printed. The scratch box covers the center of the card."
+		]
+	}
+}

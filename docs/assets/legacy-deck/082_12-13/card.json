@@ -1,0 +1,42 @@
+{
+	"sequence": 82,
+	"folder": "082_12-13",
+	"cardCode": "12-13",
+	"printedCodes": {
+		"sideA": "12-13a",
+		"sideB": "12-13b"
+	},
+	"title": "End of the Legacy Deck",
+	"category": "end_marker",
+	"month": "december",
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"stopOrPause": "NONE",
+		"header": "CONGRATULATIONS!",
+		"trigger": "",
+		"summary": "Congratulations. This is the end of the Legacy deck for Pandemic Legacy: Season 2. Updates and community info are at www.ZManGames.com.",
+		"text": "CONGRATULATIONS!\n\nYou have reached the end of the Legacy deck for Pandemic Legacy: Season 2. We hope you enjoyed the experience. For the latest updates and community info, visit www.ZManGames.com.",
+		"footer": ""
+	},
+	"sideB": {
+		"header": "WARNING!",
+		"summary": "Warning. This is the end of the Legacy deck. Start from the other side of the deck.",
+		"text": "WARNING!\n\nTHIS IS THE END OF THE LEGACY DECK.\nPLEASE START FROM THE OTHER SIDE OF THE DECK.",
+		"footer": "",
+		"scratchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"whenRead": "Last card in the Legacy deck. Side A is the face at the end of a campaign. Side B is the warning if the deck is turned around and this card is drawn first.",
+		"triggers": [],
+		"opensDoors": [],
+		"opensPackages": [],
+		"destroys": [],
+		"addsToPool": [],
+		"rules": ["No game effect.", "Side B: this is the end of the Legacy deck. Start from the other side of the deck."],
+		"notes": "Both sides are red with yellow type. 12-13b is the wrong-end warning, not a second ending."
+	}
+}

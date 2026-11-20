@@ -1,0 +1,39 @@
+{
+	"package": 4,
+	"index": 8,
+	"cardId": 10807,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P4-09b"
+	},
+	"title": "Frankfurt",
+	"category": "infection-card",
+	"city": "Frankfurt",
+	"color": "blue",
+	"coordinates": null,
+	"port": false,
+	"copies": 2,
+	"hasImprovementSlot": true,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideASummary": "Infection deck back. Biohazard art. No printed text.",
+	"sideBSummary": "Frankfurt Infection card. Blue Europe map, city name down the left edge, white center panel, green ring. No coordinates and no special rule. P4-09b.",
+	"searchBoxes": [],
+	"states": [],
+	"mechanics": {
+		"opensDoors": [],
+		"destroys": [],
+		"rules": [
+			"Blue Infection card for Frankfurt. Two copies share this face.",
+			"The white center panel is the infection-card improvement slot. The green ring is standard infection-card art.",
+			"No extra effect is printed. Drawing it infects Frankfurt by the usual infection rules."
+		],
+		"notes": [
+			"Card id 10807. Count 2.",
+			"Both copies print P4-09b. No separate P4-10b scan is in this package.",
+			"Both copies go to the reserve when the package is opened."
+		]
+	}
+}

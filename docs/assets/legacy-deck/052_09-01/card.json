@@ -1,0 +1,62 @@
+{
+	"sequence": 52,
+	"folder": "052_09-01",
+	"cardCode": "09-01",
+	"printedCodes": {
+		"sideA": "09-01a",
+		"sideB": "09-01b"
+	},
+	"title": "PERIMETER REPORT",
+	"category": "legacy_stop",
+	"month": "september",
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"stopOrPause": "STOP",
+		"header": "STOP",
+		"trigger": "Draw this card and read the other side during step 2 of the setup of your first game in September.",
+		"text": "STOP\nDRAW THIS CARD AND READ THE OTHER SIDE DURING STEP 2 OF THE SETUP OF YOUR FIRST GAME IN SEPTEMBER.",
+		"footer": ""
+	},
+	"sideB": {
+		"header": "PERIMETER REPORT",
+		"text": "If you have not opened 65, scratch the box below.",
+		"footer": "Destroy this card after resolving it.",
+		"scratchBoxes": [
+			{
+				"index": 1,
+				"instruction": "Scratch if 65 has not been opened.",
+				"coveredOnBase": true,
+				"revealedInState": 2
+			}
+		]
+	},
+	"states": [
+		{
+			"state": 2,
+			"images": {
+				"sideA": "state-2-side-a.jpg",
+				"sideB": "state-2-side-b.jpg"
+			},
+			"revealedCondition": "Box scratched because 65 was still sealed.",
+			"revealedText": "We've finally located another lost haven. We still need to get to it but now, at least, we know where to go.\n\nOpen 65 and place it on the board. You have not yet accessed this haven."
+		}
+	],
+	"mechanics": {
+		"whenRead": "STOP. Draw and read during step 2 of the setup of the first game in September.",
+		"triggers": ["65 has not been opened: scratch the box."],
+		"opensDoors": ["65, only if it is still sealed. Place it on the board. You have not yet accessed this haven."],
+		"opensPackages": [],
+		"destroys": ["This card, after resolving it."],
+		"addsToPool": [],
+		"rules": [
+			"If 65 is already open, scratch nothing.",
+			"If 65 is sealed, open 65 and place it on the board.",
+			"Opening it this way does not access the haven. The card says you have not yet accessed this haven.",
+			"Destroy this card after resolving it."
+		],
+		"notes": "Unlike the earlier perimeter reports, the revealed text opens door 65 itself rather than a package, and it names no region in parentheses. \"Open 65\" is bold. 65 is in a red box in both the condition and the reveal. Side A is the same Stop face in state 2. There is a comma after the 65 badge in the condition line."
+	}
+}

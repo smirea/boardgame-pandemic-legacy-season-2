@@ -1,0 +1,55 @@
+{
+	"door": "53",
+	"folder": 4,
+	"frontImage": "dossiers/folder-4/door-53/front.jpg",
+	"frontText": "53",
+	"items": [
+		{
+			"id": "item-01",
+			"image": "dossiers/folder-4/door-53/item-01.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "map-sticker",
+			"title": "Kolkata Recon Placeholder",
+			"placementTarget": "Board map at 20° N, 100° E (east of Kolkata)",
+			"costProductionUnits": null,
+			"text": "You do not yet know how to Recon out of Kolkata.",
+			"mapDetails": {
+				"gridLines": ["20° N", "100° E"],
+				"cities": [],
+				"seaLanes": [],
+				"supplyLines": [],
+				"redRegionLines": [],
+				"reconBoxes": []
+			},
+			"mechanics": {
+				"timing": "immediate",
+				"trigger": "Opened by Package 2 Recon Report (P2-01b)",
+				"effect": "Place at 20° N, 100° E east of Kolkata. Marks that Recon out of Kolkata is not yet known (later replaced by Door 52 if decoded via Frequency Scanner 9.2).",
+				"restrictions": [],
+				"opensDoors": []
+			}
+		},
+		{
+			"id": "item-02",
+			"image": "dossiers/folder-4/door-53/item-02.jpg",
+			"count": 1,
+			"printedCode": "53",
+			"category": "sticker-card",
+			"title": "LIMITS OF OUR KNOWLEDGE",
+			"placementTarget": "Board map at 20° N, 100° E",
+			"costProductionUnits": null,
+			"text": "LIMITS OF OUR KNOWLEDGE\n[Sticker: 20° N, 100° E — You do not yet know how to Recon out of Kolkata.]\nAdd this sticker to the board.",
+			"mapDetails": null,
+			"mechanics": {
+				"timing": "immediate",
+				"trigger": null,
+				"effect": "Full sticker carrier card containing item-01.",
+				"restrictions": [],
+				"opensDoors": []
+			}
+		}
+	],
+	"bags": [],
+	"summary": "LIMITS OF OUR KNOWLEDGE (opened by Package 2): map sticker placed at 20° N, 100° E stating 'You do not yet know how to Recon out of Kolkata.' Later replaced by Door 52."
+}

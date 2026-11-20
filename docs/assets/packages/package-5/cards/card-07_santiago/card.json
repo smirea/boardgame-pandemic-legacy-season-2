@@ -1,0 +1,54 @@
+{
+	"package": 5,
+	"index": 7,
+	"cardId": 10706,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P5-07b"
+	},
+	"title": "Santiago",
+	"category": "player-city",
+	"city": "Santiago",
+	"color": "yellow",
+	"coordinates": "33°26'56\"S 70°40'9\"W",
+	"copies": 1,
+	"hasImprovementSlot": true,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"text": "Player deck back. No printed text."
+	},
+	"sideB": {
+		"text": "Santiago\n33°26'56\"S 70°40'9\"W\nSEARCH:\n(City name and coordinates repeat upside down along the bottom.)\nP5-07b",
+		"searchBoxes": [
+			{
+				"label": "SEARCH:",
+				"kind": "search",
+				"scratched": false
+			}
+		]
+	},
+	"states": [
+		{
+			"state": 2,
+			"cardId": 10717,
+			"images": {
+				"sideA": "state-2-side-a.jpg",
+				"sideB": "state-2-side-b.jpg"
+			},
+			"scratched": ["search"],
+			"revealedText": "SEARCH:\nThis is a town haunted by despair. A surge of refugees overwhelmed the city's resources. The locals have not done well. Plague is rampant. Must not stay.\nOpen 50 if you have not already done so.\nMark Santiago as infested.",
+			"effect": "Open door 50 if it is not already open. Mark Santiago as infested."
+		}
+	],
+	"mechanics": {
+		"opensDoors": [],
+		"rules": [
+			"Yellow Player city card.",
+			"One improvement sticker may be placed on this card. No empty sticker box is printed on the face."
+		],
+		"notes": "One scratch-off box, labeled SEARCH: (not land or sea). State 2 is that box revealed. Side A stays the Player deck back."
+	}
+}

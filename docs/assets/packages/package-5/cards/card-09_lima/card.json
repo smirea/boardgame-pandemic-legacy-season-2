@@ -1,0 +1,81 @@
+{
+	"package": 5,
+	"index": 9,
+	"cardId": 10708,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P5-09b"
+	},
+	"title": "Lima",
+	"category": "player-city",
+	"city": "Lima",
+	"color": "yellow",
+	"coordinates": "12°2'47\"S 77°2'34\"W",
+	"copies": 1,
+	"hasImprovementSlot": true,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"text": "Player deck back. No printed text."
+	},
+	"sideB": {
+		"text": "Lima\n12°2'47\"S 77°2'34\"W\nSEARCH THE LAND:\nSEARCH THE SEA:\n(City name and coordinates repeat upside down along the bottom.)\nP5-09b",
+		"searchBoxes": [
+			{
+				"label": "SEARCH THE LAND:",
+				"kind": "land",
+				"scratched": false
+			},
+			{
+				"label": "SEARCH THE SEA:",
+				"kind": "sea",
+				"scratched": false
+			}
+		]
+	},
+	"states": [
+		{
+			"state": 2,
+			"cardId": 10720,
+			"images": {
+				"sideA": "state-2-side-a.jpg",
+				"sideB": "state-2-side-b.jpg"
+			},
+			"scratched": ["land"],
+			"revealedText": "SEARCH THE LAND:\nCompanion:\nHerbalist\nPlay this card at any time to remove a Plague cube from your location.",
+			"effect": "This card gains the Herbalist companion: play it at any time to remove a Plague cube from your location. The card does not say to destroy it. The sea box stays sealed."
+		},
+		{
+			"state": 3,
+			"cardId": 10719,
+			"images": {
+				"sideA": "state-3-side-a.jpg",
+				"sideB": "state-3-side-b.jpg"
+			},
+			"scratched": ["sea"],
+			"revealedText": "SEARCH THE SEA:\nWe have learned the location of a lost haven.\nWe have not yet accessed it.\nOpen 60 and add it to the board. If you have already opened 60, gain 1 action.",
+			"effect": "Open door 60 and add it to the board. If 60 is already open, the searching player gains 1 action. The land box stays sealed."
+		},
+		{
+			"state": 4,
+			"cardId": 10718,
+			"images": {
+				"sideA": "state-4-side-a.jpg",
+				"sideB": "state-4-side-b.jpg"
+			},
+			"scratched": ["land", "sea"],
+			"revealedText": "SEARCH THE LAND:\nCompanion:\nHerbalist\nPlay this card at any time to remove a Plague cube from your location.\n\nSEARCH THE SEA:\nWe have learned the location of a lost haven.\nWe have not yet accessed it.\nOpen 60 and add it to the board. If you have already opened 60, gain 1 action.",
+			"effect": "Both boxes are open: Herbalist on this card, and door 60 (or 1 action if 60 is already open)."
+		}
+	],
+	"mechanics": {
+		"opensDoors": [],
+		"rules": [
+			"Yellow Player city card.",
+			"One improvement sticker may be placed on this card. No empty sticker box is printed on the face."
+		],
+		"notes": "Harbor card (anchor compass). State 2 reveals the land box only (Herbalist), state 3 the sea box only (door 60), state 4 both."
+	}
+}

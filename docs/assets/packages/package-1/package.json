@@ -1,0 +1,312 @@
+{
+	"name": "North America",
+	"boxImage": "box.jpg",
+	"cards": [
+		{
+			"index": 1,
+			"title": "Recon Report",
+			"category": "recon-report",
+			"printedCode": "P1-01b",
+			"copies": 1,
+			"json": "cards/card-01/card.json"
+		},
+		{
+			"index": 2,
+			"title": "Decontamination Kit",
+			"category": "unrationed-event",
+			"printedCode": "P1-02b",
+			"copies": 1,
+			"json": "cards/card-02_event/card.json"
+		},
+		{
+			"index": 3,
+			"title": "Chicago",
+			"category": "player-card",
+			"color": "blue",
+			"printedCode": "P1-03b",
+			"search": true,
+			"copies": 1,
+			"json": "cards/card-03_chicago/card.json"
+		},
+		{
+			"index": 4,
+			"title": "Chicago",
+			"category": "player-card",
+			"color": "blue",
+			"printedCode": "P1-04b",
+			"copies": 1,
+			"json": "cards/card-04_chicago/card.json"
+		},
+		{
+			"index": 5,
+			"title": "Chicago",
+			"category": "infection-card",
+			"color": "blue",
+			"printedCode": "P1-06b",
+			"copies": 2,
+			"json": "cards/card-05_chicago/card.json"
+		},
+		{
+			"index": 6,
+			"title": "Denver",
+			"category": "player-card",
+			"color": "blue",
+			"printedCode": "P1-07b",
+			"search": true,
+			"copies": 1,
+			"json": "cards/card-06_denver/card.json"
+		},
+		{
+			"index": 7,
+			"title": "Denver",
+			"category": "player-card",
+			"color": "blue",
+			"printedCode": "P1-08b",
+			"copies": 1,
+			"json": "cards/card-07_denver/card.json"
+		},
+		{
+			"index": 8,
+			"title": "Denver",
+			"category": "infection-card",
+			"color": "blue",
+			"printedCode": "P1-09b",
+			"copies": 2,
+			"json": "cards/card-08_denver/card.json"
+		},
+		{
+			"index": 9,
+			"title": "Atlanta",
+			"category": "player-card",
+			"color": "blue",
+			"printedCode": "P1-11b",
+			"search": true,
+			"copies": 1,
+			"json": "cards/card-09_atlanta/card.json"
+		},
+		{
+			"index": 10,
+			"title": "Atlanta",
+			"category": "infection-card",
+			"color": "blue",
+			"printedCode": "P1-12b",
+			"copies": 1,
+			"json": "cards/card-10_atlanta/card.json"
+		},
+		{
+			"index": 11,
+			"title": "Los Angeles",
+			"category": "player-card",
+			"color": "yellow",
+			"printedCode": "P1-13b",
+			"port": true,
+			"search": [
+				"land",
+				"sea"
+			],
+			"copies": 1,
+			"json": "cards/card-11_los-angeles/card.json"
+		},
+		{
+			"index": 12,
+			"title": "Los Angeles",
+			"category": "infection-card",
+			"color": "yellow",
+			"printedCode": "P1-14b",
+			"copies": 1,
+			"json": "cards/card-12_los-angeles/card.json"
+		},
+		{
+			"index": 13,
+			"title": "Mexico City",
+			"category": "player-card",
+			"color": "yellow",
+			"printedCode": "P1-15b",
+			"search": true,
+			"copies": 1,
+			"json": "cards/card-13_mexico-city/card.json"
+		},
+		{
+			"index": 14,
+			"title": "Mexico City",
+			"category": "infection-card",
+			"color": "yellow",
+			"printedCode": "P1-16b",
+			"copies": 1,
+			"json": "cards/card-14_mexico-city/card.json"
+		},
+		{
+			"index": 15,
+			"title": "San Francisco",
+			"category": "player-card",
+			"color": "blue",
+			"printedCode": "P1-17b",
+			"port": true,
+			"search": [
+				"land",
+				"sea"
+			],
+			"copies": 1,
+			"json": "cards/card-15_san-francisco/card.json"
+		},
+		{
+			"index": 16,
+			"title": "San Francisco",
+			"category": "player-card",
+			"color": "blue",
+			"printedCode": "P1-18b",
+			"port": true,
+			"copies": 1,
+			"json": "cards/card-16_san-francisco/card.json"
+		},
+		{
+			"index": 17,
+			"title": "San Francisco",
+			"category": "infection-card",
+			"color": "blue",
+			"printedCode": "P1-19b",
+			"copies": 2,
+			"json": "cards/card-17_san-francisco/card.json"
+		}
+	],
+	"cities": [
+		{
+			"city": "Chicago",
+			"color": "blue",
+			"port": false,
+			"playerCards": 2,
+			"infectionCards": 2,
+			"search": "land",
+			"joinsOnOpen": true
+		},
+		{
+			"city": "Denver",
+			"color": "blue",
+			"port": false,
+			"playerCards": 2,
+			"infectionCards": 2,
+			"search": "land"
+		},
+		{
+			"city": "Atlanta",
+			"color": "blue",
+			"port": false,
+			"playerCards": 1,
+			"infectionCards": 1,
+			"search": "land"
+		},
+		{
+			"city": "Los Angeles",
+			"color": "yellow",
+			"port": true,
+			"playerCards": 1,
+			"infectionCards": 1,
+			"search": [
+				"land",
+				"sea"
+			]
+		},
+		{
+			"city": "Mexico City",
+			"color": "yellow",
+			"port": false,
+			"playerCards": 1,
+			"infectionCards": 1,
+			"search": "land"
+		},
+		{
+			"city": "San Francisco",
+			"color": "blue",
+			"port": true,
+			"playerCards": 2,
+			"infectionCards": 2,
+			"search": [
+				"land",
+				"sea"
+			]
+		}
+	],
+	"guid": "7622be",
+	"id": "package-1",
+	"number": 1,
+	"printedContents": {
+		"asPrintedOnReport": "20 cards • 1 sticker card",
+		"cards": 20,
+		"uniqueCardFaces": 17,
+		"stickerCards": 1,
+		"scarsOnThatCard": [
+			"Weak",
+			"Impatient",
+			"Exhausted"
+		]
+	},
+	"scars": {
+		"Weak": "Hold at most 3 Supply cubes. Return excess to the stockpile.",
+		"Impatient": "After Search, discard the card just searched.",
+		"Exhausted": "Establish Supply Line costs 1 more Supply cube."
+	},
+	"searchResults": {
+		"Chicago": "Put up to 2 Supply cubes into Chicago from the stockpile.",
+		"Denver": "Companion Logistics Expert. Establish Supply Lines costs 1 fewer Supply cube while the card is in hand.",
+		"Atlanta": "Move 1 Infection discard card to the Game End area. The scratch spells the virus CCdA.",
+		"Los Angeles land": "Take 4 Supply cubes from the reserve and add them to the stockpile.",
+		"Los Angeles sea": "Open door 60, or gain 1 action if 60 is already open.",
+		"Mexico City": "Companion Scout. As an action, discard a City card (including this card) to draw a City card of the same color from the Player discard.",
+		"San Francisco land": "Put 3 Supply cubes into San Francisco from the reserve, not the stockpile.",
+		"San Francisco sea": "Same lost haven as Los Angeles. Open door 60, or gain 1 action if 60 is already open."
+	},
+	"setup": {
+		"source": "P1-01b",
+		"opensDoors": [
+			"66",
+			"J",
+			"23",
+			"L",
+			"39"
+		],
+		"doorNotes": {
+			"66": "North America map. Chicago joins the grid.",
+			"J": "Establish Supply Line rule.",
+			"23": "Establish Supply Line reference sticker.",
+			"L": "Search rule.",
+			"39": "Search reference sticker."
+		},
+		"cityAddedToGrid": "Chicago",
+		"playerDiscard": [
+			"Chicago P1-03b",
+			"Chicago P1-04b"
+		],
+		"gameEnd": [
+			"Chicago Infection cards, scan P1-06b, two copies"
+		],
+		"reserve": "Denver, Atlanta, Los Angeles, Mexico City, and San Francisco Player and Infection cards.",
+		"toAPlayersHand": "Decontamination Kit (P1-02b)",
+		"keepReportIn": "reserve"
+	},
+	"stickers": [
+		{
+			"id": "sticker-01",
+			"name": "Weak",
+			"category": "scar",
+			"guid": "76de1b",
+			"copies": 1,
+			"json": "stickers/sticker-01.json"
+		},
+		{
+			"id": "sticker-02",
+			"name": "Impatient",
+			"category": "scar",
+			"guid": "0fd52e",
+			"copies": 1,
+			"json": "stickers/sticker-02.json"
+		},
+		{
+			"id": "sticker-03",
+			"name": "Exhausted",
+			"category": "scar",
+			"guid": "ee1184",
+			"copies": 1,
+			"json": "stickers/sticker-03.json"
+		}
+	]
+}

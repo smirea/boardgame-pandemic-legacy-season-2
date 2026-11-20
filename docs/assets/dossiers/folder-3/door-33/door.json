@@ -19,7 +19,7 @@
 				"trigger": "After discarding this card",
 				"effect": "Any player may discard a Player card to stop drawing Infection cards for the rest of this turn.",
 				"restrictions": ["This has no effect during setup and epidemics.", "Requires discarding a Player card"],
-				"costPrintedOn": "door-33/item-03.jpg",
+				"costPrintedOn": "dossiers/folder-3/door-33/item-03.jpg",
 				"sourceGuids": ["b83c57"]
 			}
 		},
@@ -38,7 +38,7 @@
 				"trigger": "If this card is in the Infection discard pile",
 				"effect": "Any player may discard a Player card to destroy this card.",
 				"restrictions": ["This card must be in the Infection discard pile", "Requires discarding a Player card"],
-				"costPrintedOn": "door-33/item-03.jpg",
+				"costPrintedOn": "dossiers/folder-3/door-33/item-03.jpg",
 				"sourceGuids": ["6eec86"]
 			}
 		},

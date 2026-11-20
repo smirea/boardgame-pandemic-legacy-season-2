@@ -1,0 +1,37 @@
+{
+	"package": 6,
+	"index": 1,
+	"cardId": 10800,
+	"printedCodes": {
+		"sideA": "P6-01a",
+		"sideB": "P6-01b"
+	},
+	"title": "Recon Report",
+	"category": "report",
+	"city": null,
+	"color": null,
+	"copies": 1,
+	"hasImprovementSlot": false,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"text": "THIS PACKAGE INCLUDES:\n• 4 cards • 3 sticker cards\n• 15 Supply cubes\n\nRECON REPORT\n\nEerie. Just like our homes. Same design...same layout. Is this our future, empty cities rusting into the ocean?\n\nSearching for a few days revealed some breakthroughs—portable lab technology enabling supplies to be generated in the field and some experimental medicine to inoculate populations.\n\nThese cities will remain inoculated for months—buying us some time—before it slowly wears off.\n\nWe also found a cache of supplies which means more supplies each month for the rest of the year.\n\nRead both sides of this card then keep it in the reserve.\nP6-01a"
+	},
+	"sideB": {
+		"text": "RIGHT NOW!\n\n• Name this new haven.\n• Take the Portable Antiviral Lab cards found in this package and add 1 to your hand. Add the other 2 to the Player discard pile.\n• Take the 15 Supply cubes from this package and add them to the stockpile.\nP6-01b",
+		"searchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"opensDoors": [],
+		"rules": [
+			"Read both sides, then keep this card in the reserve.",
+			"Name this new haven.",
+			"Add 1 Portable Antiviral Lab to your hand and the other 2 to the Player discard pile.",
+			"Add the 15 Supply cubes from this package to the stockpile. These are new cubes, not cubes moved from the reserve."
+		],
+		"notes": "The permanent extra supplies each month are the Area 10 +15 sticker and Rule B, not a second line on this card."
+	}
+}

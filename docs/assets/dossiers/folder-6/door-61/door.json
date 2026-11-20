@@ -1,0 +1,52 @@
+{
+	"door": "61",
+	"folder": 6,
+	"id": "door-61",
+	"guid": "590cf5",
+	"frontImage": "dossiers/folder-6/door-61/front.jpg",
+	"frontText": "Navy 61 centered on a yellow door card. Dashed cut-line border. No other printed text.",
+	"items": [
+		{
+			"id": "item-01",
+			"image": "dossiers/folder-6/door-61/item-01.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "map-sticker",
+			"title": "Lake Baikal",
+			"placementTarget": "Board, on the dark surround north of 40°N at the printed 100°E meridian.",
+			"text": "Lake Baikal",
+			"mapDetails": {
+				"cities": [
+					{
+						"name": "Lake Baikal",
+						"color": "red",
+						"population": 1,
+						"port": false,
+						"infested": false,
+						"lab": null,
+						"marker": "inland-x",
+						"lat": 53.0,
+						"lon": 100.0,
+						"graticule": "On a small yellow island in the dark surround. The printed 100°E meridian passes through the disc. The printed 40°N line is well south of the island. No rat."
+					}
+				],
+				"havens": [],
+				"printedRoutes": [],
+				"reconRoutes": [],
+				"redRegionLines": [],
+				"specialAreas": [
+					{
+						"name": "Lake Baikal island",
+						"kind": "isolated-land",
+						"notes": "The only land on the sticker is the yellow island. A small blue patch on its southeast shore is the lake. The rest of the sticker is the dark impassable surround. No wall text, no lab icon, no route."
+					}
+				]
+			},
+			"mechanics": {
+				"addsCities": ["Lake Baikal"],
+				"notes": "Red inland city, population 1, not infested, not a port. No printed route or recon."
+			}
+		}
+	],
+	"summary": "Lake Baikal. One red inland city at population 1 on a yellow island in the dark surround, sitting on the printed 100°E line north of 40°N. No infestation, lab, route, recon, or red region line."
+}

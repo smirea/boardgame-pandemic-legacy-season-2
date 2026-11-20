@@ -1,0 +1,40 @@
+{
+	"sequence": 49,
+	"folder": "049_08-03",
+	"cardCode": "08-03",
+	"printedCodes": {
+		"sideA": "08-03a",
+		"sideB": "08-03b"
+	},
+	"title": "RIGHT NOW!",
+	"category": "legacy_instruction",
+	"month": "august",
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"stopOrPause": "CONTINUE",
+		"header": "KEEP DRAWING",
+		"trigger": "",
+		"text": "Draw and read the other side of this card.",
+		"footer": ""
+	},
+	"sideB": {
+		"header": "RIGHT NOW!",
+		"text": "Open the following doors:\nM    25",
+		"footer": "",
+		"scratchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"whenRead": "Continue the August setup Legacy-deck reading, immediately after 08-02. Side A says to read side B now.",
+		"triggers": [],
+		"opensDoors": ["M", "25"],
+		"opensPackages": [],
+		"destroys": [],
+		"addsToPool": [],
+		"rules": ["Open doors M and 25 immediately."],
+		"notes": "M and 25 are in separate white boxes with red type. What is inside them is not printed on this card. M is a letter, not a digit."
+	}
+}

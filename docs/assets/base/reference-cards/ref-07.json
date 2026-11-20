@@ -1,0 +1,32 @@
+{
+	"id": "ref-07",
+	"guid": "b4dae3",
+	"printedCode": null,
+	"title": "ACTIONS (CONT.)",
+	"category": "reference",
+	"color": null,
+	"pawnColor": "white",
+	"copies": 1,
+	"images": {
+		"front": "ref-07.jpg",
+		"back": "back.jpg"
+	},
+	"hasImprovementSlot": true,
+	"frontText": "ACTIONS (CONT.)\nRECON\nDiscard cards at an eligible location to explore the world.\nThe location must contain a supply center.\nMAKE SUPPLIES\nTake 1 Supply cube from the stockpile and put it onto your Character card.\nDELIVER SUPPLIES\nPut any number of Supply cubes from your Character card into your current location.\nFREE ACTIONS\nDo any number of free actions during the \"Do Actions\" step of your turn.\nPICK UP SUPPLIES\nTake any number of Supply cubes from your location and put them onto your Character card.\nTRANSFER SUPPLIES\nGive Supply cubes to another player in your location or take Supply cubes from that player (with permission).",
+	"backText": "NEW ACTIONS",
+	"states": [],
+	"mechanics": {
+		"timing": "The continued action list, plus free actions during the \"Do Actions\" step.",
+		"effect": "white pawn. Actions continued and free actions.",
+		"rules": [
+			"RECON: Discard cards at an eligible location to explore the world. The location must contain a supply center.",
+			"MAKE SUPPLIES: Take 1 Supply cube from the stockpile and put it onto your Character card.",
+			"DELIVER SUPPLIES: Put any number of Supply cubes from your Character card into your current location.",
+			"FREE ACTIONS: Do any number of free actions during the \"Do Actions\" step of your turn.",
+			"PICK UP SUPPLIES: Take any number of Supply cubes from your location and put them onto your Character card.",
+			"TRANSFER SUPPLIES: Give Supply cubes to another player in your location or take Supply cubes from that player (with permission).",
+			"The shared back is titled NEW ACTIONS.",
+			"Under the title are 6 empty horizontal sticker slots and no other text."
+		]
+	}
+}

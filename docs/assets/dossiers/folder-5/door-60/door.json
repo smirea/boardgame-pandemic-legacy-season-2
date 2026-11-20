@@ -1,0 +1,57 @@
+{
+	"door": "60",
+	"folder": 5,
+	"id": "door-60",
+	"guid": "41c0e2",
+	"frontImage": "dossiers/folder-5/door-60/front.jpg",
+	"frontText": "Navy 60 centered on a yellow door card. Dashed cut-line border. No other printed text.",
+	"items": [
+		{
+			"id": "item-01",
+			"image": "dossiers/folder-5/door-60/item-01.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "map-sticker",
+			"title": "Eastern Pacific haven",
+			"placementTarget": "Board, in the eastern Pacific west of Central America, on the 100°W side of the equator.",
+			"text": "Name and access\nthis haven and open\nPackage 6 the first\ntime you move here.",
+			"mapDetails": {
+				"cities": [],
+				"havens": [
+					{
+						"name": "",
+						"population": 3,
+						"port": true,
+						"marker": "anchor",
+						"arrival": "Name and access\nthis haven and open\nPackage 6 the first\ntime you move here.",
+						"lat": -5.0,
+						"lon": -92.0,
+						"graticule": "South of the faded printed 0° label and east of the printed 100°W meridian. Central America is the yellow coast at the top right; a further yellow coast is clipped at the right edge.",
+						"nameState": "blank",
+						"namePlate": "Blank white name plate directly above the anchor, with a pointer down to the disc.",
+						"opens": "Package 6"
+					}
+				],
+				"printedRoutes": [
+					{
+						"from": "this haven",
+						"to": "off-sticker southeast",
+						"type": "sea_lane",
+						"notes": "A blue sea lane leaves the southeast side of the anchor and runs off the bottom-right corner. No city is printed at the far end. Door 67's Lima, to the southeast, has no matching line on that sticker."
+					}
+				],
+				"reconRoutes": [],
+				"redRegionLines": [
+					"A vertical red line runs south along the printed 100°W meridian, from beneath the Central American coast to the bottom of the sticker. The haven sits east of this line."
+				],
+				"specialAreas": []
+			},
+			"mechanics": {
+				"onFirstMove": "Name and access this haven and open Package 6.",
+				"opens": "Package 6",
+				"notes": "Population 3. Port. Blank name. No recon box."
+			}
+		}
+	],
+	"summary": "Eastern Pacific haven, population 3, blank name. The first move here names it and opens Package 6. A red region line runs south along 100°W, west of the haven. A sea lane leaves the haven toward the southeast and does not meet a city on this sticker."
+}

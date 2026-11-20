@@ -1,0 +1,21 @@
+{
+	"file": "page-03.jpg",
+	"printedPageNumber": 3,
+	"headings": ["The World Almost Ended 71 Years Ago"],
+	"ruleStickerSlots": [],
+	"sections": [
+		{
+			"heading": "The World Almost Ended 71 Years Ago",
+			"mechanicsSummary": [
+				"Fiction prologue, not a procedure. No actions, counts to apply in play, or sticker slots.",
+				"A plague killed most people within about a week. Nothing stopped it.",
+				"For three generations the survivors have lived on floating stations called havens and shipped medicine, food, and tools to a shrinking set of mainland cities.",
+				"Distant cities have fallen off the grid. Only a few cities remain on it, and the supplies are both running out and failing to hold the plague back.",
+				"The havens' leaders and their security team did not return from the yearly meeting. Without them, the Hollow Men (hostile mainland bands) are expected to tear down what the havens build and steal what they deliver.",
+				"The remaining haven people start a journal. They expect to save most cities, not every city."
+			]
+		}
+	],
+	"tables": [],
+	"diagramsAndCallouts": ["Full-page sketch of masked people on a haven deck, with gulls, a flag, and a radio."]
+}

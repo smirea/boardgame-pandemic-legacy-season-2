@@ -1,0 +1,101 @@
+{
+	"file": "page-04.jpg",
+	"printedPageNumber": 4,
+	"headings": [
+		"Welcome to Pandemic Legacy - Season 2",
+		"Playing a Legacy Game",
+		"Legacy Deck",
+		"If You've Played Pandemic Legacy Season 1",
+		"What Stays and What Gets Reset?",
+		"Game Months",
+		"End of the Campaign",
+		"The Prologue",
+		"Prologue Rules"
+	],
+	"ruleStickerSlots": [],
+	"sections": [
+		{
+			"heading": "Playing a Legacy Game",
+			"mechanicsSummary": [
+				"Choices persist from game to game. Different groups get different campaigns.",
+				"Players will write on components, apply stickers to cards, characters, and the board, and sometimes tear up a card. Those changes are permanent.",
+				"Each game also ends with permanent upgrades chosen for later games.",
+				"Some material is sealed. Open a package or dossier only when an instruction says to.",
+				"Some rules are absent from the manual at the start. When found, those rules are stuck into the manual and replace what was there."
+			]
+		},
+		{
+			"heading": "Legacy Deck",
+			"mechanicsSummary": [
+				"82-card story deck covering 12 months. Kept in a fixed order. Do not look through it or shuffle it.",
+				"During setup, read cards one at a time until a card whose back says PAUSE or STOP.",
+				"That card says when to resume: sometimes at the end of the current game, sometimes during setup of the next month.",
+				"The deck is one-way. Do not return Legacy cards when a month is replayed.",
+				"If the deck is scrambled, someone who is not playing restores the order from the number in each card's corner."
+			]
+		},
+		{
+			"heading": "If You've Played Pandemic Legacy Season 1",
+			"mechanicsSummary": [
+				"Shared ideas include the Legacy deck, rationing (called funding in Season 1), end-of-game upgrades, dossiers, and sealed packages.",
+				"Season 1 is not required. The two games are separate campaigns joined only by story."
+			]
+		},
+		{
+			"heading": "What Stays and What Gets Reset?",
+			"mechanicsSummary": [
+				"Permanent: writing, stickers on the board or cards, opening new material, scratching cards, and tearing up or destroying components.",
+				"When told to destroy a component, it never returns. Tear it up or set it aside.",
+				"Everything else resets at the start of each game, including pieces on the board, cards in hand, and incidents."
+			]
+		},
+		{
+			"heading": "Game Months",
+			"mechanicsSummary": [
+				"The campaign is 12 months, beginning in the 71st year after the end of the world.",
+				"A win advances the group to the next month.",
+				"The first loss of a month grants one retry of that same month, with the same rules and objectives. Set the lost game up again.",
+				"A second loss of that month still advances to the next month. The calendar does not wait."
+			]
+		},
+		{
+			"heading": "End of the Campaign",
+			"mechanicsSummary": [
+				"The campaign ends when December is finished, win or lose, and is then scored.",
+				"Score is mostly how many months were won. A win earlier in a month scores better than a win on the retry.",
+				"Grid population affects the score less than months won. Other criteria will add or subtract points."
+			]
+		},
+		{
+			"heading": "The Prologue",
+			"mechanicsSummary": [
+				"The prologue teaches rules that differ from base Pandemic and from Season 1.",
+				"The prologue has no legacy effects and no permanent changes.",
+				"Play it at least once, and repeat it as many times as the group wants, before starting the campaign."
+			]
+		},
+		{
+			"heading": "Prologue Rules",
+			"mechanicsSummary": [
+				"Two Prologue cards, found with the Player and Infection decks, walk through the objectives.",
+				"Read the Journal Entry / Prologue card for background and for which rules differ in the prologue.",
+				"Use the Prologue Objective card during the game."
+			]
+		}
+	],
+	"tables": [
+		{
+			"name": "Month outcome",
+			"rows": [
+				{ "result": "Win", "next": "Play the next month" },
+				{ "result": "First loss of the month", "next": "Retry the same month with the same rules and objectives" },
+				{ "result": "Second loss of the month", "next": "Advance to the next month anyway" },
+				{ "result": "December finished, win or lose", "next": "Campaign ends and is scored" }
+			]
+		}
+	],
+	"diagramsAndCallouts": [
+		"Legacy-deck stack pictured with a STOP back.",
+		"Shaded prologue box with the two Prologue cards."
+	]
+}

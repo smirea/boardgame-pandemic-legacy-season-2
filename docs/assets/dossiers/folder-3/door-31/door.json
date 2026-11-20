@@ -20,7 +20,7 @@
 				"effect": "You may do the Recon action in a city that does not contain a supply center.",
 				"restrictions": [],
 				"printedCapitalization": "supply center is lowercase on the sticker",
-				"costPrintedOn": "door-31/item-04.jpg",
+				"costPrintedOn": "dossiers/folder-3/door-31/item-04.jpg",
 				"sourceGuids": ["1af9c0"]
 			}
 		},
@@ -39,7 +39,7 @@
 				"trigger": null,
 				"effect": "Discard a City card to take a Supply cube from the reserve and put it in the city matching the card.",
 				"restrictions": ["The cube comes from the reserve", "The city must match the discarded City card"],
-				"costPrintedOn": "door-31/item-04.jpg",
+				"costPrintedOn": "dossiers/folder-3/door-31/item-04.jpg",
 				"sourceGuids": ["af9cad"]
 			}
 		},
@@ -62,7 +62,7 @@
 					"The card comes from the discard pile",
 					"Search that card once"
 				],
-				"costPrintedOn": "door-31/item-04.jpg",
+				"costPrintedOn": "dossiers/folder-3/door-31/item-04.jpg",
 				"sourceGuids": ["ab9390"]
 			}
 		},

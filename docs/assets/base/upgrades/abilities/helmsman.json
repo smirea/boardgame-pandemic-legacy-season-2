@@ -1,0 +1,15 @@
+{
+	"id": "helmsman",
+	"name": "Helmsman",
+	"category": "ability",
+	"costProductionUnits": 3,
+	"copies": 1,
+	"image": "helmsman.jpg",
+	"text": "Helmsman: You may do a free Drive/Ferry action\neach turn.",
+	"mechanics": {
+		"timing": "free_action",
+		"trigger": "Each turn",
+		"effect": "You may do one free Drive/Ferry action.",
+		"restrictions": ["Once each turn"]
+	}
+}

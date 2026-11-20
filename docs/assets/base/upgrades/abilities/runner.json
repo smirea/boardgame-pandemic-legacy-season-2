@@ -1,0 +1,15 @@
+{
+	"id": "runner",
+	"name": "Runner",
+	"category": "ability",
+	"costProductionUnits": 1,
+	"copies": 1,
+	"image": "runner.jpg",
+	"text": "Runner: As an action, discard a City card while in\na haven or supply center to move to any location\non the grid.",
+	"mechanics": {
+		"timing": "action",
+		"trigger": null,
+		"effect": "Discard a City card while in a haven or supply center to move to any location on the grid.",
+		"restrictions": ["Must be in a haven or supply center", "Must discard a City card"]
+	}
+}

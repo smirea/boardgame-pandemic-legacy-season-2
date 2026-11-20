@@ -1,0 +1,23 @@
+{
+	"id": "sticker-03",
+	"package": 3,
+	"guid": "91a686",
+	"printedCode": "P3-29a",
+	"name": "Game End Upgrades",
+	"category": "game-end-upgrades-sheet",
+	"placementTarget": "Carrier sheet for the five Permanent Shelter stickers. The sheet itself is not placed on the board.",
+	"costProductionUnits": null,
+	"copies": 1,
+	"image": "sticker-03.jpg",
+	"summary": "Game End Upgrades, printed code P3-29a. Five Permanent Shelter icons, each with an orange 2. Put a Permanent Shelter sticker next to a city that had a shelter in the game just played. During setup, add a shelter to each city with a Permanent Shelter sticker.",
+	"mechanics": {
+		"timing": "Read at game end, when placing Permanent Shelters, and again during setup of later games.",
+		"effect": "Explains the five Permanent Shelter stickers. Each costs 2. Place one next to a city that had a shelter in the game just played. In later setup, put a shelter figure in every city that has the sticker.",
+		"restrictions": [
+			"The sticker records a shelter from the game just finished.",
+			"Five icons, matching the five Permanent Shelter stickers.",
+			"This sheet does not list Rebirth. Rebirth is sticker-01."
+		],
+		"opensDoors": []
+	}
+}

@@ -1,0 +1,40 @@
+{
+	"sequence": 23,
+	"folder": "023_03-02",
+	"cardCode": "03-02",
+	"printedCodes": {
+		"sideA": "03-02a",
+		"sideB": "03-02b"
+	},
+	"title": "Journal Entry",
+	"category": "legacy_journal",
+	"month": "march",
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"stopOrPause": "NONE",
+		"header": "Journal Entry",
+		"trigger": "",
+		"text": "Havens have been in trouble for a while. Old records (attached) show that the four main labs were never meant to go beyond 50 years. Nor were the supplies. Our leaders have been putting on a good show for a long time now. They knew the end was near. Now they are gone and it's a race between us and the Hollow Men.\n\nWe need to find the havens outside the Atlantic... they might have supplies or equipment we can use.",
+		"footer": ""
+	},
+	"sideB": {
+		"header": "FROM THE ARCHIVES",
+		"text": "YEAR 57 SUMMARY\n\nPEARL was on the verge of a cure when it went silent.\n\nOPAL, JADE, and TOPAZ are set up to support PEARL – they are not equipped to find a cure on their own.\n\nTransporting a potential cure from PEARL to JADE was always going to be a frantic dash. We must keep the routes between them viable.",
+		"footer": "Keep papers like this in the reserve.",
+		"scratchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"whenRead": "Continue the March setup Legacy-deck reading, immediately after 03-01. Not a STOP or PAUSE, so draw the next card after reading it.",
+		"triggers": [],
+		"opensDoors": [],
+		"opensPackages": [],
+		"destroys": [],
+		"addsToPool": [],
+		"rules": ["Keep the card in the reserve. No rules change."],
+		"notes": "Side B is the attached archive clipping named by the journal. A handwritten signature sits under the summary and is not transcribed. The dash in \"PEARL – they\" is an en dash."
+	}
+}

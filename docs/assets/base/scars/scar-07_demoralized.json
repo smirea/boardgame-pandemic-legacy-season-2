@@ -1,0 +1,15 @@
+{
+	"id": "scar-07",
+	"name": "Demoralized",
+	"category": "scar",
+	"costProductionUnits": null,
+	"copies": 1,
+	"image": "scar-07_demoralized.jpg",
+	"text": "Demoralized: Move all of the Supply cubes from\nyour Character card to the stockpile every time an\nEpidemic card is revealed.",
+	"mechanics": {
+		"timing": "epidemic",
+		"trigger": "Every time an Epidemic card is revealed",
+		"effect": "Move all Supply cubes from your Character card to the stockpile.",
+		"restrictions": []
+	}
+}

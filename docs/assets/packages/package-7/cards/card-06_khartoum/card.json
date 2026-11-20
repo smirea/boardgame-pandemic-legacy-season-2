@@ -1,0 +1,37 @@
+{
+	"package": 7,
+	"index": 6,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P7-06b"
+	},
+	"title": "Khartoum",
+	"category": "infection-card",
+	"city": "Khartoum",
+	"color": "yellow",
+	"copies": 1,
+	"hasImprovementSlot": true,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"text": "Infection card back. No text."
+	},
+	"sideB": {
+		"text": "KHARTOUM\n\nYellow city art with a white upgrade panel and a green ring. No other text.",
+		"searchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"opensDoors": [],
+		"rules": [
+			"Yellow Infection card for Khartoum.",
+			"The white center panel is the infection-card upgrade slot. The green ring is standard infection-card art."
+		],
+		"notes": [
+			"Card id 10705.",
+			"Goes to the reserve with the other unused cards when the package is opened. It is not set aside in the Game End area."
+		]
+	}
+}

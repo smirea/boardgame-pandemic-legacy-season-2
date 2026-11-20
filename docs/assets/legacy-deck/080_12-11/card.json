@@ -1,0 +1,46 @@
+{
+	"sequence": 80,
+	"folder": "080_12-11",
+	"cardCode": "12-11",
+	"printedCodes": {
+		"sideA": "12-11a",
+		"sideB": "12-11b"
+	},
+	"title": "Delivered: 851 and Above",
+	"category": "ending",
+	"month": "december",
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"stopOrPause": "NONE",
+		"header": "",
+		"trigger": "",
+		"summary": "If you delivered the sample, check your score to determine the fate of the world.",
+		"text": "If you delivered the sample, check your score to determine the fate of the world...",
+		"footer": ""
+	},
+	"sideB": {
+		"header": "DELIVERED: 851 AND ABOVE",
+		"summary": "DELIVERED: 851 AND ABOVE. The work brought the world back. Cities are growing and people have hope. Leaders lost faith, and they did not. The century will be remembered as dark, with light ahead. The Hollow Men are free, and the Faded are finally free of exile on the havens. DELIVERED: 701-850. They persevered. Some cities were saved and civilization rekindled. Faded, non-Faded, and Hollow Men hope to find a way to coexist. The world moves on, hopefully for the better, though some cities may never recover.",
+		"text": "DELIVERED: 851 AND ABOVE\nThe work brought the world back from disaster. Cities are growing and people have hope. Leaders lost faith, but they never did. The century will be remembered as a time of darkness with light ahead. The Hollow Men have been freed, and the Faded are finally free from exile on the havens.\n\nDELIVERED: 701-850\nThey persevered. Some cities were saved and civilization has been rekindled. Faded, non-Faded, and Hollow Men hope to coexist. The world will move on, hopefully for the better, although some cities may never recover.",
+		"footer": "",
+		"scratchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"whenRead": "After scoring on 12-08, if the sample was delivered and the grand total is 701 or higher. 851 and above is the first blurb. 701-850 is the second. Lower delivered scores continue on 12-12.",
+		"triggers": ["Delivered the sample and grand total 851 or above", "Delivered the sample and grand total 701-850"],
+		"opensDoors": [],
+		"opensPackages": [],
+		"destroys": [],
+		"addsToPool": [],
+		"rules": [
+			"Read this card only if the sample was delivered.",
+			"Score bracket DELIVERED: 851 AND ABOVE.",
+			"Score bracket DELIVERED: 701-850."
+		],
+		"notes": "Green border. 'delivered the sample' is printed in green on side A. Flavor above is paraphrased. The brackets are exact."
+	}
+}

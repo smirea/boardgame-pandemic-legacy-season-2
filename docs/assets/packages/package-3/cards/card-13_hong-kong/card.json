@@ -1,0 +1,40 @@
+{
+	"package": 3,
+	"index": 13,
+	"cardId": 10712,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P3-13b"
+	},
+	"title": "Hong Kong",
+	"category": "infection-card",
+	"city": "Hong Kong",
+	"color": "red",
+	"coordinates": null,
+	"port": null,
+	"copies": 1,
+	"hasImprovementSlot": true,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideASummary": "Infection deck back. Red biohazard on black, with a yellow caution stripe. No text and no printed code.",
+	"sideBSummary": "Hong Kong Infection card, red. The name runs down the left edge. A blank white panel in the middle takes one improvement sticker. A green plague ring sits on a faded map. No search box and no coordinates. Printed code P3-13b.",
+	"searchBoxes": [],
+	"states": [],
+	"mechanics": {
+		"opensDoors": [],
+		"destroys": false,
+		"rules": [
+			"Red Infection card for Hong Kong. One copy.",
+			"The white panel is the one improvement slot. Rebirth, from this package, is the sticker that fits a slot like this.",
+			"No scratch-off box.",
+			"Goes to the reserve when the package is opened."
+		],
+		"notes": [
+			"Card id 10712.",
+			"Printed code P3-13b is on side B only. Side A is the Infection deck back.",
+			"The city's coordinates and port marking are on its Player card, not on this Infection card."
+		]
+	}
+}

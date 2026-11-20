@@ -1,0 +1,59 @@
+{
+	"package": 4,
+	"index": 3,
+	"cardId": 10802,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P4-03b"
+	},
+	"title": "Paris",
+	"category": "player-card",
+	"city": "Paris",
+	"color": "blue",
+	"coordinates": "48°51'24\"N 2°21'8\"E",
+	"port": false,
+	"copies": 1,
+	"hasImprovementSlot": false,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideASummary": "Player deck back. No printed text. State 2 side A is the same back.",
+	"sideBSummary": "Paris, blue, 48°51'24\"N 2°21'8\"E. Compass with no anchor. One covered SEARCH box. The name and coordinates repeat upside down along the bottom. P4-03b.",
+	"searchBoxes": [
+		{
+			"type": "search",
+			"stateRevealed": 2,
+			"isCompanion": true,
+			"companionName": "Engineer",
+			"opensDoors": [],
+			"effectSummary": "While this card is in your hand, Build Supply Center costs 1 fewer card. This card may be one of the cards spent on that build. The card does not say to discard it except by spending it as one of those cards."
+		}
+	],
+	"states": [
+		{
+			"state": 2,
+			"cardId": 10712,
+			"images": {
+				"sideA": "state-2-side-a.jpg",
+				"sideB": "state-2-side-b.jpg"
+			},
+			"summary": "SEARCH reveals Companion Engineer. When you Build a Supply Center, you need 1 fewer card if this card is in your hand, and this card can be one of the cards used. P4-03b stays on the scratched face. Side A is still the Player deck back."
+		}
+	],
+	"mechanics": {
+		"opensDoors": [],
+		"destroys": [],
+		"rules": [
+			"Blue Player card for Paris. Not a port. The compass has no anchor.",
+			"One SEARCH box. State 2 is the scratched face.",
+			"Companion Engineer: Build Supply Center needs 1 fewer card while this card is in your hand. This card can be one of the cards used."
+		],
+		"notes": [
+			"Card id 10802. Scratch state card id 10712.",
+			"Coordinates are printed 48°51'24\"N 2°21'8\"E, with no leading zero on the 8 seconds.",
+			"No improvement bullseye is printed. The scratch box covers the center.",
+			"The recon report puts this card, with the other Paris Player card, in the Player discard pile."
+		]
+	}
+}

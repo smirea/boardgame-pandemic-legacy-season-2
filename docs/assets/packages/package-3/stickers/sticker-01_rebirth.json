@@ -1,0 +1,24 @@
+{
+	"id": "sticker-01_rebirth",
+	"package": 3,
+	"guid": ["a82de8", "82baeb"],
+	"printedCode": null,
+	"name": "Rebirth",
+	"category": "infection-card-improvement",
+	"placementTarget": "On an Infection card, in its white improvement panel. The sticker says \"this card will not infect\" and does not print a separate placement line.",
+	"costProductionUnits": 1,
+	"copies": 2,
+	"image": "sticker-01_rebirth.jpg",
+	"summary": "Rebirth. If the city is recovering, meaning its population is 6 or more, this Infection card does not infect it. Do not remove a Supply cube and do not place a Plague cube. Hollow Men Gather still takes effect. No code is printed on this scan. The component list prices each copy at 1 production unit.",
+	"mechanics": {
+		"timing": "When this Infection card would infect its city. Bought at game end with production units. The 1-unit price is the catalog description of the sticker, not a numeral printed on this image.",
+		"effect": "If the city has a population of 6 or more, the card does not infect that city. Skip removing a Supply cube and skip placing a Plague cube. A Hollow Men Gather draw still adds its figure when this card is the city that draw reveals.",
+		"restrictions": [
+			"Two stickers.",
+			"The recovering test is population 6 or more, printed on the sticker.",
+			"The skip covers the normal infect step only. Hollow Men Gather still places a figure.",
+			"No P3 code is visible on the sticker image."
+		],
+		"opensDoors": []
+	}
+}

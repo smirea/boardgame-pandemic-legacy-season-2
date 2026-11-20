@@ -1,0 +1,20 @@
+{
+	"id": "sticker-01",
+	"package": 6,
+	"guid": "19cb09",
+	"printedCode": null,
+	"name": "Inoculate",
+	"category": "reference-overlay",
+	"placementTarget": "Back of each player reference card",
+	"costProductionUnits": null,
+	"copies": 1,
+	"image": "sticker-01.jpg",
+	"text": "INOCULATE (FREE ACTION)\nTake a Player card or an Infection card matching your current city from its discard pile. Put it into Package 6.",
+	"mechanics": {
+		"timing": "free_action",
+		"effect": "Take a Player card or an Infection card matching your current city from its discard pile and put it into Package 6.",
+		"restrictions": ["The card must match your current city", "The card comes from that deck's discard pile"],
+		"opensDoors": [],
+		"notes": "Reference overlay. Sticker 02 says to place it on the back of each player reference card. The storage limits and the look-but-don't-sticker rule are on Rule I, not on this overlay."
+	}
+}

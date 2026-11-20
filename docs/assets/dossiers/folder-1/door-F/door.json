@@ -1,0 +1,29 @@
+{
+	"door": "F",
+	"folder": 1,
+	"frontImage": "front.jpg",
+	"frontText": "F",
+	"items": [
+		{
+			"id": "item-01_rule-f",
+			"image": "item-01_rule-f.jpg",
+			"count": 1,
+			"printedCode": "F",
+			"category": "rule_sticker",
+			"title": "Infested Cities",
+			"placementTarget": "Rulebook page 10, slot F (under Check for Exposure)",
+			"text": "INFESTED CITIES\nYour character gets exposed if you begin your turn in a city marked with an infested symbol. (If the city has a Plague cube and is also infested, you get exposed only once, not twice.)",
+			"tables": [],
+			"mechanics": {
+				"opensDoors": [],
+				"opensPackages": [],
+				"rules": [
+					"Starting a turn in a city with an infested symbol gives 1 exposure.",
+					"Plague and infested in the same city still cause only 1 exposure that turn."
+				],
+				"effect": "Adds infestation as an exposure trigger and stops it from stacking with a plague cube."
+			}
+		}
+	],
+	"summary": "Beginning your turn in an infested city exposes you once. A plague cube in the same city does not cause a second exposure."
+}

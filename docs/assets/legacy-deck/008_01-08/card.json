@@ -1,0 +1,44 @@
+{
+	"sequence": 8,
+	"folder": "008_01-08",
+	"cardCode": "01-08",
+	"printedCodes": {
+		"sideA": "",
+		"sideB": "01-08b"
+	},
+	"title": "Data Transfer",
+	"category": "rationed_event",
+	"month": "january",
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"stopOrPause": "NONE",
+		"header": "",
+		"trigger": "",
+		"text": "",
+		"footer": ""
+	},
+	"sideB": {
+		"header": "RATIONED EVENT",
+		"text": "DATA TRANSFER\n\nTwo players (anywhere on the board) can swap 1 Player card from their hands.\n\nPlay at any time. Not an action.",
+		"footer": "Play at any time. Not an action.",
+		"scratchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"whenRead": "Taken with the other new Rationed Events when 01-07 is read, at the end of the first January game. Kept in the reserve and added to the Rationed Event pool.",
+		"triggers": [],
+		"opensDoors": [],
+		"opensPackages": [],
+		"destroys": [],
+		"addsToPool": ["Data Transfer (Rationed Event)"],
+		"rules": [
+			"Two players (anywhere on the board) can swap 1 Player card from their hands.",
+			"Play at any time. Not an action.",
+			"Any two players, wherever they are on the board, swap 1 Player card from their hands."
+		],
+		"notes": "Side A is the shared rationed-event back (haven in a signal ring, yellow bars, red arc). No printed card code and no rules text. The parenthetical 'anywhere on the board' is italic. The screen title is DATA TRANSFER."
+	}
+}

@@ -23,7 +23,7 @@
 					"Does not count toward objectives to build new supply centers"
 				],
 				"icon": "Dark circle with a supply-center building (three windows) on a yellow field",
-				"costPrintedOn": "door-36/item-02.jpg",
+				"costPrintedOn": "dossiers/folder-3/door-36/item-02.jpg",
 				"sourceGuids": ["2180e5", "fdd3f2", "f88b85"]
 			}
 		},

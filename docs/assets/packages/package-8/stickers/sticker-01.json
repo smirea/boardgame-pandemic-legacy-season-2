@@ -1,0 +1,23 @@
+{
+	"id": "sticker-01",
+	"package": 8,
+	"printedCode": null,
+	"name": "Utopia",
+	"category": "map-overlay",
+	"placementTarget": "The board, over the Lake Baikal area of the Utopia region. The sticker is the only sticker card in the package.",
+	"costProductionUnits": null,
+	"copies": 1,
+	"image": "sticker-01.jpg",
+	"text": "Open 22\nthe first time\nyou move to\nLake Baikal.\n\nUtopia\n\n40° N\n100° E\n\n[blue square with a white 8]\n[red city marker with a white cross]\n[one black route line leaving the marker toward the bottom-right edge]",
+	"mechanics": {
+		"timing": "The first time you move to Lake Baikal, open door 22.",
+		"effect": "Places the red city Utopia on the board. Starting population is the blue square with 8. A latitude line is labeled 40° N and a longitude line is labeled 100° E. One thick black route starts at the Utopia city marker and leaves the sticker through the bottom-right edge. No second city, haven, or route is drawn on this sticker.",
+		"restrictions": [
+			"Door 22 opens the first time you move to Lake Baikal. The city name printed on the sticker is Utopia, and Lake Baikal is named only in that instruction.",
+			"The Player card gives Utopia's coordinates as 41°45'10\"N 111°31'60\"E. The sticker's 40° N and 100° E are grid lines, not that coordinate pair.",
+			"The city marker is red. The population square is blue. No infested symbol, anchor, or recon diamond is printed on the sticker.",
+			"The other end of the black route is not labeled on this sticker."
+		],
+		"opensDoors": ["22"]
+	}
+}

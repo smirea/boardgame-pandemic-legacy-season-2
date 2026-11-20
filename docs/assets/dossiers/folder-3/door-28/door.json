@@ -19,7 +19,7 @@
 				"trigger": null,
 				"effect": "Discard a City card to remove a Hollow Men figure from a city matching the color of the card.",
 				"restrictions": ["The city must match the color of the discarded City card"],
-				"costPrintedOn": "door-28/item-04.jpg",
+				"costPrintedOn": "dossiers/folder-3/door-28/item-04.jpg",
 				"sourceGuids": ["a463ef"]
 			}
 		},
@@ -38,7 +38,7 @@
 				"trigger": null,
 				"effect": "Discard 2 Player cards to take 1 City card of your choice from Package 6 and add it to your hand.",
 				"restrictions": ["The City card comes from Package 6", "Discard exactly 2 Player cards"],
-				"costPrintedOn": "door-28/item-04.jpg",
+				"costPrintedOn": "dossiers/folder-3/door-28/item-04.jpg",
 				"sourceGuids": ["a06d66"]
 			}
 		},
@@ -61,7 +61,7 @@
 					"The destination must be adjacent",
 					"The destination contains 2 or fewer Hollow Men figures"
 				],
-				"costPrintedOn": "door-28/item-04.jpg",
+				"costPrintedOn": "dossiers/folder-3/door-28/item-04.jpg",
 				"sourceGuids": ["2f7769"]
 			}
 		},

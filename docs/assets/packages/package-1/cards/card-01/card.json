@@ -1,0 +1,41 @@
+{
+	"package": 1,
+	"index": 1,
+	"cardId": 900,
+	"printedCodes": {
+		"sideA": "P1-01a",
+		"sideB": "P1-01b"
+	},
+	"title": "Recon Report",
+	"category": "recon-report",
+	"city": null,
+	"color": null,
+	"copies": 1,
+	"hasImprovementSlot": false,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideASummary": "Inventory: 20 cards and 1 sticker card. The report says the plague followed COdA in North America, and that back-to-back pandemics broke the world's supply lines. Read both sides, then keep this card in the reserve.",
+	"sideBSummary": "Open doors 66, J, 23, L, and 39 if they are still sealed. Chicago joins the grid. Put Chicago's Player cards in the Player discard and Chicago's Infection cards in the Game End area. Put every other Player card and Infection card from this package in the reserve. Give Decontamination Kit to a player, into their hand.",
+	"searchBoxes": [],
+	"states": [],
+	"mechanics": {
+		"opensDoors": ["66", "J", "23", "L", "39"],
+		"destroys": [],
+		"rules": [
+			"On opening the package, open doors 66, J, 23, L, and 39 if they are not already open.",
+			"Chicago is the new city. Both Chicago Player cards (P1-03b and P1-04b) go to the Player discard pile.",
+			"Both Chicago Infection cards go to the Game End area, so they cannot be drawn this game.",
+			"Every other Player card and Infection card in the package goes to the reserve.",
+			"Give the Decontamination Kit Unrationed Event (P1-02b) to a player to add to their hand.",
+			"Keep this report in the reserve after both sides have been read."
+		],
+		"notes": [
+			"Card id 900. Printed codes P1-01a and P1-01b.",
+			"The face says 20 cards and 1 sticker card. The 17 folders are 20 physical cards once the duplicate Infection cards are counted. The Workshop splits the one sticker card into Weak, Impatient, and Exhausted.",
+			"Door 66 is the North America map. J and 23 are Establish Supply Line. L and 39 are Search.",
+			"Side A spells the earlier virus COdA. The Atlanta search spells the same name CCdA."
+		]
+	}
+}

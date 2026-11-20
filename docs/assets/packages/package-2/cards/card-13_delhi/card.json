@@ -1,0 +1,58 @@
+{
+	"package": 2,
+	"index": 13,
+	"cardId": 10712,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P2-13b"
+	},
+	"title": "Delhi",
+	"category": "player-card",
+	"city": "Delhi",
+	"color": "black",
+	"coordinates": "28°42'15\"N 77°6'9\"E",
+	"port": false,
+	"copies": 1,
+	"hasImprovementSlot": false,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideASummary": "Player deck back. No printed text. State 2 side A is the same back.",
+	"sideBSummary": "Delhi, 28°42'15\"N 77°6'9\"E, code P2-13b. Compass has no anchor. One sealed box labeled SEARCH:. The city name and coordinates repeat upside down along the bottom.",
+	"searchBoxes": [
+		{
+			"type": "search",
+			"stateRevealed": 2,
+			"isCompanion": true,
+			"companionName": "Vector Control Technician",
+			"opensDoors": [],
+			"effectSummary": "Companion: Vector Control Technician. You do not get exposed when you begin your turn in an infested city if you have this card in your hand. The protection lasts while the card is held. It does not discard the card, and it does not name plague cubes or leaving a location."
+		}
+	],
+	"states": [
+		{
+			"state": 2,
+			"cardId": 10727,
+			"images": {
+				"sideA": "state-2-side-a.jpg",
+				"sideB": "state-2-side-b.jpg"
+			},
+			"summary": "SEARCH is scratched and shows a portrait labeled Companion: Vector Control Technician. While this card is in your hand, you do not get exposed when you begin your turn in an infested city. Code P2-13b is unchanged. Side A is the player back."
+		}
+	],
+	"mechanics": {
+		"opensDoors": [],
+		"destroys": [],
+		"rules": [
+			"Black Player card for Delhi. Not a port. The only Delhi Player card.",
+			"One SEARCH box. State 2 is the scratched face.",
+			"The result is a companion, not a one-shot effect. Vector Control Technician stops the exposure from beginning your turn in an infested city, and only while this card is in your hand."
+		],
+		"notes": [
+			"Goes to the reserve when the package is opened.",
+			"Door F, which this report opens, is the rule that a turn begun in an infested city causes exposure. This companion is the printed exception for the holder.",
+			"The scratch panel fills the center. No bullseye upgrade mark is printed."
+		]
+	}
+}

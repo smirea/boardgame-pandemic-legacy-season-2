@@ -1,0 +1,21 @@
+{
+	"id": "sticker-07_area-15",
+	"package": 2,
+	"printedCode": null,
+	"name": "Hollow Men Figures",
+	"category": "board-legend",
+	"placementTarget": "On the board legend, sticker area 15.",
+	"costProductionUnits": null,
+	"copies": 1,
+	"image": "sticker-07_area-15.jpg",
+	"summary": "Title HOLLOW MEN FIGURES, with a Hollow Men shield. Three reminders: your character is exposed when your pawn leaves a location that contains 1 or more Hollow Men figures; instead of adding a 4th figure to a city, reduce its population by 1; if a location has 1 or more Hollow Men figures or Plague cubes, reduce its population by only 1 during step 1 of Game End. The number 15 is not printed on the sticker.",
+	"mechanics": {
+		"timing": "Leaving a Hollow Men location, placing a 4th figure, and Game End step 1.",
+		"effect": "Board reminder of three rules from this package. Leaving a location with 1 or more Hollow Men figures exposes the character. A 4th figure is not placed, and that city loses 1 population immediately. At Game End step 1, a location with Hollow Men figures or Plague cubes loses only 1 population.",
+		"restrictions": [
+			"This sticker does not add a rule beyond C, G, S, T, and W. It repeats the leave exposure, the 3-figure cap, and the single Game End population drop.",
+			"The Game End bullet says figures or Plague cubes, and only 1. Rule W is the rulebook wording of that combined drop."
+		],
+		"opensDoors": []
+	}
+}

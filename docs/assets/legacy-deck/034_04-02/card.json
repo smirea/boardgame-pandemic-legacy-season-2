@@ -1,0 +1,40 @@
+{
+	"sequence": 34,
+	"folder": "034_04-02",
+	"cardCode": "04-02",
+	"printedCodes": {
+		"sideA": "04-02a",
+		"sideB": "04-02b"
+	},
+	"title": "Journal Entry",
+	"category": "legacy_journal",
+	"month": "april",
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"stopOrPause": "NONE",
+		"header": "Journal Entry",
+		"trigger": "",
+		"text": "This year is already taking its toll. People and resources are getting stretched thin. Gearing up to be out in the world is mentally difficult as we're outsiders there. One bright spot are the laboratories. Although they lost their lead lab, the three labs in the Southern Hemisphere have kept working through the generations. We need to find out if they've made any progress.",
+		"footer": ""
+	},
+	"sideB": {
+		"header": "FROM THE ARCHIVES",
+		"text": "YEAR 42\n\nPacific Haven not reporting. Hoping Hollow Men did not steal everything. Sending scouts to Lima to check. Also sending patrols to Indian Haven... silent since the fallout in Indian Ocean. Presumed lost.\n\nHandwritten coordinate slip, torn at the end of the last line:\nJ  26°11'28\"S  28°02'43\"E\nO  34°29'38\"S  58°31'35\"W\nT  41°11'46\"S  174°56'29\"E\nP  53°19'21\"N  1",
+		"footer": "Keep papers like this in the reserve.",
+		"scratchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"whenRead": "Continue the April setup Legacy-deck reading, immediately after 04-01.",
+		"triggers": [],
+		"opensDoors": [],
+		"opensPackages": [],
+		"destroys": [],
+		"addsToPool": [],
+		"rules": ["Keep the card in the reserve. The coordinate slip is a clue to the four labs. No rules change."],
+		"notes": "The P line is ripped through the character after 53°19'21\"N, leaving only the start of the next figure, a 1. J longitude seconds and O longitude seconds are handwritten 43 and 35; both were checked on a magnified crop because a 3 and a 5 are close in this hand. A signature above the slip is not transcribed. The letters J, O, T, and P match Jade, Opal, Topaz, and Pearl from 03-02, but those names are not printed on this slip."
+	}
+}

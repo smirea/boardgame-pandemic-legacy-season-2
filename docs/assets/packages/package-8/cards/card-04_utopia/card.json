@@ -1,0 +1,39 @@
+{
+	"package": 8,
+	"index": 4,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P8-11b"
+	},
+	"title": "Utopia",
+	"category": "infection-card",
+	"city": "Utopia",
+	"color": "red",
+	"copies": 8,
+	"hasImprovementSlot": false,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"text": "Infection card back. No text."
+	},
+	"sideB": {
+		"text": "UTOPIA\n\nUTOPIA\nCANNOT\nBE IMPROVED.\n\nRed city art. A black label over the upgrade panel reads UTOPIA CANNOT BE IMPROVED, with CANNOT in red. A green ring sits below the label.",
+		"searchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"opensDoors": [],
+		"rules": [
+			"Red Infection card for Utopia. Eight copies, all this face.",
+			"Utopia cannot be improved. No infection-card upgrade sticker can be placed on it. The usual white upgrade panel is covered by that notice.",
+			"When the package is opened, all 8 copies go to the Infection discard pile."
+		],
+		"notes": [
+			"Card id 10704. Copies: 8.",
+			"The printed code is P8-11b, not P8-04b.",
+			"The green ring is the standard infection-card art, not a separate rule."
+		]
+	}
+}

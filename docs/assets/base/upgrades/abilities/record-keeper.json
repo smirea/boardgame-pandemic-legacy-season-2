@@ -1,0 +1,15 @@
+{
+	"id": "record-keeper",
+	"name": "Record Keeper",
+	"category": "ability",
+	"costProductionUnits": 1,
+	"copies": 1,
+	"image": "record-keeper.jpg",
+	"text": "Record Keeper: Increase your hand limit by 1 card.",
+	"mechanics": {
+		"timing": "passive",
+		"trigger": null,
+		"effect": "Increase your hand limit by 1 card.",
+		"restrictions": []
+	}
+}

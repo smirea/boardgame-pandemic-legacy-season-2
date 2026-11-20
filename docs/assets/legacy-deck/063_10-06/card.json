@@ -1,0 +1,42 @@
+{
+	"sequence": 63,
+	"folder": "063_10-06",
+	"cardCode": "10-06",
+	"printedCodes": {
+		"sideA": "10-06a",
+		"sideB": "10-06b"
+	},
+	"title": "Right Now!",
+	"category": "legacy_pause",
+	"month": "october",
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"stopOrPause": "PAUSE",
+		"header": "PAUSE",
+		"trigger": "DRAW THIS CARD AND READ THE OTHER SIDE DURING STEP 2 AT THE END OF YOUR FIRST GAME IN OCTOBER.",
+		"summary": "Pause. Draw this card and read the other side during step 2 at the end of your first game in October.",
+		"text": "PAUSE\n\nDRAW THIS CARD AND READ THE OTHER SIDE DURING STEP 2 AT THE END OF YOUR FIRST GAME IN OCTOBER.",
+		"footer": ""
+	},
+	"sideB": {
+		"header": "RIGHT NOW!",
+		"summary": "Open doors 28 and 45.",
+		"text": "Open the following doors:\n28\n45",
+		"footer": "",
+		"scratchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"whenRead": "Side A is the next Pause after October's setup cards. Read side B during step 2 of Game End after the first October game, then keep drawing the cards behind it.",
+		"triggers": ["Step 2 of Game End after the first game in October"],
+		"opensDoors": ["28", "45"],
+		"opensPackages": [],
+		"destroys": [],
+		"addsToPool": [],
+		"rules": ["Open door 28 and door 45."],
+		"notes": "The next card in the deck is 10-07, Mobile Shelters, drawn in the same Game End."
+	}
+}

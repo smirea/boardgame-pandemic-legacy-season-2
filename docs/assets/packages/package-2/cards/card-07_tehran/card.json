@@ -1,0 +1,57 @@
+{
+	"package": 2,
+	"index": 7,
+	"cardId": 10706,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P2-07b"
+	},
+	"title": "Tehran",
+	"category": "player-card",
+	"city": "Tehran",
+	"color": "black",
+	"coordinates": "35°41'21\"N 51°23'20\"E",
+	"port": false,
+	"copies": 1,
+	"hasImprovementSlot": false,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideASummary": "Player deck back. No printed text. State 2 side A is the same back.",
+	"sideBSummary": "Tehran, 35°41'21\"N 51°23'20\"E, code P2-07b. Compass has no anchor. One sealed box labeled SEARCH:. The city name and coordinates repeat upside down along the bottom.",
+	"searchBoxes": [
+		{
+			"type": "search",
+			"stateRevealed": 2,
+			"isCompanion": false,
+			"companionName": null,
+			"opensDoors": [],
+			"effectSummary": "Remove up to 2 Hollow Men figures from the board. The printed label is SEARCH:. The scratch says captured Hollow Men were questioned and the information was used to remove threats. The removal is immediate and is not limited to Tehran. No companion stays on the card."
+		}
+	],
+	"states": [
+		{
+			"state": 2,
+			"cardId": 10725,
+			"images": {
+				"sideA": "state-2-side-a.jpg",
+				"sideB": "state-2-side-b.jpg"
+			},
+			"summary": "SEARCH is scratched. Captured Hollow Men were questioned about their plans, and that information removes threats. Remove up to 2 Hollow Men figures from the board. Code P2-07b is unchanged. Side A is the player back."
+		}
+	],
+	"mechanics": {
+		"opensDoors": [],
+		"destroys": [],
+		"rules": [
+			"Black Player card for Tehran. Not a port. The only Tehran Player card.",
+			"One SEARCH box. State 2 is the scratched face.",
+			"Scratching it removes up to 2 Hollow Men figures from anywhere on the board. No companion."
+		],
+		"notes": [
+			"Goes to the reserve when the package is opened. Tehran is not the city this report connects.",
+			"The scratch panel fills the center. No bullseye upgrade mark is printed."
+		]
+	}
+}

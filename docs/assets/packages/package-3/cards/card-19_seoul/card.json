@@ -1,0 +1,40 @@
+{
+	"package": 3,
+	"index": 19,
+	"cardId": 10718,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P3-19b"
+	},
+	"title": "Seoul",
+	"category": "infection-card",
+	"city": "Seoul",
+	"color": "red",
+	"coordinates": null,
+	"port": null,
+	"copies": 1,
+	"hasImprovementSlot": true,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideASummary": "Infection deck back. Red biohazard on black, with a yellow caution stripe. No text and no printed code.",
+	"sideBSummary": "Seoul Infection card, red. The name runs down the left edge. A blank white panel in the middle takes one improvement sticker. A green plague ring sits on a faded map. No search box and no coordinates. Printed code P3-19b.",
+	"searchBoxes": [],
+	"states": [],
+	"mechanics": {
+		"opensDoors": [],
+		"destroys": false,
+		"rules": [
+			"Red Infection card for Seoul. One copy.",
+			"The white panel is the one improvement slot. Rebirth, from this package, is the sticker that fits a slot like this.",
+			"No scratch-off box.",
+			"Goes to the reserve when the package is opened."
+		],
+		"notes": [
+			"Card id 10718.",
+			"Printed code P3-19b is on side B only. Side A is the Infection deck back.",
+			"The city's coordinates and port marking are on its Player card, not on this Infection card."
+		]
+	}
+}

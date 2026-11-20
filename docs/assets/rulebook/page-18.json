@@ -1,0 +1,61 @@
+{
+	"file": "page-18.jpg",
+	"printedPageNumber": 18,
+	"headings": ["MANUAL", "GAME CALENDAR"],
+	"ruleStickerSlots": [],
+	"sections": [
+		{
+			"heading": "GAME CALENDAR",
+			"text": "If you win, advance to the next month and decrease your rationing by 2.\nIf you lose the first half of the month, play the second half of the month and increase your rationing by 2.\nIf you lose in the second half of the month, increase your rationing by 2, then proceed to the next month.\nRationing cannot go over 10 or below 0."
+		}
+	],
+	"tables": [
+		{
+			"title": "Game calendar",
+			"headers": [
+				"Month",
+				"",
+				"Rationing",
+				"Date Played",
+				"Players and Characters",
+				"Win or Lose?",
+				"Cities on the Grid"
+			],
+			"rows": [
+				["Prologue", "", "4", "", "", "", ""],
+				["January", "Early", "4", "", "", "", ""],
+				["January", "Late", "", "", "", "", ""],
+				["February", "Early", "", "", "", "", ""],
+				["February", "Late", "", "", "", "", ""],
+				["March", "Early", "", "", "", "", ""],
+				["March", "Late", "", "", "", "", ""],
+				["April", "Early", "", "", "", "", ""],
+				["April", "Late", "", "", "", "", ""],
+				["May", "Early", "", "", "", "", ""],
+				["May", "Late", "", "", "", "", ""],
+				["June", "Early", "", "", "", "", ""],
+				["June", "Late", "", "", "", "", ""],
+				["July", "Early", "", "", "", "", ""],
+				["July", "Late", "", "", "", "", ""],
+				["August", "Early", "", "", "", "", ""],
+				["August", "Late", "", "", "", "", ""],
+				["September", "Early", "", "", "", "", ""],
+				["September", "Late", "", "", "", "", ""],
+				["October", "Early", "", "", "", "", ""],
+				["October", "Late", "", "", "", "", ""],
+				["November", "Early", "", "", "", "", ""],
+				["November", "Late", "", "", "", "", ""],
+				["December", "Early", "", "", "", "", ""],
+				["December", "Late", "", "", "", "", ""]
+			],
+			"notes": "The second column has no printed header. Early and Late are printed in red. A dotted line divides Early from Late across each month. Prologue has no Early/Late label. A script 4 is preprinted in the Rationing cell for Prologue and for January Early. Every other cell is blank."
+		}
+	],
+	"diagramsAndCallouts": [
+		"Running header: MANUAL.",
+		"decrease, increase, 2, 10, and 0 in the intro are emphasized in bold.",
+		"Header cells Date Played, Win or Lose?, and Cities on the Grid wrap onto two lines.",
+		"Printed page number 18, bottom left."
+	],
+	"fullText": "MANUAL\n\nGAME CALENDAR\n\nIf you win, advance to the next month and decrease your rationing by 2.\nIf you lose the first half of the month, play the second half of the month and increase your rationing by 2.\nIf you lose in the second half of the month, increase your rationing by 2, then proceed to the next month.\nRationing cannot go over 10 or below 0.\n\nGame calendar\n\nMonth | (no header) | Rationing | Date Played | Players and Characters | Win or Lose? | Cities on the Grid\n\nPrologue |  | 4 |  |  |  | \n\nJanuary | Early | 4 |  |  |  | \n\nJanuary | Late |  |  |  |  | \n\nFebruary | Early |  |  |  |  | \n\nFebruary | Late |  |  |  |  | \n\nMarch | Early |  |  |  |  | \n\nMarch | Late |  |  |  |  | \n\nApril | Early |  |  |  |  | \n\nApril | Late |  |  |  |  | \n\nMay | Early |  |  |  |  | \n\nMay | Late |  |  |  |  | \n\nJune | Early |  |  |  |  | \n\nJune | Late |  |  |  |  | \n\nJuly | Early |  |  |  |  | \n\nJuly | Late |  |  |  |  | \n\nAugust | Early |  |  |  |  | \n\nAugust | Late |  |  |  |  | \n\nSeptember | Early |  |  |  |  | \n\nSeptember | Late |  |  |  |  | \n\nOctober | Early |  |  |  |  | \n\nOctober | Late |  |  |  |  | \n\nNovember | Early |  |  |  |  | \n\nNovember | Late |  |  |  |  | \n\nDecember | Early |  |  |  |  | \n\nDecember | Late |  |  |  |  | "
+}

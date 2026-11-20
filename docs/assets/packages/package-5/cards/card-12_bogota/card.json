@@ -1,0 +1,36 @@
+{
+	"package": 5,
+	"index": 12,
+	"cardId": 10711,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P5-12b"
+	},
+	"title": "Bogotá",
+	"category": "player-city",
+	"city": "Bogotá",
+	"color": "yellow",
+	"coordinates": "4°42'40\"N 74°4'20\"W",
+	"copies": 1,
+	"hasImprovementSlot": true,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"text": "Player deck back. No printed text."
+	},
+	"sideB": {
+		"text": "Bogotá\n4°42'40\"N 74°4'20\"W\n(City map. No search box.)\n(City name and coordinates repeat upside down along the bottom.)\nP5-12b",
+		"searchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"opensDoors": [],
+		"rules": [
+			"Yellow Player city card.",
+			"One improvement sticker may be placed on this card. No empty sticker box is printed on the face."
+		],
+		"notes": "Second Bogotá Player card. Map only, no scratch-off. The city name is printed BOGOTÁ."
+	}
+}

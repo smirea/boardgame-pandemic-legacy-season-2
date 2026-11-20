@@ -1,0 +1,36 @@
+{
+	"package": 6,
+	"index": 4,
+	"cardId": 10803,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P6-02b"
+	},
+	"title": "Portable Antiviral Lab",
+	"category": "player-card",
+	"city": null,
+	"color": null,
+	"copies": 1,
+	"hasImprovementSlot": false,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"text": "Player deck back. No printed text."
+	},
+	"sideB": {
+		"text": "PORTABLE ANTIVIRAL LAB\n\nWHEN DOING THE MAKE SUPPLIES ACTION, DISCARD THIS CARD TO PUT 3 MORE SUPPLY CUBES ONTO YOUR CHARACTER CARD.\nP6-02b",
+		"searchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"opensDoors": [],
+		"rules": [
+			"Player card. The back is the Player deck back.",
+			"When doing the Make Supplies action, discard this card to put 3 more Supply cubes onto your Character card.",
+			"Discard, not destroy. The card stays in the Player deck cycle."
+		],
+		"notes": "This scan's printed code also reads P6-02b. Cards 03 and 04 are nearly the same image of that face."
+	}
+}

@@ -1,0 +1,84 @@
+{
+	"package": 1,
+	"index": 15,
+	"cardId": 914,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P1-17b"
+	},
+	"title": "San Francisco",
+	"category": "player-card",
+	"city": "San Francisco",
+	"color": "blue",
+	"coordinates": "37°46'30\"N 122°25'10\"W",
+	"copies": 1,
+	"hasImprovementSlot": false,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideASummary": "Player deck back. No text and no printed code.",
+	"sideBSummary": "Blue San Francisco Player card, 37°46'30\"N 122°25'10\"W. Port: the compass has an anchor. Two covered boxes, SEARCH THE LAND and SEARCH THE SEA. Code P1-17b.",
+	"searchBoxes": [
+		{
+			"type": "land",
+			"stateRevealed": 2,
+			"isCompanion": false,
+			"companionName": null,
+			"opensDoors": [],
+			"effectSummary": "Put 3 Supply cubes into San Francisco from the reserve, not from the stockpile. Resolved once, when the land box is scratched."
+		},
+		{
+			"type": "sea",
+			"stateRevealed": 3,
+			"isCompanion": false,
+			"companionName": null,
+			"opensDoors": ["60"],
+			"effectSummary": "Open door 60 and add it to the board. If 60 is already open, gain 1 action instead."
+		}
+	],
+	"states": [
+		{
+			"state": 2,
+			"cardId": 1002,
+			"images": {
+				"sideB": "state-2-side-b.jpg"
+			},
+			"summary": "Land only. A long-lost supply cache. Put 3 Supply cubes into this city from the reserve instead of the stockpile. The sea box stays covered."
+		},
+		{
+			"state": 3,
+			"cardId": 1001,
+			"images": {
+				"sideB": "state-3-side-b.jpg"
+			},
+			"summary": "Sea only. A lost haven has been located but not accessed. Open 60 and add it to the board, or gain 1 action if 60 is already open. The land box stays covered."
+		},
+		{
+			"state": 4,
+			"cardId": 1000,
+			"images": {
+				"sideB": "state-4-side-b.jpg"
+			},
+			"summary": "Both boxes scratched. Land puts 3 Supply cubes into San Francisco from the reserve. Sea opens door 60, or grants 1 action if 60 is already open."
+		}
+	],
+	"mechanics": {
+		"opensDoors": ["60"],
+		"destroys": [],
+		"rules": [
+			"Blue Player card for San Francisco. Port: the compass has an anchor.",
+			"Two scratch boxes, searched independently. State 2 is land only. State 3 is sea only. State 4 is both.",
+			"Land: put 3 Supply cubes into this city from the reserve, instead of the stockpile.",
+			"Sea: the same lost haven as Los Angeles. Open door 60 and add it to the board, or gain 1 action if 60 is already open.",
+			"Neither result is a companion. Each is resolved when its box is scratched.",
+			"Goes to the reserve when the package is opened. The other San Francisco Player card is card 16."
+		],
+		"notes": [
+			"Card id 914. State card ids: state 2 is 1002, state 3 is 1001, state 4 is 1000.",
+			"Printed code P1-17b stays on every scratched face.",
+			"Coordinates are printed 37°46'30\"N 122°25'10\"W.",
+			"No state side A."
+		]
+	}
+}

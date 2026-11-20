@@ -1,0 +1,47 @@
+{
+	"file": "page-14.jpg",
+	"printedPageNumber": 14,
+	"headings": ["MANUAL", "INFECTIONS", "INCIDENTS", "OUTBREAKS", "TURN END"],
+	"ruleStickerSlots": [
+		{
+			"slot": "S",
+			"context": "INFECTIONS, first empty dashed box under the infect-a-city paragraph: RULE STICKER S"
+		},
+		{
+			"slot": "T",
+			"context": "INFECTIONS, second empty dashed box under RULE STICKER S: RULE STICKER T"
+		}
+	],
+	"sections": [
+		{
+			"heading": "INFECTIONS",
+			"text": "Flip over as many Infection cards from the top of the Infection deck as the current infection rate. This number is below the space of the Infection Rate track that has the Infection Rate marker. Flip these cards over one at a time, infecting the city named on each card.\n\nTo infect a city, remove 1 Supply cube from it and return it to the stockpile. If the city has no Supply cubes, instead place a Plague cube and record the incident (see Incidents, below). If the city already has 3 Plague cubes, do not place a 4th cube. Instead, an outbreak of the plague occurs in the city (see Outbreaks, next column). Discard this card to the Infection discard pile.\n\nRULE STICKER S\n\nRULE STICKER T\n\nIn the rare case you get through the entire Infection deck, reshuffle it and move the Infection Rate marker forward 1 space on the Infection Rate track. If this causes the rate to change during the “Infect” step, use the old rate when determining how many cards to draw."
+		},
+		{
+			"heading": "INCIDENTS",
+			"text": "An incident happens whenever a Plague cube is placed into a location. Move the Incident marker forward 1 space on the Incident track.\n\nIf the Incident marker reaches the last space (skull), the game ends and the players lose.\n\nRemember that players who start a turn in a location with Plague cubes get exposed. (See Exposure, Scars, and Death on page 7.)"
+		},
+		{
+			"heading": "",
+			"text": "After having drawn her 2 cards, Anna proceeds to the “Infect” step.\n\nInfection Rate track pictured with spaces labeled 2, 2, 2, 3, 3, 4, 4. The biohazard marker sits on the first 3.\n\nThe current infection rate is 3, so Anna flips over the top 3 Infection cards: Lagos, Lagos, London.\nCards shown: LAGOS, LAGOS, LONDON.\n\nShe first removes 2 Supply cubes from Lagos and returns them to the stockpile.\nArrow from Lagos (2 supply cubes, and a partly covered haven plaque) to a box labeled STOCKPILE.\n\nSince there are no Supply cubes in London, she must add a Plague cube there and move the Incident marker forward 1 space. She then discards the flipped Infection cards.\nLondon is shown with a pawn and a plague cube. A haven plaque on that city reads: Recon with 4 unique blue cards from a supply center here to open Package 4. Letter boxes A B C D. Istanbul is labeled nearby.\nThe Lagos plaque in the same diagram is partly covered; visible fragments include “Recon with 5 unique”, “cards from a supply”, “here to open Package”, and letter boxes A B C D.\n\nAt the start of her next turn, if Anna’s pawn is still in London with a Plague cube, she will get an exposure."
+		},
+		{
+			"heading": "OUTBREAKS",
+			"text": "When an outbreak occurs, remove 1 Supply cube from every location adjacent to the city. If the connected location does not have a Supply cube, place 1 Plague cube instead. Move the Incident marker forward 1 space on the Incident track for each Plague cube placed.\n\nIf any connecting location already has 3 Plague cubes, do not place a 4th cube in those cities. Instead, in each of them, a chain reaction outbreak occurs after the current outbreak is done.\n\nWhen a chain reaction outbreak occurs, remove Supply cubes or place Plague cubes as above, except do not add a Plague cube to locations that have already had an outbreak (or a chain reaction outbreak) as part of resolving the current Infection card. Move the Incident marker forward 1 space for each Plague cube placed."
+		},
+		{
+			"heading": "TURN END",
+			"text": "After infecting cities and discarding Infection cards, your turn is over. The player on your left begins their turn."
+		}
+	],
+	"tables": [],
+	"diagramsAndCallouts": [
+		"Running header: MANUAL.",
+		"4th is printed with a superscript th, in both the infect rule and the outbreak rule.",
+		"Two empty dashed boxes: RULE STICKER S, then RULE STICKER T.",
+		"Warning triangle: If the Incident marker reaches the last space (skull), the game ends and the players lose. A small Incident-track card is pictured beside INCIDENTS.",
+		"Right-column example panel, captions in italic:\nAfter having drawn her 2 cards, Anna proceeds to the “Infect” step.\n\nInfection Rate track pictured with spaces labeled 2, 2, 2, 3, 3, 4, 4. The biohazard marker sits on the first 3.\n\nThe current infection rate is 3, so Anna flips over the top 3 Infection cards: Lagos, Lagos, London.\nCards shown: LAGOS, LAGOS, LONDON.\n\nShe first removes 2 Supply cubes from Lagos and returns them to the stockpile.\nArrow from Lagos (2 supply cubes, and a partly covered haven plaque) to a box labeled STOCKPILE.\n\nSince there are no Supply cubes in London, she must add a Plague cube there and move the Incident marker forward 1 space. She then discards the flipped Infection cards.\nLondon is shown with a pawn and a plague cube. A haven plaque on that city reads: Recon with 4 unique blue cards from a supply center here to open Package 4. Letter boxes A B C D. Istanbul is labeled nearby.\nThe Lagos plaque in the same diagram is partly covered; visible fragments include “Recon with 5 unique”, “cards from a supply”, “here to open Package”, and letter boxes A B C D.\n\nAt the start of her next turn, if Anna’s pawn is still in London with a Plague cube, she will get an exposure.",
+		"Printed page number 14, bottom left."
+	],
+	"fullText": "MANUAL\n\nINFECTIONS\n\nFlip over as many Infection cards from the top of the Infection deck as the current infection rate. This number is below the space of the Infection Rate track that has the Infection Rate marker. Flip these cards over one at a time, infecting the city named on each card.\n\nTo infect a city, remove 1 Supply cube from it and return it to the stockpile. If the city has no Supply cubes, instead place a Plague cube and record the incident (see Incidents, below). If the city already has 3 Plague cubes, do not place a 4th cube. Instead, an outbreak of the plague occurs in the city (see Outbreaks, next column). Discard this card to the Infection discard pile.\n\nRULE STICKER S\n\nRULE STICKER T\n\nIn the rare case you get through the entire Infection deck, reshuffle it and move the Infection Rate marker forward 1 space on the Infection Rate track. If this causes the rate to change during the “Infect” step, use the old rate when determining how many cards to draw.\n\nINCIDENTS\n\nAn incident happens whenever a Plague cube is placed into a location. Move the Incident marker forward 1 space on the Incident track.\n\nIf the Incident marker reaches the last space (skull), the game ends and the players lose.\n\nRemember that players who start a turn in a location with Plague cubes get exposed. (See Exposure, Scars, and Death on page 7.)\n\nAfter having drawn her 2 cards, Anna proceeds to the “Infect” step.\n\nInfection Rate track pictured with spaces labeled 2, 2, 2, 3, 3, 4, 4. The biohazard marker sits on the first 3.\n\nThe current infection rate is 3, so Anna flips over the top 3 Infection cards: Lagos, Lagos, London.\nCards shown: LAGOS, LAGOS, LONDON.\n\nShe first removes 2 Supply cubes from Lagos and returns them to the stockpile.\nArrow from Lagos (2 supply cubes, and a partly covered haven plaque) to a box labeled STOCKPILE.\n\nSince there are no Supply cubes in London, she must add a Plague cube there and move the Incident marker forward 1 space. She then discards the flipped Infection cards.\nLondon is shown with a pawn and a plague cube. A haven plaque on that city reads: Recon with 4 unique blue cards from a supply center here to open Package 4. Letter boxes A B C D. Istanbul is labeled nearby.\nThe Lagos plaque in the same diagram is partly covered; visible fragments include “Recon with 5 unique”, “cards from a supply”, “here to open Package”, and letter boxes A B C D.\n\nAt the start of her next turn, if Anna’s pawn is still in London with a Plague cube, she will get an exposure.\n\nOUTBREAKS\n\nWhen an outbreak occurs, remove 1 Supply cube from every location adjacent to the city. If the connected location does not have a Supply cube, place 1 Plague cube instead. Move the Incident marker forward 1 space on the Incident track for each Plague cube placed.\n\nIf any connecting location already has 3 Plague cubes, do not place a 4th cube in those cities. Instead, in each of them, a chain reaction outbreak occurs after the current outbreak is done.\n\nWhen a chain reaction outbreak occurs, remove Supply cubes or place Plague cubes as above, except do not add a Plague cube to locations that have already had an outbreak (or a chain reaction outbreak) as part of resolving the current Infection card. Move the Incident marker forward 1 space for each Plague cube placed.\n\nTURN END\n\nAfter infecting cities and discarding Infection cards, your turn is over. The player on your left begins their turn."
+}

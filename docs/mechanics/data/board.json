@@ -1,9 +1,9 @@
 {
 	"meta": {
-		"description": "Board graph for the campaign: every location that exists on the start board or is revealed later, plus the sea lanes printed at the start and the routes players are known to build. See NOTES.md for sources, conflicts and inference.",
+		"description": "Board graph for the campaign: every location that exists on the start board or is revealed later, plus the 17 sea lanes printed at the start, 10 lines printed on region/city stickers, and documented player-drawn routes. Verified against docs/assets/.",
 		"conventions": {
 			"kind": "city has City and Infection cards and can hold a supply center; haven is a sea location with no cards, is never infected, always counts as a production site and cannot be the end of a supply line.",
-			"color": "Card color of the city. null where no source shows it.",
+			"color": "Card color of the city (blue, yellow, black, or red); null for havens.",
 			"startingPopulation": "Population printed on the board or on the region sticker when the location appears. Range 0-8.",
 			"coastal": "Port location (anchor symbol). Only ports can use Sail, Charter Boat and Chart Sea Lane.",
 			"infested": "Printed infested marker on the region sticker. Starting a turn in an infested city exposes the character, like a Plague cube does.",
@@ -18,95 +18,95 @@
 			"startsExplored": true,
 			"reconFrom": [],
 			"reconCost": "Explored at start. Holds the three starting havens and the nine starting cities.",
-			"confidence": "rulebook"
+			"confidence": "verified"
 		},
 		{
 			"id": "north-america",
 			"label": "North America interior and west coast",
 			"startsExplored": false,
 			"reconFrom": ["washington"],
-			"reconCost": "Supply center in Washington. Discard any 3 blue City cards. Opens Package 1 (map sticker behind door 66). Chicago joins the grid at once by a printed supply line.",
-			"confidence": "community"
+			"reconCost": "Supply center in Washington. Discard any 3 blue City cards (duplicates allowed). Opens Package 1 (doors 66, J, 23, L, 39). Chicago joins the grid at once by a printed supply line from Washington. Forced at February setup (02-01) if 66 is sealed.",
+			"confidence": "verified"
 		},
 		{
 			"id": "south-america",
 			"label": "South America west and south",
 			"startsExplored": false,
 			"reconFrom": ["sao-paulo"],
-			"reconCost": "Supply center in Sao Paulo. Discard any 4 yellow City cards. Opens Package 5 (map sticker behind door 67). Buenos Aires joins the grid at once by a printed supply line.",
-			"confidence": "community"
+			"reconCost": "Supply center in São Paulo. Discard any 4 yellow City cards (duplicates allowed). Opens Package 5 (doors 67, J, 23, L, 39). Buenos Aires joins the grid at once by a printed sea lane from São Paulo. Forced at April setup (04-01) if 67 is sealed.",
+			"confidence": "verified"
 		},
 		{
 			"id": "europe",
 			"label": "Northern and eastern Europe",
 			"startsExplored": false,
 			"reconFrom": ["london"],
-			"reconCost": "Supply center in London. Discard 4 blue City cards of 4 different cities. Opens Package 4 (map sticker behind door 64). Paris joins the grid at once by a printed supply line.",
-			"confidence": "community"
+			"reconCost": "Supply center in London. Discard 4 unique blue City cards. Opens Package 4 (door 64). Paris joins the grid at once by a printed supply line from London. Forced at June setup (06-01) if 64 is sealed (also opens door 21, permanently destroying Frankfurt).",
+			"confidence": "verified"
 		},
 		{
 			"id": "africa",
 			"label": "Sub-Saharan Africa",
 			"startsExplored": false,
 			"reconFrom": ["lagos"],
-			"reconCost": "Supply center in Lagos. Discard 5 yellow City cards of 5 different cities. Opens Package 7 (door 57). Kinshasa joins the grid at once by a printed supply line. Forced open at the start of July if not done.",
-			"confidence": "community"
+			"reconCost": "Supply center in Lagos. Discard 5 unique yellow City cards. Opens Package 7 (doors 57, F, 14). Kinshasa joins the grid at once by a printed supply line from Lagos. Forced at July setup (07-01) if 57 is sealed.",
+			"confidence": "verified"
 		},
 		{
 			"id": "middle-east",
 			"label": "Middle East and South Asia",
 			"startsExplored": false,
 			"reconFrom": ["cairo"],
-			"reconCost": "Supply center in Cairo. Discard 4 black City cards of 4 different cities. Opens Package 2 (doors 62, 53, F, 14). Baghdad joins the grid at once by a printed supply line. Forced open at the start of August if not done.",
-			"confidence": "community"
+			"reconCost": "Supply center in Cairo. Discard 4 unique black City cards. Opens Package 2 (doors 62, 53, F, 14). Baghdad joins the grid at once by a printed supply line from Cairo. Forced at August setup (08-01) if 62 is sealed.",
+			"confidence": "verified"
 		},
 		{
 			"id": "east-asia",
 			"label": "East and Southeast Asia",
 			"startsExplored": false,
 			"reconFrom": ["kolkata"],
-			"reconCost": "Recon spot at Kolkata is added by a board sticker found behind door 52 (revealed by a Frequency Scanner box). Cost is black City cards of different cities; the exact count was not visible in any source. Opens Package 3 (doors 56, 63). Jakarta joins the grid at once by a printed sea lane. Forced open at the start of October if not done.",
-			"confidence": "community"
+			"reconCost": "Recon spot at Kolkata is added by door 52 (revealed by Frequency Scanner box 9.2). Supply center in Kolkata; discard 5 unique black City cards. Opens Package 3 (doors 56, 63). Jakarta joins the grid at once by a printed sea lane from Kolkata. Forced at October setup (10-01) if 56 and 63 are not both open (also scars 1 chosen character).",
+			"confidence": "verified"
 		},
 		{
 			"id": "coral-sea",
 			"label": "Southwest Pacific",
 			"startsExplored": false,
 			"reconFrom": ["jakarta"],
-			"reconCost": "Supply center in Jakarta. Discard any 2 red City cards. Opens door 59, which reveals a ruined haven east of Australia and a further recon spot there.",
-			"confidence": "community"
+			"reconCost": "Supply center in Jakarta. Discard any 2 red City cards (duplicates allowed). Opens door 59, revealing the ruined Coral Sea haven (pop 1) and its sea lane from Jakarta.",
+			"confidence": "verified"
 		},
 		{
 			"id": "new-zealand",
 			"label": "New Zealand",
 			"startsExplored": false,
 			"reconFrom": ["haven-coral-sea"],
-			"reconCost": "Recon from the ruined Coral Sea haven with red City cards (count not recorded). Opens door 19: Wellington, the Topaz lab and a new character.",
-			"confidence": "community"
+			"reconCost": "Recon from the ruined Coral Sea haven (no supply center needed). Discard any 2 red City cards (duplicates allowed). Opens door 19 (which opens doors 51 Wellington, 41 Vector Control Expert, 61 Lake Baikal, 13 Breakthroughs, and 30 Lab markers).",
+			"confidence": "verified"
 		},
 		{
 			"id": "eastern-pacific",
 			"label": "Eastern Pacific lost haven",
 			"startsExplored": false,
 			"reconFrom": [],
-			"reconCost": "Not a recon. Searching at sea on the Los Angeles or San Francisco City card shows the lost haven. A sea route to it runs from Lima. The first pawn to arrive names it and opens its door.",
-			"confidence": "community"
+			"reconCost": "Not a recon. Revealed (door 60) by sea search on Los Angeles, San Francisco, or Lima, or forced at May setup (05-01). Printed sea lane connects southeast toward Lima. First pawn arrival names it and opens Package 6.",
+			"confidence": "verified"
 		},
 		{
 			"id": "indian-ocean",
 			"label": "Western Indian Ocean lost haven",
 			"startsExplored": false,
 			"reconFrom": [],
-			"reconCost": "Not a recon. Searching at sea on New Mumbai, Antananarivo or Dar es Salaam City cards shows the lost haven. Reach it by charting a sea lane. Door 65 is forced open at the start of September if not done.",
-			"confidence": "community"
+			"reconCost": "Not a recon. Revealed (door 65) by sea search on New Mumbai, Antananarivo, or Dar es Salaam, or forced at September setup (09-01). Reached by charting a sea lane. First pawn arrival names it and opens door 11 (+4 actions, up to 15 reserve cubes to stockpile, Area 11 +15).",
+			"confidence": "verified"
 		},
 		{
 			"id": "utopia",
 			"label": "Inner Asia (walled region)",
 			"startsExplored": false,
 			"reconFrom": [],
-			"reconCost": "Blocked by a wall until the Hollow Men defect (October objective). Then a gap sticker (door 58) says the region opens when The Plan is complete. Completing The Plan (four recons in Shanghai) opens Package 8: Utopia joins the grid. Lake Baikal is reached by a supply line from Utopia in December.",
-			"confidence": "community"
+			"reconCost": "Blocked by wall until Hollow Men defect (door 17 → door 58 gap). Completing all 4 steps of The Plan in Shanghai (no SC: 5 unique red, 4 unique black, 3 unique yellow, 3 unique blue) opens Package 8 (or forced in December 12-01): places Utopia (pop 8, printed supply line from Shanghai) and opens door 61 (Lake Baikal). Establish a supply line from Utopia to Lake Baikal; first arrival opens door 22 (PEARL).",
+			"confidence": "verified"
 		}
 	],
 	"cities": [
@@ -124,7 +124,7 @@
 			"infectionCards": 0,
 			"playerCards": 0,
 			"notes": "Starting haven. Players name it at campaign start. Character homes are chosen among the named havens.",
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"id": "haven-mediterranean",
@@ -140,7 +140,7 @@
 			"infectionCards": 0,
 			"playerCards": 0,
 			"notes": "Starting haven in the western Mediterranean. The rulebook's Sail example from London to Cairo routes through it.",
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"id": "haven-south-atlantic",
@@ -156,7 +156,7 @@
 			"infectionCards": 0,
 			"playerCards": 0,
 			"notes": "Starting haven near the equator between Brazil and West Africa.",
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"id": "haven-eastern-pacific",
@@ -167,12 +167,12 @@
 			"color": null,
 			"region": "eastern-pacific",
 			"startsOnGrid": false,
-			"startingPopulation": null,
+			"startingPopulation": 3,
 			"coastal": true,
 			"infectionCards": 0,
 			"playerCards": 0,
-			"notes": "Lost haven near the Galapagos. Accessing it is the 'Access a lost haven' objective. The first visit names it and opens its door. One play report says it grants a permanent +15 Supply cube bonus to the stockpile each game; another credits that bonus to the Opal lab package (see NOTES.md).",
-			"confidence": "community"
+			"notes": "Lost haven (door 60, pop 3). Revealed by sea search in Los Angeles, San Francisco, or Lima, or forced in May (05-01). First pawn arrival names it and opens Package 6 (15 new Supply cubes, Area 10 +15, Rule B, Rule I Inoculate, 3 Portable Antiviral Labs).",
+			"confidence": "verified"
 		},
 		{
 			"id": "haven-indian-ocean",
@@ -183,12 +183,12 @@
 			"color": null,
 			"region": "indian-ocean",
 			"startsOnGrid": false,
-			"startingPopulation": null,
+			"startingPopulation": 3,
 			"coastal": true,
 			"infectionCards": 0,
 			"playerCards": 0,
-			"notes": "Lost haven near the Seychelles. The first visit grants +15 Supply cubes to the stockpile at once and in every later game. Hollow Men can be moved onto havens (October objective).",
-			"confidence": "community"
+			"notes": "Lost haven (door 65, pop 3, at 0° 60°E). Revealed by sea search in New Mumbai, Dar es Salaam, or Antananarivo, or forced in September (09-01). First pawn arrival names it and opens door 11 (+4 actions, up to 15 reserve cubes to stockpile, Area 11 +15).",
+			"confidence": "verified"
 		},
 		{
 			"id": "haven-coral-sea",
@@ -199,12 +199,12 @@
 			"color": null,
 			"region": "coral-sea",
 			"startsOnGrid": false,
-			"startingPopulation": null,
+			"startingPopulation": 1,
 			"coastal": true,
 			"infectionCards": 0,
 			"playerCards": 0,
-			"notes": "Ruined haven revealed by the Jakarta recon. It has its own recon spot that leads to Wellington.",
-			"confidence": "community"
+			"notes": "Ruined lost haven (door 59, pop 1, east of Australia). Revealed by Jakarta recon (2 red at SC). Connected by sea lane from Jakarta; hosts recon to New Zealand (2 red, duplicates allowed, no SC needed → door 19).",
+			"confidence": "verified"
 		},
 		{
 			"id": "new-york",
@@ -220,7 +220,7 @@
 			"infectionCards": 3,
 			"playerCards": 4,
 			"notes": "Starting city.",
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"id": "washington",
@@ -236,7 +236,7 @@
 			"infectionCards": 3,
 			"playerCards": 4,
 			"notes": "Starting city. Recon spot for North America.",
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"id": "jacksonville",
@@ -252,7 +252,7 @@
 			"infectionCards": 3,
 			"playerCards": 4,
 			"notes": "Starting city.",
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"id": "sao-paulo",
@@ -268,7 +268,7 @@
 			"infectionCards": 3,
 			"playerCards": 4,
 			"notes": "Starting city. Recon spot for South America.",
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"id": "london",
@@ -284,7 +284,7 @@
 			"infectionCards": 3,
 			"playerCards": 4,
 			"notes": "Starting city. Recon spot for Europe.",
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"id": "istanbul",
@@ -300,7 +300,7 @@
 			"infectionCards": 3,
 			"playerCards": 4,
 			"notes": "Starting city.",
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"id": "tripoli",
@@ -316,7 +316,7 @@
 			"infectionCards": 3,
 			"playerCards": 4,
 			"notes": "Starting city.",
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"id": "cairo",
@@ -332,7 +332,7 @@
 			"infectionCards": 3,
 			"playerCards": 4,
 			"notes": "Starting city. Recon spot for the Middle East.",
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"id": "lagos",
@@ -348,7 +348,7 @@
 			"infectionCards": 3,
 			"playerCards": 4,
 			"notes": "Starting city. Recon spot for Africa.",
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"id": "chicago",
@@ -361,10 +361,10 @@
 			"startsOnGrid": false,
 			"startingPopulation": 2,
 			"coastal": false,
-			"infectionCards": null,
+			"infectionCards": 2,
 			"playerCards": 2,
-			"notes": "Joins the grid automatically when North America is reconned (printed supply line). One source remembers its population as 1; the sticker photo shows 2.",
-			"confidence": "community"
+			"notes": "Joins the grid automatically when North America opens (printed supply line from Washington). Search: put up to 2 stockpile cubes into Chicago.",
+			"confidence": "verified"
 		},
 		{
 			"id": "san-francisco",
@@ -377,10 +377,10 @@
 			"startsOnGrid": false,
 			"startingPopulation": 2,
 			"coastal": true,
-			"infectionCards": null,
+			"infectionCards": 2,
 			"playerCards": 2,
-			"notes": "City card has land and sea search boxes. The sea search shows the eastern Pacific lost haven.",
-			"confidence": "community"
+			"notes": "Land search: put 3 reserve cubes into San Francisco. Sea search: open door 60 (or +1 action if already open).",
+			"confidence": "verified"
 		},
 		{
 			"id": "denver",
@@ -393,10 +393,10 @@
 			"startsOnGrid": false,
 			"startingPopulation": 2,
 			"coastal": false,
-			"infectionCards": null,
+			"infectionCards": 2,
 			"playerCards": 2,
-			"notes": "",
-			"confidence": "community"
+			"notes": "Search: Companion Logistics Expert (Establish Supply Line costs 1 fewer cube while held).",
+			"confidence": "verified"
 		},
 		{
 			"id": "atlanta",
@@ -410,9 +410,9 @@
 			"startingPopulation": 1,
 			"coastal": false,
 			"infectionCards": 1,
-			"playerCards": 2,
-			"notes": "City card has a search box whose reward is a one-time removal of one card from the Infection discard pile for the rest of the game.",
-			"confidence": "community"
+			"playerCards": 1,
+			"notes": "Search: move 1 Infection discard card to Game End.",
+			"confidence": "verified"
 		},
 		{
 			"id": "los-angeles",
@@ -425,10 +425,10 @@
 			"startsOnGrid": false,
 			"startingPopulation": 1,
 			"coastal": true,
-			"infectionCards": null,
-			"playerCards": 2,
-			"notes": "City card has land and sea search boxes. The sea search shows the eastern Pacific lost haven.",
-			"confidence": "community"
+			"infectionCards": 1,
+			"playerCards": 1,
+			"notes": "Land search: move 4 reserve cubes to stockpile. Sea search: open door 60 (or +1 action if already open).",
+			"confidence": "verified"
 		},
 		{
 			"id": "mexico-city",
@@ -441,10 +441,10 @@
 			"startsOnGrid": false,
 			"startingPopulation": 1,
 			"coastal": false,
-			"infectionCards": null,
-			"playerCards": 2,
-			"notes": "Search reveals a companion who helps swap City cards.",
-			"confidence": "community"
+			"infectionCards": 1,
+			"playerCards": 1,
+			"notes": "Search: Companion Scout (action: discard a City card incl. this to take a same-color City card from Player discard).",
+			"confidence": "verified"
 		},
 		{
 			"id": "bogota",
@@ -455,12 +455,12 @@
 			"color": "yellow",
 			"region": "south-america",
 			"startsOnGrid": false,
-			"startingPopulation": null,
+			"startingPopulation": 2,
 			"coastal": false,
-			"infectionCards": null,
+			"infectionCards": 2,
 			"playerCards": 2,
-			"notes": "Search reward: remove one card from the Infection discard pile. Color inferred from the region's sticker colors.",
-			"confidence": "inferred"
+			"notes": "Search: take 1 card from Player discard into hand.",
+			"confidence": "verified"
 		},
 		{
 			"id": "lima",
@@ -471,12 +471,12 @@
 			"color": "yellow",
 			"region": "south-america",
 			"startsOnGrid": false,
-			"startingPopulation": null,
+			"startingPopulation": 1,
 			"coastal": true,
-			"infectionCards": null,
-			"playerCards": 2,
-			"notes": "A sea route to the eastern Pacific lost haven starts here. Search reveals a companion.",
-			"confidence": "community"
+			"infectionCards": 1,
+			"playerCards": 1,
+			"notes": "Land search: Companion Herbalist (play at any time to remove 1 Plague cube from your location). Sea search: open door 60 (or +1 action if already open).",
+			"confidence": "verified"
 		},
 		{
 			"id": "santiago",
@@ -487,12 +487,12 @@
 			"color": "yellow",
 			"region": "south-america",
 			"startsOnGrid": false,
-			"startingPopulation": null,
+			"startingPopulation": 1,
 			"coastal": false,
-			"infectionCards": null,
-			"playerCards": 2,
-			"notes": "",
-			"confidence": "community"
+			"infectionCards": 1,
+			"playerCards": 1,
+			"notes": "Search: open door 50 if sealed and mark Santiago infested.",
+			"confidence": "verified"
 		},
 		{
 			"id": "buenos-aires",
@@ -503,12 +503,12 @@
 			"color": "yellow",
 			"region": "south-america",
 			"startsOnGrid": false,
-			"startingPopulation": null,
+			"startingPopulation": 2,
 			"coastal": true,
-			"infectionCards": null,
+			"infectionCards": 2,
 			"playerCards": 2,
-			"notes": "Joins the grid automatically when South America is reconned. City card search boxes: sea search finds a supply cache, land search finds the Opal lab (opens Package 6).",
-			"confidence": "community"
+			"notes": "Joins the grid automatically when South America opens (printed sea lane from São Paulo). Land search: OPAL lab (open doors 18 and 20). Sea search: put 3 reserve cubes into Buenos Aires.",
+			"confidence": "verified"
 		},
 		{
 			"id": "paris",
@@ -521,10 +521,10 @@
 			"startsOnGrid": false,
 			"startingPopulation": 2,
 			"coastal": false,
-			"infectionCards": null,
+			"infectionCards": 2,
 			"playerCards": 2,
-			"notes": "Joins the grid automatically when Europe is reconned (printed supply line from London).",
-			"confidence": "community"
+			"notes": "Joins the grid automatically when Europe opens (printed supply line from London). Search: Companion Engineer (Build Supply Center costs 1 fewer card while held; may spend this card).",
+			"confidence": "verified"
 		},
 		{
 			"id": "frankfurt",
@@ -537,10 +537,10 @@
 			"startsOnGrid": false,
 			"startingPopulation": 2,
 			"coastal": false,
-			"infectionCards": null,
+			"infectionCards": 2,
 			"playerCards": 2,
-			"notes": "",
-			"confidence": "community"
+			"notes": "Search: Companion Messenger (free action: move Supply cubes from an adjacent location into yours while held). Permanently destroyed by door 21 if Europe is forced open in June (06-01).",
+			"confidence": "verified"
 		},
 		{
 			"id": "st-petersburg",
@@ -553,10 +553,10 @@
 			"startsOnGrid": false,
 			"startingPopulation": 1,
 			"coastal": true,
-			"infectionCards": null,
-			"playerCards": 2,
-			"notes": "City card has land and sea search boxes.",
-			"confidence": "community"
+			"infectionCards": 1,
+			"playerCards": 1,
+			"notes": "Land search: Companion Operative (Search is free while held). Sea search: draw a free sea lane from St. Petersburg.",
+			"confidence": "verified"
 		},
 		{
 			"id": "moscow",
@@ -569,10 +569,10 @@
 			"startsOnGrid": false,
 			"startingPopulation": 1,
 			"coastal": false,
-			"infectionCards": null,
-			"playerCards": 2,
-			"notes": "Black city in the Europe region. Its card is often the fourth unique black card needed for the Cairo recon.",
-			"confidence": "community"
+			"infectionCards": 1,
+			"playerCards": 1,
+			"notes": "Black city in Europe. Search: give 1 Player card from hand to another player.",
+			"confidence": "verified"
 		},
 		{
 			"id": "kinshasa",
@@ -585,10 +585,10 @@
 			"startsOnGrid": false,
 			"startingPopulation": 1,
 			"coastal": false,
-			"infectionCards": null,
-			"playerCards": 2,
-			"notes": "Printed infested. Joins the grid automatically when Africa is reconned (printed supply line from Lagos). Search reveals a companion who lowers the satellite tower cost.",
-			"confidence": "community"
+			"infectionCards": 1,
+			"playerCards": 1,
+			"notes": "Printed infested. Joins the grid automatically when Africa opens (printed supply line from Lagos). Search: Companion Technician (Build Satellite Tower costs 1 fewer cube while held).",
+			"confidence": "verified"
 		},
 		{
 			"id": "khartoum",
@@ -601,10 +601,10 @@
 			"startsOnGrid": false,
 			"startingPopulation": 1,
 			"coastal": false,
-			"infectionCards": null,
-			"playerCards": 2,
-			"notes": "Printed infested. Search reward: a one-time action to give a City card to any player anywhere.",
-			"confidence": "community"
+			"infectionCards": 1,
+			"playerCards": 1,
+			"notes": "Printed infested. Search: give 1 Player card from hand to another player.",
+			"confidence": "verified"
 		},
 		{
 			"id": "dar-es-salaam",
@@ -617,10 +617,10 @@
 			"startsOnGrid": false,
 			"startingPopulation": 2,
 			"coastal": true,
-			"infectionCards": null,
+			"infectionCards": 2,
 			"playerCards": 2,
-			"notes": "Printed infested. Sea search shows the Indian Ocean lost haven.",
-			"confidence": "community"
+			"notes": "Printed infested. Land search: draw a free supply line from Dar es Salaam. Sea search: open door 65 (or +1 action if already open).",
+			"confidence": "verified"
 		},
 		{
 			"id": "antananarivo",
@@ -633,10 +633,10 @@
 			"startsOnGrid": false,
 			"startingPopulation": 2,
 			"coastal": true,
-			"infectionCards": null,
+			"infectionCards": 2,
 			"playerCards": 2,
-			"notes": "Sea search shows the Indian Ocean lost haven.",
-			"confidence": "community"
+			"notes": "Land search: Companion Containment Specialist (play to remove all Plague cubes from 1 grid location). Sea search: open door 65 (or +1 action if already open).",
+			"confidence": "verified"
 		},
 		{
 			"id": "johannesburg",
@@ -649,10 +649,10 @@
 			"startsOnGrid": false,
 			"startingPopulation": 2,
 			"coastal": false,
-			"infectionCards": null,
+			"infectionCards": 2,
 			"playerCards": 2,
-			"notes": "Search finds the Jade lab. Final objective destination: the sample must reach a supply center here.",
-			"confidence": "community"
+			"notes": "Search: JADE lab (open doors 46 and 20). Final objective destination: carrier must reach Johannesburg while it holds a supply center.",
+			"confidence": "verified"
 		},
 		{
 			"id": "baghdad",
@@ -665,10 +665,10 @@
 			"startsOnGrid": false,
 			"startingPopulation": 2,
 			"coastal": false,
-			"infectionCards": null,
+			"infectionCards": 2,
 			"playerCards": 2,
-			"notes": "Printed infested. Joins the grid automatically when the Middle East is reconned (printed supply line toward Cairo).",
-			"confidence": "community"
+			"notes": "Printed infested. Joins the grid automatically when Middle East opens (printed supply line from Cairo). Search: gain 2 actions.",
+			"confidence": "verified"
 		},
 		{
 			"id": "riyadh",
@@ -681,10 +681,10 @@
 			"startsOnGrid": false,
 			"startingPopulation": 2,
 			"coastal": false,
-			"infectionCards": null,
+			"infectionCards": 2,
 			"playerCards": 2,
-			"notes": "",
-			"confidence": "community"
+			"notes": "Search: take 1 Player card from discard into hand.",
+			"confidence": "verified"
 		},
 		{
 			"id": "tehran",
@@ -697,10 +697,10 @@
 			"startsOnGrid": false,
 			"startingPopulation": 1,
 			"coastal": false,
-			"infectionCards": null,
-			"playerCards": 2,
-			"notes": "Search reward: remove two Hollow Men figures from the board.",
-			"confidence": "community"
+			"infectionCards": 1,
+			"playerCards": 1,
+			"notes": "Search: remove up to 2 Hollow Men figures from the board.",
+			"confidence": "verified"
 		},
 		{
 			"id": "delhi",
@@ -713,10 +713,10 @@
 			"startsOnGrid": false,
 			"startingPopulation": 1,
 			"coastal": false,
-			"infectionCards": null,
-			"playerCards": 2,
-			"notes": "Printed infested.",
-			"confidence": "community"
+			"infectionCards": 1,
+			"playerCards": 1,
+			"notes": "Printed infested. Search: Companion Vector Control Technician (no exposure for starting a turn in an infested city while held).",
+			"confidence": "verified"
 		},
 		{
 			"id": "new-mumbai",
@@ -729,10 +729,10 @@
 			"startsOnGrid": false,
 			"startingPopulation": 2,
 			"coastal": true,
-			"infectionCards": null,
+			"infectionCards": 2,
 			"playerCards": 2,
-			"notes": "Printed infested. Sea search shows the Indian Ocean lost haven.",
-			"confidence": "community"
+			"notes": "Printed infested. Land search: gain 1 action. Sea search: open door 65 (or +1 action if already open).",
+			"confidence": "verified"
 		},
 		{
 			"id": "kolkata",
@@ -745,10 +745,10 @@
 			"startsOnGrid": false,
 			"startingPopulation": 1,
 			"coastal": true,
-			"infectionCards": null,
-			"playerCards": 2,
-			"notes": "Printed infested. Gains a recon spot for East Asia from a later sticker. Its City card has no search box.",
-			"confidence": "community"
+			"infectionCards": 1,
+			"playerCards": 1,
+			"notes": "Printed infested. No search box. Door 53 adds recon placeholder; door 52 adds East Asia recon (5 unique black at SC → Package 3).",
+			"confidence": "verified"
 		},
 		{
 			"id": "jakarta",
@@ -763,8 +763,8 @@
 			"coastal": true,
 			"infectionCards": 1,
 			"playerCards": 1,
-			"notes": "Joins the grid automatically when East Asia is reconned. Recon spot for the Coral Sea region. The package text says 'the Player card' and 'the Infection card' (singular) for Jakarta.",
-			"confidence": "community"
+			"notes": "Joins the grid automatically when East Asia opens (printed sea lane from Kolkata). Recon spot for Coral Sea (2 red at SC → door 59). Search: Companion Builder (play at any time to place a shelter on 1 grid city).",
+			"confidence": "verified"
 		},
 		{
 			"id": "bangkok",
@@ -777,10 +777,10 @@
 			"startsOnGrid": false,
 			"startingPopulation": 1,
 			"coastal": true,
-			"infectionCards": null,
-			"playerCards": null,
-			"notes": "",
-			"confidence": "community"
+			"infectionCards": 1,
+			"playerCards": 1,
+			"notes": "No search box.",
+			"confidence": "verified"
 		},
 		{
 			"id": "ho-chi-minh-city",
@@ -793,10 +793,10 @@
 			"startsOnGrid": false,
 			"startingPopulation": 1,
 			"coastal": true,
-			"infectionCards": null,
-			"playerCards": null,
-			"notes": "",
-			"confidence": "community"
+			"infectionCards": 1,
+			"playerCards": 1,
+			"notes": "No search box.",
+			"confidence": "verified"
 		},
 		{
 			"id": "manila",
@@ -809,10 +809,10 @@
 			"startsOnGrid": false,
 			"startingPopulation": 1,
 			"coastal": true,
-			"infectionCards": null,
-			"playerCards": null,
-			"notes": "Printed infested.",
-			"confidence": "community"
+			"infectionCards": 1,
+			"playerCards": 1,
+			"notes": "Printed infested. No search box.",
+			"confidence": "verified"
 		},
 		{
 			"id": "hong-kong",
@@ -825,10 +825,10 @@
 			"startsOnGrid": false,
 			"startingPopulation": 1,
 			"coastal": true,
-			"infectionCards": null,
-			"playerCards": null,
-			"notes": "",
-			"confidence": "community"
+			"infectionCards": 1,
+			"playerCards": 1,
+			"notes": "Port on board map sticker (door 56); Player card compass omits anchor (publisher misprint). Search: Companion Structural Engineer (Build Shelter may discard any color while held).",
+			"confidence": "verified"
 		},
 		{
 			"id": "shanghai",
@@ -841,10 +841,10 @@
 			"startsOnGrid": false,
 			"startingPopulation": 1,
 			"coastal": true,
-			"infectionCards": null,
-			"playerCards": null,
-			"notes": "Printed infested. Site of the four Plan recons (November). No supply center is needed for those recons.",
-			"confidence": "community"
+			"infectionCards": 1,
+			"playerCards": 1,
+			"notes": "Printed infested. Port on board map sticker (door 56); Player card compass omits anchor (publisher misprint). Search: story only (no game effect). Site of The Plan recons in November (no SC required).",
+			"confidence": "verified"
 		},
 		{
 			"id": "seoul",
@@ -857,10 +857,10 @@
 			"startsOnGrid": false,
 			"startingPopulation": 1,
 			"coastal": true,
-			"infectionCards": null,
-			"playerCards": null,
-			"notes": "",
-			"confidence": "community"
+			"infectionCards": 1,
+			"playerCards": 1,
+			"notes": "Search: draw a free sea lane from Seoul.",
+			"confidence": "verified"
 		},
 		{
 			"id": "tokyo",
@@ -873,10 +873,10 @@
 			"startsOnGrid": false,
 			"startingPopulation": 1,
 			"coastal": true,
-			"infectionCards": null,
-			"playerCards": null,
-			"notes": "Printed infested.",
-			"confidence": "community"
+			"infectionCards": 1,
+			"playerCards": 1,
+			"notes": "Printed infested. Search: Companion Spies (counts as 2 unique red cards for Recon).",
+			"confidence": "verified"
 		},
 		{
 			"id": "osaka",
@@ -889,10 +889,10 @@
 			"startsOnGrid": false,
 			"startingPopulation": 1,
 			"coastal": true,
-			"infectionCards": null,
-			"playerCards": null,
-			"notes": "Printed infested.",
-			"confidence": "community"
+			"infectionCards": 1,
+			"playerCards": 1,
+			"notes": "Printed infested. Search: Companion Local Resistance (play at any time to remove 1 Hollow Man anywhere on grid).",
+			"confidence": "verified"
 		},
 		{
 			"id": "wellington",
@@ -900,15 +900,15 @@
 			"lat": -41.29,
 			"lon": 174.78,
 			"kind": "city",
-			"color": null,
+			"color": "blue",
 			"region": "new-zealand",
 			"startsOnGrid": false,
-			"startingPopulation": null,
+			"startingPopulation": 2,
 			"coastal": true,
-			"infectionCards": null,
-			"playerCards": null,
-			"notes": "Revealed by the recon from the Coral Sea haven (door 19). Holds the Topaz lab. Described as untouched by the plague.",
-			"confidence": "community"
+			"infectionCards": 0,
+			"playerCards": 0,
+			"notes": "Blue port city at pop 2 (door 51, opened by door 19). Connected by sea lane from Coral Sea haven. Holds the TOPAZ lab. No Player or Infection cards.",
+			"confidence": "verified"
 		},
 		{
 			"id": "utopia",
@@ -916,15 +916,15 @@
 			"lat": 40,
 			"lon": 103,
 			"kind": "city",
-			"color": null,
+			"color": "red",
 			"region": "utopia",
 			"startsOnGrid": false,
 			"startingPopulation": 8,
 			"coastal": false,
 			"infectionCards": 8,
-			"playerCards": null,
-			"notes": "Printed infested marker. Inaccessible until the Hollow Men defect. Package 8 connects it to the grid and adds 8 Utopia Infection cards: shuffled into the Infection deck if The Plan was completed, placed in the Infection discard pile if Package 8 was forced open in December. Reached from Shanghai by supply line. Population 8 is inferred from a play report (7 after losing 1).",
-			"confidence": "community"
+			"playerCards": 1,
+			"notes": "Red inland city at pop 8 (Package 8 map sticker; Player card compass misprints anchor). Not printed infested; cannot be improved. Connects via printed supply line from Shanghai; puts 8 Infection + 4 Gather cards in Infection discard. Search: Companion Informant (play at any time to move up to 4 Utopia Infection discards to Game End).",
+			"confidence": "verified"
 		},
 		{
 			"id": "lake-baikal",
@@ -932,15 +932,15 @@
 			"lat": 53.5,
 			"lon": 108,
 			"kind": "city",
-			"color": null,
+			"color": "red",
 			"region": "utopia",
 			"startsOnGrid": false,
-			"startingPopulation": null,
+			"startingPopulation": 1,
 			"coastal": false,
-			"infectionCards": null,
-			"playerCards": null,
-			"notes": "Holds the Pearl lab and the cure sample. Its coordinates are given early by a lab-coordinates card. Joined to the grid by a supply line from Utopia. Self-Infect happens here.",
-			"confidence": "community"
+			"infectionCards": 0,
+			"playerCards": 0,
+			"notes": "Red inland city at pop 1 (door 61). Holds the PEARL lab (first arrival opens door 22 → Q, 38, 27, 32). Connected by establishing a supply line from Utopia. No Player or Infection cards.",
+			"confidence": "verified"
 		}
 	],
 	"routes": [
@@ -949,175 +949,182 @@
 			"b": "washington",
 			"kind": "sea",
 			"startsEstablished": true,
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
-			"a": "washington",
+			"a": "new-york",
 			"b": "jacksonville",
 			"kind": "sea",
 			"startsEstablished": true,
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"a": "new-york",
 			"b": "haven-north-atlantic",
 			"kind": "sea",
 			"startsEstablished": true,
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
-			"a": "london",
-			"b": "haven-north-atlantic",
+			"a": "washington",
+			"b": "jacksonville",
 			"kind": "sea",
 			"startsEstablished": true,
-			"confidence": "community"
-		},
-		{
-			"a": "haven-north-atlantic",
-			"b": "haven-south-atlantic",
-			"kind": "sea",
-			"startsEstablished": true,
-			"confidence": "community"
-		},
-		{
-			"a": "haven-north-atlantic",
-			"b": "haven-mediterranean",
-			"kind": "sea",
-			"startsEstablished": true,
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"a": "jacksonville",
 			"b": "haven-south-atlantic",
 			"kind": "sea",
 			"startsEstablished": true,
-			"confidence": "community"
+			"confidence": "verified"
+		},
+		{
+			"a": "haven-north-atlantic",
+			"b": "london",
+			"kind": "sea",
+			"startsEstablished": true,
+			"confidence": "verified"
+		},
+		{
+			"a": "haven-north-atlantic",
+			"b": "haven-mediterranean",
+			"kind": "sea",
+			"startsEstablished": true,
+			"confidence": "verified"
+		},
+		{
+			"a": "haven-north-atlantic",
+			"b": "haven-south-atlantic",
+			"kind": "sea",
+			"startsEstablished": true,
+			"confidence": "verified"
 		},
 		{
 			"a": "london",
 			"b": "haven-mediterranean",
 			"kind": "sea",
 			"startsEstablished": true,
-			"confidence": "community"
-		},
-		{
-			"a": "haven-mediterranean",
-			"b": "tripoli",
-			"kind": "sea",
-			"startsEstablished": true,
-			"confidence": "community"
-		},
-		{
-			"a": "tripoli",
-			"b": "istanbul",
-			"kind": "sea",
-			"startsEstablished": true,
-			"confidence": "inferred"
-		},
-		{
-			"a": "istanbul",
-			"b": "cairo",
-			"kind": "sea",
-			"startsEstablished": true,
-			"confidence": "community"
-		},
-		{
-			"a": "tripoli",
-			"b": "cairo",
-			"kind": "sea",
-			"startsEstablished": true,
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"a": "haven-mediterranean",
 			"b": "haven-south-atlantic",
 			"kind": "sea",
 			"startsEstablished": true,
-			"confidence": "community"
+			"confidence": "verified"
+		},
+		{
+			"a": "haven-mediterranean",
+			"b": "tripoli",
+			"kind": "sea",
+			"startsEstablished": true,
+			"confidence": "verified"
+		},
+		{
+			"a": "haven-mediterranean",
+			"b": "istanbul",
+			"kind": "sea",
+			"startsEstablished": true,
+			"confidence": "verified"
+		},
+		{
+			"a": "tripoli",
+			"b": "cairo",
+			"kind": "sea",
+			"startsEstablished": true,
+			"confidence": "verified"
+		},
+		{
+			"a": "istanbul",
+			"b": "cairo",
+			"kind": "sea",
+			"startsEstablished": true,
+			"confidence": "verified"
 		},
 		{
 			"a": "haven-south-atlantic",
 			"b": "lagos",
 			"kind": "sea",
 			"startsEstablished": true,
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"a": "haven-south-atlantic",
 			"b": "sao-paulo",
 			"kind": "sea",
 			"startsEstablished": true,
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"a": "lagos",
 			"b": "sao-paulo",
 			"kind": "sea",
 			"startsEstablished": true,
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"a": "chicago",
-			"b": "new-york",
+			"b": "washington",
 			"kind": "land",
 			"startsEstablished": false,
-			"confidence": "inferred"
+			"confidence": "verified"
 		},
 		{
 			"a": "buenos-aires",
 			"b": "sao-paulo",
-			"kind": "land",
+			"kind": "sea",
 			"startsEstablished": false,
-			"confidence": "inferred"
+			"confidence": "verified"
 		},
 		{
 			"a": "paris",
 			"b": "london",
 			"kind": "land",
 			"startsEstablished": false,
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"a": "kinshasa",
 			"b": "lagos",
 			"kind": "land",
 			"startsEstablished": false,
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"a": "baghdad",
 			"b": "cairo",
 			"kind": "land",
 			"startsEstablished": false,
-			"confidence": "inferred"
+			"confidence": "verified"
 		},
 		{
 			"a": "jakarta",
 			"b": "kolkata",
 			"kind": "sea",
 			"startsEstablished": false,
-			"confidence": "inferred"
+			"confidence": "verified"
 		},
 		{
 			"a": "jakarta",
 			"b": "haven-coral-sea",
 			"kind": "sea",
 			"startsEstablished": false,
-			"confidence": "inferred"
+			"confidence": "verified"
 		},
 		{
 			"a": "haven-coral-sea",
 			"b": "wellington",
 			"kind": "sea",
 			"startsEstablished": false,
-			"confidence": "inferred"
+			"confidence": "verified"
 		},
 		{
 			"a": "lima",
 			"b": "haven-eastern-pacific",
 			"kind": "sea",
 			"startsEstablished": false,
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"a": "jacksonville",
@@ -1355,7 +1362,7 @@
 			"b": "utopia",
 			"kind": "land",
 			"startsEstablished": false,
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"a": "utopia",

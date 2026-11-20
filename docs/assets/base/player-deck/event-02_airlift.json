@@ -1,0 +1,26 @@
+{
+	"id": "event-02",
+	"cardId": 104,
+	"printedCode": null,
+	"title": "AIRLIFT",
+	"category": "rationed_event",
+	"color": null,
+	"copies": 1,
+	"images": {
+		"front": "event-02_airlift.jpg",
+		"back": "back.jpg"
+	},
+	"hasImprovementSlot": false,
+	"frontText": "RATIONED EVENT\nAIRLIFT\nMove any 1 pawn to any location.\nGet permission before moving another player's pawn.\nThe havens' last remaining plane is held together with bailing wire, but we're still able to get it off the ground about once a month.\nPlay at any time. Not an action.",
+	"backText": null,
+	"states": [],
+	"mechanics": {
+		"timing": "Play at any time. Not an action.",
+		"effect": "Move any 1 pawn to any location. Get permission before moving another player's pawn.",
+		"rules": [
+			"The screen title is AIRLIFT under the header RATIONED EVENT.",
+			"The havens' last remaining plane paragraph is italic flavor text.",
+			"Play at any time. Not an action. is printed in red italics."
+		]
+	}
+}

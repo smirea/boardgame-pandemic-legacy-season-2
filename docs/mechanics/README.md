@@ -4,15 +4,17 @@ This is a functional spec of the mechanics of Pandemic Legacy: Season 2 (Z-Man G
 
 ## Files
 
-| File                                           | Contents                                                                                                           |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| [core-rules.md](core-rules.md)                 | The base game at the start of the campaign. Setup, turn, actions, infection, characters, game end steps, calendar. |
-| [legacy-progression.md](legacy-progression.md) | Every mechanic that unlocks during the campaign, its trigger, and its interactions. Final scoring.                 |
-| [components.md](components.md)                 | Component counts, deck composition, board graph, and the state each piece carries.                                 |
-| [interactions.md](interactions.md)             | A numbered checklist of 170 interactions, each pointing at its rule. Start here to plan the engine.                |
-| [open-questions.md](open-questions.md)         | Unconfirmed values, conflicts between sources, and inferred rulings with proposed defaults.                        |
+| File                                           | Contents                                                                                                              |
+| ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| [core-rules.md](core-rules.md)                 | The base game at the start of the campaign. Setup, turn, actions, infection, characters, game end steps, calendar.    |
+| [legacy-progression.md](legacy-progression.md) | Every mechanic that unlocks during the campaign, its trigger, and its interactions. Final scoring.                    |
+| [components.md](components.md)                 | Component counts, deck composition, board graph, and the state each piece carries.                                    |
+| [box-contents.md](box-contents.md)             | Complete package-by-package and door-by-door inventory compared against the current engine.                           |
+| [interactions.md](interactions.md)             | A numbered checklist of 170 interactions, each pointing at its rule. Start here to plan the engine.                   |
+| [open-questions.md](open-questions.md)         | Resolution log for formerly unconfirmed values and remaining FAQ edge-case rulings.                                   |
+| [docs/assets/README.md](../assets/README.md)   | Primary archive of every physical component scan (970 images + 418 JSON sidecars) and full 84-card Legacy Deck audit. |
 
-Every section carries a confidence tag. **[R]** is confirmed by the official rulebook. **[C]** comes from community sources. **[I]** is inferred by this catalogue.
+Every section carries a confidence tag. **[R]** is confirmed by the official rulebook or direct component scans in `docs/assets/`. **[C]** comes from community sources (FAQ rulings, logs). **[I]** is inferred.
 
 ## The game loop on one page
 

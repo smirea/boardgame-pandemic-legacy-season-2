@@ -1,0 +1,48 @@
+{
+	"door": "23",
+	"folder": 2,
+	"frontImage": "front.jpg",
+	"frontText": "23",
+	"items": [
+		{
+			"id": "item-01",
+			"image": "item-01.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "action_overlay",
+			"title": "ESTABLISH SUPPLY LINE",
+			"placementTarget": "Back of each player reference card",
+			"costProductionUnits": null,
+			"text": "ESTABLISH SUPPLY LINE\nSpend 2 Supply cubes to draw a straight line from the center of your city to the center of another city.",
+			"mechanics": {
+				"opensDoors": [],
+				"opensPackages": [],
+				"destroys": [],
+				"rules": [
+					"Spend 2 Supply cubes.",
+					"Draw a straight line from the center of your city to the center of another city."
+				],
+				"effect": "Action: spend 2 Supply cubes to draw a straight supply line from the center of your city to the center of another city. The icon is a yellow dot joined to a red dot."
+			}
+		},
+		{
+			"id": "item-02",
+			"image": "item-02.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "instruction",
+			"title": "Reference card placement",
+			"placementTarget": null,
+			"costProductionUnits": null,
+			"text": "Place this sticker on the back of each player reference card.",
+			"mechanics": {
+				"opensDoors": [],
+				"opensPackages": [],
+				"destroys": [],
+				"rules": [],
+				"effect": "Place the Establish Supply Line sticker on the back of each player reference card."
+			}
+		}
+	],
+	"summary": "Establish Supply Line action overlay. Spend 2 Supply cubes to draw a straight line from the center of your city to the center of another city. Place it on the back of each player reference card."
+}

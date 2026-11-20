@@ -1,0 +1,26 @@
+{
+	"id": "event-04",
+	"cardId": 106,
+	"printedCode": null,
+	"title": "ONE QUIET NIGHT",
+	"category": "rationed_event",
+	"color": null,
+	"copies": 1,
+	"images": {
+		"front": "event-04_one-quiet-night.jpg",
+		"back": "back.jpg"
+	},
+	"hasImprovementSlot": false,
+	"frontText": "RATIONED EVENT\nONE QUIET NIGHT\nSkip the next \"Infect Cities\" step (do not flip over any Infection cards).\nPlay at any time. Not an action.",
+	"backText": null,
+	"states": [],
+	"mechanics": {
+		"timing": "Play at any time. Not an action.",
+		"effect": "Skip the next \"Infect Cities\" step (do not flip over any Infection cards).",
+		"rules": [
+			"The screen title is ONE QUIET NIGHT under the header RATIONED EVENT.",
+			"Infect Cities is printed in quotation marks.",
+			"Play at any time. Not an action. is printed in red italics."
+		]
+	}
+}

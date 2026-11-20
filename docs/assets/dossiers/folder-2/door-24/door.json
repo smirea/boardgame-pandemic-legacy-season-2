@@ -1,0 +1,48 @@
+{
+	"door": "24",
+	"folder": 2,
+	"frontImage": "front.jpg",
+	"frontText": "24",
+	"items": [
+		{
+			"id": "item-01",
+			"image": "item-01.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "action_overlay",
+			"title": "CHART SEA LANE",
+			"placementTarget": "Back of each player reference card",
+			"costProductionUnits": null,
+			"text": "CHART SEA LANE\nSpend 2 Supply cubes in a port location (⚓) to draw a sea lane from it to another port location.",
+			"mechanics": {
+				"opensDoors": [],
+				"opensPackages": [],
+				"destroys": [],
+				"rules": [
+					"Spend 2 Supply cubes in a port location. The port is marked with an anchor.",
+					"Draw a sea lane from that port to another port location."
+				],
+				"effect": "Action: at a port, spend 2 Supply cubes to draw a sea lane to another port. The icon is two anchored circles joined by a line, and the same anchor is printed in parentheses after port location."
+			}
+		},
+		{
+			"id": "item-02",
+			"image": "item-02.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "instruction",
+			"title": "Reference card placement",
+			"placementTarget": null,
+			"costProductionUnits": null,
+			"text": "Place this sticker on the back of each player reference card.",
+			"mechanics": {
+				"opensDoors": [],
+				"opensPackages": [],
+				"destroys": [],
+				"rules": [],
+				"effect": "Place the Chart Sea Lane sticker on the back of each player reference card."
+			}
+		}
+	],
+	"summary": "Chart Sea Lane action overlay. Spend 2 Supply cubes in a port to draw a sea lane to another port. Place it on the back of each player reference card."
+}

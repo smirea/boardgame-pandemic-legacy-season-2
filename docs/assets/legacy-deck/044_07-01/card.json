@@ -1,0 +1,66 @@
+{
+	"sequence": 44,
+	"folder": "044_07-01",
+	"cardCode": "07-01",
+	"printedCodes": {
+		"sideA": "07-01a",
+		"sideB": "07-01b"
+	},
+	"title": "PERIMETER REPORT",
+	"category": "legacy_stop",
+	"month": "july",
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"stopOrPause": "STOP",
+		"header": "STOP",
+		"trigger": "Draw this card and read the other side during step 2 of the setup of your first game in July.",
+		"text": "STOP\nDRAW THIS CARD AND READ THE OTHER SIDE DURING STEP 2 OF THE SETUP OF YOUR FIRST GAME IN JULY.",
+		"footer": ""
+	},
+	"sideB": {
+		"header": "PERIMETER REPORT",
+		"text": "If you have not opened 57 (Africa), scratch the box below.",
+		"footer": "Destroy this card after resolving it.",
+		"scratchBoxes": [
+			{
+				"index": 1,
+				"instruction": "Scratch if 57 (Africa) has not been opened.",
+				"coveredOnBase": true,
+				"revealedInState": 2
+			}
+		]
+	},
+	"states": [
+		{
+			"state": 2,
+			"images": {
+				"sideA": "state-2-side-a.jpg",
+				"sideB": "state-2-side-b.jpg"
+			},
+			"revealedCondition": "Box scratched because 57 (Africa) was still sealed.",
+			"revealedText": "Our scouts report that the Hollow Men have raided Africa. We quickly mobilized... but too late.\n\nOpen Package 7 and follow the instructions inside. (This does not complete any objectives.)\n\nDestroy the \"TOPAZ Experimental Vaccine\" Unrationed Event card inside."
+		}
+	],
+	"mechanics": {
+		"whenRead": "STOP. Draw and read during step 2 of the setup of the first game in July.",
+		"triggers": ["57 (Africa) has not been opened: scratch the box."],
+		"opensDoors": [],
+		"opensPackages": ["7, only if 57 is still sealed"],
+		"destroys": [
+			"The \"TOPAZ Experimental Vaccine\" Unrationed Event inside Package 7, if the box is scratched.",
+			"This card, after resolving it."
+		],
+		"addsToPool": [],
+		"rules": [
+			"If 57 is already open, scratch nothing.",
+			"If 57 is sealed, open Package 7 and follow the instructions inside.",
+			"Opening Package 7 this way does not complete any objectives.",
+			"Destroy the Unrationed Event named TOPAZ Experimental Vaccine that is inside the package.",
+			"Destroy this card after resolving it."
+		],
+		"notes": "\"Open Package 7\" and \"Destroy the \\\"TOPAZ Experimental Vaccine\\\" Unrationed Event card inside.\" are bold. 57 is in a red box. Side A is the same Stop face in state 2. The card does not itself say to open 57."
+	}
+}

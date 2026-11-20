@@ -1,0 +1,42 @@
+{
+	"sequence": 76,
+	"folder": "076_12-07",
+	"cardCode": "12-07",
+	"printedCodes": {
+		"sideA": "12-07a",
+		"sideB": "12-07b"
+	},
+	"title": "If You Delivered the Sample",
+	"category": "ending",
+	"month": "december",
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"stopOrPause": "NONE",
+		"header": "",
+		"trigger": "",
+		"summary": "Illustration only: a lighthouse, a sailboat, and a barge, green border, small haven stamp. No rules text.",
+		"text": "",
+		"footer": ""
+	},
+	"sideB": {
+		"header": "IF YOU DELIVERED THE SAMPLE...",
+		"summary": "The sample has been taken from the carrier, and that sacrifice will be remembered. Production starts within days. Utopia's plan to wipe everyone out is over. The world belongs to Faded and non-Faded alike. They waited for the Faded to die, and the Faded are staying.",
+		"text": "IF YOU DELIVERED THE SAMPLE...\n\nThe sample has been extracted from the carrier, whose sacrifice will be remembered. Production starts within days. Utopia's extermination plan is over. The world belongs to Faded and non-Faded. They waited for the Faded to die, but the Faded survived and are here to stay.",
+		"footer": "",
+		"scratchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"whenRead": "One of the two cards 12-05 says to look at. Read this one if Deliver the Sample was completed. Then score on 12-08 and read 12-11 and 12-12.",
+		"triggers": ["Read only if the sample was delivered"],
+		"opensDoors": [],
+		"opensPackages": [],
+		"destroys": [],
+		"addsToPool": [],
+		"rules": ["Outcome reference for delivering the sample. No board effect."],
+		"notes": "Side A is the green-bordered illustration and prints 12-07a. 'DELIVERED THE SAMPLE' is printed in green. Flavor above is paraphrased."
+	}
+}

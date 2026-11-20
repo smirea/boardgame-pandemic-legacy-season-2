@@ -1,0 +1,40 @@
+{
+	"package": 8,
+	"index": 2,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P8-02b"
+	},
+	"title": "Riot Control",
+	"category": "unrationed-event",
+	"city": null,
+	"color": null,
+	"copies": 1,
+	"hasImprovementSlot": false,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"text": "Player card back. No text."
+	},
+	"sideB": {
+		"text": "UNRATIONED EVENT\n\nRIOT CONTROL\n\nMove up to 4 \"Utopia\" Infection\ncards from the Infection discard\npile to the Game End area.\n\nDestroy this card after use.\n\nPlay at any time. Not an action.",
+		"searchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"opensDoors": [],
+		"rules": [
+			"Unrationed Event. Play at any time. Not an action.",
+			"Move up to 4 Utopia Infection cards from the Infection discard pile to the Game End area.",
+			"Destroy this card after use."
+		],
+		"notes": [
+			"Card id 10701.",
+			"The recon report puts this card in the Player discard pile, not into a hand.",
+			"The Utopia Player card's Informant search repeats this effect and is played as that card instead of as this event.",
+			"Side A is the standard player-card back."
+		]
+	}
+}

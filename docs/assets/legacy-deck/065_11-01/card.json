@@ -1,0 +1,64 @@
+{
+	"sequence": 65,
+	"folder": "065_11-01",
+	"cardCode": "11-01",
+	"printedCodes": {
+		"sideA": "11-01a",
+		"sideB": "11-01b"
+	},
+	"title": "Intelligence Report",
+	"category": "legacy_stop",
+	"month": "november",
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"stopOrPause": "STOP",
+		"header": "STOP",
+		"trigger": "DRAW THIS CARD AND READ THE OTHER SIDE DURING STEP 2 OF THE SETUP OF YOUR FIRST GAME IN NOVEMBER.",
+		"summary": "Stop. Draw this card and read the other side during step 2 of setup of your first game in November.",
+		"text": "STOP\n\nDRAW THIS CARD AND READ THE OTHER SIDE DURING STEP 2 OF THE SETUP OF YOUR FIRST GAME IN NOVEMBER.",
+		"footer": ""
+	},
+	"sideB": {
+		"header": "INTELLIGENCE REPORT",
+		"summary": "If the Hollow Men have not yet defected, scratch the box. Destroy this card after resolving it.",
+		"text": "If Hollow Men have not yet defected, scratch the box below.\n\nDestroy this card after resolving it.",
+		"footer": "Destroy this card after resolving it.",
+		"scratchBoxes": [
+			{
+				"condition": "If Hollow Men have not yet defected, scratch the box below.",
+				"revealedInState": 2
+			}
+		]
+	},
+	"states": [
+		{
+			"state": 2,
+			"images": {
+				"sideA": "state-2-side-a.jpg",
+				"sideB": "state-2-side-b.jpg"
+			},
+			"revealedCondition": "If Hollow Men have not yet defected, scratch the box below.",
+			"revealedSummary": "The defection has happened, at a heavy cost. Open door 17 and follow what is inside. That does not complete any objectives. After characters are selected for this game, add a scar to 2 of those characters.",
+			"revealedText": "We've gotten them to turn, but at great cost.\nOpen door 17 and follow the instructions inside. (This does not complete any objectives.)\nThen, after selecting characters for this game, add a scar to 2 of these characters."
+		}
+	],
+	"mechanics": {
+		"whenRead": "Draw during step 2 of setup of the first game in November. Scratch only if the Hollow Men have not yet defected, then continue the setup draw.",
+		"triggers": ["Step 2 of setup of the first game in November", "Scratch only if Hollow Men have not yet defected"],
+		"opensDoors": ["17"],
+		"opensPackages": [],
+		"destroys": ["this card, after resolving it"],
+		"addsToPool": [],
+		"rules": [
+			"If Hollow Men have not yet defected, scratch the box.",
+			"Revealed: open door 17 and follow the instructions inside. Doing so does not complete any objectives.",
+			"Then, after selecting characters for this game, add a scar to 2 of these characters.",
+			"Destroy this card after resolving it.",
+			"If the Hollow Men have already defected, do not scratch. Still destroy this card after resolving it."
+		],
+		"notes": "state-2-side-a.jpg is the same Stop face as side-a.jpg. The scratch text is only on state-2-side-b.jpg. Door 17 is opened only on the scratch. The scar is a setup penalty on 2 of the characters just selected, not a named scar."
+	}
+}

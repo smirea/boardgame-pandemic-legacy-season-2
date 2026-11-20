@@ -1,0 +1,20 @@
+{
+	"id": "sticker-04_rule-b",
+	"package": 6,
+	"guid": "893f7b",
+	"printedCode": "B",
+	"name": "Hidden Supply Cache",
+	"category": "rule",
+	"placementTarget": "Rulebook, rule B, beside the stockpile chart",
+	"costProductionUnits": null,
+	"copies": 1,
+	"image": "sticker-04_rule-b.jpg",
+	"text": "HIDDEN SUPPLY CACHE\n\nDuring setup, add the Supply cubes indicated to the right of the stockpile chart (in addition to those for the current month) to the stockpile.",
+	"mechanics": {
+		"timing": "setup",
+		"effect": "During setup, add the Supply cubes shown to the right of the stockpile chart, in addition to the cubes for the current month.",
+		"restrictions": ["The chart amount is added on top of the month's supply"],
+		"opensDoors": [],
+		"notes": "The letter B is the rulebook slot named in the manifest. It is not printed on the sticker. Area 10's +15 is one amount this rule adds."
+	}
+}

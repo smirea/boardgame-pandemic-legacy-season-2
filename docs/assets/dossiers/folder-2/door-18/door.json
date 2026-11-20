@@ -1,0 +1,83 @@
+{
+	"door": "18",
+	"folder": 2,
+	"frontImage": "front.jpg",
+	"frontText": "18",
+	"items": [
+		{
+			"id": "item-01",
+			"image": "item-01.jpg",
+			"count": 1,
+			"printedCode": "18",
+			"category": "profile",
+			"title": "Buenos Aires profile",
+			"placementTarget": "Character card",
+			"costProductionUnits": null,
+			"text": "Continuing the work of my grandfather, who told stories of helping during a world-wide crisis.\nHOME Buenos Aires\nAGE 37",
+			"mechanics": {
+				"opensDoors": [],
+				"opensPackages": [],
+				"destroys": [],
+				"rules": ["No name is printed. Home is Buenos Aires. Age is 37.", "The word world-wide is hyphenated."],
+				"effect": "Profile sticker for the new character. Home Buenos Aires, age 37."
+			}
+		},
+		{
+			"id": "item-02",
+			"image": "item-02.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "portrait",
+			"title": "Character portrait",
+			"placementTarget": "Character card",
+			"costProductionUnits": null,
+			"text": "",
+			"mechanics": {
+				"opensDoors": [],
+				"opensPackages": [],
+				"destroys": [],
+				"rules": [],
+				"effect": "Portrait sticker with no printed text. A person with dark hair in two braids, a lab coat, and a necklace."
+			}
+		},
+		{
+			"id": "item-03",
+			"image": "item-03.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "occupation",
+			"title": "Immunologist",
+			"placementTarget": "Character card",
+			"costProductionUnits": null,
+			"text": "Immunologist. When doing the Make Supplies action, you may take the Supply cube(s) from the reserve (instead of the stockpile).",
+			"mechanics": {
+				"opensDoors": [],
+				"opensPackages": [],
+				"destroys": [],
+				"rules": [
+					"When doing the Make Supplies action, you may take the Supply cube(s) from the reserve instead of the stockpile."
+				],
+				"effect": "Immunologist may take Make Supplies cubes from the reserve instead of the stockpile."
+			}
+		},
+		{
+			"id": "item-04",
+			"image": "item-04.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "instruction",
+			"title": "Create this character",
+			"placementTarget": null,
+			"costProductionUnits": null,
+			"text": "Immediately create this character using the stickers below and add it to the pool of characters.",
+			"mechanics": {
+				"opensDoors": [],
+				"opensPackages": [],
+				"destroys": [],
+				"rules": [],
+				"effect": "Immediately build the character from the portrait, profile, and Immunologist sticker and add it to the character pool."
+			}
+		}
+	],
+	"summary": "Create a character at once and add it to the pool. Home Buenos Aires, age 37, no printed name. The job is Immunologist: Make Supplies may take its cubes from the reserve instead of the stockpile."
+}

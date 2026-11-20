@@ -1,0 +1,51 @@
+{
+	"door": "13",
+	"folder": 2,
+	"frontImage": "front.jpg",
+	"frontText": "13",
+	"items": [
+		{
+			"id": "item-01",
+			"image": "item-01.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "board_overlay",
+			"title": "BREAKTHROUGHS",
+			"placementTarget": "Area 13 on the game board",
+			"costProductionUnits": null,
+			"text": "BREAKTHROUGHS\nWhen you find a lab, check its box and gain its ability.\n☐ OPAL When you do the Make Supplies action, take 1 additional Supply cube if you are in a haven or supply center.\n☐ JADE Remove a maximum of 1 Supply cube during step 2 of each Epidemic card.\n☐ TOPAZ Discard a Player card matching the color of a just-drawn Infection card to prevent 1 Supply cube from being removed from that city.\n☐ PEARL Unknown. A possible cure?",
+			"mechanics": {
+				"opensDoors": [],
+				"opensPackages": [],
+				"destroys": [],
+				"rules": [
+					"When you find a lab, check its box and gain its ability. All four boxes are printed empty.",
+					"OPAL: When you do the Make Supplies action, take 1 additional Supply cube if you are in a haven or supply center.",
+					"JADE: Remove a maximum of 1 Supply cube during step 2 of each Epidemic card.",
+					"TOPAZ: Discard a Player card matching the color of a just-drawn Infection card to prevent 1 Supply cube from being removed from that city.",
+					"PEARL: Unknown. A possible cure?"
+				],
+				"effect": "Board legend for the four labs. Checking a lab grants its printed ability. Pearl has no ability yet."
+			}
+		},
+		{
+			"id": "item-02",
+			"image": "item-02.jpg",
+			"count": 1,
+			"printedCode": "13",
+			"category": "instruction",
+			"title": "Area 13 placement",
+			"placementTarget": null,
+			"costProductionUnits": null,
+			"text": "Put this sticker on the game board onto Area 13.",
+			"mechanics": {
+				"opensDoors": [],
+				"opensPackages": [],
+				"destroys": [],
+				"rules": [],
+				"effect": "Place the Breakthroughs sticker on Area 13 of the game board."
+			}
+		}
+	],
+	"summary": "Breakthroughs legend for Area 13. Opal adds 1 Supply cube on Make Supplies in a haven or supply center. Jade removes at most 1 Supply cube during step 2 of each Epidemic. Topaz discards a matching-color Player card to save 1 Supply cube from a just-drawn Infection card. Pearl reads: Unknown. A possible cure?"
+}

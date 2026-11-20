@@ -1,0 +1,40 @@
+{
+	"sequence": 18,
+	"folder": "018_02-07",
+	"cardCode": "02-07",
+	"printedCodes": {
+		"sideA": "02-07a",
+		"sideB": "02-07b"
+	},
+	"title": "RIGHT NOW!",
+	"category": "legacy_pause",
+	"month": "february",
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"stopOrPause": "PAUSE",
+		"header": "PAUSE",
+		"trigger": "DRAW THIS CARD AND READ THE OTHER SIDE DURING STEP 2 AT THE END OF YOUR FIRST GAME IN FEBRUARY.",
+		"text": "PAUSE\n\nDRAW THIS CARD AND READ THE OTHER SIDE DURING STEP 2 AT THE END OF YOUR FIRST GAME IN FEBRUARY.",
+		"footer": ""
+	},
+	"sideB": {
+		"header": "RIGHT NOW!",
+		"text": "Open the following door:\n34",
+		"footer": "",
+		"scratchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"whenRead": "Stop drawing when you reach this card in the February setup draw. Draw it and read the other side during step 2 at the end of the first game in February.",
+		"triggers": ["Step 2 at the end of the first game in February"],
+		"opensDoors": ["34"],
+		"opensPackages": [],
+		"destroys": [],
+		"addsToPool": [],
+		"rules": ["Immediately open door 34."],
+		"notes": "Unlike the January pause (01-07), this back does not say that new cards follow. Door 34 is a single cream badge with a red 34."
+	}
+}

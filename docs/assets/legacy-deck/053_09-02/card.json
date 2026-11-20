@@ -1,0 +1,40 @@
+{
+	"sequence": 53,
+	"folder": "053_09-02",
+	"cardCode": "09-02",
+	"printedCodes": {
+		"sideA": "09-02a",
+		"sideB": "09-02b"
+	},
+	"title": "Journal Entry",
+	"category": "legacy_journal",
+	"month": "september",
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"stopOrPause": "NONE",
+		"header": "Journal Entry",
+		"trigger": "",
+		"text": "PEARL and its possible cure are all they have left. The year is almost over and this is the last chance, so they have to find PEARL and start making a cure. They ask what Utopia's motives are, and whether Utopia is holding PEARL hostage.",
+		"footer": ""
+	},
+	"sideB": {
+		"header": "FROM THE ARCHIVES",
+		"text": "APRIL 15, YEAR 44\n\nTwo havens are gone. Without their supplies, the ability to continue is severely compromised, and the writer feels real despair. They ask whether someone would let them all die. They were condemned to the havens but had tried to help the whole world. If the havens are gone, then what?",
+		"footer": "Keep papers like this in the reserve.",
+		"scratchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"whenRead": "Continue the September setup Legacy-deck reading, immediately after 09-01.",
+		"triggers": [],
+		"opensDoors": [],
+		"opensPackages": [],
+		"destroys": [],
+		"addsToPool": [],
+		"rules": ["Keep the card in the reserve. No rules change."],
+		"notes": "A handwritten signature under the Year 44 note is not transcribed."
+	}
+}

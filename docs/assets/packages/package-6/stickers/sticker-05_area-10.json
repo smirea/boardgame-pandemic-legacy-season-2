@@ -1,0 +1,20 @@
+{
+	"id": "sticker-05_area-10",
+	"package": 6,
+	"guid": "025bea",
+	"printedCode": null,
+	"name": "Area 10 +15",
+	"category": "board-marker",
+	"placementTarget": "Game board, Area 10",
+	"costProductionUnits": null,
+	"copies": 1,
+	"image": "sticker-05_area-10.png",
+	"text": "+15",
+	"mechanics": {
+		"timing": "setup",
+		"effect": "Reminder to add 15 more Supply cubes to the stockpile during setup each month.",
+		"restrictions": [],
+		"opensDoors": [],
+		"notes": "The marker itself prints only +15. Where it goes, and what the +15 means, is printed on sticker-06. Rule B is what makes a number beside the stockpile chart add cubes at setup."
+	}
+}

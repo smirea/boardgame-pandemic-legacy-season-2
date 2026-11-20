@@ -1,0 +1,82 @@
+{
+	"package": 7,
+	"index": 7,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P7-07b"
+	},
+	"title": "Dar es Salaam",
+	"category": "player-card",
+	"city": "Dar es Salaam",
+	"color": "yellow",
+	"copies": 1,
+	"hasImprovementSlot": false,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"text": "Player card back. No text."
+	},
+	"sideB": {
+		"text": "DAR ES SALAAM\n6°47'33\"S 39°12'30\"E\n\nSEARCH THE LAND:\n[covered]\n\nSEARCH THE SEA:\n[covered]\n\nAnchor on the compass. The bottom edge repeats DAR ES SALAAM and 6°47'33\"S 39°12'30\"E upside down.",
+		"searchBoxes": [
+			{
+				"id": "land",
+				"label": "SEARCH THE LAND:",
+				"initially": "covered",
+				"revealedInState": 2
+			},
+			{
+				"id": "sea",
+				"label": "SEARCH THE SEA:",
+				"initially": "covered",
+				"revealedInState": 3
+			}
+		]
+	},
+	"states": [
+		{
+			"state": 2,
+			"images": {
+				"sideA": "state-2-side-a.jpg",
+				"sideB": "state-2-side-b.jpg"
+			},
+			"revealedText": "SEARCH THE LAND:\nWe found a well-traveled path out of\nDar es Salaam.\n\nImmediately draw a free supply line from\nDar es Salaam to another city.\n\nSEARCH THE SEA:\n[still covered]",
+			"effect": "Land only. Immediately draw a free supply line from Dar es Salaam to another city. The sea box stays covered."
+		},
+		{
+			"state": 3,
+			"images": {
+				"sideA": "state-3-side-a.jpg",
+				"sideB": "state-3-side-b.jpg"
+			},
+			"revealedText": "SEARCH THE LAND:\n[still covered]\n\nSEARCH THE SEA:\nWe have found a lost haven!\nWe have not yet accessed it.\n\nOpen 65 and add it to the board. If you have\nalready opened 65, gain 1 action.",
+			"effect": "Sea only. Open door 65 and add that haven to the board. If door 65 is already open, gain 1 action instead. The land box stays covered."
+		},
+		{
+			"state": 4,
+			"images": {
+				"sideA": "state-4-side-a.jpg",
+				"sideB": "state-4-side-b.jpg"
+			},
+			"revealedText": "SEARCH THE LAND:\nWe found a well-traveled path out of\nDar es Salaam.\n\nImmediately draw a free supply line from\nDar es Salaam to another city.\n\nSEARCH THE SEA:\nWe have found a lost haven!\nWe have not yet accessed it.\n\nOpen 65 and add it to the board. If you have\nalready opened 65, gain 1 action.",
+			"effect": "Both boxes scratched. Draw a free supply line from Dar es Salaam to another city, and open door 65 (or gain 1 action if 65 is already open)."
+		}
+	],
+	"mechanics": {
+		"opensDoors": ["65"],
+		"rules": [
+			"Yellow Player card for Dar es Salaam. Port: the compass has an anchor.",
+			"Two scratch boxes, searched independently. State 2 is land only. State 3 is sea only. State 4 is both. Every state side A is the unchanged player-card back.",
+			"Land: immediately draw a free supply line from Dar es Salaam to another city.",
+			"Sea: a lost haven. Open door 65 and add it to the board. If 65 is already open, gain 1 action. The same door 65 is also on Antananarivo's sea search."
+		],
+		"notes": [
+			"Card id 10706. State card ids: state 2 is 10722, state 3 is 10721, state 4 is 10720.",
+			"Printed code P7-07b stays on every scratched face.",
+			"Coordinates are printed 6°47'33\"S 39°12'30\"E.",
+			"Goes to the reserve when the package is opened. A second, non-search Dar es Salaam Player card is card 08."
+		]
+	}
+}

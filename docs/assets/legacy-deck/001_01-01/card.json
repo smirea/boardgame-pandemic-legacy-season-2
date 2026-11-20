@@ -1,0 +1,44 @@
+{
+	"sequence": 1,
+	"folder": "001_01-01",
+	"cardCode": "01-01",
+	"printedCodes": {
+		"sideA": "01-01a",
+		"sideB": "01-01b"
+	},
+	"title": "STOP",
+	"category": "legacy_stop",
+	"month": "january",
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"stopOrPause": "STOP",
+		"header": "STOP",
+		"trigger": "DRAW THIS CARD AND READ THE OTHER SIDE DURING STEP 2 OF THE SETUP OF YOUR FIRST GAME IN JANUARY.",
+		"text": "DO NOT DRAW, REVEAL, LOOK AT, HANDLE, OR OTHERWISE DISTURB THESE CARDS UNTIL INSTRUCTED.\n\nSTOP\n\nDRAW THIS CARD AND READ THE OTHER SIDE DURING STEP 2 OF THE SETUP OF YOUR FIRST GAME IN JANUARY.",
+		"footer": ""
+	},
+	"sideB": {
+		"header": "Journal Entry",
+		"text": "Priorities: Find our leaders.\nFind more supplies.\n\nAttached a document we found dated last year. It's grim. Our supplies won't last the year. Perhaps North America will give us clues; it's where the plague started. The Hollow Men are raiding surviving coastal cities and it's only a matter of time before they move inland. We need to recon before they do. Hope the people we meet know that we are there to help. Old prejudices last long.",
+		"footer": "Keep journal entries like this in the reserve in case you want to reference them in the future.",
+		"scratchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"whenRead": "Draw this card during step 2 of setup of the first game in January, then read the journal. Do not draw it before that. After reading it, keep drawing (the next card says KEEP DRAWING) until the next Pause or Stop.",
+		"triggers": ["Step 2 of setup of the first game in January"],
+		"opensDoors": [],
+		"opensPackages": [],
+		"destroys": [],
+		"addsToPool": [],
+		"rules": [
+			"Do not draw, reveal, look at, handle, or otherwise disturb these cards until instructed.",
+			"Journal priorities for January: find our leaders, and find more supplies. The two mandatory objective cards that follow are the mechanical form of those priorities.",
+			"Keep the journal in the reserve."
+		],
+		"notes": "The yellow warning above the stop sign is only on this first Stop card. 'won't last the year.' is its own sentence, then 'Perhaps North America...'"
+	}
+}

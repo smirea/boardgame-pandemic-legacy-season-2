@@ -1,0 +1,38 @@
+{
+	"package": 7,
+	"index": 18,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P7-17b"
+	},
+	"title": "Antananarivo",
+	"category": "infection-card",
+	"city": "Antananarivo",
+	"color": "black",
+	"copies": 1,
+	"hasImprovementSlot": true,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"text": "Infection card back. No text."
+	},
+	"sideB": {
+		"text": "ANTANANARIVO\n\nBlack city art with a white upgrade panel and a green ring. No other text.",
+		"searchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"opensDoors": [],
+		"rules": [
+			"Black Infection card for Antananarivo. Same printed face as card 17, including the code P7-17b.",
+			"The white center panel is the infection-card upgrade slot."
+		],
+		"notes": [
+			"Card id 10717.",
+			"The corner code is P7-17b, the same code as card 17. It is not printed P7-18b.",
+			"Goes to the reserve when the package is opened."
+		]
+	}
+}

@@ -1,0 +1,21 @@
+{
+	"id": "sticker-06_area-16",
+	"package": 2,
+	"printedCode": null,
+	"name": "Area 16",
+	"category": "board-area",
+	"placementTarget": "On the board, inside the Infection discard pile box. That box is sticker area 16.",
+	"costProductionUnits": null,
+	"copies": 1,
+	"image": "sticker-06_area-16.jpg",
+	"summary": "Vertical strip. During setup, place all of the Hollow Men Gather cards here. A Hollow Men shield icon sits at the end the arrow indicates. The number 16 is not printed on the sticker.",
+	"mechanics": {
+		"timing": "setup",
+		"effect": "The Infection discard pile is where every Hollow Men Gather card is placed during setup.",
+		"restrictions": [
+			"Here means the Infection discard pile, the box this sticker is placed in.",
+			"Rule C states the same setup instruction in the rulebook."
+		],
+		"opensDoors": []
+	}
+}

@@ -1,0 +1,54 @@
+{
+	"package": 5,
+	"index": 11,
+	"cardId": 10710,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P5-11b"
+	},
+	"title": "Bogotá",
+	"category": "player-city",
+	"city": "Bogotá",
+	"color": "yellow",
+	"coordinates": "4°42'40\"N 74°4'20\"W",
+	"copies": 1,
+	"hasImprovementSlot": true,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"text": "Player deck back. No printed text."
+	},
+	"sideB": {
+		"text": "Bogotá\n4°42'40\"N 74°4'20\"W\nSEARCH:\n(City name and coordinates repeat upside down along the bottom.)\nP5-11b",
+		"searchBoxes": [
+			{
+				"label": "SEARCH:",
+				"kind": "search",
+				"scratched": false
+			}
+		]
+	},
+	"states": [
+		{
+			"state": 2,
+			"cardId": 10721,
+			"images": {
+				"sideA": "state-2-side-a.jpg",
+				"sideB": "state-2-side-b.jpg"
+			},
+			"scratched": ["search"],
+			"revealedText": "SEARCH:\nLocals say the haven off the coast was abandoned decades ago. Haven staff fled to Bogotá but found no solace due to their appearance. We moved on without comment.\nTake 1 card from the Player discard pile and add it to your hand.",
+			"effect": "When this box is searched, take 1 card from the Player discard pile and add it to your hand."
+		}
+	],
+	"mechanics": {
+		"opensDoors": [],
+		"rules": [
+			"Yellow Player city card.",
+			"One improvement sticker may be placed on this card. No empty sticker box is printed on the face."
+		],
+		"notes": "One scratch-off box, labeled SEARCH:. State 2 reveals it. The city name is printed BOGOTÁ."
+	}
+}

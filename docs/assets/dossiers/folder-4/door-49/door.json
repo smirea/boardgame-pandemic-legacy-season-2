@@ -1,0 +1,74 @@
+{
+	"door": "49",
+	"folder": 4,
+	"frontImage": "dossiers/folder-4/door-49/front.jpg",
+	"frontText": "49",
+	"items": [
+		{
+			"id": "item-01",
+			"image": "dossiers/folder-4/door-49/item-01.jpg",
+			"count": 1,
+			"printedCode": "49",
+			"category": "profile",
+			"title": "Captain flavor",
+			"placementTarget": "Character card",
+			"costProductionUnits": null,
+			"text": "A veteran sailor of haven ships, used to make supply runs\nto the mainland.",
+			"mapDetails": null,
+			"mechanics": {
+				"timing": "setup",
+				"trigger": null,
+				"effect": "Flavor line for the new character. haven is lowercase. No home and no age are printed.",
+				"restrictions": [],
+				"home": null,
+				"age": null,
+				"sourceGuids": ["65dcf1"]
+			}
+		},
+		{
+			"id": "item-02",
+			"image": "dossiers/folder-4/door-49/item-02.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "occupation",
+			"title": "Captain",
+			"placementTarget": "Character card",
+			"costProductionUnits": null,
+			"text": "Captain. As a free action, discard a City card to\nmove from any port location to any other port\nlocation on the grid if you can trace a sea route to it.",
+			"mapDetails": null,
+			"mechanics": {
+				"timing": "free_action",
+				"trigger": null,
+				"effect": "Discard a City card to move from any port on the grid to any other port on the grid if you can trace a sea route to it.",
+				"restrictions": [
+					"Discard a City card",
+					"Both locations are ports on the grid",
+					"You must be able to trace a sea route between them"
+				],
+				"seaRoutePrintedAsTwoWords": true,
+				"sourceGuids": ["15752f"]
+			}
+		},
+		{
+			"id": "item-03",
+			"image": "dossiers/folder-4/door-49/item-03.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "instruction",
+			"title": "Create a new character",
+			"placementTarget": null,
+			"costProductionUnits": null,
+			"text": "Immediately create a new character using this job.\nAdd that character to the pool of available characters.",
+			"mapDetails": null,
+			"mechanics": {
+				"timing": "immediate",
+				"trigger": null,
+				"effect": "Immediately create a new character with the Captain job and add that character to the pool of available characters. There is no portrait.",
+				"restrictions": [],
+				"sourceGuids": ["0a9740"]
+			}
+		}
+	],
+	"bags": [],
+	"summary": "Create a new character with the Captain job and add it to the available pool. No portrait, home, or age. Free action: discard a City card to move between ports on the grid along a traced sea route. The words sea route are not hyphenated. Corner badge on the flavor strip is 49. The instruction wording matches door 44; the files are not byte-identical."
+}

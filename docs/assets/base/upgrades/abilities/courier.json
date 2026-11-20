@@ -1,0 +1,15 @@
+{
+	"id": "courier",
+	"name": "Courier",
+	"category": "ability",
+	"costProductionUnits": 3,
+	"copies": 1,
+	"image": "courier.jpg",
+	"text": "Courier: When doing the Deliver Supplies action,\nyou may put Supply cubes into one adjacent location\n(instead of your current location).",
+	"mechanics": {
+		"timing": "action",
+		"trigger": "When doing the Deliver Supplies action",
+		"effect": "You may put Supply cubes into one adjacent location instead of your current location.",
+		"restrictions": ["Only one adjacent location", "Instead of your current location"]
+	}
+}

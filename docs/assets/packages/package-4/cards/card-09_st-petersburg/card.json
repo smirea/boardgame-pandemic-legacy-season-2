@@ -1,0 +1,87 @@
+{
+	"package": 4,
+	"index": 9,
+	"cardId": 10808,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P4-11b"
+	},
+	"title": "St. Petersburg",
+	"category": "player-card",
+	"city": "St. Petersburg",
+	"color": "blue",
+	"coordinates": "59°56'3\"N 30°20'6\"E",
+	"port": true,
+	"copies": 1,
+	"hasImprovementSlot": false,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideASummary": "Player deck back. No printed text. Side A of states 2, 3, and 4 is the same back.",
+	"sideBSummary": "St. Petersburg, blue port, 59°56'3\"N 30°20'6\"E. The compass has an anchor. Two covered boxes: SEARCH THE LAND and SEARCH THE SEA. The name and coordinates repeat upside down along the bottom. P4-11b.",
+	"searchBoxes": [
+		{
+			"type": "land",
+			"stateRevealed": 2,
+			"isCompanion": true,
+			"companionName": "Operative",
+			"opensDoors": [],
+			"effectSummary": "While this card is in your hand, you may do the Search action for free. The card does not say to discard it. First revealed in state 2. Also visible in state 4."
+		},
+		{
+			"type": "sea",
+			"stateRevealed": 3,
+			"isCompanion": false,
+			"companionName": null,
+			"opensDoors": [],
+			"effectSummary": "Smugglers based here offer help. Immediately draw a free sea lane from St. Petersburg to another city. One-time, when the box is scratched. First revealed in state 3. Also visible in state 4."
+		}
+	],
+	"states": [
+		{
+			"state": 2,
+			"cardId": 10716,
+			"images": {
+				"sideA": "state-2-side-a.jpg",
+				"sideB": "state-2-side-b.jpg"
+			},
+			"summary": "Land only. Companion Operative: you may do the Search action for free if this card is in your hand. SEARCH THE SEA stays covered. P4-11b."
+		},
+		{
+			"state": 3,
+			"cardId": 10715,
+			"images": {
+				"sideA": "state-3-side-a.jpg",
+				"sideB": "state-3-side-b.jpg"
+			},
+			"summary": "Sea only. Smugglers offer help. Immediately draw a free sea lane from St. Petersburg to another city. SEARCH THE LAND stays covered. P4-11b."
+		},
+		{
+			"state": 4,
+			"cardId": 10714,
+			"images": {
+				"sideA": "state-4-side-a.jpg",
+				"sideB": "state-4-side-b.jpg"
+			},
+			"summary": "Both boxes scratched. Operative makes Search free while the card is in hand, and a free sea lane is drawn at once from St. Petersburg to another city. P4-11b."
+		}
+	],
+	"mechanics": {
+		"opensDoors": [],
+		"destroys": [],
+		"rules": [
+			"Blue Player card for St. Petersburg. Port: the compass has an anchor.",
+			"Two scratch boxes, searched independently. State 2 is land only. State 3 is sea only. State 4 is both. Every state side A is the unchanged Player deck back.",
+			"Land, Companion Operative: the Search action is free while this card is in your hand.",
+			"Sea: immediately draw a free sea lane from St. Petersburg to another city. The card says sea lane, not supply line, and it does not name a door."
+		],
+		"notes": [
+			"Card id 10808. State card ids: state 2 is 10716, state 3 is 10715, state 4 is 10714.",
+			"Printed code P4-11b stays on every scratched face.",
+			"Coordinates are printed 59°56'3\"N 30°20'6\"E.",
+			"This is the only St. Petersburg Player card. No improvement bullseye is printed.",
+			"Goes to the reserve when the package is opened."
+		]
+	}
+}

@@ -1,0 +1,20 @@
+{
+	"id": "sticker-03_foreman",
+	"package": 5,
+	"guid": "f1c448",
+	"printedCode": null,
+	"name": "Foreman",
+	"category": "ability",
+	"placementTarget": "Character card",
+	"costProductionUnits": 2,
+	"copies": 1,
+	"image": "sticker-03_foreman.jpg",
+	"text": "Foreman: When doing the Establish Supply Line action, spend 1 fewer Supply cube.",
+	"mechanics": {
+		"timing": "action",
+		"effect": "Establish Supply Line costs 1 fewer Supply cube.",
+		"restrictions": ["Applies when doing the Establish Supply Line action"],
+		"opensDoors": [],
+		"notes": "The production cost is not printed on the sticker. The package manifest lists it as 2 Production Units. The action name on the sticker is Establish Supply Line."
+	}
+}

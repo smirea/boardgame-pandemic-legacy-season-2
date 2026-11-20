@@ -1,0 +1,37 @@
+{
+	"package": 2,
+	"index": 18,
+	"cardId": 10717,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P2-18b"
+	},
+	"title": "New Mumbai",
+	"category": "infection-card",
+	"city": "New Mumbai",
+	"color": "black",
+	"coordinates": null,
+	"port": true,
+	"copies": 1,
+	"hasImprovementSlot": true,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideASummary": "Infection deck back. Red biohazard on a dark field. No printed text.",
+	"sideBSummary": "NEW MUMBAI printed vertically, code P2-18b. Map fragment, green ring, and a dashed white panel. Same face as index 17.",
+	"searchBoxes": [],
+	"states": [],
+	"mechanics": {
+		"opensDoors": [],
+		"destroys": [],
+		"rules": [
+			"Second black Infection card for New Mumbai. Same printed code as index 17.",
+			"The dashed white panel is the infection-card upgrade slot."
+		],
+		"notes": [
+			"Separate scan from index 17. Both faces print P2-18b.",
+			"Goes to the reserve when the package is opened."
+		]
+	}
+}

@@ -1,65 +1,63 @@
 # Open questions
 
-This file lists what this catalogue could not confirm, where sources conflict, and which rulings are inferred. Each item names the section it affects and a proposed engine default. Because the user's game uses an original theme and campaign, many of these are design decisions rather than facts to recover.
+This file originally tracked unconfirmed facts, source conflicts, and inferred defaults before the physical components were archived. Every component, card, sticker, dossier door, package, rulebook page, and the full board has now been extracted and verified directly in [docs/assets/](../assets/README.md).
 
-## Q-1. Sources not found
+## Q-1. Formerly missing sources — RESOLVED
 
-- **Rule sticker text.** The rulebook has 23 rule sticker slots (A to W) and 8 action slots (J to Q). No source transcribes the stickers. The mapping from letter to rule is known for only a few: A covers forsaken cities (FAQ), D replaces setup infection, R replaces the Epidemic infect step. E is probably the epidemic-count rule, U probably the Hollow Men loss condition, and W probably the Hollow Men population step. B, C, F to Q, S, T, and V are unmapped. Affects [L-0](legacy-progression.md#l-0-how-content-unlocks-r-c).
-- **Board print values.** The per-month supply track, the per-month required-objective count, the per-space Infection Rate values, and the Incident track length are printed on the board. The board is not in the rulebook PDF in readable form. Values in this catalogue come from campaign logs.
-- **Package and dossier contents.** No complete list exists. The catalogue rebuilds them from two full campaign logs, one partial log, and forum threads.
-- **Legacy deck text.** Not transcribed anywhere found. The month timeline in [L-13.1](legacy-progression.md#l-131-objectives-by-month-c) is rebuilt from logs.
-- **Final scoring table.** The point values in [L-15](legacy-progression.md#l-15-campaign-end-and-final-scoring-c-i) are inferred. Four published breakdowns on BoardGameGeek reconcile exactly with 50 per early win, 30 per late win, 1 per population point, 100 for the sample, 25 per lab, and minus 5 per forsaken city. No source prints the table. The rating tiers are unknown.
-- **The publisher's PDF link.** The Z-Man Games rulebook URL failed its TLS certificate check. The same PDF was read from a retailer mirror. A transcription site was used to read text that the PDF layout garbled.
-- **Errata.** No official errata list was found. A German translation error exists for the shelter cost (the English color-match wording is correct).
+All items below are now verified directly from the component scans in [docs/assets/](../assets/README.md):
 
-## Q-2. Conflicts between sources
+- **Rule sticker text (slots A–W and action slots J–Q):** 100% mapped and verified across [docs/assets/dossiers/folder-1/](../assets/dossiers/folder-1/) and [docs/assets/packages/](../assets/packages/):
+  - Page 6: **A** (Forsaken Cities, Door A)
+  - Page 8: **B** (Setup stockpile bonus caches, Package 6), **C** (Setup Hollow Men Gather staging, Package 2), **D** (6+3 Setup Infection, Door D)
+  - Page 9: **E** (Stretched Too Thin Epidemic table, Door E)
+  - Page 10: **F** (Infested city start-of-turn exposure, Door F), **G** (Hollow Men exit exposure, Package 2), **H** (Shuttle Flight, Package 4)
+  - Page 11: **I** (Inoculate free action, Package 6)
+  - Page 12 (New Actions): **J** (Establish Supply Line, Door J), **K** (Chart Sea Lane, Door K), **L** (Search, Door L), **M** (Monitor, Door M), **N** (Build Shelter, Package 3), **O** (Build Satellite Tower & Transmit, Package 7), **P** (Broadcast Misinformation, Door P), **Q** (Self-Infect, Door Q)
+  - Page 13: **R** (Epidemic Infect from Package 6, Door R)
+  - Page 14: **S** & **T** (Hollow Men Gather resolution & draw/Epidemic rules, Package 2)
+  - Page 15: **U** (Hollow Men figure exhaustion loss, Door U)
+  - Page 20: **V** (Game End step a: Sheltered cities skip b & c, Package 3), **W** (Game End step c: Hollow Men -1 population, Package 2)
+- **Board print values:** Verified directly on [board.json](../assets/board/board.json):
+  - Projected supplies & required objectives: Prologue `1★ / 36`, Jan `2★ / 36`, Feb `2★ / 33`, Mar `3★ / 30`, Apr `3★ / 27`, May `3★ / 24`, Jun `3★ / 21`, Jul `3★ / 18`, Aug `3★ / 15`, Sep `3★ / 12`, Oct `2★ / 8`, Nov `1★ / 4`, Dec `1★ / 0`.
+  - Infection Rate track (8 spaces): `[2, 2, 2, 3, 3, 4, 4, 5]`.
+  - Incident track: `0..7` then Skull (loss on 8th incident).
+  - Production Units table: `1–10: 3`, `11–16: 4`, `17–24: 5`, `25–33: 6`, `34–42: 7`, `43+: 8`, `+1` for win.
+  - Starting board: all 9 cities and 3 havens start at population **3**; exact **17** starting sea lanes (including NY–Jacksonville and Mediterranean Haven–Istanbul; no Tripoli–Istanbul).
+- **Packages (1–8), Dossiers (69 doors), and Legacy Deck (84 cards):** 100% extracted and cross-verified in [docs/assets/](../assets/README.md).
+- **Final scoring table & rating tiers:** Confirmed on `12-08` through `12-12`: 50/early win, 30/late win, +1/pop on grid, +100 delivery, +25/lab on board, -5/forsaken city on grid. Both outcome branches share 5 score tiers: `851+`, `701–850`, `551–700`, `401–550`, `≤400`.
+- **Publisher card misprints:** On three Player cards, the top-right compass icon disagrees with the authoritative board map sticker: **Hong Kong** (`P3-12b`) and **Shanghai** (`P3-14b`) omit the anchor on their cards but are ports on Door `56`; **Utopia** (`P8-03b`) prints an anchor on its card but is inland (`×`) on Package 8's map sticker.
 
-| Topic                                        | Source A                                                   | Source B                                                     | Default                                                       |
-| -------------------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------- |
-| Which unlock gives Inoculate                 | Opal lab opens Package 6 (two logs)                        | The Pacific lost haven (one log)                             | Opal opens Package 6                                          |
-| Jade lab effect                              | Gives the Scientist character (one log)                    | Changes Epidemic infect to remove only 1 cube (another log)  | Both may be true. Treat the second as unconfirmed.            |
-| Hollow Men per city                          | Penalty on the 4th figure (FAQ, one log shows 3 in a city) | Penalty on the 3rd (one log)                                 | Max 3, penalty on the 4th                                     |
-| Package with Hollow Men                      | Package 2 (rulebook route, two logs)                       | Package 8 (one log, likely a numbering slip)                 | Package 2                                                     |
-| Monitor result                               | All 4 cards discarded (FAQ, two logs)                      | One log reports gaining a card                               | Discard all 4. The gained card was likely a frequency reward. |
-| Supply track                                 | January 33, minus 3 per month (one log)                    | 36 cubes in the box, but two +15 bonuses push December to 30 | See Q-3                                                       |
-| Chart Sea Lane source                        | End of March Legacy deck (one log)                         | After the South America recon (another log)                  | Tie it to the South America package                           |
-| Who may use Lockdown during an Epidemic      | Allowed between Infect and Intensify (most posters)        | Not allowed, the Epidemic must finish (some)                 | Allow it                                                      |
-| Hollow Men exposure on another player's turn | Any movement counts (most posters)                         | Only on your own turn (a minority reading)                   | Any movement counts                                           |
+## Q-2. Formerly conflicting sources — RESOLVED
 
-## Q-3. Arithmetic that does not close
+| Topic                                        | Resolution (verified from `docs/assets/`)                                                                                                                                                                                                                                                             |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Which unlock gives Inoculate & Package 6     | **Eastern Pacific lost haven** (Door `60` → first arrival opens **Package 6**: Inoculate Rule I, Rule B, Area 10 `+15`, 15 new Supply cubes, 3 Portable Antiviral Labs). Searching Buenos Aires land (`P5-03b`) discovers OPAL and opens Doors `18` (Immunologist) & `20` (→ Doors `61`, `30`, `13`). |
+| Jade lab effect                              | **Both are true.** Searching Johannesburg (`P7-11b`) opens Doors `46` (Scientist) **and** `20` (→ Door `13` Breakthroughs, where JADE caps Epidemic step 2 removal at **1** Supply cube).                                                                                                             |
+| Hollow Men per city                          | Max **3**; an attempted **4th** figure instead drops the city's population by 1 (Rule S, Package 2).                                                                                                                                                                                                  |
+| Packages with Hollow Men                     | **Package 2** (24 figures + 4 Gather), **Package 3** (+4 Gather), **Package 8** (+4 Gather) = 12 Gather cards total. No "Hollow Men Assemble" cards exist.                                                                                                                                            |
+| Monitor result                               | Discard all 4 drawn Player cards in any order (ignoring Epidemics), then scratch 1 Frequency Scanner box (`08-04`): `9.2` → Door `52`, `11.88` → Door `43`, the other 8 boxes → take 1 or 2 non-Epidemic cards from the top of the Player discard pile.                                               |
+| Supply cube total vs `+15` bonuses           | Base box has 36 Supply cubes; **Package 6** adds **15 new physical Supply cubes** (51 total in box) and Area 10 `+15`; Door `11` (Indian Ocean haven) adds Area 11 `+15` (pulling from reserve).                                                                                                      |
+| Chart Sea Lane source                        | **End of March (`03-06b`)**, Doors `K` and `24` (base cost: **2** Supply cubes). Package 5 (South America) instead gives abilities Facilitator, Foreman, and Outrider.                                                                                                                                |
+| Who may use Lockdown during an Epidemic      | Printed text: _"If this card is in the Infection discard pile, any player may discard a Player card to destroy this card at any time."_ Community/designer consensus allows using it between Epidemic step 2 and step 3.                                                                              |
+| Hollow Men exposure on another player's turn | Printed text (Rule G / Area 15): _"Whenever you leave a location with 1 or more Hollow Men, get exposed."_ Any movement counts.                                                                                                                                                                       |
 
-- The box has 36 supply cubes. A stockpile of 33 plus +15 bonuses would exceed 36. Either packages add cubes, or the bonus pulls from a cube pool not recorded here. Default: give the engine an unbounded cube pool and enforce only the stockpile count.
-- The epidemic-count table in [L-4](legacy-progression.md#l-4-stretched-too-thin-epidemic-count-c) fits six data points but is not printed anywhere found. Its band edges are a guess.
-- The starting population of each of the 9 cities is not confirmed. Their sum is 27 if each city has one Infection card per point of population.
+## Q-3. Formerly unclosed arithmetic — RESOLVED
 
-## Q-4. Rules with no ruling
+- **Supply cubes:** 36 base + 15 new physical cubes inside Package 6 = **51** total Supply cubes.
+- **Epidemic-count table (Door E, Stretched Too Thin):** Exact printed brackets: `≤36 → 5`, `37–44 → 6`, `45–51 → 7`, `52–57 → 8`, `58–62 → 9`, `63+ → 10` (making that many piles in setup step 7, using the 5 base Epidemics + 5 extra Epidemics `03-07`..`03-11`).
+- **Starting populations:** All 9 starting cities AND all 3 starting havens start at population **3** (`9 × 3 = 27` starting Infection cards).
 
-- Whether a haven at 3 Plague cubes chains an outbreak. Default: no.
-- Whether a haven can hold a satellite tower or shelter. Default: no, both name cities.
-- Whether a city can hold more than 1 tower or shelter. Default: no.
-- The base cube cost of Chart Sea Lane. Default: 2, matching Establish Supply Line.
-- The supply counts of Hollow Men figures and shelters. Default: 16 figures, 5 shelters (guess).
-- The full effect of Portable Antiviral Lab cards.
-- The Hollow Men Assemble card effect in December.
-- The second and later Turning Point conditions.
-- The complete list of starting job stickers. Five are confirmed by two logs.
-- How many check boxes each Produce Supplies card has. The FAQ mentions three.
-- Whether a spent companion is discarded or destroyed.
-- What "access a lost haven" requires (a pawn arriving, or a connection).
-- Whether the shelter blocks only Hollow Men population loss, or also Plague cube loss. Logs say Hollow Men only.
-- Whether the Carrier scar's card cost applies to havens. One forum answer says no, because it names cities.
+## Q-4. Remaining edge-case rulings (unprinted on cards/stickers)
 
-## Q-5. Inferred rulings in this catalogue
+All physical counts and card texts are now confirmed (24 Hollow Men figures, 6 Shelter figures, 5 Permanent Shelter stickers, 6 Satellite Tower figures, 4 Permanent Satellite Tower stickers, 6 Permanent Supply Center stickers, 21 Infested stickers, 4 Carrier scar stickers, 5 starting jobs, 8 starting abilities, 3×1-box / 3×2-box / 2×3-box Produce Supplies, Portable Antiviral Lab = discard while Making Supplies for +3 Supply cubes, Shelter Rule V skips BOTH Plague step b and Hollow Men step c, all 3 Turning Points exact, companions stay on their City card permanently).
 
-- [C-3](core-rules.md#c-3-setup-r) step 5 holds the epidemic-count rule.
-- [L-4](legacy-progression.md#l-4-stretched-too-thin-epidemic-count-c) piles match the epidemic count.
-- [L-12](legacy-progression.md#l-12-new-game-end-purchases-c) permanent tower and shelter counts are unknown.
-- [L-13.1](legacy-progression.md#l-131-objectives-by-month-c) April to June keep March's set.
-- [L-15](legacy-progression.md#l-15-campaign-end-and-final-scoring-c-i) point values.
-- [K-3.4](components.md#k-34-tracks-and-areas-on-the-board-r-c) supply track values.
-- [L-5.2](legacy-progression.md#l-52-companions-c) companions persist like Unrationed Events.
+Only these genuine FAQ-level edge-case rulings remain outside printed card text:
 
-## Q-6. Design notes for an original campaign
+- **Haven outbreak chaining:** Whether a haven at 3 Plague cubes chains an outbreak. Default: no (only cities outbreak; havens still receive Plague cubes from adjacent outbreaks).
+- **Towers and shelters in havens / max per city:** Whether a haven can hold a satellite tower or shelter, and whether a city can hold more than one. Default: cities only, max 1 of each structure per city.
+- **Carrier entering havens:** Carrier scar (`Door 27`/`32`) reads _"To enter a city, you must discard a card matching its color."_ Default: entering a haven requires no card.
+- **Impossibility of objectives:** Relayed designer guidance: if an objective becomes strictly impossible, completing all remaining possible objectives wins the game.
 
-- The original's month-by-month content is story-gated. An original campaign can keep the same mechanic order (supply lines and search first, then sea lanes and epidemic scaling, then flights, then the enemy faction, then towers, then shelters, then the endgame) without copying any content.
-- Every number above that is marked [I] or listed here is a tuning knob. Expose it as configuration.
+## Q-5. Design notes for an original campaign
+
+- Every mechanic and number in this catalogue is now verified from primary assets (`docs/assets/`). Where this repo's own game engine makes deliberate simplifications or original design choices, those are documented explicitly in [coverage.md](coverage.md).

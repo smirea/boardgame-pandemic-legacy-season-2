@@ -1,0 +1,26 @@
+{
+	"id": "event-03",
+	"cardId": 105,
+	"printedCode": null,
+	"title": "TEAM BRAVO",
+	"category": "rationed_event",
+	"color": null,
+	"copies": 1,
+	"images": {
+		"front": "event-03_team-bravo.jpg",
+		"back": "back.jpg"
+	},
+	"hasImprovementSlot": false,
+	"frontText": "RATIONED EVENT\nTEAM BRAVO\nTake up to 2 Supply cubes from the stockpile and put them onto any location(s).\nPlay at any time. Not an action.",
+	"backText": null,
+	"states": [],
+	"mechanics": {
+		"timing": "Play at any time. Not an action.",
+		"effect": "Take up to 2 Supply cubes from the stockpile and put them onto any location(s).",
+		"rules": [
+			"The screen title is TEAM BRAVO under the header RATIONED EVENT.",
+			"No flavor paragraph is printed.",
+			"Play at any time. Not an action. is printed in red italics."
+		]
+	}
+}

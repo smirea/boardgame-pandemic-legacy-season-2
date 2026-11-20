@@ -1,0 +1,40 @@
+{
+	"sequence": 35,
+	"folder": "035_04-03",
+	"cardCode": "04-03",
+	"printedCodes": {
+		"sideA": "04-03a",
+		"sideB": "04-03b"
+	},
+	"title": "RIGHT NOW!",
+	"category": "legacy_pause",
+	"month": "april",
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"stopOrPause": "PAUSE",
+		"header": "PAUSE",
+		"trigger": "Draw this card and read the other side during step 2 at the end of your first game in April.",
+		"text": "PAUSE\nDRAW THIS CARD AND READ THE OTHER SIDE DURING STEP 2 AT THE END OF YOUR FIRST GAME IN APRIL.",
+		"footer": ""
+	},
+	"sideB": {
+		"header": "RIGHT NOW!",
+		"text": "Open the following door:\n42",
+		"footer": "",
+		"scratchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"whenRead": "PAUSE. Drawn during step 2 of April setup, which stops on this card. Read side B during step 2 at the end of the first April game, then continue the Legacy deck.",
+		"triggers": [],
+		"opensDoors": ["42"],
+		"opensPackages": [],
+		"destroys": [],
+		"addsToPool": [],
+		"rules": ["Open door 42 immediately."],
+		"notes": "The instruction is singular: \"door\", and 42 is the only id. It is in a white box with red type."
+	}
+}

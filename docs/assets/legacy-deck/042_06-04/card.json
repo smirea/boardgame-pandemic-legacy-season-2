@@ -1,0 +1,45 @@
+{
+	"sequence": 42,
+	"folder": "042_06-04",
+	"cardCode": "06-04",
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "06-04b"
+	},
+	"title": "INOCULATION UNIT",
+	"category": "rationed_event",
+	"month": "june",
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"stopOrPause": "NONE",
+		"header": "",
+		"trigger": "",
+		"text": "",
+		"footer": ""
+	},
+	"sideB": {
+		"header": "RATIONED EVENT",
+		"text": "INOCULATION UNIT\n\nPut up to 3 Infection cards from the Infection discard pile into Package 6.\n\nYou may play this card between step 2 and step 3 of an epidemic.",
+		"footer": "Play at any time. Not an action.",
+		"scratchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"whenRead": "Drawn while continuing the Legacy deck at Game End step 2 of the first June game, after 06-03. It is a Rationed Event, so it enters the reserve. It is not played when it comes off the Legacy deck.",
+		"triggers": ["Play at any time, including between step 2 and step 3 of an Epidemic."],
+		"opensDoors": [],
+		"opensPackages": [],
+		"destroys": [],
+		"addsToPool": ["Rationed Event: Inoculation Unit (this card), to the reserve"],
+		"rules": [
+			"Put up to 3 Infection cards from the Infection discard pile into Package 6.",
+			"May be played between Epidemic step 2 (Infect) and step 3 (Intensify), so the chosen cards can be removed from the discard before it is shuffled back onto the Infection deck.",
+			"Play at any time. Not an action.",
+			"Discard after use. It counts toward the rationing-level pick."
+		],
+		"notes": "Side A is the Player-card back and has no printed code. The screen art shows three syringes. Package 6 must already exist for the cards to have somewhere to go; this card does not open it."
+	}
+}

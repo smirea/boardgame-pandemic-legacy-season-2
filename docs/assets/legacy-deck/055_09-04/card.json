@@ -1,0 +1,49 @@
+{
+	"sequence": 55,
+	"folder": "055_09-04",
+	"cardCode": "09-04",
+	"printedCodes": {
+		"sideA": "09-04a",
+		"sideB": "09-04b"
+	},
+	"title": "Recon East Asia.",
+	"category": "objective",
+	"month": "september",
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"stopOrPause": "NONE",
+		"header": "",
+		"trigger": "",
+		"text": "",
+		"footer": ""
+	},
+	"sideB": {
+		"header": "MANDATORY OBJECTIVE",
+		"text": "Recon East Asia.\n\nAdd this card to your pool of objectives. If you complete it, but lose the first game in September, it counts as complete during your second game in September!",
+		"footer": "Add this card to your pool of objectives. If you complete it, but lose the first game in September, it counts as complete during your second game in September!",
+		"scratchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"whenRead": "Continue the September setup Legacy-deck reading, after 09-03, which calls this the enclosed Recon East Asia objective.",
+		"triggers": [
+			"If East Asia was already reconned when 09-03 was read, count this objective complete during September."
+		],
+		"opensDoors": [],
+		"opensPackages": [],
+		"destroys": [
+			"This objective, at the end of the game in which it is completed. 09-03 can mark it complete during September without a separate completion game if East Asia was already reconned."
+		],
+		"addsToPool": ["Mandatory objective: Recon East Asia"],
+		"rules": [
+			"Add this card to the objective pool.",
+			"The objective is to recon East Asia.",
+			"If you complete it but lose the first game in September, it still counts as complete during the second September game.",
+			"If East Asia was already reconned, 09-03 says to count this objective complete during September."
+		],
+		"notes": "Side A is the objective-card back and carries 09-04a. The face text is printed sideways. The header MANDATORY OBJECTIVE is red, and the compass star on the face is red. The card does not print a door to open on completion."
+	}
+}

@@ -1,0 +1,23 @@
+{
+	"id": "sticker-06_rule-o",
+	"package": 7,
+	"printedCode": null,
+	"name": "Rule O",
+	"category": "rule",
+	"placementTarget": "Rulebook slot O. No letter O and no card code are printed on the sticker.",
+	"costProductionUnits": null,
+	"copies": 1,
+	"image": "sticker-06_rule-o.jpg",
+	"text": "BUILD SATELLITE TOWER\nSpend 2 Supply cubes from your Character\ncard to build a satellite tower in your city. If\nthere are no more available, move an existing\nsatellite tower to your city instead.\n\nTRANSMIT\nAt a city containing a satellite tower, give\n1 card matching the color of the city you are\nin to another player. The other player may be\nanywhere in the world.",
+	"mechanics": {
+		"timing": "Build Satellite Tower is an action in your city. Transmit is an action in a city that contains a satellite tower.",
+		"effect": "Build Satellite Tower: spend 2 Supply cubes from your Character card to build a satellite tower in your city. If no tower miniature is left, move an existing satellite tower to your city instead. Transmit: give 1 card matching the color of the city you are in to another player anywhere in the world.",
+		"restrictions": [
+			"The cubes come from your Character card, not from the city or the supply reserve.",
+			"Moving an existing tower happens only when none of the 6 tower miniatures are available.",
+			"Transmit gives exactly 1 card, and that card must match the color of the city you are in, not merely a card you choose.",
+			"The player reference strips are shorter than this rule. This sticker is the full rule."
+		],
+		"opensDoors": []
+	}
+}

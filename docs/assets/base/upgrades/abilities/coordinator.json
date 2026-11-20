@@ -1,0 +1,15 @@
+{
+	"id": "coordinator",
+	"name": "Coordinator",
+	"category": "ability",
+	"costProductionUnits": 2,
+	"copies": 1,
+	"image": "coordinator.jpg",
+	"text": "Coordinator: As a free action, move a pawn to your\nlocation if it is in an adjacent location.",
+	"mechanics": {
+		"timing": "free_action",
+		"trigger": null,
+		"effect": "Move a pawn to your location if it is in an adjacent location.",
+		"restrictions": ["The pawn must be in an adjacent location"]
+	}
+}

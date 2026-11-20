@@ -1,0 +1,40 @@
+{
+	"sequence": 45,
+	"folder": "045_07-02",
+	"cardCode": "07-02",
+	"printedCodes": {
+		"sideA": "07-02a",
+		"sideB": "07-02b"
+	},
+	"title": "Journal Entry",
+	"category": "legacy_journal",
+	"month": "july",
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"stopOrPause": "NONE",
+		"header": "Journal Entry",
+		"trigger": "",
+		"text": "Satellite towers are picking up faint broadcasts. The writers think the Hollow Men are involved, but someone else may be transmitting, and the Hollow Men may be taking orders. They ask whether someone is ordering the plague to be spread. The grid is growing and cannot absorb that spread, so they are prepared to forsake some cities, and they wonder if that would make them the monsters the world already thinks they are.",
+		"footer": ""
+	},
+	"sideB": {
+		"header": "FROM THE ARCHIVES",
+		"text": "JULY, YEAR 38\n\nHaven networks are still at full capacity after the relocation, and hope is still kindled. The writer finds it strange to see adults who never knew the world before, dreams of living on land again, and sometimes dreams of fleeing to Utopia. They imagine Utopia still works like the old world. They miss land and dirt, have heard a cure is close, and wonder whether Utopia would share it.",
+		"footer": "Keep papers like this in the reserve.",
+		"scratchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"whenRead": "Continue the July setup Legacy-deck reading, immediately after 07-01.",
+		"triggers": [],
+		"opensDoors": [],
+		"opensPackages": [],
+		"destroys": [],
+		"addsToPool": [],
+		"rules": ["Keep the card in the reserve. No rules change."],
+		"notes": "A handwritten signature under the Year 38 note is not transcribed."
+	}
+}

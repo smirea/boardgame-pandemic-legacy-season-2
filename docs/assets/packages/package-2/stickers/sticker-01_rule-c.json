@@ -1,0 +1,21 @@
+{
+	"id": "sticker-01_rule-c",
+	"package": 2,
+	"printedCode": "C",
+	"name": "They're Everywhere",
+	"category": "rule",
+	"placementTarget": "Rulebook page 8, setup step 1, rule sticker C, after objectives and turning points are placed.",
+	"costProductionUnits": null,
+	"copies": 1,
+	"image": "sticker-01_rule-c.jpg",
+	"summary": "Title THEY'RE EVERYWHERE. During setup, take all the Hollow Men Gather cards and place them into the Infection discard pile. The letter C is the rulebook slot. It is not printed on the sticker.",
+	"mechanics": {
+		"timing": "setup",
+		"effect": "During setup, take every Hollow Men Gather card and put it into the Infection discard pile.",
+		"restrictions": [
+			"This is every future setup, not only the moment the package is opened. The recon report already puts the 4 new Gather cards there immediately.",
+			"Area 16 is the matching mark inside the Infection discard pile and says to place the Gather cards there during setup."
+		],
+		"opensDoors": []
+	}
+}

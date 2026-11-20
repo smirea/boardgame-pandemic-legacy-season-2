@@ -1,0 +1,252 @@
+{
+	"name": "Africa",
+	"bags": [
+		{
+			"name": "Satellite Towers",
+			"description": "The recon report calls these 6 satellite towers miniatures. Rule O builds with them, and moves an existing tower when none remain.",
+			"guid": "bbac5e",
+			"totalItems": 6,
+			"contents": {
+				"Satellite Tower": 6
+			}
+		}
+	],
+	"boxImage": "box.jpg",
+	"cards": [
+		{
+			"index": 1,
+			"title": "Recon Report",
+			"category": "recon-report",
+			"copies": 1,
+			"json": "cards/card-01/card.json"
+		},
+		{
+			"index": 2,
+			"title": "TOPAZ Experimental Vaccine",
+			"category": "unrationed-event",
+			"copies": 1,
+			"json": "cards/card-02_event/card.json"
+		},
+		{
+			"index": 3,
+			"title": "Kinshasa",
+			"category": "player-card",
+			"color": "yellow",
+			"search": true,
+			"copies": 1,
+			"json": "cards/card-03_kinshasa/card.json"
+		},
+		{
+			"index": 4,
+			"title": "Kinshasa",
+			"category": "infection-card",
+			"color": "yellow",
+			"copies": 1,
+			"json": "cards/card-04_kinshasa/card.json"
+		},
+		{
+			"index": 5,
+			"title": "Khartoum",
+			"category": "player-card",
+			"color": "yellow",
+			"search": true,
+			"copies": 1,
+			"json": "cards/card-05_khartoum/card.json"
+		},
+		{
+			"index": 6,
+			"title": "Khartoum",
+			"category": "infection-card",
+			"color": "yellow",
+			"copies": 1,
+			"json": "cards/card-06_khartoum/card.json"
+		},
+		{
+			"index": 7,
+			"title": "Dar es Salaam",
+			"category": "player-card",
+			"color": "yellow",
+			"port": true,
+			"search": [
+				"land",
+				"sea"
+			],
+			"copies": 1,
+			"json": "cards/card-07_dar-es-salaam/card.json"
+		},
+		{
+			"index": 8,
+			"title": "Dar es Salaam",
+			"category": "player-card",
+			"color": "yellow",
+			"port": true,
+			"copies": 1,
+			"json": "cards/card-08_dar-es-salaam/card.json"
+		},
+		{
+			"index": 9,
+			"title": "Dar es Salaam",
+			"category": "infection-card",
+			"color": "yellow",
+			"copies": 1,
+			"json": "cards/card-09_dar-es-salaam/card.json"
+		},
+		{
+			"index": 10,
+			"title": "Dar es Salaam",
+			"category": "infection-card",
+			"color": "yellow",
+			"copies": 1,
+			"json": "cards/card-10_dar-es-salaam/card.json"
+		},
+		{
+			"index": 11,
+			"title": "Johannesburg",
+			"category": "player-card",
+			"color": "blue",
+			"search": true,
+			"copies": 1,
+			"json": "cards/card-11_johannesburg/card.json"
+		},
+		{
+			"index": 12,
+			"title": "Johannesburg",
+			"category": "player-card",
+			"color": "blue",
+			"copies": 1,
+			"json": "cards/card-12_johannesburg/card.json"
+		},
+		{
+			"index": 13,
+			"title": "Johannesburg",
+			"category": "infection-card",
+			"color": "blue",
+			"printedCode": "P7-13b",
+			"copies": 1,
+			"json": "cards/card-13_johannesburg/card.json"
+		},
+		{
+			"index": 14,
+			"title": "Johannesburg",
+			"category": "infection-card",
+			"color": "blue",
+			"printedCode": "P7-13b",
+			"copies": 1,
+			"json": "cards/card-14_johannesburg/card.json"
+		},
+		{
+			"index": 15,
+			"title": "Antananarivo",
+			"category": "player-card",
+			"color": "black",
+			"port": true,
+			"search": [
+				"land",
+				"sea"
+			],
+			"copies": 1,
+			"json": "cards/card-15_antananarivo/card.json"
+		},
+		{
+			"index": 16,
+			"title": "Antananarivo",
+			"category": "player-card",
+			"color": "black",
+			"port": true,
+			"copies": 1,
+			"json": "cards/card-16_antananarivo/card.json"
+		},
+		{
+			"index": 17,
+			"title": "Antananarivo",
+			"category": "infection-card",
+			"color": "black",
+			"printedCode": "P7-17b",
+			"copies": 1,
+			"json": "cards/card-17_antananarivo/card.json"
+		},
+		{
+			"index": 18,
+			"title": "Antananarivo",
+			"category": "infection-card",
+			"color": "black",
+			"printedCode": "P7-17b",
+			"copies": 1,
+			"json": "cards/card-18_antananarivo/card.json"
+		}
+	],
+	"guid": "ac6b54",
+	"id": "package-7",
+	"number": 7,
+	"printedContents": {
+		"cards": 18,
+		"stickerCards": 4,
+		"satelliteTowerMiniatures": 6
+	},
+	"searchResults": {
+		"Kinshasa": "Companion Technician. Build Satellite Tower costs 1 fewer Supply cube while the card is in hand.",
+		"Khartoum": "You may give 1 Player card from your hand to another player. Flavor names Utopia and the Faded. No door.",
+		"Dar es Salaam land": "Immediately draw a free supply line from Dar es Salaam to another city.",
+		"Dar es Salaam sea": "Lost haven. Open door 65, or gain 1 action if 65 is already open.",
+		"Johannesburg": "JADE laboratory. Open doors 46 and 20.",
+		"Antananarivo land": "Companion Containment Specialist. Play the card to remove all Plague cubes from 1 location on the grid.",
+		"Antananarivo sea": "Same lost haven as Dar es Salaam. Open door 65, or gain 1 action if 65 is already open."
+	},
+	"setup": {
+		"source": "P7-01b",
+		"opensDoors": [
+			"57",
+			"F",
+			"14"
+		],
+		"cityAddedToGrid": "Kinshasa",
+		"playerDiscard": [
+			"Kinshasa player card (P7-03b)"
+		],
+		"gameEnd": [
+			"Kinshasa infection card (P7-04b)"
+		],
+		"reserve": "Every other Player card and Infection card in the package.",
+		"toAPlayersHand": "TOPAZ Experimental Vaccine (P7-02b)"
+	},
+	"stickers": [
+		{
+			"id": "sticker-01_permanent-satellite-tower",
+			"name": "Permanent Satellite Tower",
+			"copies": 4,
+			"costProductionUnits": 3,
+			"json": "stickers/sticker-01_permanent-satellite-tower.json"
+		},
+		{
+			"id": "sticker-02",
+			"name": "Game End Upgrades",
+			"printedCode": "P7-22a",
+			"copies": 1,
+			"json": "stickers/sticker-02.json"
+		},
+		{
+			"id": "sticker-03",
+			"name": "Build Satellite Tower",
+			"copies": 1,
+			"json": "stickers/sticker-03.json"
+		},
+		{
+			"id": "sticker-04",
+			"name": "Player reference instruction",
+			"copies": 2,
+			"json": "stickers/sticker-04.json"
+		},
+		{
+			"id": "sticker-05",
+			"name": "Transmit",
+			"copies": 1,
+			"json": "stickers/sticker-05.json"
+		},
+		{
+			"id": "sticker-06_rule-o",
+			"name": "Rule O",
+			"copies": 1,
+			"json": "stickers/sticker-06_rule-o.json"
+		}
+	]
+}

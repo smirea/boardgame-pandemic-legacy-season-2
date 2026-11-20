@@ -1,0 +1,227 @@
+{
+	"sequence": 50,
+	"folder": "050_08-04",
+	"cardCode": "08-04",
+	"printedCodes": {
+		"sideA": "08-04a",
+		"sideB": "08-04b"
+	},
+	"title": "Frequency Scanner",
+	"category": "frequency_scanner",
+	"month": "august",
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"stopOrPause": "NONE",
+		"header": "FREQUENCY SCANNER",
+		"trigger": "",
+		"text": "It's time to start listening...\n\nThe Frequency Scanner is on the other side of this card. You'll use this card whenever you do the Monitor action.\n\nKeep this card in the reserve between games.",
+		"footer": ""
+	},
+	"sideB": {
+		"header": "FREQUENCY SCANNER",
+		"text": "When you do the Monitor action, scratch a box, then refer to the text below.\n\nIF YOU REVEAL:\nAn orange square: Open the dossier door.\nA white square: Take 1 or 2 cards from the top of the Player discard pile and add them to your hand. (You may not take Epidemic cards.)\n\nTen boxes, bottom (low) to top (high): 8.24, 8.81, 9.1, 9.2, 9.31, 9.58, 9.75, 10.31, 10.57, 11.88.",
+		"footer": "",
+		"scratchBoxes": [
+			{
+				"index": 1,
+				"frequency": "8.24",
+				"instruction": "When you do the Monitor action, scratch a box.",
+				"coveredOnBase": true,
+				"revealedInState": 2,
+				"result": "White square. Take 1 or 2 cards from the top of the Player discard pile and add them to your hand. You may not take Epidemic cards."
+			},
+			{
+				"index": 2,
+				"frequency": "8.81",
+				"instruction": "When you do the Monitor action, scratch a box.",
+				"coveredOnBase": true,
+				"revealedInState": 3,
+				"result": "White square. Take 1 or 2 cards from the top of the Player discard pile and add them to your hand. You may not take Epidemic cards."
+			},
+			{
+				"index": 3,
+				"frequency": "9.1",
+				"instruction": "When you do the Monitor action, scratch a box.",
+				"coveredOnBase": true,
+				"revealedInState": 4,
+				"result": "White square. Take 1 or 2 cards from the top of the Player discard pile and add them to your hand. You may not take Epidemic cards."
+			},
+			{
+				"index": 4,
+				"frequency": "9.2",
+				"instruction": "When you do the Monitor action, scratch a box.",
+				"coveredOnBase": true,
+				"revealedInState": 5,
+				"result": "Orange door sticker 52. Open dossier door 52."
+			},
+			{
+				"index": 5,
+				"frequency": "9.31",
+				"instruction": "When you do the Monitor action, scratch a box.",
+				"coveredOnBase": true,
+				"revealedInState": 6,
+				"result": "White square. Take 1 or 2 cards from the top of the Player discard pile and add them to your hand. You may not take Epidemic cards."
+			},
+			{
+				"index": 6,
+				"frequency": "9.58",
+				"instruction": "When you do the Monitor action, scratch a box.",
+				"coveredOnBase": true,
+				"revealedInState": 7,
+				"result": "White square. Take 1 or 2 cards from the top of the Player discard pile and add them to your hand. You may not take Epidemic cards."
+			},
+			{
+				"index": 7,
+				"frequency": "9.75",
+				"instruction": "When you do the Monitor action, scratch a box.",
+				"coveredOnBase": true,
+				"revealedInState": 8,
+				"result": "White square. Take 1 or 2 cards from the top of the Player discard pile and add them to your hand. You may not take Epidemic cards."
+			},
+			{
+				"index": 8,
+				"frequency": "10.31",
+				"instruction": "When you do the Monitor action, scratch a box.",
+				"coveredOnBase": true,
+				"revealedInState": 9,
+				"result": "White square. Take 1 or 2 cards from the top of the Player discard pile and add them to your hand. You may not take Epidemic cards."
+			},
+			{
+				"index": 9,
+				"frequency": "10.57",
+				"instruction": "When you do the Monitor action, scratch a box.",
+				"coveredOnBase": true,
+				"revealedInState": 10,
+				"result": "White square. Take 1 or 2 cards from the top of the Player discard pile and add them to your hand. You may not take Epidemic cards."
+			},
+			{
+				"index": 10,
+				"frequency": "11.88",
+				"instruction": "When you do the Monitor action, scratch a box.",
+				"coveredOnBase": true,
+				"revealedInState": 11,
+				"result": "Orange door sticker 43. Open dossier door 43."
+			}
+		]
+	},
+	"states": [
+		{
+			"state": 2,
+			"images": {
+				"sideA": "state-2-side-a.jpg",
+				"sideB": "state-2-side-b.jpg"
+			},
+			"revealedCondition": "The 8.24 box, the bottom box, is scratched. The other nine stay covered in this photo.",
+			"revealedText": "8.24 reveals the white square: take 1 or 2 cards from the top of the Player discard pile and add them to your hand. You may not take Epidemic cards."
+		},
+		{
+			"state": 3,
+			"images": {
+				"sideA": "state-3-side-a.jpg",
+				"sideB": "state-3-side-b.jpg"
+			},
+			"revealedCondition": "The 8.81 box is scratched. The other nine stay covered in this photo.",
+			"revealedText": "8.81 reveals the white square: take 1 or 2 cards from the top of the Player discard pile and add them to your hand. You may not take Epidemic cards."
+		},
+		{
+			"state": 4,
+			"images": {
+				"sideA": "state-4-side-a.jpg",
+				"sideB": "state-4-side-b.jpg"
+			},
+			"revealedCondition": "The 9.1 box is scratched. The other nine stay covered in this photo.",
+			"revealedText": "9.1 reveals the white square: take 1 or 2 cards from the top of the Player discard pile and add them to your hand. You may not take Epidemic cards."
+		},
+		{
+			"state": 5,
+			"images": {
+				"sideA": "state-5-side-a.jpg",
+				"sideB": "state-5-side-b.jpg"
+			},
+			"revealedCondition": "The 9.2 box is scratched. The other nine stay covered in this photo.",
+			"revealedText": "9.2 reveals an orange sticker numbered 52. Open dossier door 52."
+		},
+		{
+			"state": 6,
+			"images": {
+				"sideA": "state-6-side-a.jpg",
+				"sideB": "state-6-side-b.jpg"
+			},
+			"revealedCondition": "The 9.31 box is scratched. The other nine stay covered in this photo.",
+			"revealedText": "9.31 reveals the white square: take 1 or 2 cards from the top of the Player discard pile and add them to your hand. You may not take Epidemic cards."
+		},
+		{
+			"state": 7,
+			"images": {
+				"sideA": "state-7-side-a.jpg",
+				"sideB": "state-7-side-b.jpg"
+			},
+			"revealedCondition": "The 9.58 box is scratched. The other nine stay covered in this photo.",
+			"revealedText": "9.58 reveals the white square: take 1 or 2 cards from the top of the Player discard pile and add them to your hand. You may not take Epidemic cards."
+		},
+		{
+			"state": 8,
+			"images": {
+				"sideA": "state-8-side-a.jpg",
+				"sideB": "state-8-side-b.jpg"
+			},
+			"revealedCondition": "The 9.75 box is scratched. The other nine stay covered in this photo.",
+			"revealedText": "9.75 reveals the white square: take 1 or 2 cards from the top of the Player discard pile and add them to your hand. You may not take Epidemic cards."
+		},
+		{
+			"state": 9,
+			"images": {
+				"sideA": "state-9-side-a.jpg",
+				"sideB": "state-9-side-b.jpg"
+			},
+			"revealedCondition": "The 10.31 box is scratched. The other nine stay covered in this photo.",
+			"revealedText": "10.31 reveals the white square: take 1 or 2 cards from the top of the Player discard pile and add them to your hand. You may not take Epidemic cards."
+		},
+		{
+			"state": 10,
+			"images": {
+				"sideA": "state-10-side-a.jpg",
+				"sideB": "state-10-side-b.jpg"
+			},
+			"revealedCondition": "The 10.57 box is scratched. The other nine stay covered in this photo.",
+			"revealedText": "10.57 reveals the white square: take 1 or 2 cards from the top of the Player discard pile and add them to your hand. You may not take Epidemic cards."
+		},
+		{
+			"state": 11,
+			"images": {
+				"sideA": "state-11-side-a.jpg",
+				"sideB": "state-11-side-b.jpg"
+			},
+			"revealedCondition": "The 11.88 box, the top box, is scratched. The other nine stay covered in this photo.",
+			"revealedText": "11.88 reveals an orange sticker numbered 43. Open dossier door 43."
+		}
+	],
+	"mechanics": {
+		"whenRead": "Continue the August setup Legacy-deck reading, immediately after 08-03. Read side A, then keep the card. Use side B from then on whenever a player does the Monitor action.",
+		"triggers": ["Monitor action: scratch one unscratched frequency box, then apply the legend."],
+		"opensDoors": ["52, if the 9.2 box is the one scratched", "43, if the 11.88 box is the one scratched"],
+		"opensPackages": [],
+		"destroys": [],
+		"addsToPool": ["Frequency Scanner (this card), kept in the reserve between games"],
+		"rules": [
+			"Keep this card in the reserve between games.",
+			"Whenever you do the Monitor action, scratch one box on side B, then apply the legend.",
+			"An orange numbered sticker means open that dossier door.",
+			"A white square means take 1 or 2 cards from the top of the Player discard pile and add them to your hand. You may not take Epidemic cards.",
+			"8.24 (state 2, bottom): white square, take 1 or 2 non-Epidemic cards from the Player discard.",
+			"8.81 (state 3): white square, take 1 or 2 non-Epidemic cards from the Player discard.",
+			"9.1 (state 4): white square, take 1 or 2 non-Epidemic cards from the Player discard.",
+			"9.2 (state 5): open dossier door 52.",
+			"9.31 (state 6): white square, take 1 or 2 non-Epidemic cards from the Player discard.",
+			"9.58 (state 7): white square, take 1 or 2 non-Epidemic cards from the Player discard.",
+			"9.75 (state 8): white square, take 1 or 2 non-Epidemic cards from the Player discard.",
+			"10.31 (state 9): white square, take 1 or 2 non-Epidemic cards from the Player discard.",
+			"10.57 (state 10): white square, take 1 or 2 non-Epidemic cards from the Player discard.",
+			"11.88 (state 11, top): open dossier door 43."
+		],
+		"notes": "The ten boxes are a vertical column. 8.24 is the bottom box and 11.88 is the top box. Each state photo scratches exactly one box and leaves the other nine covered, in order from 8.24 (state 2) through 11.88 (state 11). Side A of every state is the same Frequency Scanner intro. Only 9.2 and 11.88 are doors (52 and 43). The other eight boxes are the white discard-pile icon."
+	}
+}

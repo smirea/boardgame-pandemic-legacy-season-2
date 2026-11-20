@@ -1,0 +1,24 @@
+{
+	"id": "sticker-05_rule-n",
+	"package": 3,
+	"guid": "cd6596",
+	"printedCode": null,
+	"name": "Rule N",
+	"category": "rule",
+	"placementTarget": "Rulebook, rule N, the Build Shelter action.",
+	"costProductionUnits": null,
+	"copies": 1,
+	"image": "sticker-05_rule-n.jpg",
+	"summary": "Build Shelter. Discard a card of your current city's color to build a shelter there. If no shelter figure is left, move an existing shelter to your city instead. Characters in a sheltered city, or leaving one, cannot be exposed. A sheltered city does not lose population at game end, and does not lose population when a 4th Hollow Men figure would be placed there. No P3 code is printed on the sticker. The rule letter N is the manual's name for this action.",
+	"mechanics": {
+		"timing": "As an action on your turn, once this sticker is in the rulebook.",
+		"effect": "Discard one City card matching the color of your current city and place a shelter in that city. If all 6 shelter figures are already on the board, move one shelter from another city to your city instead. Characters in a city with a shelter, and characters leaving such a city, cannot get exposed. At game end, a city with a shelter does not lose population. It also does not lose population when a 4th Hollow Men figure would be placed in it.",
+		"restrictions": [
+			"The discarded card must match the color of the city you are in, unless Hong Kong's Structural Engineer is in your hand and you are taking this action.",
+			"The move-a-shelter line applies when no figure is left in the Shelters bag.",
+			"Exposure protection covers being in the city and leaving it.",
+			"The player-aid sticker (sticker-06) is a shorter reminder and does not repeat the move, the leaving clause, or the population lines."
+		],
+		"opensDoors": []
+	}
+}

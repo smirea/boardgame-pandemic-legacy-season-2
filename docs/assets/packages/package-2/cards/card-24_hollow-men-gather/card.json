@@ -1,0 +1,35 @@
+{
+	"package": 2,
+	"index": 24,
+	"cardId": 10723,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P2-21b"
+	},
+	"title": "Hollow Men Gather",
+	"category": "hollow-men-gather",
+	"city": null,
+	"color": null,
+	"copies": 1,
+	"hasImprovementSlot": false,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideASummary": "Infection deck back. Red biohazard on a dark field. No printed text.",
+	"sideBSummary": "HOLLOW MEN GATHER, code P2-21b. Same rules face as index 21. Drawing this card is not an Infection card draw. Draw onward to the next city card, add 1 Hollow Men figure there instead of infecting, and keep drawing through any further Gather cards. Only the first city revealed gets a figure.",
+	"searchBoxes": [],
+	"states": [],
+	"mechanics": {
+		"opensDoors": [],
+		"destroys": [],
+		"rules": [
+			"Fourth Hollow Men Gather card. Same printed rules and the same code, P2-21b, as index 21.",
+			"Drawing it is not an Infection card draw. Add 1 figure to the first city revealed, and do not infect that city."
+		],
+		"notes": [
+			"Separate scan. The face prints P2-21b, not P2-24b.",
+			"Goes to the Infection discard pile when the package is opened."
+		]
+	}
+}

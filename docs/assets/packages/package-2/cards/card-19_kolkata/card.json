@@ -1,0 +1,37 @@
+{
+	"package": 2,
+	"index": 19,
+	"cardId": 10718,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P2-19b"
+	},
+	"title": "Kolkata",
+	"category": "player-card",
+	"city": "Kolkata",
+	"color": "black",
+	"coordinates": "22°34'22\"N 88°21'50\"E",
+	"port": true,
+	"copies": 1,
+	"hasImprovementSlot": true,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideASummary": "Player deck back. No printed text.",
+	"sideBSummary": "Kolkata, 22°34'22\"N 88°21'50\"E, code P2-19b. Regional map with a bullseye. The compass carries an anchor, so the city is a port. No search box. The city name and coordinates repeat upside down along the bottom.",
+	"searchBoxes": [],
+	"states": [],
+	"mechanics": {
+		"opensDoors": [],
+		"destroys": [],
+		"rules": [
+			"Black Player card for Kolkata. Port. No search box.",
+			"The bullseye in the map is the player-card upgrade slot. One sticker."
+		],
+		"notes": [
+			"The only Kolkata Player card. Goes to the reserve when the package is opened.",
+			"P2-01a says a recon from Kolkata may be possible, and that the team does not yet know how. This card does not print that route."
+		]
+	}
+}

@@ -1,0 +1,18 @@
+{
+	"file": "page-01.jpg",
+	"printedPageNumber": null,
+	"headings": ["Manual", "Instructions for a Better Life on the Havens"],
+	"ruleStickerSlots": [],
+	"sections": [
+		{
+			"heading": "Cover",
+			"mechanicsSummary": [
+				"Title page only. No rules, counts, or sticker slots.",
+				"Art is a floating haven: buildings on a hull above waves.",
+				"No printed page number."
+			]
+		}
+	],
+	"tables": [],
+	"diagramsAndCallouts": ["Centered line drawing of a haven ship under the title."]
+}

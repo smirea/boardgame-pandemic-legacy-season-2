@@ -1,0 +1,15 @@
+{
+	"id": "architect",
+	"name": "Architect",
+	"category": "ability",
+	"costProductionUnits": 3,
+	"copies": 1,
+	"image": "architect.jpg",
+	"text": "Architect: You may do the Build Supply Center action\nwith 1 fewer card.",
+	"mechanics": {
+		"timing": "action",
+		"trigger": "When doing the Build Supply Center action",
+		"effect": "You may do the Build Supply Center action with 1 fewer card.",
+		"restrictions": []
+	}
+}

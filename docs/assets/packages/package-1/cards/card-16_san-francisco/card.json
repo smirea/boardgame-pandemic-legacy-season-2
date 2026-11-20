@@ -1,0 +1,33 @@
+{
+	"package": 1,
+	"index": 16,
+	"cardId": 915,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P1-18b"
+	},
+	"title": "San Francisco",
+	"category": "player-card",
+	"city": "San Francisco",
+	"color": "blue",
+	"coordinates": "37°46'30\"N 122°25'10\"W",
+	"copies": 1,
+	"hasImprovementSlot": false,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideASummary": "Player deck back. No text and no printed code.",
+	"sideBSummary": "Blue San Francisco Player card, 37°46'30\"N 122°25'10\"W. Port: the compass has an anchor. Map of the California coast. No search box. Code P1-18b.",
+	"searchBoxes": [],
+	"states": [],
+	"mechanics": {
+		"opensDoors": [],
+		"destroys": [],
+		"rules": [
+			"Blue Player card for San Francisco. The anchor marks it as a port. No search box.",
+			"Goes to the reserve with P1-17b until San Francisco joins the grid."
+		],
+		"notes": ["Card id 915. Printed code P1-18b.", "Same coordinates as the search card: 37°46'30\"N 122°25'10\"W."]
+	}
+}

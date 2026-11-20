@@ -1,0 +1,58 @@
+{
+	"package": 7,
+	"index": 11,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P7-11b"
+	},
+	"title": "Johannesburg",
+	"category": "player-card",
+	"city": "Johannesburg",
+	"color": "blue",
+	"copies": 1,
+	"hasImprovementSlot": false,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"text": "Player card back. No text."
+	},
+	"sideB": {
+		"text": "JOHANNESBURG\n26°12'15\"S 28°2'50\"E\n\nSEARCH:\n[covered]\n\nThe bottom edge repeats JOHANNESBURG and 26°12'15\"S 28°2'50\"E upside down.",
+		"searchBoxes": [
+			{
+				"id": "search",
+				"label": "SEARCH:",
+				"initially": "covered",
+				"revealedInState": 2
+			}
+		]
+	},
+	"states": [
+		{
+			"state": 2,
+			"images": {
+				"sideA": "state-2-side-a.jpg",
+				"sideB": "state-2-side-b.jpg"
+			},
+			"revealedText": "SEARCH:\nFound JADE laboratory, mostly\nabandoned. There is one holdout,\nwho offered to join us.\n\n[icon: a laboratory flask labeled JADE]\n\nJADE was set up to be a production facility to\ncreate vast doses of a cure, if one had been\nfound. The equipment is still functional.\nThey would need a supply center and a sample\nto start production.\n\nOpen the following doors if you haven't done so\nalready: 46  20",
+			"effect": "Open doors 46 and 20 if they are not already open. The JADE laboratory text names a functional production facility that would need a supply center and a sample to start production. Those requirements are printed as findings, not as a separate action on this card."
+		}
+	],
+	"mechanics": {
+		"opensDoors": ["46", "20"],
+		"rules": [
+			"Blue Player card for Johannesburg. Not a port. No anchor on the compass.",
+			"One SEARCH box. State 2 is the scratched face. State side A is the unchanged player-card back.",
+			"Scratching opens doors 46 and 20 if not already open, and reveals the JADE laboratory."
+		],
+		"notes": [
+			"Card id 10710. Scratch state card id 10723.",
+			"Printed code P7-11b stays on the scratched face.",
+			"Coordinates are printed 26°12'15\"S 28°2'50\"E, with a single digit in the minutes of longitude.",
+			"Goes to the reserve when the package is opened. A second, non-search Johannesburg Player card is card 12.",
+			"The holdout who offered to join is not given a name on this card. Whatever they add is behind doors 46 and 20."
+		]
+	}
+}

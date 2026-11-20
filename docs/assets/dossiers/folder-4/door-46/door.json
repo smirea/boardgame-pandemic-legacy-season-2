@@ -1,0 +1,93 @@
+{
+	"door": "46",
+	"folder": 4,
+	"frontImage": "dossiers/folder-4/door-46/front.jpg",
+	"frontText": "46",
+	"items": [
+		{
+			"id": "item-01",
+			"image": "dossiers/folder-4/door-46/item-01.jpg",
+			"count": 1,
+			"printedCode": "46",
+			"category": "profile",
+			"title": "Scientist profile",
+			"placementTarget": "Character card",
+			"costProductionUnits": null,
+			"text": "A second-generation\nscientist fighting against\nworld-wide diseases.\nHOME Johannesburg\nAGE 35",
+			"mapDetails": null,
+			"mechanics": {
+				"timing": "setup",
+				"trigger": null,
+				"effect": "Profile sticker. Home Johannesburg, age 35. The words second-generation and world-wide are hyphenated. No personal name is printed.",
+				"restrictions": [],
+				"home": "Johannesburg",
+				"age": 35,
+				"homeAndAgeInScript": true,
+				"sourceGuids": ["d35f8d"]
+			}
+		},
+		{
+			"id": "item-02",
+			"image": "dossiers/folder-4/door-46/item-02.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "portrait",
+			"title": "Scientist portrait",
+			"placementTarget": "Character card",
+			"costProductionUnits": null,
+			"text": "",
+			"mapDetails": null,
+			"mechanics": {
+				"timing": "setup",
+				"trigger": null,
+				"effect": "Portrait sticker with no printed text. A person with long wavy brown hair in a white lab coat over a pink shirt.",
+				"restrictions": [],
+				"sourceGuids": ["d32218"]
+			}
+		},
+		{
+			"id": "item-03",
+			"image": "dossiers/folder-4/door-46/item-03.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "occupation",
+			"title": "Scientist",
+			"placementTarget": "Character card",
+			"costProductionUnits": null,
+			"text": "Scientist. Once on your turn, as a free action,\ndestroy an Infection card in the discard pile\nmatching your current city.",
+			"mapDetails": null,
+			"mechanics": {
+				"timing": "free_action",
+				"trigger": "Once on your turn",
+				"effect": "Destroy an Infection card in the discard pile matching your current city.",
+				"restrictions": [
+					"Once on your turn",
+					"The Infection card must match your current city",
+					"The card must be in the discard pile"
+				],
+				"sourceGuids": ["b1aa4b"]
+			}
+		},
+		{
+			"id": "item-04",
+			"image": "dossiers/folder-4/door-46/item-04.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "instruction",
+			"title": "Create this character",
+			"placementTarget": null,
+			"costProductionUnits": null,
+			"text": "Immediately create this character using the stickers\nbelow and add it to the pool of characters.",
+			"mapDetails": null,
+			"mechanics": {
+				"timing": "immediate",
+				"trigger": null,
+				"effect": "Immediately build this character from the profile, portrait, and Scientist sticker and add it to the character pool.",
+				"restrictions": [],
+				"sourceGuids": ["4e2516"]
+			}
+		}
+	],
+	"bags": [],
+	"summary": "Create the Scientist at once and add that character to the pool. Home Johannesburg, age 35. Once on your turn, as a free action, destroy an Infection card in the discard pile matching your current city. Corner badge on the profile is 46. The instruction wording matches door 41; the files are not byte-identical."
+}

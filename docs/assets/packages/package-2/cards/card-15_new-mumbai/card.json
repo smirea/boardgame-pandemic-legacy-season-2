@@ -1,0 +1,85 @@
+{
+	"package": 2,
+	"index": 15,
+	"cardId": 10714,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P2-15b"
+	},
+	"title": "New Mumbai",
+	"category": "player-card",
+	"city": "New Mumbai",
+	"color": "black",
+	"coordinates": "19°2'43\"N 72°50'55\"E",
+	"port": true,
+	"copies": 1,
+	"hasImprovementSlot": false,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideASummary": "Player deck back. No printed text. State 2 and state 4 side A are the same back. State 3 side A is a blank black image, not the player back.",
+	"sideBSummary": "New Mumbai, 19°2'43\"N 72°50'55\"E, code P2-15b. The compass carries an anchor, so the city is a port. Two sealed boxes, labeled SEARCH THE LAND: and SEARCH THE SEA:. The city name and coordinates repeat upside down along the bottom.",
+	"searchBoxes": [
+		{
+			"type": "land",
+			"stateRevealed": 2,
+			"isCompanion": false,
+			"companionName": null,
+			"opensDoors": [],
+			"effectSummary": "Gain 1 action. A Hollow Man by the water was drawing a family, mother and children, the father drawn as himself, and was crying. The searchers kept their distance. Immediate. No companion. Also visible when both boxes are open in state 4."
+		},
+		{
+			"type": "sea",
+			"stateRevealed": 3,
+			"isCompanion": false,
+			"companionName": null,
+			"opensDoors": ["65"],
+			"effectSummary": "A lost haven has been found and not yet reached. Open door 65 and add it to the board. If 65 is already open, gain 1 action. Also visible when both boxes are open in state 4."
+		}
+	],
+	"states": [
+		{
+			"state": 2,
+			"cardId": 10730,
+			"images": {
+				"sideA": "state-2-side-a.jpg",
+				"sideB": "state-2-side-b.jpg"
+			},
+			"summary": "Land box only. A Hollow Man near the water was sketching a family and crying; the searchers kept their distance. Gain 1 action. The sea box stays sealed. Side A is the player back."
+		},
+		{
+			"state": 3,
+			"cardId": 10729,
+			"images": {
+				"sideA": "state-3-side-a.jpg",
+				"sideB": "state-3-side-b.jpg"
+			},
+			"summary": "Sea box only. A lost haven is found but not yet accessed. Open 65 and add it to the board. If 65 is already open, gain 1 action. The land box stays sealed. Side A of this state is a blank black file, about 5 KB, not the player back."
+		},
+		{
+			"state": 4,
+			"cardId": 10728,
+			"images": {
+				"sideA": "state-4-side-a.jpg",
+				"sideB": "state-4-side-b.jpg"
+			},
+			"summary": "Both boxes open: land gives 1 action, and the sea opens door 65 or gives 1 action if 65 is already open. Side A is the player back. Code P2-15b is unchanged."
+		}
+	],
+	"mechanics": {
+		"opensDoors": ["65"],
+		"destroys": [],
+		"rules": [
+			"Black Player card for New Mumbai. Port, marked by the anchor.",
+			"Two scratch boxes. State 2 reveals land only, state 3 sea only, state 4 both.",
+			"Land: gain 1 action. Not a companion.",
+			"Sea: open door 65 and add it to the board. If 65 is already open, gain 1 action instead."
+		],
+		"notes": [
+			"Goes to the reserve when the package is opened.",
+			"Door 65 is not in this package. The sea text says to open it and add it to the board.",
+			"The scratch panels fill the center. No bullseye upgrade mark is printed."
+		]
+	}
+}

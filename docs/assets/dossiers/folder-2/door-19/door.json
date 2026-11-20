@@ -1,0 +1,30 @@
+{
+	"door": "19",
+	"folder": 2,
+	"frontImage": "front.jpg",
+	"frontText": "19",
+	"items": [
+		{
+			"id": "item-01",
+			"image": "item-01.jpg",
+			"count": 1,
+			"printedCode": "19",
+			"category": "report",
+			"title": "RECON REPORT",
+			"placementTarget": null,
+			"costProductionUnits": null,
+			"text": "RECON REPORT\nFound TOPAZ lab in Wellington. Cut off from the rest of the world for nearly 50 years, they were surprised to see us!\nTOPAZ\nNo haven presence and no Hollow Men. More importantly, no trace of the plague. We were quarantined and asked to leave.\nOne brave vector control expert agreed to come with us. He explained some breakthroughs and confirmed the location of PEARL in Lake Baikal.\nOpen the following doors if you haven't done so already:\n51  41  61  13  30",
+			"mechanics": {
+				"opensDoors": ["51", "41", "61", "13", "30"],
+				"opensPackages": [],
+				"destroys": [],
+				"rules": [
+					"Discover the TOPAZ lab in Wellington.",
+					"Open doors 51, 41, 61, 13, and 30 if they are still sealed."
+				],
+				"effect": "Topaz is in Wellington. A vector control expert confirms Pearl is in Lake Baikal. Open 51, 41, 61, 13, and 30 unless they are already open. The lab icon is labeled TOPAZ."
+			}
+		}
+	],
+	"summary": "Topaz recon report. The lab is in Wellington, with no haven, no Hollow Men, and no plague. A vector control expert leaves with the team and places Pearl in Lake Baikal. Open doors 51, 41, 61, 13, and 30 if they are still closed."
+}

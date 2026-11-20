@@ -1,0 +1,40 @@
+{
+	"sequence": 37,
+	"folder": "037_05-02",
+	"cardCode": "05-02",
+	"printedCodes": {
+		"sideA": "05-02a",
+		"sideB": "05-02b"
+	},
+	"title": "Journal Entry",
+	"category": "legacy_journal",
+	"month": "may",
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"stopOrPause": "NONE",
+		"header": "Journal Entry",
+		"trigger": "",
+		"text": "Hollow Men have left the Americas alone and seem to be moving (retreating?) into Europe and Africa. They stop at nothing. Wherever they go, the plague follows. They are like men possessed to end everything we're trying to do. After 70 years, old prejudices still exist.\n\nAlso, we've learned where our leaders went.\n\nAnd why we're still here.",
+		"footer": ""
+	},
+	"sideB": {
+		"header": "FROM THE ARCHIVES",
+		"text": "NOVEMBER 5, YEAR 70\n\nInitiating the protocol during our annual leadership summit. It's a long journey to Utopia. We are the best and brightest minds of the havens and feel confident that Utopia will take us in, despite our differences. We have knowledge, skills, and experience. We can help. Those we leave behind would not gain access to Utopia.\n\nThe list is made. Not an easy task but necessary. Godspeed us on our journey.",
+		"footer": "Keep papers like this in the reserve.",
+		"scratchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"whenRead": "Continue the May setup Legacy-deck reading, immediately after 05-01.",
+		"triggers": [],
+		"opensDoors": [],
+		"opensPackages": [],
+		"destroys": [],
+		"addsToPool": [],
+		"rules": ["Keep the card in the reserve. No rules change."],
+		"notes": "A handwritten signature under the Year 70 note is not transcribed."
+	}
+}

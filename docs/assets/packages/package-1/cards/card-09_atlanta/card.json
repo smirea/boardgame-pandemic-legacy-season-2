@@ -1,0 +1,58 @@
+{
+	"package": 1,
+	"index": 9,
+	"cardId": 908,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P1-11b"
+	},
+	"title": "Atlanta",
+	"category": "player-card",
+	"city": "Atlanta",
+	"color": "blue",
+	"coordinates": "33°47'60\"N 84°19'46\"W",
+	"copies": 1,
+	"hasImprovementSlot": false,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideASummary": "Player deck back. No text and no printed code.",
+	"sideBSummary": "Blue Atlanta Player card, 33°47'60\"N 84°19'46\"W. One covered SEARCH box. Not a port. This is Atlanta's only Player card. Code P1-11b.",
+	"searchBoxes": [
+		{
+			"type": "land",
+			"stateRevealed": 2,
+			"isCompanion": false,
+			"companionName": null,
+			"opensDoors": [],
+			"effectSummary": "You may move 1 card in the Infection discard pile to the Game End area. Resolved once, when the box is scratched."
+		}
+	],
+	"states": [
+		{
+			"state": 2,
+			"cardId": 1006,
+			"images": {
+				"sideB": "state-2-side-b.jpg"
+			},
+			"summary": "The plague started when a group blew up the CDC, destroying the CCdA virus and releasing a plague. You may move 1 card in the Infection discard pile to the Game End area."
+		}
+	],
+	"mechanics": {
+		"opensDoors": [],
+		"destroys": [],
+		"rules": [
+			"Blue Player card for Atlanta. One land search box, labeled SEARCH. No anchor.",
+			"Scratching the box lets you move 1 card from the Infection discard pile to the Game End area.",
+			"The result is immediate. It is not a companion.",
+			"This is Atlanta's only Player card. It goes to the reserve until Atlanta joins the grid."
+		],
+		"notes": [
+			"Card id 908. Scratched face card id 1006. Printed code P1-11b.",
+			"Coordinates are printed 33°47'60\"N 84°19'46\"W, including 60 arcseconds.",
+			"The scratch spells the virus CCdA. The recon report spells it COdA.",
+			"No state side A."
+		]
+	}
+}

@@ -1,0 +1,85 @@
+{
+	"package": 1,
+	"index": 11,
+	"cardId": 910,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P1-13b"
+	},
+	"title": "Los Angeles",
+	"category": "player-card",
+	"city": "Los Angeles",
+	"color": "yellow",
+	"coordinates": "34°3'8\"N 118°14'37\"W",
+	"copies": 1,
+	"hasImprovementSlot": false,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideASummary": "Player deck back. No text and no printed code.",
+	"sideBSummary": "Yellow Los Angeles Player card, 34°3'8\"N 118°14'37\"W. Port: the compass has an anchor. Two covered boxes, SEARCH THE LAND and SEARCH THE SEA. This is Los Angeles's only Player card. Code P1-13b.",
+	"searchBoxes": [
+		{
+			"type": "land",
+			"stateRevealed": 2,
+			"isCompanion": false,
+			"companionName": null,
+			"opensDoors": [],
+			"effectSummary": "Take 4 Supply cubes from the reserve and add them to the stockpile. Resolved once, when the land box is scratched."
+		},
+		{
+			"type": "sea",
+			"stateRevealed": 3,
+			"isCompanion": false,
+			"companionName": null,
+			"opensDoors": ["60"],
+			"effectSummary": "Open door 60 and add it to the board. If 60 is already open, gain 1 action instead."
+		}
+	],
+	"states": [
+		{
+			"state": 2,
+			"cardId": 1005,
+			"images": {
+				"sideB": "state-2-side-b.jpg"
+			},
+			"summary": "Land only. Old shipping containers still hold supplies. Take 4 Supply cubes from the reserve and add them to the stockpile. The sea box stays covered."
+		},
+		{
+			"state": 3,
+			"cardId": 1004,
+			"images": {
+				"sideB": "state-3-side-b.jpg"
+			},
+			"summary": "Sea only. A lost haven has been located but not accessed. Open 60 and add it to the board, or gain 1 action if 60 is already open. The land box stays covered."
+		},
+		{
+			"state": 4,
+			"cardId": 1003,
+			"images": {
+				"sideB": "state-4-side-b.jpg"
+			},
+			"summary": "Both boxes scratched. Land adds 4 Supply cubes from the reserve to the stockpile. Sea opens door 60, or grants 1 action if 60 is already open."
+		}
+	],
+	"mechanics": {
+		"opensDoors": ["60"],
+		"destroys": [],
+		"rules": [
+			"Yellow Player card for Los Angeles. Port: the compass has an anchor.",
+			"Two scratch boxes, searched independently. State 2 is land only. State 3 is sea only. State 4 is both.",
+			"Land: take 4 Supply cubes from the reserve and add them to the stockpile.",
+			"Sea: open door 60 and add that haven to the board. If 60 is already open, gain 1 action instead.",
+			"Neither result is a companion. Each is resolved when its box is scratched.",
+			"This is Los Angeles's only Player card. It goes to the reserve until the city joins the grid."
+		],
+		"notes": [
+			"Card id 910. State card ids: state 2 is 1005, state 3 is 1004, state 4 is 1003.",
+			"Printed code P1-13b stays on every scratched face.",
+			"Coordinates are printed 34°3'8\"N 118°14'37\"W.",
+			"No state side A. San Francisco's sea box opens the same door 60.",
+			"The cubes come from the reserve, not the stockpile, and are added to the stockpile."
+		]
+	}
+}

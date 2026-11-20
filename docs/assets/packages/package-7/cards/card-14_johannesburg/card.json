@@ -1,0 +1,38 @@
+{
+	"package": 7,
+	"index": 14,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P7-13b"
+	},
+	"title": "Johannesburg",
+	"category": "infection-card",
+	"city": "Johannesburg",
+	"color": "blue",
+	"copies": 1,
+	"hasImprovementSlot": true,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"text": "Infection card back. No text."
+	},
+	"sideB": {
+		"text": "JOHANNESBURG\n\nBlue city art with a white upgrade panel and a green ring. No other text.",
+		"searchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"opensDoors": [],
+		"rules": [
+			"Blue Infection card for Johannesburg. Same printed face as card 13, including the code P7-13b.",
+			"The white center panel is the infection-card upgrade slot."
+		],
+		"notes": [
+			"Card id 10713.",
+			"The corner code is P7-13b, the same code as card 13. It is not printed P7-14b. A difference of the two faces is only the shared texture, not a different code.",
+			"Goes to the reserve when the package is opened."
+		]
+	}
+}

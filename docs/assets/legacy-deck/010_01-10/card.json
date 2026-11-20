@@ -1,0 +1,44 @@
+{
+	"sequence": 10,
+	"folder": "010_01-10",
+	"cardCode": "01-10",
+	"printedCodes": {
+		"sideA": "",
+		"sideB": "01-10b"
+	},
+	"title": "Drastic Measures",
+	"category": "rationed_event",
+	"month": "january",
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"stopOrPause": "NONE",
+		"header": "",
+		"trigger": "",
+		"text": "",
+		"footer": ""
+	},
+	"sideB": {
+		"header": "RATIONED EVENT",
+		"text": "DRASTIC MEASURES\n\nRemove up 2 Plague cubes from the grid.\n\nPlay at any time. Not an action.",
+		"footer": "Play at any time. Not an action.",
+		"scratchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"whenRead": "Taken with the other new Rationed Events when 01-07 is read, at the end of the first January game. Kept in the reserve and added to the Rationed Event pool.",
+		"triggers": [],
+		"opensDoors": [],
+		"opensPackages": [],
+		"destroys": [],
+		"addsToPool": ["Drastic Measures (Rationed Event)"],
+		"rules": [
+			"Remove up 2 Plague cubes from the grid.",
+			"Play at any time. Not an action.",
+			"Remove up 2 Plague cubes from the grid."
+		],
+		"notes": "Side A is the shared rationed-event back (haven in a signal ring, yellow bars, red arc). No printed card code and no rules text. Printed 'Remove up 2 Plague cubes', with no 'to' between 'up' and '2'. Word boxes on the scan leave no room for a missing 'to'. Screen title is DRASTIC MEASURES."
+	}
+}

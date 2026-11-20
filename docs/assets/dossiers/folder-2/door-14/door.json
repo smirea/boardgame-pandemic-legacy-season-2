@@ -1,0 +1,48 @@
+{
+	"door": "14",
+	"folder": 2,
+	"frontImage": "front.jpg",
+	"frontText": "14",
+	"items": [
+		{
+			"id": "item-01",
+			"image": "item-01.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "board_overlay",
+			"title": "INFESTED CITIES",
+			"placementTarget": "Area 14 on the game board",
+			"costProductionUnits": null,
+			"text": "INFESTED CITIES\nYour character gets exposed if you begin your turn in an infested city.\n(If it also contains a Plague cube, you get exposed only once, not twice.)",
+			"mechanics": {
+				"opensDoors": [],
+				"opensPackages": [],
+				"destroys": [],
+				"rules": [
+					"Your character gets exposed if you begin your turn in an infested city.",
+					"If the city also contains a Plague cube, you get exposed only once, not twice."
+				],
+				"effect": "Starting a turn in an infested city exposes the character once, even if a Plague cube is there too. The sticker has a rat in a green circle and no other text."
+			}
+		},
+		{
+			"id": "item-02",
+			"image": "item-02.jpg",
+			"count": 1,
+			"printedCode": "14",
+			"category": "instruction",
+			"title": "Area 14 placement",
+			"placementTarget": null,
+			"costProductionUnits": null,
+			"text": "Put this sticker on the game board onto Area 14.",
+			"mechanics": {
+				"opensDoors": [],
+				"opensPackages": [],
+				"destroys": [],
+				"rules": [],
+				"effect": "Place the Infested Cities sticker on Area 14 of the game board."
+			}
+		}
+	],
+	"summary": "Infested Cities rule sticker for Area 14. Beginning a turn in an infested city exposes you once; a Plague cube in the same city does not add a second exposure."
+}

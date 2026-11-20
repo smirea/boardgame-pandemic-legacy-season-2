@@ -1,0 +1,87 @@
+{
+	"door": "47",
+	"folder": 4,
+	"frontImage": "dossiers/folder-4/door-47/front.jpg",
+	"frontText": "47",
+	"items": [
+		{
+			"id": "item-01",
+			"image": "dossiers/folder-4/door-47/item-01.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "scar",
+			"title": "Missing the Sea",
+			"placementTarget": "Character card scar slot",
+			"costProductionUnits": null,
+			"text": "Missing the Sea: Lose 1 action if you begin your turn\nin a location that is not a port (anchor).",
+			"mapDetails": null,
+			"mechanics": {
+				"timing": "start of turn",
+				"trigger": "If you begin your turn in a location that is not a port",
+				"effect": "Lose 1 action.",
+				"restrictions": ["The location is not a port"],
+				"portIcon": "anchor, printed in parentheses",
+				"sourceGuids": ["990e66"]
+			}
+		},
+		{
+			"id": "item-02",
+			"image": "dossiers/folder-4/door-47/item-02.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "scar",
+			"title": "Embezzler",
+			"placementTarget": "Character card scar slot",
+			"costProductionUnits": null,
+			"text": "Embezzler: When you do the Make Supplies action,\nalso move a cube from the stockpile into the reserve.",
+			"mapDetails": null,
+			"mechanics": {
+				"timing": "action",
+				"trigger": "When you do the Make Supplies action",
+				"effect": "Also move a cube from the stockpile into the reserve.",
+				"restrictions": [],
+				"sourceGuids": ["335498"]
+			}
+		},
+		{
+			"id": "item-03",
+			"image": "dossiers/folder-4/door-47/item-03.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "scar",
+			"title": "Disoriented",
+			"placementTarget": "Character card scar slot",
+			"costProductionUnits": null,
+			"text": "Disoriented: When you do the Chart Sea Lane action,\nyou must spend 1 more Supply cube.",
+			"mapDetails": null,
+			"mechanics": {
+				"timing": "action",
+				"trigger": "When you do the Chart Sea Lane action",
+				"effect": "You must spend 1 more Supply cube.",
+				"restrictions": [],
+				"sourceGuids": ["5a8f89"]
+			}
+		},
+		{
+			"id": "item-04",
+			"image": "dossiers/folder-4/door-47/item-04.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "scar-instruction",
+			"title": "SCARS",
+			"placementTarget": null,
+			"costProductionUnits": null,
+			"text": "SCARS\nAdd these to your pool of scars.",
+			"mapDetails": null,
+			"mechanics": {
+				"timing": "setup",
+				"trigger": null,
+				"effect": "Add these stickers to the pool of scars.",
+				"restrictions": [],
+				"sourceGuids": ["84cb5e"]
+			}
+		}
+	],
+	"bags": [],
+	"summary": "Three scars for the pool: Missing the Sea (lose 1 action when you start inland; the port mark is an anchor), Embezzler (Make Supplies also moves a cube from the stockpile into the reserve), and Disoriented (Chart Sea Lane costs 1 more Supply cube). The SCARS label is byte-identical to door 48."
+}

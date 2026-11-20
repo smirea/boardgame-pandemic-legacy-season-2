@@ -1,0 +1,32 @@
+{
+	"package": 1,
+	"index": 12,
+	"cardId": 911,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P1-14b"
+	},
+	"title": "Los Angeles",
+	"category": "infection-card",
+	"city": "Los Angeles",
+	"color": "yellow",
+	"copies": 1,
+	"hasImprovementSlot": false,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideASummary": "Infection deck back. Biohazard symbol. No text and no printed code.",
+	"sideBSummary": "Yellow Los Angeles Infection card. City name down the left edge, yellow western map, green infection mark. No rules text. Code P1-14b.",
+	"searchBoxes": [],
+	"states": [],
+	"mechanics": {
+		"opensDoors": [],
+		"destroys": [],
+		"rules": [
+			"Yellow Infection card for Los Angeles. One copy.",
+			"Goes to the reserve when the package is opened, and to the Game End area when Los Angeles joins the grid."
+		],
+		"notes": ["Card id 911. Printed code P1-14b."]
+	}
+}

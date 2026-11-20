@@ -1,0 +1,27 @@
+{
+	"door": "26",
+	"folder": 2,
+	"frontImage": "front.jpg",
+	"frontText": "26",
+	"items": [
+		{
+			"id": "item-01",
+			"image": "item-01.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "summit_illustration",
+			"title": "Haven Leadership Summit 14",
+			"placementTarget": null,
+			"costProductionUnits": null,
+			"text": "Haven Leadership Summit 14\nAll Together!",
+			"mechanics": {
+				"opensDoors": [],
+				"opensPackages": [],
+				"destroys": [],
+				"rules": ["No play effect is printed."],
+				"effect": "Illustration of a haven on the water. No rule, door, or placement instruction."
+			}
+		}
+	],
+	"summary": "Summit illustration numbered 14, captioned All Together! No play effect is printed."
+}

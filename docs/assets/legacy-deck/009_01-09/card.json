@@ -1,0 +1,44 @@
+{
+	"sequence": 9,
+	"folder": "009_01-09",
+	"cardCode": "01-09",
+	"printedCodes": {
+		"sideA": "",
+		"sideB": "01-09b"
+	},
+	"title": "Dispersal",
+	"category": "rationed_event",
+	"month": "january",
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"stopOrPause": "NONE",
+		"header": "",
+		"trigger": "",
+		"text": "",
+		"footer": ""
+	},
+	"sideB": {
+		"header": "RATIONED EVENT",
+		"text": "DISPERSAL\n\nMove 3 Supply cubes from one haven into one or more locations on the grid.\n\nPlay at any time. Not an action.",
+		"footer": "Play at any time. Not an action.",
+		"scratchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"whenRead": "Taken with the other new Rationed Events when 01-07 is read, at the end of the first January game. Kept in the reserve and added to the Rationed Event pool.",
+		"triggers": [],
+		"opensDoors": [],
+		"opensPackages": [],
+		"destroys": [],
+		"addsToPool": ["Dispersal (Rationed Event)"],
+		"rules": [
+			"Move 3 Supply cubes from one haven into one or more locations on the grid.",
+			"Play at any time. Not an action.",
+			"Move 3 Supply cubes from a single haven into one or more grid locations. The destinations may be split."
+		],
+		"notes": "Side A is the shared rationed-event back (haven in a signal ring, yellow bars, red arc). No printed card code and no rules text. The screen title is DISPERSAL."
+	}
+}

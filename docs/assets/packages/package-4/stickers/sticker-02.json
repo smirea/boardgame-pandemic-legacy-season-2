@@ -1,0 +1,23 @@
+{
+	"id": "sticker-02",
+	"package": 4,
+	"guid": "24d22b",
+	"printedCode": null,
+	"name": "Shuttle Flight",
+	"category": "player-reference-action",
+	"placementTarget": "Back of each player reference card.",
+	"costProductionUnits": null,
+	"copies": 1,
+	"image": "sticker-02.jpg",
+	"summary": "Dark action strip. Shuttle Flight: move from any haven or supply center to any other haven or supply center on the grid. Same rule as the Rules H sticker, shortened for the player reference.",
+	"mechanics": {
+		"timing": "Action, matching the Rules H sticker.",
+		"effect": "Move from any haven or supply center to any other haven or supply center on the grid.",
+		"restrictions": [
+			"The origin must be a haven or a supply center.",
+			"The destination must be a different haven or supply center on the grid.",
+			"Sticker 03 says to place this strip on the back of each player reference card. The manifest counts 1 image."
+		],
+		"opensDoors": []
+	}
+}

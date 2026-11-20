@@ -1,0 +1,33 @@
+{
+	"door": "M",
+	"folder": 1,
+	"frontImage": "front.jpg",
+	"frontText": "M",
+	"items": [
+		{
+			"id": "item-01_rule-m",
+			"image": "item-01_rule-m.jpg",
+			"count": 1,
+			"printedCode": "M",
+			"category": "action_sticker",
+			"title": "Monitor",
+			"placementTarget": "Rulebook page 12, slot M (New Actions, left column, bottom)",
+			"text": "MONITOR\nAt a city containing a satellite tower, draw the top 4 Player cards together. Do not resolve any Epidemic cards that are drawn. Discard these 4 cards to the Player discard pile in any order.\nThen, scratch off one box on the Frequency Scanner card and follow the instructions.\nIf you have scratched off every box on the Frequency Scanner card, you can no longer do the Monitor action.",
+			"tables": [],
+			"mechanics": {
+				"opensDoors": [],
+				"opensPackages": [],
+				"rules": [
+					"Requires a satellite tower in your city.",
+					"Draw the top 4 Player cards as a group.",
+					"Epidemics in those 4 are not resolved.",
+					"Discard all 4 to the Player discard in any order you choose.",
+					"After the discard, scratch one Frequency Scanner box and do what it says.",
+					"Monitor is unavailable once every Frequency Scanner box has been scratched."
+				],
+				"effect": "Look at and dump the next 4 Player cards without triggering Epidemics, then tick the Frequency Scanner."
+			}
+		}
+	],
+	"summary": "Action at a satellite tower: draw the top 4 Player cards, ignore Epidemics among them, and discard those 4 in any order. Then scratch one Frequency Scanner box. The action ends when every scanner box is scratched."
+}

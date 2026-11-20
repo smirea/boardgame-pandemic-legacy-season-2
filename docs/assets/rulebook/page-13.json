@@ -1,0 +1,47 @@
+{
+	"file": "page-13.jpg",
+	"printedPageNumber": 13,
+	"headings": [
+		"INSTRUCTIONS FOR A BETTER LIFE ON THE HAVENS",
+		"DRAW CARDS",
+		"EPIDEMIC CARDS",
+		"EVENT CARDS",
+		"HAND LIMIT"
+	],
+	"ruleStickerSlots": [
+		{
+			"slot": "R",
+			"context": "EPIDEMIC CARDS, inside the dashed box under step 2 Infect: RULE STICKER R will replace this rule."
+		}
+	],
+	"sections": [
+		{
+			"heading": "DRAW CARDS",
+			"text": "After doing 4 actions, draw the top 2 cards together from the Player deck.\n\nIf, as you are about to draw, there are fewer than 2 cards left in the Player deck, the game ends and your team has lost! (Do not reshuffle the discard pile to form a new deck.)\n\nIf you are over your hand limit (usually 7 cards), immediately discard cards or play Event cards until you are at your hand limit."
+		},
+		{
+			"heading": "EPIDEMIC CARDS",
+			"text": "If your draws include any Epidemic cards, do not add them to your hand (and do not draw replacement cards for them). Instead, immediately do the following in order:\n\n1. Increase: Move the Infection Rate marker forward 1 space on the Infection Rate track (If the marker is already at 5, it remains at 5.)\n\n2. Infect: Draw the bottom card from the Infection deck. Remove all the Supply cubes from that city and put them in the stockpile. (Do not add Plague cubes if the city has no Supply cubes.)\n\nDiscard this card to the Infection discard pile.\n\nRULE STICKER R\nwill replace this rule.\n\n3. Intensify: Shuffle just the cards in the Infection discard pile and place them on top of the Infection deck.\n\nRemember to draw from the bottom of the Infection deck and to then shuffle only the Infection discard pile, placing it on top of the existing Infection deck.\n\nIt is rare but possible to draw 2 Epidemic cards at once. In this case, do all the steps above once and then again.\n\nAfter resolving any Epidemic cards, discard them to the Player discard pile."
+		},
+		{
+			"heading": "EVENT CARDS",
+			"text": "Playing an Event card is not an action. The player who plays an Event card decides how it is used. Event cards can be played at any time, except in between drawing and resolving a card. For example, you cannot draw an Infection card, see that you don’t like it, and then choose to play One Quiet Night.\n\nOnce played, Rationed Event cards are discarded to the Player discard pile, while Unrationed Event cards are destroyed."
+		},
+		{
+			"heading": "HAND LIMIT",
+			"text": "If you ever have more cards than your hand limit (after first resolving any Epidemic cards you may have drawn), discard cards or play Event cards until you are at your hand limit. The standard hand limit is 7 cards."
+		}
+	],
+	"tables": [],
+	"diagramsAndCallouts": [
+		"Running header: INSTRUCTIONS FOR A BETTER LIFE ON THE HAVENS.",
+		"Warning triangle beside the deck-out rule: If, as you are about to draw, there are fewer than 2 cards left in the Player deck, the game ends and your team has lost! (Do not reshuffle the discard pile to form a new deck.)",
+		"In step 2, bottom, all, and Do not are bold. Infect and Intensify are set in red.",
+		"Dashed box under step 2: RULE STICKER R will replace this rule.",
+		"Epidemic card pictured beside the steps:\nEPIDEMIC\n1-INCREASE\nMove the Infection Rate marker forward 1 space.\n2-INFECT\nDraw the bottom card from the Infection deck and remove all the Supply cubes (if any) from that city. Discard that card.\n3-INTENSIFY\nShuffle the cards in the Infection discard pile and put them on top of the Infection deck.",
+		"(if any) on the Epidemic card is italic.",
+		"Large helmeted-figure illustration fills the lower right. No rules text on it.",
+		"Printed page number 13, bottom right."
+	],
+	"fullText": "INSTRUCTIONS FOR A BETTER LIFE ON THE HAVENS\n\nDRAW CARDS\n\nAfter doing 4 actions, draw the top 2 cards together from the Player deck.\n\nIf, as you are about to draw, there are fewer than 2 cards left in the Player deck, the game ends and your team has lost! (Do not reshuffle the discard pile to form a new deck.)\n\nIf you are over your hand limit (usually 7 cards), immediately discard cards or play Event cards until you are at your hand limit.\n\nEPIDEMIC CARDS\n\nIf your draws include any Epidemic cards, do not add them to your hand (and do not draw replacement cards for them). Instead, immediately do the following in order:\n\n1. Increase: Move the Infection Rate marker forward 1 space on the Infection Rate track (If the marker is already at 5, it remains at 5.)\n\n2. Infect: Draw the bottom card from the Infection deck. Remove all the Supply cubes from that city and put them in the stockpile. (Do not add Plague cubes if the city has no Supply cubes.)\n\nDiscard this card to the Infection discard pile.\n\nRULE STICKER R\nwill replace this rule.\n\n3. Intensify: Shuffle just the cards in the Infection discard pile and place them on top of the Infection deck.\n\nRemember to draw from the bottom of the Infection deck and to then shuffle only the Infection discard pile, placing it on top of the existing Infection deck.\n\nIt is rare but possible to draw 2 Epidemic cards at once. In this case, do all the steps above once and then again.\n\nAfter resolving any Epidemic cards, discard them to the Player discard pile.\n\nEVENT CARDS\n\nPlaying an Event card is not an action. The player who plays an Event card decides how it is used. Event cards can be played at any time, except in between drawing and resolving a card. For example, you cannot draw an Infection card, see that you don’t like it, and then choose to play One Quiet Night.\n\nOnce played, Rationed Event cards are discarded to the Player discard pile, while Unrationed Event cards are destroyed.\n\nHAND LIMIT\n\nIf you ever have more cards than your hand limit (after first resolving any Epidemic cards you may have drawn), discard cards or play Event cards until you are at your hand limit. The standard hand limit is 7 cards."
+}

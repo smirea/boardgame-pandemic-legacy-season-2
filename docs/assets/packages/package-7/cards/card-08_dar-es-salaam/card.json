@@ -1,0 +1,38 @@
+{
+	"package": 7,
+	"index": 8,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P7-08b"
+	},
+	"title": "Dar es Salaam",
+	"category": "player-card",
+	"city": "Dar es Salaam",
+	"color": "yellow",
+	"copies": 1,
+	"hasImprovementSlot": true,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"text": "Player card back. No text."
+	},
+	"sideB": {
+		"text": "DAR ES SALAAM\n6°47'33\"S 39°12'30\"E\n\nCoastal map art with a bullseye sticker circle in the center. Anchor on the compass. No search box.\n\nThe bottom edge repeats DAR ES SALAAM and the coordinates upside down.",
+		"searchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"opensDoors": [],
+		"rules": [
+			"Second yellow Player card for Dar es Salaam. Port. No search.",
+			"The bullseye in the map art is the player-card upgrade slot."
+		],
+		"notes": [
+			"Card id 10707.",
+			"Same coordinates as the search card: 6°47'33\"S 39°12'30\"E.",
+			"Goes to the reserve when the package is opened."
+		]
+	}
+}

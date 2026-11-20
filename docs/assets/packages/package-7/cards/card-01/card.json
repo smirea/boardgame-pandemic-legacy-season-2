@@ -1,0 +1,42 @@
+{
+	"package": 7,
+	"index": 1,
+	"printedCodes": {
+		"sideA": "P7-01a",
+		"sideB": "P7-01b"
+	},
+	"title": "Recon Report",
+	"category": "recon-report",
+	"city": null,
+	"color": null,
+	"copies": 1,
+	"hasImprovementSlot": false,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"text": "THIS PACKAGE INCLUDES:\n• 18 cards • 4 sticker cards\n• 6 satellite towers miniatures\n\nRECON REPORT\n\nThere is infestation here; vermin\ncarrying the plague run through\nthe cities. The abandonment\nof supply lines by our haven\nleadership has driven much of\nthe world to the brink.\n\nOld satellite towers dot the\nlandscape. We can use them to\nbroadcast information to each\nother, which should cut down\nour need for travel on the\never-growing grid.\n\nRead both sides of this card\nthen keep it in the reserve."
+	},
+	"sideB": {
+		"text": "RIGHT NOW!\n\nOpen the following doors if you have not\ndone so already:\n57  F  14\n\nYou have connected a new city:\nKinshasa.\n• Add the Player card for Kinshasa\nto the Player discard pile.\n• Add the Infection card for Kinshasa\nto the Game End area.\n• Put the other Player and Infection cards\nincluded in this package into the reserve.\n• Finally, give the \"TOPAZ Experimental\nVaccine\" Unrationed Event card to a player\nto add to their hand.",
+		"searchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"opensDoors": ["57", "F", "14"],
+		"rules": [
+			"On opening the package, open doors 57, F, and 14 if they are not already open.",
+			"Kinshasa joins the grid. Its Player card goes to the Player discard pile.",
+			"Kinshasa's Infection card goes to the Game End area, so it cannot be drawn.",
+			"Every other Player card and Infection card in this package goes to the reserve.",
+			"Give the TOPAZ Experimental Vaccine Unrationed Event to a player, into their hand.",
+			"Keep this report in the reserve after both sides have been read."
+		],
+		"notes": [
+			"Card id 10700.",
+			"The package lists 18 cards, 4 sticker cards, and 6 satellite tower miniatures. The Satellite Towers bag holds those 6 miniatures.",
+			"Cities in the reserve are Khartoum, Dar es Salaam, Johannesburg, and Antananarivo, plus Kinshasa's extra cards if any are not the one Player card and one Infection card placed by the bullets above. Kinshasa has exactly one Player card and one Infection card, so both of those are placed and none of Kinshasa's cards go to the reserve."
+		]
+	}
+}

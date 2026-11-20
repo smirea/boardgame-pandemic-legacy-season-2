@@ -1,0 +1,25 @@
+{
+	"id": "event-01",
+	"cardId": 103,
+	"printedCode": null,
+	"title": "RESILIENT POPULATION",
+	"category": "rationed_event",
+	"color": null,
+	"copies": 1,
+	"images": {
+		"front": "event-01_resilient-population.jpg",
+		"back": "back.jpg"
+	},
+	"hasImprovementSlot": false,
+	"frontText": "RATIONED EVENT\nRESILIENT POPULATION\nMove 1 or 2 copies of a specific city in the Infection discard pile to the Game End area.\nYou may play this card between step 2 and step 3 of an epidemic.\nPlay at any time. Not an action.",
+	"backText": null,
+	"states": [],
+	"mechanics": {
+		"timing": "Play at any time. Not an action. May be played between step 2 and step 3 of an epidemic.",
+		"effect": "Move 1 or 2 copies of a specific city in the Infection discard pile to the Game End area.",
+		"rules": [
+			"The screen title is RESILIENT POPULATION under the header RATIONED EVENT.",
+			"Play at any time. Not an action. is printed in red italics."
+		]
+	}
+}

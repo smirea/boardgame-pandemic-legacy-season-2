@@ -1,0 +1,42 @@
+{
+	"sequence": 75,
+	"folder": "075_12-06",
+	"cardCode": "12-06",
+	"printedCodes": {
+		"sideA": "12-06a",
+		"sideB": "12-06b"
+	},
+	"title": "If You Failed to Deliver the Sample",
+	"category": "ending",
+	"month": "december",
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"stopOrPause": "NONE",
+		"header": "",
+		"trigger": "",
+		"summary": "Illustration only: a goggled figure over a waterfront, red border, small haven stamp. No rules text.",
+		"text": "",
+		"footer": ""
+	},
+	"sideB": {
+		"header": "IF YOU FAILED TO DELIVER THE SAMPLE...",
+		"summary": "Without the supplies and the sample, the Faded in the havens will die. They did not choose the disease. Only the non-Faded humans of Utopia will be left to repopulate. They ask to be remembered as people, not monsters: their time was short, and the harm they caused was unintended.",
+		"text": "IF YOU FAILED TO DELIVER THE SAMPLE...\n\nThe Faded living in the havens will die without the supplies and the sample. They did not choose the disease and will soon be gone. Only the non-Faded humans of Utopia will be left. They ask to be remembered as people rather than monsters. Their time was brief, and they inadvertently brought the world a great deal of pain.",
+		"footer": "",
+		"scratchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"whenRead": "One of the two cards 12-05 says to look at. Read this one if Deliver the Sample was not completed. Then score on 12-08 and read 12-09 and 12-10.",
+		"triggers": ["Read only if the sample was not delivered"],
+		"opensDoors": [],
+		"opensPackages": [],
+		"destroys": [],
+		"addsToPool": [],
+		"rules": ["Outcome reference for failing to deliver the sample. No board effect."],
+		"notes": "Side A is the red-bordered illustration and prints 12-06a. A small haven stamp sits at the bottom of both sides. Flavor above is paraphrased."
+	}
+}

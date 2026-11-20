@@ -1,0 +1,58 @@
+{
+	"package": 2,
+	"index": 3,
+	"cardId": 10702,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P2-03b"
+	},
+	"title": "Baghdad",
+	"category": "player-card",
+	"city": "Baghdad",
+	"color": "black",
+	"coordinates": "33°18'46\"N 44°21'41\"E",
+	"port": false,
+	"copies": 1,
+	"hasImprovementSlot": false,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideASummary": "Player deck back. No printed text. State 2 side A is the same back.",
+	"sideBSummary": "Baghdad, 33°18'46\"N 44°21'41\"E, code P2-03b. Compass has no anchor. One sealed box labeled SEARCH:. The city name and coordinates repeat upside down along the bottom.",
+	"searchBoxes": [
+		{
+			"type": "search",
+			"stateRevealed": 2,
+			"isCompanion": false,
+			"companionName": null,
+			"opensDoors": [],
+			"effectSummary": "Gain 2 actions. The printed label is SEARCH:, not a land/sea split. The scratch tells of Hollow Men here preparing hundreds of cages of rats for an unsuspecting city. The effect is immediate. It does not add a companion."
+		}
+	],
+	"states": [
+		{
+			"state": 2,
+			"cardId": 10724,
+			"images": {
+				"sideA": "state-2-side-a.jpg",
+				"sideB": "state-2-side-b.jpg"
+			},
+			"summary": "SEARCH is scratched. Hollow Men here are preparing hundreds of cages of rats to deliver to an unsuspecting city. Gain 2 actions. Code P2-03b is unchanged. Side A is the player back."
+		}
+	],
+	"mechanics": {
+		"opensDoors": [],
+		"destroys": [],
+		"rules": [
+			"Black Player card for Baghdad. Not a port.",
+			"One SEARCH box. State 2 is the scratched face.",
+			"Scratching it gives 2 actions immediately. No companion stays on the card."
+		],
+		"notes": [
+			"The recon report puts this card on the Player discard pile when the package is opened.",
+			"The scratch panel fills the center. No bullseye upgrade mark is printed.",
+			"The word black is not printed on the face. Baghdad is a black city on the region opened by door 62."
+		]
+	}
+}

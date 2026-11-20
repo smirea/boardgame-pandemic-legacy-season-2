@@ -1,0 +1,23 @@
+{
+	"id": "sticker-06",
+	"package": 3,
+	"guid": "9fbf86",
+	"printedCode": null,
+	"name": "Build Shelter",
+	"category": "player-reference",
+	"placementTarget": "The back of each player reference card. Sticker-07 is the line that says so.",
+	"costProductionUnits": null,
+	"copies": 1,
+	"image": "sticker-06.jpg",
+	"summary": "Build Shelter. Discard a card matching the color of your current city to build a shelter there. Shelters prevent characters from getting exposed. A shelter icon sits at the bottom. No printed code. This is the short player-aid line. The full action, including moving a shelter when none are left, is Rule N.",
+	"mechanics": {
+		"timing": "Reminder of the Build Shelter action, read during a turn.",
+		"effect": "Discard a City card of your current city's color to build a shelter in that city. A shelter stops characters there from being exposed.",
+		"restrictions": [
+			"This aid does not print the 'move an existing shelter' line, the protection for characters who are leaving, or the game-end population exceptions. Those are on Rule N.",
+			"Sticker-07 says to put this sticker on the back of each player reference card.",
+			"No printed code and no production cost."
+		],
+		"opensDoors": []
+	}
+}

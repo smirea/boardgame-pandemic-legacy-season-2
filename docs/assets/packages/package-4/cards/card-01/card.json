@@ -1,0 +1,41 @@
+{
+	"package": 4,
+	"index": 1,
+	"cardId": 10800,
+	"printedCodes": {
+		"sideA": "P4-01a",
+		"sideB": "P4-01b"
+	},
+	"title": "Recon Report",
+	"category": "recon-report",
+	"city": null,
+	"color": null,
+	"coordinates": null,
+	"copies": 1,
+	"hasImprovementSlot": false,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideASummary": "This package holds 14 cards and 2 sticker cards. Europe is in the same shape as the rest of the world, but some old military bases still have working aircraft. Supply centers can be given a landing strip, and the havens already have runways that can be put back into use, which would make travel across the growing grid much easier. Read both sides, then keep this card in the reserve. P4-01a.",
+	"sideBSummary": "Open door 64. Paris joins the grid. Put the Paris Player cards in the Player discard pile and the Paris Infection cards in the Game End area. Put every other Player card and Infection card from this package into the reserve. Give the Relocation Unrationed Event to a player, into their hand. P4-01b.",
+	"searchBoxes": [],
+	"states": [],
+	"mechanics": {
+		"opensDoors": ["64"],
+		"destroys": [],
+		"rules": [
+			"On opening the package, open door 64. The card says door, singular.",
+			"Paris joins the grid. Both Paris Player cards (P4-03b and P4-04b) go to the Player discard pile.",
+			"Both Paris Infection cards (the face printed P4-06b, 2 copies) go to the Game End area.",
+			"Every other Player card and Infection card in the package goes to the reserve: Frankfurt, St. Petersburg, and Moscow.",
+			"Give Relocation (P4-02b) to a player, into their hand.",
+			"Keep this report in the reserve after both sides have been read."
+		],
+		"notes": [
+			"Card id 10800.",
+			"The 14 cards are this report, Relocation, 2 Paris Player cards, 2 Paris Infection cards, 2 Frankfurt Player cards, 2 Frankfurt Infection cards, 1 St. Petersburg Player card, 1 St. Petersburg Infection card, 1 Moscow Player card, and 1 Moscow Infection card.",
+			"The 2 sticker cards are the Rules H sheet and the player-reference sheet. The manifest stores those as 3 images: the rule, the Shuttle Flight strip, and the placement instruction."
+		]
+	}
+}

@@ -1,0 +1,52 @@
+{
+	"door": "12",
+	"folder": 2,
+	"frontImage": "front.jpg",
+	"frontText": "12",
+	"items": [
+		{
+			"id": "item-01",
+			"image": "item-01.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "board_overlay",
+			"title": "FORSAKEN CITIES",
+			"placementTarget": "Area 12 on the game board",
+			"costProductionUnits": 2,
+			"text": "0 FORSAKEN CITIES\n• Become immediately infested.\n• Only the Drive/Ferry action is permitted.\n• Put Infection cards for forsaken cities into the Game End area and draw replacement cards.\n• Do not count toward Game End Production.\n• Cost 2 to increase to a population of 1.",
+			"mechanics": {
+				"opensDoors": [],
+				"opensPackages": [],
+				"destroys": [],
+				"rules": [
+					"A forsaken city is population 0, shown as a white 0 in a red square.",
+					"Become immediately infested.",
+					"Only the Drive/Ferry action is permitted.",
+					"Put Infection cards for forsaken cities into the Game End area and draw replacement cards.",
+					"Do not count toward Game End Production.",
+					"The 2 is printed in a yellow circle. It costs 2 production units to increase to a population of 1."
+				],
+				"effect": "Forsaken cities are immediately infested, allow only Drive/Ferry, send their Infection cards to Game End, and produce nothing at Game End. Restoring one to population 1 costs 2 production units."
+			}
+		},
+		{
+			"id": "item-02",
+			"image": "item-02.jpg",
+			"count": 1,
+			"printedCode": "12",
+			"category": "instruction",
+			"title": "Area 12 placement",
+			"placementTarget": null,
+			"costProductionUnits": null,
+			"text": "Put this sticker on the game board onto Area 12.",
+			"mechanics": {
+				"opensDoors": [],
+				"opensPackages": [],
+				"destroys": [],
+				"rules": [],
+				"effect": "Place the Forsaken Cities sticker on Area 12 of the game board."
+			}
+		}
+	],
+	"summary": "Forsaken Cities rule sticker for Area 12. Population 0, immediately infested, Drive/Ferry only, Infection cards go to Game End, no Game End production, and 2 production units restore it to population 1."
+}

@@ -1,0 +1,44 @@
+{
+	"door": "51",
+	"folder": 4,
+	"frontImage": "dossiers/folder-4/door-51/front.jpg",
+	"frontText": "51",
+	"items": [
+		{
+			"id": "item-01",
+			"image": "dossiers/folder-4/door-51/item-01.jpg",
+			"count": 1,
+			"printedCode": "51",
+			"category": "map-sticker",
+			"title": "Wellington",
+			"placementTarget": "Board map at 40° S, 160° E (New Zealand)",
+			"costProductionUnits": null,
+			"text": "Wellington — Population 2, blue port city, sea lane extending northwest toward the Coral Sea / Sydney.",
+			"mapDetails": {
+				"gridLines": ["40° S", "160° E"],
+				"cities": [
+					{
+						"name": "Wellington",
+						"color": "blue",
+						"port": true,
+						"population": 2,
+						"infested": false
+					}
+				],
+				"seaLanes": ["Wellington — northwest (toward Sydney / Coral Sea)"],
+				"supplyLines": [],
+				"redRegionLines": [],
+				"reconBoxes": []
+			},
+			"mechanics": {
+				"timing": "immediate",
+				"trigger": "Opened by reconning out of the Coral Sea (East Asia / Door 63 recon box: 2 unique red cards from a supply center)",
+				"effect": "Place Wellington on the board as a blue port city with population 2 connected by sea lane to the Coral Sea / Sydney. Wellington has no Player cards and no Infection cards (it is the location of the TOPAZ Lab clue, though no lab sticker is on this door itself; searching/visiting triggers follow Door 46 / lab rules).",
+				"restrictions": [],
+				"opensDoors": []
+			}
+		}
+	],
+	"bags": [],
+	"summary": "Map sticker placing Wellington (New Zealand, ~40° S, 160° E): blue port city, population 2, connected by a sea lane heading northwest. Has no Player or Infection cards."
+}

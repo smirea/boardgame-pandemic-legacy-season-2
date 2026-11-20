@@ -1,0 +1,27 @@
+{
+	"door": "20",
+	"folder": 2,
+	"frontImage": "front.jpg",
+	"frontText": "20",
+	"items": [
+		{
+			"id": "item-01",
+			"image": "item-01.jpg",
+			"count": 1,
+			"printedCode": "20",
+			"category": "report",
+			"title": "YOU'VE FOUND US",
+			"placementTarget": null,
+			"costProductionUnits": null,
+			"text": "YOU'VE FOUND US\nFinally, someone from the havens. Have you found our leaders? They've been gone since the summit. We stopped using our satellite towers to broadcast for help since it attracted the Hollow Men.\nWe made a breakthrough that should help and I know other labs have as well. Some of our scientists left to visit Lake Baikal, since that's where the primary lab was located. If there is a cure, it would come from there. Although no one has heard from them for decades now...\nOpen the following doors now:\n61  30  13",
+			"mechanics": {
+				"opensDoors": ["61", "30", "13"],
+				"opensPackages": [],
+				"destroys": [],
+				"rules": ["Open doors 61, 30, and 13 now.", "The card does not print the word Opal or any other lab name."],
+				"effect": "The lab has stopped broadcasting because the towers drew Hollow Men. Its scientists left for the primary lab at Lake Baikal. Open doors 61, 30, and 13 immediately. Door 13 is the breakthrough list, whose first entry is Opal."
+			}
+		}
+	],
+	"summary": "Report titled YOU'VE FOUND US. It does not print a lab name. The lab stopped using its satellite towers, made a breakthrough, and sent scientists to the primary lab at Lake Baikal. Open doors 61, 30, and 13 now."
+}

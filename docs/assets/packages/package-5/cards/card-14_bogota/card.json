@@ -1,0 +1,36 @@
+{
+	"package": 5,
+	"index": 14,
+	"cardId": 10713,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P5-14b"
+	},
+	"title": "Bogotá",
+	"category": "infection",
+	"city": "Bogotá",
+	"color": "yellow",
+	"coordinates": null,
+	"copies": 1,
+	"hasImprovementSlot": true,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"text": "Infection deck back. No printed text."
+	},
+	"sideB": {
+		"text": "Bogotá\nP5-14b",
+		"searchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"opensDoors": [],
+		"rules": [
+			"Yellow Infection card. The city name is printed vertically.",
+			"One improvement sticker may be placed on this card. No empty sticker box is printed on the face."
+		],
+		"notes": "Printed code P5-14b. The city name is printed BOGOTÁ. See card 13: that scan carries the same printed code."
+	}
+}

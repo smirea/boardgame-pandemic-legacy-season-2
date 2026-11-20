@@ -1,0 +1,83 @@
+{
+	"package": 7,
+	"index": 15,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P7-15b"
+	},
+	"title": "Antananarivo",
+	"category": "player-card",
+	"city": "Antananarivo",
+	"color": "black",
+	"copies": 1,
+	"hasImprovementSlot": false,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"text": "Player card back. No text."
+	},
+	"sideB": {
+		"text": "ANTANANARIVO\n18°52'45\"S 47°30'29\"E\n\nSEARCH THE LAND:\n[covered]\n\nSEARCH THE SEA:\n[covered]\n\nAnchor on the compass. The bottom edge repeats ANTANANARIVO and 18°52'45\"S 47°30'29\"E upside down.",
+		"searchBoxes": [
+			{
+				"id": "land",
+				"label": "SEARCH THE LAND:",
+				"initially": "covered",
+				"revealedInState": 2
+			},
+			{
+				"id": "sea",
+				"label": "SEARCH THE SEA:",
+				"initially": "covered",
+				"revealedInState": 3
+			}
+		]
+	},
+	"states": [
+		{
+			"state": 2,
+			"images": {
+				"sideA": "state-2-side-a.jpg",
+				"sideB": "state-2-side-b.jpg"
+			},
+			"revealedText": "SEARCH THE LAND:\nCompanion:\nContainment Specialist\n\nPlay this card at any time to\nremove all Plague cubes from\n1 location on the grid.\n\nSEARCH THE SEA:\n[still covered]",
+			"effect": "Land only. Companion Containment Specialist: play this card at any time to remove all Plague cubes from 1 location on the grid. The sea box stays covered."
+		},
+		{
+			"state": 3,
+			"images": {
+				"sideA": "state-3-side-a.jpg",
+				"sideB": "state-3-side-b.jpg"
+			},
+			"revealedText": "SEARCH THE LAND:\n[still covered]\n\nSEARCH THE SEA:\nWe have found a lost haven!\nWe have not yet accessed it.\n\nOpen 65 and add it to the board. If you have\nalready opened 65, gain 1 action.",
+			"effect": "Sea only. Open door 65 and add that haven to the board. If door 65 is already open, gain 1 action instead. The land box stays covered."
+		},
+		{
+			"state": 4,
+			"images": {
+				"sideA": "state-4-side-a.jpg",
+				"sideB": "state-4-side-b.jpg"
+			},
+			"revealedText": "SEARCH THE LAND:\nCompanion:\nContainment Specialist\n\nPlay this card at any time to\nremove all Plague cubes from\n1 location on the grid.\n\nSEARCH THE SEA:\nWe have found a lost haven!\nWe have not yet accessed it.\n\nOpen 65 and add it to the board. If you have\nalready opened 65, gain 1 action.",
+			"effect": "Both boxes scratched. The card is the Containment Specialist companion, and the sea search opens door 65 or grants 1 action if 65 is already open."
+		}
+	],
+	"mechanics": {
+		"opensDoors": ["65"],
+		"rules": [
+			"Black Player card for Antananarivo. Port: the compass has an anchor.",
+			"Two scratch boxes, searched independently. State 2 is land only. State 3 is sea only. State 4 is both. Every state side A is the unchanged player-card back.",
+			"Land: Companion Containment Specialist. Play this card at any time to remove all Plague cubes from 1 location on the grid.",
+			"Sea: the same lost haven as Dar es Salaam. Open door 65 and add it to the board, or gain 1 action if 65 is already open."
+		],
+		"notes": [
+			"Card id 10714. State card ids: state 2 is 10726, state 3 is 10725, state 4 is 10724.",
+			"Printed code P7-15b stays on every scratched face.",
+			"Coordinates are printed 18°52'45\"S 47°30'29\"E.",
+			"Playing the card for the Containment Specialist effect uses the card up. The sea result is resolved when that box is scratched, which can be before the card is played.",
+			"Goes to the reserve when the package is opened. A second, non-search Antananarivo Player card is card 16."
+		]
+	}
+}

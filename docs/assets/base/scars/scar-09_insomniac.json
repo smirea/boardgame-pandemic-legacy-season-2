@@ -1,0 +1,15 @@
+{
+	"id": "scar-09",
+	"name": "Insomniac",
+	"category": "scar",
+	"costProductionUnits": null,
+	"copies": 1,
+	"image": "scar-09_insomniac.jpg",
+	"text": "Insomniac: Reduce your hand limit by 1 card.",
+	"mechanics": {
+		"timing": "passive",
+		"trigger": null,
+		"effect": "Reduce your hand limit by 1 card.",
+		"restrictions": []
+	}
+}

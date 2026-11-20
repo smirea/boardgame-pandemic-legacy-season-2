@@ -1,0 +1,60 @@
+{
+	"package": 3,
+	"index": 4,
+	"cardId": 10703,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P3-04b"
+	},
+	"title": "Jakarta",
+	"category": "player-card",
+	"city": "Jakarta",
+	"color": "red",
+	"coordinates": "6°12'32\"S 106°50'44\"E",
+	"port": true,
+	"copies": 1,
+	"hasImprovementSlot": false,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideASummary": "Player deck back. Dark blue sunburst around a haven on the water. No text and no printed code.",
+	"sideBSummary": "Jakarta, red Player card. Coordinates 6°12'32\"S 106°50'44\"E. The compass has an anchor, so the city is a port. One covered SEARCH box fills the map. The city name and coordinates repeat upside down along the bottom. Printed code P3-04b.",
+	"searchBoxes": [
+		{
+			"type": "search",
+			"stateRevealed": 2,
+			"isCompanion": true,
+			"companionName": "Builder",
+			"opensDoors": [],
+			"effectSummary": "Companion Builder. Play this card at any time to place a shelter on one city on the grid."
+		}
+	],
+	"states": [
+		{
+			"state": 2,
+			"cardId": 10725,
+			"images": {
+				"sideA": "state-2-side-a.jpg",
+				"sideB": "state-2-side-b.jpg"
+			},
+			"summary": "Same Player back. The SEARCH box is scratched. Companion Builder. Play this card at any time to place a shelter on one city on the grid."
+		}
+	],
+	"mechanics": {
+		"opensDoors": [],
+		"destroys": false,
+		"rules": [
+			"Red Player card for Jakarta. Port: the compass has an anchor.",
+			"One SEARCH box. State 2 is that box scratched. Side A stays the Player deck back.",
+			"The scratch reveals Companion Builder. Play this card at any time to place a shelter onto one city on the grid. The shelter does not have to be Jakarta, and the text does not call it an action.",
+			"Playing the card spends it. The text does not say to destroy it."
+		],
+		"notes": [
+			"Card id 10703. State 2 card id 10725. One copy.",
+			"Coordinates 6°12'32\"S 106°50'44\"E. Printed code P3-04b stays on the scratched face.",
+			"When the package is opened, this Player card goes to the Player discard pile, not the reserve.",
+			"The portrait is a person in a hard hat. No door number is printed in the box."
+		]
+	}
+}

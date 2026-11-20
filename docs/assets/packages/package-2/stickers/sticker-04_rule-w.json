@@ -1,0 +1,23 @@
+{
+	"id": "sticker-04_rule-w",
+	"package": 2,
+	"printedCode": "W",
+	"name": "Hollow Men population loss",
+	"category": "rule",
+	"placementTarget": "Rulebook page 20, Game End step 1 Adjust Population, rule sticker W. The manual says this sticker supplies step c.",
+	"costProductionUnits": null,
+	"copies": 1,
+	"image": "sticker-04_rule-w.jpg",
+	"summary": "The face opens with a red step letter c, then: If a location has 1 or more Hollow Men figures in it, reduce its population by 1. If the location has both Plague cubes and Hollow Men figures, its population is only reduced by 1. The rulebook slot is W. The letter W is not printed. The red c is the Game End step this sticker fills.",
+	"mechanics": {
+		"timing": "Game End, step 1 Adjust Population, step c.",
+		"effect": "A location with 1 or more Hollow Men figures loses 1 population. If that location also has Plague cubes, the population still drops by only 1, not by 1 for each threat.",
+		"restrictions": [
+			"Step b already drops a location with any Plague cubes by 1, and only by 1 no matter how many cubes.",
+			"Step c adds Hollow Men to that same check and forbids a second drop when both are present.",
+			"One or more figures is enough. Extra figures do not increase the loss.",
+			"Area 15 restates the combined Game End loss on the board legend."
+		],
+		"opensDoors": []
+	}
+}

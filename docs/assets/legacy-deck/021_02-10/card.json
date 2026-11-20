@@ -1,0 +1,44 @@
+{
+	"sequence": 21,
+	"folder": "021_02-10",
+	"cardCode": "02-10",
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "02-10b"
+	},
+	"title": "EXTENDED TIME",
+	"category": "rationed_event",
+	"month": "february",
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"stopOrPause": "NONE",
+		"header": "",
+		"trigger": "",
+		"text": "",
+		"footer": ""
+	},
+	"sideB": {
+		"header": "RATIONED EVENT",
+		"text": "EXTENDED TIME\n\nThe current player gains 3 actions.",
+		"footer": "Play during any player's \"Actions\" step. Not an action.",
+		"scratchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"whenRead": "Drawn while continuing the Legacy deck at Game End step 2 of the first February game (after 02-07). The next card is the March STOP 03-01, which ends that reading. This face is a Rationed Event, so it enters the reserve. It is not played when it comes off the Legacy deck.",
+		"triggers": ["During any player's Actions step."],
+		"opensDoors": [],
+		"opensPackages": [],
+		"destroys": [],
+		"addsToPool": ["Rationed Event: Extended Time (this card), to the reserve"],
+		"rules": [
+			"The current player gains 3 actions.",
+			"Play during any player's Actions step. Not an action.",
+			"Discard after use, like other Rationed Events. It counts toward the rationing-level pick when the group builds a Player deck."
+		],
+		"notes": "Side A is the Player-card back and has no printed code. The screen art shows a hand holding a timer marked +3."
+	}
+}

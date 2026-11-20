@@ -19,7 +19,7 @@
 				"trigger": "When you do the Chart Sea Lane action",
 				"effect": "Do the Chart Sea Lane action without spending any Supply cubes.",
 				"restrictions": ["Once on your turn"],
-				"costPrintedOn": "door-29/item-04.jpg",
+				"costPrintedOn": "dossiers/folder-3/door-29/item-04.jpg",
 				"sourceGuids": ["eb547c"]
 			}
 		},
@@ -42,7 +42,7 @@
 					"The taken card is a City card from the Player discard pile",
 					"The discarded card is any Player card"
 				],
-				"costPrintedOn": "door-29/item-04.jpg",
+				"costPrintedOn": "dossiers/folder-3/door-29/item-04.jpg",
 				"sourceGuids": ["f779d3"]
 			}
 		},
@@ -64,7 +64,7 @@
 					"The discarded City card must match the color of the city you are leaving",
 					"Prevents exposure from Hollow Men figures in that city"
 				],
-				"costPrintedOn": "door-29/item-04.jpg",
+				"costPrintedOn": "dossiers/folder-3/door-29/item-04.jpg",
 				"sourceGuids": ["15e4f6"]
 			}
 		},

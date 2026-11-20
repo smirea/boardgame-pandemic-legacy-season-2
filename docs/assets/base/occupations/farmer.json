@@ -1,0 +1,15 @@
+{
+	"id": "farmer",
+	"name": "Farmer",
+	"category": "occupation",
+	"costProductionUnits": null,
+	"copies": 1,
+	"image": "farmer.jpg",
+	"text": "Farmer: Once on your turn, when doing the\nMake Supplies action, you may immediately do\nthe Deliver Supplies action for free.",
+	"mechanics": {
+		"timing": "action",
+		"trigger": "Once on your turn, when doing the Make Supplies action",
+		"effect": "You may immediately do the Deliver Supplies action for free.",
+		"restrictions": ["Once on your turn"]
+	}
+}

@@ -1,0 +1,24 @@
+{
+	"folder": 1,
+	"id": "folder-1",
+	"guid": "a24858",
+	"coverImage": "cover.jpg",
+	"coverText": "Navy door letters on a yellow sheet. The only other printed text is \"1/6\" at the bottom right, next to a small flag. No folder title is printed.",
+	"layout": {
+		"orientation": "Upright, with the sheet mark 1/6 at the bottom right.",
+		"columnsLeftToRight": [
+			["R", "U", "Y", "Z"],
+			["K", "L", "M", "P", "Q"],
+			["A", "D", "E", "F", "J"]
+		],
+		"rowsTopToBottom": [
+			["R", "K", "A"],
+			["U", "L", "D"],
+			[null, "M", "E"],
+			["Y", "P", "F"],
+			["Z", "Q", "J"]
+		],
+		"note": "The middle and right columns are five cells. The left column is four taller cells over the same height, so U sits a little below L and D, and Y sits a little above P and F. Top row R K A aligns. Bottom row Z Q J aligns."
+	},
+	"doorsInLayoutOrder": ["R", "K", "A", "U", "L", "D", "M", "E", "Y", "P", "F", "Z", "Q", "J"]
+}

@@ -1,0 +1,29 @@
+{
+	"door": "Z",
+	"folder": 1,
+	"frontImage": "front.jpg",
+	"frontText": "Z",
+	"items": [
+		{
+			"id": "item-01",
+			"image": "item-01.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "summit_illustration",
+			"title": "Haven Leadership Summit 4",
+			"placementTarget": "",
+			"text": "Haven Leadership Summit 4\nA New Hope!",
+			"tables": [],
+			"mechanics": {
+				"opensDoors": [],
+				"opensPackages": [],
+				"rules": [
+					"No gameplay procedure is printed.",
+					"The picture is a ship or floating haven on water, with two clouds, inside a rounded red border."
+				],
+				"effect": "Story sticker titled Haven Leadership Summit 4, A New Hope!"
+			}
+		}
+	],
+	"summary": "Summit illustration sticker. No rules text and no placement instruction on the piece."
+}

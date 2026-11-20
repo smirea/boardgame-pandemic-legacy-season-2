@@ -1,0 +1,29 @@
+{
+	"door": "54",
+	"folder": 4,
+	"frontImage": "dossiers/folder-4/door-54/front.jpg",
+	"frontText": "54",
+	"items": [
+		{
+			"id": "item-01",
+			"image": "dossiers/folder-4/door-54/item-01.jpg",
+			"count": 1,
+			"printedCode": "54",
+			"category": "memento-sticker",
+			"title": "Haven Leadership Summit 70 — Let's Go!",
+			"placementTarget": "Decorative / keepsake sticker (no board rule)",
+			"costProductionUnits": null,
+			"text": "Haven Leadership Summit 70\nLet's Go!",
+			"mapDetails": null,
+			"mechanics": {
+				"timing": "immediate",
+				"trigger": "Opened by searching London (or story door)",
+				"effect": "No mechanical game effect; green-ink haven emblem keepsake sticker referencing the Year 70 Haven Leadership Summit.",
+				"restrictions": [],
+				"opensDoors": []
+			}
+		}
+	],
+	"bags": [],
+	"summary": "Decorative green-ink sticker reading 'Haven Leadership Summit 70 — Let's Go!' with haven artwork. No mechanical effect."
+}

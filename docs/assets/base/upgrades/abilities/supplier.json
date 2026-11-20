@@ -1,0 +1,15 @@
+{
+	"id": "supplier",
+	"name": "Supplier",
+	"category": "ability",
+	"costProductionUnits": 3,
+	"copies": 1,
+	"image": "supplier.jpg",
+	"text": "Supplier: Once on your turn, as an action,\nmove a Supply cube from the stockpile to a city\nmatching a card in your hand. (Do not discard it.)",
+	"mechanics": {
+		"timing": "action",
+		"trigger": "Once on your turn",
+		"effect": "Move a Supply cube from the stockpile to a city matching a card in your hand. Do not discard that card.",
+		"restrictions": ["Once on your turn", "Do not discard the matching card"]
+	}
+}

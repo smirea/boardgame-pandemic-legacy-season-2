@@ -1,0 +1,90 @@
+{
+	"door": "41",
+	"folder": 4,
+	"frontImage": "dossiers/folder-4/door-41/front.jpg",
+	"frontText": "41",
+	"items": [
+		{
+			"id": "item-01",
+			"image": "dossiers/folder-4/door-41/item-01.jpg",
+			"count": 1,
+			"printedCode": "41",
+			"category": "profile",
+			"title": "Vector Control Expert profile",
+			"placementTarget": "Character card",
+			"costProductionUnits": null,
+			"text": "New Zealand has kept\nitself safe from the\nplague in part by\naggressively controlling\ndisease vectors.\nHOME Wellington\nAGE 42",
+			"mapDetails": null,
+			"mechanics": {
+				"timing": "setup",
+				"trigger": null,
+				"effect": "Profile sticker. Home Wellington, age 42. No name is printed besides the job on the occupation sticker.",
+				"restrictions": [],
+				"home": "Wellington",
+				"age": 42,
+				"homeAndAgeInScript": true,
+				"sourceGuids": ["82044e"]
+			}
+		},
+		{
+			"id": "item-02",
+			"image": "dossiers/folder-4/door-41/item-02.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "portrait",
+			"title": "Vector Control Expert portrait",
+			"placementTarget": "Character card",
+			"costProductionUnits": null,
+			"text": "",
+			"mapDetails": null,
+			"mechanics": {
+				"timing": "setup",
+				"trigger": null,
+				"effect": "Portrait sticker with no printed text. A bearded person in a red-and-black cap and a dark jacket, looking to the left.",
+				"restrictions": [],
+				"sourceGuids": ["a3c8a6"]
+			}
+		},
+		{
+			"id": "item-03",
+			"image": "dossiers/folder-4/door-41/item-03.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "occupation",
+			"title": "Vector Control Expert",
+			"placementTarget": "Character card",
+			"costProductionUnits": null,
+			"text": "Vector Control Expert. As an action, add a Shelter\nto your location (no card required).",
+			"mapDetails": null,
+			"mechanics": {
+				"timing": "action",
+				"trigger": null,
+				"effect": "As an action, add a Shelter to your location. No card is required.",
+				"restrictions": [],
+				"italic": ["(no card required)"],
+				"sourceGuids": ["1c378e"]
+			}
+		},
+		{
+			"id": "item-04",
+			"image": "dossiers/folder-4/door-41/item-04.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "instruction",
+			"title": "Create this character",
+			"placementTarget": null,
+			"costProductionUnits": null,
+			"text": "Immediately create this character using the stickers\nbelow and add it to the pool of characters.",
+			"mapDetails": null,
+			"mechanics": {
+				"timing": "immediate",
+				"trigger": null,
+				"effect": "Immediately build this character from the profile, portrait, and Vector Control Expert sticker and add it to the character pool.",
+				"restrictions": [],
+				"sourceGuids": ["289e8c"]
+			}
+		}
+	],
+	"bags": [],
+	"summary": "Create the Vector Control Expert at once and add that character to the pool. Home Wellington, age 42. As an action, add a Shelter to your location with no card. The parenthetical is italic. Corner badge on the profile is 41. No production cost."
+}

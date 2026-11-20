@@ -1,0 +1,39 @@
+{
+	"package": 2,
+	"index": 21,
+	"cardId": 10720,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P2-21b"
+	},
+	"title": "Hollow Men Gather",
+	"category": "hollow-men-gather",
+	"city": null,
+	"color": null,
+	"copies": 1,
+	"hasImprovementSlot": false,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideASummary": "Infection deck back. Red biohazard on a dark field. No printed text.",
+	"sideBSummary": "HOLLOW MEN GATHER, code P2-21b. Drawing this card is not an Infection card draw. Draw the next Infection card and add a Hollow Men figure to it instead of infecting it. If you draw another Hollow Men Gather card, keep drawing. Add only 1 figure to the first city you reveal.",
+	"searchBoxes": [],
+	"states": [],
+	"mechanics": {
+		"opensDoors": [],
+		"destroys": [],
+		"rules": [
+			"Infection-deck card. Drawing it does not count as an Infection card draw.",
+			"Draw the next Infection card and add a Hollow Men figure to that city instead of infecting it.",
+			"If the next card is another Hollow Men Gather card, keep drawing.",
+			"Add only 1 figure, and add it to the first city revealed.",
+			"No city name, no upgrade panel, and no improvement slot."
+		],
+		"notes": [
+			"Indexes 22, 23, and 24 are further copies. All four faces print P2-21b.",
+			"The recon report puts all 4 into the Infection discard pile when the package is opened.",
+			"Rule S and Rule T, in this package, are the full procedure: skip supply and plague, cap a city at 3 figures, and ignore a Gather card drawn in epidemic step 2."
+		]
+	}
+}

@@ -1,0 +1,15 @@
+{
+	"id": "scar-08",
+	"name": "Xenophobia",
+	"category": "scar",
+	"costProductionUnits": null,
+	"copies": 1,
+	"image": "scar-08_xenophobia.jpg",
+	"text": "Xenophobia: You need 1 extra City card (of the same\ncolor) to do the Recon action.",
+	"mechanics": {
+		"timing": "action",
+		"trigger": "When doing the Recon action",
+		"effect": "You need 1 extra City card of the same color.",
+		"restrictions": ["The extra card must be the same color"]
+	}
+}

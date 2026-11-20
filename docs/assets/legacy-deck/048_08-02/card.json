@@ -1,0 +1,44 @@
+{
+	"sequence": 48,
+	"folder": "048_08-02",
+	"cardCode": "08-02",
+	"printedCodes": {
+		"sideA": "08-02a",
+		"sideB": "08-02b"
+	},
+	"title": "Journal Entry",
+	"category": "legacy_journal",
+	"month": "august",
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"stopOrPause": "NONE",
+		"header": "Journal Entry",
+		"trigger": "",
+		"text": "They have finally fully accessed the satellite towers and started monitoring different frequencies. Whoever is broadcasting uses multiple channels, and a lot of time has been lost on decoy stations. Accessing the towers has given them a sense of purpose. They feel invigorated.\n\nImmediately spend up to 3 production units on character abilities.\nFinish spending these before step 3 of setup (Supply the Grid).",
+		"footer": ""
+	},
+	"sideB": {
+		"header": "FROM THE ARCHIVES",
+		"text": "DECEMBER 19, YEAR 48\n\nThe three labs in the Southern Hemisphere have made limited advances, perhaps too late, because PEARL has stopped reporting. Their last broadcast said they had found what they needed. The sediment cores contained bacteria in which they had identified the bacteriophage. They had a cure, and now they are gone. A team is being sent to investigate, covered properly so they do not draw attention.",
+		"footer": "Keep papers like this in the reserve.",
+		"scratchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"whenRead": "Continue the August setup Legacy-deck reading, immediately after 08-01. Resolve the production bonus before step 3 of that setup.",
+		"triggers": ["Before step 3 of setup (Supply the Grid): finish spending the bonus production."],
+		"opensDoors": [],
+		"opensPackages": [],
+		"destroys": [],
+		"addsToPool": [],
+		"rules": [
+			"Immediately spend up to 3 production units on character abilities. These units are free; the card does not say to pay Supply for them.",
+			"Finish spending them before step 3 of setup (Supply the Grid).",
+			"Keep the card in the reserve."
+		],
+		"notes": "The 3 is printed in an orange circle inside the blue rules box on the journal side (08-02a), not on the archive. A handwritten signature under the Year 48 note is not transcribed."
+	}
+}

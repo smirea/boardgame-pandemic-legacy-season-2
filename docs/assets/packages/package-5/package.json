@@ -1,0 +1,179 @@
+{
+	"name": "Package 5",
+	"bags": [],
+	"boxImage": "box.jpg",
+	"boxText": "5",
+	"cards": [
+		{
+			"index": 1,
+			"folder": "card-01",
+			"title": "Recon Report",
+			"category": "report",
+			"printedCode": "P5-01b",
+			"json": "cards/card-01/card.json"
+		},
+		{
+			"index": 2,
+			"folder": "card-02_event",
+			"title": "Strategic Reserves",
+			"category": "event",
+			"printedCode": "P5-02b",
+			"json": "cards/card-02_event/card.json"
+		},
+		{
+			"index": 3,
+			"folder": "card-03_buenos-aires",
+			"title": "Buenos Aires",
+			"category": "player-city",
+			"printedCode": "P5-03b",
+			"json": "cards/card-03_buenos-aires/card.json"
+		},
+		{
+			"index": 4,
+			"folder": "card-04_buenos-aires",
+			"title": "Buenos Aires",
+			"category": "player-city",
+			"printedCode": "P5-04b",
+			"json": "cards/card-04_buenos-aires/card.json"
+		},
+		{
+			"index": 5,
+			"folder": "card-05_buenos-aires",
+			"title": "Buenos Aires",
+			"category": "infection",
+			"printedCode": "P5-05b",
+			"json": "cards/card-05_buenos-aires/card.json"
+		},
+		{
+			"index": 6,
+			"folder": "card-06_buenos-aires",
+			"title": "Buenos Aires",
+			"category": "infection",
+			"printedCode": "P5-06b",
+			"json": "cards/card-06_buenos-aires/card.json"
+		},
+		{
+			"index": 7,
+			"folder": "card-07_santiago",
+			"title": "Santiago",
+			"category": "player-city",
+			"printedCode": "P5-07b",
+			"json": "cards/card-07_santiago/card.json"
+		},
+		{
+			"index": 8,
+			"folder": "card-08_santiago",
+			"title": "Santiago",
+			"category": "infection",
+			"printedCode": "P5-08b",
+			"json": "cards/card-08_santiago/card.json"
+		},
+		{
+			"index": 9,
+			"folder": "card-09_lima",
+			"title": "Lima",
+			"category": "player-city",
+			"printedCode": "P5-09b",
+			"json": "cards/card-09_lima/card.json"
+		},
+		{
+			"index": 10,
+			"folder": "card-10_lima",
+			"title": "Lima",
+			"category": "infection",
+			"printedCode": "P5-10b",
+			"json": "cards/card-10_lima/card.json"
+		},
+		{
+			"index": 11,
+			"folder": "card-11_bogota",
+			"title": "Bogotá",
+			"category": "player-city",
+			"printedCode": "P5-11b",
+			"json": "cards/card-11_bogota/card.json"
+		},
+		{
+			"index": 12,
+			"folder": "card-12_bogota",
+			"title": "Bogotá",
+			"category": "player-city",
+			"printedCode": "P5-12b",
+			"json": "cards/card-12_bogota/card.json"
+		},
+		{
+			"index": 13,
+			"folder": "card-13_bogota",
+			"title": "Bogotá",
+			"category": "infection",
+			"printedCode": "P5-14b",
+			"json": "cards/card-13_bogota/card.json"
+		},
+		{
+			"index": 14,
+			"folder": "card-14_bogota",
+			"title": "Bogotá",
+			"category": "infection",
+			"printedCode": "P5-14b",
+			"json": "cards/card-14_bogota/card.json"
+		}
+	],
+	"guid": "4e8321",
+	"id": "package-5",
+	"inventory": {
+		"asPrintedOnReport": "14 cards • 1 sticker card",
+		"cards": 14,
+		"stickerCards": 1,
+		"stickers": 3
+	},
+	"package": 5,
+	"rules": [
+		"Facilitator: once on your turn, as an action, take any 1 Player card from a character in your location. 2 Production Units.",
+		"Outrider: do the Recon action with 1 fewer card. 3 Production Units.",
+		"Foreman: when doing Establish Supply Line, spend 1 fewer Supply cube. 2 Production Units.",
+		"Strategic Reserves: play at any time, not an action. Move up to 8 Supply cubes from the reserve to the stockpile for this game, then destroy the card."
+	],
+	"setup": {
+		"source": "P5-01b",
+		"opensDoors": [
+			"67",
+			"J",
+			"23",
+			"L",
+			"39"
+		],
+		"connectsCity": "Buenos Aires",
+		"playerCardsToDiscard": [
+			"Buenos Aires"
+		],
+		"infectionCardsToGameEnd": [
+			"Buenos Aires"
+		],
+		"otherCardsToReserve": [
+			"Santiago",
+			"Lima",
+			"Bogotá"
+		],
+		"giveToAPlayerHand": "Strategic Reserves",
+		"keepReportIn": "reserve"
+	},
+	"stickers": [
+		{
+			"id": "sticker-01_facilitator",
+			"name": "Facilitator",
+			"costProductionUnits": 2,
+			"json": "stickers/sticker-01_facilitator.json"
+		},
+		{
+			"id": "sticker-02_outrider",
+			"name": "Outrider",
+			"costProductionUnits": 3,
+			"json": "stickers/sticker-02_outrider.json"
+		},
+		{
+			"id": "sticker-03_foreman",
+			"name": "Foreman",
+			"costProductionUnits": 2,
+			"json": "stickers/sticker-03_foreman.json"
+		}
+	]
+}

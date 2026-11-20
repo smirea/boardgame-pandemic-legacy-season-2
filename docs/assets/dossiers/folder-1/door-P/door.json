@@ -1,0 +1,31 @@
+{
+	"door": "P",
+	"folder": 1,
+	"frontImage": "front.jpg",
+	"frontText": "P",
+	"items": [
+		{
+			"id": "item-01_rule-p",
+			"image": "item-01_rule-p.jpg",
+			"count": 1,
+			"printedCode": "P",
+			"category": "action_sticker",
+			"title": "Broadcast Misinformation",
+			"placementTarget": "Rulebook page 12, slot P (New Actions, right column, third)",
+			"text": "BROADCAST MISINFORMATION\nAt a city containing a satellite tower, move a Hollow Men figure to a location adjacent to where the figure currently is. The color of your current city must match the color of the Hollow Men figure's current city.\nYou may not move a Hollow Men figure into a location that already contains 3 Hollow Men figures.",
+			"tables": [],
+			"mechanics": {
+				"opensDoors": [],
+				"opensPackages": [],
+				"rules": [
+					"Requires a satellite tower in your city.",
+					"Move one Hollow Men figure one step, to an adjacent location.",
+					"The color of your city must match the color of the city the figure is leaving.",
+					"The destination cannot already contain 3 Hollow Men figures."
+				],
+				"effect": "Reposition one Hollow Men figure by one adjacent step, under a matching-color and stack-limit constraint."
+			}
+		}
+	],
+	"summary": "Action at a satellite tower: move one Hollow Men figure to an adjacent location. Your city's color must match the figure's current city, and the destination cannot already hold 3 Hollow Men."
+}

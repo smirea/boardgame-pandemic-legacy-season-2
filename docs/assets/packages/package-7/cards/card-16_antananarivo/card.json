@@ -1,0 +1,38 @@
+{
+	"package": 7,
+	"index": 16,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P7-16b"
+	},
+	"title": "Antananarivo",
+	"category": "player-card",
+	"city": "Antananarivo",
+	"color": "black",
+	"copies": 1,
+	"hasImprovementSlot": true,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"text": "Player card back. No text."
+	},
+	"sideB": {
+		"text": "ANTANANARIVO\n18°52'45\"S 47°30'29\"E\n\nIsland map art with a bullseye sticker circle on Madagascar. Anchor on the compass. No search box.\n\nThe bottom edge repeats ANTANANARIVO and the coordinates upside down.",
+		"searchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"opensDoors": [],
+		"rules": [
+			"Second black Player card for Antananarivo. Port. No search.",
+			"The bullseye in the map art is the player-card upgrade slot."
+		],
+		"notes": [
+			"Card id 10715.",
+			"Same coordinates as the search card: 18°52'45\"S 47°30'29\"E.",
+			"Goes to the reserve when the package is opened."
+		]
+	}
+}

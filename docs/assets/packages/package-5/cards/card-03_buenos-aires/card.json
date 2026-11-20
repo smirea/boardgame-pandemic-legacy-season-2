@@ -1,0 +1,81 @@
+{
+	"package": 5,
+	"index": 3,
+	"cardId": 10702,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P5-03b"
+	},
+	"title": "Buenos Aires",
+	"category": "player-city",
+	"city": "Buenos Aires",
+	"color": "yellow",
+	"coordinates": "34°36'13\"S 58°22'54\"W",
+	"copies": 1,
+	"hasImprovementSlot": true,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"text": "Player deck back. No printed text."
+	},
+	"sideB": {
+		"text": "Buenos Aires\n34°36'13\"S 58°22'54\"W\nSEARCH THE LAND:\nSEARCH THE SEA:\n(City name and coordinates repeat upside down along the bottom.)\nP5-03b",
+		"searchBoxes": [
+			{
+				"label": "SEARCH THE LAND:",
+				"kind": "land",
+				"scratched": false
+			},
+			{
+				"label": "SEARCH THE SEA:",
+				"kind": "sea",
+				"scratched": false
+			}
+		]
+	},
+	"states": [
+		{
+			"state": 2,
+			"cardId": 10716,
+			"images": {
+				"sideA": "state-2-side-a.jpg",
+				"sideB": "state-2-side-b.jpg"
+			},
+			"scratched": ["land"],
+			"revealedText": "SEARCH THE LAND:\nFound OPAL laboratory, one of four labs seeking a cure. Someone at the lab has offered to join us.\nOpen the following doors if you haven't done so already: 18 20",
+			"effect": "Open doors 18 and 20 if they are not already open. The OPAL laboratory text is the revealed story. The sea box stays sealed."
+		},
+		{
+			"state": 3,
+			"cardId": 10715,
+			"images": {
+				"sideA": "state-3-side-a.jpg",
+				"sideB": "state-3-side-b.jpg"
+			},
+			"scratched": ["sea"],
+			"revealedText": "SEARCH THE SEA:\nWe discovered a long-lost supply cache on the Falklands.\nPut 3 Supply cubes into this city from the reserve (instead of the stockpile).",
+			"effect": "Put 3 Supply cubes into Buenos Aires from the reserve, not from the stockpile. The land box stays sealed."
+		},
+		{
+			"state": 4,
+			"cardId": 10714,
+			"images": {
+				"sideA": "state-4-side-a.jpg",
+				"sideB": "state-4-side-b.jpg"
+			},
+			"scratched": ["land", "sea"],
+			"revealedText": "SEARCH THE LAND:\nFound OPAL laboratory, one of four labs seeking a cure. Someone at the lab has offered to join us.\nOpen the following doors if you haven't done so already: 18 20\n\nSEARCH THE SEA:\nWe discovered a long-lost supply cache on the Falklands.\nPut 3 Supply cubes into this city from the reserve (instead of the stockpile).",
+			"effect": "Both boxes are open: doors 18 and 20, and 3 Supply cubes into Buenos Aires from the reserve."
+		}
+	],
+	"mechanics": {
+		"opensDoors": [],
+		"rules": [
+			"Yellow Player city card.",
+			"One improvement sticker may be placed on this card. No empty sticker box is printed on the face."
+		],
+		"notes": "Harbor card (anchor compass). Two scratch-off boxes. State 2 reveals the land box only, state 3 the sea box only, state 4 both. Side A of every state is the unchanged Player deck back."
+	}
+}

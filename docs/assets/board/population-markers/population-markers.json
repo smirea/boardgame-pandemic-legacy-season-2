@@ -1,0 +1,15 @@
+{
+	"component": "Population Marker",
+	"description": "Double-sided/multi-state square population tokens placed on cities and havens to track current population from 0 (forsaken) to 8.",
+	"states": [
+		{ "state": 1, "value": 0, "color": "red", "status": "forsaken", "image": "state-1.jpg" },
+		{ "state": 2, "value": 1, "color": "yellow", "status": "low", "image": "state-2.jpg" },
+		{ "state": 3, "value": 2, "color": "amber", "status": "low", "image": "state-3.jpg" },
+		{ "state": 4, "value": 3, "color": "dark_gray", "status": "standard", "image": "state-4.jpg" },
+		{ "state": 5, "value": 4, "color": "dark_gray", "status": "standard", "image": "state-5.jpg" },
+		{ "state": 6, "value": 5, "color": "dark_gray", "status": "standard", "image": "state-6.jpg" },
+		{ "state": 7, "value": 6, "color": "blue", "status": "high", "image": "state-7.jpg" },
+		{ "state": 8, "value": 7, "color": "blue", "status": "high", "image": "state-8.jpg" },
+		{ "state": 9, "value": 8, "color": "blue", "status": "high", "image": "state-9.jpg" }
+	]
+}

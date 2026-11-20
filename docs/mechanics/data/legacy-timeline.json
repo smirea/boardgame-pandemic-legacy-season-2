@@ -10,7 +10,6 @@
 		},
 		"constantTables": {
 			"projectedSupplies": {
-				"prologue": null,
 				"1": 36,
 				"2": 33,
 				"3": 30,
@@ -22,24 +21,25 @@
 				"9": 12,
 				"10": 8,
 				"11": 4,
-				"12": 0
+				"12": 0,
+				"prologue": 36
 			},
 			"productionUnitsByCitiesOnGrid": {
 				"brackets": ["1-10", "11-16", "17-24", "25-33", "34-42", "43+"],
 				"units": [3, 4, 5, 6, 7, 8],
 				"winBonus": 1,
-				"confidence": "inferred",
-				"note": "Bracket bounds read from a board photo. Unit values are not legible in any source, so they are inferred from reported totals in two play reports. Only connected, non-forsaken cities count. Havens do not count."
+				"confidence": "verified",
+				"note": "Verified directly from board.jpg (docs/assets/board/board.json). Only connected, non-forsaken cities count. Havens do not count."
 			},
 			"infectionRateTrack": {
 				"values": [2, 2, 2, 3, 3, 4, 4, 5],
-				"confidence": "inferred",
-				"note": "Marker starts on the leftmost 2. The rulebook says the rate caps at 5. The number of spaces between is read from a photo and not confirmed."
+				"confidence": "verified",
+				"note": "Verified directly from board.jpg: 8 spaces [2, 2, 2, 3, 3, 4, 4, 5]."
 			},
 			"incidentTrack": {
 				"lossAt": 8,
-				"confidence": "community",
-				"note": "The game is lost when the marker reaches the last (skull) space. One player report describes losing at the 8th incident."
+				"confidence": "verified",
+				"note": "Verified directly from board.jpg: spaces 0-7 followed by Skull (loss on 8th incident)."
 			}
 		}
 	},
@@ -55,21 +55,25 @@
 				{
 					"id": "recon-north-america",
 					"rule": "Do the Recon action at Washington (supply center there, discard any 3 blue City cards).",
-					"mandatory": false
+					"mandatory": true
 				}
 			],
 			"objectivesRequiredToWin": 2,
 			"setupChanges": [
-				"Destroy the prologue objective card.",
+				"Destroy the prologue cards (00-01, 00-02).",
 				"Stockpile 36 Supply cubes.",
 				"Rationing level 4.",
-				"No turning points yet."
+				"Add Turning Point #1 (01-06, Forsaken Cities) to the Game End area."
 			]
 		},
 		{
 			"month": 2,
 			"objectives": [
-				{ "id": "build-3-supply-centers", "rule": "As January.", "mandatory": true },
+				{
+					"id": "build-3-supply-centers",
+					"rule": "As January.",
+					"mandatory": true
+				},
 				{
 					"id": "recon-1-unknown-region",
 					"rule": "Complete any one Recon action that opens a new region.",
@@ -91,9 +95,21 @@
 		{
 			"month": 3,
 			"objectives": [
-				{ "id": "build-3-supply-centers", "rule": "As January.", "mandatory": true },
-				{ "id": "recon-1-unknown-region", "rule": "As February.", "mandatory": false },
-				{ "id": "connect-2-new-cities", "rule": "As February.", "mandatory": false },
+				{
+					"id": "build-3-supply-centers",
+					"rule": "As January.",
+					"mandatory": true
+				},
+				{
+					"id": "recon-1-unknown-region",
+					"rule": "As February.",
+					"mandatory": false
+				},
+				{
+					"id": "connect-2-new-cities",
+					"rule": "As February.",
+					"mandatory": false
+				},
 				{
 					"id": "complete-2-searches",
 					"rule": "Do the Search action twice during this game (two scratch boxes; may be the same card).",
@@ -114,11 +130,31 @@
 		{
 			"month": 4,
 			"objectives": [
-				{ "id": "build-3-supply-centers", "rule": "As January.", "mandatory": true },
-				{ "id": "recon-1-unknown-region", "rule": "As February.", "mandatory": false },
-				{ "id": "connect-2-new-cities", "rule": "As February.", "mandatory": false },
-				{ "id": "complete-2-searches", "rule": "As March.", "mandatory": false },
-				{ "id": "access-a-lost-haven", "rule": "As March.", "mandatory": false }
+				{
+					"id": "build-3-supply-centers",
+					"rule": "As January.",
+					"mandatory": true
+				},
+				{
+					"id": "recon-1-unknown-region",
+					"rule": "As February.",
+					"mandatory": false
+				},
+				{
+					"id": "connect-2-new-cities",
+					"rule": "As February.",
+					"mandatory": false
+				},
+				{
+					"id": "complete-2-searches",
+					"rule": "As March.",
+					"mandatory": false
+				},
+				{
+					"id": "access-a-lost-haven",
+					"rule": "As March.",
+					"mandatory": false
+				}
 			],
 			"objectivesRequiredToWin": 3,
 			"setupChanges": [
@@ -130,38 +166,101 @@
 		{
 			"month": 5,
 			"objectives": [
-				{ "id": "build-3-supply-centers", "rule": "As January.", "mandatory": true },
-				{ "id": "recon-1-unknown-region", "rule": "As February.", "mandatory": false },
-				{ "id": "connect-2-new-cities", "rule": "As February.", "mandatory": false },
-				{ "id": "complete-2-searches", "rule": "As March.", "mandatory": false },
-				{ "id": "access-a-lost-haven", "rule": "As March.", "mandatory": false }
+				{
+					"id": "build-3-supply-centers",
+					"rule": "As January.",
+					"mandatory": true
+				},
+				{
+					"id": "recon-1-unknown-region",
+					"rule": "As February.",
+					"mandatory": false
+				},
+				{
+					"id": "connect-2-new-cities",
+					"rule": "As February.",
+					"mandatory": false
+				},
+				{
+					"id": "complete-2-searches",
+					"rule": "As March.",
+					"mandatory": false
+				},
+				{
+					"id": "access-a-lost-haven",
+					"rule": "As March.",
+					"mandatory": false
+				}
 			],
 			"objectivesRequiredToWin": 3,
 			"setupChanges": [
 				"Stockpile 24 Supply cubes.",
-				"Perimeter Report checks door 60 (the eastern Pacific lost haven); what it forces was not recorded."
+				"Perimeter Report (05-01): if door 60 is sealed, open door 60 and place the Eastern Pacific haven on the board (not yet accessed; does not open Package 6)."
 			]
 		},
 		{
 			"month": 6,
 			"objectives": [
-				{ "id": "build-3-supply-centers", "rule": "As January.", "mandatory": true },
-				{ "id": "recon-1-unknown-region", "rule": "As February.", "mandatory": false },
-				{ "id": "connect-2-new-cities", "rule": "As February.", "mandatory": false },
-				{ "id": "complete-2-searches", "rule": "As March.", "mandatory": false },
-				{ "id": "access-a-lost-haven", "rule": "As March.", "mandatory": false }
+				{
+					"id": "build-3-supply-centers",
+					"rule": "As January.",
+					"mandatory": true
+				},
+				{
+					"id": "recon-1-unknown-region",
+					"rule": "As February.",
+					"mandatory": false
+				},
+				{
+					"id": "connect-2-new-cities",
+					"rule": "As February.",
+					"mandatory": false
+				},
+				{
+					"id": "complete-2-searches",
+					"rule": "As March.",
+					"mandatory": false
+				},
+				{
+					"id": "access-a-lost-haven",
+					"rule": "As March.",
+					"mandatory": false
+				}
 			],
 			"objectivesRequiredToWin": 3,
-			"setupChanges": ["Stockpile 21 Supply cubes.", "No new rules; story cards only."]
+			"setupChanges": [
+				"Stockpile 21 Supply cubes.",
+				"Perimeter Report (06-01): if door 64 (Europe) is sealed, open Package 4, destroy Relocation, and open door 21 (permanently destroys Frankfurt and its cards)."
+			]
 		},
 		{
 			"month": 7,
 			"objectives": [
-				{ "id": "build-3-supply-centers", "rule": "As January.", "mandatory": true },
-				{ "id": "recon-1-unknown-region", "rule": "As February.", "mandatory": false },
-				{ "id": "connect-2-new-cities", "rule": "As February.", "mandatory": false },
-				{ "id": "complete-2-searches", "rule": "As March.", "mandatory": false },
-				{ "id": "access-a-lost-haven", "rule": "As March.", "mandatory": false },
+				{
+					"id": "build-3-supply-centers",
+					"rule": "As January.",
+					"mandatory": true
+				},
+				{
+					"id": "recon-1-unknown-region",
+					"rule": "As February.",
+					"mandatory": false
+				},
+				{
+					"id": "connect-2-new-cities",
+					"rule": "As February.",
+					"mandatory": false
+				},
+				{
+					"id": "complete-2-searches",
+					"rule": "As March.",
+					"mandatory": false
+				},
+				{
+					"id": "access-a-lost-haven",
+					"rule": "As March.",
+					"mandatory": false
+				},
 				{
 					"id": "triangulate-signals",
 					"rule": "Have satellite towers in a blue city, a yellow city and a black city at the same time. Permanent towers count. On completion open door 35 and destroy this objective.",
@@ -177,48 +276,90 @@
 		{
 			"month": 8,
 			"objectives": [
-				{ "id": "build-3-supply-centers", "rule": "As January.", "mandatory": true },
-				{ "id": "recon-1-unknown-region", "rule": "As February.", "mandatory": false },
-				{ "id": "connect-2-new-cities", "rule": "As February.", "mandatory": false },
-				{ "id": "complete-2-searches", "rule": "As March.", "mandatory": false },
-				{ "id": "access-a-lost-haven", "rule": "As March.", "mandatory": false },
-				{ "id": "triangulate-signals", "rule": "As July, if not yet completed.", "mandatory": false }
+				{
+					"id": "build-3-supply-centers",
+					"rule": "As January.",
+					"mandatory": true
+				},
+				{
+					"id": "recon-1-unknown-region",
+					"rule": "As February.",
+					"mandatory": false
+				},
+				{
+					"id": "connect-2-new-cities",
+					"rule": "As February.",
+					"mandatory": false
+				},
+				{
+					"id": "complete-2-searches",
+					"rule": "As March.",
+					"mandatory": false
+				},
+				{
+					"id": "access-a-lost-haven",
+					"rule": "As March.",
+					"mandatory": false
+				},
+				{
+					"id": "triangulate-signals",
+					"rule": "As July, if not yet completed.",
+					"mandatory": false
+				}
 			],
 			"objectivesRequiredToWin": 3,
 			"setupChanges": [
 				"Stockpile 15 Supply cubes.",
-				"Perimeter Report: if door 62 (Middle East) is unopened, open Package 2 for the players and destroy its Unrationed Event.",
-				"Monitor action and Frequency Scanner arrive.",
-				"One free character upgrade: spend up to 2 production units on abilities at once."
+				"Perimeter Report (08-01): if door 62 (Middle East) is sealed, open Package 2 and destroy Renewal.",
+				"Immediate free upgrade (08-02a): spend up to 3 free production units on character abilities before setup step 3.",
+				"Monitor action (doors M, 25) and Frequency Scanner (08-04) arrive."
 			]
 		},
 		{
 			"month": 9,
 			"objectives": [
-				{ "id": "build-3-supply-centers", "rule": "As January.", "mandatory": true },
+				{
+					"id": "build-3-supply-centers",
+					"rule": "As January.",
+					"mandatory": true
+				},
 				{
 					"id": "recon-east-asia",
 					"rule": "Do the Recon action at Kolkata that opens Package 3. Completion carries over to the second game of the month.",
 					"mandatory": true
 				},
-				{ "id": "connect-2-new-cities", "rule": "As February.", "mandatory": false },
-				{ "id": "complete-2-searches", "rule": "As March.", "mandatory": false },
-				{ "id": "access-a-lost-haven", "rule": "As March.", "mandatory": false }
+				{
+					"id": "connect-2-new-cities",
+					"rule": "As February.",
+					"mandatory": false
+				},
+				{
+					"id": "complete-2-searches",
+					"rule": "As March.",
+					"mandatory": false
+				},
+				{
+					"id": "access-a-lost-haven",
+					"rule": "As March.",
+					"mandatory": false
+				}
 			],
 			"objectivesRequiredToWin": 3,
 			"setupChanges": [
 				"Stockpile 12 Supply cubes.",
-				"Destroy Recon 1 Unknown Region; add Recon East Asia (mandatory).",
-				"Perimeter Report: if door 65 (Indian Ocean lost haven) is unopened, it is opened for the players.",
-				"Inoculated cards in Package 6 return through Epidemics (rule sticker R).",
-				"Setup infection now places Hollow Men on the last 3 of 9 cards (rule sticker D).",
-				"New loss condition: running out of Hollow Men figures."
+				"Perimeter Report (09-01): if door 65 (Indian Ocean haven) is sealed, open door 65 and place it on the board (not yet accessed).",
+				"Destroy Recon 1 Unknown Region; add Recon East Asia (mandatory; counts complete in September if already reconned).",
+				"Open doors R, 55 (Epidemic step 2 draws from Package 6), D, Y (6+3 setup infection with Hollow Men), and U (loss when Hollow Men figures run out)."
 			]
 		},
 		{
 			"month": 10,
 			"objectives": [
-				{ "id": "build-3-supply-centers", "rule": "As January.", "mandatory": true },
+				{
+					"id": "build-3-supply-centers",
+					"rule": "As January.",
+					"mandatory": true
+				},
 				{
 					"id": "get-hollow-men-to-defect",
 					"rule": "At least 1 Hollow Men figure on each of 3 different havens. If completed in the first game of October but that game is lost, it counts as complete in the second game.",
@@ -245,8 +386,9 @@
 			"objectivesRequiredToWin": 1,
 			"setupChanges": [
 				"Stockpile 4 Supply cubes.",
+				"Intelligence Report (11-01): if Hollow Men have not yet defected, open door 17 (no objective credit) and add a scar to 2 selected characters.",
 				"Destroy Build 3 Supply Centers and Get Hollow Men to Defect.",
-				"Destroy An Incomplete Plan; The Plan replaces it."
+				"Destroy An Incomplete Plan; The Plan (11-05) replaces it."
 			]
 		},
 		{
@@ -260,9 +402,9 @@
 			],
 			"objectivesRequiredToWin": 1,
 			"setupChanges": [
-				"Stockpile 0 Supply cubes (bonuses from lost havens, labs and events still apply).",
-				"Destroy The Plan.",
-				"If Package 8 is still sealed, open it for the players: Utopia joins the grid, its 8 Infection cards go to the Infection discard pile, and its event card reward is lost."
+				"Stockpile 0 Supply cubes (bonuses from Area 10/11 and events still apply).",
+				"Perimeter Report (12-01): if The Plan is incomplete, open Package 8 (Utopia joins the grid; 8 Utopia Infection + 4 Gather cards go to Infection discard; destroy Riot Control).",
+				"Destroy Complete the Plan and The Plan if still present."
 			]
 		}
 	],
@@ -287,18 +429,22 @@
 				"Production units buy: character abilities, City card improvements (Foundations: counts as 2 cards of its color for Build Supply Center; Infrastructure: counts as 3), Infection card improvements (Well Stocked: no removal if the city has 2 or more cubes; Lockdown: discard from the Infection discard pile to destroy it), population +1 per unit."
 			],
 			"removes": [],
-			"confidence": "rulebook"
+			"confidence": "verified"
 		},
 		{
 			"order": 2,
-			"trigger": { "kind": "month-start", "detail": "January setup, Legacy deck." },
-			"source": "Legacy cards 01-xxx",
+			"trigger": {
+				"kind": "month-start",
+				"detail": "January setup, Legacy deck."
+			},
+			"source": "Legacy cards 01-01 to 01-06",
 			"adds": [
-				"Objectives: Build 3 Supply Centers (mandatory) and Recon North America. 2 required.",
-				"Recon action becomes usable: at a printed recon spot, usually with a supply center there, discard the shown cards in one action and open the shown package. Star icons mean any cards of that color; letters mean different cities of that color."
+				"Objectives: Build 3 New Supply Centers (mandatory, 01-04) and Recon North America (mandatory, carries over, 01-05). 2 required.",
+				"Recon action becomes usable.",
+				"Turning Point #1 (01-06, Forsaken Cities) placed in the Game End area: when any city reaches population 0 at Game End, open doors A and 12."
 			],
 			"removes": ["Prologue objective"],
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"order": 3,
@@ -306,45 +452,57 @@
 				"kind": "recon",
 				"detail": "Recon North America from Washington (any 3 blue). Forced at the start of February if not done."
 			},
-			"source": "Package 1; doors 66, J, L",
+			"source": "Package 1; doors 66, J, 23, L, 39",
 			"adds": [
 				"Map sticker: Chicago, San Francisco, Denver, Atlanta, Los Angeles, Mexico City. Chicago connected at once by a printed line.",
 				"New City and Infection cards for those cities go to the reserve until each city connects.",
 				"Connecting a city during play: its City cards go to the Player discard pile and its Infection cards to the Game End area (they join the Infection deck after the game).",
 				"Action Establish Supply Line (rule sticker J): spend 2 Supply cubes from your character to draw a straight line from your city to another city. It may not cross water, unexplored area, another city or another supply line, and may not end at a haven. Sail and Charter Boat cannot use supply lines.",
 				"Action Search (rule sticker L): in the city matching a City card in your hand, scratch one search box on that card and resolve it. Some cards have a land box and a sea box. A companion found by search is permanent; any other result applies once.",
-				"Unrationed Event to the recon player: remove all Plague cubes from one location on the grid. Destroyed if the region was forced open."
+				"Unrationed Event to the recon player: remove all Plague cubes from one location on the grid. Destroyed if the region was forced open.",
+				"3 scars added to scar pool: Weak (max 3 cubes carried), Impatient (discard searched card), Exhausted (Establish Supply Line +1 cube)."
 			],
 			"removes": [],
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"order": 4,
-			"trigger": { "kind": "game-loss", "detail": "End of a January game, Legacy deck at game end." },
-			"source": "Legacy cards 01-xxx",
-			"adds": ["4 new Rationed Event cards to the reserve."],
+			"trigger": {
+				"kind": "month-end",
+				"detail": "Step 2 at the end of the first January game (01-07 Pause)."
+			},
+			"source": "Legacy cards 01-07 to 01-11",
+			"adds": ["4 new Rationed Events to the reserve: Data Transfer, Dispersal, Drastic Measures, Extended Forecast."],
 			"removes": [],
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"order": 5,
-			"trigger": { "kind": "month-start", "detail": "February setup." },
-			"source": "Legacy cards 02-01b to 02-03b",
-			"adds": ["Objectives Recon 1 Unknown Region and Connect 2 New Cities (both optional). Still 2 required."],
+			"trigger": {
+				"kind": "month-start",
+				"detail": "February setup."
+			},
+			"source": "Legacy cards 02-01 to 02-06",
+			"adds": [
+				"Objectives Recon 1 Unknown Region (02-04) and Connect 2 New Cities (02-05). Still 2 required.",
+				"Turning Point #2 (02-06, Give Us the Tools...): placed in Game End area; if lost 4 games in a row, scratch for three +10 reserve-to-stockpile setup bonuses."
+			],
 			"removes": ["Recon North America objective"],
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"order": 6,
-			"trigger": { "kind": "month-end", "detail": "End of the February game(s), Legacy deck at game end." },
-			"source": "Legacy cards 02-xxx",
+			"trigger": {
+				"kind": "month-end",
+				"detail": "End of the February game(s), Legacy deck at game end."
+			},
+			"source": "Legacy cards 02-07 to 02-10; door 34",
 			"adds": [
-				"Game end upgrade: Permanent Supply Center sticker, 3 production units, limited stickers. Place it next to a city that had a supply center in the just-played game. During setup, each such city starts with a supply center. Permanent supply centers do not count for Build 3 Supply Centers.",
-				"3 new Rationed Event cards to the reserve.",
-				"Turning Point #1 to the Game End area: when any city reaches population 0, open door 50."
+				"Door 34: 3 Permanent Supply Center stickers (3 PU each).",
+				"3 new Rationed Events to the reserve: Hidden Stockpile, It Worked the First Time, Extended Time (+3 actions)."
 			],
 			"removes": [],
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"order": 7,
@@ -352,25 +510,28 @@
 				"kind": "other",
 				"detail": "Turning Point #1 resolves the first time a city is at population 0 at game end."
 			},
-			"source": "Door 50; rule sticker A; board sticker on area 12",
+			"source": "Doors A, 12 (which open door 50 → doors F, 14)",
 			"adds": [
 				"Forsaken cities (population 0): only Drive/Ferry is allowed there, no free actions. Its Infection card, whenever drawn, goes to the Game End area and a replacement is drawn. It does not count toward production units. Restoring it to population 1 costs 2 production units.",
 				"Infested: every forsaken city gets a permanent infested marker. A character who starts a turn in an infested city is exposed, even after the population is restored.",
 				"Havens can drop to 0 population but never become forsaken."
 			],
 			"removes": [],
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"order": 8,
-			"trigger": { "kind": "month-start", "detail": "March setup." },
+			"trigger": {
+				"kind": "month-start",
+				"detail": "March setup."
+			},
 			"source": "Legacy cards 03-01b to 03-03b",
 			"adds": [
 				"Objectives required rises to 3.",
 				"Objectives Complete 2 Searches and Access a Lost Haven (both optional)."
 			],
 			"removes": [],
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"order": 9,
@@ -378,95 +539,113 @@
 				"kind": "recon",
 				"detail": "Recon South America from Sao Paulo (any 4 yellow). Forced at the start of April if not done."
 			},
-			"source": "Package 5; doors 67, 23, 39 (and J, L if not yet opened)",
+			"source": "Package 5; doors 67, J, 23, L, 39",
 			"adds": [
-				"Map sticker: Bogota, Lima, Santiago, Buenos Aires. Buenos Aires connected at once.",
-				"Recon report pointing to lost labs in the south. Buenos Aires search leads to the Opal lab.",
-				"A printed sea route from Lima to the eastern Pacific lost haven.",
-				"Unrationed Event to the recon player: move Supply cubes from the reserve into the stockpile (one play report used it for 9 cubes)."
+				"Map sticker (door 67): Bogotá, Lima, Santiago, Buenos Aires. Buenos Aires connected at once by sea lane to São Paulo.",
+				"3 new character abilities added to pool: Facilitator (2), Foreman (2), Outrider (3).",
+				"Unrationed Event Strategic Reserves (P5-02b) to recon player: move up to 8 Supply cubes from reserve to stockpile for this game, then destroy (destroyed if forced)."
 			],
 			"removes": [],
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"order": 10,
-			"trigger": { "kind": "month-end", "detail": "End of the March game(s)." },
-			"source": "Doors K, 24, 47, E",
+			"trigger": {
+				"kind": "month-end",
+				"detail": "End of the March game(s)."
+			},
+			"source": "Legacy cards 03-06 to 03-11; doors K, 24, 47, E",
 			"adds": [
-				"Action Chart Sea Lane (rule sticker K): at a port, spend 2 Supply cubes to draw a sea lane to another port. It may curve, but may not cross land, unexplored area or another sea lane, and may cross at most one red region line. Connecting a city moves its cards as for supply lines.",
-				"Setup step 5 Stretched Too Thin (rule sticker E): count City cards in the Player deck. Up to 36: 5 Epidemics; 37-44: 6; 45-51: 7; 52-57: 8; 58-62: 9; 63 or more: 10. Make that many piles in step 7.",
-				"New scars."
+				"Action Chart Sea Lane (doors K, 24): spend 2 Supply cubes at a port to draw a sea lane to another port (max 1 red region line).",
+				"Setup step 5 Stretched Too Thin (door E) + 5 extra Epidemics (03-07 to 03-11): <=36:5, 37-44:6, 45-51:7, 52-57:8, 58-62:9, 63+:10 Epidemics.",
+				"Door 47: 3 scars added to pool (Missing the Sea, Embezzler, Disoriented)."
 			],
 			"removes": ["Fixed 5-Epidemic setup"],
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"order": 11,
 			"trigger": {
-				"kind": "search",
-				"detail": "Sea search on Los Angeles or San Francisco (or reaching it via Lima): the eastern Pacific lost haven. First pawn to enter names it and opens its door (60 per one source)."
+				"kind": "arrival",
+				"detail": "First pawn arrival at the Eastern Pacific lost haven (door 60, revealed by sea search in Los Angeles, San Francisco, or Lima, or forced in May by 05-01)."
 			},
-			"source": "Door 60 (inferred)",
+			"source": "Door 60 → Package 6",
 			"adds": [
-				"Haven added to the grid as a production site.",
-				"Per one report, a +15 Supply cube bonus to the stockpile at every setup from then on."
+				"Eastern Pacific haven named and added to grid (pop 3).",
+				"Package 6: 15 new physical Supply cubes added immediately to stockpile (51 total in box), Area 10 +15 marker, Rule B (Hidden Supply Cache).",
+				"Free action Inoculate (Rule I): store a matching City or Infection discard in Package 6 (max 30 each).",
+				"3 Portable Antiviral Lab cards (1 to arriving player hand, 2 to discard; permanent Player cards: discard while Making Supplies for +3 Supply cubes)."
 			],
 			"removes": [],
-			"confidence": "inferred"
+			"confidence": "verified"
 		},
 		{
 			"order": 12,
-			"trigger": { "kind": "search", "detail": "Land search on the Buenos Aires City card finds the Opal lab." },
-			"source": "Package 6",
+			"trigger": {
+				"kind": "search",
+				"detail": "Land search on Buenos Aires (P5-03b) discovers OPAL lab."
+			},
+			"source": "Doors 18 and 20 (→ doors 61, 30, 13 if sealed)",
 			"adds": [
-				"Free action Inoculate: in your city, take one Player or Infection card of that city from its discard pile and put it into Package 6 (out of play). Package 6 holds at most 30 Player and 30 Infection cards. Hollow Men Gather cards may not go there.",
-				"Hidden supply cache sticker: +15 Supply cubes to the stockpile at once and at every later setup.",
-				"3 copies of a Rationed Event: when doing Make Supplies, discard it to take 3 more Supply cubes onto your character.",
-				"A new character whose Make Supplies takes cubes from the reserve instead of the stockpile.",
-				"Lab coordinates card pointing at Lake Baikal and the other labs.",
-				"Lab marker for scoring (25 points per lab on the board)."
+				"Door 18: Immunologist character (Buenos Aires, age 37; Make Supplies may take cubes from reserve).",
+				"Door 20 (You've Found Us): opens doors 61 (Lake Baikal), 30 (4 Lab markers), and 13 (Area 13 Breakthroughs: OPAL gives +1 cube on Make Supplies in a haven or supply center)."
 			],
 			"removes": [],
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"order": 13,
-			"trigger": { "kind": "month-end", "detail": "End of April." },
-			"source": "Door 42",
-			"adds": ["New Infection card improvements available to buy."],
+			"trigger": {
+				"kind": "month-end",
+				"detail": "End of April."
+			},
+			"source": "Legacy 04-03; door 42",
+			"adds": ["Door 42: 2 Broken Link Infection card improvements (1 PU each)."],
 			"removes": [],
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"order": 14,
 			"trigger": {
 				"kind": "recon",
-				"detail": "Recon Europe from London (4 different blue cities). No forced date was recorded."
+				"detail": "Recon Europe from London (4 unique blue). Forced at June setup (06-01), destroying Relocation and opening door 21 (permanently destroys Frankfurt)."
 			},
 			"source": "Package 4; door 64",
 			"adds": [
-				"Map sticker: Paris, Frankfurt, St. Petersburg, Moscow. Paris connected at once.",
-				"Action Shuttle Flight: move from a haven or supply center on the grid to any other haven or supply center on the grid.",
-				"Unrationed Event to the recon player. Its effect is not legible in any source."
+				"Map sticker (door 64): Paris, Frankfurt, St. Petersburg, Moscow. Paris connected at once from London.",
+				"Action Shuttle Flight (Rule H): move between any two havens/supply centers.",
+				"Unrationed Event Relocation (P4-02b): destroy up to 3 copies of one city in Infection discard (playable between Epidemic steps 2-3), then destroy."
 			],
 			"removes": [],
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"order": 15,
-			"trigger": { "kind": "month-end", "detail": "End of May." },
-			"source": "Legacy cards 05-xxx; 2 doors",
-			"adds": ["New character ability stickers.", "More Permanent Supply Center stickers."],
+			"trigger": {
+				"kind": "month-end",
+				"detail": "End of May."
+			},
+			"source": "Legacy 05-03; doors 31, 36",
+			"adds": [
+				"Door 31: 3 character abilities (Lookout 2, Scout 2, Smuggler 1).",
+				"Door 36: 3 more Permanent Supply Center stickers (3 PU each; 6 total with door 34)."
+			],
 			"removes": [],
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"order": 16,
-			"trigger": { "kind": "month-end", "detail": "End of June." },
-			"source": "Legacy cards 06-xxx; 2 doors",
-			"adds": ["2 new job stickers for creating new characters.", "2 new Rationed Event cards."],
+			"trigger": {
+				"kind": "month-end",
+				"detail": "End of June."
+			},
+			"source": "Legacy 06-03 to 06-05; doors 44, 49",
+			"adds": [
+				"Doors 44 & 49: create Sanitation Officer and Captain characters.",
+				"2 new Rationed Events: Inoculation Unit (06-04), Expeditionary Voyage (06-05)."
+			],
 			"removes": [],
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"order": 17,
@@ -474,35 +653,38 @@
 				"kind": "recon",
 				"detail": "Recon Africa from Lagos (5 different yellow cities). Forced at the start of July if not done."
 			},
-			"source": "Package 7; door 57",
+			"source": "Package 7; doors 57, F, 14",
 			"adds": [
-				"Map sticker: Kinshasa, Khartoum, Dar es Salaam, Antananarivo, Johannesburg. Kinshasa connected at once. Kinshasa, Khartoum and Dar es Salaam are printed infested.",
-				"6 satellite tower pieces.",
-				"Action Build Satellite Tower (rule sticker O): spend 2 Supply cubes from your character to place a tower in your city; move one if none are left.",
-				"Action Transmit: at a city with a satellite tower, give 1 card matching that city's color to any player anywhere.",
-				"Game end upgrade: Permanent Satellite Tower, 3 production units.",
-				"Unrationed Event to the recon player (destroyed if forced)."
+				"Map sticker (door 57): Kinshasa, Khartoum, Dar es Salaam, Antananarivo, Johannesburg. Kinshasa connected at once from Lagos. Kinshasa, Khartoum, Dar es Salaam start infested.",
+				"6 satellite tower miniatures; Build Satellite Tower & Transmit (Rule O); 4 Permanent Satellite Tower stickers (3 PU each).",
+				"Unrationed Event TOPAZ Experimental Vaccine (P7-02b): discard 1 Epidemic without effect, then destroy."
 			],
 			"removes": [],
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"order": 18,
-			"trigger": { "kind": "month-start", "detail": "July setup." },
+			"trigger": {
+				"kind": "month-start",
+				"detail": "July setup."
+			},
 			"source": "Legacy cards 07-xxx",
 			"adds": ["Objective Triangulate Signals (optional)."],
 			"removes": [],
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"order": 19,
-			"trigger": { "kind": "objective-complete", "detail": "Triangulate Signals completed." },
+			"trigger": {
+				"kind": "objective-complete",
+				"detail": "Triangulate Signals completed."
+			},
 			"source": "Door 35",
 			"adds": [
 				"Hint naming three scanner frequencies worth monitoring (9.2, 9.31, 11.88). The objective is destroyed."
 			],
 			"removes": ["Triangulate Signals objective"],
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"order": 20,
@@ -512,53 +694,63 @@
 			},
 			"source": "Package 2; doors 62, 53, F, 14",
 			"adds": [
-				"Map sticker: Baghdad, Riyadh, Tehran, Delhi, New Mumbai, Kolkata. Baghdad connected at once. Baghdad, Delhi, New Mumbai and Kolkata are printed infested.",
-				"4 Hollow Men Gather cards into the Infection discard pile, and Hollow Men figures.",
-				"Hollow Men Gather (rule sticker S): when drawn, keep drawing until an Infection card with a city; put exactly 1 Hollow Men figure there instead of infecting it. No cube removed, no Plague cube, no incident, improvements do not apply. If the city already has 3 figures, reduce its population by 1 instead.",
-				"Rule sticker T: Gather cards do not count toward the infection rate. A Gather card drawn as the bottom card of an Epidemic is discarded without effect.",
-				"Exposure (rule sticker G): a character is exposed whenever its pawn leaves a location with 1 or more Hollow Men, by any means. Sail and Charter Boat do not enter or leave intermediate ports.",
-				"Population (rule sticker W, game end step c): a location with 1 or more Hollow Men loses 1 population; Plague and Hollow Men together still lose only 1.",
-				"Setup (rule sticker C): put all Hollow Men Gather cards into the Infection discard pile at setup, so they enter the deck at the first Epidemic.",
-				"Unrationed Event to the recon player (destroyed if forced)."
+				"Map sticker (door 62): Baghdad, Riyadh, Tehran, Delhi, New Mumbai, Kolkata. Baghdad connected at once from Cairo. Baghdad, Delhi, New Mumbai, Kolkata start infested.",
+				"Door 53: Kolkata recon placeholder sticker.",
+				"24 Hollow Men miniatures, 4 Hollow Men Gather cards to Infection discard, Rules C, G, S, T, W and Areas 15, 16.",
+				"Unrationed Event Renewal (P2-02b): place an ability worth <=2 PU on a character in play (may cover a scar), then destroy."
 			],
 			"removes": [],
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"order": 21,
-			"trigger": { "kind": "month-start", "detail": "August setup." },
-			"source": "Legacy cards 08-xxx; door M",
+			"trigger": {
+				"kind": "month-start",
+				"detail": "August setup."
+			},
+			"source": "Legacy 08-01 to 08-04; doors M, 25",
 			"adds": [
-				"Action Monitor (rule sticker M): at a city with a satellite tower, draw the top 4 Player cards. Do not resolve Epidemics. Discard all 4 in any order. Scratch 1 Frequency Scanner box and resolve it. When all boxes are scratched, Monitor is gone.",
-				"Frequency Scanner card: 10 boxes (8.24, 8.81, 9.1, 9.2, 9.31, 9.58, 9.75, 10.31, 10.57, 11.88). Each box reveals a dossier door to open, or take 1 or 2 cards from the top of the Player discard pile into your hand (never Epidemics). One box opens door 52: the Kolkata recon spot sticker.",
-				"One-time: spend up to 2 production units on character abilities immediately."
+				"Immediate free upgrade (08-02a): spend up to 3 free production units on character abilities before setup step 3.",
+				"Action Monitor (doors M, 25) and Frequency Scanner (08-04): 9.2 opens door 52 (Kolkata recon 5 unique black → Package 3), 11.88 opens door 43 (Decryption Key, 1 PU), other 8 boxes take 1-2 non-Epidemic cards from top of Player discard."
 			],
 			"removes": [],
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"order": 22,
-			"trigger": { "kind": "month-end", "detail": "End of August." },
-			"source": "2 doors",
-			"adds": ["New scars.", "New character abilities."],
+			"trigger": {
+				"kind": "month-end",
+				"detail": "End of August."
+			},
+			"source": "Legacy 08-05; doors 29, 48",
+			"adds": [
+				"Door 29: 3 character abilities (Investigator 3, Soldier 2, Navigator 1).",
+				"Door 48: 3 scars (Susceptible, Fear of Needles, Fear of Flying)."
+			],
 			"removes": [],
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"order": 23,
-			"trigger": { "kind": "search", "detail": "Search Johannesburg finds the Jade lab." },
-			"source": "Search box reward",
+			"trigger": {
+				"kind": "search",
+				"detail": "Search Johannesburg (P7-11b) discovers JADE lab."
+			},
+			"source": "Doors 46 and 20 (→ doors 61, 30, 13 if sealed)",
 			"adds": [
-				"A new character who can, once per turn as a free action, destroy the Infection card in the discard pile that matches their city.",
-				"Epidemic Infect step removes only 1 Supply cube instead of all (one report). Lab counts for scoring."
+				"Door 46: Scientist character (Johannesburg, age 35; once/turn free action: destroy Infection discard matching current city).",
+				"Door 20 → Door 13 Breakthroughs: JADE caps Epidemic step 2 supply removal at 1 cube (instead of all)."
 			],
 			"removes": [],
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"order": 24,
-			"trigger": { "kind": "month-start", "detail": "September setup." },
-			"source": "Legacy cards 09-xxx; rule stickers R, D, U",
+			"trigger": {
+				"kind": "month-start",
+				"detail": "September setup."
+			},
+			"source": "Legacy 09-03 to 09-04; doors R, 55, D, Y, U",
 			"adds": [
 				"Objective Recon East Asia (mandatory).",
 				"Epidemic Infect step (rule sticker R, also a sticker on each Epidemic card): draw a random Infection card from Package 6 instead of the bottom card, remove all Supply cubes from that city, then put the card in the Infection discard pile so it rejoins the deck at Intensify. If Package 6 has no Infection cards, use the bottom card as before.",
@@ -566,7 +758,7 @@
 				"Loss condition (rule sticker U): you lose if you must place a Hollow Men figure and none are left."
 			],
 			"removes": ["Recon 1 Unknown Region objective", "Bottom-card Epidemic infect"],
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"order": 25,
@@ -574,109 +766,123 @@
 				"kind": "other",
 				"detail": "Reaching the Indian Ocean lost haven (charted from Dar es Salaam, New Mumbai or Antananarivo). Forced at the start of September if door 65 is unopened."
 			},
-			"source": "Door 65",
-			"adds": ["Haven added to the grid.", "+15 Supply cubes to the stockpile at once and at every later setup."],
+			"source": "Door 65 → Door 11",
+			"adds": [
+				"Indian Ocean haven named and added to grid (pop 3).",
+				"Door 11: active player gains 4 actions, moves up to 15 reserve cubes to stockpile, and places Area 11 +15 marker for future setups."
+			],
 			"removes": [],
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"order": 26,
 			"trigger": {
-				"kind": "other",
-				"detail": "Legacy deck in September (one report ties it to Khartoum going forsaken)."
+				"kind": "month-end",
+				"detail": "End of first September game (09-05 Pause)."
 			},
-			"source": "Door 33",
+			"source": "Legacy 09-05 to 09-06; door 33",
 			"adds": [
-				"Rationed Event: the current player draws the top 4 Player cards, keeps all City cards and discards the rest, Epidemics included without effect."
+				"Door 33: 1 Broken Link + 1 Lockdown Infection card improvement (1 PU each).",
+				"Rationed Event Cautious Approach (09-06): draw next 4 Player cards, keep City cards, discard rest without effect."
 			],
 			"removes": [],
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"order": 27,
 			"trigger": {
 				"kind": "recon",
-				"detail": "Recon East Asia from Kolkata (black cards of different cities). Forced at the start of October if not done."
+				"detail": "Recon East Asia from Kolkata (5 unique black at SC, via door 52). Forced at October setup (10-01), scarring 1 chosen character and destroying Biodome Prototype."
 			},
 			"source": "Package 3; doors 56, 63",
 			"adds": [
-				"Map stickers: Bangkok, Ho Chi Minh City, Manila, Jakarta, Seoul, Tokyo, Osaka, Shanghai, Hong Kong. Jakarta connected at once. Manila, Tokyo, Osaka and Shanghai are printed infested. Utopia is shown behind a wall and cannot be accessed until the Hollow Men defect.",
-				"Recon spot at Jakarta: supply center there, discard any 2 red cards, open door 59.",
-				"4 more Hollow Men Gather cards into the Infection discard pile.",
-				"Action Build Shelter (rule sticker N): discard a card of your city's color to place a shelter there (move one if none are left). Characters in a city with a shelter, or leaving it, are never exposed. A city with a shelter loses no population at game end and does not lose population for a 4th Hollow Man.",
-				"Rule sticker V (game end step a): skip population loss steps b and c for cities with a shelter.",
-				"New Infection card improvements.",
-				"An Incomplete Plan card (kept in the reserve).",
-				"Unrationed Event to the recon player: place up to 3 shelters for free (destroyed if forced)."
+				"Map stickers (doors 56, 63): 9 red port cities at pop 1 (Jakarta auto-connects from Kolkata by sea; Manila, Shanghai, Osaka, Tokyo start infested). Jakarta recon: 2 red at SC → door 59.",
+				"6 shelter miniatures, Build Shelter (Rule N), Rule V (sheltered cities skip Game End steps b & c), 5 Permanent Shelter stickers (2 PU), 2 Rebirth Infection improvements (1 PU, pop >= 6 skips normal infection).",
+				"4 more Hollow Men Gather cards to Infection discard; An Incomplete Plan (P3-03); Unrationed Event Biodome Prototype (place up to 3 shelters, destroy)."
 			],
 			"removes": [],
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"order": 28,
-			"trigger": { "kind": "month-start", "detail": "October setup." },
-			"source": "Legacy cards 10-01b to 10-05b; doors P, 37",
+			"trigger": {
+				"kind": "month-start",
+				"detail": "October setup."
+			},
+			"source": "Legacy 10-01 to 10-07; doors P, 37 (setup) and 28, 45 (end of first Oct game)",
 			"adds": [
-				"Objective Get Hollow Men to Defect (mandatory, carries over to the second October game). 2 required.",
-				"Action Broadcast Misinformation (rule sticker P): at a city with a satellite tower, move a Hollow Men figure to a location adjacent to it. Your city's color must match the color of the figure's city. You may not move a figure into a location that already has 3.",
-				"Turning Point #3 to the Game End area: if at least 1 Hollow Men figure is on 3 different havens at game end, open door 17 and destroy the turning point.",
-				"Game end upgrade: Permanent Shelter, 2 production units each (5 stickers). During setup, place a shelter in each marked city."
+				"Objective Get Hollow Men to Defect (10-04, mandatory, carries over). 2 required.",
+				"Action Broadcast Misinformation (doors P, 37) and Turning Point #3 (10-05 → door 17).",
+				"End of first Oct game (10-06): door 28 (3 abilities: Misinformation Specialist 2, Saboteur 2, Rehab Nurse 1), door 45 (2 Local Operatives City improvements, 1 PU each), Rationed Event Mobile Shelters (10-07)."
 			],
 			"removes": ["Recon East Asia", "Connect 2 New Cities", "Complete 2 Searches"],
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"order": 29,
-			"trigger": { "kind": "objective-complete", "detail": "Hollow Men defect (Turning Point #3)." },
-			"source": "Door 17; door 58 (wall gap sticker)",
-			"adds": [
-				"Board sticker opening a gap in the wall: Utopia becomes reachable once The Plan is executed (Package 8).",
-				"A character ability that removes Hollow Men figures."
-			],
+			"trigger": {
+				"kind": "objective-complete",
+				"detail": "Hollow Men defect at Game End (Turning Point #3, 10-05) or forced at November setup (11-01, scarring 2 chosen characters)."
+			},
+			"source": "Door 17 → door 58",
+			"adds": ["Door 58 wall gap sticker: Utopia can be opened via Package 8 once The Plan is executed."],
 			"removes": ["Turning Point #3"],
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"order": 30,
-			"trigger": { "kind": "game-loss", "detail": "Turning Point #2: four games lost in a row." },
+			"trigger": {
+				"kind": "game-loss",
+				"detail": "Turning Point #2: four games lost in a row."
+			},
 			"source": "Turning Point #2",
-			"adds": ["Bonus Supply cubes added to the stockpile for the next few games (one report: 10 per game)."],
+			"adds": [
+				"Scratch box on Turning Point #2 (02-06): up to 3 games during setup step 1, cross out a 10 to move up to 10 reserve cubes into stockpile; destroy after 3rd use."
+			],
 			"removes": [],
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"order": 31,
-			"trigger": { "kind": "recon", "detail": "Recon from Jakarta (any 2 red at a supply center)." },
+			"trigger": {
+				"kind": "recon",
+				"detail": "Recon from Jakarta (any 2 red at a supply center)."
+			},
 			"source": "Door 59",
 			"adds": [
-				"Ruined Coral Sea haven placed on the board and joined to the grid by sea lane from Jakarta. The haven has its own recon spot (red cards) leading to New Zealand."
+				"Ruined Coral Sea haven (pop 1) placed and joined by sea lane from Jakarta. Recon here: any 2 red cards (duplicates allowed, no SC needed) → door 19."
 			],
 			"removes": [],
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"order": 32,
-			"trigger": { "kind": "recon", "detail": "Recon from the Coral Sea haven with red cards." },
-			"source": "Door 19",
+			"trigger": {
+				"kind": "recon",
+				"detail": "Recon from Coral Sea haven (any 2 red cards, no SC needed)."
+			},
+			"source": "Door 19 → doors 51, 41, 61, 13, 30",
 			"adds": [
-				"Wellington added to the map and grid. It holds the Topaz lab.",
-				"Topaz ability: when an Infection card would remove a Supply cube from a city, any player may discard a City card of that city's color to prevent the removal (also during an Epidemic). Not usable if the city has no cube.",
-				"A new character whose ability places a shelter in their location.",
-				"Lab tracking stickers for scoring."
+				"Door 51: Wellington (blue port, pop 2, sea lane from Coral Sea haven, no cards) holds TOPAZ lab.",
+				"Door 41: Vector Control Expert character (Wellington, age 42; action: add a Shelter to your location with no card).",
+				"Doors 61, 30, 13 (if still sealed): TOPAZ breakthrough lets any player discard a matching-color Player card to prevent 1 cube removal from a just-drawn Infection card."
 			],
 			"removes": [],
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"order": 33,
-			"trigger": { "kind": "month-start", "detail": "November setup." },
+			"trigger": {
+				"kind": "month-start",
+				"detail": "November setup."
+			},
 			"source": "Legacy cards 11-01 to 11-05b",
 			"adds": [
 				"Objective Complete the Plan (mandatory, only objective, progress carries over).",
 				"The Plan card: four Shanghai recons without a supply center: 5 different red, 4 different black, 3 different yellow, 3 different blue. When all four boxes are checked, open Package 8 and destroy the card."
 			],
 			"removes": ["Build 3 Supply Centers", "Get Hollow Men to Defect", "An Incomplete Plan"],
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"order": 34,
@@ -684,27 +890,30 @@
 				"kind": "objective-complete",
 				"detail": "The Plan completed (or Package 8 forced at December setup)."
 			},
-			"source": "Package 8",
+			"source": "Package 8; door 61",
 			"adds": [
-				"Utopia joins the grid (population 8, printed infested).",
-				"8 Utopia Infection cards: shuffled into the Infection deck if earned, put in the Infection discard pile if forced.",
-				"Event card reward (lost if forced). Sources disagree on whether it is rationed or unrationed."
+				"Utopia joins the grid (red, inland, pop 8, printed supply line from Shanghai, cannot be improved).",
+				"8 Utopia Infection cards + 4 Hollow Men Gather cards placed in Infection discard; Utopia Player card (Companion Informant) to Player discard.",
+				"Unrationed Event Riot Control (P8-02b) to Player discard (destroyed if forced in December 12-01).",
+				"Door 61 (Lake Baikal) opened if sealed; overlay triggers door 22 on first arrival at Lake Baikal."
 			],
 			"removes": [],
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"order": 35,
-			"trigger": { "kind": "month-start", "detail": "December setup." },
-			"source": "Legacy cards 12-xxx",
+			"trigger": {
+				"kind": "month-start",
+				"detail": "December setup."
+			},
+			"source": "Legacy 12-01 to 12-04; Door 22 (on arrival at Lake Baikal) → Q, 38, 27, 32",
 			"adds": [
-				"Objective Deliver the Sample (mandatory, only objective).",
-				"Action Self-Infect: while in the Pearl lab at Lake Baikal, scratch exposure boxes until a scar or skull appears. On a skull the character dies. On a scar, add the Carrier scar instead of a normal scar. The Carrier scar covers 2 slots and should not cover another scar.",
-				"Carrier scar: the pawn moves only by Drive/Ferry; to enter a city it must discard a card of that city's color; at game end, win or lose, the character is destroyed (dies).",
-				"Lake Baikal becomes connectable to the grid by supply line from Utopia."
+				"Objective Deliver the Sample (12-04, mandatory, only objective).",
+				"First arrival at Lake Baikal opens door 22 (PEARL) → doors Q, 38 (Self-Infect action) and doors 27, 32 (4 total double-slot Carrier scars).",
+				"Carrier scar: Drive/Ferry only; discard matching-color card to enter a city; character dies at Game End win or lose."
 			],
 			"removes": ["The Plan"],
-			"confidence": "community"
+			"confidence": "verified"
 		},
 		{
 			"order": 36,
@@ -712,15 +921,17 @@
 				"kind": "game-win",
 				"detail": "End of December, win or lose; Legacy deck branches on whether the sample was delivered."
 			},
-			"source": "Legacy card 12-08b (The Final Reckoning)",
-			"adds": ["Final scoring (see campaignEnd)."],
+			"source": "Legacy cards 12-05 to 12-13",
+			"adds": [
+				"Final scoring (12-08) and 5 score tiers per outcome branch (12-09..12-12: 851+, 701-850, 551-700, 401-550, <=400)."
+			],
 			"removes": [],
-			"confidence": "community"
+			"confidence": "verified"
 		}
 	],
 	"campaignEnd": {
 		"finalObjective": "Deliver the Sample: a character who self-infected at the Pearl lab (Lake Baikal) is in Johannesburg while Johannesburg has a supply center.",
-		"scoring": "Games won: 50 points per game won in the first half of a month, 30 per game won in the second half. Population: + the total population of all locations on the grid. Bonuses: +100 for delivering the sample, +25 for each lab marker on the board. Subtotal = games won + population + bonuses. Penalties: -5 for each forsaken city on the grid. Grand total = subtotal - penalties.",
-		"confidence": "community"
+		"scoring": "Games won: 50 points per early-half win, 30 points per late-half win. Population: +1 per population point of all locations on the grid. Bonuses: +100 for delivering the sample, +25 per lab marker on the board. Penalties: -5 per forsaken city on the grid. Tiers (both Delivered and Did Not Deliver): 851+, 701-850, 551-700, 401-550, <=400.",
+		"confidence": "verified"
 	}
 }

@@ -1,0 +1,103 @@
+{
+	"door": "57",
+	"folder": 5,
+	"id": "door-57",
+	"guid": "fcc2f1",
+	"frontImage": "dossiers/folder-5/door-57/front.jpg",
+	"frontText": "Navy 57 centered on a yellow door card. Dashed cut-line border. No other printed text.",
+	"items": [
+		{
+			"id": "item-01",
+			"image": "dossiers/folder-5/door-57/item-01.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "map-sticker",
+			"title": "Africa",
+			"placementTarget": "Board, over sub-Saharan Africa and Madagascar.",
+			"text": null,
+			"mapDetails": {
+				"cities": [
+					{
+						"name": "Khartoum",
+						"color": "yellow",
+						"population": 1,
+						"port": false,
+						"infested": true,
+						"lab": null,
+						"marker": "inland-x",
+						"lat": 15.6,
+						"lon": 32.5,
+						"graticule": "North of the printed 0° line. The printed 20°E meridian passes through the name, west of the disc."
+					},
+					{
+						"name": "Kinshasa",
+						"color": "yellow",
+						"population": 1,
+						"port": false,
+						"infested": true,
+						"lab": null,
+						"marker": "inland-x",
+						"lat": -4.3,
+						"lon": 15.3,
+						"graticule": "Just south of the printed 0° label on the west coast, west of the 20°E meridian."
+					},
+					{
+						"name": "Dar es Salaam",
+						"color": "yellow",
+						"population": 2,
+						"port": true,
+						"infested": true,
+						"lab": null,
+						"marker": "anchor",
+						"lat": -6.8,
+						"lon": 39.3,
+						"graticule": "East coast, just south of the printed 0° tick. Population 2 square is inland, west of the disc."
+					},
+					{
+						"name": "Antananarivo",
+						"color": "black",
+						"population": 2,
+						"port": true,
+						"infested": false,
+						"lab": null,
+						"marker": "anchor",
+						"lat": -18.9,
+						"lon": 47.5,
+						"graticule": "On Madagascar, near the printed 20°S line. Population 2 square is in the channel west of the disc. No rat."
+					},
+					{
+						"name": "Johannesburg",
+						"color": "blue",
+						"population": 2,
+						"port": false,
+						"infested": false,
+						"lab": null,
+						"marker": "inland-x",
+						"lat": -26.2,
+						"lon": 28.0,
+						"graticule": "South of the printed 20°S line and just east of the printed 20°E meridian. No rat."
+					}
+				],
+				"havens": [],
+				"printedRoutes": [
+					{
+						"from": "off-sticker west (Lagos)",
+						"to": "Kinshasa",
+						"type": "supply_line",
+						"notes": "A black land line enters from the west edge of the sticker and ends in the Kinshasa disc. Lagos is the starting-board city in that direction; its name is not printed on this sticker."
+					}
+				],
+				"reconRoutes": [],
+				"redRegionLines": [
+					"A short vertical red line leaves the southern tip of Africa and runs south into the ocean along the printed 20°E meridian."
+				],
+				"specialAreas": []
+			},
+			"mechanics": {
+				"addsCities": ["Khartoum", "Kinshasa", "Dar es Salaam", "Antananarivo", "Johannesburg"],
+				"notes": "Khartoum, Kinshasa, and Dar es Salaam are yellow and printed infested. Antananarivo is a black port. Johannesburg is blue and inland. Only Dar es Salaam and Antananarivo are ports. The only printed route is the supply line into Kinshasa from the west edge."
+			}
+		}
+	],
+	"summary": "Africa map. Khartoum and Kinshasa are yellow inland population 1, both infested. Dar es Salaam is a yellow port at population 2 and infested. Antananarivo is a black port at population 2. Johannesburg is blue, inland, population 2. A supply line runs from the west edge into Kinshasa. A red region line drops south from the Cape along 20°E. No recon box."
+}

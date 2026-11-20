@@ -1,0 +1,15 @@
+{
+	"id": "scar-06",
+	"name": "Obsessed",
+	"category": "scar",
+	"costProductionUnits": null,
+	"copies": 1,
+	"image": "scar-06_obsessed.jpg",
+	"text": "Obsessed: You must end your turn with an odd\nnumber of Player cards. If you end your turn with an\neven number, discard 1.",
+	"mechanics": {
+		"timing": "passive",
+		"trigger": "When you end your turn",
+		"effect": "You must end your turn with an odd number of Player cards. If the number is even, discard 1.",
+		"restrictions": ["Must end the turn with an odd number of Player cards"]
+	}
+}

@@ -1,0 +1,23 @@
+{
+	"id": "sticker-01",
+	"package": 1,
+	"guid": "76de1b",
+	"printedCode": null,
+	"name": "Weak",
+	"category": "scar",
+	"placementTarget": "Character card",
+	"costProductionUnits": null,
+	"copies": 1,
+	"image": "sticker-01.jpg",
+	"summary": "Weak: you can hold a maximum of 3 Supply cubes on your Character card. Return excess cubes to the stockpile.",
+	"mechanics": {
+		"timing": "Permanent while the sticker is on the character. The sticker does not print when it is gained.",
+		"effect": "The character can hold at most 3 Supply cubes. Return any excess cubes to the stockpile.",
+		"restrictions": [
+			"The cap is 3 Supply cubes on the Character card",
+			"Excess cubes return to the stockpile",
+			"No production cost is printed"
+		],
+		"opensDoors": []
+	}
+}

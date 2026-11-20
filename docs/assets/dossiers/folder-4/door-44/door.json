@@ -1,0 +1,69 @@
+{
+	"door": "44",
+	"folder": 4,
+	"frontImage": "dossiers/folder-4/door-44/front.jpg",
+	"frontText": "44",
+	"items": [
+		{
+			"id": "item-01",
+			"image": "dossiers/folder-4/door-44/item-01.jpg",
+			"count": 1,
+			"printedCode": "44",
+			"category": "profile",
+			"title": "Sanitation Officer flavor",
+			"placementTarget": "Character card",
+			"costProductionUnits": null,
+			"text": "Processing and recycling the waste and trash of the havens\nis vital for a closed ecosystem.",
+			"mapDetails": null,
+			"mechanics": {
+				"timing": "setup",
+				"trigger": null,
+				"effect": "Flavor line for the new character. No home and no age are printed.",
+				"restrictions": [],
+				"home": null,
+				"age": null,
+				"sourceGuids": ["0dd4b4"]
+			}
+		},
+		{
+			"id": "item-02",
+			"image": "dossiers/folder-4/door-44/item-02.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "occupation",
+			"title": "Sanitation Officer",
+			"placementTarget": "Character card",
+			"costProductionUnits": null,
+			"text": "Sanitation Officer. As a free action, discard 2 Player\ncards to take a City or Produce Supplies card from\nthe Player discard pile.",
+			"mapDetails": null,
+			"mechanics": {
+				"timing": "free_action",
+				"trigger": null,
+				"effect": "Discard 2 Player cards to take a City or Produce Supplies card from the Player discard pile.",
+				"restrictions": ["Discard exactly 2 Player cards", "The card taken is a City card or a Produce Supplies card"],
+				"sourceGuids": ["e7ecf0"]
+			}
+		},
+		{
+			"id": "item-03",
+			"image": "dossiers/folder-4/door-44/item-03.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "instruction",
+			"title": "Create a new character",
+			"placementTarget": null,
+			"costProductionUnits": null,
+			"text": "Immediately create a new character using this job.\nAdd that character to the pool of available characters.",
+			"mapDetails": null,
+			"mechanics": {
+				"timing": "immediate",
+				"trigger": null,
+				"effect": "Immediately create a new character with the Sanitation Officer job and add that character to the pool of available characters. There is no portrait.",
+				"restrictions": [],
+				"sourceGuids": ["cd7f70"]
+			}
+		}
+	],
+	"bags": [],
+	"summary": "Create a new character with the Sanitation Officer job and add it to the available pool. No portrait, home, or age. Free action: discard 2 Player cards to take a City or Produce Supplies card from the Player discard pile. Corner badge on the flavor strip is 44."
+}

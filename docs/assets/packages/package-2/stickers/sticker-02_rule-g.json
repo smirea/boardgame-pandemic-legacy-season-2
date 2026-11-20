@@ -1,0 +1,22 @@
+{
+	"id": "sticker-02_rule-g",
+	"package": 2,
+	"printedCode": "G",
+	"name": "Cornered!",
+	"category": "rule",
+	"placementTarget": "Rulebook page 10, rule sticker G, under Movement Actions and above Drive/Ferry.",
+	"costProductionUnits": null,
+	"copies": 1,
+	"image": "sticker-02_rule-g.jpg",
+	"summary": "Title CORNERED! Your character gets exposed when your pawn leaves a location containing 1 or more Hollow Men figures. The letter G is the rulebook slot. It is not printed on the sticker.",
+	"mechanics": {
+		"timing": "When your pawn leaves a location.",
+		"effect": "Leaving a location that contains 1 or more Hollow Men figures gives that character 1 exposure.",
+		"restrictions": [
+			"The trigger is leaving, not beginning a turn there.",
+			"One or more figures is enough. The sticker does not add a further exposure for each extra figure.",
+			"Area 15 repeats this sentence on the board legend."
+		],
+		"opensDoors": []
+	}
+}

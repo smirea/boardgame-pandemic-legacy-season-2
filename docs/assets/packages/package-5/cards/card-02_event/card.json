@@ -1,0 +1,36 @@
+{
+	"package": 5,
+	"index": 2,
+	"cardId": 10701,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P5-02b"
+	},
+	"title": "Strategic Reserves",
+	"category": "event",
+	"city": null,
+	"color": null,
+	"copies": 1,
+	"hasImprovementSlot": false,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"text": "Player deck back. No printed text."
+	},
+	"sideB": {
+		"text": "UNRATIONED EVENT\nSTRATEGIC RESERVES\n\nMove up to 8 Supply cubes from the reserve to the stockpile for use in this game.\n\nDestroy this card after use.\n\nPlay at any time. Not an action.\nP5-02b",
+		"searchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"opensDoors": [],
+		"rules": [
+			"Unrationed Event. Play at any time. Not an action.",
+			"Move up to 8 Supply cubes from the reserve to the stockpile. They are available only for this game.",
+			"Destroy this card after use."
+		],
+		"notes": "Given to a player when Package 5 is opened (P5-01b)."
+	}
+}

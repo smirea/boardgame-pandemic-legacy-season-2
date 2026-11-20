@@ -1,0 +1,58 @@
+{
+	"package": 7,
+	"index": 5,
+	"printedCodes": {
+		"sideA": null,
+		"sideB": "P7-05b"
+	},
+	"title": "Khartoum",
+	"category": "player-card",
+	"city": "Khartoum",
+	"color": "yellow",
+	"copies": 1,
+	"hasImprovementSlot": false,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"text": "Player card back. No text."
+	},
+	"sideB": {
+		"text": "KHARTOUM\n15°30'2.4\"N 32°33'36\"E\n\nSEARCH:\n[covered]\n\nThe bottom edge repeats KHARTOUM and 15°30'2.4\"N 32°33'36\"E upside down.",
+		"searchBoxes": [
+			{
+				"id": "search",
+				"label": "SEARCH:",
+				"initially": "covered",
+				"revealedInState": 2
+			}
+		]
+	},
+	"states": [
+		{
+			"state": 2,
+			"images": {
+				"sideA": "state-2-side-a.jpg",
+				"sideB": "state-2-side-b.jpg"
+			},
+			"revealedText": "SEARCH:\nPosters in abandoned broadcast facility talk of\nUtopia, which will keep mankind safe until the\nplague has passed. It was accepting petitions\nbefore its gates closed. Faded were not welcome.\n\nWe broadcast this information back to\nthe havens.\n\nYou may give 1 Player card in your hand to\nanother player.",
+			"effect": "You may give 1 Player card from your hand to another player. The card does not say to discard Khartoum, does not say the other player must be in your city, and does not name a limit such as once per turn."
+		}
+	],
+	"mechanics": {
+		"opensDoors": [],
+		"rules": [
+			"Yellow Player card for Khartoum. Not a port. No anchor on the compass.",
+			"One SEARCH box. State 2 is the scratched face. State side A is the unchanged player-card back.",
+			"Hand ability: you may give 1 Player card in your hand to another player."
+		],
+		"notes": [
+			"Card id 10704. Scratch state card id 10719.",
+			"Printed code P7-05b stays on the scratched face.",
+			"The coordinates are printed 15°30'2.4\"N 32°33'36\"E, including the decimal 2.4 seconds.",
+			"This is the only Khartoum Player card. The recon report sends it to the reserve with the other unused city cards.",
+			"The Utopia sentences are flavor. They do not open a door."
+		]
+	}
+}

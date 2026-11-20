@@ -1,0 +1,15 @@
+{
+	"id": "instructor",
+	"name": "Instructor",
+	"category": "occupation",
+	"costProductionUnits": null,
+	"copies": 1,
+	"image": "instructor.jpg",
+	"text": "Instructor: Once on your turn, as an action,\ngive any 1 Player card to a player in your location.",
+	"mechanics": {
+		"timing": "action",
+		"trigger": "Once on your turn",
+		"effect": "As an action, give any 1 Player card to a player in your location.",
+		"restrictions": ["Once on your turn", "The other player must be in your location"]
+	}
+}

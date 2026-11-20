@@ -1,0 +1,51 @@
+{
+	"id": "produce-supplies-03",
+	"cardId": 112,
+	"printedCode": null,
+	"title": "PRODUCE SUPPLIES",
+	"category": "produce_supplies",
+	"color": null,
+	"copies": 2,
+	"images": {
+		"front": "produce-supplies-03.jpg",
+		"back": "back.jpg"
+	},
+	"hasImprovementSlot": false,
+	"frontText": "PRODUCE SUPPLIES\nFor an action, do one of the following:\n• Local Production: at a haven or supply center, fill your current location to its population with Supply cubes.\nOR\n• System-Wide Production: at a haven or supply center, fill all havens and supply centers to their population with Supply cubes.\n• Then, check a box below.\nWhen all boxes are checked, destroy this card.",
+	"backText": null,
+	"states": [
+		{
+			"state": 1,
+			"cardId": 110,
+			"image": "produce-supplies-03-state-1.jpg",
+			"checkboxes": 1,
+			"checked": 0,
+			"description": "1 empty checkbox. None are marked.",
+			"text": "PRODUCE SUPPLIES\nFor an action, do one of the following:\n• Local Production: at a haven or supply center, fill your current location to its population with Supply cubes.\nOR\n• System-Wide Production: at a haven or supply center, fill all havens and supply centers to their population with Supply cubes.\n• Then, check the box below.\nWhen this box is checked, destroy this card."
+		},
+		{
+			"state": 2,
+			"cardId": 111,
+			"image": "produce-supplies-03-state-2.jpg",
+			"checkboxes": 2,
+			"checked": 0,
+			"description": "2 empty checkboxes. None are marked.",
+			"text": "PRODUCE SUPPLIES\nFor an action, do one of the following:\n• Local Production: at a haven or supply center, fill your current location to its population with Supply cubes.\nOR\n• System-Wide Production: at a haven or supply center, fill all havens and supply centers to their population with Supply cubes.\n• Then, check a box below.\nWhen all boxes are checked, destroy this card."
+		}
+	],
+	"mechanics": {
+		"timing": "An action.",
+		"effect": "PRODUCE SUPPLIES\nFor an action, do one of the following:\n• Local Production: at a haven or supply center, fill your current location to its population with Supply cubes.\nOR\n• System-Wide Production: at a haven or supply center, fill all havens and supply centers to their population with Supply cubes.\n• Then, check a box below.\nWhen all boxes are checked, destroy this card.",
+		"rules": [
+			"This copy starts on the 3-checkbox face (cardId 112).",
+			"Played as an action. Choose Local Production or System-Wide Production.",
+			"Local Production: at a haven or supply center, fill your current location to its population with Supply cubes.",
+			"System-Wide Production: at a haven or supply center, fill all havens and supply centers to their population with Supply cubes. The word all is italic.",
+			"OR is printed on a divider between the two options.",
+			"The check instruction is its own bullet after System-Wide Production.",
+			"The destroy line is a yellow footer.",
+			"Every checkbox on these scans is empty. The state images change how many boxes are printed, not which boxes are marked.",
+			"The 1-box, 2-box, and 3-box artworks are shared by cardId 110, 111, and 112. Each Produce Supplies object starts on a different artwork."
+		]
+	}
+}

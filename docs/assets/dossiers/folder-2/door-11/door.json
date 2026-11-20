@@ -1,0 +1,50 @@
+{
+	"door": "11",
+	"folder": 2,
+	"frontImage": "front.jpg",
+	"frontText": "11",
+	"items": [
+		{
+			"id": "item-01",
+			"image": "item-01.png",
+			"count": 1,
+			"printedCode": null,
+			"category": "board_overlay",
+			"title": "+15 stockpile reminder",
+			"placementTarget": "Area 11 on the game board",
+			"costProductionUnits": null,
+			"text": "+15",
+			"mechanics": {
+				"opensDoors": [],
+				"opensPackages": [],
+				"destroys": [],
+				"rules": ["During setup each month, add 15 more Supply cubes to the stockpile."],
+				"effect": "Permanent reminder on Area 11 to add 15 Supply cubes to the stockpile at the start of each month."
+			}
+		},
+		{
+			"id": "item-02",
+			"image": "item-02.jpg",
+			"count": 1,
+			"printedCode": "11",
+			"category": "report",
+			"title": "FIELD REPORT",
+			"placementTarget": null,
+			"costProductionUnits": null,
+			"text": "FIELD REPORT\nWe found a locked storage room containing supplies that will help us for the rest of the year. This has given us great hope.\nRenewed Hope\nThe current player gains 4 additional actions to do this turn.\nHidden Supply Cache\nImmediately take up to 15 cubes from the reserve and put them in the stockpile.\nPut this sticker on the game board onto Area 11 as a reminder to add 15 more Supply cubes to the stockpile during setup each month.",
+			"mechanics": {
+				"opensDoors": [],
+				"opensPackages": [],
+				"destroys": [],
+				"rules": [
+					"The current player gains 4 additional actions to do this turn.",
+					"Immediately take up to 15 cubes from the reserve and put them in the stockpile.",
+					"Put the +15 sticker on Area 11.",
+					"During setup each month, add 15 more Supply cubes to the stockpile."
+				],
+				"effect": "The current player gets 4 extra actions this turn and may move up to 15 reserve cubes into the stockpile. Area 11 then adds 15 Supply cubes to the stockpile every setup."
+			}
+		}
+	],
+	"summary": "Field report and a +15 marker for Area 11. The current player gains 4 actions and may move up to 15 reserve cubes into the stockpile. The marker makes every later setup add 15 Supply cubes. The card does not name a haven."
+}

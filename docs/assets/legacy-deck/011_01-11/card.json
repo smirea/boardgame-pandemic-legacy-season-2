@@ -1,0 +1,44 @@
+{
+	"sequence": 11,
+	"folder": "011_01-11",
+	"cardCode": "01-11",
+	"printedCodes": {
+		"sideA": "",
+		"sideB": "01-11b"
+	},
+	"title": "Extended Forecast",
+	"category": "rationed_event",
+	"month": "january",
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"stopOrPause": "NONE",
+		"header": "",
+		"trigger": "",
+		"text": "",
+		"footer": ""
+	},
+	"sideB": {
+		"header": "RATIONED EVENT",
+		"text": "EXTENDED FORECAST\n\nDraw, look at, and rearrange the top 8 cards of the Infection deck. Put them back on top of the Infection deck.\n\nPlay at any time. Not an action.",
+		"footer": "Play at any time. Not an action.",
+		"scratchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"whenRead": "Taken with the other new Rationed Events when 01-07 is read, at the end of the first January game. Kept in the reserve and added to the Rationed Event pool.",
+		"triggers": [],
+		"opensDoors": [],
+		"opensPackages": [],
+		"destroys": [],
+		"addsToPool": ["Extended Forecast (Rationed Event)"],
+		"rules": [
+			"Draw, look at, and rearrange the top 8 cards of the Infection deck. Put them back on top of the Infection deck.",
+			"Play at any time. Not an action.",
+			"Draw, look at, and rearrange the top 8 Infection cards, then put them back on top of the Infection deck."
+		],
+		"notes": "Side A is the shared rationed-event back (haven in a signal ring, yellow bars, red arc). No printed card code and no rules text. The screen title is EXTENDED FORECAST."
+	}
+}

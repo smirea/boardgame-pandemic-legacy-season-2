@@ -1,0 +1,33 @@
+{
+	"door": "K",
+	"folder": 1,
+	"frontImage": "front.jpg",
+	"frontText": "K",
+	"items": [
+		{
+			"id": "item-01_rule-k",
+			"image": "item-01_rule-k.jpg",
+			"count": 1,
+			"printedCode": "K",
+			"category": "action_sticker",
+			"title": "Chart Sea Lane",
+			"placementTarget": "Rulebook page 12, slot K (New Actions, left column, second)",
+			"text": "CHART SEA LANE\nSpend 2 Supply cubes from your Character card to draw a sea lane from your port location ([anchor]) to another port location.\nUse a pen or marker. The sea lane may curve, but it cannot cross land, unexplored areas, other sea lanes, or more than one red region line (like the one below South America).\nWhen you connect a city to the grid with a sea lane, take the matching City card(s) from the reserve and put them into the Player discard pile. Take the matching Infection card(s) and put them into the Game End area.",
+			"tables": [],
+			"mechanics": {
+				"opensDoors": [],
+				"opensPackages": [],
+				"rules": [
+					"Costs 2 supply cubes from your character card.",
+					"Both ends must be ports (anchor locations). You must be at the origin port.",
+					"The lane may curve.",
+					"It cannot cross land, unexplored areas, or other sea lanes.",
+					"It cannot cross more than one red region line.",
+					"Connecting a city to the grid moves its City cards from the reserve to the Player discard and its Infection cards to the Game End area."
+				],
+				"effect": "Permanent sea connection between two ports. Locations joined by the lane are adjacent."
+			}
+		}
+	],
+	"summary": "Action: spend 2 supply cubes to draw a sea lane from your port to another port. The lane may curve, may cross at most one red region line, and cannot cross land, unexplored areas, or other sea lanes. Connecting a city uses the same card destinations as a supply line."
+}

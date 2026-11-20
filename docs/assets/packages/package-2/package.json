@@ -1,0 +1,382 @@
+{
+	"name": "Middle East & South Asia",
+	"bags": [
+		{
+			"name": "Hollow Men Bag",
+			"description": "The recon report calls these 24 Hollow Men figures. Gather and Rule S place them. Tehran's search can take up to 2 off the board.",
+			"guid": "73b948",
+			"totalItems": 24,
+			"contents": {
+				"Hollow Men": 24
+			}
+		}
+	],
+	"boxImage": "box.jpg",
+	"boxText": "2",
+	"cards": [
+		{
+			"index": 1,
+			"title": "Recon Report",
+			"category": "recon-report",
+			"copies": 1,
+			"json": "cards/card-01/card.json"
+		},
+		{
+			"index": 2,
+			"title": "Renewal",
+			"category": "unrationed-event",
+			"copies": 1,
+			"json": "cards/card-02_event/card.json"
+		},
+		{
+			"index": 3,
+			"title": "Baghdad",
+			"category": "player-card",
+			"color": "black",
+			"search": true,
+			"copies": 1,
+			"json": "cards/card-03_baghdad/card.json"
+		},
+		{
+			"index": 4,
+			"title": "Baghdad",
+			"category": "player-card",
+			"color": "black",
+			"copies": 1,
+			"json": "cards/card-04_baghdad/card.json"
+		},
+		{
+			"index": 5,
+			"title": "Baghdad",
+			"category": "infection-card",
+			"color": "black",
+			"printedCode": "P2-06b",
+			"copies": 1,
+			"json": "cards/card-05_baghdad/card.json"
+		},
+		{
+			"index": 6,
+			"title": "Baghdad",
+			"category": "infection-card",
+			"color": "black",
+			"printedCode": "P2-06b",
+			"copies": 1,
+			"json": "cards/card-06_baghdad/card.json"
+		},
+		{
+			"index": 7,
+			"title": "Tehran",
+			"category": "player-card",
+			"color": "black",
+			"search": true,
+			"copies": 1,
+			"json": "cards/card-07_tehran/card.json"
+		},
+		{
+			"index": 8,
+			"title": "Tehran",
+			"category": "infection-card",
+			"color": "black",
+			"copies": 1,
+			"json": "cards/card-08_tehran/card.json"
+		},
+		{
+			"index": 9,
+			"title": "Riyadh",
+			"category": "player-card",
+			"color": "black",
+			"search": true,
+			"copies": 1,
+			"json": "cards/card-09_riyadh/card.json"
+		},
+		{
+			"index": 10,
+			"title": "Riyadh",
+			"category": "player-card",
+			"color": "black",
+			"copies": 1,
+			"json": "cards/card-10_riyadh/card.json"
+		},
+		{
+			"index": 11,
+			"title": "Riyadh",
+			"category": "infection-card",
+			"color": "black",
+			"printedCode": "P2-12b",
+			"copies": 1,
+			"json": "cards/card-11_riyadh/card.json"
+		},
+		{
+			"index": 12,
+			"title": "Riyadh",
+			"category": "infection-card",
+			"color": "black",
+			"printedCode": "P2-12b",
+			"copies": 1,
+			"json": "cards/card-12_riyadh/card.json"
+		},
+		{
+			"index": 13,
+			"title": "Delhi",
+			"category": "player-card",
+			"color": "black",
+			"search": true,
+			"copies": 1,
+			"json": "cards/card-13_delhi/card.json"
+		},
+		{
+			"index": 14,
+			"title": "Delhi",
+			"category": "infection-card",
+			"color": "black",
+			"copies": 1,
+			"json": "cards/card-14_delhi/card.json"
+		},
+		{
+			"index": 15,
+			"title": "New Mumbai",
+			"category": "player-card",
+			"color": "black",
+			"port": true,
+			"search": [
+				"land",
+				"sea"
+			],
+			"copies": 1,
+			"json": "cards/card-15_new-mumbai/card.json"
+		},
+		{
+			"index": 16,
+			"title": "New Mumbai",
+			"category": "player-card",
+			"color": "black",
+			"port": true,
+			"copies": 1,
+			"json": "cards/card-16_new-mumbai/card.json"
+		},
+		{
+			"index": 17,
+			"title": "New Mumbai",
+			"category": "infection-card",
+			"color": "black",
+			"printedCode": "P2-18b",
+			"copies": 1,
+			"json": "cards/card-17_new-mumbai/card.json"
+		},
+		{
+			"index": 18,
+			"title": "New Mumbai",
+			"category": "infection-card",
+			"color": "black",
+			"printedCode": "P2-18b",
+			"copies": 1,
+			"json": "cards/card-18_new-mumbai/card.json"
+		},
+		{
+			"index": 19,
+			"title": "Kolkata",
+			"category": "player-card",
+			"color": "black",
+			"port": true,
+			"copies": 1,
+			"json": "cards/card-19_kolkata/card.json"
+		},
+		{
+			"index": 20,
+			"title": "Kolkata",
+			"category": "infection-card",
+			"color": "black",
+			"copies": 1,
+			"json": "cards/card-20_kolkata/card.json"
+		},
+		{
+			"index": 21,
+			"title": "Hollow Men Gather",
+			"category": "hollow-men-gather",
+			"printedCode": "P2-21b",
+			"copies": 1,
+			"json": "cards/card-21_hollow-men-gather/card.json"
+		},
+		{
+			"index": 22,
+			"title": "Hollow Men Gather",
+			"category": "hollow-men-gather",
+			"printedCode": "P2-21b",
+			"copies": 1,
+			"json": "cards/card-22_hollow-men-gather/card.json"
+		},
+		{
+			"index": 23,
+			"title": "Hollow Men Gather",
+			"category": "hollow-men-gather",
+			"printedCode": "P2-21b",
+			"copies": 1,
+			"json": "cards/card-23_hollow-men-gather/card.json"
+		},
+		{
+			"index": 24,
+			"title": "Hollow Men Gather",
+			"category": "hollow-men-gather",
+			"printedCode": "P2-21b",
+			"copies": 1,
+			"json": "cards/card-24_hollow-men-gather/card.json"
+		}
+	],
+	"cities": [
+		{
+			"name": "Baghdad",
+			"color": "black",
+			"coordinates": "33°18'46\"N 44°21'41\"E",
+			"port": false,
+			"playerCards": 2,
+			"infectionCards": 2,
+			"search": true
+		},
+		{
+			"name": "Tehran",
+			"color": "black",
+			"coordinates": "35°41'21\"N 51°23'20\"E",
+			"port": false,
+			"playerCards": 1,
+			"infectionCards": 1,
+			"search": true
+		},
+		{
+			"name": "Riyadh",
+			"color": "black",
+			"coordinates": "24°42'49\"N 46°40'31\"E",
+			"port": false,
+			"playerCards": 2,
+			"infectionCards": 2,
+			"search": true
+		},
+		{
+			"name": "Delhi",
+			"color": "black",
+			"coordinates": "28°42'15\"N 77°6'9\"E",
+			"port": false,
+			"playerCards": 1,
+			"infectionCards": 1,
+			"search": true
+		},
+		{
+			"name": "New Mumbai",
+			"color": "black",
+			"coordinates": "19°2'43\"N 72°50'55\"E",
+			"port": true,
+			"playerCards": 2,
+			"infectionCards": 2,
+			"search": [
+				"land",
+				"sea"
+			]
+		},
+		{
+			"name": "Kolkata",
+			"color": "black",
+			"coordinates": "22°34'22\"N 88°21'50\"E",
+			"port": true,
+			"playerCards": 1,
+			"infectionCards": 1,
+			"search": false
+		}
+	],
+	"guid": "e3f6d3",
+	"id": "package-2",
+	"number": 2,
+	"printedContents": {
+		"source": "P2-01a",
+		"cards": 24,
+		"stickerCards": 6,
+		"hollowMenFigures": 24,
+		"scannedStickers": 7
+	},
+	"rules": [
+		"They're Everywhere (C) and Area 16: at every setup, put all Hollow Men Gather cards on the Infection discard pile.",
+		"Cornered (G): leaving a location with 1 or more Hollow Men figures exposes that character.",
+		"Hollow Men Gather (S): draw through Gather cards to the first city, add exactly 1 figure, skip supply and plague, and a 4th figure instead drops that city's population by 1 immediately.",
+		"Rule T: Gather cards do not count toward the Infect step's draw count. A Gather card drawn in epidemic step 2 is discarded with no effect, then continue to step 3.",
+		"Rule W, printed as Game End step c: a location with Hollow Men loses 1 population, and a location with both Hollow Men and Plague cubes still loses only 1.",
+		"Area 15 repeats the leave exposure, the 3-figure cap, and the single Game End population drop.",
+		"Renewal places an ability worth 2 or less on a character in play, may cover a scar, and is destroyed."
+	],
+	"searchResults": {
+		"Baghdad": "Gain 2 actions. Hollow Men here are packing cages of rats for another city. Not a companion.",
+		"Tehran": "Remove up to 2 Hollow Men figures from the board. Not a companion.",
+		"Riyadh": "Immediately take 1 Player card from the discard pile into your hand. The scratch calls Riyadh the Hollow Men headquarters. Not a companion.",
+		"Delhi": "Companion Vector Control Technician. No exposure when you begin your turn in an infested city while this card is in your hand.",
+		"New Mumbai land": "Gain 1 action. A Hollow Man by the water was drawing his family and crying. Not a companion.",
+		"New Mumbai sea": "Lost haven. Open door 65 and add it to the board, or gain 1 action if 65 is already open.",
+		"Kolkata": "No search box. Port. The report only suspects a later recon from here."
+	},
+	"setup": {
+		"source": "P2-01b",
+		"opensDoors": [
+			"62",
+			"53",
+			"F",
+			"14"
+		],
+		"cityAddedToGrid": "Baghdad",
+		"playerDiscard": [
+			"Baghdad Player cards P2-03b and P2-04b"
+		],
+		"gameEnd": [
+			"Baghdad Infection cards, both printed P2-06b"
+		],
+		"infectionDiscard": [
+			"4 Hollow Men Gather cards, each printed P2-21b"
+		],
+		"reserve": "Every other Player card and Infection card in the package, plus this report after both sides are read.",
+		"toAPlayersHand": "Renewal (P2-02b)"
+	},
+	"stickers": [
+		{
+			"id": "sticker-01_rule-c",
+			"name": "They're Everywhere",
+			"printedCode": "C",
+			"copies": 1,
+			"json": "stickers/sticker-01_rule-c.json"
+		},
+		{
+			"id": "sticker-02_rule-g",
+			"name": "Cornered!",
+			"printedCode": "G",
+			"copies": 1,
+			"json": "stickers/sticker-02_rule-g.json"
+		},
+		{
+			"id": "sticker-03_rule-s",
+			"name": "Hollow Men Gather",
+			"printedCode": "S",
+			"copies": 1,
+			"json": "stickers/sticker-03_rule-s.json"
+		},
+		{
+			"id": "sticker-04_rule-w",
+			"name": "Hollow Men population loss",
+			"printedCode": "W",
+			"copies": 1,
+			"json": "stickers/sticker-04_rule-w.json"
+		},
+		{
+			"id": "sticker-05_rule-t",
+			"name": "Hollow Men Gather draws",
+			"printedCode": "T",
+			"copies": 1,
+			"json": "stickers/sticker-05_rule-t.json"
+		},
+		{
+			"id": "sticker-06_area-16",
+			"name": "Area 16",
+			"copies": 1,
+			"json": "stickers/sticker-06_area-16.json"
+		},
+		{
+			"id": "sticker-07_area-15",
+			"name": "Hollow Men Figures",
+			"copies": 1,
+			"json": "stickers/sticker-07_area-15.json"
+		}
+	]
+}

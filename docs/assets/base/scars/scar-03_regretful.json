@@ -1,0 +1,15 @@
+{
+	"id": "scar-03",
+	"name": "Regretful",
+	"category": "scar",
+	"costProductionUnits": null,
+	"copies": 1,
+	"image": "scar-03_regretful.jpg",
+	"text": "Regretful: Discard a card (if you have one) every time\nyou leave a city with zero Supply cubes.",
+	"mechanics": {
+		"timing": "passive",
+		"trigger": "Every time you leave a city with zero Supply cubes",
+		"effect": "Discard a card if you have one.",
+		"restrictions": ["Discard only if you have a card"]
+	}
+}

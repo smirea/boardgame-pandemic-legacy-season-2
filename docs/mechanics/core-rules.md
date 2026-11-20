@@ -47,10 +47,9 @@ Section ids such as `C-4.2` are stable. [interactions.md](interactions.md) point
 ### C-2.2 Prologue [R]
 
 - Played any number of times before January. No permanent changes happen.
-- Uses its own two prologue cards. One holds the prologue objective: build 3 supply centers, any colors.
-- System-Wide Production is not available in the prologue [C].
-- Recon is not available in the prologue.
-- Destroy the prologue objective before January [C].
+- Uses its own two prologue cards (`00-01` and `00-02`). `00-02` holds the prologue mandatory objective: build 3 supply centers, any colors.
+- Prologue exceptions (`00-01b`): do not open the Legacy deck; characters cannot get exposed; Recon is unavailable; System-Wide Production is unavailable when playing Produce Supplies cards; do not perform Game End steps.
+- When ready to begin the campaign, destroy `00-01` and `00-02`, open the Legacy deck, and start January.
 
 ### C-2.3 What persists and what resets [R]
 
@@ -74,15 +73,15 @@ Run the steps in this order. Later rule stickers replace or fill some steps. The
 
 1. **Set up the board.**
    1. Put supply cubes into the stockpile equal to this month's value on the supply track. Put the rest in the reserve.
-   2. (Rule sticker B slot. Filled later.)
+   2. (Rule sticker **B** slot: later adds stockpile bonuses printed to the right of the supply track — Area 10 `+15` from Package 6 and Area 11 `+15` from Door 11.)
    3. Collect from the reserve every card that goes on the board. Turning Point cards go to the Game End area. Objective cards go to the objectives area.
-   4. (Rule sticker C slot. Filled later.)
+   4. (Rule sticker **C** slot: later places all Hollow Men Gather cards into the Infection discard pile, Area 16.)
    5. Put the Plague cube pool beside the board. Put the Incident marker on space 0. Put the Infection Rate marker on the leftmost "2" space. Put a tracking token on space 0 of every track printed on an objective.
    6. Put the supply center pieces beside the board.
 2. **Read the Legacy deck** ([C-11](#c-11-legacy-deck-r)). Read cards one at a time until a PAUSE or STOP card.
 3. **Supply the grid.** Players distribute every cube in the stockpile onto locations on the grid. Any number per location, including zero. Havens may receive cubes.
-4. **Infect the grid.** Shuffle the Infection deck. Flip 9 cards one at a time. For each, infect that city once with the setup rule: remove 1 supply cube, or if it has none, place 1 Plague cube and advance the Incident marker. Setup infection never causes an outbreak in practice because a city can hold at most as many setup Plague cubes as it has cards flipped [C]. Put flipped cards in the Infection discard pile. Rule sticker D later replaces this step ([L-9.4](legacy-progression.md#l-94-new-setup-infection-c)).
-5. (Rule sticker E slot. Empty at the start. Community sources place the epidemic-count rule here [I], see [L-4](legacy-progression.md#l-4-stretched-too-thin-epidemic-count-c).)
+4. **Infect the grid.** Shuffle the Infection deck. Flip 9 cards one at a time. For each, infect that city once with the setup rule: remove 1 supply cube, or if it has none, place 1 Plague cube and advance the Incident marker. Setup infection never causes an outbreak in practice because a city can hold at most as many setup Plague cubes as it has cards flipped [C]. Put flipped cards in the Infection discard pile. Rule sticker **D** (September, Door D) later replaces this step ([L-9.4](legacy-progression.md#l-94-new-setup-infection-r)).
+5. (Rule sticker **E** slot: filled at the end of March by Door E, _Stretched Too Thin_, setting the Epidemic count from the number of City cards in the Player deck; see [L-4](legacy-progression.md#l-4-stretched-too-thin-epidemic-count-r).)
 6. **Prepare the Player deck and deal.**
    1. The group picks Rationed Event cards equal to the rationing level. Unrationed Event cards in the reserve always go in and do not count toward the limit.
    2. Shuffle the chosen Events, all Produce Supplies cards, and all City cards of cities on the grid. Deal face up: 2 players get 4 cards each, 3 players get 3, 4 players get 2.
@@ -223,7 +222,7 @@ At the end of every turn, flip Infection cards from the top of the Infection dec
 
 A city with 3 Plague cubes and at least 1 supply cube just loses a cube [C].
 
-Rule stickers S and T add lines to this section later. Community sources do not identify their content [I].
+Rule stickers **S** and **T** (Package 2) add Hollow Men Gather resolution and draw/Epidemic rules to this section ([L-9.1](legacy-progression.md#l-91-gather-cards-r)).
 
 ### C-8.2 Incidents [R]
 
@@ -267,17 +266,15 @@ A character card holds:
 - An exposure track of 7 scratch-off boxes. Under each box: nothing, a scar symbol, or a skull. The layout differs per card and is hidden until scratched.
 - A count of supply cubes held. Unlimited.
 
-Starting jobs seen in community logs, each with a once-per-turn or passive rule [C]:
+All 5 starting job stickers ([docs/assets/base/occupations/](../assets/base/occupations/)) [R]:
 
-| Job            | Effect summary                                                                                     |
-| -------------- | -------------------------------------------------------------------------------------------------- |
-| Administrator  | Once per turn, as an action, move any pawn to the location of any other pawn.                      |
-| Radio Operator | On their own Transfer Supplies, the other character may be in a different location.                |
-| Laborer        | Build Supply Center with 4 cards plus 2 supply cubes spent.                                        |
-| Farmer         | Once per turn, right after Make Supplies, a free Deliver Supplies.                                 |
-| Instructor     | Once per own turn, give any Player card to a character in the same location (only give, not take). |
-
-The full list of starting job stickers is not confirmed. See [open-questions.md](open-questions.md).
+| Job            | Effect summary                                                                                                                  |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Administrator  | Once on your turn, as an action, move a pawn to any other pawn.                                                                 |
+| Radio Operator | Whenever you do the Transfer Supplies free action, you may give or take Supply cubes from a player in any location.             |
+| Laborer        | When doing Build Supply Center, spend 2 Supply cubes from your Character card to build with 1 fewer City card (4 instead of 5). |
+| Farmer         | Once on your turn, when doing Make Supplies, you may immediately do Deliver Supplies as a free action.                          |
+| Instructor     | Once on your turn, as an action, give any 1 Player card to a player in your location (only give, not take).                     |
 
 ### C-9.2 Exposure [R]
 
@@ -355,9 +352,9 @@ Run after every game, win or lose, in this order.
 
 ### C-12.1 Adjust population [R]
 
-1. (Rule sticker V slot, step a. Filled later.)
+1. Step a (Rule sticker **V** slot, Package 3): cities with a **Shelter** skip steps b and c (no population loss from Plague cubes or Hollow Men).
 2. Step b: every location with 1 or more Plague cubes loses 1 population. Only 1, however many cubes.
-3. (Rule sticker W slot, step c. Filled later. Community sources put the Hollow Men population loss here [I], see [L-9.7](legacy-progression.md#l-97-hollow-men-at-game-end-c).)
+3. Step c (Rule sticker **W** slot, Package 2): every location with 1 or more Hollow Men figures loses 1 population. A location with both Plague cubes and Hollow Men still loses only 1 total.
 4. Step d: every city with a supply center gains 1 population.
 5. A location that would both lose and gain 1 stays the same.
 6. Population stays within 0 to 8.
@@ -400,14 +397,11 @@ Cards are referred to by the city they name. Each City card or Infection card ha
 
 Infection card improvements apply whenever that card is drawn: during setup infection, during an Epidemic's Infect step, and during every turn's Infect step [R].
 
-Examples printed in the rulebook ([R]):
+Starting upgrades in the box ([docs/assets/base/upgrades/](../assets/base/upgrades/)) [R]:
 
-- City improvement, counts as 2 cards of its color for Build Supply Center.
-- City improvement, counts as 3 cards of its color for Build Supply Center.
-- Infection improvement, if this card is in the Infection discard pile, any player may discard it at any time to destroy this card.
-- Infection improvement, if the city holds 2 or more supply cubes when this card is drawn, remove none.
-- Ability, hand limit plus 1.
-- Ability, once per turn as an action, move a pawn to any other pawn.
+- **Character abilities (8):** Architect (3), Helmsman (3), Courier (3), Supplier (3), Broker (2), Coordinator (2), Record Keeper (1), Runner (1). See [L-16.2](legacy-progression.md#l-162-abilities-r).
+- **City card improvements (4):** Foundations ×3 (1 PU each: counts as 2 cards of its color for Build Supply Center), Infrastructure ×1 (2 PU: counts as 3 cards of its color for Build Supply Center).
+- **Infection card improvements (4):** Lockdown ×2 (1 PU each: if in the Infection discard pile, any player may discard a Player card to destroy this card at any time), Well Stocked ×2 (1 PU each: if there are 2 or more Supply cubes in this city when drawn, remove none).
 
 ## C-13. Clarifications [R]
 

@@ -1,0 +1,37 @@
+{
+	"file": "page-07.jpg",
+	"printedPageNumber": 7,
+	"headings": ["Characters"],
+	"ruleStickerSlots": [],
+	"sections": [
+		{
+			"heading": "Characters",
+			"mechanicsSummary": [
+				"Players may switch characters between games.",
+				"Before the prologue, create the five starting characters. The other five Character cards are for characters discovered during the campaign.",
+				"To create one: take a blank Character card; stick a job into the Job box; stick an image as the photo; write a name and an age; choose one of the named havens as the home.",
+				"Leave Place of Death blank.",
+				"The Exposure track is scratched as the character gains exposure. Later scratches can reveal scars or a skull. Do not scratch any at creation.",
+				"The illustrated Administrator job (an example sticker, not a rule added by this page): once on your turn, as an action, move a pawn onto any other pawn."
+			]
+		}
+	],
+	"tables": [
+		{
+			"name": "Character creation",
+			"rows": [
+				{ "step": 1, "do": "Take a blank Character card" },
+				{ "step": 2, "do": "Apply a job sticker to the Job box" },
+				{ "step": 3, "do": "Apply an image sticker as the photo" },
+				{ "step": 4, "do": "Write a name and an age" },
+				{ "step": 5, "do": "Choose a named haven as the home" }
+			]
+		}
+	],
+	"diagramsAndCallouts": [
+		"Character card diagram with fields Name, Photo, Job, Home, Age, Place of Death, and an Exposure scratch track numbered 1–7. Example fill-in: home Asgard, age 36.",
+		"Haven tile labeled Asgard with an anchor, pointed at the Home line.",
+		"Portrait sticker pointed at the photo box, and an Administrator ability callout pointed at the Job box.",
+		"Flavor line at the bottom: the group did not ask to be here and did not want the responsibility."
+	]
+}

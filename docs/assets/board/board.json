@@ -1,0 +1,191 @@
+{
+	"id": "board",
+	"title": "Pandemic Legacy: Season 2 World Map Board",
+	"image": "board.jpg",
+	"dimensions": { "width": 8929, "height": 5607 },
+	"markers": {
+		"infectionRateMarker": "infection-rate-marker.png",
+		"incidentMarker": "incident-marker.png",
+		"populationMarkers": "population-markers/population-markers.json"
+	},
+	"tracks": {
+		"objectivesAndProjectedSupplies": {
+			"header": "YEAR 71 OF THE FALL - OBJECTIVES AND PROJECTED SUPPLIES",
+			"months": [
+				{ "month": "prologue", "requiredObjectives": 1, "projectedSupplies": 36 },
+				{ "month": "january", "requiredObjectives": 2, "projectedSupplies": 36 },
+				{ "month": "february", "requiredObjectives": 2, "projectedSupplies": 33 },
+				{ "month": "march", "requiredObjectives": 3, "projectedSupplies": 30 },
+				{ "month": "april", "requiredObjectives": 3, "projectedSupplies": 27 },
+				{ "month": "may", "requiredObjectives": 3, "projectedSupplies": 24 },
+				{ "month": "june", "requiredObjectives": 3, "projectedSupplies": 21 },
+				{ "month": "july", "requiredObjectives": 3, "projectedSupplies": 18 },
+				{ "month": "august", "requiredObjectives": 3, "projectedSupplies": 15 },
+				{ "month": "september", "requiredObjectives": 3, "projectedSupplies": 12 },
+				{ "month": "october", "requiredObjectives": 2, "projectedSupplies": 8 },
+				{ "month": "november", "requiredObjectives": 1, "projectedSupplies": 4 },
+				{ "month": "december", "requiredObjectives": 1, "projectedSupplies": 0 }
+			],
+			"bonusStickerAreas": ["10", "11"]
+		},
+		"incidents": {
+			"spaces": [0, 1, 2, 3, 4, 5, 6, 7, "skull"],
+			"lossOnIncident": 8
+		},
+		"infectionRate": {
+			"spaces": [2, 2, 2, 3, 3, 4, 4, 5]
+		},
+		"gameEndProductionTable": {
+			"steps": [
+				"1. Adjust population",
+				"2. Check Legacy deck",
+				"3. Resolve Game End cards",
+				"4. Spend production units"
+			],
+			"brackets": [
+				{ "minCities": 1, "maxCities": 10, "productionUnits": 3 },
+				{ "minCities": 11, "maxCities": 16, "productionUnits": 4 },
+				{ "minCities": 17, "maxCities": 24, "productionUnits": 5 },
+				{ "minCities": 25, "maxCities": 33, "productionUnits": 6 },
+				{ "minCities": 34, "maxCities": 42, "productionUnits": 7 },
+				{ "minCities": 43, "maxCities": null, "productionUnits": 8 }
+			],
+			"winBonus": 1
+		}
+	},
+	"boardAreas": {
+		"objectives": "Top-left area for active Objective cards",
+		"gameEndCards": "Top-center-right box for cards resolved in Game End step 3",
+		"infectionDeck": "Top-right deck slot",
+		"infectionDiscardPile": "Top-right discard slot, containing sticker Area 16",
+		"plagueCubes": "Bottom-left pool box",
+		"stockpile": "Bottom-center supply cube stockpile box",
+		"playerDeck": "Bottom-right deck slot",
+		"playerDiscardPile": "Bottom-right discard slot",
+		"onYourTurn": [
+			"1. Check for exposure",
+			"2. Do 4 actions",
+			"3. Draw 2 cards and resolve epidemics",
+			"4. Infect cities",
+			"Hand limit applies at all times (usually 7 cards)"
+		],
+		"legend": {
+			"printedEntries": [
+				{ "icon": "anchor", "label": "PORTS", "summary": "Required for Sail and Charter Boat actions." }
+			],
+			"stickerAreas": ["12", "13", "14", "15"]
+		},
+		"stickerAreas": {
+			"10": "Right of Projected Supplies track (bonus supply cache 1)",
+			"11": "Right of Projected Supplies track (bonus supply cache 2)",
+			"12": "Legend box slot 12",
+			"13": "Legend box slot 13",
+			"14": "Legend box slot 14",
+			"15": "Legend box slot 15",
+			"16": "Inside Infection Discard Pile box"
+		}
+	},
+	"startingLocations": {
+		"havens": [
+			{
+				"id": "north-atlantic-haven",
+				"label": "North Atlantic Haven",
+				"startingPopulation": 3,
+				"port": true,
+				"nameBlank": true
+			},
+			{
+				"id": "mediterranean-haven",
+				"label": "Mediterranean Haven",
+				"startingPopulation": 3,
+				"port": true,
+				"nameBlank": true
+			},
+			{
+				"id": "south-atlantic-haven",
+				"label": "South Atlantic Haven",
+				"startingPopulation": 3,
+				"port": true,
+				"nameBlank": true
+			}
+		],
+		"cities": [
+			{ "name": "New York", "color": "blue", "startingPopulation": 3, "port": true, "infested": false },
+			{ "name": "Washington", "color": "blue", "startingPopulation": 3, "port": true, "infested": false },
+			{ "name": "London", "color": "blue", "startingPopulation": 3, "port": true, "infested": false },
+			{ "name": "Jacksonville", "color": "yellow", "startingPopulation": 3, "port": true, "infested": false },
+			{ "name": "São Paulo", "color": "yellow", "startingPopulation": 3, "port": true, "infested": false },
+			{ "name": "Lagos", "color": "yellow", "startingPopulation": 3, "port": true, "infested": false },
+			{ "name": "Tripoli", "color": "black", "startingPopulation": 3, "port": true, "infested": false },
+			{ "name": "Cairo", "color": "black", "startingPopulation": 3, "port": true, "infested": false },
+			{ "name": "Istanbul", "color": "black", "startingPopulation": 3, "port": true, "infested": false }
+		]
+	},
+	"startingSeaLanes": [
+		["New York", "Washington"],
+		["New York", "Jacksonville"],
+		["New York", "North Atlantic Haven"],
+		["Washington", "Jacksonville"],
+		["Jacksonville", "South Atlantic Haven"],
+		["North Atlantic Haven", "London"],
+		["North Atlantic Haven", "Mediterranean Haven"],
+		["North Atlantic Haven", "South Atlantic Haven"],
+		["London", "Mediterranean Haven"],
+		["Mediterranean Haven", "South Atlantic Haven"],
+		["Mediterranean Haven", "Tripoli"],
+		["Mediterranean Haven", "Istanbul"],
+		["Tripoli", "Cairo"],
+		["Istanbul", "Cairo"],
+		["South Atlantic Haven", "Lagos"],
+		["South Atlantic Haven", "São Paulo"],
+		["Lagos", "São Paulo"]
+	],
+	"startingReconRoutes": [
+		{
+			"fromCity": "Washington",
+			"requiresSupplyCenter": true,
+			"cardColor": "blue",
+			"cardCount": 3,
+			"uniqueCardsRequired": false,
+			"opens": "Package 1"
+		},
+		{
+			"fromCity": "London",
+			"requiresSupplyCenter": true,
+			"cardColor": "blue",
+			"cardCount": 4,
+			"uniqueCardsRequired": true,
+			"opens": "Package 4"
+		},
+		{
+			"fromCity": "Cairo",
+			"requiresSupplyCenter": true,
+			"cardColor": "black",
+			"cardCount": 4,
+			"uniqueCardsRequired": true,
+			"opens": "Package 2"
+		},
+		{
+			"fromCity": "São Paulo",
+			"requiresSupplyCenter": true,
+			"cardColor": "yellow",
+			"cardCount": 4,
+			"uniqueCardsRequired": false,
+			"opens": "Package 5"
+		},
+		{
+			"fromCity": "Lagos",
+			"requiresSupplyCenter": true,
+			"cardColor": "yellow",
+			"cardCount": 5,
+			"uniqueCardsRequired": true,
+			"opens": "Package 7"
+		}
+	],
+	"printedRedRegionLines": [
+		{
+			"location": "Southern tip of South America (Cape Horn, ~67°W, south of 50°S)",
+			"notes": "Separates South Atlantic from South Pacific ocean region."
+		}
+	]
+}

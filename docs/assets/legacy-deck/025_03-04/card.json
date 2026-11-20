@@ -1,0 +1,44 @@
+{
+	"sequence": 25,
+	"folder": "025_03-04",
+	"cardCode": "03-04",
+	"printedCodes": {
+		"sideA": "03-04a",
+		"sideB": "03-04b"
+	},
+	"title": "Complete 2 searches",
+	"category": "objective",
+	"month": "march",
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"stopOrPause": "NONE",
+		"header": "",
+		"trigger": "",
+		"text": "",
+		"footer": ""
+	},
+	"sideB": {
+		"header": "OBJECTIVE",
+		"text": "Complete 2 searches.",
+		"footer": "Add this card to your pool of objectives.",
+		"scratchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"whenRead": "Continue the March setup Legacy-deck reading, after 03-03.",
+		"triggers": [],
+		"opensDoors": [],
+		"opensPackages": [],
+		"destroys": [],
+		"addsToPool": ["Objective: Complete 2 searches"],
+		"rules": [
+			"Add this card to the objective pool.",
+			"The objective is complete after 2 searches.",
+			"A connected track is labeled 2, 1, and 0. The circle at 0 is filled, marking the start. Move the marker as searches are completed."
+		],
+		"notes": "Side A is the objective-card back (blue star emblem) and carries 03-04a. The face text is printed sideways relative to that code. The card does not say to destroy it when completed."
+	}
+}

@@ -1,0 +1,54 @@
+{
+	"door": "42",
+	"folder": 4,
+	"frontImage": "dossiers/folder-4/door-42/front.jpg",
+	"frontText": "42",
+	"items": [
+		{
+			"id": "item-01_broken-link",
+			"image": "dossiers/folder-4/door-42/item-01_broken-link.jpg",
+			"count": 2,
+			"printedCode": null,
+			"category": "infection-card-improvement",
+			"title": "Broken Link",
+			"placementTarget": "Infection card",
+			"costProductionUnits": 1,
+			"text": "Broken Link:\nAfter discarding this card, any player may discard\na Player card to stop drawing Infection cards for\nthe rest of this turn.\n(This has no effect during setup and epidemics.)",
+			"mapDetails": null,
+			"mechanics": {
+				"timing": "after this Infection card is discarded",
+				"trigger": "After discarding this card",
+				"effect": "Any player may discard a Player card to stop drawing Infection cards for the rest of this turn.",
+				"restrictions": ["This has no effect during setup and epidemics.", "Requires discarding a Player card"],
+				"italic": ["(This has no effect during setup and epidemics.)"],
+				"costPrintedOn": "dossiers/folder-4/door-42/item-02.jpg",
+				"sourceGuids": ["619bce", "270210"]
+			}
+		},
+		{
+			"id": "item-02",
+			"image": "dossiers/folder-4/door-42/item-02.jpg",
+			"count": 1,
+			"printedCode": "42",
+			"category": "infection-card-improvement-pool-card",
+			"title": "INFECTION CARD IMPROVEMENTS",
+			"placementTarget": null,
+			"costProductionUnits": null,
+			"text": "INFECTION CARD IMPROVEMENTS\nAdd these to your pool of Infection card improvements.\n\nBroken Link:\nAfter discarding this card, any player may discard a Player card to stop drawing Infection cards for the rest of this turn.\n(This has no effect during setup and epidemics.) (1)\n\nBroken Link:\nAfter discarding this card, any player may discard a Player card to stop drawing Infection cards for the rest of this turn.\n(This has no effect during setup and epidemics.) (1)",
+			"mapDetails": null,
+			"mechanics": {
+				"timing": "game end upgrade",
+				"trigger": null,
+				"effect": "Add these two Broken Link stickers to the pool of Infection card improvements. Each costs 1 production unit.",
+				"restrictions": [],
+				"costs": {
+					"Broken Link": 1
+				},
+				"copiesPriced": 2,
+				"sourceGuids": ["613273"]
+			}
+		}
+	],
+	"bags": [],
+	"summary": "Two Broken Link Infection-card stickers and the pool card that prices each at 1. Same wording as door 33. The parenthetical is italic. The orange 1s are on the pool card, which lists the sticker twice. Corner badge is 42."
+}

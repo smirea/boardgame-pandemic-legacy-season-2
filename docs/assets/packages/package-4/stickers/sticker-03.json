@@ -1,0 +1,19 @@
+{
+	"id": "sticker-03",
+	"package": 4,
+	"guid": "d83f4d",
+	"printedCode": null,
+	"name": "Player reference instruction",
+	"category": "instruction",
+	"placementTarget": "Not placed. It tells you to put the Shuttle Flight strip on the back of each player reference card.",
+	"costProductionUnits": null,
+	"copies": 1,
+	"image": "sticker-03.jpg",
+	"summary": "Place this sticker on the back of each player reference card.",
+	"mechanics": {
+		"timing": "When the package is opened, before Shuttle Flight is used.",
+		"effect": "Instruction to stick the Shuttle Flight strip on the back of each player reference card.",
+		"restrictions": ["This label is not an action and not a rule.", "The strip it points at is sticker-02."],
+		"opensDoors": []
+	}
+}

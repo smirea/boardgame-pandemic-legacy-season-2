@@ -1,0 +1,27 @@
+{
+	"id": "washington",
+	"cardId": 208,
+	"printedCode": null,
+	"title": "WASHINGTON",
+	"category": "city_infection",
+	"color": "blue",
+	"copies": 3,
+	"images": {
+		"front": "washington.jpg",
+		"back": "back.jpg"
+	},
+	"hasImprovementSlot": false,
+	"frontText": "WASHINGTON",
+	"backText": null,
+	"states": [],
+	"mechanics": {
+		"timing": "An Infection deck card. The city name is the only printed text.",
+		"effect": "WASHINGTON",
+		"rules": [
+			"WASHINGTON is printed vertically in the right-hand banner, reading top to bottom.",
+			"The card face is blue, with a green crosshair and a faint biohazard mark.",
+			"No coordinates, population, or rules text are printed.",
+			"Epidemic step 2 draws the bottom Infection card, removes all Supply cubes from that city, and discards the card."
+		]
+	}
+}

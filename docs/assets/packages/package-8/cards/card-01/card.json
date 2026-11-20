@@ -1,0 +1,42 @@
+{
+	"package": 8,
+	"index": 1,
+	"printedCodes": {
+		"sideA": "P8-01a",
+		"sideB": "P8-01b"
+	},
+	"title": "Recon Report",
+	"category": "recon-report",
+	"city": null,
+	"color": null,
+	"copies": 1,
+	"hasImprovementSlot": false,
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"text": "THIS PACKAGE INCLUDES:\n• 15 cards • 1 sticker card\n\nRECON REPORT\n\nWe have accessed Utopia.\nBut, this is no utopia... This is hell\non Earth. Utopia's mission? Kill the\nFaded and the people we are helping\nand then repopulate the world with\nuninfected humans. Every year they\nexpel males to keep their population\ndown and their people in check. These\nHollow Men are tasked to destroy us\nin order to be allowed home. What's\nmore, Utopia has had the PEARL\nlaboratory under armed guard for 30\nyears. Utopia has been holding the\ncure from the world.\n\nThey were just waiting for us to die.\n\nRead both sides of this card\nthen keep it in the reserve."
+	},
+	"sideB": {
+		"text": "RIGHT NOW!\n\nOpen the following door if you have not\ndone so already:\n61\n\nYou have connected a new city: Utopia.\n• Add the Player card for Utopia\nto the Player discard pile.\n• Add all 8 Infection cards for Utopia\nto the Infection discard pile.\n• Add the \"Riot Control\" Unrationed Event\nto the Player discard pile.\n• Put the 4 Hollow Men Gather cards\ninto the Infection discard pile.",
+		"searchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"opensDoors": ["61"],
+		"rules": [
+			"On opening the package, open door 61 if it is not already open.",
+			"Utopia joins the grid. Its one Player card goes to the Player discard pile.",
+			"All 8 Utopia Infection cards go to the Infection discard pile, not the Game End area.",
+			"Riot Control goes to the Player discard pile, not to a player's hand.",
+			"The 4 Hollow Men Gather cards go into the Infection discard pile.",
+			"Keep this report in the reserve after both sides have been read."
+		],
+		"notes": [
+			"Card id 10700.",
+			"The package lists 15 cards and 1 sticker card. The 15 are this report, Riot Control, 1 Utopia Player card, 8 Utopia Infection cards, and 4 Hollow Men Gather cards.",
+			"Nothing in this package goes to the reserve except this report."
+		]
+	}
+}

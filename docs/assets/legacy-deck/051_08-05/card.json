@@ -1,0 +1,40 @@
+{
+	"sequence": 51,
+	"folder": "051_08-05",
+	"cardCode": "08-05",
+	"printedCodes": {
+		"sideA": "08-05a",
+		"sideB": "08-05b"
+	},
+	"title": "RIGHT NOW!",
+	"category": "legacy_pause",
+	"month": "august",
+	"images": {
+		"sideA": "side-a.jpg",
+		"sideB": "side-b.jpg"
+	},
+	"sideA": {
+		"stopOrPause": "PAUSE",
+		"header": "PAUSE",
+		"trigger": "Draw this card and read the other side during step 2 at the end of your first game in August.",
+		"text": "PAUSE\nDRAW THIS CARD AND READ THE OTHER SIDE DURING STEP 2 AT THE END OF YOUR FIRST GAME IN AUGUST.",
+		"footer": ""
+	},
+	"sideB": {
+		"header": "RIGHT NOW!",
+		"text": "Open the following doors:\n29    48",
+		"footer": "",
+		"scratchBoxes": []
+	},
+	"states": [],
+	"mechanics": {
+		"whenRead": "PAUSE. Drawn during the August setup Legacy-deck reading, after 08-04, which stops on this card. Read side B during step 2 at the end of the first August game, then continue the Legacy deck.",
+		"triggers": [],
+		"opensDoors": ["29", "48"],
+		"opensPackages": [],
+		"destroys": [],
+		"addsToPool": [],
+		"rules": ["Open doors 29 and 48 immediately when this side is read."],
+		"notes": "29 and 48 are in separate white boxes with red type. What is inside them is not printed on this card."
+	}
+}
