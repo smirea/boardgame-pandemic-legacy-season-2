@@ -201,7 +201,7 @@ describe('building', () => {
 		expect(gameOf(improved).locations[city('london')]!.center).toBe(true);
 	});
 
-	test('with every piece placed, building moves a supply center that is not permanent', () => {
+	test('with every piece placed, building moves a supply center, a permanent one too, and a tower moves the same way', () => {
 		const actor = late((world, game) => {
 			game.pieces.center = 0;
 			game.locations[city('lagos')]!.center = true;
@@ -211,10 +211,21 @@ describe('building', () => {
 		});
 		const cards = gameOf(actor).players[A]!.hand;
 		expect(refuses(actor, { a: 'buildCenter', cards })).toContain('pick one to move');
-		expect(refuses(actor, { a: 'buildCenter', cards, moveFrom: city('cairo') })).toContain('permanent');
+		expect(refuses(actor, { a: 'buildCenter', cards, moveFrom: city('cairo') })).toBeNull();
 		act(actor, { a: 'buildCenter', cards, moveFrom: city('lagos') });
 		expect(gameOf(actor).locations[city('lagos')]!.center).toBe(false);
 		expect(gameOf(actor).locations[city('london')]!.center).toBe(true);
+
+		const towers = late((world, game) => {
+			game.pieces.tower = 0;
+			game.locations[city('lagos')]!.tower = true;
+			game.players[A]!.location = city('london');
+			game.players[A]!.supplies = 2;
+		});
+		expect(refuses(towers, { a: 'buildTower' })).toBe('Every tower is placed: pick one to move');
+		act(towers, { a: 'buildTower', moveFrom: city('lagos') });
+		expect(gameOf(towers).locations[city('lagos')]!.tower).toBe(false);
+		expect(gameOf(towers).locations[city('london')]!.tower).toBe(true);
 	});
 
 	test('towers cost 2 cubes, count toward triangulation, and enable Transmit and Monitor', () => {
@@ -971,7 +982,7 @@ describe('game end and the campaign', () => {
 		expect(campaign.turningPoints).not.toContain('firstForsaken');
 	});
 
-	test('four losses in a row add 10 cubes to the next games', () => {
+	test('four losses in a row add 10 cubes to the next games, and the reserve holds the cubes the supply track leaves out', () => {
 		const actor = ended(false, world => {
 			world.campaign.results = world.campaign.results.slice(0, -3).concat(
 				[7, 8, 9].map(month => ({
@@ -995,6 +1006,8 @@ describe('game end and the campaign', () => {
 			],
 		});
 		expect(gameOf(actor).stockpile).toBe(8 + 30 + 10);
+		// The reserve holds what the supply track leaves out of the stockpile, and bonus cubes come on top.
+		expect(gameOf(actor).reserve).toBe(36 - 8);
 	});
 
 	test('a win moves to the next month and eases rationing, and December ends the campaign', () => {
@@ -1018,6 +1031,7 @@ describe('game end and the campaign', () => {
 			stackInfection(world, ['cairo', 'lagos', 'london']);
 			const [london] = infectionCards(world, 'london');
 			(world.campaign.infectionCards[london!] as { improvement: string }).improvement = 'lockdown';
+			give(world, B, cityCards(world, 'tokyo', 1));
 			game.infectionsLeft = 3;
 		}, 'playing.infect');
 		send(actor, { type: 'INFECT' });
@@ -1026,8 +1040,14 @@ describe('game end and the campaign', () => {
 		expect(gameOf(actor).locations[city('lagos')]).toMatchObject({ supplies: 0, plague: 0 });
 		const london = infectionCards(worldOf(actor), 'london')[0]!;
 		send(actor, { type: 'INFECT' });
-		send(actor, { type: 'LOCKDOWN', card: london });
+		const seat = gameOf(actor).seats.find(other => gameOf(actor).players[other]!.hand.length > 0)!;
+		const pay = gameOf(actor).players[seat]!.hand[0]!;
+		expect(reject(worldOf(actor), phase(actor), { type: 'LOCKDOWN', card: london, seat, pay: london })).toBe(
+			'Discard a Player card from that hand',
+		);
+		send(actor, { type: 'LOCKDOWN', card: london, seat, pay });
 		expect(worldOf(actor).campaign.infectionCards[london]).toBeUndefined();
+		expect(gameOf(actor).playerDiscard).toContain(pay);
 		expect(gameOf(actor).infectionDiscard).not.toContain(london);
 	});
 
@@ -1914,10 +1934,12 @@ test('an Epidemic waits before the reshuffle when a Lockdown card is in the disc
 		epidemicOnTop(world, game);
 		card = improve(world, 'cairo', 'lockdown');
 		onBottom(game, card);
+		give(world, B, cityCards(world, 'tokyo', 1));
 	}, 'playing.draw');
 	send(actor, { type: 'DRAW' });
 	expect(gameOf(actor).pending[0]).toEqual({ t: 'intensify' });
-	send(actor, { type: 'LOCKDOWN', card });
+	const seat = gameOf(actor).seats.find(other => gameOf(actor).players[other]!.hand.length > 0)!;
+	send(actor, { type: 'LOCKDOWN', card, seat, pay: gameOf(actor).players[seat]!.hand[0]! });
 	expect(worldOf(actor).campaign.infectionCards[card]).toBeUndefined();
 	send(actor, { type: 'DECIDE', decide: { d: 'skip' } });
 	expect(gameOf(actor).pending).toEqual([]);

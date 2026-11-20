@@ -526,6 +526,20 @@
 		};
 	}
 
+	function lockdown(card: CardId) {
+		const options: Option[] = game!.seats.filter(owns).flatMap(seat =>
+			game!.players[seat]!.hand.map(pay => ({
+				label: `${seatName(world, seat)} discards ${cardName(world, pay)}`,
+				detail: '',
+				run: () => {
+					send({ type: 'LOCKDOWN', card, seat, pay });
+					chooser = null;
+				},
+			})),
+		);
+		chooser = { title: `Lockdown: discard a card to destroy ${cardName(world, card)}`, options };
+	}
+
 	function playCard(seat: SeatId, card: CardId) {
 		const variants = plays.filter(option => option.seat === seat && option.card === card);
 		const run = (play: Play) => () => {
@@ -865,6 +879,7 @@
 				aiming={targeting?.a ?? null}
 				onchoose={choice => start(choice.a, choice.actions)}
 				{send}
+				onlockdown={lockdown}
 				bind:columns={actionColumns}
 			/>
 		</div>

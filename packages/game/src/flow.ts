@@ -96,7 +96,10 @@ export function createGame(world: World, seating: { seat: SeatId; character: Cha
 	const permanent = (kind: 'center' | 'tower' | 'shelter') =>
 		Object.values(locations).filter(location => location[kind]).length;
 	const bonus = campaign.stockpileBonus + (campaign.losingStreakBonusGames > 0 ? 10 : 0);
-	const stockpile = (numbers.supplyByMonth[campaign.month] ?? 0) + bonus;
+	const track = numbers.supplyByMonth[campaign.month] ?? 0;
+	const stockpile = track + bonus;
+	// Every cube the group owns that the supply track does not put in the stockpile waits in the reserve.
+	const reserve = numbers.supplyByMonth[0]! - track;
 	const seats = seating.map(entry => entry.seat);
 	world.game = {
 		seats,
@@ -113,7 +116,7 @@ export function createGame(world: World, seating: { seat: SeatId; character: Cha
 		infectionsLeft: 0,
 		locations,
 		stockpile,
-		reserve: numbers.reserve,
+		reserve,
 		pieces: {
 			center: numbers.pieces.center - permanent('center'),
 			tower: numbers.pieces.tower - permanent('tower'),
@@ -409,7 +412,7 @@ function outbreak(world: World, origin: CityId) {
 				continue;
 			} else if (location.plague < numbers.maxPlaguePerCity) {
 				incident(world, next);
-			} else if (!isHaven(next)) {
+			} else {
 				queue.push(next);
 			}
 		}

@@ -101,6 +101,8 @@ function candidateActions(world: World, seat: SeatId): Action[] {
 	const others = game.seats.filter(other => other !== seat);
 	const ports = [...seaRoute(campaign, here)];
 	const candidates: Action[] = [{ a: 'makeSupplies' }, { a: 'buildTower' }, { a: 'selfInject' }];
+	for (const city of Object.keys(game.locations) as CityId[])
+		if (game.locations[city]!.tower) candidates.push({ a: 'buildTower', moveFrom: city });
 
 	for (const to of neighbours(campaign, here)) {
 		// The carrier pays to enter a city with any card of its colour, so each such card is its own option.

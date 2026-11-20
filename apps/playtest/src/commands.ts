@@ -157,7 +157,19 @@ export function optionsFor(state: PublicState, who: Who, seating: (CharacterId |
 		);
 	}
 	for (const id of game.infectionDiscard)
-		add(`lockdown:${enc(id)}`, 'lockdown', `destroy ${human(world, id)}`, { type: 'LOCKDOWN', card: id });
+		for (const seat of game.seats)
+			for (const pay of game.players[seat]!.hand)
+				add(
+					`lockdown:${enc(id)}:${enc(pay)}`,
+					'lockdown',
+					`destroy ${human(world, id)}, discarding ${human(world, pay)}`,
+					{
+						type: 'LOCKDOWN',
+						card: id,
+						seat,
+						pay,
+					},
+				);
 	return options;
 }
 

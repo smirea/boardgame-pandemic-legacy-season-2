@@ -363,7 +363,6 @@ export type ContentPack = {
 		portraits: number;
 		exposureBoxes: number;
 		storageCap: number;
-		reserve: number;
 		rebirthPopulation: number;
 		startingRationing: number;
 		epidemicTable: { maxCityCards: number; epidemics: number }[];

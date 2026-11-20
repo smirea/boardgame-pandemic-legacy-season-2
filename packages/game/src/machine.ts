@@ -17,7 +17,7 @@ import {
 	startDrawStep,
 	startInfectStep,
 } from './flow';
-import { cityDef, grid, hasEdge, isForsaken, log, overLimit, SEAT_IDS, tableSeating } from './helpers';
+import { cityDef, discardFromHand, grid, hasEdge, isForsaken, log, overLimit, SEAT_IDS, tableSeating } from './helpers';
 import { edgeKey } from './ids';
 import type { CardId, CharacterId, CityId, PlayerId, SeatId } from './ids';
 import type { Purchase } from './legacy';
@@ -60,7 +60,8 @@ export type Command =
 	| { type: 'INFECT' }
 	| { type: 'PLAY'; seat: SeatId; card: CardId; play: Play }
 	| { type: 'DECIDE'; decide: Decide }
-	| { type: 'LOCKDOWN'; card: CardId }
+	/** Destroying a Lockdown card costs whoever does it a Player card from their hand. */
+	| { type: 'LOCKDOWN'; card: CardId; seat: SeatId; pay: CardId }
 	/** The group's call that an objective cannot be completed any more, so the rest decide the game. */
 	| { type: 'WAIVE_OBJECTIVE'; objective: ObjectiveId }
 	| { type: 'UNDO' }
@@ -214,7 +215,9 @@ export function reject(world: World, phase: Phase, command: Command): string | n
 			const card = campaign.infectionCards[command.card];
 			const armed =
 				game?.infectionDiscard.includes(command.card) && card?.kind === 'city' && card.improvement === 'lockdown';
-			return armed ? inPhase('playing.actions', 'playing.draw', 'playing.infect') : 'That card cannot be destroyed';
+			if (!armed) return 'That card cannot be destroyed';
+			if (!game?.players[command.seat]?.hand.includes(command.pay)) return 'Discard a Player card from that hand';
+			return inPhase('playing.actions', 'playing.draw', 'playing.infect');
 		}
 		case 'WAIVE_OBJECTIVE': {
 			const live =
@@ -434,7 +437,8 @@ export const gameMachine = setup({
 		decide: assign(change((world, event) => applyDecide(world, (event as Of<'DECIDE'>).decide))),
 		lockdown: assign(
 			change((world, event) => {
-				const { card } = event as Of<'LOCKDOWN'>;
+				const { card, seat, pay } = event as Of<'LOCKDOWN'>;
+				discardFromHand(world.game!, seat, pay);
 				const destroyed = world.campaign.infectionCards[card]!;
 				world.game!.infectionDiscard.splice(world.game!.infectionDiscard.indexOf(card), 1);
 				delete world.campaign.infectionCards[card];

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { actionCost, isFreeAction, pack, reject } from '@repo/game';
-	import type { Action, ActionChoice, Command, PublicState, SeatId } from '@repo/game';
+	import type { Action, ActionChoice, CardId, Command, PublicState, SeatId } from '@repo/game';
 	import { tick } from 'svelte';
 	import ActionIcon from './ActionIcon.svelte';
 	import { ACTION_NAMES, ACTION_TEXT, actionDetail, actionTarget, cityName, sharedCost } from './labels.svelte.ts';
@@ -22,14 +22,31 @@
 		aiming: Action['a'] | null;
 		onchoose: (choice: ActionChoice) => void;
 		send: (command: Command) => void;
+		/** Destroying a Lockdown card costs a Player card, so the screen asks whose. */
+		onlockdown: (card: CardId) => void;
 		/** How many columns the list takes to show every row whole. */
 		columns?: number;
 	};
 
-	let { snap, seat, name, menu, live, canAct, aiming, onchoose, send, columns = $bindable(1) }: Props = $props();
+	let {
+		snap,
+		seat,
+		name,
+		menu,
+		live,
+		canAct,
+		aiming,
+		onchoose,
+		send,
+		onlockdown,
+		columns = $bindable(1),
+	}: Props = $props();
 
 	const world = $derived(snap.world);
 	const game = $derived(world.game!);
+	const anyPay = $derived(
+		game.seats.flatMap(other => game.players[other]!.hand.map(pay => ({ seat: other, pay })))[0] ?? null,
+	);
 	const refused = (command: Command) => !canAct || reject(world, snap.phase, command) !== null;
 
 	// Every row is always in view, so the list keeps the engine's order and a row never moves under the pointer.
@@ -192,8 +209,8 @@
 		{#each lockable as card (card.id)}
 			<button
 				class="lockdown"
-				disabled={reject(world, snap.phase, { type: 'LOCKDOWN', card: card.id }) !== null}
-				onclick={() => send({ type: 'LOCKDOWN', card: card.id })}
+				disabled={!anyPay || reject(world, snap.phase, { type: 'LOCKDOWN', card: card.id, ...anyPay }) !== null}
+				onclick={() => onlockdown(card.id)}
 				data-testid="lockdown"
 				title="Lockdown: destroy this Infection card for good">Lockdown: destroy {cityName(card.city)}</button
 			>

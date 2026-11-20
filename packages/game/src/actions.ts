@@ -44,7 +44,7 @@ export type Action =
 	| { a: 'chartLane'; to: CityId }
 	| { a: 'search'; card: CardId; box: number }
 	| { a: 'shuttle'; to: CityId }
-	| { a: 'buildTower' }
+	| { a: 'buildTower'; moveFrom?: CityId }
 	| { a: 'transmit'; card: CardId; to: SeatId }
 	| { a: 'monitor'; frequency: number }
 	| { a: 'broadcast'; from: CityId; to: CityId }
@@ -389,10 +389,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 			if (values.includes(0) || total < needed) return `Needs ${needed} ${color} cards`;
 			if (total - Math.min(...values) >= needed) return 'That is more cards than needed';
 			if (ctx.game.pieces.center > 0) return ok;
-			if (!moveFrom || !ctx.game.locations[moveFrom]?.center) return 'Every supply center is placed: pick one to move';
-			return ctx.campaign.locations[moveFrom]!.permanent.includes('center')
-				? 'A permanent supply center cannot move'
-				: ok;
+			return moveFrom && ctx.game.locations[moveFrom]?.center ? ok : 'Every supply center is placed: pick one to move';
 		},
 		apply(ctx, { cards, laborer = false, moveFrom }) {
 			for (const card of cards) discardFromHand(ctx.game, ctx.seat, card);
@@ -508,15 +505,18 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 		apply: (ctx, { to }) => void movePawn(ctx.world, ctx.seat, to, 'shuttle'),
 	},
 	buildTower: {
-		check(ctx) {
+		check(ctx, { moveFrom }) {
 			if (ctx.def.kind !== 'city' || ctx.loc.tower) return 'Pick a city without a tower';
-			if (ctx.game.pieces.tower === 0) return 'No tower pieces left';
+			if (ctx.game.pieces.tower === 0 && !(moveFrom && ctx.game.locations[moveFrom]?.tower))
+				return 'Every tower is placed: pick one to move';
+			if (ctx.game.pieces.tower > 0 && moveFrom) return 'A tower is still in the box';
 			const cost = Math.max(0, numbers.costs.tower - (trait(ctx, 'rigger') ? 1 : 0));
 			return ctx.me.supplies >= cost ? ok : `Needs ${cost} cubes on your character`;
 		},
-		apply(ctx) {
+		apply(ctx, { moveFrom }) {
 			spendCubes(ctx, Math.max(0, numbers.costs.tower - (trait(ctx, 'rigger') ? 1 : 0)));
-			ctx.game.pieces.tower -= 1;
+			if (moveFrom) ctx.game.locations[moveFrom]!.tower = false;
+			else ctx.game.pieces.tower -= 1;
 			ctx.loc.tower = true;
 			log(ctx.game, { t: 'structure', city: ctx.here, structure: 'tower' });
 			setProgress(ctx.world, 'triangulate', towerColours(ctx.game));
