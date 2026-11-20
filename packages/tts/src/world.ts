@@ -162,7 +162,8 @@ export function importReading(reading: Reading, seed = 1): Import {
 				evidence: read.evidence,
 			});
 		record.population = population;
-		record.infested = read.infested;
+		// Some cities are printed infested; the table only adds stickers for the rest.
+		record.infested = read.infested || (pack.cities.find(entry => entry.id === city)!.startsInfested ?? false);
 		record.permanent = [...read.permanent];
 	}
 	for (const [id, record] of Object.entries(campaign.locations))

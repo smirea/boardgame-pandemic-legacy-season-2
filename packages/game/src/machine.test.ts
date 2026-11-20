@@ -749,7 +749,7 @@ describe('events and companions', () => {
 				Object.keys(before.campaign.infectionCards).length - 1,
 			),
 		antidote: (_, after) => expect(after.game!.pending).toEqual([]),
-		mentor: (_, after) => expect(after.campaign.abilitiesForSale).not.toContain('architect'),
+		mentor: (_, after) => expect(after.campaign.abilitiesForSale).not.toContain('scout'),
 		scavenge: (before, after) =>
 			expect(after.game!.playerDeck.order.length).toBe(before.game!.playerDeck.order.length - 4),
 		openWaters: (before, after) => expect(after.campaign.edges.length).toBe(before.campaign.edges.length + 1),
@@ -779,7 +779,7 @@ describe('events and companions', () => {
 		},
 		antidote: world => void world.game!.pending.push({ t: 'epidemicDrawn' }),
 		mentor: world => {
-			world.campaign.abilitiesForSale = ['architect'];
+			world.campaign.abilitiesForSale = ['scout'];
 			character(world, A).slots[3] = null;
 		},
 		surplus: world => void world.game!.players[A]!.used.push('madeSupplies'),
@@ -936,13 +936,13 @@ describe('game end and the campaign', () => {
 			game.locations[city('london')]!.center = true;
 			world.campaign.locations[city('frankfurt')]!.population = 0;
 			world.campaign.freeAbilityUnits = 2;
-			world.campaign.abilitiesForSale.push('architect');
+			world.campaign.abilitiesForSale.push('scout');
 		});
 		const { campaign } = worldOf(actor);
 		const units = gameOf(actor).upkeep!.units;
 		const ada = Object.values(campaign.characters)[0]!.id;
 		const purchases = [
-			{ t: 'ability', ability: 'architect', character: ada, slot: 1 },
+			{ t: 'ability', ability: 'scout', character: ada, slot: 1 },
 			{ t: 'cityImprovement', improvement: 'double', card: cityCards(worldOf(actor), 'london')[0]! },
 			{ t: 'infectionImprovement', improvement: 'wellStocked', card: infectionCards(worldOf(actor), 'cairo')[0]! },
 			{ t: 'population', city: city('lagos'), steps: 1 },
@@ -953,7 +953,7 @@ describe('game end and the campaign', () => {
 		const after = worldOf(actor).campaign;
 		expect(gameOf(actor).upkeep!.units).toBe(units - 1 - 1 - 1 - 2 - 2);
 		expect(after.freeAbilityUnits).toBe(0);
-		expect(after.characters[ada]!.slots[1]).toEqual({ kind: 'ability', id: 'architect' });
+		expect(after.characters[ada]!.slots[1]).toEqual({ kind: 'ability', id: 'scout' });
 		expect(after.locations[city('frankfurt')]!.population).toBe(1);
 		expect(after.locations[city('lagos')]!.population).toBe(campaign.locations[city('lagos')]!.population + 1);
 		send(actor, { type: 'FINISH_UPKEEP' });
@@ -1497,7 +1497,7 @@ test('the final score counts population on the grid only', () => {
 test('free ability units are spent at setup, and nothing else can be bought then', () => {
 	const save = octoberSave();
 	save.world.campaign.freeAbilityUnits = 2;
-	save.world.campaign.abilitiesForSale = ['architect'];
+	save.world.campaign.abilitiesForSale = ['scout'];
 	const actor = createGameActor({ seed: 3, save }).start();
 	const cast = Object.values(worldOf(actor).campaign.characters).slice(0, 3);
 	actor.send({
@@ -1512,8 +1512,8 @@ test('free ability units are spent at setup, and nothing else can be bought then
 			purchase: { t: 'population', city: onGrid[5]!, steps: 1 },
 		}),
 	).toBe('Not in the spending step');
-	send(actor, { type: 'PURCHASE', purchase: { t: 'ability', ability: 'architect', character: cast[2]!.id, slot: 3 } });
-	expect(worldOf(actor).campaign.characters[cast[2]!.id]!.slots[3]).toEqual({ kind: 'ability', id: 'architect' });
+	send(actor, { type: 'PURCHASE', purchase: { t: 'ability', ability: 'scout', character: cast[2]!.id, slot: 3 } });
+	expect(worldOf(actor).campaign.characters[cast[2]!.id]!.slots[3]).toEqual({ kind: 'ability', id: 'scout' });
 	expect(worldOf(actor).campaign.freeAbilityUnits).toBe(0);
 });
 

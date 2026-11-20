@@ -150,7 +150,7 @@ export const startingEdges: EdgeDef[] = [
 	['haven-north-atlantic', 'haven-south-atlantic'],
 	['haven-north-atlantic', 'haven-mediterranean'],
 	['jacksonville', 'haven-south-atlantic'],
-	['london', 'haven-mediterranean'],
+	['new-york', 'jacksonville'],
 	['haven-mediterranean', 'tripoli'],
 	['tripoli', 'istanbul'],
 	['istanbul', 'cairo'],
@@ -165,8 +165,7 @@ export const startingEdges: EdgeDef[] = [
 export const documentedEdges: EdgeDef[] = [
 	...(
 		[
-			['chicago', 'new-york'],
-			['buenos-aires', 'sao-paulo'],
+			['chicago', 'washington'],
 			['paris', 'london'],
 			['kinshasa', 'lagos'],
 			['baghdad', 'cairo'],
@@ -216,6 +215,7 @@ export const documentedEdges: EdgeDef[] = [
 			['osaka', 'shanghai'],
 			// A real campaign drew these lanes round Cape Horn and the Cape of Good Hope.
 			['lima', 'lagos'],
+			['buenos-aires', 'sao-paulo'],
 			['lagos', 'dar-es-salaam'],
 		] as const
 	).map(([a, b]) => edge(a, b, 'sea')),

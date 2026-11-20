@@ -97,7 +97,7 @@ const bundles: BundleDef[] = [
 		id: bundleId('north-america'),
 		name: 'North America revealed',
 		unlocks: [
-			region('north-america', ['chicago', 'new-york', 'land']),
+			region('north-america', ['chicago', 'washington', 'land']),
 			{ t: 'action', action: 'establishLine' },
 			{ t: 'action', action: 'search' },
 		],
@@ -107,7 +107,7 @@ const bundles: BundleDef[] = [
 		id: bundleId('south-america'),
 		name: 'South America revealed',
 		unlocks: [
-			region('south-america', ['buenos-aires', 'sao-paulo', 'land']),
+			region('south-america', ['buenos-aires', 'sao-paulo', 'sea']),
 			{ t: 'action', action: 'establishLine' },
 			{ t: 'action', action: 'search' },
 		],
@@ -506,7 +506,7 @@ export const pack: ContentPack = {
 	abilities: [
 		{ id: 'recordKeeper', name: 'Record Keeper', text: 'Hand limit +1.', cost: 1 },
 		{ id: 'helmsman', name: 'Helmsman', text: 'Your first Drive or Ferry each turn is free.', cost: 3 },
-		{ id: 'architect', name: 'Architect', text: 'Build a supply center with 1 card fewer.', cost: 2 },
+		{ id: 'architect', name: 'Architect', text: 'Build a supply center with 1 card fewer.', cost: 3 },
 		{ id: 'courier', name: 'Courier', text: 'Deliver supplies to an adjacent location.', cost: 3 },
 		{ id: 'scout', name: 'Scout', text: 'Recon without a supply center.', cost: 2 },
 		{
@@ -751,7 +751,7 @@ export const pack: ContentPack = {
 			text: 'If the city holds 2 or more cubes when drawn, remove none.',
 			cost: 1,
 		},
-		{ id: 'lockdown', name: 'Lockdown', text: 'While in the discard pile, any player may destroy this card.', cost: 2 },
+		{ id: 'lockdown', name: 'Lockdown', text: 'While in the discard pile, any player may destroy this card.', cost: 1 },
 		{
 			id: 'rebirth',
 			name: 'Rebirth',

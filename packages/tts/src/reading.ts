@@ -378,8 +378,8 @@ export function read(table: Census): Reading {
 			continue;
 		}
 		if (colour !== 'black' && colour !== 'blue') continue;
-		// A dot or a tick joins nothing: two locations are never this close.
-		if (Math.hypot(first.x - last.x, first.z - last.z) < 1.5) continue;
+		// A dot or a tick joins nothing. Denver and Los Angeles are the closest pair the group joined, about 1.5 apart.
+		if (Math.hypot(first.x - last.x, first.z - last.z) < 1) continue;
 		const freehand = stroke.points.length > 2;
 		const ends = [first, last].map(point => {
 			const city = nearestAnchor(point);
@@ -553,7 +553,13 @@ export function read(table: Census): Reading {
 			if (inner.type === 'Card' || inner.type === 'Deck') {
 				for (const each of inner.type === 'Deck' ? inner.contents : [inner]) {
 					const face = faceOf(each);
-					if (face && face.t !== 'paper' && face.t !== 'objective' && face.t !== 'turningPoint') into.push(card(each));
+					if (face && face.t !== 'paper' && face.t !== 'objective' && face.t !== 'turningPoint') {
+						into.push(card(each));
+						if (bag.nickname === 'The Reserve')
+							problems.push(
+								`Card ${each.guid} (${face.t}) lies in the bag "The Reserve", not the trash: the import treats it as destroyed`,
+							);
+					}
 				}
 			} else emptyOut(inner, into);
 		}
