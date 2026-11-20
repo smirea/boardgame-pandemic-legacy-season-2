@@ -371,6 +371,20 @@ describe('exploring', () => {
 		expect(worldOf(actor).campaign.opened).toContain('door:59');
 	});
 
+	test('with all six shelters placed, building one moves a placed shelter', () => {
+		const actor = late((world, game) => {
+			game.players[A]!.location = city('cairo');
+			game.pieces.shelter = 0;
+			game.locations[city('london')]!.shelter = true;
+			give(world, A, cityCards(world, 'baghdad'));
+		});
+		const [baghdad] = cityCards(worldOf(actor), 'baghdad');
+		expect(refuses(actor, { a: 'buildShelter', card: baghdad! })).toBe('Every shelter is placed: pick one to move');
+		act(actor, { a: 'buildShelter', card: baghdad!, moveFrom: city('london') });
+		expect(gameOf(actor).locations[city('cairo')]!.shelter).toBe(true);
+		expect(gameOf(actor).locations[city('london')]!.shelter).toBe(false);
+	});
+
 	test('the Quartermaster builds a shelter with a City card of any colour', () => {
 		const actor = late((world, game) => {
 			game.players[A]!.location = city('cairo');

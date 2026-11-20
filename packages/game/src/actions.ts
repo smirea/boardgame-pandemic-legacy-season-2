@@ -49,7 +49,7 @@ export type Action =
 	| { a: 'transmit'; card: CardId; to: SeatId }
 	| { a: 'monitor'; frequency: number }
 	| { a: 'broadcast'; from: CityId; to: CityId }
-	| { a: 'buildShelter'; card?: CardId }
+	| { a: 'buildShelter'; card?: CardId; moveFrom?: CityId }
 	| { a: 'administratorMove'; pawn: SeatId; to: SeatId }
 	| { a: 'sabotage'; card: CardId; city: CityId }
 	| { a: 'broker'; card: CardId; take: CardId }
@@ -598,9 +598,11 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 		},
 	},
 	buildShelter: {
-		check(ctx, { card }) {
+		check(ctx, { card, moveFrom }) {
 			if (ctx.loc.shelter) return 'There is already a shelter here';
-			if (ctx.game.pieces.shelter === 0) return 'No shelter pieces left';
+			if (ctx.game.pieces.shelter === 0 && !(moveFrom && ctx.game.locations[moveFrom]?.shelter))
+				return 'Every shelter is placed: pick one to move';
+			if (ctx.game.pieces.shelter > 0 && moveFrom) return 'A shelter is still in the box';
 			if (trait(ctx, 'vectorControl')) return ok;
 			const held = card ? cityCard(ctx, card) : null;
 			return ctx.def.kind === 'city' &&
@@ -609,9 +611,10 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 				? ok
 				: "Discard a City card of this city's colour";
 		},
-		apply(ctx, { card }) {
+		apply(ctx, { card, moveFrom }) {
 			if (card && !trait(ctx, 'vectorControl')) discardFromHand(ctx.game, ctx.seat, card);
-			ctx.game.pieces.shelter -= 1;
+			if (moveFrom) ctx.game.locations[moveFrom]!.shelter = false;
+			else ctx.game.pieces.shelter -= 1;
 			ctx.loc.shelter = true;
 			log(ctx.game, { t: 'structure', city: ctx.here, structure: 'shelter' });
 		},

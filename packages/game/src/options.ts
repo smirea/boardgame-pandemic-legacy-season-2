@@ -170,10 +170,17 @@ function candidateActions(world: World, seat: SeatId): Action[] {
 					});
 			}
 		}
-		const shelterCard = held.find(card => cityDef(card.city).color === def.color);
-		if (shelterCard) candidates.push({ a: 'buildShelter', card: shelterCard.id });
 	}
-	candidates.push({ a: 'buildShelter' });
+	// With every shelter placed, one is moved: each placed shelter is a way to build.
+	const shelterMoves =
+		game.pieces.shelter > 0
+			? [undefined]
+			: (Object.keys(game.locations) as CityId[]).filter(id => game.locations[id]!.shelter);
+	for (const moveFrom of shelterMoves) {
+		const moved = moveFrom ? { moveFrom } : {};
+		candidates.push({ a: 'buildShelter', ...moved });
+		for (const card of held) candidates.push({ a: 'buildShelter', card: card.id, ...moved });
+	}
 	for (const route of pack.reconRoutes) {
 		if (route.city !== here || !campaign.routes.includes(route.id)) continue;
 		for (const count of [route.count - 1, route.count, route.count + 1])

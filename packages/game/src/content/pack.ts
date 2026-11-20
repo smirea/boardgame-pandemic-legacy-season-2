@@ -1025,7 +1025,7 @@ export const pack: ContentPack = {
 		maxHollowPerCity: 3,
 		supplyByMonth: [36, 36, 33, 30, 27, 24, 21, 18, 15, 12, 8, 4, 0],
 		requiredByMonth: [1, 2, 2, 3, 3, 3, 3, 3, 3, 3, 2, 1, 1],
-		pieces: { center: 9, tower: 6, shelter: 5, hollow: 24 },
+		pieces: { center: 9, tower: 6, shelter: 6, hollow: 24 },
 		produceCards: 8,
 		produceBoxes: 2,
 		characterSlots: 4,
