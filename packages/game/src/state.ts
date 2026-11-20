@@ -177,6 +177,7 @@ export type Decision =
 	| { t: 'freeEdge'; seat: SeatId; kind: 'land' | 'sea'; ignoreRegions: boolean }
 	| { t: 'removeHollow'; seat: SeatId; amount: number }
 	| { t: 'quarantineCard'; seat: SeatId }
+	| { t: 'giveCard'; seat: SeatId }
 	/** Any player may discard a card to end the Infect step early. */
 	| { t: 'cordon' }
 	/** An Epidemic has struck and its discard pile is about to go back on the deck. Held open for a player with Resilience. */

@@ -235,6 +235,10 @@ function resolveSearch(ctx: Ctx, result: SearchResult, card: CardId) {
 			if (campaign.locations[ctx.here]!.infested)
 				log(game, { t: 'note', text: `${cityDef(ctx.here).name} was already infested, so nothing changes` });
 			campaign.locations[ctx.here]!.infested = true;
+			if (result.opens) openSeal(ctx.world, result.opens, false);
+			return;
+		case 'giveCard':
+			if (ctx.me.hand.length && ctx.game.seats.length > 1) game.pending.push({ t: 'giveCard', seat: ctx.seat });
 			return;
 		case 'nothing':
 			return;
@@ -424,10 +428,12 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 				1,
 				route.count + (trait(ctx, 'reconExtraCard') ? 1 : 0) - (trait(ctx, 'outrider') ? 1 : 0),
 			);
-			if (cards.length !== needed || !distinct(cards)) return `Needs ${needed} ${route.color} cards`;
-			const paid = cards.map(card => cityCard(ctx, card));
-			if (paid.some((card, index) => !card || cardValue(ctx.campaign, cards[index]!, route.color, 'recon') === 0))
+			const values = cards.map(card => (cityCard(ctx, card) ? cardValue(ctx.campaign, card, route.color, 'recon') : 0));
+			const total = values.reduce((sum, value) => sum + value, 0);
+			// Every card counts, and none is spare: the Double Agent counts as two.
+			if (!distinct(cards) || values.includes(0) || total < needed || total - Math.min(...values) >= needed)
 				return `Needs ${needed} ${route.color} cards`;
+			const paid = cards.map(card => cityCard(ctx, card));
 			if (route.unique && new Set(paid.map(card => card!.city)).size !== paid.length)
 				return 'Each card must name a different city';
 			return ok;
@@ -591,7 +597,9 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 			if (ctx.game.pieces.shelter === 0) return 'No shelter pieces left';
 			if (trait(ctx, 'vectorControl')) return ok;
 			const held = card ? cityCard(ctx, card) : null;
-			return ctx.def.kind === 'city' && held && cityDef(held.city).color === ctx.def.color
+			return ctx.def.kind === 'city' &&
+				held &&
+				(trait(ctx, 'quartermaster') || cityDef(held.city).color === ctx.def.color)
 				? ok
 				: "Discard a City card of this city's colour";
 		},

@@ -23,6 +23,8 @@ export const EVENT_ICON: Record<EventId, string> = {
 	stockUp: 'M2.5 9.5V14h11V9.5M8 2v8.5M5 7.5l3 3 3-3',
 	cardSwap: 'M3 5.5h10M10 2.5l3 3-3 3M13 10.5H3M6 7.5l-3 3 3 3',
 	surplus: 'M7 3.5l4.5 2.5v5L7 13.5 2.5 11V6zM2.5 6 7 8.5 11.5 6M7 8.5v5M13.5 1.5v4M11.5 3.5h4',
+	riotControl: 'M3 2.5h10v5c0 3-2.2 5-5 6-2.8-1-5-3-5-6zM5.5 6.5h5M5.5 9h5',
+	mobileShelters: 'M1.5 9 5 5.5 8.5 9M2.5 8v4.5h5V8M7.5 9 11 5.5 14.5 9M8.5 8v4.5h5V8',
 };
 
 export const COMPANION_ICON: Record<CompanionId, string> = {
@@ -39,6 +41,10 @@ export const COMPANION_ICON: Record<CompanionId, string> = {
 	trader: 'M2.5 5.5h9M9 3l2.5 2.5L9 8M13.5 10.5h-9M7 8l-2.5 2.5L7 13',
 	porter:
 		'M2 10.5h8.5V6H2zM10.5 8h2.5l1 2.5M4 12.5a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM11.5 12.5a1 1 0 1 0 0-2 1 1 0 0 0 0 2z',
+	quartermaster: 'M2.5 8.5 8 3l5.5 5.5M4 7v6.5h8V7M6.5 10.5h3',
+	doubleAgent:
+		'M5.5 3.5a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM10.5 3.5a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM2 13c.6-2.2 2-3.5 3.5-3.5S8.4 10.8 9 13M7 13c.6-2.2 2-3.5 3.5-3.5S13.4 10.8 14 13',
+	informant: 'M2.5 6.5a5.5 5.5 0 0 1 11 0v2a5.5 5.5 0 0 1-11 0zM5 7.5h2M9 7.5h2M6 11h4',
 };
 
 export const PRODUCE_ICON = 'M3 3h10v10H3zM3 8h10M8 3v10';

@@ -109,7 +109,10 @@ export type CompanionId =
 	| 'shelterWright'
 	| 'marksman'
 	| 'trader'
-	| 'porter';
+	| 'porter'
+	| 'quartermaster'
+	| 'doubleAgent'
+	| 'informant';
 
 export type EventId =
 	| 'airlift'
@@ -132,7 +135,9 @@ export type EventId =
 	| 'exile'
 	| 'antidote'
 	| 'mentor'
-	| 'surplus';
+	| 'surplus'
+	| 'riotControl'
+	| 'mobileShelters';
 
 export type CityImprovementId = 'double' | 'triple' | 'wild' | 'redWild';
 export type InfectionImprovementId = 'wellStocked' | 'lockdown' | 'rebirth' | 'cordon';
@@ -231,13 +236,16 @@ export type SearchResult =
 	| { t: 'stockpile'; amount: number }
 	| { t: 'actions'; amount: number }
 	| { t: 'retrieve' }
+	/** Give a card from hand to any other player. */
+	| { t: 'giveCard' }
 	| { t: 'quarantineCard' }
 	| { t: 'removeHollow'; amount: number }
 	| { t: 'freeEdge'; kind: EdgeKind }
 	/** Opens a door or package, or gives 1 action when it is already open. */
 	| { t: 'discover'; seal: Seal }
 	| { t: 'companion'; companion: CompanionId }
-	| { t: 'infest' }
+	/** Marks the city infested, and opens a door when one is named. */
+	| { t: 'infest'; opens?: Seal }
 	| { t: 'nothing' };
 
 export type SearchBoxDef = { scope: 'land' | 'sea'; result: SearchResult };

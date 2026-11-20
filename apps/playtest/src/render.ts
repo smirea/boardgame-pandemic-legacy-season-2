@@ -61,6 +61,8 @@ function pendingLine(world: World, pending: Decision): string {
 			return `${who} may remove up to ${pending.amount} Hollow Men`;
 		case 'quarantineCard':
 			return `${who} may set aside an Infection card from the discard pile`;
+		case 'giveCard':
+			return `${who} may give a card from their hand to another player`;
 		case 'intensify':
 			return 'An Epidemic just struck and its discard pile is about to be reshuffled onto the deck. A player holding Resilience or Mass Inoculation may play it now. Otherwise the active player passes with `do decide:skip`';
 		case 'epidemicDrawn':
@@ -136,6 +138,7 @@ const SEARCH_FINDS: Record<string, string> = {
 	actions: 'extra actions this turn',
 	retrieve: 'a card to take from the Player discard pile (a choice follows)',
 	quarantineCard: 'the chance to set an Infection card aside until game end (a choice follows)',
+	giveCard: 'a card to give to another player (a choice follows)',
 	removeHollow: 'the chance to remove Hollow Men (a choice follows)',
 	freeEdge: 'a free supply line or sea lane from here (a choice follows)',
 	discover: 'a lead (the next line says what it opened, or that it was already followed)',

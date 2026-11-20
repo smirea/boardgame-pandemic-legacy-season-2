@@ -351,7 +351,8 @@ export function legalPlays(world: World, phase: Phase): { seat: SeatId; card: Ca
 						if (edge.kind === 'sea') plays.push({ e: 'openWaters', to: edge.a }, { e: 'openWaters', to: edge.b });
 					break;
 				case 'safeHouses':
-					for (const city of onGrid) plays.push({ e: 'safeHouses', cities: [city] });
+				case 'mobileShelters':
+					for (const city of onGrid) plays.push({ e: id, cities: [city] });
 					break;
 				case 'purge':
 				case 'purifier':
@@ -375,6 +376,8 @@ export function legalPlays(world: World, phase: Phase): { seat: SeatId; card: Ca
 				case 'antidote':
 				case 'surplus':
 				case 'medic':
+				case 'riotControl':
+				case 'informant':
 					plays.push({ e: id });
 					break;
 				default:
@@ -436,6 +439,10 @@ export function legalDecides(world: World): Decide[] {
 				break;
 			case 'quarantineCard':
 				for (const card of game.infectionDiscard) candidates.push({ d: 'quarantineCard', card });
+				break;
+			case 'giveCard':
+				for (const card of player(game, pending.seat).hand)
+					for (const to of game.seats) if (to !== pending.seat) candidates.push({ d: 'giveCard', card, to });
 				break;
 			case 'shield':
 				for (const seat of game.seats)
@@ -516,6 +523,7 @@ export function cardTargets(world: World, phase: Phase, card: CardId): { cities:
 					cities.add(play.city);
 					break;
 				case 'safeHouses':
+				case 'mobileShelters':
 				case 'handout':
 				case 'cleanse':
 					for (const city of play.cities) cities.add(city);

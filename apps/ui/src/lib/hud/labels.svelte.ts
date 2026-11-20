@@ -396,6 +396,8 @@ export function decideLabel(world: World, decide: Decide): string {
 			return `Remove one from ${decide.cities.map(cityName).join(', ')}`;
 		case 'quarantineCard':
 			return `Set aside ${cardName(world, decide.card)}`;
+		case 'giveCard':
+			return `Give ${cardName(world, decide.card)} to ${seatName(world, decide.to)}`;
 		case 'shield':
 			return `${seatName(world, decide.seat)} discards ${cardName(world, decide.card)}`;
 		case 'skip':
@@ -411,6 +413,7 @@ const DECISION_TITLES: Record<Decision['t'], string> = {
 	freeEdge: 'Draw a free route from here',
 	removeHollow: 'Remove Hollow Men',
 	quarantineCard: 'Set an Infection card aside until game end',
+	giveCard: 'Give a card to another player',
 	shield: 'Discard a matching card to keep the cube?',
 	cordon: 'Discard any card to stop the rest of this Infect step?',
 	intensify: 'An Epidemic struck. Play Resilience or Mass Inoculation now, or pass to reshuffle the discard pile',

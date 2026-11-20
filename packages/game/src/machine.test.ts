@@ -336,9 +336,51 @@ describe('exploring', () => {
 		const searched = worldOf(found).campaign.playerCards[gameOf(found).players[A]!.hand[0]!];
 		expect(searched).toMatchObject({ kind: 'city', city: 'denver', companion: 'medic' });
 		expect(worldOf(searching({ t: 'infest' })).campaign.locations[city('denver')]!.infested).toBe(true);
+		const santiago = searching({ t: 'infest', opens: { t: 'door', id: '50' } }, world => {
+			world.campaign.opened = world.campaign.opened.filter(key => key !== 'door:50');
+		});
+		expect(worldOf(santiago).campaign.locations[city('denver')]!.infested).toBe(true);
+		expect(worldOf(santiago).campaign.opened).toContain('door:50');
 		const repeat = searching({ t: 'discover', seal: { t: 'door', id: '20' } });
 		expect(gameOf(repeat).actionsLeft).toBe(4);
 		expect(refuses(repeat, { a: 'search', card: gameOf(repeat).players[A]!.hand[0]!, box: 0 })).toContain('used up');
+	});
+
+	test('a search that gives a card hands one from the searcher to another player of their choice', () => {
+		const giving = searching({ t: 'giveCard' }, world => give(world, A, cityCards(world, 'tokyo')));
+		expect(gameOf(giving).pending[0]).toMatchObject({ t: 'giveCard', seat: A });
+		const tokyo = cityCards(worldOf(giving), 'tokyo')[0]!;
+		send(giving, { type: 'DECIDE', decide: { d: 'giveCard', card: tokyo, to: B } });
+		expect(gameOf(giving).players[B]!.hand).toContain(tokyo);
+		expect(gameOf(giving).players[A]!.hand).not.toContain(tokyo);
+	});
+
+	test('the Double Agent counts as two red cards for Recon, with no card to spare', () => {
+		const actor = late((world, game) => {
+			world.campaign.opened = world.campaign.opened.filter(key => key !== 'door:59');
+			game.players[A]!.location = city('jakarta');
+			game.locations[city('jakarta')]!.center = true;
+			const [tokyo] = cityCards(world, 'tokyo');
+			(world.campaign.playerCards[tokyo!] as { companion: unknown }).companion = 'doubleAgent';
+			give(world, A, [tokyo!, ...cityCards(world, 'manila')]);
+		});
+		const [tokyo] = cityCards(worldOf(actor), 'tokyo');
+		const [manila] = cityCards(worldOf(actor), 'manila');
+		expect(refuses(actor, { a: 'recon', route: 'coral-sea', cards: [tokyo!, manila!] })).toContain('Needs 2');
+		act(actor, { a: 'recon', route: 'coral-sea', cards: [tokyo!] });
+		expect(worldOf(actor).campaign.opened).toContain('door:59');
+	});
+
+	test('the Quartermaster builds a shelter with a City card of any colour', () => {
+		const actor = late((world, game) => {
+			game.players[A]!.location = city('cairo');
+			const [tokyo] = cityCards(world, 'tokyo');
+			(world.campaign.playerCards[tokyo!] as { companion: unknown }).companion = 'quartermaster';
+			give(world, A, [tokyo!, ...cityCards(world, 'london')]);
+		});
+		const [london] = cityCards(worldOf(actor), 'london');
+		act(actor, { a: 'buildShelter', card: london! });
+		expect(gameOf(actor).locations[city('cairo')]!.shelter).toBe(true);
 	});
 
 	test('a search result that asks for a choice takes effect once chosen: retrieve, set aside, remove Hollow Men or a free route', () => {
@@ -738,6 +780,11 @@ describe('events and companions', () => {
 		give(world, C, cityCards(world, 'tokyo'));
 		stackInfection(world, []);
 		game.infectionDiscard = game.infectionDeck.order.splice(0, 2);
+		const utopia = Object.values(world.campaign.infectionCards).find(
+			card => card.kind === 'city' && card.city === 'utopia',
+		)!.id;
+		game.infectionDeck.order = game.infectionDeck.order.filter(card => card !== utopia);
+		game.infectionDiscard.push(utopia);
 		game.infectionDeck.strata = [game.infectionDeck.order.toSorted()];
 	};
 	const checks: Record<string, (before: World, after: World) => void> = {
@@ -778,6 +825,9 @@ describe('events and companions', () => {
 		purifier: (_, after) => expect(after.game!.locations[city('cairo')]!.plague).toBe(0),
 		shelterWright: (before, after) => expect(after.game!.pieces.shelter).toBe(before.game!.pieces.shelter - 1),
 		marksman: (_, after) => expect(after.game!.locations[city('lagos')]!.hollow).toBe(0),
+		riotControl: (before, after) => expect(after.game!.gameEndArea).toHaveLength(before.game!.gameEndArea.length + 1),
+		informant: (before, after) => expect(after.game!.gameEndArea).toHaveLength(before.game!.gameEndArea.length + 1),
+		mobileShelters: (before, after) => expect(after.game!.pieces.shelter).toBe(before.game!.pieces.shelter - 1),
 	};
 
 	const setup: Partial<Record<EventId, (world: World) => void>> = {

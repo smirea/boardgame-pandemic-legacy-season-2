@@ -55,9 +55,19 @@ export type Play =
 	| { e: 'medic' }
 	| { e: 'purifier'; city: CityId }
 	| { e: 'shelterWright'; city: CityId }
-	| { e: 'marksman'; city: CityId };
+	| { e: 'marksman'; city: CityId }
+	| { e: 'riotControl' }
+	| { e: 'informant' }
+	| { e: 'mobileShelters'; cities: CityId[] };
 
 const ok = null;
+
+/** The Utopia Infection cards in the discard pile, which Riot Control and the Informant set aside. */
+const utopiaDiscards = (world: World) =>
+	world.game!.infectionDiscard.filter(id => {
+		const card = world.campaign.infectionCards[id];
+		return card?.kind === 'city' && card.city === 'utopia';
+	});
 const HANDOUT = 2;
 const SPREAD_OUT = 3;
 const CLEANSE = 2;
@@ -240,6 +250,16 @@ export function checkPlay(world: World, seat: SeatId, card: CardId, play: Play, 
 				: 'Pick a location without a shelter';
 		case 'marksman':
 			return (game.locations[play.city]?.hollow ?? 0) > 0 ? ok : 'No Hollow Men there';
+		case 'riotControl':
+		case 'informant':
+			return utopiaDiscards(world).length > 0 ? ok : 'No Utopia Infection cards in the discard pile';
+		case 'mobileShelters': {
+			const fresh = play.cities.every(city => grid(campaign).has(city) && !game.locations[city]!.shelter);
+			const count = play.cities.length;
+			return count >= 1 && count <= 2 && new Set(play.cities).size === count && fresh && game.pieces.shelter >= count
+				? ok
+				: 'Pick up to 2 grid locations without a shelter';
+		}
 	}
 }
 
@@ -267,6 +287,7 @@ function playDetail(world: World, play: Play): string {
 		case 'openWaters':
 			return `${cityDef(world.game!.players[world.game!.active]!.location).name} to ${cityDef(play.to).name}`;
 		case 'safeHouses':
+		case 'mobileShelters':
 		case 'handout':
 		case 'cleanse':
 			return play.cities.map(id => cityDef(id).name).join(', ');
@@ -400,6 +421,14 @@ function resolvePlay(world: World, seat: SeatId, card: CardId, play: Play) {
 		case 'openWaters':
 			addEdge(world, player(game, game.active).location, play.to, 'sea', true);
 			return;
+		case 'riotControl':
+		case 'informant':
+			for (const target of utopiaDiscards(world).slice(0, 4)) {
+				game.infectionDiscard.splice(game.infectionDiscard.indexOf(target), 1);
+				game.gameEndArea.push(target);
+			}
+			return;
+		case 'mobileShelters':
 		case 'safeHouses':
 			for (const city of play.cities) {
 				game.locations[city]!.shelter = true;
@@ -454,6 +483,7 @@ export type Decide =
 	| { d: 'freeEdge'; to: CityId }
 	| { d: 'removeHollow'; cities: CityId[] }
 	| { d: 'quarantineCard'; card: CardId }
+	| { d: 'giveCard'; card: CardId; to: SeatId }
 	| { d: 'shield'; seat: SeatId; card: CardId }
 	| { d: 'cordon'; seat: SeatId; card: CardId }
 	| { d: 'skip' };
@@ -463,6 +493,7 @@ const PASSED: Partial<Record<string, string>> = {
 	freeEdge: 'no free line drawn',
 	removeHollow: 'no Hollow Men removed',
 	quarantineCard: 'no Infection card quarantined',
+	giveCard: 'no card given',
 	cordon: 'the Cordon was not used',
 };
 
@@ -471,6 +502,7 @@ const OPTIONAL = new Set([
 	'freeEdge',
 	'removeHollow',
 	'quarantineCard',
+	'giveCard',
 	'shield',
 	'cordon',
 	'intensify',
@@ -541,6 +573,11 @@ export function checkDecide(world: World, decide: Decide): string | null {
 			return game.infectionDiscard.includes(decide.card) && campaign.infectionCards[decide.card]?.kind === 'city'
 				? ok
 				: 'Pick a City card from the Infection discard pile';
+		case 'giveCard': {
+			const from = (pending as { seat: SeatId }).seat;
+			if (!player(game, from).hand.includes(decide.card)) return 'Pick a card from your hand';
+			return decide.to !== from && game.seats.includes(decide.to) ? ok : 'Pick another player';
+		}
 		case 'cordon':
 			return game.players[decide.seat]?.hand.includes(decide.card) ? ok : 'Discard a card from a hand';
 		case 'shield': {
@@ -625,6 +662,12 @@ export function applyDecide(world: World, decide: Decide) {
 				log(game, { t: 'note', text: `A Hollow Man was removed from ${cityDef(city).name}` });
 			}
 			return;
+		case 'giveCard': {
+			player(game, seat).hand = player(game, seat).hand.filter(card => card !== decide.card);
+			player(game, decide.to).hand.push(decide.card);
+			log(game, { t: 'note', text: `${cardLabel(campaign, decide.card)} was given to another player` });
+			return;
+		}
 		case 'quarantineCard': {
 			game.infectionDiscard.splice(game.infectionDiscard.indexOf(decide.card), 1);
 			game.gameEndArea.push(decide.card);

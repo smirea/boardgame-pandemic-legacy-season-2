@@ -320,6 +320,7 @@ export function universe(world: World): { key: string; live: boolean }[] {
 			'freeEdge',
 			'removeHollow',
 			'quarantineCard',
+			'giveCard',
 			'shield',
 			'cordon',
 			'skip',

@@ -173,6 +173,7 @@ export function cardValue(campaign: Campaign, id: CardId, color: Color, purpose:
 	if (card.improvement === 'wild') return 1;
 	if (card.improvement === 'redWild' && color === 'red') return 1;
 	if (cityDef(card.city).color !== color) return 0;
+	if (purpose === 'recon' && card.companion === 'doubleAgent') return 2;
 	if (purpose === 'build' && card.improvement === 'double') return 2;
 	if (purpose === 'build' && card.improvement === 'triple') return 3;
 	return 1;
