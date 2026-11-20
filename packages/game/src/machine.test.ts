@@ -1551,6 +1551,31 @@ test('opening a package, even by a perimeter report, opens the doors its report 
 	expect(world.campaign.forced).toEqual(['package:2']);
 });
 
+test('the first pawn at the eastern Pacific haven opens Package 6: 15 new cubes, one Lab card in hand and two in the discard pile', () => {
+	const actor = late((world, game) => {
+		world.campaign.opened = world.campaign.opened.filter(key => key !== 'package:6');
+		world.campaign.playerCards = Object.fromEntries(
+			Object.entries(world.campaign.playerCards).filter(
+				([, card]) => card.kind !== 'event' || card.event !== 'surplus',
+			),
+		);
+		game.players[A]!.location = city('lima');
+		world.campaign.edges.push({ a: city('lima'), b: city('haven-eastern-pacific'), kind: 'sea' });
+		world.campaign.locations[city('haven-eastern-pacific')]!.revealed = true;
+	});
+	const before = gameOf(actor);
+	act(actor, { a: 'drive', to: city('haven-eastern-pacific') });
+	const labs = (ids: CardId[]) =>
+		ids.filter(id => {
+			const card = worldOf(actor).campaign.playerCards[id];
+			return card?.kind === 'event' && card.event === 'surplus';
+		});
+	expect(worldOf(actor).campaign.opened).toContain('package:6');
+	expect(gameOf(actor).stockpile).toBe(before.stockpile + 15);
+	expect(labs(gameOf(actor).players[A]!.hand)).toHaveLength(1);
+	expect(labs(gameOf(actor).playerDiscard)).toHaveLength(2);
+});
+
 test('the canonical tabletop campaign still builds against the pack, at the August lobby with no invariant broken', () => {
 	const save = parseSave(JSON.parse(JSON.stringify(tabletopSave())));
 	expect(save.phase).toBe('lobby');

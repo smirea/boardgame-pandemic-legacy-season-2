@@ -137,13 +137,13 @@ const seals: SealDef[] = [
 			{ t: 'scar', scar: 'searchDiscard' },
 			{ t: 'scar', scar: 'lineExtraCube' },
 		],
-		[{ t: 'event', event: 'purge', mode: 'unrationed' }],
+		[{ t: 'event', event: 'purge', mode: 'unrationed', now: ['hand'] }],
 	),
 	sealed(
 		pkg(2),
 		'Middle East and South Asia',
 		[...opens('62', '53', 'F', '14'), { t: 'gather', cards: 4 }],
-		[{ t: 'event', event: 'mentor', mode: 'unrationed' }],
+		[{ t: 'event', event: 'mentor', mode: 'unrationed', now: ['hand'] }],
 	),
 	sealed(
 		pkg(3),
@@ -155,13 +155,13 @@ const seals: SealDef[] = [
 			{ t: 'permanentStructure', structure: 'shelter', copies: 5 },
 			{ t: 'infectionImprovement', improvement: 'rebirth', copies: 2 },
 		],
-		[{ t: 'event', event: 'safeHouses', mode: 'unrationed' }],
+		[{ t: 'event', event: 'safeHouses', mode: 'unrationed', now: ['hand'] }],
 	),
 	sealed(
 		pkg(4),
 		'Europe',
 		[...opens('64'), { t: 'action', action: 'shuttle' }],
-		[{ t: 'event', event: 'exile', mode: 'unrationed' }],
+		[{ t: 'event', event: 'exile', mode: 'unrationed', now: ['hand'] }],
 	),
 	sealed(
 		pkg(5),
@@ -172,13 +172,13 @@ const seals: SealDef[] = [
 			{ t: 'ability', ability: 'outrider' },
 			{ t: 'ability', ability: 'foreman' },
 		],
-		[{ t: 'event', event: 'stockUp', mode: 'unrationed' }],
+		[{ t: 'event', event: 'stockUp', mode: 'unrationed', now: ['hand'] }],
 	),
 	sealed(pkg(6), 'Eastern Pacific haven reached', [
 		{ t: 'action', action: 'inoculate' },
 		{ t: 'rule', rule: 'storage' },
-		{ t: 'stockpileBonus', amount: 15 },
-		{ t: 'event', event: 'surplus', mode: 'permanent', copies: 3 },
+		{ t: 'stockpileBonus', amount: 15, fresh: true },
+		{ t: 'event', event: 'surplus', mode: 'permanent', copies: 3, now: ['hand', 'discard', 'discard'] },
 	]),
 	sealed(
 		pkg(7),
@@ -189,13 +189,13 @@ const seals: SealDef[] = [
 			{ t: 'action', action: 'transmit' },
 			{ t: 'permanentStructure', structure: 'tower', copies: 4 },
 		],
-		[{ t: 'event', event: 'antidote', mode: 'unrationed' }],
+		[{ t: 'event', event: 'antidote', mode: 'unrationed', now: ['hand'] }],
 	),
 	sealed(
 		pkg(8),
 		'Utopia',
 		[region('utopia', ['shanghai', 'utopia', 'land']), { t: 'gather', cards: 4 }, ...opens('61')],
-		[{ t: 'event', event: 'riotControl', mode: 'unrationed' }],
+		[{ t: 'event', event: 'riotControl', mode: 'unrationed', now: ['hand'] }],
 	),
 
 	sealed(door('A'), 'Forsaken cities', [{ t: 'rule', rule: 'forsaken' }, ...opens('12', '50')]),
@@ -213,7 +213,10 @@ const seals: SealDef[] = [
 	aid('Y', 'Hollow Men setup marker'),
 	aid('Z', 'Summit'),
 
-	sealed(door('11'), 'Indian Ocean haven reached', [{ t: 'stockpileBonus', amount: 15 }]),
+	sealed(door('11'), 'Indian Ocean haven reached', [
+		{ t: 'actions', amount: 4 },
+		{ t: 'stockpileBonus', amount: 15 },
+	]),
 	aid('12', 'Forsaken cities legend'),
 	aid('13', 'Lab breakthroughs'),
 	aid('14', 'Infested cities legend'),

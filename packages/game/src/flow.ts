@@ -154,6 +154,7 @@ export function createGame(world: World, seating: { seat: SeatId; character: Cha
 		centersBuilt: 0,
 		searches: 0,
 		connectedThisGame: [],
+		cubesAdded: 0,
 		outcome: null,
 		log: [],
 		nextSeq: 1,
@@ -353,7 +354,7 @@ export function movePawn(world: World, seat: SeatId, to: CityId, by: string): bo
 		game.pending.push({ t: 'discard', seat, count: 1 });
 	const destination = cityDef(to);
 	if (destination.kind === 'haven' && destination.lost) setProgress(world, 'lostHaven', 1);
-	if (destination.arrival) openSeal(world, destination.arrival, false);
+	if (destination.arrival) openSeal(world, destination.arrival, false, seat);
 	if (characterOf(world, seat).carrier && to === pack.sampleTo && game.locations[to]!.center) {
 		campaign.sampleDelivered = true;
 		setProgress(world, 'deliverSample', 1);

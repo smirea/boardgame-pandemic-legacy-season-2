@@ -40,6 +40,7 @@
 		assemble: ['infectionDeck', 'box'],
 		freeAbilityUnits: ['box'],
 		stockpileBonus: ['map'],
+		actions: ['actions', 'box'],
 	};
 	const putAway = (unlock: BriefedUnlock) =>
 		unlock.t === 'event' && unlock.mode === 'rationed' ? ['box'] : PUT_AWAY[unlock.t];

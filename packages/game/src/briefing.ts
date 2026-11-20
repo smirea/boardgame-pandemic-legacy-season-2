@@ -59,6 +59,7 @@ const HEADING = {
 	assemble: 'Hollow Men',
 	freeAbilityUnits: 'Production',
 	stockpileBonus: 'Stockpile',
+	actions: 'Right now',
 } satisfies Partial<Record<Unlock['t'], string>>;
 
 export type BriefedUnlock = Extract<Unlock, { t: keyof typeof HEADING }>;
@@ -239,6 +240,8 @@ function unlockLine(campaign: Campaign, unlock: BriefedUnlock): string | null {
 			return `${unlock.amount} free production units for character abilities. Spend them now, before the supplies go out: what is left then is lost.`;
 		case 'stockpileBonus':
 			return `The stockpile grows by ${unlock.amount} cubes now and at every later setup.`;
+		case 'actions':
+			return `${unlock.amount} extra actions for the player whose turn it is.`;
 		case 'permanentStructure':
 			return `A ${unlock.structure} can be made permanent, so it starts every later game already built.`;
 	}

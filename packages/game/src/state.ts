@@ -249,6 +249,8 @@ export type Game = {
 	centersBuilt: number;
 	searches: number;
 	connectedThisGame: CityId[];
+	/** Supply cubes a package brought into the game after setup. */
+	cubesAdded: number;
 	outcome: { won: boolean; reason: string } | null;
 	log: LogEntry[];
 	nextSeq: number;

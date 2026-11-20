@@ -41,7 +41,7 @@ export function violations(world: World, cubeTotals: Map<number, number>): strin
 		problems.push('infection strata drifted from the deck');
 	if (game.playerDeck.piles.reduce((sum, pile) => sum + pile.size, 0) !== game.playerDeck.order.length)
 		problems.push('player piles drifted from the deck');
-	const total = game.stockpile + game.reserve + cubes;
+	const total = game.stockpile + game.reserve + cubes - game.cubesAdded;
 	const expected = cubeTotals.get(campaign.results.length) ?? total;
 	cubeTotals.set(campaign.results.length, expected);
 	if (total !== expected) problems.push(`cubes leaked: ${total} in play, ${expected} at setup`);

@@ -28,6 +28,7 @@
 		haven: 'Haven',
 		frequencyHint: 'Signal',
 		freeAbilityUnits: 'Units',
+		actions: 'Actions',
 		objectives: 'Objective',
 	};
 

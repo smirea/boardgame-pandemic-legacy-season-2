@@ -224,7 +224,7 @@ function resolveSearch(ctx: Ctx, result: SearchResult, card: CardId) {
 			if (isOpen(campaign, result.seal)) {
 				game.actionsLeft += 1;
 				log(game, { t: 'note', text: 'That lead was already followed: 1 extra action this turn' });
-			} else openSeal(ctx.world, result.seal, false);
+			} else openSeal(ctx.world, result.seal, false, ctx.seat);
 			return;
 		case 'companion': {
 			const searched = campaign.playerCards[card]!;
@@ -235,7 +235,7 @@ function resolveSearch(ctx: Ctx, result: SearchResult, card: CardId) {
 			if (campaign.locations[ctx.here]!.infested)
 				log(game, { t: 'note', text: `${cityDef(ctx.here).name} was already infested, so nothing changes` });
 			campaign.locations[ctx.here]!.infested = true;
-			if (result.opens) openSeal(ctx.world, result.opens, false);
+			if (result.opens) openSeal(ctx.world, result.opens, false, ctx.seat);
 			return;
 		case 'giveCard':
 			if (ctx.me.hand.length && ctx.game.seats.length > 1) game.pending.push({ t: 'giveCard', seat: ctx.seat });
@@ -442,7 +442,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 			const route = pack.reconRoutes.find(candidate => candidate.id === routeId)!;
 			for (const card of cards) discardFromHand(ctx.game, ctx.seat, card);
 			const connectedBefore = ctx.game.connectedThisGame.length;
-			if (route.opens) openSeal(ctx.world, route.opens, false);
+			if (route.opens) openSeal(ctx.world, route.opens, false, ctx.seat);
 			else ctx.campaign.planRecons.push(route.id);
 			for (const objective of route.counts) bump(ctx.world, objective);
 			const joined = ctx.game.connectedThisGame
@@ -571,7 +571,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 				t: 'note',
 				text: `Monitor revealed ${names(revealed)}${keep.length ? `. ${characterOf(ctx.world, ctx.seat).name} kept ${names(keep)}` : ''}. The rest went to the discard pile. An Epidemic revealed this way has no effect`,
 			});
-			if (reward && 'seal' in reward) openSeal(ctx.world, reward.seal, false);
+			if (reward && 'seal' in reward) openSeal(ctx.world, reward.seal, false, ctx.seat);
 			ctx.game.playerDiscard = ctx.game.playerDiscard.filter(id => !keep.includes(id));
 			ctx.me.hand.push(...keep);
 		},

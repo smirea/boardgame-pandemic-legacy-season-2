@@ -274,7 +274,14 @@ export type Unlock =
 	| { t: 'required'; count: number }
 	/** Puts a turning point in play, or with `over` resolves one. */
 	| { t: 'turningPoint'; id: TurningPointId; over?: true }
-	| { t: 'event'; event: EventId; mode: 'rationed' | 'unrationed' | 'permanent'; copies?: number }
+	| {
+			t: 'event';
+			event: EventId;
+			mode: 'rationed' | 'unrationed' | 'permanent';
+			copies?: number;
+			/** Where each new copy goes in a game under way: the opener's hand or the Player discard pile. */
+			now?: ('hand' | 'discard')[];
+	  }
 	/** Stickers: each unlock adds `copies` of one (1 when left out), and a sticker that is placed is gone. */
 	| { t: 'ability'; ability: AbilityId; copies?: number }
 	| { t: 'scar'; scar: ScarId; copies?: number }
@@ -284,7 +291,10 @@ export type Unlock =
 	| { t: 'job'; job: JobId; home: CityId }
 	| { t: 'gather'; cards: number }
 	| { t: 'assemble'; cards: number }
-	| { t: 'stockpileBonus'; amount: number }
+	/** `fresh` cubes are new to the game; otherwise this game's share comes out of the reserve. */
+	| { t: 'stockpileBonus'; amount: number; fresh?: true }
+	/** Extra actions for the active player, now. */
+	| { t: 'actions'; amount: number }
 	| { t: 'freeAbilityUnits'; amount: number }
 	| { t: 'lab'; city: CityId }
 	| { t: 'infest'; city: CityId }

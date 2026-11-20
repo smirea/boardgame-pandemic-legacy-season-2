@@ -17,7 +17,7 @@ import type {
 import { briefUnlock } from './briefing';
 import { settleGrid } from './flow';
 import { cityDef, grid, gridCityCount, hasEdge, hasRule, isForsaken, log, sealDef } from './helpers';
-import type { CardId, CharacterId, CityId } from './ids';
+import type { CardId, CharacterId, CityId, SeatId } from './ids';
 import { shuffle } from './rng';
 import type { Campaign, Character, ExposureBox, World } from './state';
 
@@ -26,10 +26,11 @@ const numbers = pack.numbers;
 const newCardId = (campaign: Campaign, prefix: string) => `${prefix}#${campaign.nextCardId++}` as CardId;
 
 function addEvent(campaign: Campaign, event: EventId, mode: 'rationed' | 'unrationed' | 'permanent', copies = 1) {
-	for (let i = 0; i < copies; i++) {
+	return Array.from({ length: copies }, () => {
 		const id = newCardId(campaign, event);
 		campaign.playerCards[id] = { id, kind: 'event', event, mode };
-	}
+		return id;
+	});
 }
 
 export function newCampaign(seed: number): Campaign {
@@ -171,7 +172,8 @@ export function createCharacter(
 export const isOpen = (campaign: Campaign, seal: Seal) => campaign.opened.includes(sealKey(seal));
 
 /** Opens a package or door that is still sealed, and everything its contents open in turn. */
-export function openSeal(world: World, seal: Seal, forced: boolean) {
+/** `by` is the seat whose recon, search or arrival opened it, who takes what the package hands out. */
+export function openSeal(world: World, seal: Seal, forced: boolean, by?: SeatId) {
 	const { campaign, game } = world;
 	if (isOpen(campaign, seal)) return;
 	const def = sealDef(seal);
@@ -187,7 +189,7 @@ export function openSeal(world: World, seal: Seal, forced: boolean) {
 	});
 	for (const unlock of [...def.unlocks, ...(forced ? [] : (def.reward ?? []))]) {
 		briefUnlock(campaign, unlock);
-		applyUnlock(world, unlock);
+		applyUnlock(world, unlock, by);
 	}
 }
 
@@ -204,7 +206,7 @@ function takeOne<T>(list: T[], value: T) {
 	if (index >= 0) list.splice(index, 1);
 }
 
-export function applyUnlock(world: World, unlock: Unlock) {
+export function applyUnlock(world: World, unlock: Unlock, by?: SeatId) {
 	const { campaign, game } = world;
 	switch (unlock.t) {
 		case 'rule':
@@ -245,8 +247,19 @@ export function applyUnlock(world: World, unlock: Unlock) {
 			if (unlock.over) campaign.turningPoints = campaign.turningPoints.filter(id => id !== unlock.id);
 			else pushUnique(campaign.turningPoints, unlock.id);
 			return;
-		case 'event':
-			return addEvent(campaign, unlock.event, unlock.mode, unlock.copies);
+		case 'event': {
+			const added = addEvent(campaign, unlock.event, unlock.mode, unlock.copies);
+			if (!game) return;
+			added.forEach((id, index) => {
+				const where = unlock.now?.[index];
+				if (where === 'hand' && by) game.players[by]!.hand.push(id);
+				else if (where) game.playerDiscard.push(id);
+			});
+			return;
+		}
+		case 'actions':
+			if (game) game.actionsLeft += unlock.amount;
+			return;
 		case 'ability':
 			return pushCopies(campaign.abilitiesForSale, unlock.ability, unlock.copies);
 		case 'cityImprovement':
@@ -272,8 +285,12 @@ export function applyUnlock(world: World, unlock: Unlock) {
 			return;
 		case 'stockpileBonus':
 			campaign.stockpileBonus += unlock.amount;
-			// The bonus also lands in the game it is found in. The cubes come out of the box, which is the reserve.
-			if (world.game) {
+			// The bonus also lands in the game it is found in: new cubes from the package, or else out of the reserve.
+			if (world.game && unlock.fresh) {
+				world.game.stockpile += unlock.amount;
+				world.game.cubesAdded += unlock.amount;
+				log(world.game, { t: 'note', text: `${unlock.amount} new cubes went into the stockpile` });
+			} else if (world.game) {
 				const now = Math.min(unlock.amount, world.game.reserve);
 				world.game.reserve -= now;
 				world.game.stockpile += now;
@@ -299,7 +316,7 @@ export function applyUnlock(world: World, unlock: Unlock) {
 		case 'frequencyHint':
 			return;
 		case 'open':
-			return openSeal(world, unlock.seal, false);
+			return openSeal(world, unlock.seal, false, by);
 		case 'perimeter':
 			if (isOpen(campaign, unlock.seal)) return;
 			openSeal(world, unlock.seal, true);
