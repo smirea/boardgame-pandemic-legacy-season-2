@@ -23,6 +23,7 @@
 	import { fitText } from '#lib/cards/fit.ts';
 	import MapArt from '#lib/cards/MapArt.svelte';
 	import { inkOn } from '#lib/color.ts';
+	import { eventScan, scan } from '#lib/scans.svelte.ts';
 
 	const hoverCard = getContext<((card: CardId | null) => void) | undefined>('card-hover');
 
@@ -86,6 +87,7 @@
 	disabled={!onclick}
 	{onclick}
 	title={face.text}
+	{@attach scan(() => (card.kind === 'event' ? eventScan(card.event) : []), `card:${card.id}`)}
 >
 	<span class="head">
 		<span class="kicker">{face.kicker}</span>

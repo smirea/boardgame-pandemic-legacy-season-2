@@ -350,6 +350,7 @@ export function sharedCost(world: World, variants: Action[]): Rich | null {
 }
 
 export function playTarget(play: Play): CityId | null {
+	if (play.e === 'encore') return playTarget(play.played);
 	if ('city' in play) return play.city;
 	if (play.e === 'airlift') return play.to;
 	if (play.e === 'openWaters') return play.to;
@@ -363,7 +364,10 @@ export function playGroup(world: World, play: Play): string {
 	if (play.e === 'airlift') return seatName(world, play.pawn);
 	if (play.e === 'spreadOut') return `from ${cityName(play.from)}`;
 	if (play.e === 'resilience' || play.e === 'massInoculation' || play.e === 'exile') return cards(world, play.cards);
-	if (play.e === 'encore') return cardName(world, play.card);
+	if (play.e === 'encore') {
+		const then = playGroup(world, play.played);
+		return then ? `${cardName(world, play.card)}: ${then}` : cardName(world, play.card);
+	}
 	if (play.e === 'mentor') {
 		const ability = pack.abilities.find(entry => entry.id === play.ability)!;
 		return `${seatName(world, play.seat)}: ${ability.name} in slot ${play.slot + 1}`;

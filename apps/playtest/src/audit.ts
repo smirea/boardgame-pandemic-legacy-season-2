@@ -355,7 +355,10 @@ export function universe(world: World): { key: string; live: boolean }[] {
 			live: campaign.actions.includes('search'),
 		})),
 		...['land', 'sea'].map(kind => ({ key: `freeEdge:${kind}`, live: campaign.actions.includes('search') })),
-		...pack.legacyDeck.map(card => ({ key: `legacy:${card.id}`, live: card.month <= campaign.month })),
+		// The Prologue cards are in play from the start and the end marker is never drawn, so neither is read in play.
+		...pack.legacyDeck
+			.filter(card => card.month > 0 && card.kind !== 'end')
+			.map(card => ({ key: `legacy:${card.id}`, live: card.month <= campaign.month })),
 		...pack.objectives
 			.filter(objective => objective.id !== 'prologueCenters')
 			.map(objective => ({ key: `objective:${objective.id}`, live: campaign.objectives.includes(objective.id) })),

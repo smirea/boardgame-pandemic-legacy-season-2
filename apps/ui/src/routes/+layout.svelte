@@ -2,6 +2,7 @@
 	import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
 	import favicon from '#lib/assets/favicon.svg';
 	import { startFeedback } from '#lib/feedback.ts';
+	import ScanPeek from '#lib/hud/ScanPeek.svelte';
 	import { blockAutofill } from '#lib/noAutofill.ts';
 	import { onMount } from 'svelte';
 	import './layout.css';
@@ -27,4 +28,5 @@
 
 <QueryClientProvider client={queryClient}>
 	{@render children()}
+	<ScanPeek />
 </QueryClientProvider>

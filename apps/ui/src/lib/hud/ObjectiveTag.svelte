@@ -21,6 +21,7 @@
 </script>
 
 <script lang="ts">
+	import { objectiveScan, scan } from '#lib/scans.svelte.ts';
 	import { backOut } from 'svelte/easing';
 	import { scale } from 'svelte/transition';
 
@@ -72,6 +73,7 @@
 	disabled={!onclick || done || waived}
 	title={`${objective.name}. ${objective.rule}${objective.mandatory ? ' Mandatory.' : ''}${progress && objective.target > 1 ? ` ${progress} of ${objective.target} done.` : ''}${onclick ? ' Click to mark it impossible this game.' : ''}`}
 	{onclick}
+	{@attach scan(() => objectiveScan(objective.id), `objective:${objective.id}`)}
 >
 	<span class="face">
 		{@render glyph(GLYPH[objective.id])}

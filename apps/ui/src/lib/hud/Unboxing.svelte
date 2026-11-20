@@ -3,6 +3,7 @@
 	import { openings, pack } from '@repo/game';
 	import type { BriefedUnlock, BriefingEntry, Campaign, Opening } from '@repo/game';
 	import { onDestroy, onMount } from 'svelte';
+	import { scan, sealScans, sourceScans } from '#lib/scans.svelte.ts';
 	import BriefPiece from './BriefPiece.svelte';
 	import Briefing from './Briefing.svelte';
 	import Crate from './Crate.svelte';
@@ -204,7 +205,15 @@
 				{#key index}
 					<div class="containers">
 						{#each containers as box, order (order)}
-							<span class="shell {box.t}" data-shell style:--order={order}>
+							<span
+								class="shell {box.t}"
+								data-shell
+								style:--order={order}
+								{@attach scan(
+									() => (box.t === 'card' ? sourceScans(current.from) : sealScans(box)),
+									`unbox:${index}:${order}`,
+								)}
+							>
 								{#if box.t === 'package'}
 									<Crate id={box.id} open={phase !== 'enter'} />
 								{:else if box.t === 'door'}
@@ -215,7 +224,7 @@
 							</span>
 						{/each}
 					</div>
-					<header>
+					<header {@attach scan(() => sourceScans(current.from), `unbox:${index}`)}>
 						<h2>{current.title}</h2>
 						{#if current.text}<p>{current.text}</p>{/if}
 					</header>

@@ -15,6 +15,8 @@ import {
 	neighbours,
 	player,
 	reconned,
+	isColor,
+	infest,
 } from './helpers';
 import type { CardId, CharacterId, CityId, RegionId, SeatId } from './ids';
 import { openSeal } from './legacy';
@@ -107,11 +109,13 @@ export function createGame(world: World, seating: { seat: SeatId; character: Cha
 	) as Record<CityId, GameLocation>;
 	const permanent = (kind: 'center' | 'tower' | 'shelter') =>
 		Object.values(locations).filter(location => location[kind]).length;
-	const bonus = campaign.stockpileBonus + (campaign.losingStreakBonusGames > 0 ? 10 : 0);
 	const track = numbers.supplyByMonth[campaign.month] ?? 0;
-	const stockpile = track + bonus;
 	// Every cube the group owns that the supply track does not put in the stockpile waits in the reserve.
-	const reserve = numbers.supplyByMonth[0]! - track;
+	const unused = numbers.supplyByMonth[0]! - track;
+	// Give Us the Tools moves up to 10 cubes from the reserve into the stockpile.
+	const relief = campaign.losingStreakBonusGames > 0 ? Math.min(10, unused) : 0;
+	const stockpile = track + campaign.stockpileBonus + relief;
+	const reserve = unused - relief;
 	const seats = seating.map(entry => entry.seat);
 	world.game = {
 		seats,
@@ -146,9 +150,15 @@ export function createGame(world: World, seating: { seat: SeatId; character: Cha
 		progress: { ...campaign.carriedProgress },
 		completed: pack.objectives
 			.filter(objective => campaign.objectives.includes(objective.id))
-			.filter(objective => (campaign.carriedProgress[objective.id] ?? 0) >= objective.target)
+			.filter(
+				objective =>
+					(campaign.carriedProgress[objective.id] ?? 0) >= objective.target ||
+					(objective.doneIfReconned && impossibleObjectives(campaign).includes(objective.id)),
+			)
 			.map(objective => objective.id),
-		waived: impossibleObjectives(campaign),
+		waived: impossibleObjectives(campaign).filter(
+			id => !pack.objectives.find(objective => objective.id === id)!.doneIfReconned,
+		),
 		pending: [],
 		skipInfection: false,
 		pickedEvents: [],
@@ -269,6 +279,8 @@ export function expose(world: World, seat: SeatId) {
 		log(game, { t: 'exposure', seat, result: 'worker' });
 		return;
 	}
+	// The Prologue card: characters cannot get exposed.
+	if (world.campaign.month === 0) return;
 	const box = character.exposureTrack[character.exposure] ?? 'skull';
 	character.exposure += 1;
 	log(game, { t: 'exposure', seat, result: box });
@@ -340,7 +352,7 @@ export function movePawn(world: World, seat: SeatId, to: CityId, by: string): bo
 		const guard = has(world, seat, 'soldier')
 			? current.hand.find(id => {
 					const card = campaign.playerCards[id];
-					return card?.kind === 'city' && cityDef(card.city).color === cityDef(from).color;
+					return card?.kind === 'city' && isColor(card, cityDef(from).color);
 				})
 			: undefined;
 		if (guard) {
@@ -359,11 +371,20 @@ export function movePawn(world: World, seat: SeatId, to: CityId, by: string): bo
 	const destination = cityDef(to);
 	if (destination.kind === 'haven' && destination.lost) setProgress(world, 'lostHaven', 1);
 	if (destination.arrival) openSeal(world, destination.arrival, false, seat);
-	if (characterOf(world, seat).carrier && to === pack.sampleTo && game.locations[to]!.center) {
-		campaign.sampleDelivered = true;
-		setProgress(world, 'deliverSample', 1);
-	}
+	checkDelivery(world);
 	return true;
+}
+
+/** The sample is delivered once a carrier stands in Johannesburg and Johannesburg has a supply center, in either order. */
+export function checkDelivery(world: World) {
+	const game = world.game!;
+	if (world.campaign.sampleDelivered || !game.locations[pack.sampleTo]!.center) return;
+	const carrierThere = game.seats.some(
+		seat => player(game, seat).location === pack.sampleTo && characterOf(world, seat).carrier,
+	);
+	if (!carrierThere) return;
+	world.campaign.sampleDelivered = true;
+	setProgress(world, 'deliverSample', 1);
 }
 
 type DrawnCity = { id: CardId; city: CityId };
@@ -472,7 +493,7 @@ export function infectCity(world: World, city: CityId, cardId: CardId) {
 			const canPay = game.seats.some(seat =>
 				player(game, seat).hand.some(id => {
 					const held = campaign.playerCards[id]!;
-					return held.kind === 'city' && cityDef(held.city).color === color;
+					return held.kind === 'city' && isColor(held, color);
 				}),
 			);
 			if (canPay) game.pending.push({ t: 'shield', city, color });
@@ -494,7 +515,7 @@ export function placeHollow(world: World, city: CityId, cardId: CardId) {
 		const record = campaign.locations[city]!;
 		if (!location.shelter) record.population = Math.max(0, record.population - 1);
 		// A city that is forsaken the moment its last person leaves is infested from that moment too.
-		if (isForsaken(campaign, city)) record.infested = true;
+		if (isForsaken(campaign, city)) infest(campaign, city);
 		return;
 	}
 	if (game.pieces.hollow === 0) {

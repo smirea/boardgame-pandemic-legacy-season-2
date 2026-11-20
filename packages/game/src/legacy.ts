@@ -16,7 +16,7 @@ import type {
 } from './content/types';
 import { briefUnlock } from './briefing';
 import { settleGrid } from './flow';
-import { cityDef, grid, gridCityCount, hasEdge, hasRule, isForsaken, log, sealDef } from './helpers';
+import { cityDef, grid, gridCityCount, hasEdge, hasRule, infest, isForsaken, log, sealDef } from './helpers';
 import type { CardId, CharacterId, CityId, SeatId } from './ids';
 import { shuffle } from './rng';
 import type { Campaign, Character, ExposureBox, World } from './state';
@@ -53,7 +53,8 @@ export function newCampaign(seed: number): Campaign {
 			'pickUp',
 			'transfer',
 		],
-		legacyIndex: 0,
+		// The two Prologue cards are in play from the start; they are not drawn.
+		legacyIndex: pack.legacyDeck.findIndex(card => card.month > 0),
 		legacyHalt: null,
 		briefing: [],
 		opened: [],
@@ -121,19 +122,20 @@ export function newCampaign(seed: number): Campaign {
 			campaign.infectionCards[id] = { id, kind: 'city', city: city.id, improvement: null };
 		}
 	}
-	for (let i = 0; i < numbers.produceCards; i++) {
+	for (const boxesLeft of numbers.produceBoxes) {
 		const id = newCardId(campaign, 'produce');
-		campaign.playerCards[id] = { id, kind: 'produce', boxesLeft: numbers.produceBoxes };
+		campaign.playerCards[id] = { id, kind: 'produce', boxesLeft };
 	}
-	const maxEpidemics = Math.max(...numbers.epidemicTable.map(row => row.epidemics));
-	for (let i = 0; i < maxEpidemics; i++) {
-		const id = newCardId(campaign, 'epidemic');
-		campaign.playerCards[id] = { id, kind: 'epidemic' };
-	}
+	for (let i = 0; i < numbers.epidemicTable[0]!.epidemics; i++) addEpidemic(campaign);
 	for (const event of pack.startingEvents) addEvent(campaign, event, 'rationed');
 	for (const route of pack.reconRoutes)
 		if (campaign.locations[route.city]!.revealed && !route.id.startsWith('hidden:')) campaign.routes.push(route.id);
 	return campaign;
+}
+
+function addEpidemic(campaign: Campaign) {
+	const id = newCardId(campaign, 'epidemic');
+	campaign.playerCards[id] = { id, kind: 'epidemic' };
 }
 
 /** Every card shows the same number of boxes, so the boxes past the one that kills are blank and never reached. */
@@ -258,6 +260,8 @@ export function applyUnlock(world: World, unlock: Unlock, by?: SeatId) {
 			});
 			return;
 		}
+		case 'epidemicCard':
+			return addEpidemic(campaign);
 		case 'actions':
 			if (game) game.actionsLeft += unlock.amount;
 			return;
@@ -312,12 +316,10 @@ export function applyUnlock(world: World, unlock: Unlock, by?: SeatId) {
 			campaign.locations[unlock.city]!.lab = true;
 			return;
 		case 'infest':
-			campaign.locations[unlock.city]!.infested = true;
-			return;
+			return infest(campaign, unlock.city);
 		case 'forsake':
 			campaign.locations[unlock.city]!.population = 0;
-			campaign.locations[unlock.city]!.infested = true;
-			return;
+			return infest(campaign, unlock.city);
 		case 'destroy': {
 			const record = campaign.locations[unlock.city]!;
 			Object.assign(record, { revealed: false, population: 0, permanent: [], lab: false });
@@ -362,13 +364,16 @@ export function readLegacy(world: World, phase: 'setup' | 'gameEnd', won?: boole
 	const campaign = world.campaign;
 	if (campaign.month === 0) return;
 	const halt = campaign.legacyHalt;
-	if (phase === 'setup' && halt && (halt.kind === 'pause' || halt.month >= campaign.month)) return;
-	if (phase === 'gameEnd' && halt?.kind !== 'pause') return;
+	if (phase === 'setup' && halt && (halt.kind !== 'stop' || halt.month >= campaign.month)) return;
+	if (phase === 'gameEnd') {
+		if (halt?.kind === 'finale' && !(won || campaign.attempt === 2)) return;
+		if (halt?.kind !== 'pause' && halt?.kind !== 'finale') return;
+	}
 	for (;;) {
 		const card = pack.legacyDeck[campaign.legacyIndex];
 		if (!card || card.month > campaign.month) return;
 		campaign.legacyIndex += 1;
-		const applies = !card.when || (card.when === 'won') === won;
+		const applies = !card.when || (card.when === 'delivered') === campaign.sampleDelivered;
 		if (applies) {
 			campaign.briefing.push({ t: 'card', title: card.title, text: card.text, from: { t: 'legacy', card: card.id } });
 			for (const unlock of card.unlocks) {
@@ -409,7 +414,10 @@ export function resolveGameEnd(world: World) {
 	readLegacy(world, 'gameEnd', won);
 	if (
 		campaign.turningPoints.includes('firstForsaken') &&
-		pack.cities.some(city => city.kind === 'city' && campaign.locations[city.id]!.population === 0)
+		pack.cities.some(
+			city =>
+				city.kind === 'city' && campaign.locations[city.id]!.revealed && campaign.locations[city.id]!.population === 0,
+		)
 	) {
 		campaign.turningPoints = campaign.turningPoints.filter(id => id !== 'firstForsaken');
 		openSeal(world, { t: 'door', id: 'A' }, false);
@@ -417,10 +425,16 @@ export function resolveGameEnd(world: World) {
 	const havensHeld = pack.cities.filter(city => city.kind === 'haven' && game.locations[city.id]!.hollow > 0).length;
 	if (campaign.turningPoints.includes('defection') && havensHeld >= 3) openSeal(world, { t: 'door', id: '17' }, false);
 	if (hasRule(campaign, 'forsaken')) {
-		for (const city of pack.cities) if (isForsaken(campaign, city.id)) campaign.locations[city.id]!.infested = true;
+		for (const city of pack.cities) if (isForsaken(campaign, city.id)) infest(campaign, city.id);
 	}
 	if (campaign.losingStreakBonusGames > 0) campaign.losingStreakBonusGames -= 1;
-	const lastFour = [...campaign.results.slice(-3).map(result => result.won), won];
+	const lastFour = [
+		...campaign.results
+			.filter(result => result.month > 0)
+			.slice(-3)
+			.map(result => result.won),
+		won,
+	];
 	if (campaign.turningPoints.includes('losingStreak') && lastFour.length === 4 && lastFour.every(result => !result)) {
 		campaign.turningPoints = campaign.turningPoints.filter(id => id !== 'losingStreak');
 		campaign.losingStreakBonusGames = 3;
@@ -466,6 +480,9 @@ export function purchaseCost(purchase: Purchase): number {
 	}
 }
 
+/** Its cards print that Utopia cannot be improved. */
+const UTOPIA = 'utopia' as CityId;
+
 export function checkPurchase(world: World, purchase: Purchase): string | null {
 	const { campaign, game } = world;
 	// Free ability units are spent the moment they arrive, which is during setup, as well as at game end.
@@ -490,6 +507,7 @@ export function checkPurchase(world: World, purchase: Purchase): string | null {
 			if (!campaign.cityImprovementsForSale.includes(purchase.improvement))
 				return 'That improvement is not available yet';
 			if (card?.kind !== 'city' || card.improvement) return 'Pick a City card with an empty slot';
+			if (card.city === UTOPIA) return 'Utopia cannot be improved';
 			return onGrid.has(card.city) ? null : 'The city is not on the grid';
 		}
 		case 'infectionImprovement': {
@@ -497,6 +515,7 @@ export function checkPurchase(world: World, purchase: Purchase): string | null {
 			if (!campaign.infectionImprovementsForSale.includes(purchase.improvement))
 				return 'That improvement is not available yet';
 			if (card?.kind !== 'city' || card.improvement) return 'Pick an Infection card with an empty slot';
+			if (card.city === UTOPIA) return 'Utopia cannot be improved';
 			return onGrid.has(card.city) ? null : 'The city is not on the grid';
 		}
 		case 'population': {
@@ -607,6 +626,26 @@ export function closeGame(world: World) {
 }
 
 export const campaignOver = (campaign: Campaign) => campaign.month > 12;
+
+const BRACKETS = [
+	{ min: 851, label: '851 and above', delivered: '12-11', notDelivered: '12-09' },
+	{ min: 701, label: '701 to 850', delivered: '12-11', notDelivered: '12-09' },
+	{ min: 551, label: '551 to 700', delivered: '12-12', notDelivered: '12-10' },
+	{ min: 401, label: '401 to 550', delivered: '12-12', notDelivered: '12-10' },
+	{ min: Number.NEGATIVE_INFINITY, label: '400 and below', delivered: '12-12', notDelivered: '12-10' },
+];
+
+/** The ending the campaign reads: the outcome card for the sample, and the tier its score lands in, by printed code. */
+export function ending(campaign: Campaign) {
+	const total = score(campaign).total;
+	const bracket = BRACKETS.find(entry => total >= entry.min)!;
+	const delivered = campaign.sampleDelivered;
+	return {
+		outcome: delivered ? '12-07' : '12-06',
+		tier: delivered ? bracket.delivered : bracket.notDelivered,
+		bracket: `${delivered ? 'Delivered' : 'Did not deliver'}: ${bracket.label}`,
+	};
+}
 
 export function score(campaign: Campaign) {
 	const months = campaign.results.filter(result => result.month >= 1 && result.won);

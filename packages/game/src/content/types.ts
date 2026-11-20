@@ -229,6 +229,8 @@ export type ObjectiveDef = {
 	carriesOver: boolean;
 	/** Each step is permanent, so partial progress carries over too. */
 	stepsCarry?: boolean;
+	/** A recon of one named region: once that region is reconned, the card counts as complete. */
+	doneIfReconned?: true;
 	/** Opened once, the first time the objective completes. */
 	reward?: Seal;
 	destroyOnComplete?: boolean;
@@ -244,8 +246,11 @@ export type SearchResult =
 	| { t: 'quarantineCard' }
 	| { t: 'removeHollow'; amount: number }
 	| { t: 'freeEdge'; kind: EdgeKind }
-	/** Opens a door or package, or gives 1 action when it is already open. */
-	| { t: 'discover'; seal: Seal }
+	/**
+	 * Opens each door or package still sealed, and marks a lab when one is named. A lost haven's lead, already
+	 * followed, gives 1 action instead (`orAction`).
+	 */
+	| { t: 'discover'; seals: Seal[]; lab?: CityId; orAction?: true }
 	| { t: 'companion'; companion: CompanionId }
 	/** Marks the city infested, and opens a door when one is named. */
 	| { t: 'infest'; opens?: Seal }
@@ -253,7 +258,7 @@ export type SearchResult =
 
 export type SearchBoxDef = { scope: 'land' | 'sea'; result: SearchResult };
 
-/** What a Monitor frequency gives: a door to open, or cards kept from the top of the Player discard pile. */
+/** What a Monitor frequency gives: a door to open, or up to `take` cards kept from the top of the Player discard pile. */
 export type FrequencyReward = { seal: Seal } | { take: number } | null;
 
 export type TurningPointId = 'firstForsaken' | 'losingStreak' | 'defection';
@@ -296,6 +301,8 @@ export type Unlock =
 	| { t: 'assemble'; cards: number }
 	/** `fresh` cubes are new to the game; otherwise this game's share comes out of the reserve. */
 	| { t: 'stockpileBonus'; amount: number; fresh?: true }
+	/** One more Epidemic card in the box. How many go in the Player deck is the epidemic table's to say. */
+	| { t: 'epidemicCard' }
 	/** Extra actions for the active player, now. */
 	| { t: 'actions'; amount: number }
 	| { t: 'freeAbilityUnits'; amount: number }
@@ -333,16 +340,37 @@ export type SealDef = {
 	reward?: Unlock[];
 };
 
+export type LegacyCardKind =
+	| 'prologue'
+	| 'stop'
+	| 'pause'
+	| 'archive'
+	| 'priorities'
+	| 'objective'
+	| 'turningPoint'
+	| 'event'
+	| 'epidemic'
+	| 'scanner'
+	| 'plan'
+	| 'ending'
+	| 'reckoning'
+	| 'end';
+
 export type LegacyCardDef = {
+	/** The code printed on the card, such as `06-04`. */
 	id: string;
 	month: number;
-	/** Where reading halts after this card. `pause` resumes at game end, `stop` at the next month's setup. */
-	halt?: 'pause' | 'stop';
+	kind: LegacyCardKind;
+	/**
+	 * Where reading halts after this card. `pause` resumes at game end, `stop` at the next month's setup, and
+	 * `finale` at the end of the last December game: a win, or the second game lost.
+	 */
+	halt?: 'pause' | 'stop' | 'finale';
 	title: string;
 	text: string;
 	unlocks: Unlock[];
-	/** Only applies when the month was lost or won, for cards read at game end. */
-	when?: 'won' | 'lost';
+	/** Only applies when the sample was, or was not, delivered. */
+	when?: 'delivered' | 'notDelivered';
 };
 
 export type JobDef = { id: JobId; name: string; text: string; starting: boolean };
@@ -401,8 +429,8 @@ export type ContentPack = {
 		supplyByMonth: number[];
 		requiredByMonth: number[];
 		pieces: { center: number; tower: number; shelter: number; hollow: number };
-		produceCards: number;
-		produceBoxes: number;
+		/** The System-Wide Production boxes printed on each Produce Supplies card, one entry per card. */
+		produceBoxes: number[];
 		characterSlots: number;
 		/** How many portraits a character can wear, `/portraits/survivor-<n>.webp` in the UI. */
 		portraits: number;

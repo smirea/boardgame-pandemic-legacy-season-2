@@ -4,7 +4,7 @@
 
 ## Implementation since this audit
 
-The audit below compares the box with the engine as it stood in November 2026. Since then the engine keeps content in these packages and doors (`pack.seals`), and the gaps it lists are closed except: the north and south East Asia map stickers (56, 63) open as one region, the losing-streak bonus applies automatically instead of as a choice, Encore puts the event in hand instead of playing it, the ending tiers are not shown, and the five extra Epidemics are in the box from the start (they only count once door E's rule is in force).
+The audit below compares the box with the engine as it stood in November 2026. Since then the engine keeps content in these packages and doors (`pack.seals`), the Legacy deck is the 84 printed cards, and the gaps it lists are closed except those [coverage.md](coverage.md#checked-against-the-printed-archive) names as this project's reading.
 
 ## Evidence and status
 

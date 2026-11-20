@@ -8,7 +8,8 @@
 
 	type Slot = 'won' | 'lost' | 'now' | 'open';
 
-	let { campaign }: { campaign: Campaign } = $props();
+	/** `room` is the width the bar can give the calendar. Months that do not fit fold away. */
+	let { campaign, room = Number.POSITIVE_INFINITY }: { campaign: Campaign; room?: number } = $props();
 
 	const ATTEMPTS = ['Early', 'Late'] as const;
 	const SAID: Record<Slot, string> = { won: 'won', lost: 'lost', now: 'in play', open: '' };
@@ -29,6 +30,34 @@
 			return { month, name, slots, required, cubes, attempts };
 		}),
 	);
+
+	// The widest month drawn so far, which every month is budgeted at, and the fold marker's width.
+	let slot = $state(0);
+	const FOLD = 18;
+	const measure = (element: HTMLElement) => {
+		slot = Math.max(slot, element.offsetWidth);
+	};
+	/** Future months fold first, farthest first, then past months, oldest first. The current month always stays. */
+	const shown = $derived.by(() => {
+		const all = months.map(entry => entry.month);
+		if (!slot || room === Number.POSITIVE_INFINITY) return new Set(all);
+		const fit = (count: number, folds: number) => count * slot + folds * FOLD <= room;
+		const order = [
+			...all.filter(month => month > campaign.month).toReversed(),
+			...all.filter(month => month < campaign.month),
+		];
+		const visible = new Set(all);
+		for (const month of order) {
+			const folds =
+				Number(all.some(m => m > campaign.month && !visible.has(m))) +
+				Number(all.some(m => m < campaign.month && !visible.has(m)));
+			if (fit(visible.size, folds)) break;
+			visible.delete(month);
+		}
+		return visible;
+	});
+	const foldedPast = $derived(months.filter(entry => entry.month < campaign.month && !shown.has(entry.month)));
+	const foldedFuture = $derived(months.filter(entry => entry.month > campaign.month && !shown.has(entry.month)));
 </script>
 
 {#snippet mark(slot: Slot, side: 'early' | 'late')}
@@ -52,8 +81,17 @@
 		results: campaign.results.map(result => `${result.month}.${result.attempt}:${result.won ? 'won' : 'lost'}`),
 	}))}
 >
-	{#each months as entry (entry.month)}
+	{#if foldedPast.length}
 		<li
+			class="fold"
+			title={foldedPast.map(entry => `${entry.name}: ${entry.attempts.join(', ') || 'not played'}`).join('\n')}
+		>
+			⋯
+		</li>
+	{/if}
+	{#each months.filter(entry => shown.has(entry.month)) as entry (entry.month)}
+		<li
+			{@attach measure}
 			class="month"
 			class:current={entry.month === campaign.month}
 			class:past={entry.month < campaign.month}
@@ -95,6 +133,9 @@
 			</div>
 		</li>
 	{/each}
+	{#if foldedFuture.length}
+		<li class="fold" title={`Still to come: ${foldedFuture.map(entry => entry.name).join(', ')}`}>⋯</li>
+	{/if}
 </ol>
 
 <style>
@@ -105,6 +146,14 @@
 		margin: 0;
 		padding: 0;
 		list-style: none;
+	}
+
+	.fold {
+		display: grid;
+		place-items: center;
+		width: 18px;
+		color: var(--muted);
+		cursor: default;
 	}
 
 	.month {

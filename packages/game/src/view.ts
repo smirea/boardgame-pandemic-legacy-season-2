@@ -52,6 +52,8 @@ export type Insights = {
 		/** Top stratum first: the cards known to be in each layer of the deck. */
 		strata: { size: number; cities: Record<CityId, number> }[];
 		discard: Record<CityId, number>;
+		/** Infection cards set aside in the Game End area, out of play until the game ends. */
+		gameEnd: Record<CityId, number>;
 		/** Cities that would take a Plague cube or outbreak if hit now, with their odds. */
 		atRisk: { city: CityId; odds: number; outbreak: boolean }[];
 	};
@@ -147,6 +149,10 @@ export function insights(world: World): Insights | null {
 			expected,
 			strata: layers.map(stratum => ({ size: stratum.length, cities: countCities(world, stratum) })),
 			discard: countCities(world, game.infectionDiscard),
+			gameEnd: countCities(
+				world,
+				game.gameEndArea.filter(id => id in world.campaign.infectionCards),
+			),
 			atRisk,
 		},
 		incidentsLeft: pack.numbers.incidentLimit - game.incidents,

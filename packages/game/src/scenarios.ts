@@ -4,7 +4,7 @@ import { sealKey } from './content/types';
 import { documentedEdges } from './content/world';
 import { gridCityCount, hasEdge } from './helpers';
 import type { CityId } from './ids';
-import { createCharacter, newCampaign, openSeal, readLegacy } from './legacy';
+import { applyUnlock, createCharacter, newCampaign, openSeal, readLegacy } from './legacy';
 import type { Save } from './machine';
 import type { World } from './state';
 import { newTable } from './table';
@@ -21,12 +21,14 @@ const CAST: [name: string, job: JobId][] = [
 /** What a group that explored on schedule would have opened, by the month they opened it. */
 const pkg = (id: number): Seal => ({ t: 'package', id });
 const door = (id: string): Seal => ({ t: 'door', id });
-const EXPLORED: Record<number, Seal[]> = {
+/** A lab the group found by searching its city. */
+const lab = (city: string) => ({ lab: city as CityId });
+const EXPLORED: Record<number, (Seal | { lab: CityId })[]> = {
 	1: [pkg(1)],
-	3: [pkg(5), door('20')],
+	3: [pkg(5), lab('buenos-aires'), door('18'), door('20')],
 	4: [door('60'), pkg(6)],
 	5: [pkg(4)],
-	6: [pkg(7), door('46')],
+	6: [pkg(7), lab('johannesburg'), door('46')],
 	7: [pkg(2), door('65'), door('11')],
 	9: [pkg(3), door('59')],
 	10: [door('19'), door('17')],
@@ -61,7 +63,10 @@ export function campaignAt(
 	for (let played = 1; played < month; played++) {
 		campaign.month = played;
 		readLegacy(world, 'setup');
-		for (const seal of EXPLORED[played] ?? []) if (!unexplored.includes(sealKey(seal))) openSeal(world, seal, false);
+		for (const found of EXPLORED[played] ?? []) {
+			if ('lab' in found) applyUnlock(world, { t: 'lab', city: found.lab });
+			else if (!unexplored.includes(sealKey(found))) openSeal(world, found, false);
+		}
 		readLegacy(world, 'gameEnd', true);
 		campaign.results.push({
 			month: played,

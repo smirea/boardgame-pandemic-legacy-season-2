@@ -64,7 +64,7 @@ const HEADING = {
 export type BriefedUnlock = Extract<Unlock, { t: keyof typeof HEADING }>;
 
 export type BriefingSection =
-	| { t: 'card'; title: string; text: string | null }
+	| { t: 'card'; title: string; text: string | null; from: BriefingSource }
 	| { t: 'group'; heading: string; items: { unlock: BriefedUnlock; text: string }[] };
 
 /** A briefing as it is read: each Legacy card on its own, and everything unlocked grouped by kind in order of first mention. */
@@ -229,9 +229,9 @@ function unlockLine(campaign: Campaign, unlock: BriefedUnlock): string | null {
 		}
 		case 'frequencyHint': {
 			const worth = pack.frequencies.flatMap((reward, index) =>
-				reward && ('seal' in reward || reward.take > 1) ? [pack.frequencyLabels[index]!] : [],
+				reward && 'seal' in reward ? [pack.frequencyLabels[index]!] : [],
 			);
-			return `The bearings cross on ${worth.length} Monitor frequencies worth tuning to: ${worth.join(', ')}. The others return a single card.`;
+			return `The bearings cross on ${worth.length} Monitor frequencies that open a door: ${worth.join(', ')}. The others return up to 2 cards from the discard pile.`;
 		}
 		case 'gather':
 			return `${unlock.cards} Gather cards join the Infection cards. They start each game in the discard pile and enter the deck with the first Epidemic. When one is flipped, the next city flipped gets a Hollow Man and is not infected. Leaving a location that holds Hollow Men exposes a character.`;

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
-	import { score, SEAT_IDS, tablePlayers } from '@repo/game';
+	import { ending, score, SEAT_IDS, tablePlayers } from '@repo/game';
+	import { legacyScan, scan } from '#lib/scans.svelte.ts';
 	import type { Command, PlayerId, PublicState, SeatId, Start } from '@repo/game';
 	import { LS } from '#lib/storage.ts';
 	import { MONTHS, SEAT_COLORS } from './labels.svelte.ts';
@@ -19,6 +20,7 @@
 	const table = $derived(snap.world.table);
 	const finished = $derived(snap.phase === 'finished');
 	const total = $derived(score(campaign));
+	const end = $derived(ending(campaign));
 	const players = $derived(tablePlayers(table));
 	const colorOf = (seat: SeatId) => SEAT_COLORS[SEAT_IDS.indexOf(seat)]!;
 	const firstSeat = (who: PlayerId) => table.seats.find(entry => entry.player === who)!;
@@ -46,6 +48,13 @@
 >
 	{#if finished}
 		<h1>Campaign complete</h1>
+		<p class="ending">
+			<span {@attach scan(() => legacyScan(end.outcome), 'ending-outcome')}
+				>{campaign.sampleDelivered ? 'The sample was delivered.' : 'The sample was not delivered.'}</span
+			>
+			<b {@attach scan(() => legacyScan(end.tier), 'ending-tier')}>{end.bracket}</b>
+			<span class="hint">Point at either line to read the printed ending.</span>
+		</p>
 		<dl class="score">
 			<dt>Final score</dt>
 			<dd>{total.total}</dd>
@@ -124,6 +133,23 @@
 </div>
 
 <style>
+	.ending {
+		display: grid;
+		gap: 0.2rem;
+		margin: 0 0 1rem;
+	}
+
+	.ending b {
+		font-family: var(--font-display);
+		font-size: 1.4rem;
+		font-weight: 400;
+	}
+
+	.ending .hint {
+		font-size: 0.8rem;
+		opacity: 0.7;
+	}
+
 	.lobby {
 		display: flex;
 		flex-direction: column;

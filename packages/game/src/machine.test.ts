@@ -343,7 +343,9 @@ describe('exploring', () => {
 		});
 		expect(worldOf(santiago).campaign.locations[city('denver')]!.infested).toBe(true);
 		expect(worldOf(santiago).campaign.opened).toContain('door:50');
-		const repeat = searching({ t: 'discover', seal: { t: 'door', id: '20' } });
+		const repeat = searching({ t: 'discover', seals: [{ t: 'door', id: '60' }], orAction: true }, world => {
+			world.campaign.opened.push('door:60');
+		});
 		expect(gameOf(repeat).actionsLeft).toBe(4);
 		expect(refuses(repeat, { a: 'search', card: gameOf(repeat).players[A]!.hand[0]!, box: 0 })).toContain('used up');
 	});
@@ -833,7 +835,8 @@ describe('events and companions', () => {
 		forecast: (_, after) =>
 			expect(after.game!.infectionDeck.strata.slice(0, 8).every(layer => layer.length === 1)).toBe(true),
 		cache: (before, after) => expect(after.game!.reserve).toBe(before.game!.reserve - 6),
-		encore: (before, after) => expect(after.game!.playerDiscard.length).toBe(before.game!.playerDiscard.length),
+		// The event taken back is played at once, so both cards end in the discard pile and neither in a hand.
+		encore: (before, after) => expect(after.game!.playerDiscard.length).toBe(before.game!.playerDiscard.length + 1),
 		secondWind: (_, after) => expect(after.game!.actionsLeft).toBe(7),
 		massInoculation: (before, after) =>
 			expect(after.campaign.stored.infection).toHaveLength(before.campaign.stored.infection.length + 1),
@@ -975,7 +978,7 @@ describe('events and companions', () => {
 		act(actor, { a: 'carry', from, count: 2 });
 		expect(gameOf(actor).locations[here]!.supplies).toBe(before + 2);
 		expect(gameOf(actor).actionsLeft).toBe(4);
-		expect(refuses(actor, { a: 'carry', from, count: 1 })).toBe('Once per turn');
+		expect(refuses(actor, { a: 'carry', from, count: 1 })).toBe('There are not that many cubes there');
 
 		const trading = late(world => {
 			conjure(world, A, { kind: 'companion', companion: 'trader' });
@@ -1090,7 +1093,7 @@ describe('game end and the campaign', () => {
 		expect(campaign.turningPoints).not.toContain('firstForsaken');
 	});
 
-	test('four losses in a row add 10 cubes to the next games, and the reserve holds the cubes the supply track leaves out', () => {
+	test('four losses in a row move 10 reserve cubes into the stockpile in the next games', () => {
 		const actor = ended(false, world => {
 			world.campaign.results = world.campaign.results.slice(0, -3).concat(
 				[7, 8, 9].map(month => ({
@@ -1114,8 +1117,8 @@ describe('game end and the campaign', () => {
 			],
 		});
 		expect(gameOf(actor).stockpile).toBe(8 + 30 + 10);
-		// The reserve holds what the supply track leaves out of the stockpile, and bonus cubes come on top.
-		expect(gameOf(actor).reserve).toBe(36 - 8);
+		// The reserve holds what the supply track leaves out of the stockpile, less the 10 the turning point moves.
+		expect(gameOf(actor).reserve).toBe(36 - 8 - 10);
 	});
 
 	test('a win moves to the next month and eases rationing, and December ends the campaign', () => {
@@ -1798,7 +1801,7 @@ test('a lost early attempt carries completed objectives and Plan steps, not part
 	expect(campaign.carriedProgress).toEqual({ reconEastAsia: 1, plan: 2 });
 });
 
-test('a recon objective with no recon left is dropped, and the rest decide the win', () => {
+test('a recon objective for a region already reconned counts as complete', () => {
 	const save = octoberSave();
 	const { campaign } = save.world;
 	campaign.objectives = ['buildCenters', 'reconRegion'];
@@ -1810,7 +1813,8 @@ test('a recon objective with no recon left is dropped, and the rest decide the w
 		type: 'START_GAME',
 		seating: cast.map((entry, index) => ({ seat: [A, B, C][index]!, character: entry.id })),
 	});
-	expect(gameOf(actor).waived).toEqual(['reconRegion']);
+	expect(gameOf(actor).waived).toEqual([]);
+	expect(gameOf(actor).completed).toEqual(['reconRegion']);
 	const world = JSON.parse(JSON.stringify(worldOf(actor))) as World;
 	world.campaign.objectives = ['buildCenters', 'reconRegion'];
 	world.game!.progress.buildCenters = 2;
@@ -2203,11 +2207,12 @@ test('no other Event may be played while a drawn card is still being resolved', 
 	);
 });
 
-test('a character needs two free slots to take the sample', () => {
+test('the Carrier scar covers another scar only when no empty slot or ability is left', () => {
 	const actor = late((world, game) => {
 		if (!world.campaign.rules.includes('carrier')) world.campaign.rules.push('carrier');
 		world.campaign.locations[pack.sampleFrom]!.revealed = true;
 		game.players[A]!.location = pack.sampleFrom;
+		Object.assign(character(world, A), { exposureTrack: ['scar', 'empty', 'skull'], exposure: 0 });
 		character(world, A).slots = [
 			{ kind: 'scar', id: 'smallHand' },
 			{ kind: 'scar', id: 'reconExtraCard' },
@@ -2215,7 +2220,11 @@ test('a character needs two free slots to take the sample', () => {
 			null,
 		];
 	});
-	expect(refuses(actor, { a: 'selfInject' })).toContain('covers 2 slots');
+	act(actor, { a: 'selfInject' });
+	const slots = character(worldOf(actor), A).slots;
+	expect(slots[3]).toEqual({ kind: 'scar', id: 'carrier' });
+	expect(slots.filter(slot => slot?.id === 'carrier')).toHaveLength(2);
+	expect(slots.filter(slot => slot?.kind === 'scar' && slot.id !== 'carrier')).toHaveLength(2);
 });
 
 test('a city emptied by a fourth Hollow Man is infested at once', () => {

@@ -96,7 +96,7 @@ const cityRows: Record<string, CityRow[]> = {
 	'eastern-pacific': [['haven-eastern-pacific', 'Farwater', -2, -92, 'haven', 3, 0, 'pl']],
 	'indian-ocean': [['haven-indian-ocean', 'Monsoon Rest', -5, 55, 'haven', 3, 0, 'pl']],
 	utopia: [
-		['utopia', 'Utopia', 40, 103, 'red', 8, 1, 'i'],
+		['utopia', 'Utopia', 40, 103, 'red', 8, 1],
 		['lake-baikal', 'Lake Baikal', 53.5, 108, 'red', 1, 0, 'lx'],
 	],
 };
@@ -154,6 +154,8 @@ export const startingEdges: EdgeDef[] = [
 	['jacksonville', 'haven-south-atlantic'],
 	['new-york', 'jacksonville'],
 	['haven-mediterranean', 'tripoli'],
+	// The printed board sails Midsea to Istanbul. This map cannot lay that lane clear of Tripoli's port, so it
+	// reaches Istanbul through Tripoli instead.
 	['tripoli', 'istanbul'],
 	['istanbul', 'cairo'],
 	['tripoli', 'cairo'],

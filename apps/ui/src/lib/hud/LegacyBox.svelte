@@ -2,7 +2,10 @@
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { dossierView, rulebook, stickerStock } from '@repo/game';
 	import type { Campaign, DossierSlot } from '@repo/game';
+	import InfectionCard from '#lib/cards/InfectionCard.svelte';
+	import { scan, scanUrl, sealScans } from '#lib/scans.svelte.ts';
 	import Crate from './Crate.svelte';
+	import PlayerCard from './PlayerCard.svelte';
 	import DossierDoor from './DossierDoor.svelte';
 	import { keep } from './viewState.ts';
 
@@ -39,6 +42,12 @@
 			chosen = saved.chosen && slot ? { kind: saved.chosen.kind, slot } : null;
 		},
 	);
+	const sealOf = (kind: Read['kind'], slot: Read['slot']) =>
+		kind === 'Package' ? { t: 'package' as const, id: slot.id as number } : { t: 'door' as const, id: String(slot.id) };
+	/** Package 6 is where the campaign keeps the cards it takes out of play. */
+	const STORAGE = 6;
+	const storedPlayer = $derived(campaign.stored.player.map(id => campaign.playerCards[id]!).filter(Boolean));
+	const storedInfection = $derived(campaign.stored.infection.map(id => campaign.infectionCards[id]!).filter(Boolean));
 	const describe = (kind: Read['kind'], slot: Read['slot']) =>
 		`${kind} ${slot.id}: ${slot.open ? (slot.name ?? 'opened') : 'sealed'}`;
 	const look = (kind: Read['kind'], slot: Read['slot']) => ({
@@ -75,9 +84,16 @@
 		<ol class="packages" {@attach feedback('Packages', () => ({ open: openPackages }))}>
 			{#each view.packages as slot (slot.id)}
 				<li class="package" class:open={slot.open}>
-					<button aria-label={describe('Package', slot)} {...look('Package', slot)}>
+					<button
+						aria-label={describe('Package', slot)}
+						{...look('Package', slot)}
+						{@attach scan(() => (slot.open ? sealScans(sealOf('Package', slot)) : []), `box:package:${slot.id}`)}
+					>
 						<span class="crate"><Crate id={slot.id} open={slot.open} /></span>
 						<span class="caption">{slot.open ? slot.name : 'Sealed'}</span>
+						{#if slot.id === STORAGE && slot.open}
+							<span class="holds">{storedPlayer.length + storedInfection.length} cards inside</span>
+						{/if}
 					</button>
 				</li>
 			{/each}
@@ -96,7 +112,11 @@
 					<ol class="doors" aria-label={`Sheet ${index + 1}`}>
 						{#each sheet as door (door.id)}
 							<li>
-								<button aria-label={describe('Door', door)} {...look('Door', door)}>
+								<button
+									aria-label={describe('Door', door)}
+									{...look('Door', door)}
+									{@attach scan(() => (door.open ? sealScans(sealOf('Door', door)) : []), `box:door:${door.id}`)}
+								>
 									<DossierDoor id={door.id} open={door.open} />
 								</button>
 							</li>
@@ -124,6 +144,28 @@
 				{:else}
 					<p class="hint">A reference for the board or the player aid, with no rule of its own.</p>
 				{/if}
+				{#if reading.kind === 'Package' && reading.slot.id === STORAGE}
+					<h4>Inside now</h4>
+					{#if storedPlayer.length + storedInfection.length}
+						<div class="stored" {@attach feedback('Package 6 contents', () => campaign.stored)}>
+							{#each storedInfection as card (card.id)}<InfectionCard {card} />{/each}
+							{#each storedPlayer as card (card.id)}<PlayerCard {card} small />{/each}
+						</div>
+					{:else}
+						<p class="hint">Empty. Inoculate and Inoculation Unit put cards in here, out of play.</p>
+					{/if}
+				{/if}
+				<div class="scans" aria-label="The printed originals">
+					{#each sealScans(sealOf(reading.kind, reading.slot)) as item (item.src)}
+						<img
+							src={scanUrl(item.src)}
+							alt={item.title}
+							title={item.title}
+							loading="lazy"
+							{@attach scan(() => [item], `box:scan:${item.src}`)}
+						/>
+					{/each}
+				</div>
 			{/if}
 		</div>
 	{:else if tab === 'rulebook'}
@@ -369,6 +411,38 @@
 
 	.reading p {
 		margin: 0 0 0.3rem;
+	}
+
+	.holds {
+		font-size: 0.72rem;
+		color: var(--paper-muted);
+	}
+
+	h4 {
+		margin: 0.6rem 0 0.3rem;
+		font-family: var(--font-display);
+		font-weight: 400;
+		font-size: 1rem;
+	}
+
+	.stored {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+		font-size: 0.7rem;
+	}
+
+	.scans {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.35rem;
+		margin-top: 0.6rem;
+	}
+
+	.scans img {
+		height: 4.5rem;
+		border-radius: 3px;
+		box-shadow: 0 1px 3px rgb(0 0 0 / 0.3);
 	}
 
 	.reading ul {

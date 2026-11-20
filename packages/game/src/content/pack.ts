@@ -5,8 +5,10 @@ import type {
 	Color,
 	DoorId,
 	DossierDef,
+	EventId,
 	ContentPack,
 	LegacyCardDef,
+	LegacyCardKind,
 	ObjectiveId,
 	ReconRoute,
 	SearchBoxDef,
@@ -53,34 +55,39 @@ const reconRoutes: ReconRoute[] = [
 
 const land = (result: SearchResult): SearchBoxDef => ({ scope: 'land', result });
 const sea = (result: SearchResult): SearchBoxDef => ({ scope: 'sea', result });
-const discover = (seal: Seal): SearchResult => ({ t: 'discover', seal });
+/** A lead to a lost haven: its door, or an action once the haven is already on the map. */
+const lostHaven = (seal: Seal): SearchResult => ({ t: 'discover', seals: [seal], orAction: true });
+const labFound = (at: string, ...seals: Seal[]): SearchResult => ({ t: 'discover', seals, lab: city(at) });
 
 /** Each City card's search boxes, as the printed cards have them (`box-contents.md`, per package). */
 const searches: Record<string, SearchBoxDef[]> = {
 	chicago: [land({ t: 'supplies', amount: 2, from: 'stockpile' })],
-	'san-francisco': [land({ t: 'supplies', amount: 3, from: 'reserve' }), sea(discover(door('60')))],
+	'san-francisco': [land({ t: 'supplies', amount: 3, from: 'reserve' }), sea(lostHaven(door('60')))],
 	denver: [land({ t: 'companion', companion: 'lineman' })],
 	atlanta: [land({ t: 'quarantineCard' })],
-	'los-angeles': [land({ t: 'stockpile', amount: 4 }), sea(discover(door('60')))],
+	'los-angeles': [land({ t: 'stockpile', amount: 4 }), sea(lostHaven(door('60')))],
 	'mexico-city': [land({ t: 'companion', companion: 'trader' })],
 	bogota: [land({ t: 'retrieve' })],
-	lima: [land({ t: 'companion', companion: 'medic' }), sea(discover(door('60')))],
+	lima: [land({ t: 'companion', companion: 'medic' }), sea(lostHaven(door('60')))],
 	santiago: [land({ t: 'infest', opens: door('50') })],
-	'buenos-aires': [land(discover(door('20'))), sea({ t: 'supplies', amount: 3, from: 'reserve' })],
+	'buenos-aires': [
+		land(labFound('buenos-aires', door('18'), door('20'))),
+		sea({ t: 'supplies', amount: 3, from: 'reserve' }),
+	],
 	paris: [land({ t: 'companion', companion: 'builder' })],
 	frankfurt: [land({ t: 'companion', companion: 'porter' })],
 	'st-petersburg': [land({ t: 'companion', companion: 'tracker' }), sea({ t: 'freeEdge', kind: 'sea' })],
 	moscow: [land({ t: 'giveCard' })],
 	kinshasa: [land({ t: 'companion', companion: 'rigger' })],
 	khartoum: [land({ t: 'giveCard' })],
-	'dar-es-salaam': [land({ t: 'freeEdge', kind: 'land' }), sea(discover(door('65')))],
-	antananarivo: [land({ t: 'companion', companion: 'purifier' }), sea(discover(door('65')))],
-	johannesburg: [land(discover(door('46')))],
+	'dar-es-salaam': [land({ t: 'freeEdge', kind: 'land' }), sea(lostHaven(door('65')))],
+	antananarivo: [land({ t: 'companion', companion: 'purifier' }), sea(lostHaven(door('65')))],
+	johannesburg: [land(labFound('johannesburg', door('46'), door('20')))],
 	baghdad: [land({ t: 'actions', amount: 2 })],
 	riyadh: [land({ t: 'retrieve' })],
 	tehran: [land({ t: 'removeHollow', amount: 2 })],
 	delhi: [land({ t: 'companion', companion: 'fieldSurgeon' })],
-	'new-mumbai': [land({ t: 'actions', amount: 1 }), sea(discover(door('65')))],
+	'new-mumbai': [land({ t: 'actions', amount: 1 }), sea(lostHaven(door('65')))],
 	jakarta: [land({ t: 'companion', companion: 'shelterWright' })],
 	'hong-kong': [land({ t: 'companion', companion: 'quartermaster' })],
 	shanghai: [land({ t: 'nothing' })],
@@ -195,7 +202,7 @@ const seals: SealDef[] = [
 		pkg(8),
 		'Utopia',
 		[region('utopia', ['shanghai', 'utopia', 'land']), { t: 'gather', cards: 4 }, ...opens('61')],
-		[{ t: 'event', event: 'riotControl', mode: 'unrationed', now: ['hand'] }],
+		[{ t: 'event', event: 'riotControl', mode: 'unrationed', now: ['discard'] }],
 	),
 
 	sealed(door('A'), 'Forsaken cities', [{ t: 'rule', rule: 'forsaken' }, ...opens('12', '50')]),
@@ -223,11 +230,10 @@ const seals: SealDef[] = [
 	sealed(door('17'), 'The Hollow Men defect', [...opens('58'), { t: 'turningPoint', id: 'defection', over: true }]),
 	sealed(door('18'), 'The Immunologist', [{ t: 'job', job: 'immunologist', home: city('buenos-aires') }]),
 	sealed(door('19'), 'Topaz lab found', [
-		region('new-zealand', ['haven-coral-sea', 'wellington', 'sea']),
 		{ t: 'lab', city: city('wellington') },
-		...opens('41', '61', '13', '30'),
+		...opens('51', '41', '61', '13', '30'),
 	]),
-	sealed(door('20'), 'Opal lab found', [{ t: 'lab', city: city('buenos-aires') }, ...opens('18', '61', '30', '13')]),
+	sealed(door('20'), "You've found us", opens('61', '30', '13')),
 	sealed(door('21'), 'Frankfurt destroyed', [{ t: 'destroy', city: city('frankfurt') }]),
 	sealed(door('22'), 'Pearl lab reached', [{ t: 'lab', city: city('lake-baikal') }, ...opens('Q', '38', '27', '32')]),
 	aid('23', 'Supply line reference'),
@@ -270,10 +276,7 @@ const seals: SealDef[] = [
 		{ t: 'job', job: 'sanitationOfficer', home: city('haven-mediterranean') },
 	]),
 	sealed(door('45'), 'Local Operatives', [{ t: 'cityImprovement', improvement: 'redWild', copies: 2 }]),
-	sealed(door('46'), 'Jade lab found', [
-		{ t: 'lab', city: city('johannesburg') },
-		{ t: 'job', job: 'scientist', home: city('johannesburg') },
-	]),
+	sealed(door('46'), 'The Scientist', [{ t: 'job', job: 'scientist', home: city('johannesburg') }]),
 	sealed(door('47'), 'New scars', [
 		{ t: 'scar', scar: 'laneExtraCube' },
 		{ t: 'scar', scar: 'portBound' },
@@ -286,7 +289,7 @@ const seals: SealDef[] = [
 	]),
 	sealed(door('49'), 'The Captain', [{ t: 'job', job: 'captain', home: city('haven-north-atlantic') }]),
 	sealed(door('50'), 'Infestation', [...opens('F', '14')]),
-	sealed(door('51'), 'Wellington'),
+	sealed(door('51'), 'Wellington', [region('new-zealand', ['haven-coral-sea', 'wellington', 'sea'])]),
 	sealed(door('52'), 'A route into East Asia', [{ t: 'route', route: 'hidden:east-asia' }]),
 	sealed(door('53'), 'The way east is unknown'),
 	aid('54', 'Summit'),
@@ -317,176 +320,280 @@ const perimeter = (seal: Seal, penalty?: Unlock[]): Unlock => ({
 	...(penalty ? { penalty } : {}),
 });
 
+type CardExtras = Pick<LegacyCardDef, 'halt' | 'when'>;
+
+/** One printed Legacy card, by the code printed on it. */
 function card(
-	month: number,
-	sequence: number,
-	halt: 'pause' | 'stop',
+	code: string,
+	kind: LegacyCardKind,
 	title: string,
 	text: string,
-	unlocks: Unlock[],
+	unlocks: Unlock[] = [],
+	extras: CardExtras = {},
 ): LegacyCardDef {
-	return {
-		id: `${String(month).padStart(2, '0')}-${String(sequence).padStart(2, '0')}`,
-		month,
-		halt,
-		title,
-		text,
-		unlocks,
-	};
+	return { id: code, month: Number(code.slice(0, 2)), kind, title, text, unlocks, ...extras };
 }
 
+const archive = (code: string, extras?: CardExtras) =>
+	card(code, 'archive', 'Journal entry', 'An entry from the archive, kept in the reserve.', [], extras);
+const objective = (code: string, id: ObjectiveId, title: string, extras?: CardExtras) =>
+	card(code, 'objective', title, 'A new objective joins the pool.', [{ t: 'objectives', add: [id] }], extras);
+const rationed = (code: string, event: EventId, title: string, extras?: CardExtras) =>
+	card(
+		code,
+		'event',
+		title,
+		'A new Rationed Event joins the reserve.',
+		[{ t: 'event', event, mode: 'rationed' }],
+		extras,
+	);
+const rightNow = (code: string, doors: DoorId[], extras?: CardExtras) =>
+	card(
+		code,
+		'pause',
+		'Right now!',
+		`Open door${doors.length > 1 ? 's' : ''} ${doors.join(', ')}.`,
+		opens(...doors),
+		extras,
+	);
+const epidemicCard = (code: string, extras?: CardExtras) =>
+	card(code, 'epidemic', 'Epidemic', 'One more Epidemic card goes into the box.', [{ t: 'epidemicCard' }], extras);
+const tier = (code: string, title: string, when: 'delivered' | 'notDelivered') =>
+	card(code, 'ending', title, 'The outcome for the final score.', [], { when });
+
+/**
+ * The Legacy deck as printed, top first. A card's `halt` stands for the STOP or PAUSE printed on the back of
+ * the card after it: reading stops there until that card's moment comes.
+ */
 const legacyDeck: LegacyCardDef[] = [
 	card(
-		1,
-		1,
-		'pause',
+		'00-01',
+		'prologue',
+		'Prologue',
+		'The Prologue is played with this card in effect. It is destroyed when the campaign starts.',
+	),
+	card('00-02', 'objective', 'Build 3 supply centers', 'The Prologue objective.', [], { halt: 'stop' }),
+
+	card(
+		'01-01',
+		'stop',
 		'January',
-		'Build 3 supply centers and recon a region, which is required and carries over. Recon is now available. A turning point watches for a city at population 0.',
+		'The campaign begins. Recon is now available, and the Prologue cards are destroyed.',
 		[
-			{ t: 'objectives', remove: ['prologueCenters'], add: ['buildCenters', 'reconRegion'] },
-			{ t: 'required', count: 2 },
+			{ t: 'objectives', remove: ['prologueCenters'] },
 			{ t: 'action', action: 'recon' },
-			{ t: 'turningPoint', id: 'firstForsaken' },
 			{ t: 'cityImprovement', improvement: 'double', copies: 3 },
 			{ t: 'cityImprovement', improvement: 'triple' },
 			{ t: 'infectionImprovement', improvement: 'wellStocked', copies: 2 },
 			{ t: 'infectionImprovement', improvement: 'lockdown', copies: 2 },
 		],
 	),
-	card(1, 2, 'stop', 'Supplies arrive', 'Four new Rationed Events join the reserve.', [
-		{ t: 'event', event: 'cardSwap', mode: 'rationed' },
-		{ t: 'event', event: 'spreadOut', mode: 'rationed' },
-		{ t: 'event', event: 'cleanse', mode: 'rationed' },
-		{ t: 'event', event: 'forecast', mode: 'rationed' },
+	archive('01-02'),
+	card('01-03', 'priorities', 'New priorities', 'This month 2 objectives are mandatory.', [
+		{ t: 'required', count: 2 },
 	]),
+	objective('01-04', 'buildCenters', 'Build 3 new supply centers'),
+	objective('01-05', 'reconRegion', 'Recon North America'),
 	card(
-		2,
-		1,
-		'pause',
-		'February',
-		'Perimeter report on North America. New objectives: recon a new area, connect 2 new cities. A turning point watches for four games lost in a row.',
-		[
-			perimeter(pkg(1)),
-			{ t: 'objectives', remove: ['reconRegion'], add: ['reconNewArea', 'connectCities'] },
-			{ t: 'turningPoint', id: 'losingStreak' },
-		],
+		'01-06',
+		'turningPoint',
+		'Forsaken Cities',
+		'Turning point: at Game End, if a city has population 0, open doors A and 12.',
+		[{ t: 'turningPoint', id: 'firstForsaken' }],
+		{ halt: 'pause' },
 	),
-	card(2, 2, 'stop', 'Putting down roots', 'Supply centers can be made permanent. Three new Rationed Events.', [
-		...opens('34'),
-		{ t: 'event', event: 'cache', mode: 'rationed' },
-		{ t: 'event', event: 'encore', mode: 'rationed' },
-		{ t: 'event', event: 'secondWind', mode: 'rationed' },
+	card('01-07', 'pause', 'Right now!', 'New Rationed Events follow, for the reserve.'),
+	rationed('01-08', 'cardSwap', 'Data Transfer'),
+	rationed('01-09', 'spreadOut', 'Dispersal'),
+	rationed('01-10', 'cleanse', 'Drastic Measures'),
+	rationed('01-11', 'forecast', 'Extended Forecast', { halt: 'stop' }),
+
+	card('02-01', 'stop', 'Perimeter report', 'If door 66 is still sealed, Package 1 opens without its reward.', [
+		perimeter(pkg(1)),
 	]),
+	archive('02-02'),
+	card('02-03', 'priorities', 'New priorities', 'Recon North America is destroyed. 2 objectives are still mandatory.', [
+		{ t: 'objectives', remove: ['reconRegion'] },
+	]),
+	objective('02-04', 'reconNewArea', 'Recon 1 unknown region'),
+	objective('02-05', 'connectCities', 'Connect 2 new cities to the grid'),
 	card(
-		3,
-		1,
-		'pause',
-		'March',
-		'Three objectives are now required. New objectives: perform 2 searches, access a lost haven.',
-		[
-			{ t: 'required', count: 3 },
-			{ t: 'objectives', add: ['searches', 'lostHaven'] },
-		],
+		'02-06',
+		'turningPoint',
+		'Give Us the Tools',
+		'Turning point: after 4 games lost in a row, up to 10 extra reserve cubes go to the stockpile at setup, three times.',
+		[{ t: 'turningPoint', id: 'losingStreak' }],
+		{ halt: 'pause' },
 	),
+	rightNow('02-07', ['34']),
+	rationed('02-08', 'cache', 'Hidden Stockpile'),
+	rationed('02-09', 'encore', 'It Worked the First Time'),
+	rationed('02-10', 'secondWind', 'Extended Time', { halt: 'stop' }),
+
 	card(
-		3,
-		2,
+		'03-01',
 		'stop',
-		'Stretched too thin',
-		'Chart Sea Lane is available. The epidemic count now grows with the Player deck. New scars.',
-		opens('K', '24', '47', 'E'),
+		'Perimeter report',
+		'If door 67 is still sealed: a warning that South America is still unexplored.',
 	),
-	card(4, 1, 'pause', 'April', 'Perimeter report on South America.', [perimeter(pkg(5))]),
-	card(4, 2, 'stop', 'Rebuilding', 'A new Infection card improvement is for sale.', opens('42')),
-	card(5, 1, 'pause', 'May', 'Perimeter report on the eastern Pacific.', [perimeter(door('60'))]),
+	archive('03-02'),
+	card('03-03', 'priorities', 'New priorities', 'From now on 3 objectives are mandatory each month.', [
+		{ t: 'required', count: 3 },
+	]),
+	objective('03-04', 'searches', 'Complete 2 searches'),
+	objective('03-05', 'lostHaven', 'Access a lost haven', { halt: 'pause' }),
+	rightNow('03-06', ['K', '24', '47', 'E']),
+	epidemicCard('03-07'),
+	epidemicCard('03-08'),
+	epidemicCard('03-09'),
+	epidemicCard('03-10'),
+	epidemicCard('03-11', { halt: 'stop' }),
+
+	card('04-01', 'stop', 'Perimeter report', 'If door 67 is still sealed, Package 5 opens without its reward.', [
+		perimeter(pkg(5)),
+	]),
+	archive('04-02', { halt: 'pause' }),
+	rightNow('04-03', ['42'], { halt: 'stop' }),
+
+	card('05-01', 'stop', 'Perimeter report', 'If door 60 is still sealed, the eastern Pacific haven goes on the map.', [
+		perimeter(door('60')),
+	]),
+	archive('05-02', { halt: 'pause' }),
+	rightNow('05-03', ['31', '36'], { halt: 'stop' }),
+
 	card(
-		5,
-		2,
+		'06-01',
 		'stop',
-		'Experience',
-		'New character abilities are for sale. More supply centers can be made permanent.',
-		opens('31', '36'),
+		'Perimeter report',
+		'If door 64 is still sealed, Package 4 opens without its reward, and door 21 destroys Frankfurt.',
+		[perimeter(pkg(4), opens('21'))],
 	),
-	card(6, 1, 'pause', 'June', 'Perimeter report on Europe. If it was never reconned, Frankfurt is lost.', [
-		perimeter(pkg(4), opens('21')),
-	]),
-	card(6, 2, 'stop', 'New arrivals', 'Two new characters join. Two new Rationed Events.', [
-		...opens('44', '49'),
-		{ t: 'event', event: 'massInoculation', mode: 'rationed' },
-		{ t: 'event', event: 'openWaters', mode: 'rationed' },
-	]),
-	card(7, 1, 'stop', 'July', 'Perimeter report on Africa. New objective: towers in 3 cities of different colours.', [
+	archive('06-02', { halt: 'pause' }),
+	card('06-03', 'pause', 'Right now!', 'New volunteers join. Open doors 44, 49.', opens('44', '49')),
+	rationed('06-04', 'massInoculation', 'Inoculation Unit'),
+	rationed('06-05', 'openWaters', 'Expeditionary Voyage', { halt: 'stop' }),
+
+	card('07-01', 'stop', 'Perimeter report', 'If door 57 is still sealed, Package 7 opens without its reward.', [
 		perimeter(pkg(7)),
-		{ t: 'objectives', add: ['triangulate'] },
+	]),
+	archive('07-02'),
+	objective('07-03', 'triangulate', 'Triangulate signals', { halt: 'stop' }),
+
+	card('08-01', 'stop', 'Perimeter report', 'If door 62 is still sealed, Package 2 opens without its reward.', [
+		perimeter(pkg(2)),
 	]),
 	card(
-		8,
-		1,
-		'pause',
-		'August',
-		'Perimeter report on the Middle East. Monitor is available. Spend up to 3 free units on abilities now, before the supplies go out.',
-		[perimeter(pkg(2)), { t: 'freeAbilityUnits', amount: 3 }, ...opens('M', '25')],
+		'08-02',
+		'archive',
+		'Journal entry',
+		'Spend up to 3 free production units on character abilities now, before the supplies go out.',
+		[{ t: 'freeAbilityUnits', amount: 3 }],
 	),
-	card(8, 2, 'stop', 'Hard lessons', 'New abilities and new scars.', opens('29', '48')),
+	rightNow('08-03', ['M', '25']),
 	card(
-		9,
-		1,
-		'pause',
-		'September',
-		'Recon East Asia is mandatory. Epidemics now strike stored cards first. The last 3 setup infections place Hollow Men.',
-		[
-			{ t: 'objectives', remove: ['reconNewArea'], add: ['reconEastAsia'] },
-			perimeter(door('65')),
-			...opens('R', '55', 'D', 'Y', 'U'),
-		],
+		'08-04',
+		'scanner',
+		'Frequency Scanner',
+		'Each Monitor action scratches one of its ten frequencies: an orange square opens a door, a white one takes Player cards back from the discard pile.',
+		[],
+		{ halt: 'pause' },
 	),
-	card(9, 2, 'stop', 'Closing in', 'More Infection card improvements. A new Rationed Event.', [
-		...opens('33'),
-		{ t: 'event', event: 'scavenge', mode: 'rationed' },
+	rightNow('08-05', ['29', '48'], { halt: 'stop' }),
+
+	card('09-01', 'stop', 'Perimeter report', 'If door 65 is still sealed, the Indian Ocean haven goes on the map.', [
+		perimeter(door('65')),
 	]),
+	archive('09-02'),
+	card('09-03', 'priorities', 'New priorities', 'Recon 1 unknown region is destroyed. Open doors R, 55, D, Y, U.', [
+		{ t: 'objectives', remove: ['reconNewArea'] },
+		...opens('R', '55', 'D', 'Y', 'U'),
+	]),
+	objective('09-04', 'reconEastAsia', 'Recon East Asia', { halt: 'pause' }),
+	rightNow('09-05', ['33']),
+	rationed('09-06', 'scavenge', 'Cautious Approach', { halt: 'stop' }),
+
 	card(
-		10,
-		1,
-		'pause',
-		'October',
-		'Perimeter report on East Asia. Get 3 Hollow Men into havens. Broadcast Misinformation is available.',
+		'10-01',
+		'stop',
+		'Perimeter report',
+		'If doors 56 and 63 are not both open, Package 3 opens without its reward and one character takes a scar.',
+		[perimeter(pkg(3), [{ t: 'owedScar' }])],
+	),
+	archive('10-02'),
+	card(
+		'10-03',
+		'priorities',
+		'New priorities',
+		'Recon East Asia, Connect 2 new cities and Complete 2 searches are destroyed. 2 objectives are mandatory. Open doors P, 37.',
 		[
-			perimeter(pkg(3), [{ t: 'owedScar' }]),
-			{ t: 'objectives', remove: ['reconEastAsia', 'connectCities', 'searches'], add: ['defect'] },
+			{ t: 'objectives', remove: ['reconEastAsia', 'connectCities', 'searches'] },
 			{ t: 'required', count: 2 },
-			{ t: 'turningPoint', id: 'defection' },
 			...opens('P', '37'),
 		],
 	),
-	card(10, 2, 'stop', 'Know your enemy', 'New abilities and card improvements. A new Rationed Event.', [
-		...opens('28', '45'),
-		{ t: 'event', event: 'mobileShelters', mode: 'rationed' },
-	]),
+	objective('10-04', 'defect', 'Get Hollow Men to defect'),
 	card(
-		11,
-		1,
+		'10-05',
+		'turningPoint',
+		'Hollow Men Have Defected',
+		'Turning point: at Game End, with a Hollow Man on 3 different havens, open door 17.',
+		[{ t: 'turningPoint', id: 'defection' }],
+		{ halt: 'pause' },
+	),
+	rightNow('10-06', ['28', '45']),
+	rationed('10-07', 'mobileShelters', 'Mobile Shelters', { halt: 'stop' }),
+
+	card(
+		'11-01',
 		'stop',
-		'November',
-		'Complete the Plan: four recons at Shanghai. If the Hollow Men never defected, they are forced to.',
+		'Intelligence report',
+		'If the Hollow Men have not defected, door 17 opens anyway and two characters take a scar.',
+		[perimeter(door('17'), [{ t: 'owedScar' }, { t: 'owedScar' }])],
+	),
+	archive('11-02'),
+	card(
+		'11-03',
+		'priorities',
+		'New priorities',
+		'Build 3 new supply centers and Get Hollow Men to defect are destroyed. Only 1 objective is mandatory.',
 		[
-			perimeter(door('17'), [{ t: 'owedScar' }, { t: 'owedScar' }]),
-			{ t: 'objectives', remove: ['buildCenters', 'defect'], add: ['plan'] },
+			{ t: 'objectives', remove: ['buildCenters', 'defect'] },
 			{ t: 'required', count: 1 },
+		],
+	),
+	objective('11-04', 'plan', 'Complete the Plan'),
+	card(
+		'11-05',
+		'plan',
+		'The Plan',
+		'Four recons at Shanghai, no supply center needed: 5 different red cards, 4 black, 3 yellow, 3 blue. Checked boxes carry over.',
+		[
 			{ t: 'route', route: 'hidden:plan-red' },
 			{ t: 'route', route: 'hidden:plan-black' },
 			{ t: 'route', route: 'hidden:plan-yellow' },
 			{ t: 'route', route: 'hidden:plan-blue' },
 		],
+		{ halt: 'stop' },
 	),
-	card(
-		12,
-		1,
-		'pause',
-		'December',
-		'Deliver the sample from Lake Baikal to a supply center in Johannesburg. A character must infect themself to carry it.',
-		[perimeter(pkg(8)), { t: 'objectives', remove: ['plan'], add: ['deliverSample'] }, { t: 'required', count: 1 }],
-	),
-	card(12, 2, 'stop', 'The final reckoning', 'The campaign is scored.', []),
+
+	card('12-01', 'stop', 'Perimeter report', 'If the Plan is not complete, Package 8 opens without its reward.', [
+		perimeter(pkg(8)),
+	]),
+	archive('12-02'),
+	card('12-03', 'priorities', 'New priorities', 'The Plan cards are destroyed. Only 1 objective is mandatory.', [
+		{ t: 'objectives', remove: ['plan'] },
+		{ t: 'required', count: 1 },
+	]),
+	objective('12-04', 'deliverSample', 'Deliver the Sample', { halt: 'finale' }),
+	card('12-05', 'stop', 'At last', 'The campaign is over. What happens next, then the final score.'),
+	tier('12-06', 'If you failed to deliver the sample', 'notDelivered'),
+	tier('12-07', 'If you delivered the sample', 'delivered'),
+	card('12-08', 'reckoning', 'The Final Reckoning', 'The campaign is scored.'),
+	tier('12-09', 'Did not deliver: 851 and above, 701 to 850', 'notDelivered'),
+	tier('12-10', 'Did not deliver: 551 to 700, 401 to 550, 400 and below', 'notDelivered'),
+	tier('12-11', 'Delivered: 851 and above, 701 to 850', 'delivered'),
+	{ ...tier('12-12', 'Delivered: 551 to 700, 401 to 550, 400 and below', 'delivered'), halt: 'stop' },
+	card('12-13', 'end', 'End of the Legacy deck', 'The bottom of the deck.'),
 ];
 
 export const pack: ContentPack = {
@@ -728,7 +835,7 @@ export const pack: ContentPack = {
 		{
 			id: 'porter',
 			name: 'Porter',
-			text: 'While you hold this card, once per turn, free: move cubes from an adjacent location into yours.',
+			text: 'While you hold this card, free: move cubes from an adjacent location into yours.',
 			spent: false,
 		},
 		{ id: 'medic', name: 'Medic', text: 'Discard this card: remove 1 Plague cube from your location.', spent: true },
@@ -873,7 +980,7 @@ export const pack: ContentPack = {
 	objectives: [
 		{
 			id: 'prologueCenters',
-			name: 'Establish supply centers',
+			name: 'Build 3 supply centers',
 			rule: 'Build 3 supply centers.',
 			target: 3,
 			mandatory: true,
@@ -881,7 +988,7 @@ export const pack: ContentPack = {
 		},
 		{
 			id: 'buildCenters',
-			name: 'Build 3 supply centers',
+			name: 'Build 3 new supply centers',
 			rule: 'Build 3 new supply centers this game.',
 			target: 3,
 			mandatory: true,
@@ -889,23 +996,24 @@ export const pack: ContentPack = {
 		},
 		{
 			id: 'reconRegion',
-			name: 'Recon a region',
-			rule: 'Recon any unexplored region.',
+			name: 'Recon North America',
+			rule: 'Recon North America from Washington.',
 			target: 1,
 			mandatory: true,
 			carriesOver: true,
+			doneIfReconned: true,
 		},
 		{
 			id: 'reconNewArea',
-			name: 'Recon a new area',
-			rule: 'Recon any unexplored area.',
+			name: 'Recon 1 unknown region',
+			rule: 'Recon any unknown region.',
 			target: 1,
 			mandatory: false,
 			carriesOver: false,
 		},
 		{
 			id: 'connectCities',
-			name: 'Connect 2 new cities',
+			name: 'Connect 2 new cities to the grid',
 			rule: 'Join 2 cities to the grid this game.',
 			target: 2,
 			mandatory: false,
@@ -913,7 +1021,7 @@ export const pack: ContentPack = {
 		},
 		{
 			id: 'searches',
-			name: 'Perform 2 searches',
+			name: 'Complete 2 searches',
 			rule: 'Search twice this game.',
 			target: 2,
 			mandatory: false,
@@ -945,10 +1053,11 @@ export const pack: ContentPack = {
 			target: 1,
 			mandatory: true,
 			carriesOver: true,
+			doneIfReconned: true,
 		},
 		{
 			id: 'defect',
-			name: 'Turn the Hollow Men',
+			name: 'Get Hollow Men to defect',
 			rule: 'Have a Hollow Man in each of 3 different havens at the same time.',
 			target: 3,
 			mandatory: true,
@@ -966,7 +1075,7 @@ export const pack: ContentPack = {
 		},
 		{
 			id: 'deliverSample',
-			name: 'Deliver the sample',
+			name: 'Deliver the Sample',
 			rule: 'Carry the sample from Lake Baikal to a supply center in Johannesburg.',
 			target: 1,
 			mandatory: true,
@@ -977,15 +1086,15 @@ export const pack: ContentPack = {
 	legacyDeck,
 	dossier,
 	frequencies: [
-		{ take: 1 },
-		{ take: 1 },
-		{ take: 1 },
+		{ take: 2 },
+		{ take: 2 },
+		{ take: 2 },
 		{ seal: door('52') },
 		{ take: 2 },
-		{ take: 1 },
-		{ take: 1 },
-		{ take: 1 },
-		{ take: 1 },
+		{ take: 2 },
+		{ take: 2 },
+		{ take: 2 },
+		{ take: 2 },
 		{ seal: door('43') },
 	],
 	frequencyLabels: ['8.24', '8.81', '9.1', '9.2', '9.31', '9.58', '9.75', '10.31', '10.57', '11.88'],
@@ -1025,8 +1134,7 @@ export const pack: ContentPack = {
 		supplyByMonth: [36, 36, 33, 30, 27, 24, 21, 18, 15, 12, 8, 4, 0],
 		requiredByMonth: [1, 2, 2, 3, 3, 3, 3, 3, 3, 3, 2, 1, 1],
 		pieces: { center: 9, tower: 6, shelter: 6, hollow: 24 },
-		produceCards: 8,
-		produceBoxes: 2,
+		produceBoxes: [1, 1, 1, 2, 2, 2, 3, 3],
 		characterSlots: 4,
 		portraits: 10,
 		exposureBoxes: 7,

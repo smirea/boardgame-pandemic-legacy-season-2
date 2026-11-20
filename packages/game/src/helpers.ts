@@ -172,6 +172,21 @@ export function playerCard(campaign: Campaign, id: CardId): PlayerCard {
 	return card;
 }
 
+/** Door 50 holds this many Infested stickers. Once they are gone, no new city becomes infested. */
+export const INFESTED_STICKERS = 21;
+
+/** Marks a city infested with one of door 50's stickers, while any are left. Printed infestations need none. */
+export function infest(campaign: Campaign, city: CityId) {
+	const record = campaign.locations[city]!;
+	if (record.infested) return;
+	const used = pack.cities.filter(entry => !entry.startsInfested && campaign.locations[entry.id]!.infested).length;
+	if (used < INFESTED_STICKERS) record.infested = true;
+}
+
+/** Whether a City card counts as `color`. Local Operatives also makes it red, for every purpose. */
+export const isColor = (card: { city: CityId; improvement: string | null }, color: Color | null) =>
+	cityDef(card.city).color === color || (card.improvement === 'redWild' && color === 'red');
+
 /** How many cards of `color` this card is worth when paying a colour cost. Wild improvements match any colour. */
 export function cardValue(campaign: Campaign, id: CardId, color: Color, purpose: 'build' | 'recon'): number {
 	const card = playerCard(campaign, id);

@@ -49,6 +49,7 @@
 				},
 			]);
 	const discard = $derived(names(infection.discard));
+	const setAside = $derived(names(infection.gameEnd));
 
 	let open = $state<'player' | 'infection' | null>(null);
 </script>
@@ -163,6 +164,15 @@
 				</p>
 				{#if discard.length}<p class="note">An Epidemic shuffles these back on top of the deck.</p>{/if}
 			</section>
+			{#if setAside.length}
+				<section>
+					<h4>Game End area <b>{Object.values(infection.gameEnd).reduce((a, b) => a + b, 0)}</b></h4>
+					<p><RichText text={setAside} /></p>
+					<p class="note">
+						Out of play until the game ends: new cities' cards, forsaken cities' and quarantined cards.
+					</p>
+				</section>
+			{/if}
 			{#if infection.atRisk.length}
 				<section>
 					<h4>An incident if hit next</h4>

@@ -54,6 +54,7 @@
 	import Briefing from './Briefing.svelte';
 	import Unboxing from './Unboxing.svelte';
 	import LegacyBox from './LegacyBox.svelte';
+	import LegacyDeck from './LegacyDeck.svelte';
 	import Objectives from './Objectives.svelte';
 	import SeatPicker from './SeatPicker.svelte';
 	import TopBar from './TopBar.svelte';
@@ -179,6 +180,7 @@
 	}
 	let menu = $state(false);
 	let boxOpen = $state(false);
+	let deckOpen = $state(false);
 	// Once the table knows which game is next, every game is set up by choosing who plays, over the whole table.
 	const choosingCharacters = $derived(snap.phase === 'lobby' && !spectator && tableStart(snap.world) !== null);
 	// A haven the character screen points at, which the camera looks at behind it.
@@ -525,6 +527,7 @@
 			viewing,
 			menu,
 			box: boxOpen,
+			deck: deckOpen,
 			steps: targeting || chooser || ring ? trail : [],
 			filter,
 			toasts: toasts.map(({ text, tone }) => ({ text, tone })),
@@ -547,6 +550,7 @@
 		dismiss();
 		menu = next.menu;
 		boxOpen = next.box;
+		deckOpen = next.deck;
 		viewing = next.viewing;
 		heldAnnouncements = next.toasts.length > 0 || next.banner !== null || next.turnBanner !== null;
 		toasts = next.toasts.map(entry => ({ id: nextFx++, ...entry }));
@@ -1071,6 +1075,7 @@
 		onreset={() => resetView++}
 		onmenu={() => (menu = !menu)}
 		onbox={() => (boxOpen = !boxOpen)}
+		ondeck={() => (deckOpen = !deckOpen)}
 	/>
 
 	<main class="stage" bind:this={stage} data-dest="map">
@@ -1287,6 +1292,20 @@
 			>
 				<div in:fly={{ y: 24, duration: 300 }}>
 					<LegacyBox {campaign} onclose={() => (boxOpen = false)} />
+				</div>
+			</div>
+		{/if}
+
+		{#if deckOpen}
+			<div
+				class="scrim box-scrim"
+				role="dialog"
+				aria-modal="true"
+				aria-label="The Legacy deck"
+				transition:fade={{ duration: 180 }}
+			>
+				<div in:fly={{ y: 24, duration: 300 }}>
+					<LegacyDeck {campaign} onclose={() => (deckOpen = false)} />
 				</div>
 			</div>
 		{/if}

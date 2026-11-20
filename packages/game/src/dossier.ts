@@ -1,6 +1,7 @@
 import { pack } from './content/pack';
 import { sealKey } from './content/types';
-import type { DoorId, Seal, SealDef, TurningPointId } from './content/types';
+import type { DoorId, RuleId, Seal, SealDef, TurningPointId } from './content/types';
+import { INFESTED_STICKERS } from './helpers';
 import { actionBriefs, ruleBriefs, unlockText } from './briefing';
 import { newCampaign } from './legacy';
 import type { Campaign } from './state';
@@ -60,15 +61,36 @@ const TURNING_POINTS: Record<TurningPointId, string> = {
 	defection: 'Watching for a game that ends with Hollow Men in three different havens.',
 };
 
+/** What the box still holds for a rule that uses up a supply: doses of the sample, Infested stickers. */
+function ruleCount(campaign: Campaign, rule: RuleId): string {
+	if (rule === 'carrier')
+		return ` Doses left: ${pack.numbers.selfInfectDoses - campaign.dosesUsed} of ${pack.numbers.selfInfectDoses}.`;
+	if (rule === 'forsaken') {
+		const used = pack.cities.filter(city => !city.startsInfested && campaign.locations[city.id]!.infested).length;
+		return ` Infested stickers left: ${Math.max(0, INFESTED_STICKERS - used)} of ${INFESTED_STICKERS}.`;
+	}
+	return '';
+}
+
 /** What the group's rulebook holds by now: the rules in force, the actions unlocked and the turning points waiting. */
 export function rulebook(campaign: Campaign) {
 	const start = new Set(newCampaign(0).actions);
 	return {
-		rules: campaign.rules.map(rule => ({ id: rule, text: ruleBriefs[rule] ?? rule })),
+		rules: campaign.rules.map(rule => ({ id: rule, text: `${ruleBriefs[rule] ?? rule}${ruleCount(campaign, rule)}` })),
 		actions: campaign.actions
 			.filter(action => !start.has(action))
 			.map(action => ({ id: action, text: actionBriefs[action] ?? action })),
-		turningPoints: campaign.turningPoints.map(id => ({ id, text: TURNING_POINTS[id] })),
+		turningPoints: [
+			...campaign.turningPoints.map(id => ({ id, text: TURNING_POINTS[id] })),
+			...(campaign.losingStreakBonusGames > 0
+				? [
+						{
+							id: 'relief',
+							text: `Give Us the Tools: up to 10 reserve cubes join the stockpile at setup, ${campaign.losingStreakBonusGames} more ${campaign.losingStreakBonusGames === 1 ? 'game' : 'games'}.`,
+						},
+					]
+				: []),
+		],
 	};
 }
 

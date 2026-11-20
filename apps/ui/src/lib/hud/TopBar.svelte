@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { pack } from '@repo/game';
+	import { scan, scanUrl } from '#lib/scans.svelte.ts';
+	import { legacyScans } from '#lib/scans.generated.ts';
 	import type { Insights, PublicState } from '@repo/game';
 	import Calendar from './Calendar.svelte';
 	import Decks from './Decks.svelte';
@@ -15,14 +17,19 @@
 		onreset: () => void;
 		onmenu: () => void;
 		onbox: () => void;
+		ondeck: () => void;
 	};
 
-	let { snap, info, status, players, solo, onreset, onmenu, onbox }: Props = $props();
+	let { snap, info, status, players, solo, onreset, onmenu, onbox, ondeck }: Props = $props();
 
 	const campaign = $derived(snap.world.campaign);
 	const game = $derived(snap.world.game);
 	const rates = pack.numbers.infectionRates;
 	const dealt = $derived(!snap.phase.startsWith('setup'));
+	/** The width left for the calendar once the rest of the bar has what it needs. */
+	let room = $state(0);
+	const nextLegacy = $derived(pack.legacyDeck[campaign.legacyIndex]);
+	const legacyLeft = $derived(pack.legacyDeck.length - campaign.legacyIndex);
 </script>
 
 <div
@@ -30,12 +37,10 @@
 	{@attach feedback(undefined, () => ({ status, players, solo, month: campaign.month, phase: snap.phase }))}
 >
 	<header class="bar">
-		<div class="month">
+		<div class="month" bind:clientWidth={room}>
 			{#if !MONTHS[campaign.month]}<strong>Campaign over</strong>{/if}
-			<Calendar {campaign} />
+			<Calendar {campaign} {room} />
 		</div>
-
-		<div class="spacer"></div>
 		<div class="stats">
 			{#if game && info}
 				<div class="track" title="Infection rate: cards flipped at the end of every turn">
@@ -62,11 +67,44 @@
 				data-dest="box">Box</button
 			>
 			<button onclick={onmenu}>Menu</button>
+			<button
+				class="legacy"
+				onclick={ondeck}
+				aria-label={`Legacy deck, ${legacyLeft} cards left`}
+				title="The Legacy deck: the cards read so far, and when the next one is read"
+				data-testid="open-legacy-deck"
+				{@attach scan(
+					() => (nextLegacy ? [{ title: 'Top of the Legacy deck', src: legacyScans[nextLegacy.id]!.back! }] : []),
+					'legacy-pile',
+				)}
+			>
+				{#if nextLegacy}<img src={scanUrl(legacyScans[nextLegacy.id]!.back!)} alt="" />{/if}
+				<span>{legacyLeft}</span>
+			</button>
 		</div>
 	</header>
 </div>
 
 <style>
+	.legacy {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		padding-left: 0.3rem;
+	}
+
+	.legacy img {
+		height: 1.9rem;
+		border-radius: 2px;
+		box-shadow:
+			1px 1px 0 rgb(0 0 0 / 0.5),
+			2px 2px 0 rgb(231 220 198 / 0.25);
+	}
+
+	.legacy span {
+		font-variant-numeric: tabular-nums;
+	}
+
 	/* Above the seats and panels on the board, so the bar's slips hang over them. */
 	.frame {
 		position: relative;
@@ -127,10 +165,13 @@
 		}
 	}
 
+	/* Takes the room the rest of the bar leaves, whatever the calendar holds, so the calendar can fold to fit it. */
 	.month {
 		display: flex;
+		flex: 1 1 0;
 		align-items: center;
 		gap: 0.7rem;
+		min-width: 0;
 	}
 
 	.month strong {
@@ -143,10 +184,6 @@
 	.caption {
 		color: var(--muted);
 		font-size: 0.82rem;
-	}
-
-	.spacer {
-		flex: 1;
 	}
 
 	.stats {

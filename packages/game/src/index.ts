@@ -31,6 +31,7 @@ export {
 	purchaseCost,
 	readLegacy,
 	score,
+	ending,
 } from './legacy';
 export { createGame } from './flow';
 export type { Command, GameActor, GameSnapshot, Phase, Save, Seating } from './machine';

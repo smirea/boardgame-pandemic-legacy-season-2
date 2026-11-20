@@ -1,7 +1,17 @@
 import { pack } from './content/pack';
 import type { ActionId, CityDef, CompanionId, EdgeKind, RuleId, SearchResult } from './content/types';
 import { drawPiled } from './decks';
-import { bump, havensWithHollow, kill, movePawn, setProgress, settleCarried, settleGrid, towerColours } from './flow';
+import {
+	bump,
+	checkDelivery,
+	havensWithHollow,
+	kill,
+	movePawn,
+	setProgress,
+	settleCarried,
+	settleGrid,
+	towerColours,
+} from './flow';
 import {
 	cardLabel,
 	cardValue,
@@ -25,9 +35,11 @@ import {
 	seaRoute,
 	reconned,
 	breakthrough,
+	isColor,
+	infest,
 } from './helpers';
 import type { CardId, CityId, SeatId } from './ids';
-import { isOpen, openSeal } from './legacy';
+import { applyUnlock, isOpen, openSeal } from './legacy';
 import type { Campaign, Game, GameLocation, Player, World } from './state';
 
 export type Action =
@@ -211,8 +223,7 @@ function resolveSearch(ctx: Ctx, result: SearchResult, card: CardId) {
 				game.pending.push({ t: 'retrieve', seat: ctx.seat, filter: 'any' });
 			return;
 		case 'quarantineCard':
-			if (game.infectionDiscard.some(id => campaign.infectionCards[id]?.kind === 'city'))
-				game.pending.push({ t: 'quarantineCard', seat: ctx.seat });
+			if (game.infectionDiscard.length) game.pending.push({ t: 'quarantineCard', seat: ctx.seat });
 			return;
 		case 'removeHollow':
 			if (Object.values(game.locations).some(location => location.hollow > 0))
@@ -222,10 +233,13 @@ function resolveSearch(ctx: Ctx, result: SearchResult, card: CardId) {
 			game.pending.push({ t: 'freeEdge', seat: ctx.seat, kind: result.kind, ignoreRegions: false });
 			return;
 		case 'discover':
-			if (isOpen(campaign, result.seal)) {
+			if (result.orAction && result.seals.every(seal => isOpen(campaign, seal))) {
 				game.actionsLeft += 1;
 				log(game, { t: 'note', text: 'That lead was already followed: 1 extra action this turn' });
-			} else openSeal(ctx.world, result.seal, false, ctx.seat);
+				return;
+			}
+			if (result.lab) applyUnlock(ctx.world, { t: 'lab', city: result.lab }, ctx.seat);
+			for (const seal of result.seals) openSeal(ctx.world, seal, false, ctx.seat);
 			return;
 		case 'companion': {
 			const searched = campaign.playerCards[card]!;
@@ -235,7 +249,7 @@ function resolveSearch(ctx: Ctx, result: SearchResult, card: CardId) {
 		case 'infest':
 			if (campaign.locations[ctx.here]!.infested)
 				log(game, { t: 'note', text: `${cityDef(ctx.here).name} was already infested, so nothing changes` });
-			campaign.locations[ctx.here]!.infested = true;
+			infest(campaign, ctx.here);
 			if (result.opens) openSeal(ctx.world, result.opens, false, ctx.seat);
 			return;
 		case 'giveCard':
@@ -253,7 +267,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 			if (!neighbours(ctx.campaign, ctx.here).includes(to)) return 'Not adjacent';
 			if (!characterOf(ctx.world, ctx.seat).carrier || cityDef(to).kind === 'haven') return ok;
 			const paid = card ? cityCard(ctx, card) : null;
-			return paid && cityDef(paid.city).color === cityDef(to).color
+			return paid && isColor(paid, cityDef(to).color)
 				? ok
 				: "The carrier must discard a card of the destination's colour";
 		},
@@ -300,9 +314,11 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 		},
 	},
 	makeSupplies: {
-		check: ctx => (ctx.game[trait(ctx, 'immunologist') ? 'reserve' : 'stockpile'] > 0 ? ok : 'No cubes left to take'),
+		check: ctx =>
+			ctx.game.stockpile > 0 || (trait(ctx, 'immunologist') && ctx.game.reserve > 0) ? ok : 'No cubes left to take',
 		apply(ctx) {
-			const source = trait(ctx, 'immunologist') ? 'reserve' : 'stockpile';
+			// The Immunologist may take from the reserve instead, which spares the stockpile.
+			const source = trait(ctx, 'immunologist') && ctx.game.reserve > 0 ? 'reserve' : 'stockpile';
 			ctx.game[source] -= 1;
 			ctx.me.supplies += 1;
 			if (breakthrough(ctx.campaign, 'opal') && (ctx.def.kind === 'haven' || ctx.loc.center) && ctx.game[source] > 0) {
@@ -415,6 +431,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 			}
 			ctx.loc.center = true;
 			log(ctx.game, { t: 'structure', city: ctx.here, structure: 'center' });
+			checkDelivery(ctx.world);
 			if (isNew) {
 				bump(ctx.world, 'buildCenters');
 				bump(ctx.world, 'prologueCenters');
@@ -548,7 +565,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 			if (!ctx.loc.tower) return 'Stand in a city with a tower';
 			if (!ctx.game.players[to] || to === ctx.seat) return 'Pick another player';
 			const held = cityCard(ctx, card);
-			return held && cityDef(held.city).color === ctx.def.color ? ok : "Send a City card of the tower city's colour";
+			return held && isColor(held, ctx.def.color) ? ok : "Send a City card of the tower city's colour";
 		},
 		apply(ctx, { card, to }) {
 			removeFromHand(ctx.game, ctx.seat, card);
@@ -611,9 +628,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 			if (ctx.game.pieces.shelter > 0 && moveFrom) return 'A shelter is still in the box';
 			if (trait(ctx, 'vectorControl')) return ok;
 			const held = card ? cityCard(ctx, card) : null;
-			return ctx.def.kind === 'city' &&
-				held &&
-				(trait(ctx, 'quartermaster') || cityDef(held.city).color === ctx.def.color)
+			return ctx.def.kind === 'city' && held && (trait(ctx, 'quartermaster') || isColor(held, ctx.def.color))
 				? ok
 				: "Discard a City card of this city's colour";
 		},
@@ -645,7 +660,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 			const held = cityCard(ctx, card);
 			if (!held) return 'Pick a City card from your hand';
 			const target = ctx.game.locations[city];
-			return target && target.hollow > 0 && cityDef(city).color === cityDef(held.city).color
+			return target && target.hollow > 0 && isColor(held, cityDef(city).color)
 				? ok
 				: "Pick Hollow Men in a city of the card's colour";
 		},
@@ -661,7 +676,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 		check(ctx, { card, take }) {
 			const paid = cityCard(ctx, card);
 			const wanted = cityCard(ctx, take, 'discard');
-			return paid && wanted && cityDef(paid.city).color === cityDef(wanted.city).color
+			return paid && wanted && (isColor(paid, cityDef(wanted.city).color) || isColor(wanted, cityDef(paid.city).color))
 				? ok
 				: 'Trade for a City card of the same colour';
 		},
@@ -676,7 +691,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 		check(ctx, { card, take }) {
 			const paid = cityCard(ctx, card);
 			const wanted = cityCard(ctx, take, 'discard');
-			return paid && wanted && cityDef(paid.city).color === cityDef(wanted.city).color
+			return paid && wanted && (isColor(paid, cityDef(wanted.city).color) || isColor(wanted, cityDef(paid.city).color))
 				? ok
 				: 'Trade for a City card of the same colour';
 		},
@@ -690,13 +705,11 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 		trait: 'porter',
 		free: true,
 		check(ctx, { from, count }) {
-			if (!unused(ctx, 'porter')) return 'Once per turn';
 			if (!neighbours(ctx.campaign, ctx.here).includes(from)) return 'Pick an adjacent location';
 			const there = ctx.game.locations[from]?.supplies ?? 0;
 			return Number.isInteger(count) && count >= 1 && count <= there ? ok : 'There are not that many cubes there';
 		},
 		apply(ctx, { from, count }) {
-			useOnce(ctx, 'porter');
 			ctx.game.locations[from]!.supplies -= count;
 			ctx.loc.supplies += count;
 		},
@@ -785,7 +798,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 	misinform: {
 		trait: 'misinformationSpecialist',
 		check(ctx, { to }) {
-			if (ctx.loc.hollow === 0) return 'No Hollow Men here';
+			if (ctx.def.kind !== 'city' || ctx.loc.hollow === 0) return 'No Hollow Men in your city';
 			if (!neighbours(ctx.campaign, ctx.here).includes(to) || cityDef(to).kind !== 'city')
 				return 'Pick a neighbouring city';
 			return ctx.game.locations[to]!.hollow <= 2 ? ok : 'That city already holds 3 Hollow Men';
@@ -819,10 +832,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 			if (!hasRule(ctx.campaign, 'carrier') || ctx.here !== pack.sampleFrom) return 'The sample is not here';
 			if (character.worker || character.carrier) return 'This character cannot carry the sample';
 			if (ctx.campaign.dosesUsed >= numbers.selfInfectDoses) return 'Every dose of the sample is used';
-			// The Carrier scar covers 2 slots and may not cover another scar.
-			return character.slots.filter(slot => slot?.kind !== 'scar').length >= 2
-				? ok
-				: 'This character has no room for the Carrier scar, which covers 2 slots';
+			return ok;
 		},
 		apply(ctx) {
 			const character = characterOf(ctx.world, ctx.seat);
@@ -835,11 +845,12 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 				if (box !== 'scar') continue;
 				character.carrier = true;
 				log(ctx.game, { t: 'note', text: `${character.name} now carries the sample` });
-				// The scar covers 2 slots. Empty ones go first, so an ability is lost only when there is no room.
+				// The scar covers 2 slots: empty ones first, then abilities, and another scar only when nothing else is left.
+				const rank = (slot: (typeof character.slots)[number]) => (slot === null ? 0 : slot.kind === 'ability' ? 1 : 2);
 				const order = character.slots
 					.map((slot, index) => ({ slot, index }))
-					.filter(entry => entry.slot?.kind !== 'scar')
-					.toSorted((a, b) => Number(a.slot !== null) - Number(b.slot !== null))
+					.filter(entry => entry.slot?.id !== 'carrier')
+					.toSorted((a, b) => rank(a.slot) - rank(b.slot))
 					.slice(0, 2);
 				for (const entry of order) character.slots[entry.index] = { kind: 'scar', id: 'carrier' };
 				return;

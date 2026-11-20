@@ -10,6 +10,7 @@ import type {
 	EventId,
 	InfectionImprovementId,
 	JobId,
+	LegacyCardDef,
 	ObjectiveId,
 	RuleId,
 	ScarId,
@@ -106,7 +107,7 @@ export type Campaign = {
 	rules: RuleId[];
 	actions: ActionId[];
 	legacyIndex: number;
-	legacyHalt: { kind: 'pause' | 'stop'; month: number } | null;
+	legacyHalt: { kind: NonNullable<LegacyCardDef['halt']>; month: number } | null;
 	/** Legacy cards revealed since the players last acknowledged, shown as a briefing. */
 	briefing: BriefingEntry[];
 	/** Packages and dossier doors opened so far, in the order they were opened. */

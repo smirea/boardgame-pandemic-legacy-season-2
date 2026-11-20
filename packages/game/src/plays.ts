@@ -1,6 +1,6 @@
 import { addEdge, checkEdge } from './actions';
 import { pack } from './content/pack';
-import type { AbilityId, ScarId } from './content/types';
+import type { AbilityId, Color, ScarId } from './content/types';
 import { drawPiled, restackTop } from './decks';
 import {
 	canTakeScar,
@@ -22,11 +22,14 @@ import {
 	log,
 	player,
 	removeFromHand,
+	isColor,
 } from './helpers';
 import type { CardId, CharacterId, CityId, SeatId } from './ids';
 import { createCharacter } from './legacy';
 import type { Phase } from './machine';
 import type { Game, World } from './state';
+
+const isGridCity = (onGrid: Set<CityId>, city: CityId) => onGrid.has(city) && cityDef(city).kind === 'city';
 
 /** Event and companion cards, playable by anyone at any time during a game. */
 export type Play =
@@ -40,7 +43,8 @@ export type Play =
 	/** The top Infection cards, top first, in the order they go back. */
 	| { e: 'forecast'; order: CardId[] }
 	| { e: 'cache'; city: CityId }
-	| { e: 'encore'; card: CardId }
+	/** Takes a Rationed Event from the discard pile and plays it at once, as `played`. */
+	| { e: 'encore'; card: CardId; played: Play }
 	| { e: 'secondWind' }
 	| { e: 'massInoculation'; cards: CardId[] }
 	| { e: 'openWaters'; to: CityId }
@@ -88,7 +92,7 @@ function tally<T>(items: readonly T[]): Map<T, number> {
 }
 
 /** The plays that may wait on an Epidemic's reshuffle, since they act on the discard pile it is about to take. */
-export const DURING_INTENSIFY = new Set<Play['e']>(['resilience', 'massInoculation']);
+export const DURING_INTENSIFY = new Set<Play['e']>(['resilience', 'massInoculation', 'exile']);
 
 /** The top of the Infection deck that Forecast rearranges. */
 export function forecastCards(game: Game): CardId[] {
@@ -132,11 +136,12 @@ export function checkPlay(world: World, seat: SeatId, card: CardId, play: Play, 
 	if (unresolved === 'intensify' && !DURING_INTENSIFY.has(play.e)) return 'The Epidemic must finish first';
 	if (unresolved === 'epidemicDrawn' && play.e !== 'antidote') return 'The Epidemic must strike first';
 	const onGrid = grid(campaign);
+	const onMap = (city: CityId) => campaign.locations[city]?.revealed === true;
 	const here = owner.location;
 	switch (play.e) {
 		case 'airlift': {
-			if (!game.players[play.pawn] || !onGrid.has(play.to) || player(game, play.pawn).location === play.to)
-				return 'Pick a pawn and a different location on the grid';
+			if (!game.players[play.pawn] || !onMap(play.to) || player(game, play.pawn).location === play.to)
+				return 'Pick a pawn and a different location';
 			return characterOf(world, play.pawn).carrier ? 'The carrier cannot be moved' : ok;
 		}
 		case 'quietNight':
@@ -145,7 +150,7 @@ export function checkPlay(world: World, seat: SeatId, card: CardId, play: Play, 
 			return sameCityDiscards(world, play.cards, 2) ? ok : 'Pick 1 or 2 discarded Infection cards of one city';
 		case 'handout':
 			if (play.cities.length < 1 || play.cities.length > HANDOUT) return `Pick 1 to ${HANDOUT} locations`;
-			if (!play.cities.every(city => onGrid.has(city))) return 'Pick locations on the grid';
+			if (!play.cities.every(onMap)) return 'Pick locations on the map';
 			return game.stockpile >= play.cities.length ? ok : 'The stockpile does not hold that many cubes';
 		case 'spreadOut': {
 			const from = game.locations[play.from];
@@ -178,12 +183,30 @@ export function checkPlay(world: World, seat: SeatId, card: CardId, play: Play, 
 				target?.kind === 'event' &&
 				target.mode === 'rationed' &&
 				target.event !== 'encore'
-				? ok
+				? checkPlay(
+						{
+							...world,
+							game: {
+								...game,
+								// The Encore card is already played, so the event it takes cannot be aimed at it.
+								players: {
+									...game.players,
+									[seat]: { ...owner, hand: [...owner.hand.filter(id => id !== card), play.card] },
+								},
+								playerDiscard: game.playerDiscard.filter(id => id !== play.card),
+							},
+						},
+						seat,
+						play.card,
+						play.played,
+						phase,
+					)
 				: 'Pick another Rationed Event from the Player discard pile';
 		}
 		case 'secondWind':
 			return phase === 'playing.actions' ? ok : 'Second Wind is played during the action step';
 		case 'massInoculation': {
+			if (!campaign.rules.includes('storage')) return 'Package 6 is not open yet';
 			const cards = play.cards;
 			if (cards.length < 1 || cards.length > MASS_INOCULATION || new Set(cards).size !== cards.length)
 				return `Pick 1 to ${MASS_INOCULATION} cards`;
@@ -196,11 +219,14 @@ export function checkPlay(world: World, seat: SeatId, card: CardId, play: Play, 
 		case 'openWaters':
 			return checkEdge(campaign, player(game, game.active).location, play.to, 'sea', true);
 		case 'safeHouses': {
-			const fresh = play.cities.every(city => game.locations[city] && !game.locations[city].shelter);
+			const onGrid = grid(campaign);
+			const fresh = play.cities.every(
+				city => game.locations[city] && !game.locations[city].shelter && isGridCity(onGrid, city),
+			);
 			const count = play.cities.length;
 			return count >= 1 && count <= 3 && new Set(play.cities).size === count && fresh && game.pieces.shelter >= count
 				? ok
-				: 'Pick up to 3 locations without a shelter';
+				: 'Pick up to 3 cities on the grid without a shelter';
 		}
 		case 'purge':
 		case 'purifier':
@@ -245,9 +271,12 @@ export function checkPlay(world: World, seat: SeatId, card: CardId, play: Play, 
 		case 'medic':
 			return game.locations[here]!.plague > 0 ? ok : 'No Plague cubes in your location';
 		case 'shelterWright':
-			return game.locations[play.city] && !game.locations[play.city].shelter && game.pieces.shelter > 0
+			return game.locations[play.city] &&
+				!game.locations[play.city].shelter &&
+				isGridCity(grid(campaign), play.city) &&
+				game.pieces.shelter > 0
 				? ok
-				: 'Pick a location without a shelter';
+				: 'Pick a city on the grid without a shelter';
 		case 'marksman':
 			return (game.locations[play.city]?.hollow ?? 0) > 0 ? ok : 'No Hollow Men there';
 		case 'riotControl':
@@ -270,6 +299,7 @@ function playDetail(world: World, play: Play): string {
 	const card = (id: CardId) => {
 		const held = campaign.playerCards[id];
 		if (held?.kind === 'city') return cityDef(held.city).name;
+		if (held?.kind === 'event') return pack.events.find(entry => entry.id === held.event)!.name;
 		const infection = campaign.infectionCards[id];
 		return infection?.kind === 'city' ? cityDef(infection.city).name : (held?.kind ?? 'a card');
 	};
@@ -282,8 +312,10 @@ function playDetail(world: World, play: Play): string {
 		case 'massInoculation':
 		case 'exile':
 			return play.cards.map(card).join(', ');
-		case 'encore':
-			return card(play.card);
+		case 'encore': {
+			const then = playDetail(world, play.played);
+			return then ? `${card(play.card)}: ${then}` : card(play.card);
+		}
 		case 'openWaters':
 			return `${cityDef(world.game!.players[world.game!.active]!.location).name} to ${cityDef(play.to).name}`;
 		case 'safeHouses':
@@ -374,7 +406,7 @@ function resolvePlay(world: World, seat: SeatId, card: CardId, play: Play) {
 		case 'encore':
 			game.playerDiscard.splice(game.playerDiscard.indexOf(play.card), 1);
 			owner.hand.push(play.card);
-			return;
+			return resolvePlay(world, seat, play.card, play.played);
 		case 'secondWind':
 			game.actionsLeft += SECOND_WIND;
 			return;
@@ -570,9 +602,7 @@ export function checkDecide(world: World, decide: Decide): string | null {
 			return decide.cities.length >= 1 && decide.cities.length <= amount && valid ? ok : 'Pick Hollow Men on the board';
 		}
 		case 'quarantineCard':
-			return game.infectionDiscard.includes(decide.card) && campaign.infectionCards[decide.card]?.kind === 'city'
-				? ok
-				: 'Pick a City card from the Infection discard pile';
+			return game.infectionDiscard.includes(decide.card) ? ok : 'Pick a card from the Infection discard pile';
 		case 'giveCard': {
 			const from = (pending as { seat: SeatId }).seat;
 			if (!player(game, from).hand.includes(decide.card)) return 'Pick a card from your hand';
@@ -585,7 +615,7 @@ export function checkDecide(world: World, decide: Decide): string | null {
 			const color = (pending as { color: string }).color;
 			return game.players[decide.seat]?.hand.includes(decide.card) &&
 				card?.kind === 'city' &&
-				cityDef(card.city).color === color
+				isColor(card, color as Color)
 				? ok
 				: "Discard a City card of the city's colour";
 		}
