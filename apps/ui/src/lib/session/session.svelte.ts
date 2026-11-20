@@ -51,11 +51,18 @@ function storedRecord(save: Save | null): GameRecord | null {
 	}
 }
 
+/** Saves fill the browser's storage quickly, so only this many checkpoints are kept. */
+const CHECKPOINTS = 12;
+
 type DebugApi = {
 	getState: () => PublicState | null;
 	saveState: () => void;
 	loadState: (state?: unknown) => void;
 	setState: (state: unknown) => void;
+	/** Keeps the campaign as it stands under `name`, to return to with `restore`. Only the newest few are kept. */
+	checkpoint: (name: string) => string[];
+	restore: (name: string) => void;
+	checkpoints: () => string[];
 	/** Sends a command the way a click would. Returns why this client would refuse it, or null once it is sent. */
 	send: (command: Command) => string | null;
 	connection: () => {
@@ -316,6 +323,20 @@ export class GameSession {
 			saveState: () => LS.set({ debugSnapshot: this.#save() }),
 			loadState: state => this.importSave(state ?? LS.get('debugSnapshot')),
 			setState: state => this.importSave(state),
+			checkpoint: name => {
+				const kept = [
+					...(LS.get('checkpoints') ?? []).filter(entry => entry.name !== name),
+					{ name, save: this.#save() },
+				];
+				LS.set({ checkpoints: kept.slice(-CHECKPOINTS) });
+				return kept.slice(-CHECKPOINTS).map(entry => entry.name);
+			},
+			restore: name => {
+				const found = (LS.get('checkpoints') ?? []).find(entry => entry.name === name);
+				if (!found) throw new Error(`No checkpoint named ${name}`);
+				this.importSave(found.save);
+			},
+			checkpoints: () => (LS.get('checkpoints') ?? []).map(entry => entry.name),
 			send: command => {
 				const reason = this.explain(command);
 				if (!reason) this.send(command);

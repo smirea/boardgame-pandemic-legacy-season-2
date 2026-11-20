@@ -14,6 +14,8 @@ export const LS = new LocalStorage<{
 	/** The host's campaign save: plain `{ phase, world }` JSON. */
 	save: unknown;
 	debugSnapshot: unknown;
+	/** Named saves to return to (`DEBUG.checkpoint`), newest last. */
+	checkpoints: { name: string; save: unknown }[];
 	/** The host's recording of the game in progress, played back at `/replay`. */
 	record: unknown;
 	replay: { speed: number; panel: boolean; bubbles: boolean };
@@ -29,6 +31,7 @@ export const LS = new LocalStorage<{
 		mode: null,
 		save: null,
 		debugSnapshot: null,
+		checkpoints: [],
 		record: null,
 		replay: { speed: 1, panel: true, bubbles: true },
 		studio: null,
