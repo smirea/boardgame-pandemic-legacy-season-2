@@ -232,7 +232,7 @@ const bundles: BundleDef[] = [
 		name: 'New card improvements',
 		unlocks: [{ t: 'cityImprovement', improvement: 'wild' }],
 	},
-	{ id: bundleId('frequency-training'), name: 'New training', unlocks: [{ t: 'ability', ability: 'lookout' }] },
+	{ id: bundleId('frequency-training'), name: 'New training', unlocks: [{ t: 'ability', ability: 'surveyor' }] },
 	{
 		id: bundleId('defection'),
 		name: 'The Hollow Men defect',
@@ -282,8 +282,6 @@ const legacyDeck: LegacyCardDef[] = [
 		{ t: 'objectives', remove: ['prologueCenters'], add: ['buildCenters', 'reconRegion'] },
 		{ t: 'required', count: 2 },
 		{ t: 'action', action: 'recon' },
-		{ t: 'ability', ability: 'recordKeeper' },
-		{ t: 'ability', ability: 'helmsman' },
 		{ t: 'cityImprovement', improvement: 'double', copies: 3 },
 		{ t: 'cityImprovement', improvement: 'triple' },
 		{ t: 'infectionImprovement', improvement: 'wellStocked', copies: 2 },
@@ -338,7 +336,6 @@ const legacyDeck: LegacyCardDef[] = [
 		[
 			{ t: 'action', action: 'chartLane' },
 			{ t: 'rule', rule: 'epidemicScaling' },
-			{ t: 'ability', ability: 'foreman' },
 		],
 	),
 	card(4, 1, 'pause', 'April', 'Perimeter report on South America.', [perimeter('south-america')]),
@@ -347,9 +344,9 @@ const legacyDeck: LegacyCardDef[] = [
 	]),
 	card(5, 1, 'pause', 'May', 'Perimeter report on the eastern Pacific.', [perimeter('find-eastern-pacific')]),
 	card(5, 2, 'stop', 'Experience', 'New character abilities are for sale.', [
-		{ t: 'ability', ability: 'architect' },
-		{ t: 'ability', ability: 'courier' },
+		{ t: 'ability', ability: 'lookout' },
 		{ t: 'ability', ability: 'scout' },
+		{ t: 'ability', ability: 'smuggler' },
 	]),
 	card(6, 1, 'pause', 'June', 'Perimeter report on Europe. If it was never reconned, Frankfurt is lost.', [
 		perimeter('europe', [{ t: 'forsake', city: city('frankfurt') }]),
@@ -359,8 +356,6 @@ const legacyDeck: LegacyCardDef[] = [
 		{ t: 'job', job: 'sanitationOfficer', home: city('haven-mediterranean') },
 		{ t: 'event', event: 'openWaters', mode: 'rationed' },
 		{ t: 'event', event: 'secondWind', mode: 'rationed' },
-		{ t: 'ability', ability: 'facilitator' },
-		{ t: 'ability', ability: 'runner' },
 	]),
 	card(7, 1, 'pause', 'July', 'Perimeter report on Africa. New objective: towers in 3 cities of different colours.', [
 		perimeter('africa'),
@@ -378,9 +373,7 @@ const legacyDeck: LegacyCardDef[] = [
 	card(8, 2, 'stop', 'Hard lessons', 'New abilities.', [
 		{ t: 'ability', ability: 'surveyor' },
 		{ t: 'ability', ability: 'navigator' },
-		{ t: 'ability', ability: 'broker' },
 		{ t: 'ability', ability: 'investigator' },
-		{ t: 'ability', ability: 'supplier' },
 	]),
 	card(
 		9,
@@ -396,7 +389,7 @@ const legacyDeck: LegacyCardDef[] = [
 			{ t: 'event', event: 'scavenge', mode: 'rationed' },
 		],
 	),
-	card(9, 2, 'stop', 'Closing in', 'A new ability is for sale.', [{ t: 'ability', ability: 'outrider' }]),
+	card(9, 2, 'stop', 'Closing in', 'Nothing new this month.', []),
 	card(
 		10,
 		1,
@@ -462,7 +455,7 @@ export const pack: ContentPack = {
 		{
 			id: 'radioOperator',
 			name: 'Radio Operator',
-			text: 'Transfer supplies with a character in any location.',
+			text: 'On your turn, transfer supplies with a character in any location.',
 			starting: true,
 		},
 		{
@@ -480,14 +473,14 @@ export const pack: ContentPack = {
 		{
 			id: 'instructor',
 			name: 'Instructor',
-			text: 'May give any Player card to a character in the same location.',
+			text: 'Once per turn, Share Knowledge may give any Player card to a character in the same location.',
 			starting: true,
 		},
 		{ id: 'immunologist', name: 'Immunologist', text: 'Make Supplies takes cubes from the reserve.', starting: false },
 		{
 			id: 'captain',
 			name: 'Captain',
-			text: 'As an action, discard any City card to move to any port on your sea route.',
+			text: 'Free: discard any City card to move to any port on your sea route.',
 			starting: false,
 		},
 		{
@@ -511,13 +504,23 @@ export const pack: ContentPack = {
 	],
 	abilities: [
 		{ id: 'recordKeeper', name: 'Record Keeper', text: 'Hand limit +1.', cost: 1 },
-		{ id: 'helmsman', name: 'Helmsman', text: 'Your first Drive or Ferry each turn is free.', cost: 2 },
+		{ id: 'helmsman', name: 'Helmsman', text: 'Your first Drive or Ferry each turn is free.', cost: 3 },
 		{ id: 'architect', name: 'Architect', text: 'Build a supply center with 1 card fewer.', cost: 2 },
-		{ id: 'courier', name: 'Courier', text: 'Deliver supplies to an adjacent location.', cost: 1 },
+		{ id: 'courier', name: 'Courier', text: 'Deliver supplies to an adjacent location.', cost: 3 },
 		{ id: 'scout', name: 'Scout', text: 'Recon without a supply center.', cost: 2 },
-		{ id: 'surveyor', name: 'Surveyor', text: 'Recon with 1 card fewer.', cost: 2 },
+		{
+			id: 'surveyor',
+			name: 'Surveyor',
+			text: 'No exposure when leaving a location that holds Hollow Men.',
+			cost: 2,
+		},
 		{ id: 'navigator', name: 'Navigator', text: 'Once per turn, Chart Sea Lane costs no cubes.', cost: 1 },
-		{ id: 'lookout', name: 'Lookout', text: 'Search using a City card from the discard pile.', cost: 2 },
+		{
+			id: 'lookout',
+			name: 'Lookout',
+			text: "Search by taking this city's card from the discard pile into your hand.",
+			cost: 2,
+		},
 		{
 			id: 'broker',
 			name: 'Broker',
@@ -539,24 +542,36 @@ export const pack: ContentPack = {
 		{
 			id: 'supplier',
 			name: 'Supplier',
-			text: 'As an action, place 1 cube from the reserve on a city whose card you hold.',
-			cost: 2,
+			text: 'Once per turn, as an action, move 1 cube from the stockpile to a city whose card you hold.',
+			cost: 3,
 		},
 		{
 			id: 'facilitator',
 			name: 'Facilitator',
-			text: 'As an action, take any card from a player in your location.',
-			cost: 1,
+			text: 'Once per turn, as an action, take any card from a player in your location.',
+			cost: 2,
 		},
 		{
 			id: 'runner',
 			name: 'Runner',
 			text: 'As an action, discard any City card to move from a haven or supply center to anywhere on the grid.',
+			cost: 1,
+		},
+		{ id: 'foreman', name: 'Foreman', text: 'Supply lines cost 1 cube fewer.', cost: 2 },
+		{ id: 'outrider', name: 'Outrider', text: 'Recon with 1 card fewer.', cost: 3 },
+		{ id: 'soldier', name: 'Soldier', text: 'As an action, remove 1 Hollow Man from your location.', cost: 2 },
+		{
+			id: 'coordinator',
+			name: 'Coordinator',
+			text: 'Free: move a pawn from an adjacent location to yours.',
 			cost: 2,
 		},
-		{ id: 'foreman', name: 'Foreman', text: 'Supply lines cost 1 cube fewer.', cost: 1 },
-		{ id: 'outrider', name: 'Outrider', text: 'No exposure when leaving a location that holds Hollow Men.', cost: 2 },
-		{ id: 'soldier', name: 'Soldier', text: 'As an action, remove 1 Hollow Man from your location.', cost: 2 },
+		{
+			id: 'smuggler',
+			name: 'Smuggler',
+			text: 'As an action, discard a City card to put 1 cube from the reserve in that city.',
+			cost: 1,
+		},
 	],
 	scars: [
 		{ id: 'reconExtraCard', name: 'Shaken', text: 'Recon needs 1 extra card.', slots: 1 },
@@ -814,6 +829,19 @@ export const pack: ContentPack = {
 		{ bundle: bundleId('frequency-training') },
 	],
 	startingEvents: ['airlift', 'quietNight', 'supplyDrop', 'secondWind'],
+	startingAbilities: [
+		'architect',
+		'helmsman',
+		'recordKeeper',
+		'courier',
+		'broker',
+		'supplier',
+		'facilitator',
+		'runner',
+		'foreman',
+		'outrider',
+		'coordinator',
+	],
 	sampleFrom: city('lake-baikal'),
 	sampleTo: city('johannesburg'),
 	numbers: {

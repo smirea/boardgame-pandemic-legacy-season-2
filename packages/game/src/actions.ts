@@ -57,6 +57,8 @@ export type Action =
 	| { a: 'facilitate'; with: SeatId; card: CardId }
 	| { a: 'run'; card: CardId; to: CityId }
 	| { a: 'strike' }
+	| { a: 'coordinate'; pawn: SeatId }
+	| { a: 'smuggle'; card: CardId }
 	| { a: 'selfInject' }
 	| { a: 'pickUp'; count: number }
 	| { a: 'transfer'; with: SeatId; count: number; give: boolean }
@@ -281,6 +283,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 	},
 	captainSail: {
 		trait: 'captain',
+		free: true,
 		check(ctx, { card, to }) {
 			if (!cityCard(ctx, card)) return 'Pick a City card from your hand';
 			return seaRoute(ctx.campaign, ctx.here).has(to) ? ok : 'No sea route reaches that port';
@@ -357,11 +360,16 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 				return 'Both pawns must be in the same location';
 			const giver = action.give ? ctx.seat : action.with;
 			if (!player(ctx.game, giver).hand.includes(action.card)) return 'The giver does not hold that card';
-			if (has(ctx.world, giver, 'instructor')) return ok;
 			const card = ctx.campaign.playerCards[action.card];
-			return card?.kind === 'city' && card.city === ctx.here ? ok : "Only this city's card can be shared here";
+			if (card?.kind === 'city' && card.city === ctx.here) return ok;
+			// The Instructor's own gift, once a turn, may be any card. It is never a way to take one.
+			return action.give && trait(ctx, 'instructor') && unused(ctx, 'instructor')
+				? ok
+				: "Only this city's card can be shared here";
 		},
 		apply(ctx, action) {
+			const card = ctx.campaign.playerCards[action.card];
+			if (action.give && !(card?.kind === 'city' && card.city === ctx.here)) useOnce(ctx, 'instructor');
 			const [giver, receiver] = action.give ? [ctx.seat, action.with] : [action.with, ctx.seat];
 			removeFromHand(ctx.game, giver, action.card);
 			player(ctx.game, receiver).hand.push(action.card);
@@ -415,7 +423,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 			if (route.needsCenter && !ctx.loc.center && !trait(ctx, 'scout')) return 'The city needs a supply center';
 			const needed = Math.max(
 				1,
-				route.count + (trait(ctx, 'reconExtraCard') ? 1 : 0) - (trait(ctx, 'surveyor') ? 1 : 0),
+				route.count + (trait(ctx, 'reconExtraCard') ? 1 : 0) - (trait(ctx, 'outrider') ? 1 : 0),
 			);
 			if (cards.length !== needed || !distinct(cards)) return `Needs ${needed} ${route.color} cards`;
 			const paid = cards.map(card => cityCard(ctx, card));
@@ -476,6 +484,11 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 		apply(ctx, { card, box }) {
 			const held = ctx.campaign.playerCards[card]!;
 			if (held.kind !== 'city') return;
+			// The Lookout takes the card out of the discard pile to search it, and keeps it.
+			if (!ctx.me.hand.includes(card)) {
+				ctx.game.playerDiscard.splice(ctx.game.playerDiscard.indexOf(card), 1);
+				ctx.me.hand.push(card);
+			}
 			const target = held.search[box]!;
 			target.scratched = true;
 			ctx.game.searches += 1;
@@ -649,23 +662,52 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 		trait: 'supplier',
 		check(ctx, { card }) {
 			const held = cityCard(ctx, card);
+			if (!unused(ctx, 'supplier')) return 'Once per turn';
 			if (!held || !grid(ctx.campaign).has(held.city)) return 'Hold the card of a city on the grid';
+			return ctx.game.stockpile > 0 ? ok : 'The stockpile is empty';
+		},
+		apply(ctx, { card }) {
+			useOnce(ctx, 'supplier');
+			ctx.game.stockpile -= 1;
+			ctx.game.locations[cityCard(ctx, card)!.city]!.supplies += 1;
+		},
+	},
+	smuggle: {
+		trait: 'smuggler',
+		check(ctx, { card }) {
+			const held = cityCard(ctx, card);
+			if (!held || !ctx.campaign.locations[held.city]!.revealed) return 'Discard a City card from your hand';
 			return ctx.game.reserve > 0 ? ok : 'The reserve is empty';
 		},
 		apply(ctx, { card }) {
+			const { city } = cityCard(ctx, card)!;
+			discardFromHand(ctx.game, ctx.seat, card);
 			ctx.game.reserve -= 1;
-			ctx.game.locations[cityCard(ctx, card)!.city]!.supplies += 1;
+			ctx.game.locations[city]!.supplies += 1;
 		},
+	},
+	coordinate: {
+		trait: 'coordinator',
+		free: true,
+		check(ctx, { pawn }) {
+			const moved = ctx.game.players[pawn];
+			if (!moved || pawn === ctx.seat || !neighbours(ctx.campaign, ctx.here).includes(moved.location))
+				return 'Pick a pawn in an adjacent location';
+			return characterOf(ctx.world, pawn).carrier ? 'The carrier cannot be moved' : ok;
+		},
+		apply: (ctx, { pawn }) => void movePawn(ctx.world, pawn, ctx.here, 'coordinator'),
 	},
 	facilitate: {
 		trait: 'facilitator',
 		check(ctx, action) {
 			const other = ctx.game.players[action.with];
+			if (!unused(ctx, 'facilitator')) return 'Once per turn';
 			if (!other || action.with === ctx.seat || other.location !== ctx.here)
 				return 'Both pawns must be in the same location';
 			return other.hand.includes(action.card) ? ok : 'They do not hold that card';
 		},
 		apply(ctx, action) {
+			useOnce(ctx, 'facilitator');
 			removeFromHand(ctx.game, action.with, action.card);
 			ctx.me.hand.push(action.card);
 		},
@@ -738,8 +780,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 		check(ctx, action) {
 			const other = ctx.game.players[action.with];
 			if (!other || action.with === ctx.seat) return 'Pick another player';
-			const remote = trait(ctx, 'radioOperator') || has(ctx.world, action.with, 'radioOperator');
-			if (other.location !== ctx.here && !remote) return 'Both pawns must be in the same location';
+			if (other.location !== ctx.here && !trait(ctx, 'radioOperator')) return 'Both pawns must be in the same location';
 			const giver = action.give ? ctx.me : other;
 			return Number.isInteger(action.count) && action.count >= 1 && action.count <= giver.supplies
 				? ok

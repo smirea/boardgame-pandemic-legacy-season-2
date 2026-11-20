@@ -6,7 +6,7 @@ import { pack } from './content/pack';
 import type { EdgeDef, EventId, ScarId, SearchResult } from './content/types';
 import { edge } from './content/world';
 import { bump, epidemicCount, placeHollow, setupInfection } from './flow';
-import { grid, handLimit, hasEdge, isCandidate, passage, segmentsCross, tableSeating } from './helpers';
+import { grid, handLimit, hasEdge, isCandidate, neighbours, passage, segmentsCross, tableSeating } from './helpers';
 import { edgeKey } from './ids';
 import type { BundleId, CardId, CityId, PlayerId } from './ids';
 import { createGameActor, parseSave, phaseOf, reject } from './machine';
@@ -375,7 +375,7 @@ describe('exploring', () => {
 		expect(gameOf(actor).searches).toBe(1);
 	});
 
-	test('recon needs different cities when the route says so, the Surveyor saves a card, a scar adds one, and the Scout needs no supply center', () => {
+	test('recon needs different cities when the route says so, the Outrider saves a card, a scar adds one, and the Scout needs no supply center', () => {
 		const at = (edit?: (world: World) => void) =>
 			late((world, game) => {
 				world.campaign.routes.push('hidden:plan-blue');
@@ -403,8 +403,8 @@ describe('exploring', () => {
 		expect(worldOf(plain).campaign.opened as string[]).toContain('plan-blue');
 		expect(refuses(plain, { a: 'recon', route: 'hidden:plan-blue', cards: [london2, paris] })).toBe('Already reconned');
 
-		const surveyor = at(world => void (character(world, A).slots[1] = { kind: 'ability', id: 'surveyor' }));
-		act(surveyor, { a: 'recon', route: 'hidden:plan-blue', cards: [london, newYork] });
+		const outrider = at(world => void (character(world, A).slots[1] = { kind: 'ability', id: 'outrider' }));
+		act(outrider, { a: 'recon', route: 'hidden:plan-blue', cards: [london, newYork] });
 		const scarred = at(world => void (character(world, A).slots[1] = { kind: 'scar', id: 'reconExtraCard' }));
 		expect(refuses(scarred, { a: 'recon', route: 'hidden:plan-blue', cards: [london, newYork, washington] })).toContain(
 			'4',
@@ -1080,13 +1080,41 @@ describe('the remaining abilities and the Jade lab', () => {
 		expect(gameOf(actor).playerDiscard).toContain(cityCards(worldOf(actor), 'cairo')[0]!);
 	});
 
-	test('the Supplier places a reserve cube on a city whose card they hold', () => {
+	test('the Supplier moves a stockpile cube to a city whose card they hold, once per turn', () => {
 		const actor = withAbility('supplier', world => give(world, A, cityCards(world, 'tokyo')));
-		const reserve = gameOf(actor).reserve;
-		act(actor, { a: 'supply', card: gameOf(actor).players[A]!.hand[0]! });
-		expect(gameOf(actor).locations[city('tokyo')]!.supplies).toBe(3);
+		const { stockpile } = gameOf(actor);
+		const before = gameOf(actor).locations[city('tokyo')]!.supplies;
+		const card = gameOf(actor).players[A]!.hand[0]!;
+		act(actor, { a: 'supply', card });
+		expect(gameOf(actor).locations[city('tokyo')]!.supplies).toBe(before + 1);
+		expect(gameOf(actor).stockpile).toBe(stockpile - 1);
+		expect(gameOf(actor).players[A]!.hand).toEqual([card]);
+		expect(refuses(actor, { a: 'supply', card })).toBe('Once per turn');
+	});
+
+	test('the Smuggler discards a City card to put a reserve cube in that city', () => {
+		const actor = withAbility('smuggler', world => give(world, A, cityCards(world, 'tokyo')));
+		const { reserve } = gameOf(actor);
+		const before = gameOf(actor).locations[city('tokyo')]!.supplies;
+		const card = gameOf(actor).players[A]!.hand[0]!;
+		act(actor, { a: 'smuggle', card });
+		expect(gameOf(actor).locations[city('tokyo')]!.supplies).toBe(before + 1);
 		expect(gameOf(actor).reserve).toBe(reserve - 1);
-		expect(gameOf(actor).players[A]!.hand).toHaveLength(1);
+		expect(gameOf(actor).players[A]!.hand).toEqual([]);
+		expect(gameOf(actor).playerDiscard).toContain(card);
+	});
+
+	test('the Coordinator pulls a pawn from an adjacent location for free', () => {
+		const actor = withAbility('coordinator', world => {
+			const here = world.game!.players[A]!.location;
+			world.game!.players[B]!.location = neighbours(world.campaign, here)[0]!;
+		});
+		const here = gameOf(actor).players[A]!.location;
+		const actions = gameOf(actor).actionsLeft;
+		act(actor, { a: 'coordinate', pawn: B });
+		expect(gameOf(actor).players[B]!.location).toBe(here);
+		expect(gameOf(actor).actionsLeft).toBe(actions);
+		expect(refuses(actor, { a: 'coordinate', pawn: B })).toBe('Pick a pawn in an adjacent location');
 	});
 
 	test('the Facilitator takes any card from a player in the same location', () => {
@@ -1133,8 +1161,8 @@ describe('the remaining abilities and the Jade lab', () => {
 		expect(gameOf(actor).players[A]!.supplies).toBe(0);
 	});
 
-	test('the Outrider leaves Hollow Men behind without exposure', () => {
-		const actor = withAbility('outrider', world => {
+	test('the Surveyor leaves Hollow Men behind without exposure', () => {
+		const actor = withAbility('surveyor', world => {
 			world.game!.players[A]!.location = city('cairo');
 			world.game!.locations[city('cairo')]!.hollow = 2;
 		});
@@ -1173,12 +1201,15 @@ describe('the remaining abilities and the Jade lab', () => {
 		expect(gameOf(actor).locations[struck]!.supplies).toBe(2);
 	});
 
-	test('every ability the game defines is unlocked by a Legacy card or a bundle', () => {
+	test('every ability the game defines is in the box from the start or unlocked by a Legacy card or a bundle', () => {
 		const unlocks = [...pack.legacyDeck, ...pack.bundles].flatMap(source => [
 			...source.unlocks,
 			...('reward' in source ? (source.reward ?? []) : []),
 		]);
-		const offered = new Set(unlocks.flatMap(unlock => (unlock.t === 'ability' ? [unlock.ability] : [])));
+		const offered = new Set([
+			...pack.startingAbilities,
+			...unlocks.flatMap(unlock => (unlock.t === 'ability' ? [unlock.ability] : [])),
+		]);
 		expect([...offered].toSorted()).toEqual(pack.abilities.map(ability => ability.id).toSorted());
 	});
 });
@@ -1303,7 +1334,7 @@ test('the final score counts population on the grid only', () => {
 test('free ability units are spent at setup, and nothing else can be bought then', () => {
 	const save = octoberSave();
 	save.world.campaign.freeAbilityUnits = 2;
-	save.world.campaign.abilitiesForSale = ['helmsman'];
+	save.world.campaign.abilitiesForSale = ['architect'];
 	const actor = createGameActor({ seed: 3, save }).start();
 	const cast = Object.values(worldOf(actor).campaign.characters).slice(0, 3);
 	actor.send({
@@ -1318,8 +1349,8 @@ test('free ability units are spent at setup, and nothing else can be bought then
 			purchase: { t: 'population', city: onGrid[5]!, steps: 1 },
 		}),
 	).toBe('Not in the spending step');
-	send(actor, { type: 'PURCHASE', purchase: { t: 'ability', ability: 'helmsman', character: cast[2]!.id, slot: 3 } });
-	expect(worldOf(actor).campaign.characters[cast[2]!.id]!.slots[3]).toEqual({ kind: 'ability', id: 'helmsman' });
+	send(actor, { type: 'PURCHASE', purchase: { t: 'ability', ability: 'architect', character: cast[2]!.id, slot: 3 } });
+	expect(worldOf(actor).campaign.characters[cast[2]!.id]!.slots[3]).toEqual({ kind: 'ability', id: 'architect' });
 	expect(worldOf(actor).campaign.freeAbilityUnits).toBe(0);
 });
 

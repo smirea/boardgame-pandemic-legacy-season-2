@@ -317,7 +317,7 @@ export function movePawn(world: World, seat: SeatId, to: CityId, by: string): bo
 	const current = player(game, seat);
 	const from = current.location;
 	const leaving = game.locations[from]!;
-	if (leaving.hollow > 0 && !leaving.shelter && !has(world, seat, 'outrider')) {
+	if (leaving.hollow > 0 && !leaving.shelter && !has(world, seat, 'surveyor')) {
 		expose(world, seat);
 		if (characterOf(world, seat).dead || current.location !== from) return false;
 	}

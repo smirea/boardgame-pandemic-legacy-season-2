@@ -57,6 +57,8 @@ export const ACTION_NAMES: Record<Action['a'], string> = {
 	facilitate: 'Take a card',
 	run: 'Run',
 	strike: 'Remove Hollow Man',
+	coordinate: 'Call a pawn over',
+	smuggle: 'Smuggle a cube',
 };
 
 /** What each kind of action does, in a line short enough to sit beside its name. */
@@ -84,7 +86,7 @@ export const ACTION_TEXT: Record<Action['a'], string> = {
 	sabotage: 'Discard a City card to remove Hollow Men',
 	broker: 'Swap a City card for one of its colour',
 	investigate: 'Swap a City card for a discarded one',
-	supply: "Discard a grid city's card to supply it",
+	supply: "Show a grid city's card to supply it",
 	facilitate: 'Take a card from a player here',
 	run: 'Discard a City card to reach the grid',
 	strike: 'Remove a Hollow Man here',
@@ -94,6 +96,8 @@ export const ACTION_TEXT: Record<Action['a'], string> = {
 	inoculate: "Store this city's card out of the decks",
 	salvage: 'Discard 2 cards to take one back',
 	destroyInfection: "Destroy this city's Infection card",
+	coordinate: 'Move a pawn next door to this location',
+	smuggle: 'Discard a City card to supply that city',
 };
 
 /** Each action's cell in the generated icon strip, `static/actions/icons.webp`, 16 icons wide. */
@@ -131,6 +135,8 @@ export const ACTION_ICON: Record<Action['a'], number> = {
 	inoculate: 12,
 	salvage: 13,
 	destroyInfection: 14,
+	coordinate: 0,
+	smuggle: 4,
 };
 
 /** Names the group gave to havens. Reactive, so every label that reads `cityName` follows a rename. */
@@ -281,7 +287,11 @@ export function actionDetail(world: World, action: Action): Rich {
 		case 'facilitate':
 			return [cardRef(world, action.card), ` from ${seatName(world, action.with)}`];
 		case 'supply':
+			return [...cubeCount(1), ' from the stockpile to ', cardRef(world, action.card)];
+		case 'smuggle':
 			return ['Discard ', cardRef(world, action.card), ' for ', ...cubeCount(1), ' from the reserve'];
+		case 'coordinate':
+			return [`${seatName(world, action.pawn)} to here`];
 		case 'inoculate':
 		case 'destroyInfection':
 			return [cardRef(world, action.card)];
@@ -303,7 +313,7 @@ function discarded(action: Action): CardId[] {
 		case 'captainSail':
 		case 'run':
 		case 'sabotage':
-		case 'supply':
+		case 'smuggle':
 			return [action.card];
 		case 'buildCenter':
 		case 'recon':

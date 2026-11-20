@@ -74,7 +74,9 @@ export type AbilityId =
 	| 'runner'
 	| 'foreman'
 	| 'outrider'
-	| 'soldier';
+	| 'soldier'
+	| 'coordinator'
+	| 'smuggler';
 
 export type ScarId =
 	| 'reconExtraCard'
@@ -159,7 +161,9 @@ export type ActionId =
 	| 'supply'
 	| 'facilitate'
 	| 'run'
-	| 'strike';
+	| 'strike'
+	| 'coordinate'
+	| 'smuggle';
 
 export type RuleId =
 	/** Population 0 makes a city forsaken and infested. */
@@ -324,6 +328,8 @@ export type ContentPack = {
 	/** What each of the ten Monitor frequencies opens. */
 	frequencies: FrequencyReward[];
 	startingEvents: EventId[];
+	/** The ability stickers in the box when the campaign begins, one of each. */
+	startingAbilities: AbilityId[];
 	sampleFrom: CityId;
 	sampleTo: CityId;
 	numbers: {

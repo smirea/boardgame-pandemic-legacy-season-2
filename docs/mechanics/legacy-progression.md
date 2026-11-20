@@ -433,25 +433,29 @@ These fill the 5 blank character cards. Each has a fixed job and home.
 
 ### L-16.2 Abilities [C]
 
-Abilities are stickers bought with production units. Ones seen in logs:
+Abilities are stickers bought with production units. Eleven are in the box from the first game, May adds three, later months add the rest. Costs are what a real table shows where it shows one.
 
-| Ability              | Effect summary                                                                      |
-| -------------------- | ----------------------------------------------------------------------------------- |
-| Architect            | Build Supply Center with 1 fewer card                                               |
-| Helmsman             | One free Drive or Ferry per turn                                                    |
-| Record Keeper        | Hand limit plus 1                                                                   |
-| Courier              | Deliver Supplies to an adjacent location                                            |
-| Broker               | Discard a City card to take a same-color City card from the discard pile            |
-| Scout                | Recon without a supply center                                                       |
-| A recon discount     | Recon with 1 fewer card                                                             |
-| Lookout              | Search using a City card taken from the discard pile                                |
-| Navigator            | Chart Sea Lane costs no cubes, once per turn                                        |
-| Investigator         | Swap a City card in hand for any City card in the discard pile                      |
-| Saboteur             | As an action, discard a City card to remove 1 Hollow Man from a city of that color  |
-| Smuggler or Supplier | Place a cube from the reserve on a city matching a card in hand                     |
-| Unnamed in logs      | Take any card from a player in the same location                                    |
-| Unnamed in logs      | Discard any City card to move from a haven or supply center to anywhere on the grid |
-| Others named in logs | Runner, Facilitator, Foreman, Outrider, Soldier                                     |
+| Ability       | Effect summary                                                                      | Cost | Arrives |
+| ------------- | ----------------------------------------------------------------------------------- | ---- | ------- |
+| Architect     | Build Supply Center with 1 fewer card                                               | 2    | Start   |
+| Helmsman      | One free Drive or Ferry per turn                                                    | 3    | Start   |
+| Record Keeper | Hand limit plus 1                                                                   | 1    | Start   |
+| Courier       | Deliver Supplies to an adjacent location                                            | 3    | Start   |
+| Broker        | Discard a City card to take a same-color City card from the discard pile            | 2    | Start   |
+| Supplier      | Once per turn, move a stockpile cube to a city matching a card in hand              | 3    | Start   |
+| Facilitator   | Once per turn, take any card from a player in the same location                     | 2    | Start   |
+| Runner        | Discard any City card to move from a haven or supply center to anywhere on the grid | 1    | Start   |
+| Foreman       | Supply lines cost 1 cube fewer                                                      | 2    | Start   |
+| Outrider      | Recon with 1 fewer card                                                             | 3    | Start   |
+| Coordinator   | Free action: move a pawn in an adjacent location to yours                           | 2    | Start   |
+| Lookout       | Take a City card from the discard pile into hand, then search with it               | 2    | May     |
+| Scout         | Recon without a supply center                                                       | 2    | May     |
+| Smuggler      | Action: discard a City card to put a reserve cube in that city                      | 1    | May     |
+| Navigator     | Chart Sea Lane costs no cubes, once per turn                                        | 1    | Later   |
+| Investigator  | Swap a City card in hand for any City card in the discard pile                      | 2    | Later   |
+| Saboteur      | As an action, discard a City card to remove 1 Hollow Man from a city of that color  | 2    | Later   |
+| Surveyor      | Leave a location with Hollow Men without exposure                                   | 2    | Later   |
+| Soldier       | Remove a Hollow Man from your own location                                          | 2    | Later   |
 
 ### L-16.3 Scars [C]
 

@@ -419,6 +419,7 @@
 		'broker',
 		'investigate',
 		'supply',
+		'smuggle',
 		'run',
 	]);
 	function cardUses(

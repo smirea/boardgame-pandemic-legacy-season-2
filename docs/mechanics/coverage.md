@@ -70,6 +70,16 @@ An independent audit (November 2026) checked all 170 interactions against the en
 
 The thirteenth was not a defect: **Triangulate needs blue, yellow and black**. The prose catalogue shortens this to "three different colours". The objective text recorded in `data/legacy-timeline.json` names those three colours, and the engine follows it.
 
+## Checked against a real campaign table
+
+A Tabletop Simulator save of a group's campaign, between July and August, was read piece by piece (November 2026): every card, sticker, token, bag and pen stroke. Where the table shows a rule or a count the research did not have, the engine now follows the table. Names and wording stay this project's own.
+
+- **Character cards.** The ten Character cards have fixed exposure layouts (`pack.characterCards`), dealt from a shuffled pool. A new character takes the next unused card, and none can be made once all ten are in use. The box that kills is anywhere from the 4th to the 7th.
+- **Player cards per city.** A city outside the starting grid has one Player card per point of its starting population. Lima starts at 1 and the eastern Pacific haven at 3.
+- **Sticker stock.** Abilities, card improvements, permanent structures and scars are counted stickers. Buying one or taking a scar removes it from the box. Fifteen scars are in the box from the first game, ten of them new: Wasteful, Landsick, Fixated, Rattled, Squeamish, Frail, Haunted, Grasping, Exacting and Wary.
+- **Abilities.** Eleven abilities are in the box from the first game (`pack.startingAbilities`). May's report adds Lookout, Scout and Smuggler. Costs follow the table: Helmsman 3, Courier 3, Supplier 3, Outrider 3, Facilitator 2, Foreman 2, Coordinator 2, Runner 1, Smuggler 1, Record Keeper 1. Outrider is the recon discount and Surveyor leaves Hollow Men without exposure. Supplier moves a stockpile cube, once per turn. Facilitator is once per turn. Lookout takes the discard pile card into hand before searching. Two are new: Coordinator (free, pull a pawn from an adjacent location) and Smuggler (an action, discard a City card to put a reserve cube there).
+- **Jobs.** The Instructor gives a card once per own turn and only gives. The Captain's crossing is a free action. The Radio Operator transfers at a distance only on their own transfer.
+
 ## UI simplifications
 
 - Actions that pay with cards (Build Supply Center, Recon) pick the cheapest legal payment for the player.

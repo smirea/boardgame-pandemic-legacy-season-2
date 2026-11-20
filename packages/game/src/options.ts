@@ -198,8 +198,11 @@ function candidateActions(world: World, seat: SeatId): Action[] {
 			candidates.push({ a: 'investigate', card: card.id, take: take.id });
 	}
 	for (const card of held) for (const to of grid(campaign)) candidates.push({ a: 'run', card: card.id, to });
-	for (const other of others)
+	for (const other of others) {
+		candidates.push({ a: 'coordinate', pawn: other });
 		for (const card of player(game, other).hand) candidates.push({ a: 'facilitate', with: other, card });
+	}
+	for (const card of held) candidates.push({ a: 'smuggle', card: card.id });
 
 	return candidates;
 }
@@ -230,6 +233,8 @@ const NEEDS: Partial<Record<ActionId, string>> = {
 	destroyInfection: 'Nothing in the discard piles',
 	salvage: 'Needs 2 cards in hand and one in the discard pile',
 	facilitate: 'No one else holds cards',
+	coordinate: 'No other pawn to move',
+	smuggle: 'Needs a City card in hand',
 	administratorMove: 'No other pawn to move',
 };
 

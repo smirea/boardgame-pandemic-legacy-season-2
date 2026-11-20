@@ -69,7 +69,7 @@ export function newCampaign(seed: number): Campaign {
 		required: 1,
 		carriedProgress: {},
 		turningPoints: [],
-		abilitiesForSale: [],
+		abilitiesForSale: [...pack.startingAbilities],
 		cityImprovementsForSale: [],
 		infectionImprovementsForSale: [],
 		permanentForSale: [],

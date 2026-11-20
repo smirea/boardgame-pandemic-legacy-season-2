@@ -272,10 +272,10 @@ Starting jobs seen in community logs, each with a once-per-turn or passive rule 
 | Job            | Effect summary                                                                                     |
 | -------------- | -------------------------------------------------------------------------------------------------- |
 | Administrator  | Once per turn, as an action, move any pawn to the location of any other pawn.                      |
-| Radio Operator | Transfer Supplies works between characters in different locations.                                 |
+| Radio Operator | On their own Transfer Supplies, the other character may be in a different location.                |
 | Laborer        | Build Supply Center with 4 cards plus 2 supply cubes spent.                                        |
 | Farmer         | Once per turn, right after Make Supplies, a free Deliver Supplies.                                 |
-| Instructor     | Give any Player card to a character in the same location (any location, not only the card's city). |
+| Instructor     | Once per own turn, give any Player card to a character in the same location (only give, not take). |
 
 The full list of starting job stickers is not confirmed. See [open-questions.md](open-questions.md).
 
