@@ -123,6 +123,8 @@ export class GameSession {
 	/** The game in progress, recorded step by step. Only the host keeps one. */
 	#record: GameRecord | null = null;
 	#sender: { command: Command; by: string | null } | null = null;
+	/** Prevents re-seating a player mid-game after they explicitly vacated their seat. */
+	#resumedGame: number | null = null;
 
 	/** False for a session that stands apart from this browser's campaign, which neither reads nor writes storage. */
 	readonly #persist: boolean;
@@ -206,12 +208,40 @@ export class GameSession {
 
 	/** A player in the lobby is seated as soon as they arrive. Playing on one screen, they hold two seats from the start. */
 	#sitDown() {
-		if (this.state?.phase !== 'lobby') return;
+		const state = this.state;
+		if (!state) return;
 		const held = () => this.state!.world.table.seats.filter(entry => entry.player === this.player).length;
-		const join: Command = { type: 'JOIN', player: this.player, name: LS.get('name', '').trim() || 'Player' };
-		if (held() === 0 && !this.explain(join)) this.send(join);
-		const another: Command = { type: 'ADD_SEAT', player: this.player };
-		if (this.mode === 'solo' && held() === 1 && !this.explain(another)) this.send(another);
+		const name = LS.get('name', '').trim() || 'Player';
+		if (state.phase === 'lobby') {
+			this.#resumedGame = null;
+			const join: Command = { type: 'JOIN', player: this.player, name };
+			if (held() === 0 && !this.explain(join)) this.send(join);
+			const another: Command = { type: 'ADD_SEAT', player: this.player };
+			if (this.mode === 'solo' && held() === 1 && !this.explain(another)) this.send(another);
+			return;
+		}
+		const { game, campaign, table } = state.world;
+		if (
+			!game ||
+			this.mode === 'solo' ||
+			state.phase === 'upkeep' ||
+			state.phase === 'over' ||
+			state.phase === 'finished'
+		)
+			return;
+		const index = gameIndexOf(state);
+		if (this.#resumedGame === index) return;
+		this.#resumedGame = index;
+		if (held() > 0) return;
+		const present = new Set(this.peers.filter(peer => peer.connected).map(peer => peer.id as string));
+		for (const seat of game.seats) {
+			const character = campaign.characters[game.players[seat]!.character];
+			if (character?.player !== this.player) continue;
+			const holder = table.seats.find(entry => entry.seat === seat);
+			if (holder && holder.player !== this.player && present.has(holder.player)) continue;
+			const take: Command = { type: 'TAKE_SEAT', player: this.player, name, seat };
+			if (!this.explain(take)) this.send(take);
+		}
 	}
 
 	/** The host gets up for anyone who left the lobby, so the rest are not left waiting on them to ready. */

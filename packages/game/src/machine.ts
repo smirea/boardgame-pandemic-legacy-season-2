@@ -366,7 +366,7 @@ export const gameMachine = setup({
 			}),
 		})),
 		table: assign(({ context, event }: Args) => ({
-			world: produce(context.world, draft => applyTable(draft.table, event as TableCommand)),
+			world: produce(context.world, draft => applyTable(draft, event as TableCommand)),
 		})),
 		startTable: assign(
 			change((world, event) => {

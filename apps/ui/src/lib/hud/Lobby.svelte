@@ -26,10 +26,14 @@
 	const firstSeat = (who: PlayerId) => table.seats.find(entry => entry.player === who)!;
 	const mine = $derived(table.seats.filter(entry => entry.player === player));
 
-	const starts: { start: Start; label: string }[] = [
-		{ start: 'prologue', label: 'Prologue' },
-		{ start: 'month', label: MONTHS[1]! },
-	];
+	const starts: { start: Start; label: string }[] = $derived(
+		campaign.month === 0
+			? [
+					{ start: 'prologue', label: 'Prologue' },
+					{ start: 'month', label: MONTHS[1]! },
+				]
+			: [{ start: 'month', label: MONTHS[campaign.month]! }],
+	);
 	const waitingOn = $derived(players.filter(who => !table.ready[who]).map(who => firstSeat(who).name));
 	const split = $derived(new Set(Object.values(table.ready)).size > 1);
 

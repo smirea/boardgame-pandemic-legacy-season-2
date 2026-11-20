@@ -19,8 +19,8 @@ export type TableCommand =
 
 export const newTable = (): Table => ({ seats: [], ready: {}, start: null });
 
-/** The game the lobby is choosing characters for. Only month 0 has a choice, made by everyone readying for one. */
-export const tableStart = (world: World): Start | null => (world.campaign.month > 0 ? 'month' : world.table.start);
+/** The game the lobby is choosing characters for, set once everyone readies in the lobby. */
+export const tableStart = (world: World): Start | null => world.table.start;
 
 const bySeat = (a: { seat: SeatId }, b: { seat: SeatId }) => SEAT_IDS.indexOf(a.seat) - SEAT_IDS.indexOf(b.seat);
 const freeSeat = (table: Table) => SEAT_IDS.find(seat => !table.seats.some(entry => entry.seat === seat));
@@ -106,23 +106,49 @@ export function claimCharacter(world: World, player: PlayerId, id: CharacterId |
 }
 
 /** Applies a legal table command. Any change to who sits where in the lobby asks everyone to ready again. */
-export function applyTable(table: Table, command: TableCommand) {
+export function applyTable(world: World, command: TableCommand) {
+	const { table, campaign, game } = world;
 	const named = (player: PlayerId) => table.seats.find(entry => entry.player === player)!.name;
 	switch (command.type) {
-		case 'JOIN':
+		case 'JOIN': {
+			const name = command.name.trim();
 			if (seated(table, command.player)) {
-				for (const entry of table.seats) if (entry.player === command.player) entry.name = command.name.trim();
+				for (const entry of table.seats) if (entry.player === command.player) entry.name = name;
 				return;
 			}
-			table.seats.push({ seat: freeSeat(table)!, player: command.player, name: command.name.trim() });
+			const owned = Object.values(campaign.characters).filter(
+				character => character.player === command.player && !character.dead && !character.worker,
+			);
+			const desired: SeatId[] = [];
+			for (const entry of campaign.seating) {
+				if (
+					entry.character &&
+					owned.some(character => character.id === entry.character) &&
+					!table.seats.some(taken => taken.seat === entry.seat) &&
+					!desired.includes(entry.seat)
+				)
+					desired.push(entry.seat);
+			}
+			for (const seat of desired) table.seats.push({ seat, player: command.player, name });
+			const needed = Math.max(1, owned.length) - desired.length;
+			for (let index = 0; index < needed; index++) {
+				const seat = freeSeat(table);
+				if (!seat) break;
+				table.seats.push({ seat, player: command.player, name });
+			}
 			break;
+		}
 		case 'ADD_SEAT':
 			table.seats.push({ seat: freeSeat(table)!, player: command.player, name: named(command.player) });
 			break;
-		case 'TAKE_SEAT':
+		case 'TAKE_SEAT': {
 			table.seats = table.seats.filter(entry => entry.seat !== command.seat);
 			table.seats.push({ seat: command.seat, player: command.player, name: command.name.trim() });
+			const character = game?.players[command.seat]?.character;
+			if (character && campaign.characters[character] && !campaign.characters[character]!.worker)
+				campaign.characters[character]!.player = command.player;
 			break;
+		}
 		case 'LEAVE':
 			table.seats = table.seats.filter(
 				entry => entry.player !== command.player || (command.seat !== undefined && entry.seat !== command.seat),
@@ -157,6 +183,16 @@ export function dealTable(world: World): { seat: SeatId; character: CharacterId 
 	const dealt = new Map<SeatId, CharacterId>();
 	const taken = () => new Set(dealt.values());
 	for (const entry of seats) {
+		const last = campaign.seating.find(item => item.seat === entry.seat)?.character;
+		const exact =
+			last &&
+			living.find(
+				character => character.id === last && character.player === entry.player && !taken().has(character.id),
+			);
+		if (exact) dealt.set(entry.seat, exact.id);
+	}
+	for (const entry of seats) {
+		if (dealt.has(entry.seat)) continue;
 		const own = living.find(character => character.player === entry.player && !taken().has(character.id));
 		if (own) dealt.set(entry.seat, own.id);
 	}

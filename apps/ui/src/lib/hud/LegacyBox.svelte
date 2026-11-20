@@ -440,7 +440,10 @@
 	}
 
 	.scans img {
-		height: 4.5rem;
+		max-width: 100%;
+		max-height: 4.5rem;
+		width: auto;
+		height: auto;
 		border-radius: 3px;
 		box-shadow: 0 1px 3px rgb(0 0 0 / 0.3);
 	}

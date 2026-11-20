@@ -68,14 +68,16 @@
 
 	img {
 		display: block;
-		height: min(26rem, 62vh);
+		max-width: 100%;
+		max-height: min(26rem, 62vh);
 		width: auto;
+		height: auto;
 		border-radius: 4px;
 		background: var(--chrome);
 	}
 
 	.many img {
-		height: min(13rem, 30vh);
+		max-height: min(13rem, 30vh);
 	}
 
 	figcaption {

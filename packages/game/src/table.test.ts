@@ -4,7 +4,8 @@ import type { JobId } from './content/types';
 import type { CityId, PlayerId } from './ids';
 import { createGameActor, reject } from './machine';
 import type { Start, World } from './state';
-import { tablePlayers } from './table';
+import { tablePlayers, tableStart } from './table';
+import { tabletopSave } from './tabletop';
 import { A, act, B, C, gameOf, late, phase, send, worldOf } from './testkit';
 
 const ann = 'ann' as PlayerId;
@@ -100,4 +101,50 @@ test('a player plays the character they claimed, one per seat they hold, and nob
 	begin(next, 'month');
 	expect(gameOf(next).players[A]!.character).toBe(created.id);
 	expect(gameOf(next).players[B]!.character).toBe(benChar!);
+});
+
+test('loading a mid-campaign lobby starts at the lobby before moving to character select', () => {
+	const actor = createGameActor({ seed: 7, save: tabletopSave() }).start();
+	send(actor, { type: 'JOIN', player: ann, name: 'Ann' });
+	send(actor, { type: 'JOIN', player: ben, name: 'Ben' });
+	expect(phase(actor)).toBe('lobby');
+	expect(tableStart(worldOf(actor))).toBeNull();
+	send(actor, { type: 'READY', player: ann, start: 'month' });
+	send(actor, { type: 'READY', player: ben, start: 'month' });
+	expect(phase(actor)).toBe('lobby');
+	expect(tableStart(worldOf(actor))).toBe('month');
+	send(actor, { type: 'READY', player: ann, start: 'month' });
+	send(actor, { type: 'READY', player: ben, start: 'month' });
+	expect(phase(actor)).toBe('setup.supply');
+});
+
+test('returning players resume their previous seats and characters in a known game', () => {
+	const actor = lobby();
+	send(actor, { type: 'ADD_SEAT', player: ben });
+	begin(actor, 'month');
+	const before = worldOf(actor);
+	const expected = {
+		[A]: before.game!.players[A]!.character,
+		[B]: before.game!.players[B]!.character,
+		[C]: before.game!.players[C]!.character,
+	};
+	const saved = structuredClone(before);
+	saved.game = null;
+	saved.table.seats = [];
+	saved.table.ready = {};
+	saved.table.start = null;
+	const resumed = createGameActor({ seed: 6, save: { v: 1, phase: 'lobby', world: saved } }).start();
+	// Joining out of order still returns each player to the exact seat(s) they held.
+	send(resumed, { type: 'JOIN', player: ben, name: 'Ben' });
+	expect(worldOf(resumed).table.seats.map(entry => entry.seat)).toEqual([B, C]);
+	send(resumed, { type: 'JOIN', player: ann, name: 'Ann' });
+	expect(worldOf(resumed).table.seats).toEqual([
+		{ seat: A, player: ann, name: 'Ann' },
+		{ seat: B, player: ben, name: 'Ben' },
+		{ seat: C, player: ben, name: 'Ben' },
+	]);
+	begin(resumed, 'month');
+	expect(gameOf(resumed).players[A]!.character).toBe(expected[A]);
+	expect(gameOf(resumed).players[B]!.character).toBe(expected[B]);
+	expect(gameOf(resumed).players[C]!.character).toBe(expected[C]);
 });

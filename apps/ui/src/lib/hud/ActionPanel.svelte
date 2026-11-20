@@ -57,14 +57,15 @@
 			const target = only ? actionTarget(world, only) : null;
 			const detail = only ? actionDetail(world, only) : sharedCost(world, offered);
 			const free =
+				live &&
 				choice.actions.length > 0 &&
 				(isFreeAction(choice.a) || choice.actions.every(action => actionCost(world, seat, action) === 0));
 			return {
 				choice,
 				open: live && choice.actions.length > 0,
-				title: ACTION_NAMES[choice.a] + (target ? ` to ${cityName(target)}` : ''),
-				text: live && choice.reason ? choice.reason : detail?.length ? detail : ACTION_TEXT[choice.a],
-				count: offered.length > 1 ? offered.length : null,
+				title: ACTION_NAMES[choice.a] + (live && target ? ` to ${cityName(target)}` : ''),
+				text: live && choice.reason ? choice.reason : live && detail?.length ? detail : ACTION_TEXT[choice.a],
+				count: live && offered.length > 1 ? offered.length : null,
 				free,
 			};
 		}),
@@ -331,12 +332,12 @@
 	}
 
 	/* Rows that cannot be taken stay readable, with the reason where the description was. */
-	.live li button.closed {
+	li button.closed {
 		opacity: 0.55;
 		cursor: default;
 	}
 
-	.live li button.closed :global(.icon) {
+	li button.closed :global(.icon) {
 		filter: grayscale(0.85);
 	}
 
