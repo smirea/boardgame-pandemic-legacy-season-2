@@ -268,19 +268,27 @@
 							</span>
 						</span>
 						<span class="traits">
-							{#each traits as trait (`${trait.kind}:${trait.name}`)}
-								<span class="line {trait.kind}" class:struck={trait.struck}>
-									<span class="kind">
-										{#if trait.kind === 'scar'}<CardIcon path={SCAR_ICON} size="0.85rem" />{/if}
-										{TRAIT_KIND[trait.kind]}{trait.struck ? ', covered by a scar' : ''}
-									</span>
+							{#each traits as trait, index (`${trait.kind}:${trait.name}:${index}`)}
+								<span
+									class="line {trait.kind}"
+									class:struck={trait.struck}
+									title={trait.struck ? `${TRAIT_KIND[trait.kind]}, covered by a scar` : TRAIT_KIND[trait.kind]}
+								>
+									{#if trait.kind === 'job' && trait.job}
+										<span class="trait-icon"><OccupationIcon job={trait.job} /></span>
+									{:else if trait.kind === 'scar'}
+										<span class="trait-icon"><CardIcon path={SCAR_ICON} size="0.72rem" /></span>
+									{/if}
+									<span class="sr-only">{TRAIT_KIND[trait.kind]}{trait.struck ? ', covered by a scar' : ''}: </span>
 									<b>{trait.name}</b>
 									<span class="text">{trait.text}</span>
 								</span>
 							{/each}
-							{#if empty}
-								<span class="slots">{empty} empty slot{empty === 1 ? '' : 's'} for abilities or scars</span>
-							{/if}
+							{#each { length: empty } as _, index (index)}
+								<span class="slot-empty" title="Empty slot for an ability or scar">
+									<span class="sr-only">Empty slot</span>
+								</span>
+							{/each}
 						</span>
 						<span class="exposure" aria-label={`Exposure ${character.exposure} of ${character.exposureTrack.length}`}>
 							<span class="kind">Exposure</span>
@@ -292,7 +300,12 @@
 				</article>
 			{/each}
 		</div>
-		<article class="card new" bind:this={form} data-testid="new-character">
+		<article
+			class="card new"
+			bind:this={form}
+			data-testid="new-character"
+			{@attach feedback('New character', () => ({ job, home, portrait }))}
+		>
 			<form
 				class="face"
 				aria-label="New character"
@@ -349,9 +362,6 @@
 							</label>
 						{/each}
 					</fieldset>
-					<button class="make" disabled={refusal !== null} title={refusal ?? ''} data-testid="create-character"
-						>Create and take</button
-					>
 					<fieldset class="choices jobs" data-testid="new-job">
 						<legend>Occupation</legend>
 						{#each jobs as option (option.id)}
@@ -369,6 +379,9 @@
 							</label>
 						{/each}
 					</fieldset>
+					<button class="make" disabled={refusal !== null} title={refusal ?? ''} data-testid="create-character"
+						>Create and take</button
+					>
 				{:else}
 					<p class="text">
 						Every starting occupation is taken. A seat with no character left gets a haven worker when the game starts.
@@ -442,10 +455,10 @@
 	.select {
 		display: flex;
 		flex-direction: column;
-		gap: 0.8rem;
+		gap: 0.35rem;
 		width: 100%;
 		height: 100%;
-		padding: 1rem 1.6rem 1rem;
+		padding: 0.35rem 0.85rem 0.45rem;
 		color: var(--ink);
 		/* No backdrop: the map shows through, so the words standing on it carry their own shadow. */
 		text-shadow:
@@ -465,7 +478,7 @@
 	h1 {
 		margin: 0;
 		font-family: var(--font-display);
-		font-size: 2.6rem;
+		font-size: 1.45rem;
 		font-weight: 400;
 		line-height: 1;
 	}
@@ -473,39 +486,40 @@
 	.row {
 		display: flex;
 		flex: 1 1 auto;
-		gap: 1.1rem;
+		gap: 0.65rem;
 		min-height: 0;
 	}
 
-	/* Every card whole and legible, wrapping into rows. A roster too long for the screen scrolls here, never the page. */
+	/* Every card whole and equal-sized, wrapping into rows. A roster too long for the screen scrolls here, never the page. */
 	.cards {
 		display: grid;
 		flex: 1 1 auto;
-		grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+		grid-template-columns: repeat(auto-fill, minmax(10.8rem, 1fr));
+		grid-auto-rows: 1fr;
 		align-content: start;
-		gap: 0.6rem 1.1rem;
+		gap: 0.35rem 0.5rem;
 		min-height: 0;
-		padding: 0.2rem 0.4rem 0.6rem 0.2rem;
+		padding: 0.1rem 0.15rem 0.15rem 0.1rem;
 		overflow: hidden auto;
 	}
 
 	.card {
 		display: flex;
 		flex-direction: column;
-		gap: 0.4rem;
+		gap: 0.15rem;
 	}
 
 	.claim {
 		display: flex;
 		align-items: flex-end;
 		justify-content: center;
-		height: 2.2rem;
+		height: 1.25rem;
 	}
 
 	/* Words standing on the open map get a dark slip of their own, since the map under them may be pale land. */
 	.claim > span,
 	.status {
-		padding: 0.25rem 0.7rem;
+		padding: 0.08rem 0.45rem;
 		border-radius: 999px;
 		background: rgb(12 10 8 / 0.72);
 		backdrop-filter: blur(4px);
@@ -513,21 +527,21 @@
 
 	.status {
 		justify-self: start;
-		padding: 0.6rem 1rem;
-		border-radius: 10px;
+		padding: 0.25rem 0.65rem;
+		border-radius: 8px;
 	}
 
 	.who {
 		display: inline-flex;
 		align-items: flex-end;
-		gap: 0.4rem;
-		font-size: 1.1rem;
+		gap: 0.25rem;
+		font-size: 0.76rem;
 	}
 
 	.me {
 		display: inline-flex;
 		align-items: baseline;
-		gap: 0.3rem;
+		gap: 0.2rem;
 		cursor: text;
 	}
 
@@ -535,7 +549,7 @@
 	.me input {
 		field-sizing: content;
 		min-width: 2ch;
-		max-width: 12rem;
+		max-width: 9rem;
 		padding: 0 0.15rem;
 		border: 0;
 		border-bottom: 1px dashed transparent;
@@ -557,8 +571,8 @@
 	}
 
 	.pen {
-		width: 0.8rem;
-		height: 0.8rem;
+		width: 0.65rem;
+		height: 0.65rem;
 		fill: var(--muted);
 		opacity: 0.6;
 	}
@@ -569,15 +583,15 @@
 	}
 
 	.pawn {
-		width: 1.3rem;
-		height: 1.8rem;
+		width: 0.8rem;
+		height: 1.05rem;
 		fill: var(--seat);
 		filter: drop-shadow(0 2px 2px rgb(0 0 0 / 0.6));
 	}
 
 	.free {
 		color: var(--muted);
-		font-size: 0.9rem;
+		font-size: 0.68rem;
 		font-style: italic;
 	}
 
@@ -585,13 +599,12 @@
 		display: flex;
 		flex: 1;
 		flex-direction: column;
-		gap: 0.7rem;
-		min-height: 0;
-		padding: 0.9rem 1rem 0.9rem;
+		gap: 0.28rem;
+		padding: 0.38rem 0.48rem;
 		border: 2px solid transparent;
 		border-radius: 4px;
 		background: var(--document);
-		box-shadow: 0 0.8rem 2rem rgb(0 0 0 / 0.45);
+		box-shadow: 0 0.5rem 1.4rem rgb(0 0 0 / 0.45);
 		color: var(--slip-ink);
 		font: inherit;
 		text-align: left;
@@ -608,16 +621,16 @@
 	}
 
 	button.face:hover:not(:disabled) {
-		translate: 0 -3px;
-		box-shadow: 0 1.2rem 2.4rem rgb(0 0 0 / 0.55);
+		translate: 0 -2px;
+		box-shadow: 0 0.8rem 1.8rem rgb(0 0 0 / 0.55);
 	}
 
 	.card.mine .face,
 	.card.taken .face {
 		border-color: var(--seat);
 		box-shadow:
-			0 0 0 3px color-mix(in srgb, var(--seat) 35%, transparent),
-			0 0.8rem 2rem rgb(0 0 0 / 0.45);
+			0 0 0 2px color-mix(in srgb, var(--seat) 35%, transparent),
+			0 0.5rem 1.4rem rgb(0 0 0 / 0.45);
 	}
 
 	.card.taken .face {
@@ -627,15 +640,15 @@
 
 	.top {
 		display: flex;
-		gap: 0.8rem;
+		gap: 0.4rem;
 		align-items: center;
 	}
 
 	.portrait {
 		position: relative;
 		flex: none;
-		width: 4.6rem;
-		height: 4.6rem;
+		width: 2.05rem;
+		height: 2.05rem;
 		border-radius: 3px;
 		overflow: hidden;
 	}
@@ -643,13 +656,13 @@
 	.title {
 		display: flex;
 		flex-direction: column;
-		gap: 0.2rem;
+		gap: 0.04rem;
 		min-width: 0;
 	}
 
 	.title strong {
 		font-family: var(--font-display);
-		font-size: 1.7rem;
+		font-size: 0.96rem;
 		font-weight: 400;
 		line-height: 1.05;
 	}
@@ -657,21 +670,22 @@
 	.title small,
 	.kind {
 		color: var(--slip-muted);
-		font-size: 0.85rem;
+		font-size: 0.64rem;
 	}
 
 	.traits {
 		display: flex;
+		flex: 1;
 		flex-direction: column;
-		gap: 0.6rem;
+		gap: 0.18rem;
 	}
 
 	.line {
-		display: flex;
-		flex-direction: column;
-		gap: 0.1rem;
-		padding-left: 0.6rem;
-		border-left: 3px solid var(--ink-good);
+		display: block;
+		padding-left: 0.35rem;
+		border-left: 2.5px solid var(--ink-good);
+		font-size: 0.63rem;
+		line-height: 1.18;
 	}
 
 	.line.ability {
@@ -682,23 +696,30 @@
 		border-left-color: var(--ink-danger);
 	}
 
-	.line .kind {
+	.trait-icon {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.3rem;
-		font-size: 0.78rem;
-		letter-spacing: 0.04em;
-		text-transform: uppercase;
+		justify-content: center;
+		width: 0.72rem;
+		height: 0.72rem;
+		margin-right: 0.15rem;
+		vertical-align: -0.14em;
+	}
+
+	.line.scar .trait-icon {
+		color: var(--ink-danger);
 	}
 
 	.line b {
-		font-size: 1.08rem;
+		margin-right: 0.2rem;
+		font-size: 0.67rem;
+		font-weight: 700;
 	}
 
 	.text {
 		margin: 0;
-		font-size: 0.95rem;
-		line-height: 1.4;
+		font-size: 0.63rem;
+		line-height: 1.18;
 	}
 
 	.line.struck b,
@@ -708,29 +729,48 @@
 		opacity: 0.6;
 	}
 
-	.slots {
-		color: var(--slip-muted);
-		font-size: 0.88rem;
-		font-style: italic;
+	.line.struck .trait-icon {
+		opacity: 0.6;
+	}
+
+	.slot-empty {
+		display: block;
+		flex: 1 1 1.05rem;
+		min-height: 1.05rem;
+		max-height: 2.1rem;
+		border: 1px dashed rgb(42 32 23 / 0.28);
+		border-radius: 2px;
+		background: rgb(42 32 23 / 0.035);
+	}
+
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		margin: -1px;
+		padding: 0;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
 	}
 
 	.exposure {
 		display: flex;
 		align-items: center;
-		gap: 0.25rem;
+		gap: 0.16rem;
 		margin-top: auto;
-		padding-top: 0.5rem;
+		padding-top: 0.24rem;
 		border-top: 1px dotted rgb(42 32 23 / 0.3);
 	}
 
 	.exposure .kind {
-		margin-right: 0.35rem;
+		margin-right: 0.18rem;
 	}
 
 	.exposure i {
 		display: block;
-		width: 1.05rem;
-		height: 1.05rem;
+		width: 0.68rem;
+		height: 0.68rem;
 		border: 1px solid rgb(42 32 23 / 0.45);
 		border-radius: 2px;
 	}
@@ -747,49 +787,40 @@
 		background: var(--slip-ink);
 	}
 
-	/* The portrait thumbs set the form's width: five to a row, with the preview the same size as one. */
+	/* Compact single-column create panel beside the character grid so 8 cards and the form fit on a laptop screen. */
 	.new {
-		--thumb: 4.4rem;
-		--thumb-gap: 0.35rem;
 		flex: none;
 		align-self: flex-start;
+		width: 16.5rem;
 		max-height: 100%;
 	}
 
 	.new form {
-		display: grid;
-		grid-template:
-			'who jobs' auto
-			'avatars jobs' auto
-			'havens jobs' auto
-			'make jobs' 1fr
-			/ calc(5 * var(--thumb) + 4 * var(--thumb-gap)) 17rem;
-		gap: 0.7rem 1.2rem;
-	}
-
-	.new form > .text {
-		grid-column: 1 / -1;
+		display: flex;
+		flex-direction: column;
+		gap: 0.32rem;
+		min-height: 0;
+		padding: 0.45rem 0.55rem;
+		overflow-y: auto;
 	}
 
 	.who-new {
 		display: flex;
-		grid-area: who;
-		gap: 0.8rem;
+		gap: 0.45rem;
 		align-items: center;
 	}
 
 	.who-new .portrait {
-		width: var(--thumb);
-		height: var(--thumb);
+		width: 2.15rem;
+		height: 2.15rem;
 	}
 
 	.havens {
-		grid-area: havens;
-		grid-template-columns: repeat(auto-fit, minmax(6rem, 1fr));
+		grid-template-columns: repeat(3, minmax(0, 1fr));
 	}
 
 	.jobs {
-		grid-area: jobs;
+		gap: 0.1rem;
 	}
 
 	.named {
@@ -801,21 +832,21 @@
 	legend {
 		display: flex;
 		flex-direction: column;
-		gap: 0.2rem;
+		gap: 0.08rem;
 		color: var(--slip-muted);
-		font-size: 0.85rem;
+		font-size: 0.66rem;
 	}
 
 	.named input {
 		width: 100%;
 		min-width: 0;
-		padding: 0.35rem 0.3rem;
+		padding: 0.16rem 0.2rem;
 		border: 0;
 		border-bottom: 1px solid rgb(42 32 23 / 0.35);
 		background: rgb(255 252 242 / 0.35);
 		color: var(--slip-ink);
 		font: inherit;
-		font-size: 1.05rem;
+		font-size: 0.8rem;
 	}
 
 	.named input:focus {
@@ -830,15 +861,14 @@
 	}
 
 	legend {
-		margin-bottom: 0.25rem;
+		margin-bottom: 0.12rem;
 		padding: 0;
 	}
 
 	.avatars {
 		display: grid;
-		grid-area: avatars;
-		grid-template-columns: repeat(5, var(--thumb));
-		gap: var(--thumb-gap);
+		grid-template-columns: repeat(5, minmax(0, 1fr));
+		gap: 0.2rem;
 	}
 
 	.avatars legend {
@@ -900,7 +930,7 @@
 
 	.choices {
 		display: grid;
-		gap: 0.2rem;
+		gap: 0.12rem;
 	}
 
 	.choices legend {
@@ -910,9 +940,9 @@
 	.new .choice {
 		position: relative;
 		flex-direction: row;
-		gap: 0.5rem;
+		gap: 0.3rem;
 		align-items: baseline;
-		padding: 0.2rem 0.45rem;
+		padding: 0.12rem 0.25rem;
 		border: 1px solid transparent;
 		border-radius: 3px;
 		color: var(--slip-ink);
@@ -930,11 +960,22 @@
 		align-items: center;
 	}
 
+	.havens .choice {
+		justify-content: center;
+		padding: 0.12rem 0.15rem;
+		text-align: center;
+		white-space: nowrap;
+	}
+
+	.havens .choice b {
+		font-size: 0.66rem;
+	}
+
 	.mark {
 		position: relative;
 		flex: none;
-		width: 1.9rem;
-		height: 1.9rem;
+		width: 1.15rem;
+		height: 1.15rem;
 	}
 
 	.choice.used {
@@ -970,13 +1011,14 @@
 	}
 
 	.choice b {
-		font-size: 0.95rem;
+		font-size: 0.7rem;
+		line-height: 1.12;
 	}
 
 	.choice small {
 		color: var(--slip-muted);
-		font-size: 0.78rem;
-		line-height: 1.25;
+		font-size: 0.62rem;
+		line-height: 1.15;
 	}
 
 	/* The radio itself stays for the keyboard and screen readers; the row is what shows the choice. */
@@ -993,15 +1035,13 @@
 	}
 
 	.make {
-		grid-area: make;
-		align-self: end;
-		padding: 0.6rem;
+		padding: 0.35rem;
 		border: 1px solid var(--slip-ink);
 		border-radius: 2px;
 		background: var(--slip-ink);
 		color: #efe6d2;
 		font: inherit;
-		font-size: 1rem;
+		font-size: 0.78rem;
 		font-weight: 700;
 		cursor: pointer;
 	}
@@ -1012,9 +1052,9 @@
 	}
 
 	.fallen {
-		margin: -0.4rem 0 0;
+		margin: -0.15rem 0 0;
 		color: var(--muted);
-		font-size: 0.88rem;
+		font-size: 0.7rem;
 	}
 
 	/* What moves the table on: who is still choosing, and the vote in the middle. */
@@ -1022,23 +1062,23 @@
 		display: grid;
 		grid-template-columns: 1fr auto 1fr;
 		align-items: center;
-		gap: 1.5rem;
-		padding-top: 0.7rem;
+		gap: 0.8rem;
+		padding-top: 0.35rem;
 		border-top: 1px solid var(--line);
 	}
 
 	.status {
 		display: flex;
 		flex-direction: column;
-		gap: 0.4rem;
+		gap: 0.14rem;
 	}
 
 	.hands {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: 0.35rem;
 		color: var(--muted);
-		font-size: 0.9rem;
+		font-size: 0.72rem;
 	}
 
 	.hands b {
@@ -1048,11 +1088,11 @@
 	}
 
 	.hands button {
-		width: 1.7rem;
-		height: 1.7rem;
+		width: 1.25rem;
+		height: 1.25rem;
 		padding: 0;
 		border: 1px solid var(--line-strong);
-		border-radius: 6px;
+		border-radius: 5px;
 		background: rgb(12 10 8 / 0.6);
 		color: var(--ink);
 		font: inherit;
@@ -1069,9 +1109,10 @@
 		display: flex;
 		flex-wrap: wrap;
 		align-items: flex-end;
-		gap: 0.8rem;
+		gap: 0.45rem;
 		margin: 0;
 		color: var(--muted);
+		font-size: 0.72rem;
 	}
 
 	.choosing .who {
@@ -1080,12 +1121,89 @@
 
 	.starts {
 		display: flex;
-		gap: 1rem;
+		gap: 0.8rem;
+	}
+
+	.starts :global(.ready.big) {
+		gap: 0.3rem;
+		min-width: 11rem;
+		padding: 0.4rem 1.4rem 0.35rem;
+	}
+
+	.starts :global(.ready.big .label) {
+		font-size: 1.35rem;
+	}
+
+	.starts :global(.ready.big .pips i) {
+		width: 0.7rem;
+		height: 0.7rem;
 	}
 
 	.hint {
 		margin: 0;
 		color: var(--muted);
-		font-size: 0.85rem;
+		font-size: 0.68rem;
+	}
+
+	@media (max-height: 840px) {
+		.select {
+			gap: 0.25rem;
+			padding: 0.25rem 0.75rem 0.35rem;
+		}
+
+		h1 {
+			font-size: 1.25rem;
+		}
+
+		.cards {
+			gap: 0.25rem 0.45rem;
+		}
+
+		.claim {
+			height: 1.1rem;
+		}
+
+		.face {
+			gap: 0.2rem;
+			padding: 0.3rem 0.42rem;
+		}
+
+		.portrait {
+			width: 1.8rem;
+			height: 1.8rem;
+		}
+
+		.title strong {
+			font-size: 0.88rem;
+		}
+
+		.line,
+		.text {
+			font-size: 0.6rem;
+			line-height: 1.14;
+		}
+
+		.line b {
+			font-size: 0.63rem;
+		}
+
+		.slot-empty {
+			min-height: 0.95rem;
+			max-height: 1.8rem;
+		}
+
+		.new form {
+			gap: 0.22rem;
+			padding: 0.38rem 0.48rem;
+		}
+
+		.who-new .portrait {
+			width: 1.9rem;
+			height: 1.9rem;
+		}
+
+		footer {
+			padding-top: 0.25rem;
+		}
 	}
 </style>
