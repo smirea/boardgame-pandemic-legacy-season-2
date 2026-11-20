@@ -247,7 +247,10 @@ export function beginTurn(world: World) {
 		(has(world, seat, 'plagueShy') && here.plague > 0 ? 1 : 0);
 	game.actionsLeft = Math.max(0, game.actionsLeft - lost);
 	const infested = campaign.locations[current.location]!.infested && !has(world, seat, 'fieldSurgeon');
-	if ((here.plague > 0 || infested) && !here.shelter) expose(world, seat);
+	if ((here.plague > 0 || infested) && !here.shelter) {
+		expose(world, seat);
+		if (infested && has(world, seat, 'susceptible') && !characterOf(world, seat).dead) expose(world, seat);
+	}
 }
 
 export function nextSeat(game: Game): SeatId {

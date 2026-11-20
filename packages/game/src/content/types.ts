@@ -21,6 +21,8 @@ export type CityDef = {
 	/** Hidden until an unlock reveals it by name, whatever its region. */
 	lost?: boolean;
 	startsInfested?: boolean;
+	/** Never drawn for infection: the map sticker brings no Infection cards. */
+	noInfectionCards?: boolean;
 	/** Opened the first time a pawn arrives. */
 	arrival?: Seal;
 	/**
@@ -96,6 +98,9 @@ export type ScarId =
 	| 'grasping'
 	| 'buildExtraCard'
 	| 'wary'
+	| 'susceptible'
+	| 'fearOfNeedles'
+	| 'fearOfFlying'
 	| 'carrier';
 
 export type CompanionId =

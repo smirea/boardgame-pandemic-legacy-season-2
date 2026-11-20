@@ -115,7 +115,7 @@ export function newCampaign(seed: number): Campaign {
 				search: copy === 0 ? boxes.map(box => ({ ...box, scratched: false })) : [],
 			};
 		}
-		for (let copy = 0; copy < city.population; copy++) {
+		for (let copy = 0; copy < (city.noInfectionCards ? 0 : city.population); copy++) {
 			const id = newCardId(campaign, `inf-${city.id}`);
 			campaign.infectionCards[id] = { id, kind: 'city', city: city.id, improvement: null };
 		}

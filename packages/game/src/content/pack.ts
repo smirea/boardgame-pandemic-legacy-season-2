@@ -42,7 +42,7 @@ const reconRoutes: ReconRoute[] = [
 	route('africa', 'lagos', 'yellow', 5, true, pkg(7), ['reconNewArea']),
 	route('middle-east', 'cairo', 'black', 4, true, pkg(2), ['reconNewArea']),
 	// Hidden until a Monitor frequency or the October perimeter report reveals it.
-	route('hidden:east-asia', 'kolkata', 'black', 3, true, pkg(3), ['reconNewArea', 'reconEastAsia']),
+	route('hidden:east-asia', 'kolkata', 'black', 5, true, pkg(3), ['reconNewArea', 'reconEastAsia']),
 	route('coral-sea', 'jakarta', 'red', 2, false, door('59'), ['reconNewArea']),
 	route('new-zealand', 'haven-coral-sea', 'red', 2, false, door('19'), ['reconNewArea'], false),
 	route('hidden:plan-red', 'shanghai', 'red', 5, true, null, ['plan'], false),
@@ -253,7 +253,10 @@ const seals: SealDef[] = [
 		{ t: 'ability', ability: 'smuggler' },
 	]),
 	aid('32', 'Carrier stickers'),
-	sealed(door('33'), 'More Infection card improvements'),
+	sealed(door('33'), 'More Infection card improvements', [
+		{ t: 'infectionImprovement', improvement: 'cordon' },
+		{ t: 'infectionImprovement', improvement: 'lockdown' },
+	]),
 	sealed(door('34'), 'Permanent supply centers', [{ t: 'permanentStructure', structure: 'center', copies: 3 }]),
 	sealed(door('35'), 'Signals triangulated', [{ t: 'frequencyHint' }]),
 	sealed(door('36'), 'More permanent supply centers', [{ t: 'permanentStructure', structure: 'center', copies: 3 }]),
@@ -267,7 +270,7 @@ const seals: SealDef[] = [
 	sealed(door('44'), 'The Sanitation Officer', [
 		{ t: 'job', job: 'sanitationOfficer', home: city('haven-mediterranean') },
 	]),
-	sealed(door('45'), 'Local Operatives', [{ t: 'cityImprovement', improvement: 'redWild' }]),
+	sealed(door('45'), 'Local Operatives', [{ t: 'cityImprovement', improvement: 'redWild', copies: 2 }]),
 	sealed(door('46'), 'Jade lab found', [
 		{ t: 'lab', city: city('johannesburg') },
 		{ t: 'job', job: 'scientist', home: city('haven-south-atlantic') },
@@ -278,7 +281,11 @@ const seals: SealDef[] = [
 		{ t: 'scar', scar: 'portBound' },
 		{ t: 'scar', scar: 'wasteful' },
 	]),
-	sealed(door('48'), 'More scars'),
+	sealed(door('48'), 'More scars', [
+		{ t: 'scar', scar: 'susceptible' },
+		{ t: 'scar', scar: 'fearOfNeedles' },
+		{ t: 'scar', scar: 'fearOfFlying' },
+	]),
 	sealed(door('49'), 'The Captain', [{ t: 'job', job: 'captain', home: city('haven-north-atlantic') }]),
 	sealed(door('50'), 'Infestation', [...opens('F', '14')]),
 	sealed(door('51'), 'Wellington'),
@@ -679,6 +686,19 @@ export const pack: ContentPack = {
 			slots: 1,
 		},
 		{
+			id: 'susceptible',
+			name: 'Susceptible',
+			text: 'Starting a turn in an infested city exposes you twice.',
+			slots: 1,
+		},
+		{ id: 'fearOfNeedles', name: 'Fear of Needles', text: 'May not Inoculate.', slots: 1 },
+		{
+			id: 'fearOfFlying',
+			name: 'Fear of Flying',
+			text: 'Shuttle Flight costs a card from your hand, when you hold one.',
+			slots: 1,
+		},
+		{
 			id: 'carrier',
 			name: 'Carrier',
 			text: 'Moves only by Drive or Ferry and discards a matching card to enter a city. Dies at game end.',
@@ -823,7 +843,7 @@ export const pack: ContentPack = {
 			text: 'Counts as 3 cards of its colour when building a supply center.',
 			cost: 2,
 		},
-		{ id: 'wild', name: 'Universal', text: 'Counts as any colour for building and recon.', cost: 2 },
+		{ id: 'wild', name: 'Universal', text: 'Counts as any colour for building and recon.', cost: 1 },
 		{ id: 'redWild', name: 'Eastern Ties', text: 'Also counts as red for building and recon.', cost: 1 },
 	],
 	infectionImprovements: [
@@ -833,12 +853,17 @@ export const pack: ContentPack = {
 			text: 'If the city holds 2 or more cubes when drawn, remove none.',
 			cost: 1,
 		},
-		{ id: 'lockdown', name: 'Lockdown', text: 'While in the discard pile, any player may destroy this card.', cost: 1 },
+		{
+			id: 'lockdown',
+			name: 'Lockdown',
+			text: 'While in the discard pile, any player may discard a Player card to destroy this card.',
+			cost: 1,
+		},
 		{
 			id: 'rebirth',
 			name: 'Rebirth',
-			text: 'When this Infection card is drawn while its city has population 4 or more, the city is not infected: no cube lost, no Plague cube.',
-			cost: 2,
+			text: 'When this Infection card is drawn while its city has population 6 or more, the city is not infected: no cube lost, no Plague cube.',
+			cost: 1,
 		},
 		{
 			id: 'cordon',
@@ -1007,7 +1032,7 @@ export const pack: ContentPack = {
 		portraits: 10,
 		exposureBoxes: 7,
 		storageCap: 30,
-		rebirthPopulation: 4,
+		rebirthPopulation: 6,
 		startingRationing: 4,
 		epidemicTable: [
 			{ maxCityCards: 36, epidemics: 5 },

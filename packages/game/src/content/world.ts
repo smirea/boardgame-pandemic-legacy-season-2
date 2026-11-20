@@ -91,13 +91,13 @@ const cityRows: Record<string, CityRow[]> = {
 		['tokyo', 'Tokyo', 35.68, 139.69, 'red', 1, 1, 'pi'],
 		['osaka', 'Osaka', 34.69, 135.5, 'red', 1, 1, 'pi'],
 	],
-	'coral-sea': [['haven-coral-sea', 'Coralhold', -18, 155, 'haven', 2, 0, 'pl']],
-	'new-zealand': [['wellington', 'Wellington', -41.29, 174.78, 'blue', 2, 2, 'p']],
+	'coral-sea': [['haven-coral-sea', 'Coralhold', -18, 155, 'haven', 1, 0, 'pl']],
+	'new-zealand': [['wellington', 'Wellington', -41.29, 174.78, 'blue', 2, 0, 'px']],
 	'eastern-pacific': [['haven-eastern-pacific', 'Farwater', -2, -92, 'haven', 3, 0, 'pl']],
-	'indian-ocean': [['haven-indian-ocean', 'Monsoon Rest', -5, 55, 'haven', 2, 0, 'pl']],
+	'indian-ocean': [['haven-indian-ocean', 'Monsoon Rest', -5, 55, 'haven', 3, 0, 'pl']],
 	utopia: [
-		['utopia', 'Utopia', 40, 103, 'red', 8, 2, 'i'],
-		['lake-baikal', 'Lake Baikal', 53.5, 108, 'black', 1, 1, 'l'],
+		['utopia', 'Utopia', 40, 103, 'red', 8, 1, 'i'],
+		['lake-baikal', 'Lake Baikal', 53.5, 108, 'red', 1, 0, 'lx'],
 	],
 };
 
@@ -136,6 +136,7 @@ export const cities: CityDef[] = Object.entries(cityRows).flatMap(([region, rows
 		startsOnGrid: flags.includes('g'),
 		...(flags.includes('l') ? { lost: true } : {}),
 		...(flags.includes('i') ? { startsInfested: true } : {}),
+		...(flags.includes('x') ? { noInfectionCards: true } : {}),
 		...(arrivals[id] ? { arrival: arrivals[id] } : {}),
 		...(groundWeights[id] ? { groundWeight: groundWeights[id] } : {}),
 	})),

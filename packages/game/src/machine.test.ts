@@ -5,7 +5,7 @@ import { botCommand } from './bot';
 import { pack } from './content/pack';
 import type { EdgeDef, EventId, ScarId, SearchResult } from './content/types';
 import { edge } from './content/world';
-import { bump, epidemicCount, placeHollow, setupInfection } from './flow';
+import { beginTurn, bump, epidemicCount, placeHollow, setupInfection } from './flow';
 import {
 	grid,
 	handLimit,
@@ -1087,7 +1087,7 @@ describe('game end and the campaign', () => {
 			const [lagos] = infectionCards(world, 'lagos');
 			(world.campaign.infectionCards[cairo!] as { improvement: string }).improvement = 'wellStocked';
 			(world.campaign.infectionCards[lagos!] as { improvement: string }).improvement = 'rebirth';
-			world.campaign.locations[city('lagos')]!.population = 4;
+			world.campaign.locations[city('lagos')]!.population = 6;
 			game.locations[city('lagos')]!.supplies = 0;
 			stackInfection(world, ['cairo', 'lagos', 'london']);
 			const [london] = infectionCards(world, 'london');
@@ -1402,6 +1402,40 @@ describe('the remaining abilities and the Jade lab', () => {
 		const caught = leaving(false);
 		act(caught, { a: 'drive', to: city('tripoli') });
 		expect(character(worldOf(caught), A).exposure).toBe(1);
+	});
+
+	test("door 48's scars: Susceptible is exposed twice in an infested city, Fear of Needles may not Inoculate, Fear of Flying pays a card to shuttle", () => {
+		const scarred = (scar: string, edit?: (world: World) => void) =>
+			late(world => {
+				character(world, A).slots[1] = { kind: 'scar', id: scar } as never;
+				edit?.(world);
+			});
+		const exposures = (scar: string) => {
+			const world = mutable(scarred(scar));
+			world.campaign.locations[city('kinshasa')]!.infested = true;
+			Object.assign(world.game!, { active: A });
+			world.game!.players[A]!.location = city('kinshasa');
+			character(world, A).exposureTrack = ['empty', 'empty', 'empty', 'empty', 'skull'];
+			beginTurn(world);
+			return character(world, A).exposure;
+		};
+		expect(exposures('susceptible')).toBe(2);
+		expect(exposures('wary')).toBe(1);
+		const needles = scarred('fearOfNeedles', world => {
+			world.game!.players[A]!.location = city('cairo');
+			world.game!.playerDiscard.push(...cityCards(world, 'cairo'));
+		});
+		expect(refuses(needles, { a: 'inoculate', card: cityCards(worldOf(needles), 'cairo')[0]! })).toContain(
+			'Fear of Needles',
+		);
+		const flying = scarred('fearOfFlying', world => {
+			world.game!.players[A]!.location = city('haven-north-atlantic');
+			give(world, A, cityCards(world, 'tokyo'));
+		});
+		const to = city('haven-mediterranean');
+		expect(refuses(flying, { a: 'shuttle', to })).toContain('Fear of Flying');
+		act(flying, { a: 'shuttle', to, card: cityCards(worldOf(flying), 'tokyo')[0]! });
+		expect(gameOf(flying).players[A]!.location).toBe(to);
 	});
 
 	test('the Misinformation Specialist leads a Hollow Man to a neighbouring city holding 2 or fewer', () => {

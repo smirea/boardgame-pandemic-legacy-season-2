@@ -44,7 +44,7 @@ export type Action =
 	| { a: 'establishLine'; to: CityId }
 	| { a: 'chartLane'; to: CityId }
 	| { a: 'search'; card: CardId; box: number }
-	| { a: 'shuttle'; to: CityId }
+	| { a: 'shuttle'; to: CityId; card?: CardId }
 	| { a: 'buildTower'; moveFrom?: CityId }
 	| { a: 'transmit'; card: CardId; to: SeatId }
 	| { a: 'monitor'; frequency: number }
@@ -505,13 +505,19 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 		},
 	},
 	shuttle: {
-		check(ctx, { to }) {
+		check(ctx, { to, card }) {
 			const usable = (city: CityId) =>
 				(cityDef(city).kind === 'haven' || ctx.game.locations[city]!.center) && !isForsaken(ctx.campaign, city);
 			if (to === ctx.here || !usable(ctx.here) || !usable(to)) return 'Shuttles fly between havens and supply centers';
-			return grid(ctx.campaign).has(to) ? ok : 'That location is not on the grid';
+			if (!grid(ctx.campaign).has(to)) return 'That location is not on the grid';
+			const scared = trait(ctx, 'fearOfFlying') && ctx.me.hand.length > 0;
+			if (scared && !(card && ctx.me.hand.includes(card))) return 'Fear of Flying: discard a card to fly';
+			return !scared && card ? 'No card is needed to fly' : ok;
 		},
-		apply: (ctx, { to }) => void movePawn(ctx.world, ctx.seat, to, 'shuttle'),
+		apply(ctx, { to, card }) {
+			if (card) discardFromHand(ctx.game, ctx.seat, card);
+			movePawn(ctx.world, ctx.seat, to, 'shuttle');
+		},
 	},
 	buildTower: {
 		check(ctx, { moveFrom }) {
@@ -859,6 +865,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 	inoculate: {
 		free: true,
 		check(ctx, { card }) {
+			if (trait(ctx, 'fearOfNeedles')) return 'Fear of Needles: this character may not Inoculate';
 			const asPlayer = ctx.campaign.playerCards[card];
 			const asInfection = ctx.campaign.infectionCards[card];
 			if (ctx.game.playerDiscard.includes(card) && asPlayer?.kind === 'city' && asPlayer.city === ctx.here) {

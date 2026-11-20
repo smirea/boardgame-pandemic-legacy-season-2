@@ -187,7 +187,10 @@ function candidateActions(world: World, seat: SeatId): Action[] {
 	for (const card of cityCards(world, [...hand, ...game.playerDiscard])) {
 		card.search.forEach((_, box) => candidates.push({ a: 'search', card: card.id, box }));
 	}
-	for (const city of grid(campaign)) candidates.push({ a: 'shuttle', to: city });
+	for (const city of grid(campaign)) {
+		candidates.push({ a: 'shuttle', to: city });
+		if (has(world, seat, 'fearOfFlying')) for (const card of hand) candidates.push({ a: 'shuttle', to: city, card });
+	}
 	for (let frequency = 0; frequency < pack.frequencies.length; frequency++)
 		candidates.push({ a: 'monitor', frequency });
 	for (const id of Object.keys(game.locations) as CityId[]) {
