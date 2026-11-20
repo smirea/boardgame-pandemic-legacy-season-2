@@ -42,13 +42,13 @@ export function handGroups(hand: PlayerCard[], name: (card: PlayerCard) => strin
 function keyOf(card: PlayerCard): string {
 	switch (card.kind) {
 		case 'city':
-			return card.improvement || card.search.length ? `card:${card.id}` : `color:${regionOf(card.city)}`;
+			return card.improvement || card.search.length || card.companion
+				? `card:${card.id}`
+				: `color:${regionOf(card.city)}`;
 		case 'event':
 			return `event:${card.event}:${card.mode}`;
 		case 'produce':
 			return `produce:${card.boxesLeft}`;
-		case 'companion':
-			return `card:${card.id}`;
 		case 'epidemic':
 			return 'epidemic';
 	}
@@ -60,18 +60,20 @@ function describe(key: string, cards: PlayerCard[], name: (card: PlayerCard) => 
 	switch (card.kind) {
 		case 'city': {
 			const region = regionOf(card.city);
-			if (cards.length === 1 && (card.improvement || card.search.length)) {
+			if (cards.length === 1 && (card.improvement || card.search.length || card.companion)) {
 				const improvement = pack.cityImprovements.find(item => item.id === card.improvement);
+				const companion = pack.companions.find(item => item.id === card.companion);
 				const mark = card.improvement ? IMPROVEMENT_MARK[card.improvement] : undefined;
 				const extras = [
 					improvement && `${improvement.name}: ${improvement.text}`,
+					companion && `${companion.name}: ${companion.text}`,
 					card.search.length && `${card.search.length} search box${card.search.length === 1 ? '' : 'es'}`,
 				].filter(Boolean);
 				return {
 					key,
 					cards,
 					tone: region,
-					icon: mark?.icon ?? (mark ? undefined : SEARCH_ICON),
+					icon: mark?.icon ?? (mark ? undefined : card.companion ? COMPANION_ICON[card.companion] : SEARCH_ICON),
 					mark: mark?.text,
 					title: `${name(card)} (${extras.join('; ')})`,
 				};
@@ -93,16 +95,6 @@ function describe(key: string, cards: PlayerCard[], name: (card: PlayerCard) => 
 				tone: 'event',
 				icon: EVENT_ICON[card.event],
 				title: `${listed} (event${mode}): ${event.text}`,
-			};
-		}
-		case 'companion': {
-			const companion = pack.companions.find(item => item.id === card.companion)!;
-			return {
-				key,
-				cards,
-				tone: 'companion',
-				icon: COMPANION_ICON[card.companion],
-				title: `${listed} (companion): ${companion.text}`,
 			};
 		}
 		case 'produce':

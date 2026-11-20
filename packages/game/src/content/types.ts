@@ -105,7 +105,9 @@ export type CompanionId =
 	| 'fieldSurgeon'
 	| 'purifier'
 	| 'shelterWright'
-	| 'marksman';
+	| 'marksman'
+	| 'trader'
+	| 'porter';
 
 export type EventId =
 	| 'airlift'
@@ -172,7 +174,9 @@ export type ActionId =
 	| 'run'
 	| 'strike'
 	| 'coordinate'
-	| 'smuggle';
+	| 'smuggle'
+	| 'trade'
+	| 'carry';
 
 export type RuleId =
 	/** Population 0 makes a city forsaken and infested. */

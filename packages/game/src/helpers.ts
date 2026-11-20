@@ -113,7 +113,7 @@ export function has(world: World, seat: SeatId, trait: Trait): boolean {
 	if (character.slots.some(slot => slot?.id === trait)) return true;
 	return player(world.game!, seat).hand.some(id => {
 		const card = world.campaign.playerCards[id];
-		return card?.kind === 'companion' && card.companion === trait;
+		return card?.kind === 'city' && card.companion === trait;
 	});
 }
 
@@ -154,8 +154,6 @@ export function cardLabel(campaign: Campaign, id: CardId): string {
 			return 'Produce Supplies';
 		case 'event':
 			return pack.events.find(event => event.id === card.event)!.name;
-		case 'companion':
-			return pack.companions.find(companion => companion.id === card.companion)!.name;
 	}
 }
 

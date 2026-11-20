@@ -107,6 +107,7 @@ export function newCampaign(seed: number): Campaign {
 				kind: 'city',
 				city: city.id,
 				improvement: null,
+				companion: null,
 				// Only the first copy of a city carries its search boxes, so a result can resolve once.
 				search: copy === 0 ? boxes.map(box => ({ ...box, scratched: false })) : [],
 			};

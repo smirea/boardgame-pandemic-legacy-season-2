@@ -24,11 +24,18 @@ import type { RngState } from './rng';
 export type SearchBox = { scope: 'land' | 'sea'; result: SearchResult; scratched: boolean };
 
 export type PlayerCard =
-	| { id: CardId; kind: 'city'; city: CityId; improvement: CityImprovementId | null; search: SearchBox[] }
+	| {
+			id: CardId;
+			kind: 'city';
+			city: CityId;
+			improvement: CityImprovementId | null;
+			search: SearchBox[];
+			/** A companion found by searching lives on the City card and works while the card is held. */
+			companion: CompanionId | null;
+	  }
 	| { id: CardId; kind: 'epidemic' }
 	| { id: CardId; kind: 'produce'; boxesLeft: number }
-	| { id: CardId; kind: 'event'; event: EventId; mode: 'rationed' | 'unrationed' | 'permanent' }
-	| { id: CardId; kind: 'companion'; companion: CompanionId };
+	| { id: CardId; kind: 'event'; event: EventId; mode: 'rationed' | 'unrationed' | 'permanent' };
 
 export type InfectionCard =
 	| { id: CardId; kind: 'city'; city: CityId; improvement: InfectionImprovementId | null }

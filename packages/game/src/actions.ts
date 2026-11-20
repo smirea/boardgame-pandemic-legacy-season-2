@@ -52,6 +52,8 @@ export type Action =
 	| { a: 'administratorMove'; pawn: SeatId; to: SeatId }
 	| { a: 'sabotage'; card: CardId; city: CityId }
 	| { a: 'broker'; card: CardId; take: CardId }
+	| { a: 'trade'; card: CardId; take: CardId }
+	| { a: 'carry'; from: CityId; count: number }
 	| { a: 'investigate'; card: CardId; take: CardId }
 	| { a: 'supply'; card: CardId }
 	| { a: 'facilitate'; with: SeatId; card: CardId }
@@ -183,13 +185,7 @@ export function addEdge(world: World, a: CityId, b: CityId, kind: EdgeKind, coun
 	settleGrid(world, before, countsForObjective);
 }
 
-function giveCompanion(ctx: Ctx, companion: CompanionId) {
-	const id = `${companion}#${ctx.campaign.nextCardId++}` as CardId;
-	ctx.campaign.playerCards[id] = { id, kind: 'companion', companion };
-	ctx.me.hand.push(id);
-}
-
-function resolveSearch(ctx: Ctx, result: SearchResult) {
+function resolveSearch(ctx: Ctx, result: SearchResult, card: CardId) {
 	const { game, campaign } = ctx;
 	switch (result.t) {
 		case 'supplies': {
@@ -228,8 +224,11 @@ function resolveSearch(ctx: Ctx, result: SearchResult) {
 				log(game, { t: 'note', text: 'That lead was already followed: 1 extra action this turn' });
 			} else openBundle(ctx.world, result.bundle, false);
 			return;
-		case 'companion':
-			return giveCompanion(ctx, result.companion);
+		case 'companion': {
+			const searched = campaign.playerCards[card]!;
+			if (searched.kind === 'city') searched.companion = result.companion;
+			return;
+		}
 		case 'infest':
 			if (campaign.locations[ctx.here]!.infested)
 				log(game, { t: 'note', text: `${cityDef(ctx.here).name} was already infested, so nothing changes` });
@@ -494,7 +493,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 			target.scratched = true;
 			ctx.game.searches += 1;
 			log(ctx.game, { t: 'search', seat: ctx.seat, city: ctx.here, result: target.result.t });
-			resolveSearch(ctx, target.result);
+			resolveSearch(ctx, target.result, card);
 			bump(ctx.world, 'searches');
 			if (trait(ctx, 'searchDiscard') && ctx.me.hand.includes(card)) discardFromHand(ctx.game, ctx.seat, card);
 		},
@@ -644,6 +643,36 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 			ctx.game.playerDiscard.splice(ctx.game.playerDiscard.indexOf(take), 1);
 			discardFromHand(ctx.game, ctx.seat, card);
 			ctx.me.hand.push(take);
+		},
+	},
+	trade: {
+		trait: 'trader',
+		check(ctx, { card, take }) {
+			const paid = cityCard(ctx, card);
+			const wanted = cityCard(ctx, take, 'discard');
+			return paid && wanted && cityDef(paid.city).color === cityDef(wanted.city).color
+				? ok
+				: 'Trade for a City card of the same colour';
+		},
+		apply(ctx, { card, take }) {
+			ctx.game.playerDiscard.splice(ctx.game.playerDiscard.indexOf(take), 1);
+			discardFromHand(ctx.game, ctx.seat, card);
+			ctx.me.hand.push(take);
+		},
+	},
+	carry: {
+		trait: 'porter',
+		free: true,
+		check(ctx, { from, count }) {
+			if (!unused(ctx, 'porter')) return 'Once per turn';
+			if (!neighbours(ctx.campaign, ctx.here).includes(from)) return 'Pick an adjacent location';
+			const there = ctx.game.locations[from]?.supplies ?? 0;
+			return Number.isInteger(count) && count >= 1 && count <= there ? ok : 'There are not that many cubes there';
+		},
+		apply(ctx, { from, count }) {
+			useOnce(ctx, 'porter');
+			ctx.game.locations[from]!.supplies -= count;
+			ctx.loc.supplies += count;
 		},
 	},
 	investigate: {

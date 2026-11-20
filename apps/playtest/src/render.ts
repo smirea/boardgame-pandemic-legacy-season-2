@@ -137,7 +137,7 @@ const SEARCH_FINDS: Record<string, string> = {
 	removeHollow: 'the chance to remove Hollow Men (a choice follows)',
 	freeEdge: 'a free supply line or sea lane from here (a choice follows)',
 	discover: 'a lead (the next line says what it opened, or that it was already followed)',
-	companion: 'a companion, who joins your hand',
+	companion: 'a companion, who joins the City card you searched with and works while you hold it',
 	infest: 'an infestation: this city now exposes whoever starts a turn in it',
 	nothing: 'nothing',
 };
@@ -389,7 +389,7 @@ export function renderStatus(state: PublicState, who: Who | null): string {
 			const def =
 				card.kind === 'event'
 					? pack.events.find(entry => entry.id === card.event)
-					: card.kind === 'companion'
+					: card.kind === 'city' && card.companion
 						? pack.companions.find(entry => entry.id === card.companion)
 						: null;
 			return def ? [`  ${enc(id)} (${seatName(world, seat)}): ${def.name}. ${def.text}`] : [];

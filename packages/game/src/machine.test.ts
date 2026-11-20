@@ -320,9 +320,8 @@ describe('exploring', () => {
 		expect(gameOf(searching({ t: 'stockpile', amount: 4 })).stockpile).toBe(24);
 		expect(gameOf(searching({ t: 'actions', amount: 2 })).actionsLeft).toBe(5);
 		const found = searching({ t: 'companion', companion: 'medic' });
-		expect(
-			gameOf(found).players[A]!.hand.some(id => worldOf(found).campaign.playerCards[id]?.kind === 'companion'),
-		).toBe(true);
+		const searched = worldOf(found).campaign.playerCards[gameOf(found).players[A]!.hand[0]!];
+		expect(searched).toMatchObject({ kind: 'city', city: 'denver', companion: 'medic' });
 		expect(worldOf(searching({ t: 'infest' })).campaign.locations[city('denver')]!.infested).toBe(true);
 		const repeat = searching({ t: 'discover', bundle: 'opal' as never });
 		expect(gameOf(repeat).actionsLeft).toBe(4);
@@ -824,7 +823,7 @@ describe('events and companions', () => {
 	}
 
 	for (const companion of pack.companions.filter(entry => entry.spent)) {
-		test(`the ${companion.name} companion takes effect and is destroyed`, () => {
+		test(`the ${companion.name} companion takes effect and its City card goes to the discard pile, still carrying it`, () => {
 			const actor = late(world => {
 				scene(world);
 				conjure(world, A, { kind: 'companion', companion: companion.id });
@@ -835,9 +834,42 @@ describe('events and companions', () => {
 			expect(play).toBeDefined();
 			send(actor, { type: 'PLAY', ...play! });
 			checks[companion.id]!(before, worldOf(actor));
-			expect(worldOf(actor).campaign.playerCards[card]).toBeUndefined();
+			expect(gameOf(actor).playerDiscard).toContain(card);
+			expect(worldOf(actor).campaign.playerCards[card]).toMatchObject({ companion: companion.id });
 		});
 	}
+
+	test('the Porter and the Trader work while their City card is held, and leave with it', () => {
+		const actor = late(world => {
+			conjure(world, A, { kind: 'companion', companion: 'porter' });
+			const here = world.game!.players[A]!.location;
+			world.game!.locations[neighbours(world.campaign, here)[0]!]!.supplies = 2;
+		});
+		const here = gameOf(actor).players[A]!.location;
+		const from = neighbours(worldOf(actor).campaign, here)[0]!;
+		const before = gameOf(actor).locations[here]!.supplies;
+		act(actor, { a: 'carry', from, count: 2 });
+		expect(gameOf(actor).locations[here]!.supplies).toBe(before + 2);
+		expect(gameOf(actor).actionsLeft).toBe(4);
+		expect(refuses(actor, { a: 'carry', from, count: 1 })).toBe('Once per turn');
+
+		const trading = late(world => {
+			conjure(world, A, { kind: 'companion', companion: 'trader' });
+			give(world, A, cityCards(world, 'cairo', 1));
+			world.game!.playerDiscard.push(...cityCards(world, 'tripoli', 1));
+		});
+		const [cairo] = cityCards(worldOf(trading), 'cairo', 1);
+		const [tripoli] = cityCards(worldOf(trading), 'tripoli', 1);
+		act(trading, { a: 'trade', card: cairo!, take: tripoli! });
+		expect(gameOf(trading).players[A]!.hand).toContain(tripoli);
+
+		const dropped = late(world => {
+			const card = conjure(world, A, { kind: 'companion', companion: 'porter' });
+			removeFromHand(world.game!, A, card);
+			world.game!.playerDiscard.push(card);
+		});
+		expect(refuses(dropped, { a: 'carry', from, count: 1 })).toBeTruthy();
+	});
 
 	test('an Unrationed Event is destroyed after use, and companions lower costs while held', () => {
 		const actor = late(world => {

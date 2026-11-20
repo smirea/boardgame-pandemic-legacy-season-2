@@ -2,7 +2,7 @@ import { cityDef } from '@repo/game';
 import type { CityId, Color, PlayerCard } from '@repo/game';
 
 const COLOR_ORDER: (Color | 'haven')[] = ['blue', 'yellow', 'black', 'red', 'haven'];
-const KIND_ORDER: PlayerCard['kind'][] = ['city', 'event', 'produce', 'companion', 'epidemic'];
+const KIND_ORDER: PlayerCard['kind'][] = ['city', 'event', 'produce', 'epidemic'];
 
 export const regionOf = (city: CityId) => cityDef(city).color ?? 'haven';
 

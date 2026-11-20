@@ -59,6 +59,8 @@ export const ACTION_NAMES: Record<Action['a'], string> = {
 	strike: 'Remove Hollow Man',
 	coordinate: 'Call a pawn over',
 	smuggle: 'Smuggle a cube',
+	trade: 'Trade a card',
+	carry: 'Carry cubes over',
 };
 
 /** What each kind of action does, in a line short enough to sit beside its name. */
@@ -98,6 +100,8 @@ export const ACTION_TEXT: Record<Action['a'], string> = {
 	destroyInfection: "Destroy this city's Infection card",
 	coordinate: 'Move a pawn next door to this location',
 	smuggle: 'Discard a City card to supply that city',
+	trade: 'Swap a City card for one of its colour in the discard pile',
+	carry: 'Bring cubes from next door to here',
 };
 
 /** Each action's cell in the generated icon strip, `static/actions/icons.webp`, 16 icons wide. */
@@ -137,6 +141,8 @@ export const ACTION_ICON: Record<Action['a'], number> = {
 	destroyInfection: 14,
 	coordinate: 0,
 	smuggle: 4,
+	trade: 15,
+	carry: 5,
 };
 
 /** Names the group gave to havens. Reactive, so every label that reads `cityName` follows a rename. */
@@ -158,7 +164,6 @@ export function cardName(world: World, id: CardId): string {
 	if (card) {
 		if (card.kind === 'city') return cityName(card.city);
 		if (card.kind === 'event') return pack.events.find(event => event.id === card.event)!.name;
-		if (card.kind === 'companion') return pack.companions.find(companion => companion.id === card.companion)!.name;
 		return card.kind === 'produce' ? 'Produce Supplies' : 'Epidemic';
 	}
 	const infection = world.campaign.infectionCards[id];
@@ -282,8 +287,11 @@ export function actionDetail(world: World, action: Action): Rich {
 		case 'sabotage':
 			return [{ glyph: 'hollow', text: cityName(action.city) }, ', discard ', cardRef(world, action.card)];
 		case 'broker':
+		case 'trade':
 		case 'investigate':
 			return [cardRef(world, action.card), ' for ', cardRef(world, action.take)];
+		case 'carry':
+			return [...cubeCount(action.count), ` from ${cityName(action.from)}`];
 		case 'facilitate':
 			return [cardRef(world, action.card), ` from ${seatName(world, action.with)}`];
 		case 'supply':

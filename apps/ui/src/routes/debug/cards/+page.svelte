@@ -21,7 +21,10 @@
 	const extras: PlayerCardData[] = [
 		...pack.companions.map((companion, index) => ({
 			id: `c${index}` as never,
-			kind: 'companion' as const,
+			kind: 'city' as const,
+			city: 'cairo' as never,
+			improvement: null,
+			search: [],
 			companion: companion.id,
 		})),
 		...pack.events.map((event, index) => ({

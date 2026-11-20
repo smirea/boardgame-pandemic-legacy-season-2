@@ -26,7 +26,6 @@
 		{ kind: 'haven', name: 'Havens', color: CITY_COLOR.haven },
 		{ kind: 'event', name: 'Events', color: KIND_COLOR.event, glyph: GLYPH.event },
 		{ kind: 'produce', name: 'Produce Supplies', color: KIND_COLOR.produce, glyph: GLYPH.produce },
-		{ kind: 'companion', name: 'Companions', color: KIND_COLOR.companion, glyph: GLYPH.companion },
 		{ kind: 'epidemic', name: 'Epidemics', color: KIND_COLOR.epidemic, glyph: GLYPH.epidemic },
 	];
 	const player = $derived(info.playerDeck);

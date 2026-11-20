@@ -7,6 +7,7 @@ import type { Action } from '@repo/game';
  */
 export function ways(variants: Action[]): Action[] {
 	const first = variants[0];
-	if (!first || !isFreeAction(first.a)) return variants;
+	// Carry is once per turn, so it asks how many.
+	if (!first || !isFreeAction(first.a) || first.a === 'carry') return variants;
 	return variants.filter(action => !('count' in action) || action.count === 1);
 }

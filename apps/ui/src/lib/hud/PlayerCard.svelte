@@ -5,12 +5,11 @@
 
 	export const KIND_COLOR = {
 		event: '#b08628',
-		companion: '#6f5a96',
 		produce: '#8d8476',
 		epidemic: '#a8261c',
 	} as const;
 
-	export const GLYPH = { event: '✦', companion: '☻', produce: '▦', epidemic: '☣' } as const;
+	export const GLYPH = { event: '✦', produce: '▦', epidemic: '☣' } as const;
 
 	/** The colour a card is known by at a glance: its city's region, or its kind. */
 	export const cardColor = (card: PlayerCard) =>
@@ -36,12 +35,13 @@
 			case 'city': {
 				const city = cityDef(card.city);
 				const improvement = pack.cityImprovements.find(item => item.id === card.improvement);
+				const companion = pack.companions.find(item => item.id === card.companion);
 				return {
 					title: city.name,
-					kicker: city.port ? 'Port' : 'City',
+					kicker: companion ? `${city.port ? 'Port' : 'City'} with ${companion.name}` : city.port ? 'Port' : 'City',
 					color: cardColor(card),
-					text: improvement?.text ?? '',
-					badge: improvement?.name,
+					text: [improvement?.text, companion && `${companion.name}: ${companion.text}`].filter(Boolean).join(' '),
+					badge: improvement?.name ?? companion?.name,
 				};
 			}
 			case 'event': {
@@ -52,10 +52,6 @@
 					color: cardColor(card),
 					text: event.text,
 				};
-			}
-			case 'companion': {
-				const companion = pack.companions.find(item => item.id === card.companion)!;
-				return { title: companion.name, kicker: 'Companion', color: cardColor(card), text: companion.text };
 			}
 			case 'produce':
 				return {

@@ -36,6 +36,9 @@ export const COMPANION_ICON: Record<CompanionId, string> = {
 	purifier: 'M8 2c3 4 4.5 6 4.5 8a4.5 4.5 0 0 1-9 0C3.5 8 5 6 8 2z',
 	shelterWright: 'M1.5 13.5 8 3l6.5 10.5zM8 3v10.5',
 	marksman: 'M8 2a6 6 0 1 0 0 12A6 6 0 0 0 8 2zM8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z',
+	trader: 'M2.5 5.5h9M9 3l2.5 2.5L9 8M13.5 10.5h-9M7 8l-2.5 2.5L7 13',
+	porter:
+		'M2 10.5h8.5V6H2zM10.5 8h2.5l1 2.5M4 12.5a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM11.5 12.5a1 1 0 1 0 0-2 1 1 0 0 0 0 2z',
 };
 
 export const PRODUCE_ICON = 'M3 3h10v10H3zM3 8h10M8 3v10';

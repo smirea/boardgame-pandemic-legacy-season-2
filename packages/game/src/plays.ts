@@ -114,7 +114,7 @@ export function checkPlay(world: World, seat: SeatId, card: CardId, play: Play, 
 	const held = campaign.playerCards[card];
 	const owner = game.players[seat];
 	if (!owner?.hand.includes(card) || !held) return 'You do not hold that card';
-	const id = held.kind === 'event' ? held.event : held.kind === 'companion' ? held.companion : null;
+	const id = held.kind === 'event' ? held.event : held.kind === 'city' ? held.companion : null;
 	if (id !== play.e) return 'That card does not do that';
 	// No Event may be played between drawing a card and resolving it, except one whose text names that window.
 	const unresolved = game.pending[0]?.t;
@@ -295,12 +295,13 @@ function resolvePlay(world: World, seat: SeatId, card: CardId, play: Play) {
 	const held = campaign.playerCards[card]!;
 	const owner = player(game, seat);
 	removeFromHand(game, seat, card);
-	const destroyed = (held.kind === 'event' && held.mode === 'unrationed') || held.kind === 'companion';
+	const destroyed = held.kind === 'event' && held.mode === 'unrationed';
 	if (destroyed) delete campaign.playerCards[card];
 	else game.playerDiscard.push(card);
 	if (held.kind === 'event') log(game, { t: 'event', seat, event: held.event, detail: playDetail(world, play) });
-	if (held.kind === 'companion') {
-		const name = pack.companions.find(companion => companion.id === held.companion)!.name;
+	if (held.kind === 'city' && held.companion) {
+		const companion = held.companion;
+		const name = pack.companions.find(entry => entry.id === companion)!.name;
 		const where = playDetail(world, play) || cityDef(owner.location).name;
 		log(game, { t: 'note', text: `${characterOf(world, seat).name} played ${name}: ${where}` });
 	}

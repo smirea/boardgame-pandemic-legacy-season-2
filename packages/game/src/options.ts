@@ -186,7 +186,10 @@ function candidateActions(world: World, seat: SeatId): Action[] {
 		candidates.push({ a: 'inoculate', card: id }, { a: 'destroyInfection', card: id });
 	for (const card of held)
 		for (const take of cityCards(world, game.playerDiscard))
-			candidates.push({ a: 'broker', card: card.id, take: take.id });
+			candidates.push({ a: 'broker', card: card.id, take: take.id }, { a: 'trade', card: card.id, take: take.id });
+	for (const from of neighbours(campaign, here))
+		for (let count = 1; count <= (game.locations[from]?.supplies ?? 0); count++)
+			candidates.push({ a: 'carry', from, count });
 	if (characterOf(world, seat).job === 'sanitationOfficer')
 		for (const [index, first] of hand.entries())
 			for (const second of hand.slice(index + 1))
@@ -277,7 +280,7 @@ export function legalPlays(world: World, phase: Phase): { seat: SeatId; card: Ca
 	for (const seat of game.seats) {
 		for (const card of player(game, seat).hand) {
 			const held = campaign.playerCards[card]!;
-			const id = held.kind === 'event' ? held.event : held.kind === 'companion' ? held.companion : null;
+			const id = held.kind === 'event' ? held.event : held.kind === 'city' ? held.companion : null;
 			if (!id) continue;
 			const plays: Play[] = [];
 			switch (id) {
@@ -466,7 +469,7 @@ export function cardTargets(world: World, phase: Phase, card: CardId): { cities:
 			if (grid(world.campaign).has(city.id) && (city.kind === 'haven' || world.game.locations[city.id]?.center))
 				cities.add(city.id);
 	}
-	if (held?.kind === 'event' || held?.kind === 'companion') {
+	if (held?.kind === 'event' || (held?.kind === 'city' && held.companion)) {
 		for (const entry of legalPlays(world, phase)) {
 			if (entry.card !== card) continue;
 			const play = entry.play;

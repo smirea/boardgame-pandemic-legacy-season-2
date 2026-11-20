@@ -246,8 +246,10 @@ export function observe(audit: Audit, previous: PublicState | null, next: Public
 	for (const rule of campaign.rules) if (!previous?.world.campaign.rules.includes(rule)) bump(audit, `rule:${rule}`);
 	if (previous)
 		for (const card of Object.values(campaign.playerCards))
-			if (card.kind === 'companion' && !previous.world.campaign.playerCards[card.id])
-				bump(audit, `found:companion:${card.companion}`);
+			if (card.kind === 'city' && card.companion) {
+				const before = previous.world.campaign.playerCards[card.id];
+				if (before?.kind === 'city' && !before.companion) bump(audit, `found:companion:${card.companion}`);
+			}
 	// A turning point leaves the list at the moment it resolves.
 	for (const point of previous?.world.campaign.turningPoints ?? []) {
 		if (campaign.turningPoints.includes(point)) continue;

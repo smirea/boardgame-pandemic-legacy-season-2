@@ -71,7 +71,7 @@ export function conjure(
 	world.campaign.playerCards[id] = (
 		card.kind === 'event'
 			? { id, kind: 'event', event: card.event, mode: 'rationed' }
-			: { id, kind: 'companion', companion: card.companion }
+			: { id, kind: 'city', city: 'cairo', improvement: null, search: [], companion: card.companion }
 	) as never;
 	world.game!.players[seat]!.hand.push(id);
 	return id;

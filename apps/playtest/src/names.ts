@@ -50,7 +50,10 @@ export function cardName(world: World, id: CardId): string {
 			case 'city': {
 				const def = cityDef(card.city);
 				const open = card.search.filter(box => !box.scratched).length;
-				return `${def.color ?? 'haven'} ${cityName(world, card.city)}${card.improvement ? ` +${card.improvement}` : ''}${open ? ` (${open} search box${open > 1 ? 'es' : ''})` : ''}`;
+				const companion = card.companion
+					? ` with companion ${pack.companions.find(entry => entry.id === card.companion)?.name}`
+					: '';
+				return `${def.color ?? 'haven'} ${cityName(world, card.city)}${card.improvement ? ` +${card.improvement}` : ''}${companion}${open ? ` (${open} search box${open > 1 ? 'es' : ''})` : ''}`;
 			}
 			case 'epidemic':
 				return 'EPIDEMIC';
@@ -58,8 +61,6 @@ export function cardName(world: World, id: CardId): string {
 				return `Produce Supplies (${card.boxesLeft} uses left)`;
 			case 'event':
 				return `event ${pack.events.find(event => event.id === card.event)?.name ?? card.event}`;
-			case 'companion':
-				return `companion ${pack.companions.find(companion => companion.id === card.companion)?.name ?? card.companion}`;
 		}
 	}
 	const infection = world.campaign.infectionCards[id];

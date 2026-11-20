@@ -194,7 +194,7 @@ function stageOctober(world: World) {
 	const towns = {
 		rook: pick(['bangkok', 'manila', 'seoul', 'tokyo', 'ho-chi-minh-city', 'osaka']),
 		wren: pick(['riyadh', 'baghdad', 'johannesburg', 'tehran']),
-		pike: pick(['delhi', 'kolkata']),
+		pike: pick(['delhi', 'new-mumbai']),
 	};
 	const brokered = pick(['istanbul'])[0]!;
 	deal(world, [towns.rook, towns.wren, towns.pike]);
@@ -202,7 +202,17 @@ function stageOctober(world: World) {
 	game.players[seats[0]!]!.location = id('jakarta');
 	game.players[seats[1]!]!.location = id('riyadh');
 	game.players[seats[2]!]!.location = id('delhi');
-	calm(world, ['jakarta', 'kolkata', 'ho-chi-minh-city', 'riyadh', 'cairo', 'johannesburg', 'delhi', 'tehran']);
+	calm(world, [
+		'jakarta',
+		'kolkata',
+		'new-mumbai',
+		'ho-chi-minh-city',
+		'riyadh',
+		'cairo',
+		'johannesburg',
+		'delhi',
+		'tehran',
+	]);
 	// One city on the brink, drawn first: the first Infect step is an outbreak.
 	plagued(world, id('hong-kong'), 3);
 	supplied(world, [...neighbours(world.campaign, id('hong-kong'))], 2);
@@ -340,18 +350,19 @@ const october: Stage = {
 			'You are Rook, at Jakarta, with the Saboteur ability. Rook is one exposure from death. Dying is on your list, but last.',
 			'First, as the lead or not, send `waive buildCenters` once. It is a plain command for `play`, not a `do` key. It exercises waiving an objective.',
 			'Turn 1: Recon at Jakarta with the Bangkok and Manila cards. Drive or ferry to the haven that appears. Recon there with the Seoul and Tokyo cards. Use Sabotage: discard the Osaka card to remove the Hollow Man in Osaka.',
-			'Turn 2: go to Ho Chi Minh City (Jakarta, Kolkata, Ho Chi Minh City) and Search there with its card. You get a companion card that places a shelter: play it at once, anywhere.',
+			'Turn 2: go to Ho Chi Minh City (Jakarta, Kolkata, Ho Chi Minh City) and Search there with its card. A companion joins that City card: discard the card to place a shelter, at once, anywhere.',
 			'Turn 3: drive to Osaka, which is infested, and end your turn there. Rook dies at the start of your next turn. A choice appears: take any free character.',
 		],
 		[
 			'You are Wren, at Riyadh, with the Broker ability.',
-			'Turn 1: Search at Riyadh with its card. It gives a free supply line: answer the choice by picking a city to connect. Drive to Baghdad. Search there with its card. You get a companion card that removes 1 plague cube from where you stand: play it right there, Baghdad has one. Use Broker: discard the Tehran card to take the Istanbul card from the discard pile.',
+			'Turn 1: Search at Riyadh with its card. It gives a free supply line: answer the choice by picking a city to connect. Drive to Baghdad. Search there with its card. A companion joins that City card: discard the card to remove 1 plague cube from where you stand, right there, Baghdad has one. Use Broker: discard the Tehran card to take the Istanbul card from the discard pile.',
 			'Turn 2: drive to Cairo, Shuttle to Johannesburg, and Search there with its card.',
 			'Then: help wherever the game needs it.',
 		],
 		[
 			'You are Pike, at Delhi.',
-			'Turn 1: Search at Delhi with its card. You get a companion card that removes a Hollow Man: play it on Tokyo. Drive to Tehran, then Kolkata. Search at Kolkata with its card. You get a companion card that clears a city of plague: play it on Hong Kong, but only after Hong Kong has had its outbreak in the first Infect step.',
+			'Turn 1: Search at Delhi with its card. A companion joins that City card: discard the card to remove a Hollow Man in Tokyo. Drive to Tehran, then Kolkata, then New Mumbai.',
+			'Turn 2: Search at New Mumbai with its card, land box. A companion joins that City card that clears a city of plague: discard the card on Hong Kong, but only after Hong Kong has had its outbreak in the first Infect step.',
 			'Then: help wherever the game needs it.',
 		],
 	],
@@ -428,8 +439,8 @@ const searches: Stage = {
 		'This is a **tour game**. A campaign already ran the whole year. This game exists to play the searches, companions and scars that campaign never reached, so finishing your list below matters more than winning. Keep the game going until every list is done.',
 		'Pick these characters in the lobby: seat 1 takes **Gale**, seat 2 takes **Moss**, seat 3 takes **Tarn**. Do not create or pick anyone else.',
 		'When the first action step starts, the lab rearranges the table once: it moves the pawns, deals each of you a chosen hand, and makes seat 1 the first to move. `wait` shows a chat line starting TABLE STAGED when that has happened. Run `status` and `options` again after it. Do not act before it.',
-		'A search does not use up the city card, so keep every card your list names. Some companions found by a search are not played: they stay in your hand and change a cost while you hold them. `report` it if a cost does not change the way your list says.',
-		'A companion found by a search can put you over the hand limit. Then discard a City card you have already searched with. Never discard a companion.',
+		'A search does not use up the city card, so keep every card your list names. A companion found by a search joins the City card you searched with. Some are not played: they change a cost while you hold that card. `report` it if a cost does not change the way your list says.',
+		'Never discard a City card that carries a companion unless your list says to play it.',
 	],
 	seats: [
 		[
@@ -437,7 +448,7 @@ const searches: Stage = {
 			'Turn 1: Search at Denver. The Lineman joins your hand. Drive to Los Angeles, then Mexico City. Search at Mexico City. The Builder joins your hand.',
 			'Turn 2: Make supplies once. Establish a supply line from Mexico City to Denver. With the Lineman it costs 1 cube, not 2. Drive to Los Angeles, then Farwater.',
 			'Turn 3: drive to Lima and Search there. The Tracker joins your hand: from now on your searches cost no action. You are now one card over the hand limit: discard the Denver card. Drive to Bogotá and Search there. It should cost no action. Then Build a supply center at Bogotá with 4 yellow cards (Mexico City, Lima, Santiago, Bogotá). With the Builder it takes 4 cards, not 5.',
-			'Whenever you are over the hand limit, discard what you drew. Never discard a companion or a yellow card.',
+			'Whenever you are over the hand limit, discard what you drew. Never discard a City card that carries a companion, or a yellow card.',
 		],
 		[
 			'You are Moss, at Dar es Salaam, which is infested. Moss is one exposure from a scar.',

@@ -351,9 +351,9 @@ export function heldUnplayable(state: PublicState, seat: SeatId): string[] {
 	const anywhere = [...grid(world.campaign)][0]!;
 	const lines = (game.players[seat]?.hand ?? []).flatMap(card => {
 		const held = world.campaign.playerCards[card];
-		if (!held || (held.kind !== 'event' && held.kind !== 'companion') || playable.has(card)) return [];
-		const spent = held.kind === 'companion' && pack.companions.find(entry => entry.id === held.companion)?.spent;
-		if (held.kind === 'companion' && !spent) return [];
+		const companion = held?.kind === 'city' ? held.companion : null;
+		if (!held || (held.kind !== 'event' && !companion) || playable.has(card)) return [];
+		if (companion && !pack.companions.find(entry => entry.id === companion)?.spent) return [];
 		// These take cubes from the reserve or the stockpile, or wait for their moment, which is the usual reason they cannot be played.
 		const samples: Partial<Record<string, Play>> = {
 			handout: { e: 'handout', cities: [anywhere] },
@@ -366,7 +366,7 @@ export function heldUnplayable(state: PublicState, seat: SeatId): string[] {
 		const name =
 			held.kind === 'event'
 				? pack.events.find(entry => entry.id === held.event)!.name
-				: pack.companions.find(entry => entry.id === held.companion)!.name;
+				: pack.companions.find(entry => entry.id === companion)!.name;
 		return [`${name}${reason ? ` (${reason})` : ''}`];
 	});
 	return lines.length ? [`In your hand but not playable right now: ${lines.join(', ')}.`] : [];

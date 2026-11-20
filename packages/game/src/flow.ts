@@ -201,7 +201,7 @@ export function setupPlayerDeck(world: World) {
 	const { campaign, game } = world as { campaign: World['campaign']; game: Game };
 	const cards = onGridCards(world);
 	const always = cards.playerCards.filter(
-		card => card.kind === 'produce' || card.kind === 'companion' || (card.kind === 'event' && card.mode !== 'rationed'),
+		card => card.kind === 'produce' || (card.kind === 'event' && card.mode !== 'rationed'),
 	);
 	const deck = shuffle(campaign.rng, [...cards.cityCards, ...always.map(card => card.id), ...game.pickedEvents]);
 	const deal = numbers.dealByPlayers[game.seats.length] ?? 2;
