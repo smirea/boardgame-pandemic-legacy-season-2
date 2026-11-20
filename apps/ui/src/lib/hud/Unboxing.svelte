@@ -42,8 +42,15 @@
 		stockpileBonus: ['map'],
 		actions: ['actions', 'box'],
 	};
+	// An event goes where its first copy lands now: a hand, the discard pile, or the pool of Rationed Events in the box.
 	const putAway = (unlock: BriefedUnlock) =>
-		unlock.t === 'event' && unlock.mode === 'rationed' ? ['box'] : PUT_AWAY[unlock.t];
+		unlock.t !== 'event'
+			? PUT_AWAY[unlock.t]
+			: unlock.now?.[0] === 'hand'
+				? ['hand', 'playerDeck', 'box']
+				: unlock.mode === 'rationed'
+					? ['box']
+					: PUT_AWAY.event;
 
 	const steps = $derived(openings(briefing));
 	const objectives = $derived(pack.objectives.filter(objective => campaign.objectives.includes(objective.id)));

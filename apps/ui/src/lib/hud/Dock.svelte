@@ -185,7 +185,7 @@
 		decides: decides.length,
 	}))}
 >
-	<footer class="dock">
+	<footer class="dock" data-dest="hand">
 		{#if snap.phase === 'setup.supply'}
 			<div class="setup">
 				<div
