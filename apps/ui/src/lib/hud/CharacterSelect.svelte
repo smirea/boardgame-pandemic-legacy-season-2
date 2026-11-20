@@ -494,10 +494,12 @@
 	.cards {
 		display: grid;
 		flex: 1 1 auto;
+		align-self: flex-start;
 		grid-template-columns: repeat(auto-fill, minmax(10.8rem, 1fr));
 		grid-auto-rows: 1fr;
 		align-content: start;
 		gap: 0.35rem 0.5rem;
+		max-height: 100%;
 		min-height: 0;
 		padding: 0.1rem 0.15rem 0.15rem 0.1rem;
 		overflow: hidden auto;
