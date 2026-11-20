@@ -1,0 +1,87 @@
+{
+	"id": "character-07",
+	"guid": "20e19b",
+	"cardCode": null,
+	"images": {
+		"blankFront": "../blank-front.jpg",
+		"back": "../back.jpg",
+		"states": [
+			{
+				"state": 2,
+				"image": "state-2.jpg"
+			},
+			{
+				"state": 3,
+				"image": "state-3.jpg"
+			},
+			{
+				"state": 4,
+				"image": "state-4.jpg"
+			},
+			{
+				"state": 5,
+				"image": "state-5.jpg"
+			},
+			{
+				"state": 6,
+				"image": "state-6.jpg",
+				"identicalToState": 5
+			},
+			{
+				"state": 7,
+				"image": "state-7.jpg",
+				"identicalToState": 5
+			},
+			{
+				"state": 8,
+				"image": "state-8.jpg",
+				"identicalToState": 5
+			}
+		]
+	},
+	"exposureTrack": [
+		{
+			"box": 1,
+			"result": "safe",
+			"revealedInState": 2,
+			"notes": "Scratched blank. The foil is gone and the cream card shows through, with no symbol."
+		},
+		{
+			"box": 2,
+			"result": "scar",
+			"revealedInState": 3,
+			"notes": "Red scratch mark, the scar symbol."
+		},
+		{
+			"box": 3,
+			"result": "safe",
+			"revealedInState": 4,
+			"notes": "Scratched blank. The foil is gone and the cream card shows through, with no symbol."
+		},
+		{
+			"box": 4,
+			"result": "skull",
+			"revealedInState": 5,
+			"notes": "Red skull. This exposure kills the character. state-5.jpg through state-8.jpg are the same image."
+		},
+		{
+			"box": 5,
+			"result": null,
+			"revealedInState": null,
+			"notes": "Gray scratch-off foil still intact. The box was never scratched; the character is already dead."
+		},
+		{
+			"box": 6,
+			"result": null,
+			"revealedInState": null,
+			"notes": "Gray scratch-off foil still intact. The box was never scratched; the character is already dead."
+		},
+		{
+			"box": 7,
+			"result": null,
+			"revealedInState": null,
+			"notes": "Gray scratch-off foil still intact. The box was never scratched; the character is already dead."
+		}
+	],
+	"summary": "7 boxes: safe, scar, safe, skull, unrevealed, unrevealed, unrevealed. The 4th exposure is a skull (1 scar before death)."
+}

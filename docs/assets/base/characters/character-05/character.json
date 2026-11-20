@@ -1,0 +1,84 @@
+{
+	"id": "character-05",
+	"guid": "afc463",
+	"cardCode": null,
+	"images": {
+		"blankFront": "../blank-front.jpg",
+		"back": "../back.jpg",
+		"states": [
+			{
+				"state": 2,
+				"image": "state-2.jpg"
+			},
+			{
+				"state": 3,
+				"image": "state-3.jpg"
+			},
+			{
+				"state": 4,
+				"image": "state-4.jpg"
+			},
+			{
+				"state": 5,
+				"image": "state-5.jpg"
+			},
+			{
+				"state": 6,
+				"image": "state-6.jpg"
+			},
+			{
+				"state": 7,
+				"image": "state-7.jpg"
+			},
+			{
+				"state": 8,
+				"image": "state-8.jpg"
+			}
+		]
+	},
+	"exposureTrack": [
+		{
+			"box": 1,
+			"result": "scar",
+			"revealedInState": 2,
+			"notes": "Red scratch mark, the scar symbol."
+		},
+		{
+			"box": 2,
+			"result": "safe",
+			"revealedInState": 3,
+			"notes": "Scratched blank. The foil is gone and the cream card shows through, with no symbol."
+		},
+		{
+			"box": 3,
+			"result": "scar",
+			"revealedInState": 4,
+			"notes": "Red scratch mark, the scar symbol."
+		},
+		{
+			"box": 4,
+			"result": "safe",
+			"revealedInState": 5,
+			"notes": "Scratched blank. The foil is gone and the cream card shows through, with no symbol."
+		},
+		{
+			"box": 5,
+			"result": "scar",
+			"revealedInState": 6,
+			"notes": "Red scratch mark, the scar symbol."
+		},
+		{
+			"box": 6,
+			"result": "safe",
+			"revealedInState": 7,
+			"notes": "Scratched blank. The foil is gone and the cream card shows through, with no symbol."
+		},
+		{
+			"box": 7,
+			"result": "skull",
+			"revealedInState": 8,
+			"notes": "Red skull. This exposure kills the character. It is the last box on the track."
+		}
+	],
+	"summary": "7 boxes: scar, safe, scar, safe, scar, safe, skull. The 7th exposure is a skull (3 scars before death)."
+}

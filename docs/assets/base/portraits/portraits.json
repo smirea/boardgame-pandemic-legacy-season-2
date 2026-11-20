@@ -1,0 +1,100 @@
+{
+	"portraits": [
+		{
+			"id": "portrait-01",
+			"decalName": "ZP1",
+			"filename": "portrait-01.jpg",
+			"description": "Hood up over a pale hood and yellow jacket. Round goggles and a light blue wrap covering the nose and mouth. Faces forward."
+		},
+		{
+			"id": "portrait-02",
+			"decalName": "ZP2",
+			"filename": "portrait-02.jpg",
+			"description": "Same hooded yellow jacket as ZP1, with an orange face wrap and larger dark-lensed goggles. A blue panel shows on the chest. Faces forward."
+		},
+		{
+			"id": "portrait-03",
+			"decalName": "ZP3",
+			"filename": "portrait-03.jpg",
+			"description": "Goggles pushed onto the forehead, long brown hair under a red wrap, and a yellow stitched mask marked with a red X. Pale blue beads hang beside the face. Turned three-quarters left."
+		},
+		{
+			"id": "portrait-04",
+			"decalName": "ZP4",
+			"filename": "portrait-04.jpg",
+			"description": "Large goggles over the eyes and a purple stitched veil with one eye showing. Yellow jacket edged with blue beads, dark hair tied back. Faces forward."
+		},
+		{
+			"id": "portrait-05",
+			"decalName": "ZP5",
+			"filename": "portrait-05.jpg",
+			"description": "Spiky dark hair, yellow-lensed goggles on the forehead, and a long pale stitched mask with one green eye showing. Yellow collar over a red vest with pouches. Faces forward."
+		},
+		{
+			"id": "portrait-06",
+			"decalName": "ZP6",
+			"filename": "portrait-06.jpg",
+			"description": "Profile facing left. Long dark curly hair strung with blue beads, white and yellow angular paint on the cheek, and a high tan collar."
+		},
+		{
+			"id": "portrait-07",
+			"decalName": "ZP7",
+			"filename": "portrait-07.jpg",
+			"description": "Short messy dark hair and a pale face with yellow cheek paint. Thick gray ribbed collar under a yellow jacket with epaulets. Turned three-quarters right."
+		},
+		{
+			"id": "portrait-08",
+			"decalName": "ZP8",
+			"filename": "portrait-08.jpg",
+			"description": "Blue-gray face with two vertical yellow stripes, a dark patterned cap, and braids wrapped in pale beads. Small chin tuft and a brown vest with a yellow geometric border. Faces forward."
+		},
+		{
+			"id": "portrait-09",
+			"decalName": "ZP9",
+			"filename": "portrait-09.jpg",
+			"description": "Red bandana tied at the side, dark wavy hair, and red paint around the eyes and on one cheek. Pale blue bead collar and a red mark on the upper arm. Turned three-quarters."
+		},
+		{
+			"id": "portrait-10",
+			"decalName": "ZP10",
+			"filename": "portrait-10.jpg",
+			"description": "Brown head wrap and scarf covering the lower face, small goggles resting on the forehead, and a red mark on the forehead. Black sleeveless top with a large round metal clasp and red circle marks on the upper arms. Faces forward."
+		},
+		{
+			"id": "portrait-11",
+			"decalName": "ZP11",
+			"filename": "portrait-11.jpg",
+			"description": "Camouflage cap, red and white paint across the eyes and mouth, and a short goatee. Tan vest over a light hood. Faces forward."
+		},
+		{
+			"id": "portrait-12",
+			"decalName": "ZP12",
+			"filename": "portrait-12.jpg",
+			"description": "Pale yellow scarf covering the lower face, small goggles on top of the wrap, and red dots on the forehead. Dark vest with red straps and red marks on both upper arms. Faces forward."
+		},
+		{
+			"id": "portrait-13",
+			"decalName": "ZP13",
+			"filename": "portrait-13.jpg",
+			"description": "Long dark hair under a blue headband, red paint under the eyes, and a goatee. Tan multi-pocket vest and a white armband with a red mark. Faces forward."
+		},
+		{
+			"id": "portrait-14",
+			"decalName": "ZP14",
+			"filename": "portrait-14.jpg",
+			"description": "Short dark hair swept up. One side of the face is painted solid red with two white dots. Large hoop earring plus several smaller rings, and a gray scarf. Turned three-quarters."
+		},
+		{
+			"id": "portrait-15",
+			"decalName": "ZP15",
+			"filename": "portrait-15.jpg",
+			"description": "Bald except for a small dark tuft, with a full dark beard. Orange paint covers the scalp and a red streak runs down one cheek. Thick yellow scarf and a light jacket. Head tilted up."
+		},
+		{
+			"id": "portrait-16",
+			"decalName": "ZP16",
+			"filename": "portrait-16.jpg",
+			"description": "Long pale hair under a red hood, yellow goggles on the forehead, and a yellow stitched mask with a red X. Bead strands frame the face and a red mark sits on the shoulder. Faces forward."
+		}
+	]
+}
