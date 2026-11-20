@@ -873,14 +873,28 @@
 		return { x: (left + right) / 2 / width, y: 0.45 };
 	}
 	// Worked out once per city: a new object restarts the camera's glide, and the panels move while the show plays.
-	const showFocus = $derived(show.focus ? { city: show.focus, ...untrack(openMiddle), glide: 600, zoom: 0.45 } : null);
+	const showFocus = $derived(show.focus ? { city: show.focus, ...untrack(openMiddle), glide: 900, zoom: 0.45 } : null);
 	// Before anything draws the new state, so the board and the incident track never show what the show holds back.
 	$effect.pre(() => {
 		const next = world;
 		const lived = !spectator || announce;
-		untrack(() => show.observe(next, lived));
+		const phase = snap.phase;
+		untrack(() => show.observe(next, lived, phase, !spectator));
 	});
 	$effect(() => () => show.stop());
+
+	const drawPlayerAction = $derived(
+		!spectator && canAct && snap.phase === 'playing.draw' && game && game.drawsLeft > 0 && game.pending.length === 0
+			? { left: game.drawsLeft, onclick: () => send({ type: 'DRAW' }) }
+			: null,
+	);
+	const drawInfectionAction = $derived.by(() => {
+		if (spectator || !game) return null;
+		if (show.queued > 0) return { left: show.queued, busy: show.playing, onclick: () => show.next() };
+		if (canAct && snap.phase === 'playing.infect' && game.infectionsLeft > 0 && game.pending.length === 0)
+			return { left: game.infectionsLeft, busy: show.playing, onclick: () => send({ type: 'INFECT' }) };
+		return null;
+	});
 
 	$effect(() => {
 		const notice = session.notice;
@@ -901,7 +915,8 @@
 	});
 
 	const boardView = $derived.by((): BoardView => {
-		const targets = new Set(hoveredCards.length ? hoveredTargets.cities : (targeting?.cities.keys() ?? []));
+		// A target being aimed at wins over a card the pointer happens to rest on.
+		const targets = new Set(targeting ? targeting.cities.keys() : hoveredCards.length ? hoveredTargets.cities : []);
 		const showOdds = playing && info !== null;
 		const cities = Object.fromEntries(
 			pack.cities.map((city): [CityId, CityView] => {
@@ -1004,11 +1019,17 @@
 		const key = event.key.toLowerCase();
 		if (key === 'f') resetView++;
 		if (key === 'z' && snap.canUndo && canAct) send({ type: 'UNDO' });
-		if (key !== ' ' || !canAct) return;
+		if (key !== ' ') return;
+		if (show.queued > 0 && !show.playing && !spectator) {
+			event.preventDefault();
+			show.next();
+			return;
+		}
+		if (!canAct) return;
 		event.preventDefault();
 		if (snap.phase === 'playing.actions') send({ type: 'END_ACTIONS', seat: game.active });
 		else if (snap.phase === 'playing.draw') send({ type: 'DRAW' });
-		else if (snap.phase === 'playing.infect') send({ type: 'INFECT' });
+		else if (snap.phase === 'playing.infect' && !show.playing) send({ type: 'INFECT' });
 	}
 
 	function downloadRecord() {
@@ -1123,6 +1144,8 @@
 		players={session.peers.filter(peer => peer.connected).length}
 		solo={session.mode === 'solo' || spectator}
 		legacyOut={legacyDeckOut}
+		drawPlayer={drawPlayerAction}
+		drawInfection={drawInfectionAction}
 		onreset={() => resetView++}
 		onmenu={() => (menu = !menu)}
 		onbox={() => (boxOpen = !boxOpen)}
@@ -1464,7 +1487,7 @@
 			/>
 		</div>
 	{/if}
-	<InfectionDraw drawn={show.card} />
+	<InfectionDraw cards={show.stack} draw={drawInfectionAction} />
 </div>
 
 <style>

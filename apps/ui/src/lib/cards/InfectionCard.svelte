@@ -1,9 +1,12 @@
 <script lang="ts">
+	import { getContext } from 'svelte';
 	import { cityDef, pack } from '@repo/game';
-	import type { InfectionCard } from '@repo/game';
+	import type { CardId, InfectionCard } from '@repo/game';
 	import { CITY_COLOR } from '#lib/board/CityMarker.svelte';
 	import MapArt from './MapArt.svelte';
 	import { mapArt } from './mapArt.ts';
+
+	const hoverCard = getContext<((card: CardId | null) => void) | undefined>('card-hover');
 
 	type Props = { card: InfectionCard; onclick?: () => void; note?: string };
 
@@ -14,26 +17,42 @@
 	const improvement = $derived(
 		card.kind === 'city' ? pack.infectionImprovements.find(item => item.id === card.improvement) : undefined,
 	);
+	$effect(() => () => hoverCard?.(null));
 </script>
 
-<button class="card" style:--accent={accent} disabled={!onclick} {onclick} title={improvement?.text}>
-	{#if card.kind === 'city' && city}
-		<span class="art"><MapArt city={card.city} {accent} tone="night" /></span>
-		<span class="plate">
-			<span class="kicker">Infection</span>
-			<span class="title">{city.name}</span>
-			<span class="meta">{mapArt(card.city).coordinates}</span>
-		</span>
-		{#if improvement}<span class="badge">{improvement.name}</span>{/if}
-	{:else}
-		<span class="hollow">
-			<span class="kicker">Infection</span>
-			<span class="title">{card.kind === 'gather' ? 'Hollow Men gather' : 'Hollow Men assemble'}</span>
-			<span class="meta">The next city flipped gets a figure instead of an infection.</span>
-		</span>
-	{/if}
-	{#if note}<span class="note">{note}</span>{/if}
-</button>
+<div
+	class="wrap"
+	role="presentation"
+	onpointerenter={() => hoverCard?.(card.id)}
+	onpointerleave={() => hoverCard?.(null)}
+>
+	<button
+		class="card"
+		style:--accent={accent}
+		disabled={!onclick}
+		{onclick}
+		title={improvement?.text}
+		onfocus={() => hoverCard?.(card.id)}
+		onblur={() => hoverCard?.(null)}
+	>
+		{#if card.kind === 'city' && city}
+			<span class="art"><MapArt city={card.city} {accent} tone="night" /></span>
+			<span class="plate">
+				<span class="kicker">Infection</span>
+				<span class="title">{city.name}</span>
+				<span class="meta">{mapArt(card.city).coordinates}</span>
+			</span>
+			{#if improvement}<span class="badge">{improvement.name}</span>{/if}
+		{:else}
+			<span class="hollow">
+				<span class="kicker">Infection</span>
+				<span class="title">{card.kind === 'gather' ? 'Hollow Men gather' : 'Hollow Men assemble'}</span>
+				<span class="meta">The next city flipped gets a figure instead of an infection.</span>
+			</span>
+		{/if}
+		{#if note}<span class="note">{note}</span>{/if}
+	</button>
+</div>
 
 <style>
 	/* Infection cards are the dark half of the table: a night chart with the city's region colour as its pin. */

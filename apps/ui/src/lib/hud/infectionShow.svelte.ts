@@ -1,4 +1,4 @@
-import type { CityId, InfectionCard, LogEntry, World } from '@repo/game';
+import type { CityId, InfectionCard, LogEntry, Phase, World } from '@repo/game';
 import type { FxKind } from '#lib/board/types.ts';
 
 type Piece = 'supplies' | 'plague' | 'hollow';
@@ -18,6 +18,7 @@ type Beat = {
 	incidents: { city: CityId; hidden: Hidden[] }[];
 };
 
+export type DrawnInfection = { key: number; card: InfectionCard; note: string; city: CityId };
 export type Lag = { cities: Partial<Record<CityId, Pieces>>; stockpile: number };
 
 const NOTE = {
@@ -41,25 +42,31 @@ function boardOf(world: World): Board | null {
 }
 
 /**
- * Plays each Infection card the game flips as a short scene: the card leaves the deck, the camera finds the city,
- * and the cube comes off. An incident plays slower: a skull rises over the empty city and becomes the plague cube,
- * then the incident track grows and takes its marker. The state is never held back. The board shows it late
- * instead, through `lag`, so players can act while it plays and the scene keeps to what really happened.
+ * Plays each Infection card one at a time, 50% slower, lingering on each drawn city and stacking drawn cards
+ * so every city name remains visible until the phase ends (when the camera zooms back out to fit).
  */
 export class InfectionShow {
-	card = $state.raw<{ key: number; card: InfectionCard; note: string } | null>(null);
+	/** All Infection cards drawn in the current phase, newest first. */
+	stack = $state.raw<DrawnInfection[]>([]);
 	focus = $state.raw<CityId | null>(null);
 	skull = $state.raw<{ key: number; city: CityId; at: number } | null>(null);
 	/** The incident track is drawn large while a marker goes into it. */
 	surge = $state(false);
 	/** Incidents the state holds whose marker has not gone onto the track yet. */
 	heldIncidents = $state(0);
+	/** True while a drawn card's animation is in flight. */
+	playing = $state(false);
+	/** Queued beats waiting for the player to click to flip one at a time (e.g. setup's 9 opening infections). */
+	queued = $state(0);
+
 	private hidden = $state.raw<Hidden[]>([]);
 	private queue: Beat[] = [];
 	private seen = -1;
 	private board: Board | null = null;
 	private run = 0;
-	private playing = false;
+	private phase: Phase | null = null;
+	private manual = true;
+	private clearTimer: ReturnType<typeof setTimeout> | null = null;
 
 	constructor(private pulse: (city: CityId, kind: FxKind) => void) {}
 
@@ -76,7 +83,10 @@ export class InfectionShow {
 	});
 
 	/** Takes in the newest state. `live` is false for a jump that nobody lived through, which only catches up. */
-	observe(world: World, live: boolean) {
+	observe(world: World, live: boolean, phase: Phase, manual = true) {
+		const prevPhase = this.phase;
+		this.phase = phase;
+		this.manual = manual;
 		const log = world.game?.log ?? [];
 		const newest = log.at(-1)?.seq ?? -1;
 		const before = this.board;
@@ -87,27 +97,76 @@ export class InfectionShow {
 		if (undone || !live || !before || !this.board) return this.stop();
 		this.reconcile(this.board);
 		const beats = this.beats(world, fresh, before, this.board);
-		if (beats.length === 0) return;
 		if (beats.length > MOST_BEATS) return this.stop();
-		this.queue.push(...beats);
-		this.hidden = [
-			...this.hidden,
-			...beats.flatMap(beat => [...beat.strike, ...beat.incidents.flatMap(i => i.hidden)]),
-		];
-		this.heldIncidents += beats.reduce((sum, beat) => sum + beat.incidents.length, 0);
-		if (!this.playing) void this.play(this.run);
+		if (beats.length > 0) {
+			this.cancelClear();
+			// A new infect phase starts a fresh stack.
+			if (prevPhase !== 'playing.infect' && phase === 'playing.infect' && this.queue.length === 0) {
+				this.stack = [];
+			}
+			this.queue.push(...beats);
+			this.queued = this.queue.length;
+			this.hidden = [
+				...this.hidden,
+				...beats.flatMap(beat => [...beat.strike, ...beat.incidents.flatMap(i => i.hidden)]),
+			];
+			this.heldIncidents += beats.reduce((sum, beat) => sum + beat.incidents.length, 0);
+			// Single-card draws (e.g. clicking INFECT or an Epidemic) play immediately; multi-card batches (setup's 9)
+			// wait for the player to click one card at a time unless this is a passive replay/spectator.
+			if (!this.playing && (!manual || beats.length === 1)) void this.playStep(this.run, !manual);
+			return;
+		}
+		// Leaving the infect phase with nothing left queued or animating zooms back out to fit.
+		if (prevPhase === 'playing.infect' && phase !== 'playing.infect' && !this.playing && this.queue.length === 0) {
+			this.scheduleClear();
+		}
+		// Moving into play from setup catches up any unflipped setup cards cleanly.
+		if (
+			prevPhase === 'setup.events' &&
+			phase.startsWith('playing') &&
+			(this.queue.length > 0 || this.stack.length > 0)
+		) {
+			this.stop();
+		}
+	}
+
+	/** Draws and animates the next queued Infection card (used for click-to-draw setup infections). */
+	next() {
+		if (this.playing || this.queue.length === 0) return;
+		this.cancelClear();
+		void this.playStep(this.run, false);
 	}
 
 	stop() {
+		this.cancelClear();
 		this.run++;
 		this.queue = [];
+		this.queued = 0;
 		this.playing = false;
 		this.hidden = [];
 		this.heldIncidents = 0;
-		this.card = null;
+		this.stack = [];
 		this.focus = null;
 		this.skull = null;
 		this.surge = false;
+	}
+
+	private cancelClear() {
+		if (this.clearTimer) {
+			clearTimeout(this.clearTimer);
+			this.clearTimer = null;
+		}
+	}
+
+	private scheduleClear(delay = 900) {
+		this.cancelClear();
+		const token = this.run;
+		this.clearTimer = setTimeout(() => {
+			this.clearTimer = null;
+			if (this.run !== token || this.playing || this.queue.length > 0 || this.phase === 'playing.infect') return;
+			this.focus = null;
+			this.stack = [];
+		}, delay);
 	}
 
 	/** Splits fresh log entries into beats, each holding back the part of the change it shows. */
@@ -180,10 +239,6 @@ export class InfectionShow {
 		return beats;
 	}
 
-	/**
-	 * A player can take away what a scene still holds back, such as a Purge on a city whose plague cube has not landed
-	 * yet. The scene then shows less, so the board never counts below nothing.
-	 */
 	private reconcile(board: Board) {
 		let changed = false;
 		const shown = (entry: Hidden) =>
@@ -205,46 +260,48 @@ export class InfectionShow {
 		this.hidden = this.hidden.filter(entry => !gone.has(entry));
 	}
 
-	private async play(run: number) {
+	/** Plays one beat (or all queued beats when `drain` is true for spectators), 50% slower, lingering on the city. */
+	private async playStep(run: number, drain: boolean) {
 		this.playing = true;
 		const wait = (ms: number) => new Promise<boolean>(done => setTimeout(() => done(this.run === run), ms));
-		while (this.queue.length) {
-			const beat = this.queue[0]!;
+		do {
+			const beat = this.queue.shift();
+			if (!beat) break;
+			this.queued = this.queue.length;
 			const slow = beat.incidents.length > 0;
-			this.card = { key: beat.seq, card: beat.card, note: beat.note };
+			this.stack = [{ key: beat.seq, card: beat.card, note: beat.note, city: beat.city }, ...this.stack];
 			this.focus = beat.city;
-			if (!(await wait(slow ? 700 : 420))) return;
+			if (!(await wait(slow ? 1050 : 630))) return;
 			this.reveal(beat.strike);
 			if (beat.pulse) this.pulse(beat.city, beat.pulse);
 			for (const incident of beat.incidents) {
 				if (incident.city !== this.focus) {
 					this.focus = incident.city;
-					if (!(await wait(600))) return;
+					if (!(await wait(900))) return;
 				}
-				// The city is seen empty, then a skull rises over it and sinks into the plague cube it becomes.
-				if (!(await wait(300))) return;
+				if (!(await wait(450))) return;
 				this.skull = { key: beat.seq, city: incident.city, at: this.lagged(incident.city, 'plague') };
-				if (!(await wait(1050))) return;
+				if (!(await wait(1575))) return;
 				this.skull = null;
 				this.reveal(incident.hidden);
 				this.pulse(incident.city, 'plague');
-				if (!(await wait(300))) return;
-				this.surge = true;
 				if (!(await wait(450))) return;
+				this.surge = true;
+				if (!(await wait(675))) return;
 				this.heldIncidents -= 1;
-				if (!(await wait(1500))) return;
+				if (!(await wait(2250))) return;
 				this.surge = false;
-				if (!(await wait(350))) return;
+				if (!(await wait(525))) return;
 			}
-			if (!(await wait(slow ? 300 : 260))) return;
-			this.queue.shift();
-		}
+			if (!(await wait(slow ? 750 : 650))) return;
+		} while (drain && this.queue.length > 0);
 		this.playing = false;
-		this.card = null;
-		this.focus = null;
+		// Linger on the drawn city while more cards remain in this phase; zoom back out only once the phase finishes.
+		if (this.queue.length === 0 && this.phase !== 'playing.infect') {
+			this.scheduleClear(950);
+		}
 	}
 
-	/** How many of a city's pieces the board shows right now. */
 	private lagged(city: CityId, piece: Piece) {
 		return (this.board?.cities[city]?.[piece] ?? 0) - (this.lag.cities[city]?.[piece] ?? 0);
 	}

@@ -8,6 +8,7 @@
 	import Decks from './Decks.svelte';
 	import { MONTHS } from './labels.svelte.ts';
 
+	type DeckAction = { left: number; busy?: boolean; onclick: () => void } | null;
 	type Props = {
 		snap: PublicState;
 		info: Insights | null;
@@ -16,13 +17,28 @@
 		solo: boolean;
 		/** True while the Legacy deck is lifted out onto the table during an interactive briefing. */
 		legacyOut?: boolean;
+		drawPlayer?: DeckAction;
+		drawInfection?: DeckAction;
 		onreset: () => void;
 		onmenu: () => void;
 		onbox: () => void;
 		ondeck: () => void;
 	};
 
-	let { snap, info, status, players, solo, legacyOut = false, onreset, onmenu, onbox, ondeck }: Props = $props();
+	let {
+		snap,
+		info,
+		status,
+		players,
+		solo,
+		legacyOut = false,
+		drawPlayer = null,
+		drawInfection = null,
+		onreset,
+		onmenu,
+		onbox,
+		ondeck,
+	}: Props = $props();
 
 	const campaign = $derived(snap.world.campaign);
 	const game = $derived(snap.world.game);
@@ -52,7 +68,7 @@
 					{/each}
 				</div>
 
-				<Decks {info} {dealt} />
+				<Decks {info} {dealt} {drawPlayer} {drawInfection} />
 			{/if}
 		</div>
 		<div class="right">

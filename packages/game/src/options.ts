@@ -511,9 +511,11 @@ export function legalPurchases(world: World): Purchase[] {
 
 export function cardTargets(world: World, phase: Phase, card: CardId): { cities: CityId[]; seats: SeatId[] } {
 	const held = world.campaign.playerCards[card];
+	const infection = world.campaign.infectionCards[card];
 	const cities = new Set<CityId>();
 	const seats = new Set<SeatId>();
 	if (held?.kind === 'city') cities.add(held.city);
+	if (infection?.kind === 'city') cities.add(infection.city);
 	if (held?.kind === 'produce' && world.game) {
 		for (const city of pack.cities)
 			if (grid(world.campaign).has(city.id) && (city.kind === 'haven' || world.game.locations[city.id]?.center))

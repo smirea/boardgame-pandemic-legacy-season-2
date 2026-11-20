@@ -11,9 +11,10 @@
 	import type { Rich } from './rich.ts';
 	import RichText from './RichText.svelte';
 
-	type Props = { info: Insights; dealt: boolean };
+	type DeckAction = { left: number; busy?: boolean; onclick: () => void } | null;
+	type Props = { info: Insights; dealt: boolean; drawPlayer?: DeckAction; drawInfection?: DeckAction };
 
-	let { info, dealt }: Props = $props();
+	let { info, dealt, drawPlayer = null, drawInfection = null }: Props = $props();
 
 	const percent = (value: number) => `${Math.round(value * 100)}%`;
 	const INFECTION = '#2c2733';
@@ -58,15 +59,23 @@
 	<span class="card-icon" style:--band={color} style:--on={inkOn(color)} aria-hidden="true">{glyph ?? ''}</span>
 {/snippet}
 
-{#snippet deck(which: 'player' | 'infection', label: string, color: string, count: string)}
+{#snippet deck(which: 'player' | 'infection', label: string, color: string, count: string, action: DeckAction)}
 	<div
 		class="deck"
+		class:actionable={Boolean(action && !action.busy)}
 		data-deck={which}
 		data-dest={which === 'player' ? 'playerDeck' : 'infectionDeck'}
 		role="button"
 		tabindex="0"
-		aria-label={label}
+		aria-label={action ? `${label} — click to draw (${action.left} left)` : label}
 		aria-expanded={open === which}
+		onclick={() => action && !action.busy && action.onclick()}
+		onkeydown={event => {
+			if ((event.key === 'Enter' || event.key === ' ') && action && !action.busy) {
+				event.preventDefault();
+				action.onclick();
+			}
+		}}
 		onpointerenter={() => (open = which)}
 		onpointerleave={() => (open = null)}
 		onfocus={() => (open = which)}
@@ -91,8 +100,15 @@
 		dealt ? `Player deck: ${player.cards} cards` : 'Player deck: dealt when the game begins',
 		'#5d5446',
 		dealt ? String(player.cards) : '–',
+		drawPlayer,
 	)}
-	{@render deck('infection', `Infection deck: ${infectionCards} cards`, INFECTION, String(infectionCards))}
+	{@render deck(
+		'infection',
+		`Infection deck: ${infectionCards} cards`,
+		INFECTION,
+		String(infectionCards),
+		drawInfection,
+	)}
 
 	{#if open === 'player'}
 		<div class="tip" role="tooltip" data-testid="player-deck-tip" transition:fade={{ duration: 140 }}>
@@ -201,9 +217,40 @@
 		display: flex;
 		align-items: center;
 		gap: 0.45rem;
-		padding: 0.2rem 0.1rem;
+		padding: 0.2rem 0.35rem;
+		border: 1px solid transparent;
+		border-radius: 4px;
 		cursor: default;
 		outline: none;
+		transition:
+			transform 180ms ease,
+			border-color 180ms ease;
+	}
+
+	.deck.actionable {
+		border-color: rgb(227 178 60 / 0.7);
+		background: rgb(227 178 60 / 0.12);
+		cursor: pointer;
+		animation: deckDrawPulse 1.6s ease-in-out infinite;
+	}
+
+	.deck.actionable[data-deck='infection'] {
+		border-color: rgb(147 178 54 / 0.8);
+		background: rgb(147 178 54 / 0.14);
+	}
+
+	.deck.actionable:hover {
+		transform: scale(1.06);
+	}
+
+	@keyframes deckDrawPulse {
+		0%,
+		100% {
+			box-shadow: 0 0 0 rgb(227 178 60 / 0);
+		}
+		50% {
+			box-shadow: 0 0 0.8rem rgb(227 178 60 / 0.65);
+		}
 	}
 
 	.deck:focus-visible {
