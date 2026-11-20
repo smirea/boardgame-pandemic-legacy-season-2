@@ -354,13 +354,14 @@ export function heldUnplayable(state: PublicState, seat: SeatId): string[] {
 		if (!held || (held.kind !== 'event' && held.kind !== 'companion') || playable.has(card)) return [];
 		const spent = held.kind === 'companion' && pack.companions.find(entry => entry.id === held.companion)?.spent;
 		if (held.kind === 'companion' && !spent) return [];
-		// These two take cubes from the reserve, which is the usual reason neither can be played.
-		const sample: Play | null =
-			held.kind === 'event' && held.event === 'supplyDrop'
-				? { e: 'supplyDrop', city: anywhere }
-				: held.kind === 'event' && held.event === 'stockUp'
-					? { e: 'stockUp' }
-					: null;
+		// These take cubes from the reserve or the stockpile, or wait for their moment, which is the usual reason they cannot be played.
+		const samples: Partial<Record<string, Play>> = {
+			handout: { e: 'handout', cities: [anywhere] },
+			stockUp: { e: 'stockUp' },
+			antidote: { e: 'antidote' },
+			surplus: { e: 'surplus' },
+		};
+		const sample = held.kind === 'event' ? (samples[held.event] ?? null) : null;
 		const reason = sample ? reject(world, phase, { type: 'PLAY', seat, card, play: sample }) : null;
 		const name =
 			held.kind === 'event'

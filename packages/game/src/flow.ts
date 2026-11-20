@@ -1,6 +1,6 @@
 import { current, isDraft } from 'immer';
 import { pack } from './content/pack';
-import type { ObjectiveId, ScarId } from './content/types';
+import type { EventId, ObjectiveId, ScarId } from './content/types';
 import { drawBottom, drawPiled, drawTop, newDeck, newPiledDeck, stackOnTop } from './decks';
 import { characterOf, cityDef, grid, has, hasRule, isForsaken, isHaven, log, neighbours, player } from './helpers';
 import type { BundleId, CardId, CharacterId, CityId, RegionId, SeatId } from './ids';
@@ -536,19 +536,24 @@ export function epidemic(world: World) {
 		rate: numbers.infectionRates[game.rateIndex]!,
 		removed,
 	});
-	const resilient = game.seats.some(seat =>
-		player(game, seat).hand.some(id => {
-			const card = campaign.playerCards[id];
-			return card?.kind === 'event' && card.event === 'resilience';
-		}),
-	);
+	const resilient = holdsEvent(world, ['resilience', 'massInoculation']);
 	const lockable = game.infectionDiscard.some(id => {
 		const card = campaign.infectionCards[id];
 		return card?.kind === 'city' && card.improvement === 'lockdown';
 	});
-	// Resilience and Lockdown both act on the discard pile, which is about to be reshuffled away, so the game waits for them.
+	// These events and Lockdown act on the discard pile, which is about to be reshuffled away, so the game waits for them.
 	if ((resilient || lockable) && game.infectionDiscard.length > 0) game.pending.push({ t: 'intensify' });
 	else intensify(world);
+}
+
+function holdsEvent(world: World, events: readonly EventId[]): boolean {
+	const { campaign, game } = world as { campaign: World['campaign']; game: Game };
+	return game.seats.some(seat =>
+		player(game, seat).hand.some(id => {
+			const card = campaign.playerCards[id];
+			return card?.kind === 'event' && events.includes(card.event);
+		}),
+	);
 }
 
 /** The last step of an Epidemic: the Infection discard pile goes back on top of the deck, shuffled. */
@@ -572,7 +577,8 @@ export function drawPlayerCard(world: World) {
 	log(game, { t: 'draw', seat: game.active, card: id });
 	if (campaign.playerCards[id]!.kind === 'epidemic') {
 		game.playerDiscard.push(id);
-		epidemic(world);
+		if (holdsEvent(world, ['antidote'])) game.pending.push({ t: 'epidemicDrawn' });
+		else epidemic(world);
 	} else {
 		player(game, game.active).hand.push(id);
 	}

@@ -95,3 +95,10 @@ export function drawPiled(deck: PiledDeck, isEpidemic: (card: CardId) => boolean
 	if (pile.size === 0) deck.piles.shift();
 	return card;
 }
+
+/** Puts the top cards back in a chosen order, which the table then knows card by card. */
+export function restackTop(deck: StratifiedDeck, order: readonly CardId[]) {
+	for (const card of order) removeCard(deck, card);
+	deck.order.unshift(...order);
+	deck.strata.unshift(...order.map(card => [card]));
+}

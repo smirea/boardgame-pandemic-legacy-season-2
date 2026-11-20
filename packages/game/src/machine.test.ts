@@ -6,7 +6,17 @@ import { pack } from './content/pack';
 import type { EdgeDef, EventId, ScarId, SearchResult } from './content/types';
 import { edge } from './content/world';
 import { bump, epidemicCount, placeHollow, setupInfection } from './flow';
-import { grid, handLimit, hasEdge, isCandidate, neighbours, passage, segmentsCross, tableSeating } from './helpers';
+import {
+	grid,
+	handLimit,
+	hasEdge,
+	isCandidate,
+	neighbours,
+	passage,
+	removeFromHand,
+	segmentsCross,
+	tableSeating,
+} from './helpers';
 import { edgeKey } from './ids';
 import type { BundleId, CardId, CityId, PlayerId } from './ids';
 import { createGameActor, parseSave, phaseOf, reject } from './machine';
@@ -711,14 +721,31 @@ describe('events and companions', () => {
 			),
 		quietNight: (_, after) => expect(after.game!.skipInfection).toBe(true),
 		resilience: (_, after) => expect(after.game!.gameEndArea).toHaveLength(1),
-		supplyDrop: (before, after) => expect(after.game!.reserve).toBe(before.game!.reserve - 4),
-		secondWind: (_, after) => expect(after.game!.actionsLeft).toBe(6),
+		handout: (before, after) => expect(after.game!.stockpile).toBe(before.game!.stockpile - 1),
+		spreadOut: (before, after) =>
+			expect(after.game!.locations[city('haven-north-atlantic')]!.supplies).toBe(
+				before.game!.locations[city('haven-north-atlantic')]!.supplies - 1,
+			),
+		cleanse: (_, after) => expect(after.game!.locations[city('cairo')]!.plague).toBe(1),
+		forecast: (_, after) =>
+			expect(after.game!.infectionDeck.strata.slice(0, 8).every(layer => layer.length === 1)).toBe(true),
+		cache: (before, after) => expect(after.game!.reserve).toBe(before.game!.reserve - 6),
+		encore: (before, after) => expect(after.game!.playerDiscard.length).toBe(before.game!.playerDiscard.length),
+		secondWind: (_, after) => expect(after.game!.actionsLeft).toBe(7),
+		massInoculation: (before, after) =>
+			expect(after.campaign.stored.infection).toHaveLength(before.campaign.stored.infection.length + 1),
+		exile: (before, after) =>
+			expect(Object.keys(after.campaign.infectionCards)).toHaveLength(
+				Object.keys(before.campaign.infectionCards).length - 1,
+			),
+		antidote: (_, after) => expect(after.game!.pending).toEqual([]),
+		mentor: (_, after) => expect(after.campaign.abilitiesForSale).not.toContain('architect'),
 		scavenge: (before, after) =>
 			expect(after.game!.playerDeck.order.length).toBe(before.game!.playerDeck.order.length - 4),
 		openWaters: (before, after) => expect(after.campaign.edges.length).toBe(before.campaign.edges.length + 1),
 		safeHouses: (before, after) => expect(after.game!.pieces.shelter).toBe(before.game!.pieces.shelter - 1),
 		purge: (_, after) => expect(after.game!.locations[city('cairo')]!.plague).toBe(0),
-		stockUp: (before, after) => expect(after.game!.stockpile).toBe(before.game!.stockpile + 6),
+		stockUp: (before, after) => expect(after.game!.stockpile).toBe(before.game!.stockpile + 8),
 		cardSwap: (before, after) => expect(after.game!.players[B]!.hand).not.toEqual(before.game!.players[B]!.hand),
 		surplus: (_, after) => expect(after.game!.players[A]!.supplies).toBe(3),
 		medic: (_, after) => expect(after.game!.locations[city('cairo')]!.plague).toBe(1),
@@ -727,10 +754,63 @@ describe('events and companions', () => {
 		marksman: (_, after) => expect(after.game!.locations[city('lagos')]!.hollow).toBe(0),
 	};
 
+	const setup: Partial<Record<EventId, (world: World) => void>> = {
+		spreadOut: world => void (world.game!.locations[city('haven-north-atlantic')]!.supplies = 3),
+		encore: world => {
+			const spent = conjure(world, B, { kind: 'event', event: 'airlift' });
+			removeFromHand(world.game!, B, spent);
+			world.game!.playerDiscard.push(spent);
+		},
+		openWaters: world => {
+			const port = pack.candidateEdges.find(
+				edge => edge.kind === 'sea' && checkEdge(world.campaign, edge.a, edge.b, 'sea', true) === null,
+			)!;
+			world.game!.players[A]!.location = port.a;
+		},
+		antidote: world => void world.game!.pending.push({ t: 'epidemicDrawn' }),
+		mentor: world => {
+			world.campaign.abilitiesForSale = ['architect'];
+			character(world, A).slots[3] = null;
+		},
+		surplus: world => void world.game!.players[A]!.used.push('madeSupplies'),
+	};
+
+	test('a drawn Epidemic waits while someone holds Antidote, and strikes when the table passes', () => {
+		const drawing = (antidote: boolean) =>
+			late((world, game) => {
+				if (antidote) conjure(world, B, { kind: 'event', event: 'antidote' });
+				const epidemic = Object.values(world.campaign.playerCards).find(card => card.kind === 'epidemic')!.id;
+				game.playerDeck.order = [epidemic, ...game.playerDeck.order.filter(card => card !== epidemic)];
+				game.playerDeck.piles = [{ size: game.playerDeck.order.length, epidemics: 10 }];
+				game.drawsLeft = 2;
+			}, 'playing.draw');
+		const plain = drawing(false);
+		send(plain, { type: 'DRAW' });
+		expect(gameOf(plain).epidemics).toBe(1);
+
+		const held = drawing(true);
+		send(held, { type: 'DRAW' });
+		expect(gameOf(held).pending).toEqual([{ t: 'epidemicDrawn' }]);
+		expect(gameOf(held).epidemics).toBe(0);
+		send(held, { type: 'DECIDE', decide: { d: 'skip' } });
+		expect(gameOf(held).epidemics).toBe(1);
+	});
+
+	test('Surplus is played by the active player after they Make Supplies that turn', () => {
+		let card = '' as CardId;
+		const actor = late(world => void (card = conjure(world, A, { kind: 'event', event: 'surplus' })));
+		const play = { type: 'PLAY', seat: A, card, play: { e: 'surplus' } } as const;
+		expect(reject(worldOf(actor), phase(actor), play)).toBe('Play it after you Make Supplies this turn');
+		act(actor, { a: 'makeSupplies' });
+		send(actor, play);
+		expect(gameOf(actor).players[A]!.supplies).toBe(4);
+	});
+
 	for (const event of pack.events) {
 		test(`the ${event.name} event takes effect and goes to the discard pile`, () => {
 			const actor = late(world => {
 				scene(world);
+				setup[event.id]?.(world);
 				conjure(world, A, { kind: 'event', event: event.id });
 			});
 			const before = worldOf(actor);
@@ -1271,12 +1351,13 @@ test('Lake Baikal can only be joined to the grid from Utopia', () => {
 	expect(partners as string[]).toEqual(['utopia']);
 });
 
-test('South America arrives with the sea route from Lima to the eastern Pacific haven', () => {
+test('South America leaves the eastern Pacific haven hidden, and sighting the haven draws its sea route from Lima', () => {
 	const world: World = { campaign: newCampaign(4), game: null, table: newTable() };
 	openBundle(world, 'south-america' as BundleId, false);
 	const { campaign } = world;
+	expect(campaign.locations[city('haven-eastern-pacific')]!.revealed).toBe(false);
+	openBundle(world, 'find-eastern-pacific' as BundleId, false);
 	expect(campaign.locations[city('haven-eastern-pacific')]!.revealed).toBe(true);
-	expect(campaign.opened).toContain('find-eastern-pacific' as BundleId);
 	expect(
 		campaign.edges.some(
 			edge => edge.kind === 'sea' && [edge.a, edge.b].toSorted().join() === 'haven-eastern-pacific,lima',
@@ -1569,13 +1650,23 @@ test('a Courier may deliver any number of cubes to a neighbouring city', () => {
 	).toEqual([1, 2, 3]);
 });
 
-test('Open Waters offers each sea lane once, not once from each end', () => {
-	const actor = late(world => void conjure(world, A, { kind: 'event', event: 'openWaters' }));
-	const lanes = legalPlays(worldOf(actor), 'playing.actions').flatMap(option =>
-		option.play.e === 'openWaters' ? [[option.play.a, option.play.b].toSorted().join('~')] : [],
+test("Open Waters charts a free lane from the active player's port, each port offered once", () => {
+	let card = '' as CardId;
+	const actor = late(world => {
+		card = conjure(world, B, { kind: 'event', event: 'openWaters' });
+		const port = pack.candidateEdges.find(
+			edge => edge.kind === 'sea' && checkEdge(world.campaign, edge.a, edge.b, 'sea', true) === null,
+		)!;
+		world.game!.players[A]!.location = port.a;
+	});
+	const here = gameOf(actor).players[A]!.location;
+	const targets = legalPlays(worldOf(actor), 'playing.actions').flatMap(option =>
+		option.play.e === 'openWaters' ? [option.play.to] : [],
 	);
-	expect(lanes.length).toBeGreaterThan(0);
-	expect(new Set(lanes).size).toBe(lanes.length);
+	expect(targets.length).toBeGreaterThan(0);
+	expect(new Set(targets).size).toBe(targets.length);
+	send(actor, { type: 'PLAY', seat: B, card, play: { e: 'openWaters', to: targets[0]! } });
+	expect(hasEdge(worldOf(actor).campaign, here, targets[0]!)).toBe(true);
 });
 
 test('the Sanitation Officer may discard any two cards to salvage, not only the first two', () => {

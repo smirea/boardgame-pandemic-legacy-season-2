@@ -335,16 +335,22 @@ export function sharedCost(world: World, variants: Action[]): Rich | null {
 export function playTarget(play: Play): CityId | null {
 	if ('city' in play) return play.city;
 	if (play.e === 'airlift') return play.to;
-	if (play.e === 'openWaters') return play.b;
-	if (play.e === 'safeHouses') return play.cities[0]!;
+	if (play.e === 'openWaters') return play.to;
+	if (play.e === 'safeHouses' || play.e === 'handout' || play.e === 'cleanse') return play.cities[0]!;
+	if (play.e === 'spreadOut') return play.to[0]!;
 	return null;
 }
 
 /** The choice a play needs before its city, such as which pawn to airlift. Empty when there is none. */
 export function playGroup(world: World, play: Play): string {
 	if (play.e === 'airlift') return seatName(world, play.pawn);
-	if (play.e === 'openWaters') return `from ${cityName(play.a)}`;
-	if (play.e === 'resilience') return cards(world, play.cards);
+	if (play.e === 'spreadOut') return `from ${cityName(play.from)}`;
+	if (play.e === 'resilience' || play.e === 'massInoculation' || play.e === 'exile') return cards(world, play.cards);
+	if (play.e === 'encore') return cardName(world, play.card);
+	if (play.e === 'mentor') {
+		const ability = pack.abilities.find(entry => entry.id === play.ability)!;
+		return `${seatName(world, play.seat)}: ${ability.name} in slot ${play.slot + 1}`;
+	}
 	if (play.e === 'cardSwap')
 		return `${seatName(world, play.a)}: ${cardName(world, play.cardA)} ↔ ${seatName(world, play.b)}: ${cardName(world, play.cardB)}`;
 	return '';
@@ -390,7 +396,8 @@ const DECISION_TITLES: Record<Decision['t'], string> = {
 	quarantineCard: 'Set an Infection card aside until game end',
 	shield: 'Discard a matching card to keep the cube?',
 	cordon: 'Discard any card to stop the rest of this Infect step?',
-	intensify: 'An Epidemic struck. Play Resilience now, or pass to reshuffle the discard pile',
+	intensify: 'An Epidemic struck. Play Resilience or Mass Inoculation now, or pass to reshuffle the discard pile',
+	epidemicDrawn: 'An Epidemic was drawn. Play Antidote to discard it with no effect, or pass to let it strike',
 };
 
 /** The prompt for a pending choice, naming who and where it concerns. */

@@ -15,7 +15,7 @@
 		scenarios,
 		tableStart,
 	} from '@repo/game';
-	import type { Action, CardId, CityId, Command, EdgeDef, Play, SeatId } from '@repo/game';
+	import type { Action, CardId, CityId, Command, EdgeDef, EventId, Play, SeatId } from '@repo/game';
 	import Board from '#lib/board/Board.svelte';
 	import type { BoardPoint } from '#lib/board/projection.ts';
 	import { travelOf } from '#lib/board/travel.ts';
@@ -132,7 +132,7 @@
 		if (owed?.d === 'discard') viewing = owed.seat;
 	});
 
-	type Option = { label: string; detail: Rich | string; run: () => void; city?: CityId };
+	type Option = { label: string; detail: Rich | string; run: () => void; city?: CityId; item?: string };
 	type Chooser = {
 		title: string;
 		options: Option[];
@@ -476,6 +476,56 @@
 		if (reject(world, snap.phase, command) === null) send(command);
 	}
 
+	type Several = { field: 'cities' | 'to' | 'cards' | 'order'; verb: string; max: number; repeat: number };
+	/** Events that take several targets at once: they are ticked off a list and confirmed together. */
+	const SEVERAL: Partial<Record<EventId, Several>> = {
+		safeHouses: { field: 'cities', verb: 'Place shelters', max: 3, repeat: 1 },
+		handout: { field: 'cities', verb: 'Place cubes', max: 2, repeat: 2 },
+		cleanse: { field: 'cities', verb: 'Remove Plague cubes', max: 2, repeat: 2 },
+		spreadOut: { field: 'to', verb: 'Move cubes', max: 3, repeat: 3 },
+		massInoculation: { field: 'cards', verb: 'Store cards', max: 3, repeat: 1 },
+		exile: { field: 'cards', verb: 'Destroy cards', max: 3, repeat: 1 },
+		// Cards not picked keep their order below the ones picked.
+		forecast: { field: 'order', verb: 'Put back, top first', max: 8, repeat: 1 },
+	};
+
+	function pickSeveral(seat: SeatId, card: CardId, variants: { play: Play }[], several: Several) {
+		const first = variants[0]!.play as Record<string, unknown>;
+		const items =
+			several.field === 'order'
+				? (first.order as string[])
+				: variants.map(option => ((option.play as Record<string, unknown>)[several.field] as string[])[0]!);
+		const isCard = several.field === 'cards' || several.field === 'order';
+		const name = (item: string) => (isCard ? cardName(world, item as CardId) : cityName(item as CityId));
+		const options: Option[] = items.flatMap(item =>
+			Array.from({ length: several.repeat }, (_, copy) => ({
+				label: copy ? `${name(item)} (${copy + 1})` : name(item),
+				detail: '',
+				run: () => {},
+				item,
+				...(isCard ? {} : { city: item as CityId }),
+			})),
+		);
+		targeting = null;
+		chooser = {
+			title: cardName(world, card),
+			options: several.field === 'order' ? options : options.sort(byLabel),
+			multi: {
+				max: Math.min(several.max, options.length),
+				verb: several.verb,
+				confirm: chosen => {
+					const values = chosen.map(option => option.item!);
+					if (several.field === 'order') values.push(...items.filter(item => !values.includes(item)));
+					const command: Command = { type: 'PLAY', seat, card, play: { ...first, [several.field]: values } as Play };
+					const refused = reject(world, snap.phase, command);
+					if (refused) return toast(refused, 'bad');
+					send(command);
+					chooser = null;
+				},
+			},
+		};
+	}
+
 	function playCard(seat: SeatId, card: CardId) {
 		const variants = plays.filter(option => option.seat === seat && option.card === card);
 		const run = (play: Play) => () => {
@@ -491,25 +541,27 @@
 			targeting = { label, a: null, cities };
 		};
 		const held = world.campaign.playerCards[card];
-		if (held?.kind === 'event' && held.event === 'safeHouses') {
-			// The card places up to three shelters at once, so its cities are ticked off a list and confirmed together.
-			const cities = [...new Set(variants.map(option => playTarget(option.play)!))];
-			targeting = null;
-			chooser = {
-				title: 'Safe Houses',
-				options: cities
-					.map(target => ({ label: cityName(target), detail: '', run: () => {}, city: target }))
-					.sort(byLabel),
-				multi: {
-					max: Math.min(3, game!.pieces.shelter),
-					verb: 'Place shelters',
-					confirm: chosen => {
-						send({ type: 'PLAY', seat, card, play: { e: 'safeHouses', cities: chosen.map(option => option.city!) } });
-						chooser = null;
-					},
-				},
-			};
-			return;
+		const several = held?.kind === 'event' ? SEVERAL[held.event] : undefined;
+		if (several && variants.length) {
+			const froms = [...new Set(variants.map(option => (option.play.e === 'spreadOut' ? option.play.from : '')))];
+			if (froms.length > 1) {
+				chooser = {
+					title: cardName(world, card),
+					options: froms.map(from => ({
+						label: cityName(from as CityId),
+						detail: '',
+						run: () =>
+							pickSeveral(
+								seat,
+								card,
+								variants.filter(option => 'from' in option.play && option.play.from === from),
+								several,
+							),
+					})),
+				};
+				return;
+			}
+			return pickSeveral(seat, card, variants, several);
 		}
 		if (variants.length === 1) return run(variants[0]!.play)();
 		if (variants.every(option => option.play.e === 'airlift')) {

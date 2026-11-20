@@ -108,9 +108,7 @@ const bundles: BundleDef[] = [
 		id: bundleId('south-america'),
 		name: 'South America revealed',
 		unlocks: [
-			region('south-america', ['buenos-aires', 'sao-paulo', 'land'], ['lima', 'haven-eastern-pacific', 'sea']),
-			// The map of South America shows a sea route from Lima to the lost haven, so the haven is sighted with it.
-			open('find-eastern-pacific'),
+			region('south-america', ['buenos-aires', 'sao-paulo', 'land']),
 			{ t: 'action', action: 'establishLine' },
 			{ t: 'action', action: 'search' },
 		],
@@ -120,7 +118,7 @@ const bundles: BundleDef[] = [
 		id: bundleId('europe'),
 		name: 'Europe revealed',
 		unlocks: [region('europe', ['paris', 'london', 'land']), { t: 'action', action: 'shuttle' }],
-		reward: [{ t: 'event', event: 'airlift', mode: 'unrationed' }],
+		reward: [{ t: 'event', event: 'exile', mode: 'unrationed' }],
 	},
 	{
 		id: bundleId('africa'),
@@ -131,13 +129,13 @@ const bundles: BundleDef[] = [
 			{ t: 'action', action: 'transmit' },
 			{ t: 'permanentStructure', structure: 'tower', copies: 4 },
 		],
-		reward: [{ t: 'event', event: 'supplyDrop', mode: 'unrationed' }],
+		reward: [{ t: 'event', event: 'antidote', mode: 'unrationed' }],
 	},
 	{
 		id: bundleId('middle-east'),
 		name: 'Middle East and South Asia revealed',
 		unlocks: [region('middle-east', ['baghdad', 'cairo', 'land']), { t: 'gather', cards: 4 }],
-		reward: [{ t: 'event', event: 'quietNight', mode: 'unrationed' }],
+		reward: [{ t: 'event', event: 'mentor', mode: 'unrationed' }],
 	},
 	{
 		id: bundleId('east-asia'),
@@ -148,7 +146,7 @@ const bundles: BundleDef[] = [
 			{ t: 'action', action: 'buildShelter' },
 			{ t: 'cityImprovement', improvement: 'wild' },
 			{ t: 'cityImprovement', improvement: 'redWild' },
-			{ t: 'infectionImprovement', improvement: 'cordon' },
+			{ t: 'infectionImprovement', improvement: 'rebirth' },
 		],
 		reward: [{ t: 'event', event: 'safeHouses', mode: 'unrationed' }],
 	},
@@ -173,12 +171,20 @@ const bundles: BundleDef[] = [
 	{
 		id: bundleId('find-eastern-pacific'),
 		name: 'Eastern Pacific haven sighted',
-		unlocks: [{ t: 'haven', city: city('haven-eastern-pacific') }],
+		unlocks: [
+			{ t: 'haven', city: city('haven-eastern-pacific') },
+			{ t: 'edge', edge: edge('lima', 'haven-eastern-pacific', 'sea') },
+		],
 	},
 	{
 		id: bundleId('arrive-eastern-pacific'),
 		name: 'Eastern Pacific haven reached',
-		unlocks: [{ t: 'event', event: 'secondWind', mode: 'rationed' }],
+		unlocks: [
+			{ t: 'action', action: 'inoculate' },
+			{ t: 'rule', rule: 'storage' },
+			{ t: 'stockpileBonus', amount: 15 },
+			{ t: 'event', event: 'surplus', mode: 'permanent', copies: 3 },
+		],
 	},
 	{
 		id: bundleId('find-indian-ocean'),
@@ -195,10 +201,6 @@ const bundles: BundleDef[] = [
 		name: 'Opal lab found',
 		unlocks: [
 			{ t: 'lab', city: city('buenos-aires') },
-			{ t: 'action', action: 'inoculate' },
-			{ t: 'rule', rule: 'storage' },
-			{ t: 'stockpileBonus', amount: 15 },
-			{ t: 'event', event: 'surplus', mode: 'rationed', copies: 3 },
 			{ t: 'job', job: 'immunologist', home: city('haven-south-atlantic') },
 		],
 	},
@@ -288,10 +290,10 @@ const legacyDeck: LegacyCardDef[] = [
 		{ t: 'infectionImprovement', improvement: 'lockdown', copies: 2 },
 	]),
 	card(1, 2, 'stop', 'Supplies arrive', 'Four new Rationed Events join the reserve.', [
-		{ t: 'event', event: 'quietNight', mode: 'rationed' },
-		{ t: 'event', event: 'supplyDrop', mode: 'rationed' },
 		{ t: 'event', event: 'cardSwap', mode: 'rationed' },
-		{ t: 'event', event: 'resilience', mode: 'rationed' },
+		{ t: 'event', event: 'spreadOut', mode: 'rationed' },
+		{ t: 'event', event: 'cleanse', mode: 'rationed' },
+		{ t: 'event', event: 'forecast', mode: 'rationed' },
 	]),
 	card(
 		2,
@@ -309,9 +311,9 @@ const legacyDeck: LegacyCardDef[] = [
 		'Supply centers can be made permanent. Three new Rationed Events. A turning point watches for a city at population 0.',
 		[
 			{ t: 'permanentStructure', structure: 'center', copies: 6 },
-			{ t: 'event', event: 'airlift', mode: 'rationed' },
-			{ t: 'event', event: 'purge', mode: 'rationed' },
-			{ t: 'event', event: 'stockUp', mode: 'rationed' },
+			{ t: 'event', event: 'cache', mode: 'rationed' },
+			{ t: 'event', event: 'encore', mode: 'rationed' },
+			{ t: 'event', event: 'secondWind', mode: 'rationed' },
 			{ t: 'turningPoint', id: 'firstForsaken' },
 			{ t: 'turningPoint', id: 'losingStreak' },
 		],
@@ -340,7 +342,7 @@ const legacyDeck: LegacyCardDef[] = [
 	),
 	card(4, 1, 'pause', 'April', 'Perimeter report on South America.', [perimeter('south-america')]),
 	card(4, 2, 'stop', 'Rebuilding', 'A new Infection card improvement is for sale.', [
-		{ t: 'infectionImprovement', improvement: 'rebirth' },
+		{ t: 'infectionImprovement', improvement: 'cordon', copies: 2 },
 	]),
 	card(5, 1, 'pause', 'May', 'Perimeter report on the eastern Pacific.', [perimeter('find-eastern-pacific')]),
 	card(5, 2, 'stop', 'Experience', 'New character abilities are for sale.', [
@@ -354,8 +356,8 @@ const legacyDeck: LegacyCardDef[] = [
 	card(6, 2, 'stop', 'New arrivals', 'Two new characters join. Two new Rationed Events.', [
 		{ t: 'job', job: 'captain', home: city('haven-north-atlantic') },
 		{ t: 'job', job: 'sanitationOfficer', home: city('haven-mediterranean') },
+		{ t: 'event', event: 'massInoculation', mode: 'rationed' },
 		{ t: 'event', event: 'openWaters', mode: 'rationed' },
-		{ t: 'event', event: 'secondWind', mode: 'rationed' },
 	]),
 	card(7, 1, 'pause', 'July', 'Perimeter report on Africa. New objective: towers in 3 cities of different colours.', [
 		perimeter('africa'),
@@ -645,8 +647,19 @@ export const pack: ContentPack = {
 			name: 'Resilience',
 			text: 'Set aside up to 2 discarded Infection cards of one city until game end.',
 		},
-		{ id: 'supplyDrop', name: 'Supply Drop', text: 'Add 4 cubes from the reserve to a location on the grid.' },
-		{ id: 'secondWind', name: 'Second Wind', text: 'The active player gains 2 actions this turn.' },
+		{ id: 'handout', name: 'Handout', text: 'Move up to 2 cubes from the stockpile to locations on the grid.' },
+		{ id: 'cardSwap', name: 'Card Swap', text: 'Two players trade one card each.' },
+		{ id: 'spreadOut', name: 'Spread Out', text: 'Move up to 3 cubes from one haven to locations on the grid.' },
+		{ id: 'cleanse', name: 'Cleanse', text: 'Remove up to 2 Plague cubes from the grid.' },
+		{ id: 'forecast', name: 'Forecast', text: 'Look at the top 8 Infection cards and put them back in any order.' },
+		{ id: 'cache', name: 'Cache', text: 'Move 6 cubes from the reserve to a location with a pawn.' },
+		{ id: 'encore', name: 'Encore', text: 'Take a Rationed Event from the Player discard pile into your hand.' },
+		{ id: 'secondWind', name: 'Second Wind', text: 'The active player gains 3 actions this turn.' },
+		{
+			id: 'massInoculation',
+			name: 'Mass Inoculation',
+			text: 'Put up to 3 cards from the Infection discard pile into storage. May be played while an Epidemic waits to reshuffle.',
+		},
 		{
 			id: 'scavenge',
 			name: 'Scavenge',
@@ -655,13 +668,27 @@ export const pack: ContentPack = {
 		{
 			id: 'openWaters',
 			name: 'Open Waters',
-			text: 'Draw a free sea lane between two ports. Region boundaries do not limit it.',
+			text: 'The active player charts a sea lane from their port for free. Region lines do not limit it.',
 		},
 		{ id: 'safeHouses', name: 'Safe Houses', text: 'Place up to 3 shelters for free.' },
 		{ id: 'purge', name: 'Purge', text: 'Remove all Plague cubes from one location.' },
-		{ id: 'stockUp', name: 'Stock Up', text: 'Move 6 cubes from the reserve to the stockpile.' },
-		{ id: 'cardSwap', name: 'Card Swap', text: 'Two players trade one card each.' },
-		{ id: 'surplus', name: 'Surplus', text: 'Take up to 3 cubes from the stockpile onto your character.' },
+		{ id: 'stockUp', name: 'Stock Up', text: 'Move 8 cubes from the reserve to the stockpile.' },
+		{
+			id: 'exile',
+			name: 'Exile',
+			text: 'Destroy up to 3 Infection cards of one city from the Infection discard pile.',
+		},
+		{ id: 'antidote', name: 'Antidote', text: 'Play when an Epidemic is drawn: discard it with no effect.' },
+		{
+			id: 'mentor',
+			name: 'Mentor',
+			text: 'Put an ability that costs 2 or less on a character in this game, on an empty slot or over a scar.',
+		},
+		{
+			id: 'surplus',
+			name: 'Surplus',
+			text: 'Play after you Make Supplies this turn: take 3 more cubes from the stockpile.',
+		},
 	],
 	characterCards: [
 		['scar', 'empty', 'empty', 'scar', 'skull'],
@@ -709,7 +736,7 @@ export const pack: ContentPack = {
 			id: 'cordon',
 			name: 'Cordon',
 			text: 'When drawn in an Infect step, any player may discard a card to stop the rest of that step.',
-			cost: 2,
+			cost: 1,
 		},
 	],
 	objectives: [
@@ -828,7 +855,7 @@ export const pack: ContentPack = {
 		{ take: 1 },
 		{ bundle: bundleId('frequency-training') },
 	],
-	startingEvents: ['airlift', 'quietNight', 'supplyDrop', 'secondWind'],
+	startingEvents: ['airlift', 'quietNight', 'resilience', 'handout'],
 	startingAbilities: [
 		'architect',
 		'helmsman',

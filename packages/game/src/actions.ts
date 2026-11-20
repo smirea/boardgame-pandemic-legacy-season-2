@@ -302,6 +302,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 				ctx.game.stockpile -= 1;
 				ctx.game.reserve += 1;
 			}
+			if (unused(ctx, 'madeSupplies')) useOnce(ctx, 'madeSupplies');
 			useOnce(ctx, 'farmerReady');
 		},
 	},

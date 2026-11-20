@@ -3,13 +3,13 @@ import { actionGate, actionIds, checkAction, checkEdge, hasAction, isFreeAction 
 import { pack } from './content/pack';
 import type { ActionId, Color } from './content/types';
 import { freeCharacters, scarTargets } from './flow';
-import { cardValue, characterOf, cityDef, grid, handLimit, neighbours, player, seaRoute } from './helpers';
+import { cardValue, characterOf, cityDef, grid, handLimit, isHaven, neighbours, player, seaRoute } from './helpers';
 import type { CardId, CityId, SeatId } from './ids';
 import type { Purchase } from './legacy';
 import { checkPurchase } from './legacy';
 import type { Phase } from './machine';
 import type { Decide, Play } from './plays';
-import { checkDecide, checkPlay } from './plays';
+import { checkDecide, checkPlay, forecastCards } from './plays';
 import type { World } from './state';
 
 function cityCards(world: World, cards: CardId[]) {
@@ -291,13 +291,43 @@ export function legalPlays(world: World, phase: Phase): { seat: SeatId; card: Ca
 							plays.push({ e: 'resilience', cards: [target, second] });
 					}
 					break;
-				case 'supplyDrop':
-					for (const city of onGrid) plays.push({ e: 'supplyDrop', city });
+				case 'handout':
+					for (const city of onGrid) plays.push({ e: 'handout', cities: [city] });
+					break;
+				case 'spreadOut':
+					for (const from of onGrid)
+						if (isHaven(from) && game.locations[from]!.supplies > 0)
+							for (const to of onGrid) plays.push({ e: 'spreadOut', from, to: [to] });
+					break;
+				case 'cleanse':
+					for (const city of onGrid) plays.push({ e: 'cleanse', cities: [city] });
+					break;
+				case 'forecast':
+					plays.push({ e: 'forecast', order: forecastCards(game) });
+					break;
+				case 'cache':
+					for (const city of new Set(game.seats.map(other => player(game, other).location)))
+						plays.push({ e: 'cache', city });
+					break;
+				case 'encore':
+					for (const target of game.playerDiscard) plays.push({ e: 'encore', card: target });
+					break;
+				case 'massInoculation':
+					for (const target of game.infectionDiscard) plays.push({ e: 'massInoculation', cards: [target] });
+					break;
+				case 'exile':
+					for (const target of game.infectionDiscard) plays.push({ e: 'exile', cards: [target] });
+					break;
+				case 'mentor':
+					for (const other of game.seats)
+						for (const ability of new Set(campaign.abilitiesForSale))
+							characterOf(world, other).slots.forEach((_, slot) =>
+								plays.push({ e: 'mentor', seat: other, ability, slot }),
+							);
 					break;
 				case 'openWaters':
 					for (const edge of pack.candidateEdges)
-						if (edge.kind === 'sea')
-							plays.push({ e: 'openWaters', a: edge.a, b: edge.b }, { e: 'openWaters', a: edge.b, b: edge.a });
+						if (edge.kind === 'sea') plays.push({ e: 'openWaters', to: edge.a }, { e: 'openWaters', to: edge.b });
 					break;
 				case 'safeHouses':
 					for (const city of onGrid) plays.push({ e: 'safeHouses', cities: [city] });
@@ -321,6 +351,7 @@ export function legalPlays(world: World, phase: Phase): { seat: SeatId; card: Ca
 				case 'secondWind':
 				case 'scavenge':
 				case 'stockUp':
+				case 'antidote':
 				case 'surplus':
 				case 'medic':
 					plays.push({ e: id });
@@ -330,17 +361,10 @@ export function legalPlays(world: World, phase: Phase): { seat: SeatId; card: Ca
 			}
 			for (const play of plays) {
 				if (checkPlay(world, seat, card, play, phase) !== null) continue;
-				// A sea lane drawn from either end is the same lane, so it is offered once.
-				const mirrored =
+				const repeated =
 					play.e === 'openWaters' &&
-					result.some(
-						other =>
-							other.card === card &&
-							other.play.e === 'openWaters' &&
-							other.play.a === play.b &&
-							other.play.b === play.a,
-					);
-				if (!mirrored) result.push({ seat, card, play });
+					result.some(other => other.card === card && other.play.e === 'openWaters' && other.play.to === play.to);
+				if (!repeated) result.push({ seat, card, play });
 			}
 		}
 	}
@@ -463,7 +487,7 @@ export function cardTargets(world: World, phase: Phase, card: CardId): { cities:
 					seats.add(play.a);
 					seats.add(play.b);
 					break;
-				case 'supplyDrop':
+				case 'cache':
 				case 'purge':
 				case 'purifier':
 				case 'shelterWright':
@@ -471,13 +495,27 @@ export function cardTargets(world: World, phase: Phase, card: CardId): { cities:
 					cities.add(play.city);
 					break;
 				case 'safeHouses':
+				case 'handout':
+				case 'cleanse':
 					for (const city of play.cities) cities.add(city);
 					break;
+				case 'spreadOut':
+					cities.add(play.from);
+					for (const city of play.to) cities.add(city);
+					break;
 				case 'openWaters':
-					cities.add(play.a);
-					cities.add(play.b);
+					cities.add(world.game!.players[world.game!.active]!.location);
+					cities.add(play.to);
+					break;
+				case 'mentor':
+					seats.add(play.seat);
+					break;
+				case 'antidote':
+					seats.add(entry.seat);
 					break;
 				case 'resilience':
+				case 'massInoculation':
+				case 'exile':
 					for (const id of play.cards) {
 						const infection = world.campaign.infectionCards[id];
 						if (infection?.kind === 'city') cities.add(infection.city);

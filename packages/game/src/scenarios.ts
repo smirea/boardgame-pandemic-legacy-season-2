@@ -20,7 +20,7 @@ const CAST: [name: string, job: JobId][] = [
 const EXPLORED: Record<number, string[]> = {
 	1: ['north-america'],
 	3: ['south-america', 'opal'],
-	4: ['find-eastern-pacific'],
+	4: ['find-eastern-pacific', 'arrive-eastern-pacific'],
 	5: ['europe'],
 	6: ['africa', 'jade'],
 	7: ['middle-east', 'find-indian-ocean', 'arrive-indian-ocean'],

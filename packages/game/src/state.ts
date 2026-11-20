@@ -167,6 +167,8 @@ export type Decision =
 	| { t: 'cordon' }
 	/** An Epidemic has struck and its discard pile is about to go back on the deck. Held open for a player with Resilience. */
 	| { t: 'intensify' }
+	/** An Epidemic was drawn and has not struck yet. Held open for a player who can cancel it. */
+	| { t: 'epidemicDrawn' }
 	/** Any player may discard a card of this colour to stop the pending cube removal. */
 	| { t: 'shield'; city: CityId; color: Color };
 
