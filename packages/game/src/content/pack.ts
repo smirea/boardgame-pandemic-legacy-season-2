@@ -106,8 +106,8 @@ const dossier: DossierDef = {
 		numbered(11, 26, [15, 16]),
 		numbered(27, 40),
 		numbered(41, 54),
-		numbered(55, 59),
-		numbered(60, 67),
+		numbered(55, 60),
+		numbered(61, 67),
 	],
 };
 

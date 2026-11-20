@@ -12,7 +12,7 @@ import type {
 	StructureKind,
 	TurningPointId,
 } from './content/types';
-import { gridCityCount } from './helpers';
+import { gridCityCount, isForsaken } from './helpers';
 import type { BundleId, CardId, CharacterId, CityId } from './ids';
 import { newCampaign, openBundle, paddedTrack, readLegacy } from './legacy';
 import type { Save } from './machine';
@@ -349,7 +349,7 @@ const TABLE = {
 			home: 'haven-north-atlantic',
 			card: 1,
 			exposure: 1,
-			slots: [{ ability: 'courier' }, { ability: 'runner' }, { ability: 'foreman' }, null],
+			slots: [{ ability: 'runner' }, { ability: 'foreman' }, { ability: 'courier' }, null],
 			played: true,
 		},
 		{
@@ -359,9 +359,10 @@ const TABLE = {
 			card: 9,
 			exposure: 2,
 			slots: [
+				// The table put Architect in the job box and the Laborer job in the first slot: he is a Laborer with Architect.
 				{ ability: 'architect' },
-				{ ability: 'coordinator' },
 				{ ability: 'facilitator' },
+				{ ability: 'coordinator' },
 				{ scar: 'reconExtraCard' },
 			],
 			played: true,
@@ -372,7 +373,7 @@ const TABLE = {
 			home: 'haven-mediterranean',
 			card: 3,
 			exposure: 2,
-			slots: [{ ability: 'recordKeeper' }, { ability: 'supplier' }, { ability: 'outrider' }, { scar: 'plagueShy' }],
+			slots: [{ scar: 'plagueShy' }, { ability: 'recordKeeper' }, { ability: 'supplier' }, { ability: 'outrider' }],
 			played: true,
 		},
 	] as CharacterFact[],
@@ -492,6 +493,8 @@ export function tabletopSave(seed = 7): Save {
 		record.infested = Boolean(fact.infested) || Boolean(printed.startsInfested);
 		record.permanent = [...(fact.permanent ?? [])];
 	}
+	// As July's game end would have: a forsaken city is infested for good, sticker or not.
+	for (const city of pack.cities) if (isForsaken(campaign, city.id)) campaign.locations[city.id]!.infested = true;
 	for (const [id, record] of Object.entries(campaign.locations))
 		if (record.revealed && !(id in TABLE.locations)) throw new Error(`The replay reveals ${id}, the table does not`);
 
