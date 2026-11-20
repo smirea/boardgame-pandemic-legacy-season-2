@@ -1,0 +1,48 @@
+{
+	"door": "39",
+	"folder": 3,
+	"frontImage": "dossiers/folder-3/door-39/front.jpg",
+	"frontText": "39",
+	"items": [
+		{
+			"id": "item-01",
+			"image": "dossiers/folder-3/door-39/item-01.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "action-reference",
+			"title": "SEARCH",
+			"placementTarget": "Back of each player reference card",
+			"costProductionUnits": null,
+			"text": "SEARCH\nScratch off one box on a City card in your hand if you are in the matching city. (You do not need to discard it.)",
+			"mechanics": {
+				"timing": "action",
+				"trigger": "You are in the city matching a City card in your hand",
+				"effect": "Scratch off one box on that City card.",
+				"restrictions": ["You must be in the matching city", "The City card stays in your hand; you do not discard it"],
+				"parentheticalItalic": "You do not need to discard it.",
+				"icon": "Magnifying glass",
+				"sourceGuids": ["67f8d3"]
+			}
+		},
+		{
+			"id": "item-02",
+			"image": "dossiers/folder-3/door-39/item-02.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "placement-instruction",
+			"title": "Reference card placement",
+			"placementTarget": null,
+			"costProductionUnits": null,
+			"text": "Place this sticker on the back of each player reference card.",
+			"mechanics": {
+				"timing": "setup",
+				"trigger": null,
+				"effect": "Place the action sticker on the back of each player reference card.",
+				"restrictions": [],
+				"sourceGuids": ["00444a"]
+			}
+		}
+	],
+	"bags": [],
+	"summary": "Search action overlay: in the matching city, scratch one box on a City card in hand and do not discard it. Place it on the back of each player reference card. The door numeral is printed rotated 90° counter-clockwise. The placement strip is byte-identical to doors 37 and 38."
+}

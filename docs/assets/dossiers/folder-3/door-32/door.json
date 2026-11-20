@@ -1,0 +1,51 @@
+{
+	"door": "32",
+	"folder": 3,
+	"frontImage": "dossiers/folder-3/door-32/front.jpg",
+	"frontText": "32",
+	"items": [
+		{
+			"id": "item-01",
+			"image": "dossiers/folder-3/door-32/item-01.jpg",
+			"count": 2,
+			"printedCode": null,
+			"category": "scar",
+			"title": "Carrier",
+			"placementTarget": "Character card, across two scar slots",
+			"costProductionUnits": null,
+			"text": "Carrier: You have the sample in your body.\n• Your pawn may be moved only by doing the Drive/Ferry action.\n• To enter a city, you must discard a card matching its color.\n• At game end, win or lose, destroy this character.",
+			"mechanics": {
+				"timing": "persistent",
+				"trigger": "Used when doing the Self-Infect action only",
+				"effect": "The character has the sample in their body. At game end, win or lose, destroy this character.",
+				"restrictions": [
+					"Your pawn may be moved only by doing the Drive/Ferry action.",
+					"To enter a city, you must discard a card matching its color."
+				],
+				"scarSlots": 2,
+				"firstBulletPrintedInWhite": true,
+				"sourceGuids": ["fb15cd", "2262a6"]
+			}
+		},
+		{
+			"id": "item-02",
+			"image": "dossiers/folder-3/door-32/item-02.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "scar-instruction",
+			"title": "SCARS",
+			"placementTarget": null,
+			"costProductionUnits": null,
+			"text": "SCARS\nUse these scars when doing the Self-Infect action only.",
+			"mechanics": {
+				"timing": "setup",
+				"trigger": null,
+				"effect": "These scars are used when doing the Self-Infect action only.",
+				"restrictions": ["Self-Infect action only"],
+				"sourceGuids": ["450b43"]
+			}
+		}
+	],
+	"bags": [],
+	"summary": "Two more double-slot Carrier scar stickers and the same Self-Infect-only scars label as door 27. Wording matches door 27 exactly, including the white movement bullet. Count in this door is 2. The sticker image is byte-identical to door 27, and Workshop guids fb15cd and 2262a6 are the same pair."
+}

@@ -1,0 +1,51 @@
+{
+	"door": "27",
+	"folder": 3,
+	"frontImage": "dossiers/folder-3/door-27/front.jpg",
+	"frontText": "27",
+	"items": [
+		{
+			"id": "item-01",
+			"image": "dossiers/folder-3/door-27/item-01.jpg",
+			"count": 2,
+			"printedCode": null,
+			"category": "scar",
+			"title": "Carrier",
+			"placementTarget": "Character card, across two scar slots",
+			"costProductionUnits": null,
+			"text": "Carrier: You have the sample in your body.\n• Your pawn may be moved only by doing the Drive/Ferry action.\n• To enter a city, you must discard a card matching its color.\n• At game end, win or lose, destroy this character.",
+			"mechanics": {
+				"timing": "persistent",
+				"trigger": "Used when doing the Self-Infect action only",
+				"effect": "The character has the sample in their body. At game end, win or lose, destroy this character.",
+				"restrictions": [
+					"Your pawn may be moved only by doing the Drive/Ferry action.",
+					"To enter a city, you must discard a card matching its color."
+				],
+				"scarSlots": 2,
+				"firstBulletPrintedInWhite": true,
+				"sourceGuids": ["2262a6", "fb15cd"]
+			}
+		},
+		{
+			"id": "item-02",
+			"image": "dossiers/folder-3/door-27/item-02.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "scar-instruction",
+			"title": "SCARS",
+			"placementTarget": null,
+			"costProductionUnits": null,
+			"text": "SCARS\nUse these scars when doing the Self-Infect action only.",
+			"mechanics": {
+				"timing": "setup",
+				"trigger": null,
+				"effect": "These scars are used when doing the Self-Infect action only.",
+				"restrictions": ["Self-Infect action only"],
+				"sourceGuids": ["450b43"]
+			}
+		}
+	],
+	"bags": [],
+	"summary": "Two double-slot Carrier scar stickers and one Self-Infect-only scars label. The movement bullet is printed in white; the enter-city and game-end bullets are black. The sticker is about twice the height of a one-line ability sticker and covers two scar slots. Workshop guids 2262a6 and fb15cd are the same pair listed on door 32; this door's count is still 2."
+}

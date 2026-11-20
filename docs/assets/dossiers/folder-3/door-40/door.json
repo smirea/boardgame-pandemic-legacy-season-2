@@ -1,0 +1,30 @@
+{
+	"door": "40",
+	"folder": 3,
+	"frontImage": "dossiers/folder-3/door-40/front.jpg",
+	"frontText": "40",
+	"items": [
+		{
+			"id": "item-01",
+			"image": "dossiers/folder-3/door-40/item-01.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "illustration",
+			"title": "Haven Leadership Summit 45",
+			"placementTarget": null,
+			"costProductionUnits": null,
+			"text": "Haven Leadership Summit 45\nThe Power of Three!",
+			"mechanics": {
+				"timing": "story",
+				"trigger": null,
+				"effect": null,
+				"restrictions": [],
+				"illustration": "Haven skyline on a curved shoreline, with clouds, inside a rounded stamped border.",
+				"summitNumber": 45,
+				"sourceGuids": ["1881fa"]
+			}
+		}
+	],
+	"bags": [],
+	"summary": "One summit illustration sticker. Printed text is \"Haven Leadership Summit 45\" and \"The Power of Three!\". No rule, cost, or placement instruction is printed on it. The door numeral is rotated 90° counter-clockwise."
+}

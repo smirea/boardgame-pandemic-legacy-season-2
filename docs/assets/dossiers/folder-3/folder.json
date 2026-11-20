@@ -1,0 +1,9 @@
+{
+	"folder": 3,
+	"id": "folder-3",
+	"guid": "ab224d",
+	"coverImage": "dossiers/folder-3/cover.jpg",
+	"coverText": null,
+	"doors": ["27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40"],
+	"summary": "Folder 3 cover is the perforated door sheet for doors 27 through 40. The only printing on the cover is those door numerals. There is no title, rule, or other text. Doors 27–36 show the numeral upright on the door panel. Doors 37–40 show the numeral rotated 90° counter-clockwise on the panel."
+}

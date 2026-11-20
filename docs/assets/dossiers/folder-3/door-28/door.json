@@ -1,0 +1,94 @@
+{
+	"door": "28",
+	"folder": 3,
+	"frontImage": "dossiers/folder-3/door-28/front.jpg",
+	"frontText": "28",
+	"items": [
+		{
+			"id": "item-01_saboteur",
+			"image": "dossiers/folder-3/door-28/item-01_saboteur.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "ability",
+			"title": "Saboteur",
+			"placementTarget": "Character card ability slot",
+			"costProductionUnits": 2,
+			"text": "Saboteur: As an action, discard a City card to remove a Hollow Men figure from a city matching the color of the card.",
+			"mechanics": {
+				"timing": "action",
+				"trigger": null,
+				"effect": "Discard a City card to remove a Hollow Men figure from a city matching the color of the card.",
+				"restrictions": ["The city must match the color of the discarded City card"],
+				"costPrintedOn": "door-28/item-04.jpg",
+				"sourceGuids": ["a463ef"]
+			}
+		},
+		{
+			"id": "item-02_rehab-nurse",
+			"image": "dossiers/folder-3/door-28/item-02_rehab-nurse.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "ability",
+			"title": "Rehab Nurse",
+			"placementTarget": "Character card ability slot",
+			"costProductionUnits": 1,
+			"text": "Rehab Nurse: As an action, discard 2 Player cards to take 1 City card of your choice from Package 6 and add it to your hand.",
+			"mechanics": {
+				"timing": "action",
+				"trigger": null,
+				"effect": "Discard 2 Player cards to take 1 City card of your choice from Package 6 and add it to your hand.",
+				"restrictions": ["The City card comes from Package 6", "Discard exactly 2 Player cards"],
+				"costPrintedOn": "door-28/item-04.jpg",
+				"sourceGuids": ["a06d66"]
+			}
+		},
+		{
+			"id": "item-03_misinformation-specialist",
+			"image": "dossiers/folder-3/door-28/item-03_misinformation-specialist.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "ability",
+			"title": "Misinformation Specialist",
+			"placementTarget": "Character card ability slot",
+			"costProductionUnits": 2,
+			"text": "Misinformation Specialist: As an action, move a Hollow Men figure from your city to an adjacent city containing 2 or fewer Hollow Men figures.",
+			"mechanics": {
+				"timing": "action",
+				"trigger": null,
+				"effect": "Move a Hollow Men figure from your city to an adjacent city containing 2 or fewer Hollow Men figures.",
+				"restrictions": [
+					"The figure starts in your city",
+					"The destination must be adjacent",
+					"The destination contains 2 or fewer Hollow Men figures"
+				],
+				"costPrintedOn": "door-28/item-04.jpg",
+				"sourceGuids": ["2f7769"]
+			}
+		},
+		{
+			"id": "item-04",
+			"image": "dossiers/folder-3/door-28/item-04.jpg",
+			"count": 1,
+			"printedCode": "28",
+			"category": "ability-pool-card",
+			"title": "CHARACTER ABILITIES",
+			"placementTarget": null,
+			"costProductionUnits": null,
+			"text": "CHARACTER ABILITIES\nAdd these to your pool of character abilities.\n\nMisinformation Specialist: As an action, move a Hollow Men figure from your city to an adjacent city containing 2 or fewer Hollow Men figures. (2)\n\nSaboteur: As an action, discard a City card to remove a Hollow Men figure from a city matching the color of the card. (2)\n\nRehab Nurse: As an action, discard 2 Player cards to take 1 City card of your choice from Package 6 and add it to your hand. (1)",
+			"mechanics": {
+				"timing": "game end upgrade",
+				"trigger": null,
+				"effect": "Add these stickers to the pool of character abilities.",
+				"restrictions": [],
+				"costs": {
+					"Misinformation Specialist": 2,
+					"Saboteur": 2,
+					"Rehab Nurse": 1
+				},
+				"sourceGuids": ["a4381e"]
+			}
+		}
+	],
+	"bags": [],
+	"summary": "Three character abilities and the pool card that prices them. Misinformation Specialist 2, Saboteur 2, Rehab Nurse 1. The orange cost circles are on the pool card, not on the stickers. Corner badge on the pool card is 28."
+}

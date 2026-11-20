@@ -1,0 +1,97 @@
+{
+	"door": "29",
+	"folder": 3,
+	"frontImage": "dossiers/folder-3/door-29/front.jpg",
+	"frontText": "29",
+	"items": [
+		{
+			"id": "item-01_navigator",
+			"image": "dossiers/folder-3/door-29/item-01_navigator.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "ability",
+			"title": "Navigator",
+			"placementTarget": "Character card ability slot",
+			"costProductionUnits": 1,
+			"text": "Navigator: Once on your turn, you may do the Chart Sea Lane action without spending any Supply cubes.",
+			"mechanics": {
+				"timing": "once on your turn",
+				"trigger": "When you do the Chart Sea Lane action",
+				"effect": "Do the Chart Sea Lane action without spending any Supply cubes.",
+				"restrictions": ["Once on your turn"],
+				"costPrintedOn": "door-29/item-04.jpg",
+				"sourceGuids": ["eb547c"]
+			}
+		},
+		{
+			"id": "item-02_investigator",
+			"image": "dossiers/folder-3/door-29/item-02_investigator.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "ability",
+			"title": "Investigator",
+			"placementTarget": "Character card ability slot",
+			"costProductionUnits": 3,
+			"text": "Investigator: Once on your turn, as an action, discard a Player card to take a City card from the Player discard pile.",
+			"mechanics": {
+				"timing": "action",
+				"trigger": "Once on your turn",
+				"effect": "Discard a Player card to take a City card from the Player discard pile.",
+				"restrictions": [
+					"Once on your turn",
+					"The taken card is a City card from the Player discard pile",
+					"The discarded card is any Player card"
+				],
+				"costPrintedOn": "door-29/item-04.jpg",
+				"sourceGuids": ["f779d3"]
+			}
+		},
+		{
+			"id": "item-03_soldier",
+			"image": "dossiers/folder-3/door-29/item-03_soldier.jpg",
+			"count": 1,
+			"printedCode": null,
+			"category": "ability",
+			"title": "Soldier",
+			"placementTarget": "Character card ability slot",
+			"costProductionUnits": 2,
+			"text": "Soldier: Discard a City card matching the color of the city you are leaving to prevent exposure from Hollow Men figures in that city.",
+			"mechanics": {
+				"timing": "when leaving a city",
+				"trigger": "When you would be exposed by Hollow Men figures in the city you are leaving",
+				"effect": "Discard a City card matching the color of the city you are leaving to prevent that exposure.",
+				"restrictions": [
+					"The discarded City card must match the color of the city you are leaving",
+					"Prevents exposure from Hollow Men figures in that city"
+				],
+				"costPrintedOn": "door-29/item-04.jpg",
+				"sourceGuids": ["15e4f6"]
+			}
+		},
+		{
+			"id": "item-04",
+			"image": "dossiers/folder-3/door-29/item-04.jpg",
+			"count": 1,
+			"printedCode": "29",
+			"category": "ability-pool-card",
+			"title": "CHARACTER ABILITIES",
+			"placementTarget": null,
+			"costProductionUnits": null,
+			"text": "CHARACTER ABILITIES\nAdd these to your pool of character abilities.\n\nInvestigator: Once on your turn, as an action, discard a Player card to take a City card from the Player discard pile. (3)\n\nSoldier: Discard a City card matching the color of the city you are leaving to prevent exposure from Hollow Men figures in that city. (2)\n\nNavigator: Once on your turn, you may do the Chart Sea Lane action without spending any Supply cubes. (1)",
+			"mechanics": {
+				"timing": "game end upgrade",
+				"trigger": null,
+				"effect": "Add these stickers to the pool of character abilities.",
+				"restrictions": [],
+				"costs": {
+					"Investigator": 3,
+					"Soldier": 2,
+					"Navigator": 1
+				},
+				"sourceGuids": ["c6515d"]
+			}
+		}
+	],
+	"bags": [],
+	"summary": "Three character abilities and the pool card that prices them. Investigator 3, Soldier 2, Navigator 1. Soldier is not printed as an action; it is a discard when leaving a city. Corner badge on the pool card is 29."
+}
