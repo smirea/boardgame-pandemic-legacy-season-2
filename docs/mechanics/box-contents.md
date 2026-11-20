@@ -2,6 +2,10 @@
 
 **Full campaign spoilers.** This reference records where the physical components come from, when they enter play, and how the engine represents their mechanics. Printed codes identify the components. The descriptions paraphrase rules and omit story text.
 
+## Implementation since this audit
+
+The audit below compares the box with the engine as it stood in November 2026. Since then the engine keeps content in these packages and doors (`pack.seals`), and the gaps it lists are closed except: the north and south East Asia map stickers (56, 63) open as one region, the losing-streak bonus applies automatically instead of as a choice, Encore puts the event in hand instead of playing it, the ending tiers are not shown, and the five extra Epidemics are in the box from the start (they only count once door E's rule is in force).
+
 ## Evidence and status
 
 The untouched English Workshop template `2236267539.json` supplies the object census and ordered deck. For cards, the template's `CardID` selects the sheet and the cell on both faces. A state on a scratch-off card represents another face of the same copy. The campaign save `TS_Save_109.json` corroborates consumption and storage through July. The save has 27 opened dossier doors and 36 of the 82 Legacy cards left, headed by August's `08-01`. Its counters, extra bags, decal sources, and retired shells are play aids. The template and published components establish the starting inventory. [Workshop mod](https://steamcommunity.com/sharedfiles/filedetails/?id=2236267539), [Z-Man rulebook](https://cdn.svc.asmodee.net/production-zman/uploads/2024/09/pandemic_legacy_season_2_rules.pdf).
