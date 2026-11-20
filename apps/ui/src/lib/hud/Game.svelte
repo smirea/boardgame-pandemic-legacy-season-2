@@ -1623,7 +1623,7 @@
 		flex-direction: column;
 		gap: 0.4rem;
 		width: 22rem;
-		max-height: min(72%, 28rem);
+		max-height: min(72vh, 28rem);
 		padding: 0.6rem;
 		border: 1px solid var(--line-strong);
 		border-radius: 3px;
