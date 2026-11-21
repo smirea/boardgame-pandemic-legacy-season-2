@@ -319,6 +319,8 @@ export type Unlock =
 	| { t: 'frequencyHint' }
 	/** Opens a door or package, when it is still sealed. */
 	| { t: 'open'; seal: Seal }
+	/** A Legacy card's scratch-off box (`<code>:<n>`) that is scratched only when `unlessOpen` is still sealed. */
+	| { t: 'scratch'; box: string; unlessOpen: Seal }
 	/** Forced opening, when still sealed: the explorer's reward is lost and nothing counts toward an objective. */
 	| { t: 'perimeter'; seal: Seal; penalty?: Unlock[] };
 

@@ -60,7 +60,7 @@ So supply cubes are armour. Your main job between objectives is keeping cubes on
 
 **Epidemic odds.** The Player deck is stacked in equal piles with one epidemic in each. The chance in `status` follows the pile being drawn, so it is not simply epidemics divided by cards.
 
-**Event timing.** Quiet Night skips the next Infect step. Played before the first flip of an Infect step, that is the step it skips. Second Wind can only be played during the action step. When an Epidemic strikes while someone holds Resilience, the game pauses before the reshuffle so it can be played on the city that was just hit.
+**Event timing.** One Quiet Night skips the next Infect step. Played before the first flip of an Infect step, that is the step it skips. Extended Time can only be played during the action step. When an Epidemic strikes while someone holds Resilient Population, the game pauses before the reshuffle so it can be played on the city that was just hit.
 
 **Exposure.** Starting your turn in a city with Plague cubes exposes your character. So does leaving a location that holds Hollow Men. A shelter in the location prevents both. Each exposure scratches one box on your character: nothing, a scar (a permanent penalty), or death. A dead character is gone for the rest of the campaign and you pick or make another.
 
@@ -84,7 +84,7 @@ Each costs 1 action unless `options` shows another cost. `options` is the truth 
 - `search:<card>:<box>`: unlocks with the first region you reveal and stays unlocked. Holding a city's card while standing in that city, scratch one of the card's search boxes. Only some City cards have boxes. A card that has them shows `(2 search boxes)` after its name, and `options` then lists the search. Finds range from supplies to new places to nothing.
 - `buildShelter`, `buildTower`, and others appear in `options` as the year unlocks them. The Legacy briefing at the start of a game says what is new.
 
-A choice that takes several targets is one key with the targets joined by `+`: `do play:safeHouses.241:cairo+lagos+london` places three shelters with one Safe Houses card. `options` lists the single targets.
+A choice that takes several targets is one key with the targets joined by `+`: `do play:safeHouses.241:cairo+lagos+london` places three shelters with one Biodome Prototype card. `options` lists the single targets.
 
 Event cards and companions in your hand are played with `play:...` keys at any time, even on another player's turn. They cost no action. A Rationed Event goes to the discard pile and returns to the reserve for later games. The lead picks as many as the rationing level at setup, which can be none. An Unrationed Event is in every deck until someone plays it: playing it destroys it for good.
 

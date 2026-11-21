@@ -233,7 +233,10 @@ function unlockLine(campaign: Campaign, unlock: BriefedUnlock): string | null {
 			const worth = pack.frequencies.flatMap((reward, index) =>
 				reward && 'seal' in reward ? [pack.frequencyLabels[index]!] : [],
 			);
-			return `The bearings cross on ${worth.length} Monitor frequencies that open a door: ${worth.join(', ')}. The others return up to 2 cards from the discard pile.`;
+			const pairs = pack.frequencies.flatMap((reward, index) =>
+				reward && 'take' in reward && reward.take > 1 ? [pack.frequencyLabels[index]!] : [],
+			);
+			return `The bearings cross on ${worth.length} Monitor frequencies that open a door: ${worth.join(', ')}. ${pairs.join(', ')} returns 2 cards from the discard pile, and the others return 1.`;
 		}
 		case 'gather':
 			return `${unlock.cards} Gather cards join the Infection cards. They start each game in the discard pile and enter the deck with the first Epidemic. When one is flipped, the next city flipped gets a Hollow Man and is not infected. Leaving a location that holds Hollow Men exposes a character.`;
