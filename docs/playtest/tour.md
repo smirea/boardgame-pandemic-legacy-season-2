@@ -1,5 +1,7 @@
 # Tour games: the parts of the year the campaign did not reach
 
+> **November 2026: this count is out of date.** Content now follows the printed archive (`docs/assets`), so the catalogue counts every printed Legacy card, package and door: 382 keys. The recordings below were made before that and replay against today's engine with invariant noise, and they count 186 of the 382. Three Grok playtesters then played the whole campaign, January to December, through the real UI at `/debug/game` (reports and their fixes in the commit history from `907f90d`). Between them they read all 84 Legacy cards, opened all 8 packages and nearly every door, and reached Self-Infect, but never delivered the sample. Those games were not lab recordings, so they do not count here. A new lab campaign is what would refill this count.
+
 Campaign 2 played January to December and touched 181 of the 227 mechanics the playtest lab tracks. The other 46 sat on paths that group never took: two recons, most of the searches and their companions, two jobs, four abilities, two scars, half of the Plan, an outbreak, and a death by exposure. Unit tests covered them. No player had played them.
 
 Four tour games closed that. The same three Grok players (Vex, Sol, Kit) played staged games through the real app, one browser tab each. A stage arranges the table once, on the first action step: pawns, hands, a few cubes, the top of a deck. Every move after it is a player's command, checked by the engine like any other. `apps/playtest/README.md` describes how stages work.
