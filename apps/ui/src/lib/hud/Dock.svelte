@@ -270,17 +270,21 @@
 				</div>
 			{:else}
 				<div class="setup">
-					<div>Pick <strong>{eventsNeeded}</strong> Rationed Events for the deck. {picked.length} chosen.</div>
-					<!-- Every Rationed Event as the card a hand holds, with its full text, so the choice never depends on memory. -->
-					<div class="events" data-testid="rationed-events" in:fly={{ y: 40, duration: 380 }}>
-						{#each rationed as card (card.id)}
-							{@const chosen = picked.includes(card.id)}
-							<div class="pick" class:picked={chosen} data-picked={chosen}>
-								<PlayerCard {card} tone={chosen ? 'play' : null} onclick={() => toggleEvent(card.id)} />
-								{#if chosen}<span class="check" aria-label="chosen" in:fly={{ y: -6, duration: 200 }}>✓</span>{/if}
-							</div>
-						{/each}
-					</div>
+					{#if eventsNeeded === 0}
+						<div data-testid="no-funding">No funding — no rationed events for you.</div>
+					{:else}
+						<div>Pick <strong>{eventsNeeded}</strong> Rationed Events for the deck. {picked.length} chosen.</div>
+						<!-- Every Rationed Event as the card a hand holds, with its full text, so the choice never depends on memory. -->
+						<div class="events" data-testid="rationed-events" in:fly={{ y: 40, duration: 380 }}>
+							{#each rationed as card (card.id)}
+								{@const chosen = picked.includes(card.id)}
+								<div class="pick" class:picked={chosen} data-picked={chosen}>
+									<PlayerCard {card} tone={chosen ? 'play' : null} onclick={() => toggleEvent(card.id)} />
+									{#if chosen}<span class="check" aria-label="chosen" in:fly={{ y: -6, duration: 200 }}>✓</span>{/if}
+								</div>
+							{/each}
+						</div>
+					{/if}
 					<button
 						class="primary"
 						disabled={picked.length !== eventsNeeded}
