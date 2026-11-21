@@ -133,7 +133,7 @@
 				body: [
 					{
 						t: 'p',
-						text: "It's critical that we Recon South America soon, before the Hollow Men sabotage anything important.",
+						text: 'Recon South America soon.',
 					},
 				],
 			},
