@@ -9,7 +9,15 @@
 {#if glyph === 'port'}
 	<b class="glyph port" aria-hidden="true">{'⚓︎'}</b>
 {:else if glyph === 'epidemic'}
-	<b class="glyph epidemic" aria-hidden="true">☣</b>
+	<b class="glyph epidemic" aria-hidden="true">
+		<svg class="bio-svg" viewBox="0 0 24 24">
+			<circle cx="12" cy="12" r="2.2" fill="currentColor" />
+			<path
+				d="M12 4.2a4.3 4.3 0 0 0-3.7 6.5l1.5-.9a2.6 2.6 0 1 1 4.4 0l1.5.9A4.3 4.3 0 0 0 12 4.2Zm-6.8 11.7a4.3 4.3 0 0 0 7.4-.1l-1.5-.9a2.6 2.6 0 1 1-2.2-3.8V9.4a4.3 4.3 0 0 0-3.7 6.5Zm13.6 0a4.3 4.3 0 0 0-3.7-6.5v1.7a2.6 2.6 0 1 1-2.2 3.8l-1.5.9a4.3 4.3 0 0 0 7.4.1Z"
+				fill="currentColor"
+			/>
+		</svg>
+	</b>
 {:else if glyph === 'event'}
 	<b class="glyph event" aria-hidden="true">✦</b>
 {:else if glyph === 'objective'}
@@ -106,12 +114,18 @@
 	.epidemic {
 		display: inline-grid;
 		place-items: center;
-		width: 0.85em;
-		height: 1.05em;
+		width: 0.88em;
+		height: 1.12em;
 		border-radius: 2px;
 		background: #a8261c;
 		color: #f6ead4;
-		font-size: 0.82em;
+		vertical-align: -0.14em;
+	}
+
+	.bio-svg {
+		display: block;
+		width: 0.74em;
+		height: 0.74em;
 	}
 
 	.event {

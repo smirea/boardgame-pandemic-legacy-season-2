@@ -3,7 +3,7 @@ import { CanvasTexture, SRGBColorSpace } from 'three';
 /** Something painted onto a transparent sheet, sized in board units, to lie flat on the chart. */
 export type Print = { texture: CanvasTexture; width: number; height: number };
 
-export type PrintedKind = 'center' | 'tower' | 'shelter' | 'lab';
+export type PrintedKind = 'center' | 'tower' | 'shelter' | 'lab' | 'infested';
 
 const PX_PER_UNIT = 64;
 const NAME_FONT = '"IM Fell English"';
@@ -210,10 +210,10 @@ export function printSticker(kind: PrintedKind, size: number): Print {
 		context.translate(r, r);
 		context.beginPath();
 		context.arc(0, 0, r * 0.94, 0, Math.PI * 2);
-		context.fillStyle = kind === 'lab' ? '#dfe8ef' : '#f1e7cf';
+		context.fillStyle = kind === 'lab' ? '#dfe8ef' : kind === 'infested' ? '#dde4cb' : '#f1e7cf';
 		context.fill();
 		context.lineWidth = r * 0.1;
-		context.strokeStyle = kind === 'lab' ? '#3d618f' : '#7a3a22';
+		context.strokeStyle = kind === 'lab' ? '#3d618f' : kind === 'infested' ? '#3b5210' : '#7a3a22';
 		context.stroke();
 		context.beginPath();
 		context.arc(0, 0, r * 0.78, 0, Math.PI * 2);
@@ -280,5 +280,34 @@ function glyph(context: CanvasRenderingContext2D, kind: PrintedKind) {
 			context.closePath();
 			context.fill();
 			return;
+		case 'infested': {
+			// Plague rat silhouette: arched haunch, pointed snout, upright ear, tucked paws, and S-curved tail.
+			context.moveTo(-0.34, 0.22);
+			context.bezierCurveTo(-0.36, -0.14, -0.06, -0.32, 0.16, -0.14);
+			context.quadraticCurveTo(0.24, -0.28, 0.32, -0.2);
+			context.quadraticCurveTo(0.34, -0.1, 0.28, -0.04);
+			context.lineTo(0.5, 0.1);
+			context.quadraticCurveTo(0.48, 0.18, 0.34, 0.2);
+			context.lineTo(0.24, 0.28);
+			context.lineTo(0.18, 0.28);
+			context.lineTo(0.16, 0.22);
+			context.lineTo(-0.12, 0.22);
+			context.lineTo(-0.18, 0.3);
+			context.lineTo(-0.28, 0.3);
+			context.closePath();
+			context.fill();
+			// Tail curling up behind the haunch.
+			context.beginPath();
+			context.lineWidth = 0.085;
+			context.moveTo(-0.32, 0.2);
+			context.bezierCurveTo(-0.56, 0.24, -0.58, -0.16, -0.34, -0.32);
+			context.stroke();
+			// Pale eye dot.
+			context.beginPath();
+			context.fillStyle = '#dde4cb';
+			context.arc(0.32, 0.05, 0.038, 0, Math.PI * 2);
+			context.fill();
+			return;
+		}
 	}
 }

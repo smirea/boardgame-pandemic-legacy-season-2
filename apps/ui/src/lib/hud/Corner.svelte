@@ -188,6 +188,12 @@
 			</span>
 		</button>
 
+		{#if active}
+			<span class="turn-rail" class:on-left={right} data-testid="current-turn-rail" aria-label="Current turn"
+				>Current turn</span
+			>
+		{/if}
+
 		{#if reading && traits.length}
 			<!-- The whole character card, readable: beside the seat on the side facing the board. -->
 			<div
@@ -368,6 +374,44 @@
 	.slip.highlighted {
 		outline: 3px solid #f7d68b;
 		outline-offset: 3px;
+	}
+
+	.turn-rail {
+		position: absolute;
+		top: 50%;
+		left: calc(100% + 0.35rem);
+		transform: translateY(-50%);
+		writing-mode: vertical-rl;
+		text-orientation: mixed;
+		font-size: 0.66rem;
+		font-weight: 800;
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+		color: #ffe394;
+		text-shadow:
+			0 0 8px rgb(255 206 92 / 0.95),
+			0 0 18px rgb(227 178 60 / 0.7),
+			0 1px 2px rgb(0 0 0 / 0.85);
+		pointer-events: none;
+		user-select: none;
+		white-space: nowrap;
+		animation: turn-glow 2s ease-in-out 3;
+	}
+
+	.turn-rail.on-left {
+		left: auto;
+		right: calc(100% + 0.35rem);
+		transform: translateY(-50%) rotate(180deg);
+	}
+
+	@keyframes turn-glow {
+		50% {
+			color: #fff4cf;
+			text-shadow:
+				0 0 12px rgb(255 224 128 / 1),
+				0 0 26px rgb(227 178 60 / 0.95),
+				0 1px 2px rgb(0 0 0 / 0.85);
+		}
 	}
 
 	.portrait {

@@ -52,6 +52,7 @@
 		tower: [-2.9, -2.5],
 		shelter: [-2.9, 2.7],
 		lab: [3.1, 2.8],
+		infested: [-3.4, -1.95],
 	} as const;
 	const DISC = CITY_TOP - LAND_HEIGHT;
 	/**
@@ -105,7 +106,8 @@
 						kind: structure.kind,
 					})),
 					...(state.lab ? [{ part: 'lab' as const, kind: 'lab' as const }] : []),
-				].map(entry => ({ ...entry, print: printSticker(entry.kind, 2.1) }))
+					...(state.infested ? [{ part: 'city' as const, kind: 'infested' as const }] : []),
+				].map(entry => ({ ...entry, print: printSticker(entry.kind, entry.kind === 'infested' ? 2.0 : 2.1) }))
 			: [],
 	);
 	const built = (kind: 'center' | 'tower' | 'shelter') =>

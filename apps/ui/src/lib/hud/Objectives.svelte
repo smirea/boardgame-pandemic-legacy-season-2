@@ -236,7 +236,15 @@
 		<div class="incidents" class:surge data-testid="incidents" data-flash={flash} aria-label={left(limit - filled)}>
 			{#key flash}{#if flash}<span class="flash" aria-hidden="true"></span>{/if}{/key}
 			{#each { length: limit } as _, index (index)}
-				<i bind:this={pips[index]} class:on={index < filled} class:last={index === limit - 1} class:away={!dealt}></i>
+				<i bind:this={pips[index]} class:on={index < filled} class:last={index === limit - 1} class:away={!dealt}>
+					{#if index === limit - 1}
+						<svg class="skull-pip" viewBox="0 0 24 24" aria-hidden="true" data-testid="incident-skull">
+							<path
+								d="M12 2.5C7.3 2.5 4 5.7 4 10c0 2.4 1.1 4.4 2.8 5.6V18c0 .8.7 1.5 1.5 1.5h7.4c.8 0 1.5-.7 1.5-1.5v-2.4C18.9 14.4 20 12.4 20 10c0-4.3-3.3-7.5-8-7.5Zm-3.1 9.2a1.7 1.7 0 1 1 0-3.4 1.7 1.7 0 0 1 0 3.4Zm6.2 0a1.7 1.7 0 1 1 0-3.4 1.7 1.7 0 0 1 0 3.4Zm-4.6 6.3v-2h1.2v2h-1.2Zm2.3 0v-2H14v2h-1.2Z"
+							/>
+						</svg>
+					{/if}
+				</i>
 			{/each}
 			<span class="left" class:hot={limit - filled <= 2}>{left(limit - filled)}. The game is lost when it fills.</span>
 		</div>
@@ -337,8 +345,8 @@
 	}
 
 	.incidents i.on {
-		border-color: var(--danger);
-		background: var(--danger);
+		border-color: #3b5210;
+		background: #93b236;
 		scale: 1.12;
 	}
 
@@ -347,7 +355,21 @@
 	}
 
 	.incidents i.last {
-		border-color: var(--danger);
+		border-color: #3b5210;
+		display: grid;
+		place-items: center;
+	}
+
+	.skull-pip {
+		width: 0.78rem;
+		height: 0.78rem;
+		rotate: -45deg;
+		fill: #241b13;
+		pointer-events: none;
+	}
+
+	.incidents i.last.on .skull-pip {
+		fill: #1b2608;
 	}
 
 	.left {
@@ -387,9 +409,9 @@
 		z-index: 80;
 		width: 0.95rem;
 		height: 0.95rem;
-		border: 2px solid #fff4ec;
-		background: var(--danger);
-		box-shadow: 0 0 0.8rem rgb(207 91 62 / 0.8);
+		border: 2px solid #f4fbe2;
+		background: #93b236;
+		box-shadow: 0 0 0.8rem rgb(147 178 54 / 0.85);
 		pointer-events: none;
 	}
 </style>

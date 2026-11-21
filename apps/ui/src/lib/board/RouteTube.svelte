@@ -36,15 +36,9 @@
 	const RADIAL = 6;
 	const curve = $derived(routeCurve(route));
 	const segments = $derived(Math.max(16, Math.round(curve.getLength() * 2)));
-	const tube = $derived(new TubeGeometry(curve, segments, ghost ? 0.09 : route.kind === 'sea' ? 0.22 : 0.2, RADIAL));
-	const halo = $derived(!ghost && route.kind === 'sea' ? new TubeGeometry(curve, segments, 0.32, RADIAL) : null);
-	const dashes = $derived(
-		dashTexture(
-			Math.max(3, Math.round(curve.getLength() / (route.kind === 'sea' ? 2.1 : 1.6))),
-			route.kind === 'sea' ? 3 : 1,
-			1,
-		),
-	);
+	const tube = $derived(new TubeGeometry(curve, segments, ghost ? 0.09 : route.kind === 'sea' ? 0.16 : 0.2, RADIAL));
+	const halo = $derived(!ghost && route.kind === 'sea' ? new TubeGeometry(curve, segments, 0.23, RADIAL) : null);
+	const dashes = $derived(dashTexture(Math.max(3, Math.round(curve.getLength() / 1.6)), 1, 1));
 
 	// A route that appears mid-game draws itself from its first city to its second.
 	const drawn = new Tween(
@@ -63,7 +57,14 @@
 
 {#if halo}
 	<T.Mesh geometry={halo} renderOrder={1}>
-		<T.MeshBasicMaterial color="#e8f3fa" transparent opacity={0.55} depthWrite={false} />
+		<T.MeshBasicMaterial
+			color="#ffffff"
+			alphaMap={dashes}
+			alphaTest={0.5}
+			transparent
+			opacity={0.28}
+			depthWrite={false}
+		/>
 	</T.Mesh>
 {/if}
 
@@ -71,14 +72,7 @@
 	{#if ghost}
 		<T.MeshBasicMaterial color="#3a2e22" alphaMap={dashes} alphaTest={0.5} transparent opacity={0.5} />
 	{:else if route.kind === 'sea'}
-		<T.MeshStandardMaterial
-			color="#135d92"
-			emissive="#0d446e"
-			emissiveIntensity={0.45}
-			roughness={0.55}
-			alphaMap={dashes}
-			alphaTest={0.5}
-		/>
+		<T.MeshStandardMaterial color="#2d5873" roughness={0.8} alphaMap={dashes} alphaTest={0.5} />
 	{:else}
 		<T.MeshStandardMaterial color="#8e3a24" roughness={0.75} />
 	{/if}

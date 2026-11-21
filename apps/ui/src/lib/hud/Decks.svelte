@@ -92,7 +92,19 @@
 </script>
 
 {#snippet cardIcon(color: string, glyph?: string)}
-	<span class="card-icon" style:--band={color} style:--on={inkOn(color)} aria-hidden="true">{glyph ?? ''}</span>
+	<span class="card-icon" style:--band={color} style:--on={inkOn(color)} aria-hidden="true">
+		{#if glyph === '☣'}
+			<svg class="bio-svg" viewBox="0 0 24 24">
+				<circle cx="12" cy="12" r="2.2" fill="currentColor" />
+				<path
+					d="M12 4.2a4.3 4.3 0 0 0-3.7 6.5l1.5-.9a2.6 2.6 0 1 1 4.4 0l1.5.9A4.3 4.3 0 0 0 12 4.2Zm-6.8 11.7a4.3 4.3 0 0 0 7.4-.1l-1.5-.9a2.6 2.6 0 1 1-2.2-3.8V9.4a4.3 4.3 0 0 0-3.7 6.5Zm13.6 0a4.3 4.3 0 0 0-3.7-6.5v1.7a2.6 2.6 0 1 1-2.2 3.8l-1.5.9a4.3 4.3 0 0 0 7.4.1Z"
+					fill="currentColor"
+				/>
+			</svg>
+		{:else}
+			{glyph ?? ''}
+		{/if}
+	</span>
 {/snippet}
 
 {#snippet deck(which: 'player' | 'infection', label: string, color: string, count: string, action: DeckAction)}
@@ -180,7 +192,7 @@
 					<dt><RichText text="Epidemic draw chance" /></dt>
 					<dd class:hot={player.epidemicNextDraw > 0.5}>{percent(player.epidemicNextDraw)}</dd>
 					{#if player.epidemicWithin}
-						<dt><RichText text="An Epidemic comes within" /></dt>
+						<dt><RichText text="Epidemic comes within" /></dt>
 						<dd>{player.epidemicWithin} cards</dd>
 					{/if}
 				</dl>
@@ -422,15 +434,21 @@
 		display: inline-grid;
 		place-items: center;
 		flex: none;
-		width: 0.8rem;
-		height: 1.1rem;
+		width: 0.85rem;
+		height: 1.15rem;
 		border: 1px solid color-mix(in srgb, var(--band) 55%, #000);
 		border-radius: 2px;
 		background: linear-gradient(172deg, var(--band), color-mix(in srgb, var(--band) 80%, #140c06));
 		box-shadow: inset 0 0 0 1.5px rgb(255 248 228 / 0.16);
 		color: var(--on);
-		font-size: 0.58rem;
+		font-size: 0.62rem;
 		line-height: 1;
+	}
+
+	.bio-svg {
+		display: block;
+		width: 0.72rem;
+		height: 0.72rem;
 	}
 
 	.deck .card-icon {
