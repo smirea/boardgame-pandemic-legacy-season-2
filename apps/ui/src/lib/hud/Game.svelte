@@ -2361,9 +2361,4 @@
 	.menu .danger {
 		color: var(--danger);
 	}
-
-	.menu p {
-		margin: 0;
-		color: var(--muted);
-	}
 </style>
