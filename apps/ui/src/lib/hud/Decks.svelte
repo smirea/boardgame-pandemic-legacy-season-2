@@ -1,20 +1,27 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { cityDef } from '@repo/game';
-	import type { CityId, Insights, PlayerDeckKind } from '@repo/game';
+	import type { CityId, Insights, PlayerDeckKind, World } from '@repo/game';
 	import { fade, fly } from 'svelte/transition';
 	import { CITY_COLOR } from '#lib/board/CityMarker.svelte';
 	import { inkOn } from '#lib/color.ts';
-	import { cityName } from './labels.svelte.ts';
-	import { GLYPH, KIND_COLOR } from './PlayerCard.svelte';
+	import { sortHand } from './handOrder.ts';
+	import { cardName, cityName } from './labels.svelte.ts';
+	import { cardColor, GLYPH, KIND_COLOR } from './PlayerCard.svelte';
 	import { HOLLOW_COLOR } from './rich.ts';
 	import type { Rich } from './rich.ts';
 	import RichText from './RichText.svelte';
 
 	type DeckAction = { left: number; busy?: boolean; onclick: () => void } | null;
-	type Props = { info: Insights; dealt: boolean; drawPlayer?: DeckAction; drawInfection?: DeckAction };
+	type Props = {
+		info: Insights;
+		world?: World;
+		dealt: boolean;
+		drawPlayer?: DeckAction;
+		drawInfection?: DeckAction;
+	};
 
-	let { info, dealt, drawPlayer = null, drawInfection = null }: Props = $props();
+	let { info, world, dealt, drawPlayer = null, drawInfection = null }: Props = $props();
 
 	const percent = (value: number) => `${Math.round(value * 100)}%`;
 	const INFECTION = '#2c2733';
@@ -51,6 +58,35 @@
 			]);
 	const discard = $derived(names(infection.discard));
 	const setAside = $derived(names(infection.gameEnd));
+	const playerDiscardIds = $derived(world?.game?.playerDiscard ?? []);
+	const playerDiscard = $derived.by((): Rich => {
+		if (!world || !playerDiscardIds.length) return [];
+		const cards = sortHand(
+			playerDiscardIds.flatMap(id => world.campaign.playerCards[id] ?? []),
+			card => cardName(world, card.id),
+		);
+		const groups = new Map<string, { card: (typeof cards)[number]; count: number }>();
+		for (const card of cards) {
+			const key =
+				card.kind === 'city' ? `city:${card.city}` : card.kind === 'event' ? `event:${card.event}` : card.kind;
+			const existing = groups.get(key);
+			if (existing) existing.count += 1;
+			else groups.set(key, { card, count: 1 });
+		}
+		return [...groups.values()].flatMap(({ card, count }, index) => [
+			...(index ? [', '] : []),
+			{
+				glyph:
+					card.kind === 'epidemic'
+						? ('epidemic' as const)
+						: card.kind === 'event'
+							? ('event' as const)
+							: ('card' as const),
+				color: cardColor(card),
+				text: `${cardName(world, card.id)}${count > 1 ? ` ×${count}` : ''}`,
+			},
+		]);
+	});
 
 	let open = $state<'player' | 'infection' | null>(null);
 </script>
@@ -141,14 +177,10 @@
 				<dl>
 					<dt>Turns of draws left</dt>
 					<dd>{player.turnsLeft}</dd>
-					<dt>Epidemics still in the deck</dt>
-					<dd>{player.epidemicsLeft}</dd>
-					<dt>Epidemics drawn</dt>
-					<dd>{player.epidemicsDrawn}</dd>
-					<dt>Epidemic in the next draw</dt>
+					<dt><RichText text="Epidemic draw chance" /></dt>
 					<dd class:hot={player.epidemicNextDraw > 0.5}>{percent(player.epidemicNextDraw)}</dd>
 					{#if player.epidemicWithin}
-						<dt>An Epidemic comes within</dt>
+						<dt><RichText text="An Epidemic comes within" /></dt>
 						<dd>{player.epidemicWithin} cards</dd>
 					{/if}
 				</dl>
@@ -159,25 +191,26 @@
 						</li>
 					{/each}
 				</ul>
+				<section data-testid="player-discard-section">
+					<h4>Discard pile <b>{playerDiscardIds.length}</b></h4>
+					<p>
+						{#if playerDiscard.length}<RichText text={playerDiscard} />{:else}empty{/if}
+					</p>
+				</section>
 			{:else}
 				<strong>Player deck</strong>
-				<p>Shuffled with its Epidemics and dealt once setup is done.</p>
+				<p><RichText text="Shuffled with its Epidemics and dealt once setup is done." /></p>
 			{/if}
 		</div>
 	{:else if open === 'infection' && !drawInfection}
 		<div class="tip wide" role="tooltip" data-testid="infection-deck-tip" transition:fade={{ duration: 140 }}>
 			<strong>Infection deck, {infectionCards} cards</strong>
-			<dl>
-				{#if infection.opening}
+			{#if infection.opening}
+				<dl>
 					<dt>The opening infection flips</dt>
 					<dd>{infection.rate}</dd>
-				{:else}
-					<dt>Infection rate</dt>
-					<dd>{infection.rate}, then {infection.nextRate}</dd>
-				{/if}
-				<dt>Incidents before the game is lost</dt>
-				<dd class:hot={info.incidentsLeft <= 2}>{info.incidentsLeft}</dd>
-			</dl>
+				</dl>
+			{/if}
 			{#each infection.strata as stratum, index (index)}
 				<section>
 					<h4>
@@ -202,7 +235,9 @@
 				<p>
 					{#if discard.length}<RichText text={discard} />{:else}empty{/if}
 				</p>
-				{#if discard.length}<p class="note">An Epidemic shuffles these back on top of the deck.</p>{/if}
+				{#if discard.length}<p class="note">
+						<RichText text="An Epidemic shuffles these back on top of the deck." />
+					</p>{/if}
 			</section>
 			{#if setAside.length}
 				<section>
@@ -211,18 +246,6 @@
 					<p class="note">
 						Out of play until the game ends: new cities' cards, forsaken cities' and quarantined cards.
 					</p>
-				</section>
-			{/if}
-			{#if infection.atRisk.length}
-				<section>
-					<h4>An incident if hit next</h4>
-					<ul class="risk">
-						{#each infection.atRisk.slice(0, 8) as risk (risk.city)}
-							<li>
-								<span>{cityName(risk.city)}{risk.outbreak ? ', outbreak' : ''}</span><b>{percent(risk.odds)}</b>
-							</li>
-						{/each}
-					</ul>
 				</section>
 			{/if}
 		</div>
@@ -434,7 +457,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.4rem;
-		width: 17rem;
+		width: 19rem;
 		padding: 0.45rem 0.7rem 0.6rem;
 		border-radius: 2px;
 		background: var(--slip);
@@ -497,15 +520,14 @@
 		text-align: right;
 	}
 
-	ul.risk {
-		grid-template-columns: 1fr auto;
-		border: 0;
-		padding: 0;
-	}
-
 	section {
 		padding-top: 0.35rem;
 		border-top: 1px solid var(--slip-line);
+	}
+
+	.tip > strong + section {
+		padding-top: 0;
+		border-top: 0;
 	}
 
 	h4 {

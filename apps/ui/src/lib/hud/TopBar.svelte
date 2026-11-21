@@ -72,7 +72,7 @@
 
 			<div class="deck-strip">
 				{#if game && info}
-					<Decks {info} {dealt} {drawPlayer} {drawInfection} />
+					<Decks {info} world={snap.world} {dealt} {drawPlayer} {drawInfection} />
 				{/if}
 
 				<div class="legacy-wrap">
