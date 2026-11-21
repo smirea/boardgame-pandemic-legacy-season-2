@@ -78,7 +78,7 @@
 					>{status === 'connected' ? `${Math.max(1, players)} online` : status}</span
 				>
 			{/if}
-			<button onclick={onreset} title="Fit the revealed map (F)">Fit map</button>
+			<button onclick={onreset} title="Fit the revealed map">Fit map</button>
 			<button
 				onclick={onbox}
 				title="The packages and dossier doors opened so far"

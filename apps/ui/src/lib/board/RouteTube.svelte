@@ -1,8 +1,17 @@
 <script lang="ts" module>
 	import { DataTexture, NearestFilter, RepeatWrapping, RGBAFormat } from 'three';
 
-	function dashTexture(dashes: number) {
-		const texture = new DataTexture(new Uint8Array([255, 255, 255, 255, 0, 0, 0, 255]), 2, 1, RGBAFormat);
+	function dashTexture(dashes: number, solid = 2, gap = 1) {
+		const total = solid + gap;
+		const data = new Uint8Array(total * 4);
+		for (let i = 0; i < total; i++) {
+			const v = i < solid ? 255 : 0;
+			data[i * 4] = v;
+			data[i * 4 + 1] = v;
+			data[i * 4 + 2] = v;
+			data[i * 4 + 3] = 255;
+		}
+		const texture = new DataTexture(data, total, 1, RGBAFormat);
 		texture.wrapS = RepeatWrapping;
 		texture.magFilter = NearestFilter;
 		texture.repeat.set(dashes, 1);
@@ -27,8 +36,15 @@
 	const RADIAL = 6;
 	const curve = $derived(routeCurve(route));
 	const segments = $derived(Math.max(16, Math.round(curve.getLength() * 2)));
-	const tube = $derived(new TubeGeometry(curve, segments, ghost ? 0.09 : route.kind === 'sea' ? 0.16 : 0.2, RADIAL));
-	const dashes = $derived(dashTexture(Math.max(3, Math.round(curve.getLength() / 1.6))));
+	const tube = $derived(new TubeGeometry(curve, segments, ghost ? 0.09 : route.kind === 'sea' ? 0.22 : 0.2, RADIAL));
+	const halo = $derived(!ghost && route.kind === 'sea' ? new TubeGeometry(curve, segments, 0.32, RADIAL) : null);
+	const dashes = $derived(
+		dashTexture(
+			Math.max(3, Math.round(curve.getLength() / (route.kind === 'sea' ? 2.1 : 1.6))),
+			route.kind === 'sea' ? 3 : 1,
+			1,
+		),
+	);
 
 	// A route that appears mid-game draws itself from its first city to its second.
 	const drawn = new Tween(
@@ -39,15 +55,30 @@
 		drawn.target = 1;
 	});
 	$effect(() => {
-		tube.setDrawRange(0, Math.round(drawn.current * segments) * RADIAL * 6);
+		const count = Math.round(drawn.current * segments) * RADIAL * 6;
+		tube.setDrawRange(0, count);
+		halo?.setDrawRange(0, count);
 	});
 </script>
 
-<T.Mesh geometry={tube}>
+{#if halo}
+	<T.Mesh geometry={halo} renderOrder={1}>
+		<T.MeshBasicMaterial color="#e8f3fa" transparent opacity={0.55} depthWrite={false} />
+	</T.Mesh>
+{/if}
+
+<T.Mesh geometry={tube} renderOrder={2}>
 	{#if ghost}
 		<T.MeshBasicMaterial color="#3a2e22" alphaMap={dashes} alphaTest={0.5} transparent opacity={0.5} />
 	{:else if route.kind === 'sea'}
-		<T.MeshStandardMaterial color="#2d5873" roughness={0.8} alphaMap={dashes} alphaTest={0.5} />
+		<T.MeshStandardMaterial
+			color="#135d92"
+			emissive="#0d446e"
+			emissiveIntensity={0.45}
+			roughness={0.55}
+			alphaMap={dashes}
+			alphaTest={0.5}
+		/>
 	{:else}
 		<T.MeshStandardMaterial color="#8e3a24" roughness={0.75} />
 	{/if}

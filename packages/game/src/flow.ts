@@ -1,6 +1,6 @@
 import { current, isDraft } from 'immer';
 import { pack } from './content/pack';
-import type { EventId, ObjectiveId, ScarId } from './content/types';
+import type { ObjectiveId, ScarId } from './content/types';
 import { drawBottom, drawPiled, drawTop, newDeck, newPiledDeck, stackOnTop } from './decks';
 import {
 	breakthrough,
@@ -543,10 +543,24 @@ export function infectStep(world: World) {
 		game.pending.push({ t: 'cordon' });
 }
 
-export function epidemic(world: World) {
-	const { campaign, game } = world as { campaign: World['campaign']; game: Game };
+/** Step 1 of an Epidemic: advance the infection rate and apply Rattled, then wait for Step 2 (Infect). */
+export function epidemicIncrease(world: World) {
+	const { game } = world as { campaign: World['campaign']; game: Game };
 	game.epidemics += 1;
 	game.rateIndex = Math.min(game.rateIndex + 1, numbers.infectionRates.length - 1);
+	for (const seat of game.seats) {
+		const shaken = player(game, seat);
+		if (!has(world, seat, 'rattled') || shaken.supplies === 0) continue;
+		game.stockpile += shaken.supplies;
+		shaken.supplies = 0;
+		log(game, { t: 'note', text: `${characterOf(world, seat).name} dropped every cube they carried` });
+	}
+	game.pending.push({ t: 'epidemicInfect' });
+}
+
+/** Step 2 of an Epidemic: draw the bottom (or stored) Infection card, strip its cubes, then wait for Step 3 (Intensify). */
+export function epidemicInfect(world: World) {
+	const { campaign, game } = world as { campaign: World['campaign']; game: Game };
 	let struck: DrawnCity | null = null;
 	const stored = campaign.stored.infection;
 	if (hasRule(campaign, 'epidemicFromStorage')) {
@@ -563,13 +577,6 @@ export function epidemic(world: World) {
 				});
 			}
 		}
-	}
-	for (const seat of game.seats) {
-		const shaken = player(game, seat);
-		if (!has(world, seat, 'rattled') || shaken.supplies === 0) continue;
-		game.stockpile += shaken.supplies;
-		shaken.supplies = 0;
-		log(game, { t: 'note', text: `${characterOf(world, seat).name} dropped every cube they carried` });
 	}
 	struck ??= drawInfectionCard(world, 'bottom');
 	let removed = 0;
@@ -588,24 +595,7 @@ export function epidemic(world: World) {
 		rate: numbers.infectionRates[game.rateIndex]!,
 		removed,
 	});
-	const resilient = holdsEvent(world, ['resilience', 'massInoculation']);
-	const lockable = game.infectionDiscard.some(id => {
-		const card = campaign.infectionCards[id];
-		return card?.kind === 'city' && card.improvement === 'lockdown';
-	});
-	// These events and Lockdown act on the discard pile, which is about to be reshuffled away, so the game waits for them.
-	if ((resilient || lockable) && game.infectionDiscard.length > 0) game.pending.push({ t: 'intensify' });
-	else intensify(world);
-}
-
-function holdsEvent(world: World, events: readonly EventId[]): boolean {
-	const { campaign, game } = world as { campaign: World['campaign']; game: Game };
-	return game.seats.some(seat =>
-		player(game, seat).hand.some(id => {
-			const card = campaign.playerCards[id];
-			return card?.kind === 'event' && events.includes(card.event);
-		}),
-	);
+	game.pending.push({ t: 'intensify' });
 }
 
 /** The last step of an Epidemic: the Infection discard pile goes back on top of the deck, shuffled. */
@@ -629,8 +619,7 @@ export function drawPlayerCard(world: World) {
 	log(game, { t: 'draw', seat: game.active, card: id });
 	if (campaign.playerCards[id]!.kind === 'epidemic') {
 		game.playerDiscard.push(id);
-		if (holdsEvent(world, ['antidote'])) game.pending.push({ t: 'epidemicDrawn' });
-		else epidemic(world);
+		game.pending.push({ t: 'epidemicDrawn' });
 	} else {
 		player(game, game.active).hand.push(id);
 	}

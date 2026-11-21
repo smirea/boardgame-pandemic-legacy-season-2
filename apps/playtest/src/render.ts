@@ -66,7 +66,9 @@ function pendingLine(world: World, pending: Decision): string {
 		case 'intensify':
 			return 'An Epidemic just struck and its discard pile is about to be reshuffled onto the deck. A player holding Resilience or Mass Inoculation may play it now. Otherwise the active player passes with `do decide:skip`';
 		case 'epidemicDrawn':
-			return 'An Epidemic was just drawn and has not struck yet. A player holding Antidote may play it now to discard the Epidemic with no effect. Otherwise the active player passes with `do decide:skip` and it strikes';
+			return 'An Epidemic was just drawn and has not struck yet. A player holding Antidote may play it now to discard the Epidemic with no effect. Otherwise advance Step 1 (Increase) with `do decide:skip`';
+		case 'epidemicInfect':
+			return 'Epidemic Step 1 (Increase) is done. Advance Step 2 (draw the bottom Infection card) with `do decide:skip`';
 		case 'cordon':
 			return 'Cordon: any player may discard a card to end this Infect step now, or the active player skips';
 		case 'shield':

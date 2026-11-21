@@ -11,6 +11,7 @@
 	import type { OrbitControls as OrbitControlsImpl } from 'three/examples/jsm/controls/OrbitControls.js';
 	import { typing } from '#lib/keys.ts';
 	import CityMarker from './CityMarker.svelte';
+	import Drawings from './Drawings.svelte';
 	import Flags from './Flags.svelte';
 	import { FogMask } from './chart';
 	import { loadChart } from './chartLoader';
@@ -48,6 +49,11 @@
 		/** A click on a recon route's box. */
 		onrecon?: (route: string) => void;
 		onpointer?: (point: BoardPoint | null) => void;
+		/** True while the user holds F to draw on the board with the mouse. */
+		drawing?: boolean;
+		ondrawstart?: (point: BoardPoint) => void;
+		ondrawmove?: (point: BoardPoint) => void;
+		ondrawend?: () => void;
 		/** Bump to return the camera to the fitted view of everything explored. */
 		resetView?: number;
 		/** A pointer over part of a city, or off it when `event` is null, with where the city's name is printed. */
@@ -73,6 +79,10 @@
 		view,
 		oncity,
 		onpointer,
+		drawing = false,
+		ondrawstart,
+		ondrawmove,
+		ondrawend,
 		onhint,
 		hoverCity = null,
 		onrecon,
@@ -576,6 +586,7 @@
 <T.PerspectiveCamera makeDefault fov={FOV} near={1} far={900} bind:ref={camera}>
 	<OrbitControls
 		bind:ref={controls}
+		enabled={!drawing}
 		enableDamping
 		dampingFactor={0.12}
 		minDistance={25}
@@ -692,6 +703,32 @@
 {#each view.cursors as cursor (cursor.id)}
 	<RemoteCursor {cursor} />
 {/each}
+
+{#if view.drawings?.length}
+	<Drawings drawings={view.drawings} />
+{/if}
+
+{#if drawing}
+	<T.Mesh
+		rotation.x={-Math.PI / 2}
+		position={[boardCentre.x, CITY_TOP + 0.45, boardCentre.z]}
+		onpointerdown={event => {
+			event.stopPropagation();
+			ondrawstart?.({ x: event.point.x, z: event.point.z });
+		}}
+		onpointermove={event => {
+			event.stopPropagation();
+			ondrawmove?.({ x: event.point.x, z: event.point.z });
+		}}
+		onpointerup={event => {
+			event.stopPropagation();
+			ondrawend?.();
+		}}
+	>
+		<T.PlaneGeometry args={[boardSize.width, boardSize.depth]} />
+		<T.MeshBasicMaterial transparent opacity={0} depthWrite={false} />
+	</T.Mesh>
+{/if}
 
 {#each view.marks?.rings ?? [] as ring (`${ring.city}:${ring.color}`)}
 	<Ring at={layout[ring.city]!} color={ring.color} />

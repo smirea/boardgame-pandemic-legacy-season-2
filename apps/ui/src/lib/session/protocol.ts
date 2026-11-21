@@ -1,9 +1,12 @@
 import type { Command, PublicState } from '@repo/game';
 
+export type Stroke = { id: string; points: { x: number; z: number }[] };
+
 export type Msg =
 	| { t: 'state'; state: PublicState }
 	| { t: 'command'; command: Command }
-	| { t: 'rejected'; reason: string };
+	| { t: 'rejected'; reason: string }
+	| { t: 'draw'; player: string; strokes: Stroke[] };
 
 /** A cursor position on the board plane, or null when the pointer is off the board. */
 export type Presence = { x: number; z: number } | null;
@@ -26,6 +29,18 @@ export function parseMsg(raw: unknown): Msg {
 	if (raw['t'] === 'command' && isRecord(raw['command']) && typeof raw['command']['type'] === 'string')
 		return raw as Msg;
 	if (raw['t'] === 'rejected' && typeof raw['reason'] === 'string') return raw as Msg;
+	if (raw['t'] === 'draw' && typeof raw['player'] === 'string' && Array.isArray(raw['strokes'])) {
+		const valid = (raw['strokes'] as unknown[]).every(
+			stroke =>
+				isRecord(stroke) &&
+				typeof stroke['id'] === 'string' &&
+				Array.isArray(stroke['points']) &&
+				(stroke['points'] as unknown[]).every(
+					point => isRecord(point) && Number.isFinite(point['x']) && Number.isFinite(point['z']),
+				),
+		);
+		if (valid) return raw as Msg;
+	}
 	throw new TypeError('unknown message');
 }
 

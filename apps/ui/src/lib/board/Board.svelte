@@ -38,6 +38,10 @@
 		/** A right click on a city, which takes back what a click put there. */
 		oncityback?: (city: CityId) => void;
 		onpointer?: (point: BoardPoint | null) => void;
+		drawing?: boolean;
+		ondrawstart?: (point: BoardPoint) => void;
+		ondrawmove?: (point: BoardPoint) => void;
+		ondrawend?: () => void;
 		resetView?: number;
 		covered?: Covered[];
 		focus?: { city: CityId; x: number; y: number; glide?: number; zoom?: number } | null;
@@ -58,6 +62,10 @@
 		onrecon,
 		oncityback,
 		onpointer,
+		drawing = false,
+		ondrawstart,
+		ondrawmove,
+		ondrawend,
 		resetView,
 		covered,
 		focus,
@@ -188,10 +196,12 @@
 
 <div
 	class="board"
+	class:drawing
 	role="presentation"
 	{@attach feedback(undefined, () => ({ hovered: hovered?.city ?? null }))}
 	bind:this={element}
 	oncontextmenu={event => {
+		if (drawing) return;
 		if (hovered?.city && oncityback) {
 			event.preventDefault();
 			oncityback(hovered.city);
@@ -199,6 +209,7 @@
 	}}
 	onpointerdown={event => (downAt = { x: event.clientX, y: event.clientY })}
 	onclick={event => {
+		if (drawing) return;
 		// A drag pans the chart, and a click on a city is the city's. Anything else on the board is a miss.
 		const dragged = Math.abs(event.clientX - downAt.x) + Math.abs(event.clientY - downAt.y) > 6;
 		if (!dragged && !hovered?.city && !(event.target as Element).closest('.ring')) onmiss?.();
@@ -212,9 +223,13 @@
 		<Scene
 			bind:this={scene}
 			{view}
-			{oncity}
+			oncity={city => !drawing && oncity?.(city)}
 			{onrecon}
 			{onpointer}
+			{drawing}
+			{ondrawstart}
+			{ondrawmove}
+			{ondrawend}
 			{onhint}
 			hoverCity={hovered?.city ?? null}
 			{onstockpile}
@@ -375,6 +390,14 @@
 		background:
 			radial-gradient(ellipse 70% 60% at 50% 46%, rgb(255 226 170 / 0.09), transparent 70%),
 			radial-gradient(ellipse at 50% 50%, #221e18 0%, var(--table) 78%);
+	}
+
+	.board.drawing,
+	.board.drawing :global(canvas) {
+		cursor:
+			url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23f5ecd8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath fill='%23221a12' d='M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z'/%3E%3C/svg%3E")
+				2 22,
+			crosshair;
 	}
 
 	/* A paper slip beside the pointer, tinted with the city's colour, its heading a band of that colour:

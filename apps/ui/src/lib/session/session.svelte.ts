@@ -14,7 +14,7 @@ import { createHost, createMemoryTransport, createPeerId, createWebRtcTransport,
 import type { ConnectionStatus, PeerInfo, Session } from '@repo/net';
 import { LS } from '../storage';
 import { parseMsg, parsePresence } from './protocol';
-import type { Msg, Presence } from './protocol';
+import type { Msg, Presence, Stroke } from './protocol';
 
 export type Mode = 'solo' | 'host' | 'join';
 
@@ -92,10 +92,12 @@ export type SessionView = Pick<
 	| 'status'
 	| 'peers'
 	| 'cursors'
+	| 'drawings'
 	| 'notice'
 	| 'mode'
 	| 'send'
 	| 'pointer'
+	| 'draw'
 	| 'exportSave'
 	| 'importSave'
 	| 'newCampaign'
@@ -117,6 +119,7 @@ export class GameSession {
 	status = $state<ConnectionStatus>('connecting');
 	peers = $state.raw<PeerInfo[]>([]);
 	cursors = $state.raw<Record<string, { x: number; z: number }>>({});
+	drawings = $state.raw<Record<string, Stroke[]>>({});
 	notice = $state<{ text: string; at: number } | null>(null);
 	fatal = $state<string | null>(null);
 
@@ -157,7 +160,14 @@ export class GameSession {
 			this.peers = peers;
 			const present = new Set(peers.filter(peer => peer.connected).map(peer => peer.id as string));
 			this.cursors = Object.fromEntries(Object.entries(this.cursors).filter(([id]) => present.has(id)));
-			if (this.#actor && this.state) this.#net.send({ t: 'state', state: this.state });
+			this.drawings = Object.fromEntries(
+				Object.entries(this.drawings).filter(([id]) => id === this.selfId || present.has(id)),
+			);
+			if (this.#actor && this.state) {
+				this.#net.send({ t: 'state', state: this.state });
+				for (const [player, strokes] of Object.entries(this.drawings))
+					if (strokes.length) this.#net.send({ t: 'draw', player, strokes });
+			}
 			this.#tidyLobby();
 		});
 		this.#net.on('presence', (presence, from) => {
@@ -177,6 +187,14 @@ export class GameSession {
 			if (msg.t === 'command' && this.#actor) {
 				const reason = this.#apply(msg.command, this.#nameOf(from));
 				if (reason) this.#net.send({ t: 'rejected', reason }, from);
+			}
+			if (msg.t === 'draw') {
+				const owner = this.#actor ? (from as string) : msg.player;
+				if (!this.#actor && owner === this.selfId) return;
+				const { [owner]: _gone, ...rest } = this.drawings;
+				this.drawings = msg.strokes.length ? { ...rest, [owner]: msg.strokes } : rest;
+				if (this.#actor && this.#net.status !== 'closed')
+					this.#net.send({ t: 'draw', player: owner, strokes: msg.strokes });
 			}
 		});
 		this.status = this.#net.status;
@@ -321,6 +339,13 @@ export class GameSession {
 
 	pointer(point: Presence) {
 		if (this.status === 'connected') this.#net.sendPresence(point);
+	}
+
+	draw(strokes: Stroke[]) {
+		const id = this.selfId as string;
+		const { [id]: _gone, ...rest } = this.drawings;
+		this.drawings = strokes.length ? { ...rest, [id]: strokes } : rest;
+		if (this.status === 'connected') this.#net.send({ t: 'draw', player: id, strokes });
 	}
 
 	#save(): Save | null {

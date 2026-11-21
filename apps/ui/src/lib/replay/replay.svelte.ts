@@ -38,6 +38,7 @@ export class ReplaySession implements SessionView {
 	readonly status = 'connected' as const;
 	readonly peers = [];
 	readonly cursors = {};
+	readonly drawings = {};
 	readonly notice = null;
 	readonly mode = 'join' as const;
 	readonly player = '' as PlayerId;
@@ -45,6 +46,7 @@ export class ReplaySession implements SessionView {
 	send() {}
 	rename() {}
 	pointer() {}
+	draw() {}
 	importSave() {}
 	newCampaign() {}
 	exportRecord() {

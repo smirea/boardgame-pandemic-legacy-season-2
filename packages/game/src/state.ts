@@ -183,10 +183,12 @@ export type Decision =
 	| { t: 'giveCard'; seat: SeatId }
 	/** Any player may discard a card to end the Infect step early. */
 	| { t: 'cordon' }
-	/** An Epidemic has struck and its discard pile is about to go back on the deck. Held open for a player with Resilience. */
-	| { t: 'intensify' }
-	/** An Epidemic was drawn and has not struck yet. Held open for a player who can cancel it. */
+	/** An Epidemic was drawn and has not struck yet. Held open for Antidote or the player to start the Epidemic. */
 	| { t: 'epidemicDrawn' }
+	/** Step 1 (Increase) is done; waiting for Step 2 (draw the bottom or stored Infection card). */
+	| { t: 'epidemicInfect' }
+	/** Step 2 (Infect) is done; waiting for Step 3 (Intensify) and any discard-pile Events or Lockdown. */
+	| { t: 'intensify' }
 	/** Any player may discard a card of this colour to stop the pending cube removal. */
 	| { t: 'shield'; city: CityId; color: Color };
 

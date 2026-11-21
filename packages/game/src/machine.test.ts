@@ -679,6 +679,9 @@ describe('storage and shields', () => {
 		}, 'playing.draw');
 		const bottom = gameOf(actor).infectionDeck.order.at(-1)!;
 		send(actor, { type: 'DRAW' });
+		send(actor, { type: 'DECIDE', decide: { d: 'skip' } });
+		send(actor, { type: 'DECIDE', decide: { d: 'skip' } });
+		send(actor, { type: 'DECIDE', decide: { d: 'skip' } });
 		expect(gameOf(actor).locations[city('lagos')]!.supplies).toBe(0);
 		expect(worldOf(actor).campaign.stored.infection).toEqual([]);
 		expect(gameOf(actor).infectionDeck.order.at(-1)).toBe(bottom);
@@ -884,7 +887,7 @@ describe('events and companions', () => {
 		surplus: world => void world.game!.players[A]!.used.push('madeSupplies'),
 	};
 
-	test('a drawn Epidemic waits while someone holds Antidote, and strikes when the table passes', () => {
+	test('a drawn Epidemic steps through Increase, Infect, and Intensify, pausing for Antidote before Increase', () => {
 		const drawing = (antidote: boolean) =>
 			late((world, game) => {
 				if (antidote) conjure(world, B, { kind: 'event', event: 'antidote' });
@@ -895,14 +898,24 @@ describe('events and companions', () => {
 			}, 'playing.draw');
 		const plain = drawing(false);
 		send(plain, { type: 'DRAW' });
+		expect(gameOf(plain).pending).toEqual([{ t: 'epidemicDrawn' }]);
+		expect(gameOf(plain).epidemics).toBe(0);
+		send(plain, { type: 'DECIDE', decide: { d: 'skip' } });
 		expect(gameOf(plain).epidemics).toBe(1);
+		expect(gameOf(plain).pending).toEqual([{ t: 'epidemicInfect' }]);
+		send(plain, { type: 'DECIDE', decide: { d: 'skip' } });
+		expect(gameOf(plain).pending).toEqual([{ t: 'intensify' }]);
+		send(plain, { type: 'DECIDE', decide: { d: 'skip' } });
+		expect(gameOf(plain).pending).toEqual([]);
 
 		const held = drawing(true);
 		send(held, { type: 'DRAW' });
 		expect(gameOf(held).pending).toEqual([{ t: 'epidemicDrawn' }]);
 		expect(gameOf(held).epidemics).toBe(0);
-		send(held, { type: 'DECIDE', decide: { d: 'skip' } });
-		expect(gameOf(held).epidemics).toBe(1);
+		const antidote = gameOf(held).players[B]!.hand.at(-1)!;
+		send(held, { type: 'PLAY', seat: B, card: antidote, play: { e: 'antidote' } });
+		expect(gameOf(held).pending).toEqual([]);
+		expect(gameOf(held).epidemics).toBe(0);
 	});
 
 	test('with Opal found and door 13 open, making supplies at a haven or supply center takes 2 cubes, elsewhere 1', () => {
@@ -1534,6 +1547,8 @@ describe('the remaining abilities and the Jade lab', () => {
 			worldOf(actor).campaign.infectionCards[gameOf(actor).infectionDeck.order.at(-1)!] as unknown as { city: CityId }
 		).city;
 		send(actor, { type: 'DRAW' });
+		send(actor, { type: 'DECIDE', decide: { d: 'skip' } });
+		send(actor, { type: 'DECIDE', decide: { d: 'skip' } });
 		expect(gameOf(actor).locations[struck]!.supplies).toBe(2);
 	});
 
@@ -1873,6 +1888,8 @@ test('an Epidemic waits for a Resilience holder before the discard pile is reshu
 		game.drawsLeft = 2;
 	}, 'playing.draw');
 	send(actor, { type: 'DRAW' });
+	send(actor, { type: 'DECIDE', decide: { d: 'skip' } });
+	send(actor, { type: 'DECIDE', decide: { d: 'skip' } });
 	const struck = gameOf(actor).infectionDiscard.at(-1)!;
 	expect(gameOf(actor).pending[0]).toEqual({ t: 'intensify' });
 	expect(reject(worldOf(actor), phase(actor), { type: 'DRAW' })).not.toBeNull();
@@ -2205,6 +2222,8 @@ test('an Epidemic respects the improvement on the card it strikes with', () => {
 		game.locations[city('cairo')]!.supplies = 3;
 	}, 'playing.draw');
 	send(actor, { type: 'DRAW' });
+	send(actor, { type: 'DECIDE', decide: { d: 'skip' } });
+	send(actor, { type: 'DECIDE', decide: { d: 'skip' } });
 	expect(gameOf(actor).locations[city('cairo')]!.supplies).toBe(3);
 });
 
@@ -2217,6 +2236,8 @@ test('an Epidemic waits before the reshuffle when a Lockdown card is in the disc
 		give(world, B, cityCards(world, 'tokyo', 1));
 	}, 'playing.draw');
 	send(actor, { type: 'DRAW' });
+	send(actor, { type: 'DECIDE', decide: { d: 'skip' } });
+	send(actor, { type: 'DECIDE', decide: { d: 'skip' } });
 	expect(gameOf(actor).pending[0]).toEqual({ t: 'intensify' });
 	const seat = gameOf(actor).seats.find(other => gameOf(actor).players[other]!.hand.length > 0)!;
 	send(actor, { type: 'LOCKDOWN', card, seat, pay: gameOf(actor).players[seat]!.hand[0]! });
@@ -2490,6 +2511,9 @@ describe('infection', () => {
 		const bottomCity = (worldOf(actor).campaign.infectionCards[before.infectionDeck.order.at(-1)!] as { city: CityId })
 			.city;
 		send(actor, { type: 'DRAW' });
+		send(actor, { type: 'DECIDE', decide: { d: 'skip' } });
+		send(actor, { type: 'DECIDE', decide: { d: 'skip' } });
+		send(actor, { type: 'DECIDE', decide: { d: 'skip' } });
 		const after = gameOf(actor);
 		expect(after.rateIndex).toBe(before.rateIndex + 1);
 		expect(after.locations[bottomCity]).toMatchObject({ supplies: 0, plague: 0 });
@@ -2966,6 +2990,7 @@ describe('scars and the sticker pool', () => {
 			game.drawsLeft = 2;
 		}, 'playing.draw');
 		send(actor, { type: 'DRAW' });
+		send(actor, { type: 'DECIDE', decide: { d: 'skip' } });
 		expect(gameOf(actor).players[B]!.supplies).toBe(0);
 	});
 

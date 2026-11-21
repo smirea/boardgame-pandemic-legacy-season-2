@@ -36,6 +36,7 @@
 	import { placeSeats } from './seats.ts';
 	import type { Place } from './seats.ts';
 	import Dock from './Dock.svelte';
+	import EpidemicSequence from './EpidemicSequence.svelte';
 	import InfectionDraw from './InfectionDraw.svelte';
 	import { InfectionShow } from './infectionShow.svelte.ts';
 	import {
@@ -1003,21 +1004,74 @@
 				color: SEAT_COLORS[(index + 1) % SEAT_COLORS.length]!,
 				...point,
 			})),
+			drawings: Object.entries(session.drawings)
+				.filter(([, strokes]) => strokes.length > 0)
+				.map(([id, strokes], index) => {
+					const seat = world.table.seats.find(entry => entry.player === id)?.seat;
+					const seatIdx = seat && game ? game.seats.indexOf(seat) : -1;
+					const color =
+						seatIdx >= 0
+							? SEAT_COLORS[seatIdx]!
+							: id === session.player
+								? SEAT_COLORS[0]!
+								: SEAT_COLORS[(index + 1) % SEAT_COLORS.length]!;
+					return { id, color, strokes };
+				}),
 			fx,
 			skull: show.skull,
 			marks,
 		};
 	});
 
-	/** Space advances the turn, Z undoes, F fits the map, Escape closes whatever is open. */
+	let penHeld = $state(false);
+	let activeStrokeId: string | null = null;
+	let strokeSeq = 0;
+
+	function ondrawstart(point: BoardPoint) {
+		if (!penHeld || spectator) return;
+		const id = `${Date.now()}-${++strokeSeq}`;
+		activeStrokeId = id;
+		const existing = session.drawings[session.player] ?? [];
+		session.draw([...existing, { id, points: [point] }]);
+	}
+
+	function ondrawmove(point: BoardPoint) {
+		if (!penHeld || !activeStrokeId || spectator) return;
+		const existing = session.drawings[session.player] ?? [];
+		const index = existing.findIndex(stroke => stroke.id === activeStrokeId);
+		if (index < 0) return;
+		const stroke = existing[index]!;
+		const last = stroke.points[stroke.points.length - 1];
+		if (last && Math.hypot(point.x - last.x, point.z - last.z) < 0.4) return;
+		const next = existing.slice();
+		next[index] = { id: stroke.id, points: [...stroke.points, point] };
+		session.draw(next);
+	}
+
+	function ondrawend() {
+		activeStrokeId = null;
+	}
+
+	/** Space advances the turn, Z undoes, F draws on the map (and clears your own drawing on press), Escape closes. */
 	function onkey(event: KeyboardEvent) {
 		if (event.key === 'Escape') {
 			cancel();
 			menu = false;
 		}
-		if (typing(event) || onButton(event) || event.metaKey || event.ctrlKey || !game) return;
+		if (typing(event) || event.metaKey || event.ctrlKey || event.altKey) return;
 		const key = event.key.toLowerCase();
-		if (key === 'f') resetView++;
+		if (
+			key === 'f' &&
+			!event.repeat &&
+			!spectator &&
+			!document.querySelector('[aria-modal="true"], .tabletop-unboxing')
+		) {
+			penHeld = true;
+			activeStrokeId = null;
+			if ((session.drawings[session.player] ?? []).length) session.draw([]);
+			return;
+		}
+		if (onButton(event) || !game) return;
 		if (key === 'z' && snap.canUndo && canAct) send({ type: 'UNDO' });
 		if (key !== ' ') return;
 		if (show.queued > 0 && !show.playing && !spectator) {
@@ -1027,9 +1081,26 @@
 		}
 		if (!canAct) return;
 		event.preventDefault();
+		const pending = game.pending[0]?.t;
+		if (pending === 'epidemicDrawn' || pending === 'epidemicInfect' || pending === 'intensify') {
+			send({ type: 'DECIDE', decide: { d: 'skip' } });
+			return;
+		}
 		if (snap.phase === 'playing.actions') send({ type: 'END_ACTIONS', seat: game.active });
 		else if (snap.phase === 'playing.draw') send({ type: 'DRAW' });
 		else if (snap.phase === 'playing.infect' && !show.playing) send({ type: 'INFECT' });
+	}
+
+	function onkeyup(event: KeyboardEvent) {
+		if (event.key.toLowerCase() === 'f') {
+			penHeld = false;
+			activeStrokeId = null;
+		}
+	}
+
+	function onblur() {
+		penHeld = false;
+		activeStrokeId = null;
 	}
 
 	function downloadRecord() {
@@ -1052,7 +1123,7 @@
 	}
 </script>
 
-<svelte:window onkeydown={onkey} />
+<svelte:window onkeydown={onkey} {onkeyup} {onblur} onpointerup={ondrawend} />
 
 {#snippet actionPanel()}
 	{#if game && !spectator && actionChoices.length}
@@ -1170,6 +1241,10 @@
 				: null}
 			onring={key => step({ t: 'start', a: key, via: 'ring' })}
 			onpointer={point => session.pointer(point)}
+			drawing={penHeld}
+			{ondrawstart}
+			{ondrawmove}
+			{ondrawend}
 			{resetView}
 			{covered}
 			focus={showFocus ?? focus}
@@ -1455,6 +1530,9 @@
 				{/if}
 				<div class="menu-hotkey">Show original scans <kbd>Hold O</kbd></div>
 			</div>
+		{/if}
+		{#if !spectator && game}
+			<EpidemicSequence {world} />
 		{/if}
 	</main>
 

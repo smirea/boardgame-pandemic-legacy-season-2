@@ -414,8 +414,13 @@ export function decideLabel(world: World, decide: Decide): string {
 			return `Give ${cardName(world, decide.card)} to ${seatName(world, decide.to)}`;
 		case 'shield':
 			return `${seatName(world, decide.seat)} discards ${cardName(world, decide.card)}`;
-		case 'skip':
+		case 'skip': {
+			const pending = world.game?.pending[0]?.t;
+			if (pending === 'epidemicDrawn') return 'Start Epidemic';
+			if (pending === 'epidemicInfect') return 'Draw bottom card';
+			if (pending === 'intensify') return 'Intensify';
 			return 'Skip';
+		}
 	}
 }
 
@@ -430,8 +435,9 @@ const DECISION_TITLES: Record<Decision['t'], string> = {
 	giveCard: 'Give a card to another player',
 	shield: 'Discard a matching card to keep the cube?',
 	cordon: 'Discard any card to stop the rest of this Infect step?',
-	intensify: 'An Epidemic struck. Play Resilience or Mass Inoculation now, or pass to reshuffle the discard pile',
-	epidemicDrawn: 'An Epidemic was drawn. Play Antidote to discard it with no effect, or pass to let it strike',
+	epidemicDrawn: 'Epidemic drawn — play Antidote to cancel, or start the Epidemic.',
+	epidemicInfect: 'Epidemic Step 2: Infect — draw the bottom Infection card.',
+	intensify: 'Epidemic Step 3: Intensify — play Resilience, Mass Inoculation, Exile, or Lockdown now, or reshuffle.',
 };
 
 /** The prompt for a pending choice, naming who and where it concerns. */

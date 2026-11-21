@@ -382,7 +382,14 @@
 						{#if choices.length}
 							<div class="chips">
 								{#each choices as decide, index (index)}
-									<button onclick={() => send({ type: 'DECIDE', decide })}>{decideLabel(world, decide)}</button>
+									{@const epidemicAdvance =
+										decide.d === 'skip' &&
+										(pending.t === 'epidemicDrawn' || pending.t === 'epidemicInfect' || pending.t === 'intensify')}
+									<button
+										class:primary={epidemicAdvance}
+										data-testid={epidemicAdvance ? 'epidemic-advance' : undefined}
+										onclick={() => send({ type: 'DECIDE', decide })}>{decideLabel(world, decide)}</button
+									>
 								{/each}
 							</div>
 						{:else}

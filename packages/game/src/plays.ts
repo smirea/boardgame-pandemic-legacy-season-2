@@ -4,7 +4,8 @@ import type { AbilityId, Color, ScarId } from './content/types';
 import { drawPiled, restackTop } from './decks';
 import {
 	canTakeScar,
-	epidemic,
+	epidemicIncrease,
+	epidemicInfect,
 	freeCharacters,
 	hasScar,
 	intensify,
@@ -134,6 +135,7 @@ export function checkPlay(world: World, seat: SeatId, card: CardId, play: Play, 
 	const unresolved = game.pending[0]?.t;
 	if (unresolved === 'shield' || unresolved === 'cordon') return 'Resolve the card that was just drawn first';
 	if (unresolved === 'intensify' && !DURING_INTENSIFY.has(play.e)) return 'The Epidemic must finish first';
+	if (unresolved === 'epidemicInfect') return 'Draw the bottom Infection card first';
 	if (unresolved === 'epidemicDrawn' && play.e !== 'antidote') return 'The Epidemic must strike first';
 	const onGrid = grid(campaign);
 	const onMap = (city: CityId) => campaign.locations[city]?.revealed === true;
@@ -545,6 +547,7 @@ const OPTIONAL = new Set([
 	'shield',
 	'cordon',
 	'intensify',
+	'epidemicInfect',
 	'epidemicDrawn',
 ]);
 
@@ -645,7 +648,13 @@ export function applyDecide(world: World, decide: Decide) {
 		return;
 	}
 	game.pending.shift();
-	if (decide.d === 'skip' && pending && pending.t !== 'intensify' && pending.t !== 'epidemicDrawn')
+	if (
+		decide.d === 'skip' &&
+		pending &&
+		pending.t !== 'intensify' &&
+		pending.t !== 'epidemicInfect' &&
+		pending.t !== 'epidemicDrawn'
+	)
 		log(game, {
 			t: 'note',
 			text:
@@ -654,7 +663,8 @@ export function applyDecide(world: World, decide: Decide) {
 					: `The choice was passed: ${PASSED[pending.t] ?? pending.t}`,
 		});
 	if (decide.d === 'skip' && pending?.t === 'intensify') intensify(world);
-	if (decide.d === 'skip' && pending?.t === 'epidemicDrawn') epidemic(world);
+	if (decide.d === 'skip' && pending?.t === 'epidemicInfect') epidemicInfect(world);
+	if (decide.d === 'skip' && pending?.t === 'epidemicDrawn') epidemicIncrease(world);
 	if (decide.d === 'skip' || !pending) return;
 	const seat = ('seat' in pending ? pending.seat : null) ?? ('seat' in decide ? decide.seat : null) ?? game.active;
 	switch (decide.d) {

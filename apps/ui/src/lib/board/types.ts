@@ -53,6 +53,8 @@ export type PawnView = {
 
 export type CursorView = { id: string; name: string; color: string; x: number; z: number };
 
+export type DrawingView = { id: string; color: string; strokes: { id: string; points: BoardPoint[] }[] };
+
 export type FxKind = 'infect' | 'plague' | 'outbreak' | 'epidemic' | 'connected' | 'build' | 'hollow';
 
 export type Fx = { id: number; city: CityId; kind: FxKind; delay: number };
@@ -102,6 +104,7 @@ export type BoardView = {
 	stockpile: number | null;
 	recon: ReconBoxView[];
 	cursors: CursorView[];
+	drawings?: DrawingView[];
 	fx: Fx[];
 	/** A skull over a city struck by an incident, about to become the plague cube in slot `at`. */
 	skull: { key: number; city: CityId; at: number } | null;
