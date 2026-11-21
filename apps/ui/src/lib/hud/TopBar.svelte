@@ -9,7 +9,6 @@
 	import { MONTHS } from './labels.svelte.ts';
 	import StorageDeck from './StorageDeck.svelte';
 
-	type DeckAction = { left: number; busy?: boolean; onclick: () => void } | null;
 	type Props = {
 		snap: PublicState;
 		info: Insights | null;
@@ -18,8 +17,6 @@
 		solo: boolean;
 		/** True while the Legacy deck is lifted out onto the table during an interactive briefing. */
 		legacyOut?: boolean;
-		drawPlayer?: DeckAction;
-		drawInfection?: DeckAction;
 		hasDrawings?: boolean;
 		erasing?: boolean;
 		oneraser?: () => void;
@@ -37,8 +34,6 @@
 		players,
 		solo,
 		legacyOut = false,
-		drawPlayer = null,
-		drawInfection = null,
 		hasDrawings = false,
 		erasing = false,
 		oneraser,
@@ -85,7 +80,7 @@
 
 			<div class="deck-strip">
 				{#if game && info}
-					<Decks {info} world={snap.world} {dealt} {drawPlayer} {drawInfection} />
+					<Decks {info} world={snap.world} {dealt} />
 				{/if}
 
 				<div class="legacy-wrap">

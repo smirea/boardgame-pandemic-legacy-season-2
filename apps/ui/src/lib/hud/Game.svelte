@@ -23,6 +23,7 @@
 	import { onButton, typing } from '#lib/keys.ts';
 	import { LS } from '#lib/storage.ts';
 	import { setContext, tick, untrack } from 'svelte';
+	import type { Attachment } from 'svelte/attachments';
 	import type { Snippet } from 'svelte';
 	import { backOut } from 'svelte/easing';
 	import { fade, fly, scale } from 'svelte/transition';
@@ -37,7 +38,10 @@
 	import type { Place } from './seats.ts';
 	import Dock from './Dock.svelte';
 	import EpidemicSequence from './EpidemicSequence.svelte';
-	import InfectionDraw from './InfectionDraw.svelte';
+	import CardFlights from './CardFlights.svelte';
+	import { createTurnAdmin } from './turnAdmin.svelte.ts';
+	import TurnDesk from './TurnDesk.svelte';
+	import TurnInterlude from './TurnInterlude.svelte';
 	import { InfectionShow } from './infectionShow.svelte.ts';
 	import { cardName, cityName, seatName, SEAT_COLORS, setNames } from './labels.svelte.ts';
 	import Lobby from './Lobby.svelte';
@@ -161,7 +165,7 @@
 		},
 		// The Actions panel comes and goes with the turn's steps and grows columns, and is one of the panels measured.
 		get layout() {
-			return [seatAt, listed, actionColumns];
+			return [seatAt, listed, actionColumns, admin.deck];
 		},
 	});
 	let resetView = $state(0);
@@ -214,7 +218,6 @@
 			filter: choosing.filter,
 			toasts: toasts.map(({ text, tone }) => ({ text, tone })),
 			banner: banner && { title: banner.title, text: banner.text },
-			turnBanner: turnBanner && { name: turnBanner.name, color: turnBanner.color },
 			parts: view.read(),
 		};
 	}
@@ -235,10 +238,9 @@
 		deckOpen = next.deck;
 		hotkeysOpen = next.hotkeys ?? false;
 		viewing = next.viewing;
-		heldAnnouncements = next.toasts.length > 0 || next.banner !== null || next.turnBanner !== null;
+		heldAnnouncements = next.toasts.length > 0 || next.banner !== null;
 		toasts = next.toasts.map(entry => ({ id: nextFx++, ...entry }));
 		banner = next.banner && { id: nextFx++, ...next.banner };
-		turnBanner = next.turnBanner && { id: nextFx++, ...next.turnBanner };
 		view.write(next.parts);
 		board?.setCamera(next.camera);
 		for (const [index, entry] of next.steps.entries()) {
@@ -279,7 +281,6 @@
 	let fx = $state.raw<Fx[]>([]);
 	let toasts = $state.raw<{ id: number; text: string; tone: string }[]>([]);
 	let banner = $state.raw<{ id: number; title: string; text: string } | null>(null);
-	let turnBanner = $state.raw<{ id: number; name: string; color: string } | null>(null);
 	let lastSeq = untrack(() => game?.log.at(-1)?.seq ?? 0);
 	let nextFx = 1;
 
@@ -301,7 +302,6 @@
 			untrack(() => {
 				toasts = [];
 				banner = null;
-				turnBanner = null;
 				fx = [];
 			});
 			return;
@@ -314,7 +314,6 @@
 			untrack(() => {
 				toasts = [];
 				banner = null;
-				turnBanner = null;
 			});
 		}
 		const added: Fx[] = [];
@@ -324,23 +323,14 @@
 			if (entry.t === 'connected') pulse(entry.city, 'connected');
 			else if (entry.t === 'structure') pulse(entry.city, 'build');
 			else if (entry.t === 'epidemic') {
-				const id = nextFx++;
-				banner = {
-					id,
-					title: 'Epidemic',
-					text: entry.city
-						? `${cityName(entry.city)} loses ${entry.removed} cubes. Infection rate ${entry.rate}.`
-						: `Infection rate ${entry.rate}.`,
-				};
-				setTimeout(() => banner?.id === id && (banner = null), 3400);
-			} else if (entry.t === 'turn') {
-				const id = nextFx++;
-				turnBanner = {
-					id,
-					name: seatName(world, entry.seat),
-					color: SEAT_COLORS[game!.seats.indexOf(entry.seat)] ?? '#fff',
-				};
-				setTimeout(() => turnBanner?.id === id && (turnBanner = null), 1900);
+				// The banner went up when the Epidemic was started. This is the city its second step struck.
+				if (entry.city)
+					toast(
+						entry.removed > 0
+							? `Epidemic: ${cityName(entry.city)} loses ${entry.removed} cube${entry.removed === 1 ? '' : 's'}`
+							: `Epidemic: ${cityName(entry.city)} had no cubes to lose`,
+						'bad',
+					);
 			} else if (entry.t === 'objective') toast('Objective complete', 'good');
 			else if (entry.t === 'unlock')
 				toast(`Opened: ${pack.seals.find(def => sealKey(def.seal) === entry.seal)?.name}`, 'good');
@@ -386,6 +376,81 @@
 	});
 	$effect(() => () => show.stop());
 
+	// What follows a player's actions is wound up in one place, where the Actions panel stood, for everyone to see.
+	const admin = createTurnAdmin({
+		get world() {
+			return world;
+		},
+		get phase() {
+			return snap.phase;
+		},
+		get info() {
+			return info;
+		},
+		get canAct() {
+			return canAct;
+		},
+		get spectator() {
+			return spectator;
+		},
+		get lived() {
+			return !spectator || announce;
+		},
+		get playable() {
+			return plays.length;
+		},
+		show,
+		send,
+	});
+	// The banner goes up as an Epidemic is started, before its steps are read out.
+	$effect(() => {
+		if (admin.turn.struck === 0) return;
+		untrack(() => {
+			const id = nextFx++;
+			const rate = pack.numbers.infectionRates[game?.rateIndex ?? 0];
+			banner = { id, title: 'Epidemic', text: `The infection rate marker moves on: ${rate} cards a turn.` };
+			setTimeout(() => banner?.id === id && (banner = null), 2600);
+		});
+	});
+	/** Where a drawn card ends up on this screen: its place in the hand held up here, or the seat of whoever drew it. */
+	const flightDest = (card: CardId, seat: SeatId) =>
+		document.querySelector(`[data-testid="hand"] [data-card="${card}"]`) ??
+		document.querySelector(`.place[data-seat="${seat}"] [data-testid="corner-hand"]`) ??
+		document.querySelector(`.place[data-seat="${seat}"]`);
+	// The next player is announced once the last card of the turn before has been played out.
+	const nextUp = $derived.by(() => {
+		const up = admin.turn.turn;
+		if (!up || !game || game.outcome || admin.deck !== null || show.playing || !playing) return null;
+		const character = campaign.characters[game.players[up.seat]?.character as keyof typeof campaign.characters];
+		return {
+			key: up.key,
+			name: seatName(world, up.seat),
+			color: SEAT_COLORS[game.seats.indexOf(up.seat)] ?? '#fff',
+			portrait: character?.portrait ?? null,
+			job: character && !character.jobScar ? character.job : null,
+			mine: owns(up.seat),
+		};
+	});
+	// Where the foot of the Actions panel stood in its column, which is where the desk stands once the panel leaves.
+	const panelFoot = $state<{ left: number | null; right: number | null }>({ left: null, right: null });
+	const notePanel =
+		(side: 'left' | 'right'): Attachment<HTMLElement> =>
+		node => {
+			const note = () => (panelFoot[side] = node.offsetTop + node.offsetHeight);
+			const observer = new ResizeObserver(note);
+			observer.observe(node);
+			note();
+			return () => observer.disconnect();
+		};
+	const standDesk =
+		(side: 'left' | 'right'): Attachment<HTMLElement> =>
+		node => {
+			// A screen that never showed the panel, such as another player's, stands the desk on the seat below it.
+			const seat = node.parentElement?.querySelector<HTMLElement>(':scope > .place.bl, :scope > .place.br');
+			const floor = seat ? seat.offsetTop - 10 : (node.parentElement?.clientHeight ?? 0) * 0.62;
+			node.style.top = `${Math.min(panelFoot[side] ?? floor, floor)}px`;
+		};
+
 	// Animate cards flying out of the Player/Infection deck into Package 6 when inoculated.
 	let seenStoredPlayer = untrack(() => new Set(campaign.stored.player));
 	let seenStoredInfection = untrack(() => new Set(campaign.stored.infection));
@@ -402,19 +467,6 @@
 			seenStoredInfection = new Set(nextInfection);
 			if (lived) flyToStorage(world, added);
 		});
-	});
-
-	const drawPlayerAction = $derived(
-		!spectator && canAct && snap.phase === 'playing.draw' && game && game.drawsLeft > 0 && game.pending.length === 0
-			? { left: game.drawsLeft, onclick: () => send({ type: 'DRAW' }) }
-			: null,
-	);
-	const drawInfectionAction = $derived.by(() => {
-		if (spectator || !game) return null;
-		if (show.queued > 0) return { left: show.queued, busy: show.playing, onclick: () => show.next() };
-		if (canAct && snap.phase === 'playing.infect' && game.infectionsLeft > 0 && game.pending.length === 0)
-			return { left: game.infectionsLeft, busy: show.playing, onclick: () => send({ type: 'INFECT' }) };
-		return null;
 	});
 
 	$effect(() => {
@@ -560,9 +612,9 @@
 			send({ type: 'DECIDE', decide: { d: 'skip' } });
 			return;
 		}
+		// A card still face up beside the deck is read before the next one is turned.
 		if (snap.phase === 'playing.actions') send({ type: 'END_ACTIONS', seat: game.active });
-		else if (snap.phase === 'playing.draw') send({ type: 'DRAW' });
-		else if (snap.phase === 'playing.infect' && !show.playing) send({ type: 'INFECT' });
+		else if (admin.action && !admin.action.busy) admin.action.onclick();
 	}
 
 	function onkeyup(event: KeyboardEvent) {
@@ -597,9 +649,33 @@
 
 <svelte:window onkeydown={onkey} {onkeyup} {onblur} />
 
-{#snippet actionPanel(side: 'left' | 'right')}
-	{#if game && !spectator && actionChoices.length && canAct && snap.phase === 'playing.actions'}
-		<div class="actions-slot" transition:fly={{ x: side === 'left' ? -320 : 320, duration: 360, opacity: 0 }}>
+{#snippet turnSlot(side: 'left' | 'right')}
+	{#if game && admin.deck}
+		<!-- The desk takes the panel's place for the rest of the turn, and everyone at the table sees it. -->
+		<div
+			class="desk-slot {side}"
+			{@attach standDesk(side)}
+			in:fly={{ x: side === 'left' ? -220 : 220, duration: 320, delay: 240 }}
+			out:fly={{ x: side === 'left' ? -220 : 220, duration: 240 }}
+		>
+			<TurnDesk
+				{side}
+				deck={admin.deck}
+				count={admin.count}
+				left={admin.left}
+				action={admin.action}
+				name={seatName(world, admin.seat ?? game.active)}
+				color={SEAT_COLORS[game.seats.indexOf(admin.seat ?? game.active)] ?? '#fff'}
+				epidemic={admin.epidemic !== null}
+				stack={show.stack}
+			/>
+		</div>
+	{:else if game && !spectator && actionChoices.length && canAct && snap.phase === 'playing.actions'}
+		<div
+			class="actions-slot"
+			{@attach notePanel(side)}
+			transition:fly={{ x: side === 'left' ? -320 : 320, duration: 360, opacity: 0 }}
+		>
 			<ActionPanel
 				{snap}
 				seat={game.active}
@@ -624,6 +700,7 @@
 			class="place {place}"
 			class:open={openSeats.includes(seat)}
 			data-place={place}
+			data-seat={seat}
 			role="group"
 			onpointerenter={() => (pointedSeat = seat)}
 			onpointerleave={() => pointedSeat === seat && (pointedSeat = null)}
@@ -644,6 +721,7 @@
 							color={SEAT_COLORS[game.seats.indexOf(seat)]!}
 							selected={viewing === seat}
 							showHand={seat !== dockSeat}
+							arriving={admin.turn.arriving}
 							action="Show this hand in the dock"
 							selectedTag="Hand shown"
 							onselect={() => (viewing = seat)}
@@ -687,8 +765,6 @@
 		players={session.peers.filter(peer => peer.connected).length}
 		solo={session.mode === 'solo' || spectator}
 		legacyOut={legacyDeckOut}
-		drawPlayer={drawPlayerAction}
-		drawInfection={drawInfectionAction}
 		hasDrawings={!spectator && tools.hasDrawings}
 		erasing={tools.tool === 'eraser'}
 		oneraser={() => tools.toggleEraser()}
@@ -732,12 +808,12 @@
 		{#if game && seatAt && snap.phase !== 'upkeep'}
 			<div class="column left" bind:this={leftColumn}>
 				{@render seated('tl')}
-				{#if seatAt.has('tr')}{@render actionPanel('left')}{/if}
+				{#if seatAt.has('tr')}{@render turnSlot('left')}{/if}
 				{@render seated('bl')}
 			</div>
 			<div class="column right" bind:this={rightColumn}>
 				{@render seated('tr')}
-				{#if !seatAt.has('tr')}{@render actionPanel('right')}{/if}
+				{#if !seatAt.has('tr')}{@render turnSlot('right')}{/if}
 				{@render seated('br')}
 			</div>
 		{/if}
@@ -830,17 +906,16 @@
 			{/key}
 		{/if}
 
-		{#if turnBanner && !banner}
-			{#key turnBanner.id}
-				<div
-					class="turn-banner"
-					style:--seat={turnBanner.color}
-					style:--on={inkOn(turnBanner.color)}
-					in:fly={{ y: -24, duration: 320 }}
-					out:fade={{ duration: 450 }}
-				>
-					<i></i>{turnBanner.name}'s turn
-				</div>
+		{#if nextUp && !banner}
+			{#key nextUp.key}
+				<TurnInterlude
+					name={nextUp.name}
+					color={nextUp.color}
+					portrait={nextUp.portrait}
+					job={nextUp.job}
+					mine={nextUp.mine && !spectator}
+					ondone={() => admin.turn.announced(nextUp.key)}
+				/>
 			{/key}
 		{/if}
 
@@ -1042,7 +1117,13 @@
 			</div>
 		{/if}
 		{#if !spectator && game}
-			<EpidemicSequence {world} />
+			<EpidemicSequence
+				{world}
+				{canAct}
+				held={admin.held}
+				who={seatName(world, game.active)}
+				onadvance={admin.advance}
+			/>
 		{/if}
 	</main>
 
@@ -1074,24 +1155,24 @@
 				uses={choosing.cardUses}
 				onplaycard={(seat, card) => choosing.step({ t: 'play', seat, card })}
 				onlockdown={card => choosing.step({ t: 'lockdown', card })}
-				drawInfection={snap.phase === 'playing.infect' ? drawInfectionAction : null}
-				infectionCount={info
-					? info.infection.opening
-						? (info.infection.strata[0]?.size ?? 0)
-						: info.infection.deck
-					: 0}
+				arriving={admin.turn.arriving}
 				setupInfect={snap.phase === 'setup.events' && (show.queued > 0 || show.playing)
-					? { left: show.queued, busy: show.playing, onclick: () => show.next() }
+					? { left: show.queued, busy: show.playing }
 					: null}
 			/>
 		</div>
 	{/if}
-	<InfectionDraw
-		cards={show.stack}
-		draw={snap.phase === 'playing.infect' || (snap.phase === 'setup.events' && (show.queued > 0 || show.playing))
-			? null
-			: drawInfectionAction}
-	/>
+	{#if game}
+		<CardFlights
+			reveals={admin.turn.reveals}
+			epidemic={admin.epidemic}
+			canStart={canAct && !spectator}
+			who={seatName(world, game.active)}
+			onstart={admin.advance}
+			onlanded={key => admin.turn.landed(key)}
+			dest={flightDest}
+		/>
+	{/if}
 </div>
 
 <style>
@@ -1182,6 +1263,19 @@
 		min-width: 15.5rem;
 		min-height: 0;
 		flex: 0 1 auto;
+	}
+
+	/* The desk stands with its foot where the panel's was, out of the column's flow, so nothing moves to make room. */
+	.column > .desk-slot {
+		position: absolute;
+		left: 0;
+		translate: 0 -100%;
+		pointer-events: none;
+	}
+
+	.column > .desk-slot.right {
+		right: 0;
+		left: auto;
 	}
 
 	.column.left .actions-slot {
@@ -1375,9 +1469,10 @@
 	}
 
 	/* The epidemic lands like a quarantine stamp across the chart: it overshoots, settles, and bleeds. */
+	/* Above the Epidemic's panel, which opens under it in the middle of the table. */
 	.banner {
 		position: absolute;
-		top: 30%;
+		top: 6%;
 		left: 50%;
 		z-index: 45;
 		display: flex;
@@ -1418,32 +1513,6 @@
 		to {
 			scale: 1;
 		}
-	}
-
-	.turn-banner {
-		position: absolute;
-		top: 3.3rem;
-		left: 50%;
-		z-index: 44;
-		display: flex;
-		align-items: center;
-		gap: 0.55rem;
-		padding: 0.3rem 1.1rem 0.35rem;
-		border-radius: 2px;
-		background: var(--seat);
-		color: var(--on);
-		box-shadow: 0 0.6rem 1.6rem rgb(0 0 0 / 0.45);
-		font-family: var(--font-display);
-		font-size: 1.15rem;
-		transform: translateX(-50%);
-		pointer-events: none;
-	}
-
-	.turn-banner i {
-		width: 0.55rem;
-		height: 0.55rem;
-		border: 2px solid var(--on);
-		border-radius: 50%;
 	}
 
 	.flash {

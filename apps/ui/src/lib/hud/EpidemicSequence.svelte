@@ -2,7 +2,7 @@
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { pack } from '@repo/game';
 	import type { World } from '@repo/game';
-	import { scale } from 'svelte/transition';
+	import { fade, scale } from 'svelte/transition';
 	import { legacyScans } from '#lib/scans.generated.ts';
 	import { originals, scanUrl } from '#lib/scans.svelte.ts';
 	import { cityName } from './labels.svelte.ts';
@@ -10,20 +10,36 @@
 
 	type Props = {
 		world: World;
+		/** This browser's player is the one resolving the Epidemic. */
+		canAct: boolean;
+		/** Something may still be played before the last step, so it waits for the player in place of running on. */
+		held: boolean;
+		/** Whose turn it is, for everyone who is waiting on them. */
+		who: string;
+		/** Takes the last step now. */
+		onadvance: () => void;
 	};
 
-	let { world }: Props = $props();
+	let { world, canAct, held, who, onadvance }: Props = $props();
 
 	const game = $derived(world.game);
 	const pending = $derived(game?.pending[0]?.t ?? null);
-	const stage = $derived(
-		pending === 'epidemicDrawn' || pending === 'epidemicInfect' || pending === 'intensify' ? pending : null,
-	);
-	const docked = $derived(stage === 'epidemicInfect' || stage === 'intensify');
+	// The card lies beside the deck until its player starts it. This opens once the first step has been taken.
+	const stage = $derived(pending === 'epidemicInfect' || pending === 'intensify' ? pending : null);
+	// It stands aside for the second step, so the city that is struck shows on the board.
+	const docked = $derived(stage === 'intensify');
+	// The first step is shown as just taken for a beat, and then the second as the one about to be.
+	const INCREASE_MS = 1200;
+	let increased = $state(false);
+	$effect(() => {
+		if (stage !== 'epidemicInfect') return void (increased = false);
+		const timer = setTimeout(() => (increased = true), INCREASE_MS);
+		return () => clearTimeout(timer);
+	});
 
 	const rates = pack.numbers.infectionRates;
 	const currentRate = $derived(game ? (rates[game.rateIndex] ?? rates.at(-1)!) : rates[0]!);
-	const nextRate = $derived(game ? (rates[Math.min(game.rateIndex + 1, rates.length - 1)] ?? currentRate) : rates[0]!);
+	const earlierRate = $derived(game ? (rates[Math.max(game.rateIndex - 1, 0)] ?? currentRate) : rates[0]!);
 	const fromStorage = $derived(
 		world.campaign.rules.includes('epidemicFromStorage') && world.campaign.stored.infection.length > 0,
 	);
@@ -39,14 +55,16 @@
 	const originalSrc = $derived(legacyScans['03-07']?.src ? scanUrl(legacyScans['03-07']!.src) : null);
 
 	type StepState = 'pending' | 'active' | 'done';
-	const increaseState = $derived<StepState>(stage === 'epidemicDrawn' ? 'active' : 'done');
-	const infectState = $derived<StepState>(
-		stage === 'epidemicDrawn' ? 'pending' : stage === 'epidemicInfect' ? 'active' : 'done',
-	);
+	const increaseState = $derived<StepState>(stage === 'epidemicInfect' && !increased ? 'active' : 'done');
+	const infectState = $derived<StepState>(stage === 'epidemicInfect' ? (increased ? 'active' : 'pending') : 'done');
 	const intensifyState = $derived<StepState>(stage === 'intensify' ? 'active' : 'pending');
 </script>
 
 {#if stage && game}
+	{#if !docked}
+		<!-- The table steps back while the Epidemic is read out, and returns for the city it strikes. -->
+		<div class="scrim" transition:fade={{ duration: 260 }}></div>
+	{/if}
 	<div
 		class="epidemic-layer"
 		class:docked
@@ -71,8 +89,8 @@
 					<div class="title-wrap">
 						<strong>EPIDEMIC</strong>
 						<span class="sub">
-							{#if stage === 'epidemicDrawn'}
-								Card drawn · resolve in order
+							{#if stage === 'epidemicInfect' && !increased}
+								Step 1 of 3 · Increase
 							{:else if stage === 'epidemicInfect'}
 								Step 2 of 3 · Infect
 							{:else}
@@ -91,8 +109,10 @@
 								<span class="pill">
 									{#if increaseState === 'done'}
 										Rate {currentRate}
+									{:else if earlierRate === currentRate}
+										Rate stays {currentRate}
 									{:else}
-										Rate {currentRate} → {nextRate}
+										Rate {earlierRate} → {currentRate}
 									{/if}
 								</span>
 							</div>
@@ -135,6 +155,19 @@
 							<p>
 								<RichText text="Shuffle the Infection discard pile and place it on top of the Infection deck." />
 							</p>
+							{#if intensifyState === 'active' && held}
+								<!-- An Event or a Lockdown may come first, so this step waits for its player. -->
+								<div class="hold">
+									{#if canAct}
+										<button class="go" onclick={onadvance} data-testid="epidemic-advance" title="Space"
+											>Intensify</button
+										>
+										<span>An Event or a Lockdown may be played first.</span>
+									{:else}
+										<span>Waiting for {who}.</span>
+									{/if}
+								</div>
+							{/if}
 						</div>
 					</li>
 				</ol>
@@ -152,10 +185,40 @@
 		pointer-events: none;
 	}
 
+	.scrim {
+		position: absolute;
+		inset: 0;
+		z-index: 43;
+		background: radial-gradient(ellipse at 50% 44%, rgb(40 8 6 / 0.55), rgb(10 4 3 / 0.82));
+		pointer-events: none;
+	}
+
+	.hold {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.5rem;
+		margin-top: 0.45rem;
+		font-size: 0.74rem;
+		color: #f0d7b4;
+	}
+
+	.go {
+		padding: 0.3rem 0.9rem;
+		border: 0;
+		border-radius: 3px;
+		background: #e3b23c;
+		color: #1c140a;
+		font: inherit;
+		font-size: 0.84rem;
+		font-weight: 700;
+		cursor: pointer;
+	}
+
 	.epi-card {
 		position: absolute;
 		left: 50%;
-		top: 44%;
+		top: 52%;
 		transform: translate(-50%, -50%) scale(1);
 		width: 20.5rem;
 		border-radius: 10px;

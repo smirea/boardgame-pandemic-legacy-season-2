@@ -45,6 +45,8 @@
 		selectedTag?: string;
 		onselect: () => void;
 		onnote?: (note: SaidNote) => void;
+		/** Cards drawn into this hand whose flight here has not landed: a pile made only of them is not shown yet. */
+		arriving?: ReadonlySet<CardId>;
 	};
 
 	let {
@@ -62,6 +64,7 @@
 		selectedTag,
 		onselect,
 		onnote = () => {},
+		arriving = new Set(),
 	}: Props = $props();
 
 	const game = $derived(world.game);
@@ -84,12 +87,6 @@
 	const groups = $derived(handGroups(hand, named));
 	const toneColor = (tone: PlayerDeckKind) =>
 		tone in CITY_COLOR ? CITY_COLOR[tone as keyof typeof CITY_COLOR] : KIND_COLOR[tone as keyof typeof KIND_COLOR];
-	// Cards drawn this turn come from the Player deck. Anything else, such as a shared card, settles in where it lands.
-	const drawnThisTurn = $derived.by(() => {
-		const log = game?.log ?? [];
-		const since = log.slice(log.findLastIndex(entry => entry.t === 'turn') + 1);
-		return new Set(since.flatMap(entry => (entry.t === 'draw' && entry.seat === seat ? [entry.card] : [])));
-	});
 	const steps = $derived(active ? turnSteps(world, seat) : []);
 	let reading = $state(false);
 
@@ -268,14 +265,15 @@
 					data-group={group.key}
 					data-count={group.cards.length}
 					animate:flip={{ duration: 320 }}
-					in:deal={{ drawn: group.cards.some(card => drawnThisTurn.has(card.id)) }}
+					class:arriving={group.cards.every(card => arriving.has(card.id))}
+					in:deal
 					out:fly={{ y: top ? 16 : -16, duration: 220, easing: cubicIn }}
 				>
 					{#each group.cards.slice(1) as card, index (card.id)}
 						<i
 							class="sheet"
 							style:--depth={Math.min(index + 1, 3)}
-							in:deal={{ drawn: drawnThisTurn.has(card.id) }}
+							in:deal
 							out:fly={{ y: top ? 12 : -12, duration: 220, easing: cubicIn }}
 						></i>
 					{/each}
@@ -708,6 +706,10 @@
 		color: var(--ink);
 		cursor: pointer;
 		transition: translate 160ms ease;
+	}
+
+	.mini.arriving {
+		visibility: hidden;
 	}
 
 	.mini + .mini {

@@ -191,22 +191,6 @@
 				{game.actionsLeft > 0 ? 'End actions' : 'Draw cards'}
 			</button>
 			<button disabled={!snap.canUndo} onclick={() => send({ type: 'UNDO' })} data-testid="undo" title="Z">Undo</button>
-		{:else if snap.phase === 'playing.draw'}
-			<button
-				class="primary"
-				disabled={refused({ type: 'DRAW' })}
-				onclick={() => send({ type: 'DRAW' })}
-				data-testid="draw"
-				title="Space">Draw card ({game.drawsLeft})</button
-			>
-		{:else if snap.phase === 'playing.infect'}
-			<button
-				class="primary"
-				disabled={refused({ type: 'INFECT' })}
-				onclick={() => send({ type: 'INFECT' })}
-				data-testid="infect"
-				title="Space">Flip infection ({game.infectionsLeft})</button
-			>
 		{/if}
 		{#each lockable as card (card.id)}
 			<button

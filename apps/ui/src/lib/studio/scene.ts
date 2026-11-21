@@ -38,7 +38,6 @@ export type GameUi = {
 	filter: string;
 	toasts: Announcement[];
 	banner: { title: string; text: string } | null;
-	turnBanner: { name: string; color: string } | null;
 	/** State kept by the panels inside the screen, by the name each registers under `keep` (`hud/viewState.ts`). */
 	parts: Record<string, unknown>;
 };
@@ -81,7 +80,6 @@ export const restingUi = (): SceneUi => ({
 	filter: '',
 	toasts: [],
 	banner: null,
-	turnBanner: null,
 	parts: {},
 	scroll: [],
 	pointer: null,

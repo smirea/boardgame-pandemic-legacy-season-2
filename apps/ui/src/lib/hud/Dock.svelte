@@ -33,12 +33,10 @@
 		onplaycard: (seat: SeatId, card: CardId) => void;
 		/** Destroying a Lockdown card costs a Player card, so the screen asks whose. */
 		onlockdown?: (card: CardId) => void;
-		/** Active turn Infect phase draw action, shown as a pulsating Infection deck centered above the hand. */
-		drawInfection?: { left: number; busy?: boolean; onclick: () => void } | null;
-		/** Remaining cards in the Infection deck, printed on the animated hand-top deck. */
-		infectionCount?: number;
-		/** Active start-of-game infection sequence; while present, player deck setup waits until all cards finish. */
-		setupInfect?: { left: number; busy: boolean; onclick: () => void } | null;
+		/** The opening infection being turned over at the turn desk. While it lasts, picking Events waits. */
+		setupInfect?: { left: number; busy: boolean } | null;
+		/** Cards drawn into a hand whose flight there has not landed: the hand keeps their place and hides them. */
+		arriving?: ReadonlySet<CardId>;
 	};
 
 	let {
@@ -56,9 +54,8 @@
 		uses,
 		onplaycard,
 		onlockdown,
-		drawInfection = null,
-		infectionCount = 0,
 		setupInfect = null,
+		arriving = new Set(),
 	}: Props = $props();
 
 	const world = $derived(snap.world);
@@ -83,6 +80,11 @@
 	});
 
 	const pending = $derived(game.pending[0]);
+	// An Epidemic is started from its card beside the deck and its steps follow on the Epidemic's own panel, so the
+	// slip beside the hand only speaks up for what can be played into it.
+	const epidemicStep = $derived(
+		pending?.t === 'epidemicDrawn' || pending?.t === 'epidemicInfect' || pending?.t === 'intensify',
+	);
 	const lockable = $derived(
 		game.infectionDiscard.flatMap(id => {
 			const card = world.campaign.infectionCards[id];
@@ -95,10 +97,6 @@
 	const cardsOf = (other: SeatId) =>
 		(game.players[other]?.hand ?? []).flatMap(id => world.campaign.playerCards[id] ?? []);
 	const handCards = $derived(sortHand(cardsOf(seat), card => cardName(world, card.id)));
-	const drawnThisTurn = $derived.by(() => {
-		const since = game.log.slice(game.log.findLastIndex(entry => entry.t === 'turn') + 1);
-		return new Set(since.flatMap(entry => (entry.t === 'draw' && entry.seat === seat ? [entry.card] : [])));
-	});
 	const seatColor = (other: SeatId) => SEAT_COLORS[game.seats.indexOf(other)];
 	// The fan tightens as the hand grows, and further when its column is too narrow, so it never reaches the prompts.
 	let handWidth = $state(0);
@@ -134,6 +132,7 @@
 	const choices = $derived(
 		decides.filter(decide => {
 			if (decide.d === 'discard') return false;
+			if (epidemicStep && decide.d === 'skip') return false;
 			if (decide.d === 'shield' || decide.d === 'cordon') return owns(decide.seat);
 			return owns(decider);
 		}),
@@ -214,19 +213,12 @@
 				<div class="setup" data-testid="setup-infect-bar">
 					<div>
 						{#if setupInfect.left > 0}
-							<strong>{setupInfect.left}</strong> infection card{setupInfect.left === 1 ? '' : 's'} left to draw
+							<strong>{setupInfect.left}</strong> Infection card{setupInfect.left === 1 ? '' : 's'} left to flip. Click the
+							Infection deck, or press Space.
 						{:else}
 							Finishing infection…
 						{/if}
 					</div>
-					<button
-						class="primary"
-						disabled={setupInfect.busy || setupInfect.left === 0}
-						onclick={setupInfect.onclick}
-						data-testid="setup-infect"
-					>
-						{setupInfect.busy ? 'Infecting…' : `Infect (${setupInfect.left} left)`}
-					</button>
 				</div>
 			{:else}
 				<div class="setup">
@@ -263,36 +255,6 @@
 			</div>
 		{:else}
 			<div class="held">
-				{#if snap.phase === 'playing.infect' && drawInfection && !pending && !discarding.length}
-					{@const ready = !drawInfection.busy}
-					<button
-						class="hand-infect-deck"
-						class:pulsing={ready}
-						disabled={!ready}
-						onclick={() => ready && drawInfection.onclick()}
-						data-testid="infection-draw-deck"
-						aria-label={`Flip Infection card (${drawInfection.left} left)`}
-						in:fly={{ y: 18, duration: 280 }}
-						out:fade={{ duration: 160 }}
-					>
-						<span class="pile-card">
-							<svg class="bio-svg" viewBox="0 0 24 24" aria-hidden="true">
-								<circle cx="12" cy="12" r="2.2" fill="currentColor" />
-								<path
-									d="M12 4.2a4.3 4.3 0 0 0-3.7 6.5l1.5-.9a2.6 2.6 0 1 1 4.4 0l1.5.9A4.3 4.3 0 0 0 12 4.2Zm-6.8 11.7a4.3 4.3 0 0 0 7.4-.1l-1.5-.9a2.6 2.6 0 1 1-2.2-3.8V9.4a4.3 4.3 0 0 0-3.7 6.5Zm13.6 0a4.3 4.3 0 0 0-3.7-6.5v1.7a2.6 2.6 0 1 1-2.2 3.8l-1.5.9a4.3 4.3 0 0 0 7.4.1Z"
-									fill="currentColor"
-								/>
-							</svg>
-							<span class="pile-meta">
-								<span class="pile-label">INFECTION</span>
-								<strong class="pile-count">{infectionCount}</strong>
-							</span>
-						</span>
-						<span class="pile-badge">
-							{drawInfection.busy ? 'Infecting…' : `Infect · ${drawInfection.left} left`}
-						</span>
-					</button>
-				{/if}
 				{#if seat !== home}
 					<button class="back" style:--seat={seatColor(seat)} onclick={() => onview(home)}
 						>{seatName(world, seat)}'s hand. Back to {seatName(world, home)}</button
@@ -310,9 +272,10 @@
 						{#each handCards as card, index (card.id)}
 							<div
 								class="slot"
+								class:arriving={arriving.has(card.id)}
 								data-card={card.id}
 								animate:flip={{ duration: 320 }}
-								in:deal={{ drawn: drawnThisTurn.has(card.id) }}
+								in:deal
 								out:fly={{ y: -140, duration: 260, easing: cubicIn }}
 							>
 								{#if !mustDiscard}
@@ -366,23 +329,16 @@
 							is finished.
 						</p>
 					</div>
-				{:else if pending}
+				{:else if pending && (!epidemicStep || elsewhere.length || (pending.t === 'intensify' && lockable.length))}
 					<div class="slip">
 						<p class="prompt">{decisionTitle(world, pending)}</p>
 						{#if choices.length}
 							<div class="chips">
 								{#each choices as decide, index (index)}
-									{@const epidemicAdvance =
-										decide.d === 'skip' &&
-										(pending.t === 'epidemicDrawn' || pending.t === 'epidemicInfect' || pending.t === 'intensify')}
-									<button
-										class:primary={epidemicAdvance}
-										data-testid={epidemicAdvance ? 'epidemic-advance' : undefined}
-										onclick={() => send({ type: 'DECIDE', decide })}>{decideLabel(world, decide)}</button
-									>
+									<button onclick={() => send({ type: 'DECIDE', decide })}>{decideLabel(world, decide)}</button>
 								{/each}
 							</div>
-						{:else}
+						{:else if !epidemicStep}
 							<p class="waiting">Waiting for {seatName(world, decider)}.</p>
 						{/if}
 						{#if elsewhere.length || (pending.t === 'intensify' && lockable.length && onlockdown)}
@@ -485,109 +441,9 @@
 		background: var(--wash);
 	}
 
-	.hand-infect-deck {
-		position: absolute;
-		bottom: calc(100% + 0.75rem);
-		left: 50%;
-		transform: translateX(-50%);
-		z-index: 42;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 0.35rem;
-		padding: 0;
-		border: 0;
-		background: none;
-		color: var(--ink);
-		font: inherit;
-		cursor: pointer;
-	}
-
-	.hand-infect-deck:disabled {
-		cursor: default;
-		opacity: 0.72;
-	}
-
-	.hand-infect-deck .pile-card {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 0.65rem;
-		width: 7.4rem;
-		height: 4.8rem;
-		padding: 0.55rem 0.75rem;
-		border: 1.5px solid #93b236;
-		border-radius: 6px;
-		background:
-			radial-gradient(circle at 28% 50%, rgb(147 178 54 / 0.24), transparent 62%),
-			linear-gradient(155deg, #322b3a 0%, #231e29 68%, #18141d 100%);
-		box-shadow:
-			inset 0 0 0 2px rgb(255 248 228 / 0.14),
-			3px 3px 0 #4d5a2b,
-			6px 6px 0 #2e371a,
-			0 0.8rem 1.8rem rgb(0 0 0 / 0.65);
-		color: #f3f7e3;
-		transition: transform 180ms ease;
-	}
-
-	.hand-infect-deck.pulsing .pile-card {
-		animation: handInfectPulse 1.6s ease-in-out infinite;
-	}
-
-	.hand-infect-deck.pulsing:hover .pile-card {
-		transform: scale(1.07);
-	}
-
-	.hand-infect-deck .bio-svg {
-		width: 2.15rem;
-		height: 2.15rem;
-		color: #93b236;
-		flex: none;
-	}
-
-	.hand-infect-deck .pile-meta {
-		display: flex;
-		flex-direction: column;
-		align-items: flex-end;
-		gap: 0.1rem;
-	}
-
-	.hand-infect-deck .pile-label {
-		font-size: 0.55rem;
-		font-weight: 700;
-		letter-spacing: 0.12em;
-		color: rgb(224 238 182 / 0.8);
-	}
-
-	.hand-infect-deck .pile-count {
-		font-family: var(--font-display);
-		font-size: 1.65rem;
-		font-weight: 400;
-		line-height: 1;
-	}
-
-	.hand-infect-deck .pile-badge {
-		padding: 0.18rem 0.68rem;
-		border-radius: 999px;
-		background: rgb(16 13 10 / 0.92);
-		border: 1px solid rgb(147 178 54 / 0.75);
-		color: var(--paper);
-		font-size: 0.74rem;
-		font-weight: 600;
-		white-space: nowrap;
-		box-shadow: 0 0.35rem 0.9rem rgb(0 0 0 / 0.5);
-	}
-
-	@keyframes handInfectPulse {
-		0%,
-		100% {
-			transform: scale(1);
-			filter: drop-shadow(0 0.25rem 0.75rem rgb(147 178 54 / 0.35));
-		}
-		50% {
-			transform: scale(1.06);
-			filter: drop-shadow(0 0.45rem 1.45rem rgb(147 178 54 / 0.88));
-		}
+	/* A card on its way from the deck has its place in the hand kept, and shows once its flight lands. */
+	.slot.arriving {
+		visibility: hidden;
 	}
 
 	/* Each way to use a card stands as a tag over it once it rises out of the fan. */
