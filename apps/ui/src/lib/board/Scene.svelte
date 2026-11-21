@@ -372,6 +372,7 @@
 	});
 	// A box stays mounted after its route is taken, so it can fade out with the fog it pointed into.
 	let printedBoxes = $state.raw<ReconBoxView[]>([]);
+	const aimingCities = $derived(Object.values(view.cities).some(city => city.highlight === 'target'));
 	$effect(() => {
 		const known = new Map(untrack(() => printedBoxes).map(box => [box.route, box]));
 		for (const box of view.recon) known.set(box.route, box);
@@ -585,6 +586,7 @@
 		at={boxLayout.rects.get(box.route) ?? lastRects.get(box.route) ?? layout[box.city]!}
 		shown={liveRoutes.has(box.route)}
 		scale={boxScale}
+		passive={aimingCities}
 		onrecon={() => onrecon?.(box.route)}
 	/>
 {/each}

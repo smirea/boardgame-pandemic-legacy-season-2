@@ -28,10 +28,12 @@
 		shown: boolean;
 		/** Below 1 while the camera is zoomed out past the view the boxes were placed for. */
 		scale: number;
+		/** While the players aim at cities, the box lets a click through to a city it overlaps. */
+		passive?: boolean;
 		onrecon: () => void;
 	};
 
-	let { box, from, at, shown, scale, onrecon }: Props = $props();
+	let { box, from, at, shown, scale, passive = false, onrecon }: Props = $props();
 
 	/** The leader starts at the rim of the city's pieces. */
 	const CLEAR_OF_CITY = 3.4;
@@ -70,7 +72,8 @@
 	listen on the element the box is drawn into and capture the pointer, which would turn a click into a drag.
 -->
 <HTML position={[at.x, INK, at.z]} center pointerEvents={shown ? 'auto' : 'none'} zIndexRange={[10, 5]}>
-	<div class="zoom" style:scale>
+	<!-- Threlte reads `pointerEvents` once, so passing clicks through while aiming is set here. -->
+	<div class="zoom" style:scale style:pointer-events={passive ? 'none' : null}>
 		<div
 			class="recon {box.state}"
 			class:gone={!shown}
