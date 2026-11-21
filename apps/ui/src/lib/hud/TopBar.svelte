@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { pack } from '@repo/game';
-	import { scan } from '#lib/scans.svelte.ts';
-	import { legacyScans } from '#lib/scans.generated.ts';
+	import { fade } from 'svelte/transition';
 	import LegacyCard from '#lib/cards/LegacyCard.svelte';
 	import type { Insights, PublicState } from '@repo/game';
 	import Calendar from './Calendar.svelte';
@@ -49,6 +48,7 @@
 	let room = $state(0);
 	const nextLegacy = $derived(pack.legacyDeck[campaign.legacyIndex]);
 	const legacyLeft = $derived(pack.legacyDeck.length - campaign.legacyIndex);
+	let legacyPeek = $state(false);
 </script>
 
 <div
@@ -78,40 +78,78 @@
 					>{status === 'connected' ? `${Math.max(1, players)} online` : status}</span
 				>
 			{/if}
-			<button onclick={onreset} title="Show the whole map">Fit map</button>
+			<button onclick={onreset} title="Fit the revealed map (F)">Fit map</button>
 			<button
 				onclick={onbox}
 				title="The packages and dossier doors opened so far"
 				data-testid="open-box"
 				data-dest="box">Box</button
 			>
-			<button
-				class="legacy"
-				class:out={legacyOut}
-				onclick={ondeck}
-				aria-label={`Legacy deck, ${legacyLeft} cards left`}
-				title="The Legacy deck: the cards read so far, and when the next one is read"
-				data-testid="open-legacy-deck"
-				data-dest="legacyDeck"
-				{@attach scan(
-					() => (nextLegacy ? [{ title: 'Top of the Legacy deck', src: legacyScans[nextLegacy.id]!.back! }] : []),
-					'legacy-pile',
-				)}
-			>
-				{#if nextLegacy}<LegacyCard card={nextLegacy} side="a" size="mini" />{/if}
-				<span>{legacyLeft}</span>
-			</button>
+			<div class="legacy-wrap">
+				<button
+					class="legacy"
+					class:out={legacyOut}
+					onclick={() => {
+						legacyPeek = false;
+						ondeck();
+					}}
+					aria-label={`Legacy deck, ${legacyLeft} cards left`}
+					aria-expanded={legacyPeek}
+					data-testid="open-legacy-deck"
+					data-dest="legacyDeck"
+					onpointerenter={() => (legacyPeek = true)}
+					onpointerleave={() => (legacyPeek = false)}
+					onfocus={() => (legacyPeek = true)}
+					onblur={() => (legacyPeek = false)}
+				>
+					{#if nextLegacy}<LegacyCard card={nextLegacy} side="a" size="mini" />{/if}
+					<span>{legacyLeft}</span>
+				</button>
+				{#if legacyPeek && nextLegacy && !legacyOut}
+					<div class="legacy-tip" role="tooltip" data-testid="legacy-deck-tip" transition:fade={{ duration: 140 }}>
+						<LegacyCard card={nextLegacy} side="a" size="full" {campaign} />
+						<span class="legacy-tip-note">{legacyLeft} cards left · click to open</span>
+					</div>
+				{/if}
+			</div>
 			<button onclick={onmenu}>Menu</button>
 		</div>
 	</header>
 </div>
 
 <style>
+	.legacy-wrap {
+		position: relative;
+		display: inline-flex;
+	}
+
 	.legacy {
 		display: inline-flex;
 		align-items: center;
 		gap: 0.35rem;
 		padding-left: 0.3rem;
+	}
+
+	.legacy-tip {
+		position: absolute;
+		top: calc(100% + 0.55rem);
+		right: 0;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.4rem;
+		padding: 0.55rem;
+		border-radius: 6px;
+		background: rgb(20 18 14 / 0.94);
+		box-shadow: 0 1.2rem 3rem rgb(0 0 0 / 0.6);
+		pointer-events: none;
+		white-space: normal;
+	}
+
+	.legacy-tip-note {
+		color: var(--muted);
+		font-size: 0.72rem;
+		letter-spacing: 0.03em;
 	}
 
 	.legacy.out {

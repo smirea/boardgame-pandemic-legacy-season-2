@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { pack } from '@repo/game';
 	import type { Campaign, LegacyCardDef } from '@repo/game';
+	import { fitText } from '#lib/cards/fit.ts';
 	import { legacyScans } from '#lib/scans.generated.ts';
 	import { originals, scanUrl } from '#lib/scans.svelte.ts';
 	import { MONTHS } from '#lib/hud/labels.svelte.ts';
@@ -48,13 +49,17 @@
 	);
 
 	const triggerHint = $derived.by(() => {
+		if (card.id === '12-05') return 'Draw at the end of December';
 		if (card.kind === 'stop') return `Draw at setup of ${monthLabel}`;
 		if (card.kind === 'pause') return `Draw after the first game of ${monthLabel}`;
+		if (card.kind === 'priorities') return 'Keep drawing';
 		if (card.kind === 'objective') return 'Objective';
 		if (card.kind === 'event') return 'Rationed Event';
 		if (card.kind === 'epidemic') return 'Epidemic';
 		return monthLabel;
 	});
+
+	const docText = $derived(eventDef ? eventDef.text : card.text);
 
 	const KIND_LABEL: Record<LegacyCardDef['kind'], string> = {
 		prologue: 'Prologue',
@@ -151,7 +156,7 @@
 					{/each}
 				</div>
 			{:else}
-				<p class="obj-body"><RichText text={card.text} /></p>
+				<p class="obj-body" {@attach fitText(card.text, { max: 1.3, min: 0.8 })}><RichText text={card.text} /></p>
 			{/if}
 			<p class="obj-foot">Add this card to your pool of objectives.</p>
 			<span class="code">{code}</span>
@@ -241,9 +246,11 @@
 				<span class="doc-kicker">{KIND_LABEL[card.kind]}</span>
 				<span class="doc-month">{monthLabel}</span>
 			</header>
-			<h3>{card.title}</h3>
+			<h3 {@attach fitText(card.title, { max: 1.9, min: 1.25, across: true })}>{card.title}</h3>
 			<div class="doc-body">
-				<p><RichText text={eventDef ? eventDef.text : card.text} /></p>
+				<div class="doc-copy" {@attach fitText(docText, { max: 1.38, min: 0.78 })}>
+					<p><RichText text={docText} /></p>
+				</div>
 				{#if openedSeals.length}
 					<div class="seal-pills">
 						{#each openedSeals as seal (seal)}
@@ -259,9 +266,9 @@
 
 <style>
 	.legacy-card {
-		--w: 14.5rem;
-		--h: 20.2rem;
-		--fs: 0.88rem;
+		--w: 14.8rem;
+		--h: 20.4rem;
+		--fs: 1.02rem;
 		position: relative;
 		width: var(--w);
 		height: var(--h);
@@ -275,27 +282,27 @@
 	}
 
 	.legacy-card.landscape {
-		--w: 22.5rem;
-		--h: 15.8rem;
+		--w: 23.5rem;
+		--h: 16.5rem;
 	}
 
 	.legacy-card.size-deck {
-		--w: 7rem;
-		--h: 9.6rem;
-		--fs: 0.44rem;
+		--w: 7.6rem;
+		--h: 10.5rem;
+		--fs: 0.54rem;
 		border-radius: 5px;
 	}
 
 	.legacy-card.size-thumb {
-		--w: 6.4rem;
-		--h: 8.8rem;
-		--fs: 0.42rem;
+		--w: 6.8rem;
+		--h: 9.4rem;
+		--fs: 0.48rem;
 		border-radius: 4px;
 	}
 
 	.legacy-card.size-thumb.landscape {
-		--w: 9.6rem;
-		--h: 6.8rem;
+		--w: 10rem;
+		--h: 7rem;
 	}
 
 	.legacy-card.size-mini {
@@ -306,6 +313,12 @@
 		box-shadow:
 			1px 1px 0 rgb(0 0 0 / 0.5),
 			2px 2px 0 rgb(231 220 198 / 0.25);
+	}
+
+	.legacy-card.size-mini .back-sub,
+	.legacy-card.size-mini .back-kicker,
+	.legacy-card.size-mini .code {
+		display: none;
 	}
 
 	.original-img {
@@ -436,14 +449,14 @@
 	}
 
 	.back-kicker {
-		font-size: 0.68em;
-		letter-spacing: 0.16em;
-		color: rgb(231 220 198 / 0.65);
+		font-size: 0.78em;
+		letter-spacing: 0.14em;
+		color: rgb(231 220 198 / 0.72);
 	}
 
 	.back-title {
 		font-family: var(--font-display);
-		font-size: 1.7em;
+		font-size: 1.9em;
 		font-weight: 400;
 		line-height: 1.05;
 		color: #f4ebd8;
@@ -451,9 +464,9 @@
 
 	.back-sub {
 		margin: 0;
-		max-width: 90%;
-		font-size: 0.8em;
-		color: rgb(231 220 198 / 0.75);
+		max-width: 92%;
+		font-size: 0.96em;
+		color: rgb(231 220 198 / 0.85);
 		line-height: 1.3;
 	}
 
@@ -545,17 +558,21 @@
 	}
 
 	.obj-body {
-		margin: 0.4em 0;
-		font-size: 0.95em;
-		line-height: 1.4;
-		color: rgb(243 237 224 / 0.85);
+		display: flex;
+		align-items: center;
+		flex: 1;
+		min-height: 0;
+		margin: 0.3em 0;
+		line-height: 1.35;
+		color: rgb(243 237 224 / 0.9);
+		overflow: hidden;
 	}
 
 	.obj-foot {
 		margin: 0;
-		font-size: 0.78em;
+		font-size: 0.84em;
 		font-style: italic;
-		color: rgb(243 237 224 / 0.65);
+		color: rgb(243 237 224 / 0.7);
 	}
 
 	/* === Side B: Frequency Scanner (Landscape) === */
@@ -578,9 +595,9 @@
 	.scanner-head p,
 	.scanner-foot {
 		margin: 0.2em 0 0;
-		font-size: 0.78em;
-		color: rgb(235 228 214 / 0.8);
-		line-height: 1.3;
+		font-size: 0.88em;
+		color: rgb(235 228 214 / 0.85);
+		line-height: 1.32;
 	}
 
 	.dial {
@@ -638,8 +655,8 @@
 	.plan-intro,
 	.plan-foot {
 		margin: 0;
-		font-size: 0.76em;
-		line-height: 1.3;
+		font-size: 0.86em;
+		line-height: 1.32;
 	}
 
 	.plan-grid {
@@ -655,7 +672,7 @@
 	}
 
 	.plan-label {
-		font-size: 0.76em;
+		font-size: 0.86em;
 		font-weight: 700;
 	}
 
@@ -710,9 +727,9 @@
 	.reck-rows {
 		display: grid;
 		grid-template-columns: 1fr auto;
-		gap: 0.22em 0.8em;
+		gap: 0.28em 0.8em;
 		margin: 0;
-		font-size: 0.8em;
+		font-size: 0.92em;
 	}
 
 	.reck-rows dt {
@@ -758,11 +775,11 @@
 	.ep-steps {
 		display: flex;
 		flex-direction: column;
-		gap: 0.65em;
+		gap: 0.75em;
 		margin: 0;
 		padding: 0;
 		list-style: none;
-		font-size: 0.86em;
+		font-size: 0.96em;
 		line-height: 1.38;
 	}
 
@@ -817,9 +834,10 @@
 	.doc-face h3 {
 		margin: 0;
 		font-family: var(--font-display);
-		font-size: 1.65em;
+		font-size: 1.9em;
 		font-weight: 400;
-		line-height: 1.08;
+		line-height: 1.06;
+		overflow: hidden;
 	}
 
 	.doc-body {
@@ -827,28 +845,38 @@
 		flex-direction: column;
 		gap: 0.65em;
 		flex: 1;
+		min-height: 0;
+		padding-bottom: 0.9em;
 		overflow: hidden;
-		font-size: 0.9em;
-		line-height: 1.42;
+		line-height: 1.35;
+	}
+
+	.doc-copy {
+		display: flex;
+		align-items: center;
+		flex: 1;
+		min-height: 0;
+		overflow: hidden;
 	}
 
 	.doc-body p {
 		margin: 0;
+		width: 100%;
 	}
 
 	.seal-pills {
 		display: flex;
 		flex-wrap: wrap;
 		gap: 0.35em;
-		margin-top: auto;
+		flex: none;
 	}
 
 	.seal-pill {
-		padding: 0.2em 0.55em;
+		padding: 0.22em 0.6em;
 		border-radius: 3px;
 		background: rgb(36 28 20 / 0.12);
 		border: 1px solid rgb(36 28 20 / 0.28);
-		font-size: 0.82em;
+		font-size: 0.9em;
 		font-weight: 700;
 	}
 

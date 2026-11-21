@@ -478,7 +478,7 @@
 		position: absolute;
 		top: 0;
 		left: calc(100% + 0.5rem);
-		z-index: 5;
+		z-index: 20;
 		display: flex;
 		flex-direction: column;
 		gap: 0.45rem;
@@ -615,7 +615,7 @@
 		position: absolute;
 		bottom: -0.35rem;
 		left: -0.35rem;
-		z-index: 4;
+		z-index: 10;
 		display: grid;
 		grid-template-columns: repeat(var(--cols), max-content);
 		gap: 0.35rem;

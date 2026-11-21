@@ -9,12 +9,17 @@ export type { Scan };
 /** Served by the Bun server from `docs/assets`. */
 export const scanUrl = (src: string) => `/api/scans/${src}`;
 
-/** The printed Legacy card, with its back when the back says when to read it. */
+/** The printed Legacy card, with both sides whenever side A also carries rules, journal text, or a STOP/PAUSE header. */
 export function legacyScan(code: string): Scan[] {
 	const scan = legacyScans[code];
 	if (!scan) return [];
+	if (!scan.back) return [scan];
 	const kind = pack.legacyDeck.find(card => card.id === code)?.kind;
-	return kind === 'stop' || kind === 'pause' ? [scan, { title: `${code}, back`, src: scan.back! }] : [scan];
+	if (kind === 'archive' || kind === 'prologue' || code === '12-10' || code === '12-12')
+		return [{ title: `${code}a`, src: scan.back }, scan];
+	if (kind === 'stop' || kind === 'pause' || kind === 'scanner' || kind === 'plan')
+		return [scan, { title: `${code}a`, src: scan.back }];
+	return [scan];
 }
 
 export const sealScans = (seal: Seal): Scan[] =>

@@ -6,9 +6,10 @@
 	import { onDestroy, untrack } from 'svelte';
 	import { cubicInOut } from 'svelte/easing';
 	import { Tween } from 'svelte/motion';
-	import { CanvasTexture, LinearFilter, MeshStandardMaterial, MOUSE, SRGBColorSpace, Texture } from 'three';
-	import type { PerspectiveCamera, Vector3 } from 'three';
+	import { CanvasTexture, LinearFilter, MeshStandardMaterial, MOUSE, SRGBColorSpace, Texture, Vector3 } from 'three';
+	import type { PerspectiveCamera } from 'three';
 	import type { OrbitControls as OrbitControlsImpl } from 'three/examples/jsm/controls/OrbitControls.js';
+	import { typing } from '#lib/keys.ts';
 	import CityMarker from './CityMarker.svelte';
 	import Flags from './Flags.svelte';
 	import { FogMask } from './chart';
@@ -179,12 +180,12 @@
 	let dragging = false;
 	let lastReset = 0;
 	// A city's pieces and its printed name reach this far from its centre, so a fitted view keeps them on screen.
-	const MARKER_REACH = 6;
+	const MARKER_REACH = 3.5;
 	const visibleCities = $derived(pack.cities.filter(city => view.cities[city.id]!.revealed));
 	// A string, so the fitted view is worked out again only when the set of revealed cities changes.
 	const revealedKey = $derived(visibleCities.map(city => city.id).join());
-	// The fitted view frames what has been explored, the recon boxes reaching out of it, and the stockpile while a
-	// game is played. Before anything is explored, it frames every location.
+	// The fitted view frames only what has been revealed (and the stockpile while a game is played). Before anything
+	// is explored, it frames every location.
 	const showStockpile = $derived(view.stockpile !== null);
 	const reach = (points: BoardPoint[], margin: number): BoardBounds => ({
 		minX: Math.min(...points.map(point => point.x)) - margin,
@@ -200,53 +201,33 @@
 		);
 	});
 	const explored: BoardBounds = $derived.by(() => {
-		const corners = [...boxLayout.rects.values()].flatMap(rect => [
-			{ x: rect.x - rect.width / 2, z: rect.z - rect.depth / 2 },
-			{ x: rect.x + rect.width / 2, z: rect.z + rect.depth / 2 },
-		]);
-		const boxes = corners.length ? reach(corners, 1) : citiesBounds;
-		const frame = {
-			minX: Math.min(citiesBounds.minX, boxes.minX),
-			maxX: Math.max(citiesBounds.maxX, boxes.maxX),
-			minZ: Math.min(citiesBounds.minZ, boxes.minZ),
-			maxZ: Math.max(citiesBounds.maxZ, boxes.maxZ),
-		};
-		if (!showStockpile) return frame;
+		if (!showStockpile) return citiesBounds;
 		return {
-			minX: Math.min(frame.minX, STOCKPILE.x - STOCKPILE_REACH.x),
-			maxX: Math.max(frame.maxX, STOCKPILE.x + STOCKPILE_REACH.x),
-			minZ: Math.min(frame.minZ, STOCKPILE.z - STOCKPILE_REACH.north),
-			maxZ: Math.max(frame.maxZ, STOCKPILE.z + STOCKPILE_REACH.south),
+			minX: Math.min(citiesBounds.minX, STOCKPILE.x - STOCKPILE_REACH.x),
+			maxX: Math.max(citiesBounds.maxX, STOCKPILE.x + STOCKPILE_REACH.x),
+			minZ: Math.min(citiesBounds.minZ, STOCKPILE.z - STOCKPILE_REACH.north),
+			maxZ: Math.max(citiesBounds.maxZ, STOCKPILE.z + STOCKPILE_REACH.south),
 		};
 	});
-	// Panels hugging a side push the view in from that side. Anything else, like the objectives along the top or
-	// the dock's cards rising from the bottom, pushes it in from the top or bottom.
+	// Keep light breathing room for the top objectives strip and bottom hand while letting the revealed map fill the
+	// screen; corner seats and the mid-side Actions panel float over the edges rather than shrinking the whole board.
 	const insets = $derived.by(() => {
 		const width = Math.max(1, $size.width);
 		const height = Math.max(1, $size.height);
-		let left = 0;
-		let right = 0;
-		let firmLeft = 0;
-		let firmRight = 0;
 		let top = 0;
 		let bottom = 0;
 		for (const rect of covered) {
-			// A firm panel may grow past the middle, so it counts for the side it is anchored to.
-			if (rect.firm && rect.x < width * 0.25) firmLeft = Math.max(firmLeft, rect.x + rect.width);
-			else if (rect.firm && rect.x + rect.width > width * 0.75) firmRight = Math.max(firmRight, width - rect.x);
-			else if (rect.x < width * 0.25 && rect.x + rect.width < width / 2) left = Math.max(left, rect.x + rect.width);
-			else if (rect.x + rect.width > width * 0.75 && rect.x > width / 2) right = Math.max(right, width - rect.x);
-			else if (rect.y + rect.height / 2 < height / 2) top = Math.max(top, rect.y + rect.height);
+			if (rect.firm) continue;
+			if (rect.x < width * 0.25 && rect.x + rect.width < width / 2) continue;
+			if (rect.x + rect.width > width * 0.75 && rect.x > width / 2) continue;
+			if (rect.y + rect.height / 2 < height / 2) top = Math.max(top, rect.y + rect.height);
 			else bottom = Math.max(bottom, height - rect.y);
 		}
-		// On a narrow stage, such as the replay's, panels may not squeeze the board below 70% of its width. The
-		// seats sit in the corners, where the board is mostly open sea, but a firm panel is never slid under.
-		const squeeze = Math.min(1, 0.3 / Math.max(0.001, (left + right) / width));
 		return {
-			left: Math.max(left * squeeze, firmLeft) / width,
-			right: Math.max(right * squeeze, firmRight) / width,
-			top: Math.min(0.2, top / height),
-			bottom: Math.min(0.25, bottom / height),
+			left: 0.02,
+			right: 0.02,
+			top: Math.min(0.08, top / height),
+			bottom: Math.min(0.11, bottom / height),
 		};
 	});
 	// `$size` subscribes to the store. Reading `size.current` would not rerun when the canvas is resized.
@@ -314,6 +295,101 @@
 		controls.update();
 		trackZoom();
 		invalidate();
+	});
+
+	// WASD and Arrow keys pan along the board plane relative to camera facing. The loop runs only while a key is held
+	// so the board rests at 0 frames when idle.
+	const PAN_KEYS: Record<string, 'up' | 'down' | 'left' | 'right'> = {
+		w: 'up',
+		s: 'down',
+		a: 'left',
+		d: 'right',
+		arrowup: 'up',
+		arrowdown: 'down',
+		arrowleft: 'left',
+		arrowright: 'right',
+	};
+	const panHeld = new Set<'up' | 'down' | 'left' | 'right'>();
+	const panForward = new Vector3();
+	const panRight = new Vector3();
+	const panUp = new Vector3(0, 1, 0);
+	const panMove = new Vector3();
+	let panFrame = 0;
+	let panLast = 0;
+
+	function stopPan() {
+		panHeld.clear();
+		cancelAnimationFrame(panFrame);
+		panFrame = 0;
+		panLast = 0;
+	}
+
+	function stepPan(now: number) {
+		panFrame = 0;
+		if (!panHeld.size) {
+			panLast = 0;
+			return;
+		}
+		const dt = panLast ? Math.min(0.05, (now - panLast) / 1000) : 1 / 60;
+		panLast = now;
+		if (camera && controls) {
+			const dx = (panHeld.has('right') ? 1 : 0) - (panHeld.has('left') ? 1 : 0);
+			const dz = (panHeld.has('up') ? 1 : 0) - (panHeld.has('down') ? 1 : 0);
+			if (dx || dz) {
+				panForward.subVectors(controls.target, camera.position).setY(0);
+				if (panForward.lengthSq() < 1e-6) panForward.set(0, 0, -1);
+				else panForward.normalize();
+				panRight.crossVectors(panForward, panUp).normalize();
+				panMove.set(0, 0, 0).addScaledVector(panRight, dx).addScaledVector(panForward, dz).normalize();
+				const distance = camera.position.distanceTo(controls.target);
+				const step = distance * 0.85 * dt;
+				const nextX = Math.max(bounds.minX, Math.min(bounds.maxX, controls.target.x + panMove.x * step));
+				const nextZ = Math.max(bounds.minZ, Math.min(bounds.maxZ, controls.target.z + panMove.z * step));
+				const shiftX = nextX - controls.target.x;
+				const shiftZ = nextZ - controls.target.z;
+				if (shiftX || shiftZ) {
+					userMoved = true;
+					controls.target.x += shiftX;
+					controls.target.z += shiftZ;
+					camera.position.x += shiftX;
+					camera.position.z += shiftZ;
+					controls.update();
+					trackZoom();
+					invalidate();
+				}
+			}
+		}
+		panFrame = requestAnimationFrame(stepPan);
+	}
+
+	$effect(() => {
+		const onKeyDown = (event: KeyboardEvent) => {
+			if (event.metaKey || event.ctrlKey || event.altKey || typing(event)) return;
+			const dir = PAN_KEYS[event.key.toLowerCase()];
+			if (!dir) return;
+			if (document.querySelector('[aria-modal="true"], .tabletop-unboxing')) return;
+			if (event.key.startsWith('Arrow')) event.preventDefault();
+			panHeld.add(dir);
+			if (!panFrame) {
+				panLast = 0;
+				panFrame = requestAnimationFrame(stepPan);
+			}
+		};
+		const onKeyUp = (event: KeyboardEvent) => {
+			const dir = PAN_KEYS[event.key.toLowerCase()];
+			if (!dir) return;
+			panHeld.delete(dir);
+			if (!panHeld.size) stopPan();
+		};
+		window.addEventListener('keydown', onKeyDown);
+		window.addEventListener('keyup', onKeyUp);
+		window.addEventListener('blur', stopPan);
+		return () => {
+			window.removeEventListener('keydown', onKeyDown);
+			window.removeEventListener('keyup', onKeyUp);
+			window.removeEventListener('blur', stopPan);
+			stopPan();
+		};
 	});
 
 	/** Where the camera is now, mid-glide or at rest. */

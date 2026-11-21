@@ -150,8 +150,9 @@
 	.deck {
 		display: flex;
 		flex-direction: column;
-		width: min(72rem, 96vw);
-		max-height: calc(100vh - 2rem);
+		width: min(72rem, 100%);
+		max-height: 100%;
+		box-sizing: border-box;
 		padding: 1.2rem 1.6rem 1rem;
 		overflow: auto;
 		border-radius: 2px;

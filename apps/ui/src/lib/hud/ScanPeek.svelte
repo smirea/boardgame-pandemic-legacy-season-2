@@ -56,22 +56,29 @@
 		background: rgb(20 18 14 / 0.94);
 		box-shadow: 0 1.2rem 3rem rgb(0 0 0 / 0.6);
 		pointer-events: none;
-		max-width: min(46rem, 60vw);
+		max-width: min(46rem, 48vw);
+		max-height: calc(100vh - 1rem);
 	}
 
 	.row {
 		display: flex;
-		flex-wrap: wrap;
+		flex-wrap: nowrap;
 		gap: 0.4rem;
 		justify-content: center;
 	}
 
+	.many .row {
+		flex-wrap: wrap;
+	}
+
 	img {
 		display: block;
+		min-width: 0;
 		max-width: 100%;
 		max-height: min(26rem, 62vh);
 		width: auto;
 		height: auto;
+		object-fit: contain;
 		border-radius: 4px;
 		background: var(--chrome);
 	}

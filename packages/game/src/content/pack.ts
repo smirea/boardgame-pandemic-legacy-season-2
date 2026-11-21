@@ -336,8 +336,8 @@ function card(
 
 const archive = (code: string, extras?: CardExtras) =>
 	card(code, 'archive', 'Journal entry', 'An entry from the archive, kept in the reserve.', [], extras);
-const objective = (code: string, id: ObjectiveId, title: string, extras?: CardExtras) =>
-	card(code, 'objective', title, 'A new objective joins the pool.', [{ t: 'objectives', add: [id] }], extras);
+const objective = (code: string, id: ObjectiveId, title: string, text: string, extras?: CardExtras) =>
+	card(code, 'objective', title, text, [{ t: 'objectives', add: [id] }], extras);
 const rationed = (code: string, event: EventId, title: string, extras?: CardExtras) =>
 	card(
 		code,
@@ -370,7 +370,7 @@ const legacyDeck: LegacyCardDef[] = [
 		'00-01',
 		'prologue',
 		'Prologue',
-		'The Prologue is played with this card in effect. It is destroyed when the campaign starts.',
+		'Play with all rules except: no Legacy deck, no character exposure, no Recon, no System-Wide Production, and no Game End upgrades. Destroyed when January begins.',
 	),
 	card('00-02', 'objective', 'Build 3 supply centers', 'The Prologue objective.', [], { halt: 'stop' }),
 
@@ -392,8 +392,13 @@ const legacyDeck: LegacyCardDef[] = [
 	card('01-03', 'priorities', 'New priorities', 'This month 2 objectives are mandatory.', [
 		{ t: 'required', count: 2 },
 	]),
-	objective('01-04', 'buildCenters', 'Build 3 new supply centers'),
-	objective('01-05', 'reconRegion', 'Recon North America'),
+	objective('01-04', 'buildCenters', 'Build 3 new supply centers', 'Build 3 new supply centers.'),
+	objective(
+		'01-05',
+		'reconRegion',
+		'Recon North America',
+		'Recon North America. If completed in a lost first game of January, it still counts in the second game.',
+	),
 	card(
 		'01-06',
 		'turningPoint',
@@ -415,8 +420,8 @@ const legacyDeck: LegacyCardDef[] = [
 	card('02-03', 'priorities', 'New priorities', 'Recon North America is destroyed. 2 objectives are still mandatory.', [
 		{ t: 'objectives', remove: ['reconRegion'] },
 	]),
-	objective('02-04', 'reconNewArea', 'Recon 1 unknown region'),
-	objective('02-05', 'connectCities', 'Connect 2 new cities to the grid'),
+	objective('02-04', 'reconNewArea', 'Recon 1 unknown region', 'Recon 1 unknown region.'),
+	objective('02-05', 'connectCities', 'Connect 2 new cities to the grid', 'Connect 2 new cities to the grid.'),
 	card(
 		'02-06',
 		'turningPoint',
@@ -440,8 +445,14 @@ const legacyDeck: LegacyCardDef[] = [
 	card('03-03', 'priorities', 'New priorities', 'From now on 3 objectives are mandatory each month.', [
 		{ t: 'required', count: 3 },
 	]),
-	objective('03-04', 'searches', 'Complete 2 searches'),
-	objective('03-05', 'lostHaven', 'Access a lost haven', { halt: 'pause' }),
+	objective('03-04', 'searches', 'Complete 2 searches', 'Complete 2 searches.'),
+	objective(
+		'03-05',
+		'lostHaven',
+		'Access a lost haven',
+		'Access a lost haven. Destroy this card at the end of the game in which you complete it.',
+		{ halt: 'pause' },
+	),
 	rightNow('03-06', ['K', '24', '47', 'E']),
 	epidemicCard('03-07'),
 	epidemicCard('03-08'),
@@ -477,7 +488,13 @@ const legacyDeck: LegacyCardDef[] = [
 		perimeter(pkg(7)),
 	]),
 	archive('07-02'),
-	objective('07-03', 'triangulate', 'Triangulate signals', { halt: 'stop' }),
+	objective(
+		'07-03',
+		'triangulate',
+		'Triangulate signals',
+		'Have a satellite tower in a blue, a yellow, and a black city. When completed, open doors 43 and 52.',
+		{ halt: 'stop' },
+	),
 
 	card('08-01', 'stop', 'Perimeter report', 'If door 62 is still sealed, Package 2 opens without its reward.', [
 		perimeter(pkg(2)),
@@ -489,7 +506,7 @@ const legacyDeck: LegacyCardDef[] = [
 		'Spend up to 3 free production units on character abilities now, before the supplies go out.',
 		[{ t: 'freeAbilityUnits', amount: 3 }],
 	),
-	rightNow('08-03', ['M', '25']),
+	card('08-03', 'priorities', 'Right now!', 'Open doors M, 25.', opens('M', '25')),
 	card(
 		'08-04',
 		'scanner',
@@ -508,7 +525,13 @@ const legacyDeck: LegacyCardDef[] = [
 		{ t: 'objectives', remove: ['reconNewArea'] },
 		...opens('R', '55', 'D', 'Y', 'U'),
 	]),
-	objective('09-04', 'reconEastAsia', 'Recon East Asia', { halt: 'pause' }),
+	objective(
+		'09-04',
+		'reconEastAsia',
+		'Recon East Asia',
+		'Recon East Asia. If completed in a lost first game of September, it still counts in the second game.',
+		{ halt: 'pause' },
+	),
 	rightNow('09-05', ['33']),
 	rationed('09-06', 'scavenge', 'Cautious Approach', { halt: 'stop' }),
 
@@ -531,7 +554,12 @@ const legacyDeck: LegacyCardDef[] = [
 			...opens('P', '37'),
 		],
 	),
-	objective('10-04', 'defect', 'Get Hollow Men to defect'),
+	objective(
+		'10-04',
+		'defect',
+		'Get Hollow Men to defect',
+		'Have at least 1 Hollow Man on 3 different havens. If completed in a lost first game of October, it still counts in the second game.',
+	),
 	card(
 		'10-05',
 		'turningPoint',
@@ -561,7 +589,12 @@ const legacyDeck: LegacyCardDef[] = [
 			{ t: 'required', count: 1 },
 		],
 	),
-	objective('11-04', 'plan', 'Complete the Plan'),
+	objective(
+		'11-04',
+		'plan',
+		'Complete the Plan',
+		'Complete all four parts of The Plan. Destroy this card at the end of the game in which you complete it.',
+	),
 	card(
 		'11-05',
 		'plan',
@@ -584,7 +617,13 @@ const legacyDeck: LegacyCardDef[] = [
 		{ t: 'objectives', remove: ['plan'] },
 		{ t: 'required', count: 1 },
 	]),
-	objective('12-04', 'deliverSample', 'Deliver the Sample', { halt: 'finale' }),
+	objective(
+		'12-04',
+		'deliverSample',
+		'Deliver the Sample',
+		'Have a player carrying the sample in Johannesburg, with a supply center in Johannesburg.',
+		{ halt: 'finale' },
+	),
 	card('12-05', 'stop', 'At last', 'The campaign is over. What happens next, then the final score.'),
 	tier('12-06', 'If you failed to deliver the sample', 'notDelivered'),
 	tier('12-07', 'If you delivered the sample', 'delivered'),

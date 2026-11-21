@@ -297,7 +297,7 @@
 <style>
 	.ring {
 		position: absolute;
-		z-index: 31;
+		z-index: 38;
 		width: 0;
 		height: 0;
 	}
@@ -381,7 +381,7 @@
 	   labels in one column, values in the next. */
 	.hint {
 		position: absolute;
-		z-index: 32;
+		z-index: 52;
 		display: flex;
 		flex-direction: column;
 		gap: 0.3rem;
