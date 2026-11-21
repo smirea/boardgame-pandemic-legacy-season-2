@@ -84,6 +84,11 @@
 		border-radius: 5px;
 	}
 
+	.legacy-card.size-deck.landscape {
+		--w: 12.4rem;
+		--h: 8.7rem;
+	}
+
 	.legacy-card.size-thumb {
 		--w: 6.8rem;
 		--h: 9.4rem;
