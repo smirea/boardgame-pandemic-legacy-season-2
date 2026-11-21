@@ -638,3 +638,20 @@ export function parseSave(raw: unknown): Save {
 		throw new Error('That is not a campaign save from this build');
 	return save as Save;
 }
+
+/**
+ * For debugging only, so a long playtest survives a change to the state's shape: what an older save lacks is
+ * filled with today's fresh value. Players' saves still go through `parseSave` alone and are refused.
+ */
+export function fillSave(raw: unknown): Save {
+	const save = structuredClone(raw) as Save;
+	const fill = (written: object | undefined, fresh: object) => {
+		if (!written) return;
+		for (const [key, value] of Object.entries(fresh))
+			if (!(key in written)) (written as Record<string, unknown>)[key] = structuredClone(value);
+	};
+	fill(save?.world?.campaign, newCampaign(0));
+	fill(save?.world?.table, newTable());
+	for (const character of Object.values(save?.world?.campaign?.characters ?? {})) fill(character, freshCharacter);
+	return parseSave(save);
+}

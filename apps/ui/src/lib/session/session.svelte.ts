@@ -2,6 +2,7 @@ import {
 	createGameActor,
 	gameIndexOf,
 	parseRecord,
+	fillSave,
 	parseSave,
 	publicState,
 	recordStep,
@@ -62,6 +63,11 @@ type DebugApi = {
 	/** Keeps the campaign as it stands under `name`, to return to with `restore`. Only the newest few are kept. */
 	checkpoint: (name: string) => string[];
 	restore: (name: string) => void;
+	/**
+	 * Restores a checkpoint written by an older build, filling whatever it lacks with fresh values. For playtests
+	 * that outlive a change to the state. The page drops an older save as it loads, so name a checkpoint.
+	 */
+	upgrade: (name?: string) => void;
 	checkpoints: () => string[];
 	/** Sends a command the way a click would. Returns why this client would refuse it, or null once it is sent. */
 	send: (command: Command) => string | null;
@@ -365,6 +371,11 @@ export class GameSession {
 				const found = (LS.get('checkpoints') ?? []).find(entry => entry.name === name);
 				if (!found) throw new Error(`No checkpoint named ${name}`);
 				this.importSave(found.save);
+			},
+			upgrade: name => {
+				const found = name ? (LS.get('checkpoints') ?? []).find(entry => entry.name === name)?.save : LS.get('save');
+				if (!found) throw new Error(name ? `No checkpoint named ${name}` : 'No save to upgrade');
+				this.importSave(fillSave(found));
 			},
 			checkpoints: () => (LS.get('checkpoints') ?? []).map(entry => entry.name),
 			send: command => {
