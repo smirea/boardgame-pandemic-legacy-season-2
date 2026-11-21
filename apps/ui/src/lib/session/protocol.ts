@@ -1,21 +1,36 @@
-import type { Command, PublicState } from '@repo/game';
+import type { Command } from '@repo/game';
+import type { StateMsg } from './sync';
 
-export type Stroke = { id: string; points: { x: number; z: number }[] };
+export type Point = { x: number; z: number };
+
+export type Stroke = { id: string; points: Point[] };
 
 export type CursorTool = 'pen' | 'eraser';
 
-export type Msg =
-	| { t: 'state'; state: PublicState }
-	| { t: 'command'; command: Command }
-	| { t: 'rejected'; reason: string }
-	| { t: 'draw'; player: string; strokes: Stroke[] }
+/** What players draw on the map and point at. The host passes each one on to everyone else. */
+export type SketchMsg =
+	/** Points added to the end of one of a player's strokes, which starts the stroke if it is new. */
+	| { t: 'stroke'; player: string; id: string; points: Point[] }
+	/** All of a player's strokes, in place of what was held: after an erase, and for a browser that just joined. */
+	| { t: 'strokes'; player: string; strokes: Stroke[] }
 	| { t: 'draw-clear' }
 	| { t: 'ping'; id: string; player: string; x: number; z: number };
 
-/** A cursor position on the board plane, with optional active drawing tool, or null when off the board. */
-export type Presence = { x: number; z: number; tool?: CursorTool } | null;
+export type Msg =
+	| StateMsg
+	/** A peer that missed a change asks for the whole state. */
+	| { t: 'resync' }
+	| { t: 'command'; command: Command }
+	| { t: 'rejected'; reason: string }
+	| SketchMsg;
+
+/** A cursor position on the board plane, with the drawing tool held if any, or null when off the board. */
+export type Presence = (Point & { tool?: CursorTool }) | null;
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null;
+const isPoint = (value: unknown) => isRecord(value) && Number.isFinite(value['x']) && Number.isFinite(value['z']);
+const isPoints = (value: unknown) => Array.isArray(value) && value.every(isPoint);
+const isStroke = (value: unknown) => isRecord(value) && typeof value['id'] === 'string' && isPoints(value['points']);
 
 /**
  * Wire boundary. Friends are trusted not to forge states, but a malformed frame must not reach the
@@ -23,48 +38,47 @@ const isRecord = (value: unknown): value is Record<string, unknown> => typeof va
  */
 export function parseMsg(raw: unknown): Msg {
 	if (!isRecord(raw)) throw new TypeError('message is not an object');
-	if (
-		raw['t'] === 'state' &&
-		isRecord(raw['state']) &&
-		typeof raw['state']['phase'] === 'string' &&
-		isRecord(raw['state']['world'])
-	)
-		return raw as Msg;
-	if (raw['t'] === 'command' && isRecord(raw['command']) && typeof raw['command']['type'] === 'string')
-		return raw as Msg;
-	if (raw['t'] === 'rejected' && typeof raw['reason'] === 'string') return raw as Msg;
-	if (raw['t'] === 'draw' && typeof raw['player'] === 'string' && Array.isArray(raw['strokes'])) {
-		const valid = (raw['strokes'] as unknown[]).every(
-			stroke =>
-				isRecord(stroke) &&
-				typeof stroke['id'] === 'string' &&
-				Array.isArray(stroke['points']) &&
-				(stroke['points'] as unknown[]).every(
-					point => isRecord(point) && Number.isFinite(point['x']) && Number.isFinite(point['z']),
-				),
-		);
-		if (valid) return raw as Msg;
-	}
-	if (raw['t'] === 'draw-clear') return { t: 'draw-clear' };
-	if (
-		raw['t'] === 'ping' &&
-		typeof raw['id'] === 'string' &&
-		typeof raw['player'] === 'string' &&
-		Number.isFinite(raw['x']) &&
-		Number.isFinite(raw['z'])
-	)
-		return raw as Msg;
-	throw new TypeError('unknown message');
+	const ok = (() => {
+		switch (raw['t']) {
+			case 'state':
+				return (
+					Number.isInteger(raw['seq']) &&
+					isRecord(raw['state']) &&
+					typeof raw['state']['phase'] === 'string' &&
+					isRecord(raw['state']['world'])
+				);
+			case 'patch':
+				return (
+					Number.isInteger(raw['seq']) &&
+					Array.isArray(raw['patch']) &&
+					raw['patch'].every(entry => isRecord(entry) && Array.isArray(entry['p']))
+				);
+			case 'resync':
+			case 'draw-clear':
+				return true;
+			case 'command':
+				return isRecord(raw['command']) && typeof raw['command']['type'] === 'string';
+			case 'rejected':
+				return typeof raw['reason'] === 'string';
+			case 'stroke':
+				return typeof raw['player'] === 'string' && typeof raw['id'] === 'string' && isPoints(raw['points']);
+			case 'strokes':
+				return typeof raw['player'] === 'string' && Array.isArray(raw['strokes']) && raw['strokes'].every(isStroke);
+			case 'ping':
+				return typeof raw['id'] === 'string' && typeof raw['player'] === 'string' && isPoint(raw);
+			default:
+				return false;
+		}
+	})();
+	if (!ok) throw new TypeError(`malformed ${String(raw['t'])} message`);
+	return raw as Msg;
 }
 
 export function parsePresence(raw: unknown): Presence {
 	if (raw === null) return null;
-	if (isRecord(raw) && Number.isFinite(raw['x']) && Number.isFinite(raw['z'])) {
-		const tool = raw['tool'];
-		if (tool !== undefined && tool !== 'pen' && tool !== 'eraser') throw new TypeError('bad presence tool');
-		return tool
-			? { x: raw['x'] as number, z: raw['z'] as number, tool }
-			: { x: raw['x'] as number, z: raw['z'] as number };
-	}
-	throw new TypeError('bad presence');
+	if (!isPoint(raw)) throw new TypeError('bad presence');
+	const { x, z, tool } = raw as { x: number; z: number; tool?: unknown };
+	if (tool === undefined) return { x, z };
+	if (tool !== 'pen' && tool !== 'eraser') throw new TypeError('bad presence tool');
+	return { x, z, tool };
 }

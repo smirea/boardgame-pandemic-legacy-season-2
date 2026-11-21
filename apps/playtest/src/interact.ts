@@ -28,6 +28,11 @@ const { values: flags } = parseArgs({
 		scale: { type: 'string', default: '2' },
 		/** Slows the CPU by this factor, as a laptop on battery would be. */
 		throttle: { type: 'string', default: '1' },
+		/**
+		 * Draws as fast as the machine can instead of at the screen's rate, so the time per frame is what a frame costs.
+		 * A frame that fits the screen's rate with room to spare here is one a slower machine can still draw in time.
+		 */
+		uncapped: { type: 'boolean', default: false },
 	},
 });
 
@@ -112,6 +117,7 @@ const browser = await chromium.launch({
 		'--disable-backgrounding-occluded-windows',
 		'--disable-renderer-backgrounding',
 		'--disable-features=CalculateNativeWinOcclusion',
+		...(flags.uncapped ? ['--disable-frame-rate-limit', '--disable-gpu-vsync'] : []),
 	],
 });
 const context = await browser.newContext({
@@ -317,6 +323,7 @@ type Row = {
 	over50: number;
 	worstFrame: number;
 	p95Frame: number;
+	meanFrame: number;
 	scriptMs: number;
 	styleMs: number;
 	layoutMs: number;
@@ -375,6 +382,7 @@ try {
 			over50: frames.filter(ms => ms > 50).length,
 			worstFrame: frames.at(-1) ?? 0,
 			p95Frame: frames[Math.floor(frames.length * 0.95)] ?? 0,
+			meanFrame: frames.reduce((total, ms) => total + ms, 0) / Math.max(1, frames.length),
 			scriptMs: delta('ScriptDuration'),
 			styleMs: delta('RecalcStyleDuration'),
 			layoutMs: delta('LayoutDuration'),
@@ -390,7 +398,7 @@ try {
 		});
 		const row = rows.at(-1)!;
 		console.log(
-			`${row.scenario.padEnd(13)} ${row.seconds.toFixed(1)}s  frames ${String(row.frames).padStart(4)}  >25ms ${String(row.over25).padStart(3)}  >50ms ${String(row.over50).padStart(3)}  worst ${row.worstFrame.toFixed(0).padStart(4)}ms  ` +
+			`${row.scenario.padEnd(13)} ${row.seconds.toFixed(1)}s  frames ${String(row.frames).padStart(4)}  mean ${row.meanFrame.toFixed(1).padStart(5)}ms  >25ms ${String(row.over25).padStart(3)}  >50ms ${String(row.over50).padStart(3)}  worst ${row.worstFrame.toFixed(0).padStart(4)}ms  ` +
 				`script ${row.scriptMs.toFixed(0).padStart(5)}ms  style ${row.styleMs.toFixed(0).padStart(4)}ms (${row.styleRecalcs})  layout ${row.layoutMs.toFixed(0).padStart(4)}ms (${row.layouts})  ` +
 				`long ${row.longFrames} blocking ${row.blockingMs.toFixed(0)}ms  event ${row.worstEvent.toFixed(0)}ms`,
 		);

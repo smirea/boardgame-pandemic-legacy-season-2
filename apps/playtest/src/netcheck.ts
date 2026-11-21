@@ -50,12 +50,14 @@ type Traffic = {
 	got: Record<string, { n: number; bytes: number }>;
 };
 type Probe = { frames: number[]; last: number; on: boolean };
+type Sketch = { strokes: Record<string, number>; points: number; pings: number };
 declare const window: Window & {
 	DEBUG?: {
 		getState(): unknown;
 		setState(state: unknown): void;
 		send(command: unknown): string | null;
 		connection(): { status: string; peers: number; fatal: string | null };
+		sketch(): Sketch;
 	};
 	__traffic: Traffic;
 	__probe: Probe;
@@ -199,6 +201,15 @@ try {
 			}),
 		),
 	);
+	// How busy the watched peer's main thread is, to tell a slow page from a graphics card shared by every window here.
+	const cdp = await watched.context.newCDPSession(watched.page);
+	await cdp.send('Performance.enable');
+	const busy = async () => {
+		const { metrics } = (await cdp.send('Performance.getMetrics')) as { metrics: { name: string; value: number }[] };
+		const of = (name: string) => metrics.find(metric => metric.name === name)?.value ?? 0;
+		return of('ScriptDuration') + of('RecalcStyleDuration') + of('LayoutDuration');
+	};
+	const busyBefore = await busy();
 	const runStarted = performance.now();
 	const rng = { seed: 11 };
 	const latencies: number[] = [];
@@ -226,6 +237,7 @@ try {
 		await sleep(350);
 	}
 	const seconds = (performance.now() - runStarted) / 1000;
+	const busyShare = ((await busy()) - busyBefore) / seconds;
 	check(
 		stuck === 0,
 		`every browser held the host's state after each of ${latencies.length + stuck} commands (${stuck} did not)`,
@@ -247,13 +259,60 @@ try {
 	}
 	const frames = (await watched.page.evaluate(() => window.__probe.frames)).toSorted((a, b) => a - b);
 	console.log(
-		`     ${watched.name} drew ${frames.length} frames in ${seconds.toFixed(0)} s: ${frames.filter(ms => ms > 25).length} over 25 ms, ${frames.filter(ms => ms > 50).length} over 50 ms, worst ${frames.at(-1)?.toFixed(0)} ms`,
+		`     ${watched.name} drew ${frames.length} frames in ${seconds.toFixed(0)} s: ${frames.filter(ms => ms > 25).length} over 25 ms, ${frames.filter(ms => ms > 50).length} over 50 ms, worst ${frames.at(-1)?.toFixed(0)} ms, with its main thread ${(busyShare * 100).toFixed(0)}% busy`,
 	);
 
-	// A peer reloads and comes back to the same state.
+	moving = false;
+	await Promise.all(wandering);
+
+	// The host draws on the map with the pen held, a peer adds a line, pings and erases, and everyone sees the same.
+	const sketches = () => Promise.all(tabs.map(tab => tab.page.evaluate(() => JSON.stringify(window.DEBUG!.sketch()))));
+	// A ping lasts ten seconds and is not sent to a browser that joins later, so `lines` leaves pings out.
+	const agree = async (what: (sketch: Sketch) => boolean, timeout = 3000, lines = false) => {
+		for (const started = performance.now(); performance.now() - started < timeout; await sleep(40)) {
+			const seen = (await sketches()).map(text =>
+				lines ? JSON.stringify({ ...(JSON.parse(text) as Sketch), pings: 0 }) : text,
+			);
+			if (seen.every(text => text === seen[0]) && what(JSON.parse(seen[0]!) as Sketch)) return true;
+		}
+		console.log(`     sketches: ${(await sketches()).join(' | ')}`);
+		return false;
+	};
+	const scribble = async (tab: Tab, y: number) => {
+		await tab.page.mouse.move(420, y);
+		await tab.page.keyboard.down('f');
+		await tab.page.mouse.down();
+		for (let step = 1; step <= 40; step++) await tab.page.mouse.move(420 + step * 14, y + Math.sin(step / 3) * 40);
+		await tab.page.mouse.up();
+		await tab.page.keyboard.up('f');
+	};
+	await scribble(host, 330);
+	check(
+		await agree(sketch => sketch.points > 10 && Object.keys(sketch.strokes).length === 1),
+		`a line the host drew is on every map (${(JSON.parse((await sketches())[0]!) as Sketch).points} points)`,
+	);
+	await scribble(watched, 450);
+	check(await agree(sketch => Object.keys(sketch.strokes).length === 2), `and so is a line a peer drew`);
+	const drawn = (JSON.parse((await sketches())[0]!) as Sketch).points;
+	await watched.page.mouse.move(700, 300);
+	await watched.page.keyboard.press('Tab');
+	check(await agree(sketch => sketch.pings === 1), `a peer's ping shows on every map`);
+	await watched.page.keyboard.press('e');
+	await watched.page.mouse.move(560, 250);
+	await watched.page.mouse.down();
+	for (let step = 1; step <= 20; step++) await watched.page.mouse.move(560 + step * 4, 250 + step * 12);
+	await watched.page.mouse.up();
+	await watched.page.keyboard.press('e');
+	check(
+		await agree(sketch => sketch.points !== drawn && Object.values(sketch.strokes).some(count => count > 1)),
+		`a peer's eraser cut the same piece out of everyone's lines`,
+	);
+
+	// A peer reloads and comes back to the same state, and to the drawings on the map.
 	await watched.page.reload();
 	await watched.page.waitForFunction(() => Boolean(window.DEBUG), null, { timeout: 30_000 });
 	const back = await converged(host, peers, 20_000);
+	check(await agree(sketch => sketch.points > 10, 5000, true), `a peer that reloaded has the map's drawings`);
 	check(back !== null, `a peer that reloaded holds the host's state again (${back?.toFixed(0)} ms)`);
 
 	// The host reloads: every peer finds it again without being touched.
@@ -285,8 +344,6 @@ try {
 		check(hash(await stateOf(host)) !== before, `a peer's command still reaches the host after the reloads`);
 		check((await converged(host, peers, 5000)) !== null, `and everyone holds the result`);
 	}
-	moving = false;
-	await Promise.all(wandering);
 	for (const tab of tabs)
 		if (tab.errors.length) check(false, `${tab.name} page errors: ${[...new Set(tab.errors)].join(' | ')}`);
 } finally {

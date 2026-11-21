@@ -47,7 +47,8 @@ export class ReplaySession implements SessionView {
 	send() {}
 	rename() {}
 	pointer() {}
-	draw() {}
+	stroke() {}
+	redraw() {}
 	clearDrawings() {}
 	ping() {}
 	importSave() {}

@@ -58,10 +58,11 @@ export interface Session<Msg, Presence> {
 	readonly status: ConnectionStatus;
 	readonly peers: PeerInfo[];
 	/**
-	 * Host: broadcast, or send to one peer. Peer: always goes to the host; `to` is rejected. Messages sent while the
-	 * link is down are dropped, so gate game actions on `status === 'connected'`.
+	 * Host: broadcast, send to one peer, or broadcast to everyone but one (a relay of what that peer sent). Peer: always
+	 * goes to the host; `to` is rejected. Messages sent while the link is down are dropped, so gate game actions on
+	 * `status === 'connected'`.
 	 */
-	send(msg: Msg, to?: PeerId): void;
+	send(msg: Msg, to?: PeerId | { except: PeerId }): void;
 	/** Lossy. Coalesced to the latest value and rate limited. The host relays it to the other peers. */
 	sendPresence(presence: Presence): void;
 	on<E extends keyof SessionEvents<Msg, Presence>>(event: E, handler: SessionEvents<Msg, Presence>[E]): () => void;

@@ -1,98 +1,18 @@
-import {
-	createGameActor,
-	gameIndexOf,
-	parseRecord,
-	fillSave,
-	parseSave,
-	publicState,
-	recordStep,
-	reject,
-	startRecord,
-} from '@repo/game';
+import { createGameActor, gameIndexOf, parseSave, publicState, recordStep, reject, startRecord } from '@repo/game';
 import type { Command, GameActor, GameRecord, PlayerId, PublicState, Save } from '@repo/game';
-import { createHost, createMemoryTransport, createPeerId, createWebRtcTransport, joinHost, peerId } from '@repo/net';
-import type { ConnectionStatus, PeerInfo, Session } from '@repo/net';
+import { createHost, createMemoryTransport, createWebRtcTransport, joinHost, peerId } from '@repo/net';
+import type { ConnectionStatus, PeerId, PeerInfo, Session } from '@repo/net';
 import { LS } from '../storage';
+import { createDebugApi } from './debug';
+import type { DebugApi } from './debug';
 import { parseMsg, parsePresence } from './protocol';
-import type { CursorTool, Msg, Presence, Stroke } from './protocol';
+import type { CursorTool, Msg, Point, Presence, Stroke } from './protocol';
+import { Sketch } from './sketch.svelte';
+import { storedId, storedName, storedRecord, storedSave } from './stored';
+import { StateFeed, StateMirror } from './sync';
 
 export type Mode = 'solo' | 'host' | 'join';
-
-export const PING_DURATION_MS = 10_000;
-
-export type MapPing = {
-	id: string;
-	player: string;
-	x: number;
-	z: number;
-	createdAt: number;
-	duration: number;
-};
-
-function storedId() {
-	const existing = LS.get('playerId');
-	if (existing) return peerId(existing);
-	const created = createPeerId();
-	LS.set({ playerId: created });
-	return created;
-}
-
-// A save from an older build is dropped for a new campaign: the game keeps no backwards compatibility.
-function storedSave(): Save | null {
-	const raw = LS.get('save');
-	if (!raw) return null;
-	try {
-		return parseSave(raw);
-	} catch (error) {
-		console.warn('Starting a new campaign:', error);
-		LS.delete('save');
-		LS.delete('record');
-		return null;
-	}
-}
-
-/** The recording kept from an earlier page load, if it is of the game the save is in. */
-function storedRecord(save: Save | null): GameRecord | null {
-	const raw = LS.get('record');
-	if (!raw || !save) return null;
-	try {
-		const record = parseRecord(raw);
-		return gameIndexOf(record.initial) === save.world.campaign.results.length ? record : null;
-	} catch {
-		return null;
-	}
-}
-
-/** Saves fill the browser's storage quickly, so only this many checkpoints are kept. */
-const CHECKPOINTS = 12;
-
-type DebugApi = {
-	getState: () => PublicState | null;
-	saveState: () => void;
-	loadState: (state?: unknown) => void;
-	setState: (state: unknown) => void;
-	/** Keeps the campaign as it stands under `name`, to return to with `restore`. Only the newest few are kept. */
-	checkpoint: (name: string) => string[];
-	restore: (name: string) => void;
-	/**
-	 * Restores a checkpoint written by an older build, filling whatever it lacks with fresh values. For playtests
-	 * that outlive a change to the state. The page drops an older save as it loads, so name a checkpoint.
-	 */
-	upgrade: (name?: string) => void;
-	checkpoints: () => string[];
-	/** Sends a command the way a click would. Returns why this client would refuse it, or null once it is sent. */
-	send: (command: Command) => string | null;
-	connection: () => {
-		mode: Mode;
-		status: ConnectionStatus;
-		peers: number;
-		notice: string | null;
-		fatal: string | null;
-	};
-	getRecord: () => GameRecord | null;
-	/** Renames this player at the table, as the lobby's name field does. */
-	setName: (name: string) => void;
-};
+export type { MapPing } from './sketch.svelte';
 
 /** What the game screen needs from a session. A replay supplies the same shape with nothing behind it. */
 export type SessionView = Pick<
@@ -109,7 +29,8 @@ export type SessionView = Pick<
 	| 'mode'
 	| 'send'
 	| 'pointer'
-	| 'draw'
+	| 'stroke'
+	| 'redraw'
 	| 'clearDrawings'
 	| 'ping'
 	| 'exportSave'
@@ -118,23 +39,15 @@ export type SessionView = Pick<
 	| 'exportRecord'
 >;
 
-declare global {
-	interface Window {
-		DEBUG?: DebugApi;
-	}
-}
-
 /**
- * One player's connection to the game. The host owns the XState actor and broadcasts a redacted
- * state after every transition. Peers hold the last state they were sent and forward commands.
+ * One player's connection to the game. The host owns the XState actor and sends every peer what each transition
+ * changed. Peers hold the state that adds up to and forward commands.
  */
 export class GameSession {
 	state = $state.raw<PublicState | null>(null);
 	status = $state<ConnectionStatus>('connecting');
 	peers = $state.raw<PeerInfo[]>([]);
-	cursors = $state.raw<Record<string, { x: number; z: number; tool?: CursorTool }>>({});
-	drawings = $state.raw<Record<string, Stroke[]>>({});
-	pings = $state.raw<MapPing[]>([]);
+	cursors = $state.raw<Record<string, Point & { tool?: CursorTool }>>({});
 	notice = $state<{ text: string; at: number } | null>(null);
 	fatal = $state<string | null>(null);
 
@@ -144,17 +57,21 @@ export class GameSession {
 	readonly player: PlayerId;
 	readonly #net: Session<Msg, Presence>;
 	readonly #actor: GameActor | null = null;
+	readonly #sketch: Sketch;
+	/** The host's side of keeping peers on its state, and a peer's. */
+	readonly #feed = new StateFeed();
+	readonly #mirror = new StateMirror();
+	/** True from asking the host for the whole state until it arrives, so it is asked for once. */
+	#asked = false;
 	/** The game in progress, recorded step by step. Only the host keeps one. */
 	#record: GameRecord | null = null;
 	#sender: { command: Command; by: string | null } | null = null;
 	/** Prevents re-seating a player mid-game after they explicitly vacated their seat. */
 	#resumedGame: number | null = null;
-	#pingSeq = 0;
-	readonly #pingTimers = new Map<string, ReturnType<typeof setTimeout>>();
-	readonly #drawFlush = new Map<
-		string,
-		{ timer: ReturnType<typeof setTimeout> | null; lastAt: number; pending: Stroke[] | null }
-	>();
+	/** Where every other pointer is, as it arrives. The screen is handed them once a frame. */
+	readonly #pointers = new Map<string, NonNullable<Presence>>();
+	#pointersFrame = 0;
+	#storageFailed = false;
 
 	/** False for a session that stands apart from this browser's campaign, which neither reads nor writes storage. */
 	readonly #persist: boolean;
@@ -168,66 +85,36 @@ export class GameSession {
 		this.#persist = options.save === undefined;
 		this.selfId = options.player ? peerId(options.player) : storedId();
 		this.player = this.selfId as string as PlayerId;
-		const name = LS.get('name', '').trim() || 'Player';
 		const transport =
 			options.mode === 'solo'
 				? createMemoryTransport()
 				: createWebRtcTransport({ signalUrl: new URL(__SIGNAL_URL__, location.href).href, secret: options.secret });
-		const config = { selfId: this.selfId, name, transport, parseMsg, parsePresence };
+		const config = { selfId: this.selfId, name: storedName(), transport, parseMsg, parsePresence };
 		this.#net = options.mode === 'join' ? joinHost<Msg, Presence>(config) : createHost<Msg, Presence>(config);
-
-		this.#net.on('status', status => (this.status = status));
-		this.#net.on('peers', peers => {
-			this.peers = peers;
-			const present = new Set(peers.filter(peer => peer.connected).map(peer => peer.id as string));
-			this.cursors = Object.fromEntries(Object.entries(this.cursors).filter(([id]) => present.has(id)));
-			if (this.#actor && this.state) {
-				this.#net.send({ t: 'state', state: this.state });
-				for (const [player, strokes] of Object.entries(this.drawings))
-					if (strokes.length) this.#net.send({ t: 'draw', player, strokes });
-			}
-			this.#tidyLobby();
+		this.#sketch = new Sketch(this.selfId, msg => {
+			if (this.status === 'connected') this.#net.send(msg);
 		});
+
+		this.#net.on('status', status => {
+			this.status = status;
+			if (this.#actor) return;
+			// A peer whose link just came up has nothing it can trust: what it holds may be from before the host
+			// restarted. It asks for the game whole, and until that arrives no change is applied to what it has.
+			this.#mirror.reset();
+			this.#asked = false;
+			if (status === 'connected') this.#resync();
+		});
+		this.#net.on('peers', peers => this.#onPeers(peers));
 		this.#net.on('presence', (presence, from) => {
-			const { [from]: _gone, ...rest } = this.cursors;
-			this.cursors = presence ? { ...rest, [from]: presence } : rest;
+			if (presence) this.#pointers.set(from, presence);
+			else this.#pointers.delete(from);
+			this.#showPointers();
 		});
 		this.#net.on('error', error => {
 			if (error.fatal) this.fatal = error.message;
 			else console.warn(error.code, error.message);
 		});
-		this.#net.on('message', (msg, from) => {
-			if (msg.t === 'state' && !this.#actor) {
-				this.state = msg.state;
-				this.#sitDown();
-			}
-			if (msg.t === 'rejected') this.#say(msg.reason);
-			if (msg.t === 'command' && this.#actor) {
-				const reason = this.#apply(msg.command, this.#nameOf(from));
-				if (reason) this.#net.send({ t: 'rejected', reason }, from);
-			}
-			if (msg.t === 'draw') {
-				const { [msg.player]: _gone, ...rest } = this.drawings;
-				this.drawings = msg.strokes.length ? { ...rest, [msg.player]: msg.strokes } : rest;
-				if (this.#actor) this.#relay({ t: 'draw', player: msg.player, strokes: msg.strokes }, from);
-			}
-			if (msg.t === 'draw-clear') {
-				this.#cancelDrawFlushes();
-				this.drawings = {};
-				if (this.#actor) this.#relay({ t: 'draw-clear' }, from);
-			}
-			if (msg.t === 'ping') {
-				this.#addPing({
-					id: msg.id,
-					player: msg.player,
-					x: msg.x,
-					z: msg.z,
-					createdAt: performance.now(),
-					duration: PING_DURATION_MS,
-				});
-				if (this.#actor) this.#relay(msg, from);
-			}
-		});
+		this.#net.on('message', (msg, from) => this.#onMessage(msg, from));
 		this.status = this.#net.status;
 
 		if (options.mode !== 'join') {
@@ -237,21 +124,96 @@ export class GameSession {
 			this.#actor = createGameActor({ seed: Math.floor(Math.random() * 2 ** 31), save, undo: savedUndo });
 			this.#actor.subscribe(snapshot => {
 				const before = this.state;
-				this.state = publicState(snapshot);
-				if (before) this.#remember(before, this.state);
+				const after = publicState(snapshot);
+				// The actor reports every event it is sent, and most change nothing the screen shows.
+				if (before && before.world === after.world && before.phase === after.phase && before.canUndo === after.canUndo)
+					return;
+				this.state = after;
+				if (before) this.#remember(before, after);
 				// An imported campaign reaches its lobby with nobody seated, so the host sits down there as on arrival.
-				if (before && before.phase !== 'lobby' && this.state.phase === 'lobby')
+				if (before && before.phase !== 'lobby' && after.phase === 'lobby')
 					queueMicrotask(() => {
 						this.#tidyLobby();
 						this.#sitDown();
 					});
-				if (this.#persist) LS.set({ save: this.#save(), undo: snapshot.context.undo });
-				if (this.#net.status !== 'closed') this.#net.send({ t: 'state', state: this.state });
+				this.#store({ save: this.save(), undo: snapshot.context.undo });
+				const change = this.#feed.next(after);
+				if (change && this.#net.status !== 'closed') this.#net.send(change);
 			});
 			this.#actor.start();
 			this.#sitDown();
 			this.#tidyLobby();
 		}
+	}
+
+	get drawings() {
+		return this.#sketch.drawings;
+	}
+
+	get pings() {
+		return this.#sketch.pings;
+	}
+
+	get record() {
+		return this.#record;
+	}
+
+	#onPeers(peers: PeerInfo[]) {
+		this.peers = peers;
+		const present = new Set(peers.filter(peer => peer.connected).map(peer => peer.id as string));
+		for (const id of this.#pointers.keys()) if (!present.has(id)) this.#pointers.delete(id);
+		this.#showPointers();
+		this.#tidyLobby();
+	}
+
+	#onMessage(msg: Msg, from: PeerId) {
+		switch (msg.t) {
+			case 'state':
+			case 'patch': {
+				if (this.#actor) return;
+				const state = this.#mirror.apply(msg);
+				if (state === 'lost') return this.#resync();
+				if (msg.t === 'state') this.#asked = false;
+				this.state = state;
+				return this.#sitDown();
+			}
+			case 'resync': {
+				// The game and what is drawn on the map, whole, for a peer that just connected or lost its place.
+				const whole = this.#actor && this.#feed.whole();
+				if (!whole) return;
+				this.#net.send(whole, from);
+				// What the peer holds of the map's drawings may be from before this host restarted, so it starts clean.
+				this.#net.send({ t: 'draw-clear' }, from);
+				for (const drawn of this.#sketch.whole()) this.#net.send(drawn, from);
+				return;
+			}
+			case 'rejected':
+				return this.#say(msg.reason);
+			case 'command': {
+				if (!this.#actor) return;
+				const reason = this.#apply(msg.command, this.#nameOf(from));
+				if (reason) this.#net.send({ t: 'rejected', reason }, from);
+				return;
+			}
+			default:
+				this.#sketch.receive(msg);
+				if (this.#actor) this.#net.send(msg, { except: from });
+		}
+	}
+
+	#resync() {
+		if (this.#asked || this.status !== 'connected') return;
+		this.#asked = true;
+		this.#net.send({ t: 'resync' });
+	}
+
+	/** Pointers arrive many times a frame with a full table, so the screen takes them once a frame. */
+	#showPointers() {
+		if (this.#pointersFrame) return;
+		this.#pointersFrame = requestAnimationFrame(() => {
+			this.#pointersFrame = 0;
+			this.cursors = Object.fromEntries(this.#pointers);
+		});
 	}
 
 	#nameOf(player: string): string | null {
@@ -267,7 +229,7 @@ export class GameSession {
 		const state = this.state;
 		if (!state) return;
 		const held = () => this.state!.world.table.seats.filter(entry => entry.player === this.player).length;
-		const name = LS.get('name', '').trim() || 'Player';
+		const name = storedName();
 		if (state.phase === 'lobby') {
 			this.#resumedGame = null;
 			const join: Command = { type: 'JOIN', player: this.player, name };
@@ -325,6 +287,22 @@ export class GameSession {
 		this.notice = { text, at: Date.now() };
 	}
 
+	/**
+	 * Writes the host's game to this browser. A browser whose storage is full must not stop the game for the table,
+	 * so the game goes on unsaved and the host is told once.
+	 */
+	#store(values: Parameters<typeof LS.set>[0]) {
+		if (!this.#persist) return;
+		try {
+			LS.set(values);
+		} catch (error) {
+			console.warn('The game could not be saved in this browser:', error);
+			if (!this.#storageFailed)
+				this.#say('This browser cannot save the game: its storage is full. Export the campaign from the Menu.');
+			this.#storageFailed = true;
+		}
+	}
+
 	/** Adds the change to the recording of the game it belongs to, starting a new recording when a new game begins. */
 	#remember(before: PublicState, after: PublicState) {
 		if (!this.#record || gameIndexOf(this.#record.initial) !== gameIndexOf(before))
@@ -332,7 +310,7 @@ export class GameSession {
 		const sender = this.#sender;
 		this.#sender = null;
 		const entry = { at: Date.now(), by: sender?.by ?? null, command: sender?.command ?? null };
-		if (recordStep(this.#record, before, after, entry) && this.#persist) LS.set({ record: this.#record });
+		if (recordStep(this.#record, before, after, entry)) this.#store({ record: this.#record });
 	}
 
 	#apply(command: Command, by: string | null = this.mode === 'solo' ? null : this.#nameOf(this.selfId)): string | null {
@@ -373,101 +351,31 @@ export class GameSession {
 		if (this.status === 'connected') this.#net.sendPresence(point);
 	}
 
-	/** Relays a host-received message to every other connected peer without echoing back to the sender. */
-	#relay(msg: Msg, except?: string) {
-		if (!this.#actor || this.#net.status === 'closed') return;
-		for (const peer of this.peers) {
-			if (peer.connected && peer.id !== this.selfId && peer.id !== except) {
-				this.#net.send(msg, peer.id);
-			}
-		}
+	/** Adds a point to this player's stroke `id` on the map, starting it if it is new. */
+	stroke(id: string, point: Point) {
+		this.#sketch.stroke(id, point);
 	}
 
-	#cancelDrawFlushes() {
-		for (const entry of this.#drawFlush.values()) {
-			if (entry.timer !== null) clearTimeout(entry.timer);
-		}
-		this.#drawFlush.clear();
-	}
-
-	#sendDrawing(player: string, strokes: Stroke[], flush: boolean) {
-		if (this.status !== 'connected') return;
-		const DRAW_INTERVAL_MS = 33;
-		const now = performance.now();
-		let state = this.#drawFlush.get(player);
-		if (!state) {
-			state = { timer: null, lastAt: -Infinity, pending: null };
-			this.#drawFlush.set(player, state);
-		}
-		const sendNow = (payload: Stroke[]) => {
-			if (state!.timer !== null) {
-				clearTimeout(state!.timer);
-				state!.timer = null;
-			}
-			state!.pending = null;
-			state!.lastAt = performance.now();
-			if (this.status === 'connected') this.#net.send({ t: 'draw', player, strokes: payload });
-		};
-		if (flush || now - state.lastAt >= DRAW_INTERVAL_MS) {
-			sendNow(strokes);
-			return;
-		}
-		state.pending = strokes;
-		if (state.timer === null) {
-			state.timer = setTimeout(
-				() => {
-					if (state!.pending !== null) sendNow(state!.pending);
-					else state!.timer = null;
-				},
-				Math.max(0, state.lastAt + DRAW_INTERVAL_MS - now),
-			);
-		}
-	}
-
-	draw(strokes: Stroke[], options?: { player?: string; flush?: boolean }) {
-		const id = options?.player ?? (this.selfId as string);
-		const { [id]: _gone, ...rest } = this.drawings;
-		this.drawings = strokes.length ? { ...rest, [id]: strokes } : rest;
-		this.#sendDrawing(id, strokes, options?.flush ?? false);
+	/** Puts `strokes` in place of a player's strokes on the map, as an eraser does. */
+	redraw(player: string, strokes: Stroke[]) {
+		this.#sketch.redraw(player, strokes);
 	}
 
 	clearDrawings() {
-		this.#cancelDrawFlushes();
-		if (Object.keys(this.drawings).length === 0) return;
-		this.drawings = {};
-		if (this.status === 'connected') this.#net.send({ t: 'draw-clear' });
+		this.#sketch.clear();
 	}
 
-	#addPing(ping: MapPing) {
-		this.pings = [...this.pings, ping];
-		const timer = setTimeout(() => {
-			this.#pingTimers.delete(ping.id);
-			this.pings = this.pings.filter(entry => entry.id !== ping.id);
-		}, ping.duration + 80);
-		this.#pingTimers.set(ping.id, timer);
+	ping(point: Point) {
+		this.#sketch.ping(point);
 	}
 
-	ping(point: { x: number; z: number }) {
-		const id = `${this.selfId}-${Date.now()}-${++this.#pingSeq}`;
-		const player = this.selfId as string;
-		this.#addPing({
-			id,
-			player,
-			x: point.x,
-			z: point.z,
-			createdAt: performance.now(),
-			duration: PING_DURATION_MS,
-		});
-		if (this.status === 'connected') this.#net.send({ t: 'ping', id, player, x: point.x, z: point.z });
-	}
-
-	#save(): Save | null {
+	save(): Save | null {
 		return this.state ? { v: 1, phase: this.state.phase, world: this.state.world } : null;
 	}
 
 	/** Any player can export: everyone holds the whole state. */
 	exportSave(): string {
-		return JSON.stringify(this.#save());
+		return JSON.stringify(this.save());
 	}
 
 	/** The recording of the game in progress, or of the last one until the next begins. Only the host has it. */
@@ -492,53 +400,13 @@ export class GameSession {
 		location.reload();
 	}
 
-	/** Console helpers for reproducing a live state, per the game framework convention. */
 	debugApi(): DebugApi {
-		return {
-			getState: () => this.state,
-			saveState: () => LS.set({ debugSnapshot: this.#save() }),
-			loadState: state => this.importSave(state ?? LS.get('debugSnapshot')),
-			setState: state => this.importSave(state),
-			checkpoint: name => {
-				const kept = [
-					...(LS.get('checkpoints') ?? []).filter(entry => entry.name !== name),
-					{ name, save: this.#save() },
-				];
-				LS.set({ checkpoints: kept.slice(-CHECKPOINTS) });
-				return kept.slice(-CHECKPOINTS).map(entry => entry.name);
-			},
-			restore: name => {
-				const found = (LS.get('checkpoints') ?? []).find(entry => entry.name === name);
-				if (!found) throw new Error(`No checkpoint named ${name}`);
-				this.importSave(found.save);
-			},
-			upgrade: name => {
-				const found = name ? (LS.get('checkpoints') ?? []).find(entry => entry.name === name)?.save : LS.get('save');
-				if (!found) throw new Error(name ? `No checkpoint named ${name}` : 'No save to upgrade');
-				this.importSave(fillSave(found));
-			},
-			checkpoints: () => (LS.get('checkpoints') ?? []).map(entry => entry.name),
-			send: command => {
-				const reason = this.explain(command);
-				if (!reason) this.send(command);
-				return reason;
-			},
-			connection: () => ({
-				mode: this.mode,
-				status: this.status,
-				peers: this.peers.filter(peer => peer.connected).length,
-				notice: this.notice?.text ?? null,
-				fatal: this.fatal,
-			}),
-			getRecord: () => this.#record,
-			setName: name => this.rename(name),
-		};
+		return createDebugApi(this);
 	}
 
 	close() {
-		this.#cancelDrawFlushes();
-		for (const timer of this.#pingTimers.values()) clearTimeout(timer);
-		this.#pingTimers.clear();
+		cancelAnimationFrame(this.#pointersFrame);
+		this.#sketch.dispose();
 		this.#actor?.stop();
 		this.#net.close();
 	}

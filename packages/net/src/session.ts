@@ -108,8 +108,8 @@ export function createHost<Msg, Presence>(options: SessionOptions<Msg, Presence>
 		send(msg, to) {
 			core.assertOpen();
 			const frames = encodeReliable({ t: 'msg', d: msg });
-			if (to === undefined) {
-				for (const link of links.values()) sendFrames(frames, link);
+			if (to === undefined || typeof to === 'object') {
+				for (const [id, link] of links) if (id !== to?.except) sendFrames(frames, link);
 				return;
 			}
 			if (!roster.has(to)) throw new Error(`Unknown peer ${to}`);

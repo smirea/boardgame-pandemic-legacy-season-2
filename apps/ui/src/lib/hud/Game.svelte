@@ -19,9 +19,7 @@
 	} from '@repo/game';
 	import type { Action, CardId, CityId, Command, EdgeDef, EventId, Play, SeatId } from '@repo/game';
 	import Board from '#lib/board/Board.svelte';
-	import { eraseStrokesAlong } from '#lib/board/erase.ts';
-	import type { BoardPoint } from '#lib/board/projection.ts';
-	import type { BoardMarks, Covered, CursorTool, Fx, FxKind } from '#lib/board/types.ts';
+	import type { BoardMarks, Covered, Fx, FxKind } from '#lib/board/types.ts';
 	import type { SessionView } from '#lib/session/session.svelte.ts';
 	import { inkOn } from '#lib/color.ts';
 	import { presentFeedback } from '#lib/feedback.ts';
@@ -34,6 +32,7 @@
 	import { fade, fly, scale } from 'svelte/transition';
 	import ActionPanel from './ActionPanel.svelte';
 	import { createBoardView } from './boardView.svelte.ts';
+	import { MapTools } from './mapTools.svelte.ts';
 	import Corner from './Corner.svelte';
 	import { placeSeats } from './seats.ts';
 	import type { Place } from './seats.ts';
@@ -575,10 +574,7 @@
 
 	/** Escape and a right click put down whatever was half-chosen. */
 	function cancel() {
-		if (eraserActive) {
-			eraserActive = false;
-			return true;
-		}
+		if (tools.dropEraser()) return true;
 		if (!targeting && !chooser && !ring) return false;
 		dismiss();
 		return true;
@@ -1065,103 +1061,11 @@
 		},
 	});
 
-	let penHeld = $state(false);
-	let eraserActive = $state(false);
-	let activeStrokeId: string | null = null;
-	let strokeSeq = 0;
-	let lastErasePoint: BoardPoint | null = null;
-	const erasedOwners = new Set<string>();
-	let lastBoardPoint: BoardPoint | null = null;
-
-	const hasDrawings = $derived(Object.values(session.drawings).some(strokes => strokes.length > 0));
-	const drawTool = $derived<CursorTool | null>(
-		spectator ? null : penHeld ? 'pen' : eraserActive && hasDrawings ? 'eraser' : null,
+	const tools = new MapTools(
+		() => session,
+		() => !spectator,
+		() => board?.pointerBoardPoint() ?? null,
 	);
-	const nextStrokeId = () => `${Date.now()}-${++strokeSeq}`;
-
-	$effect(() => {
-		if (!hasDrawings && eraserActive) eraserActive = false;
-	});
-
-	$effect(() => {
-		const tool = drawTool;
-		untrack(() => {
-			const point = board?.pointerBoardPoint() ?? lastBoardPoint;
-			if (point) session.pointer(tool ? { ...point, tool } : point);
-		});
-	});
-
-	function handleBoardPointer(point: BoardPoint | null) {
-		lastBoardPoint = point;
-		session.pointer(point ? (drawTool ? { ...point, tool: drawTool } : point) : null);
-	}
-
-	function ondrawstart(point: BoardPoint) {
-		if (!penHeld || spectator) return;
-		const id = nextStrokeId();
-		activeStrokeId = id;
-		const existing = session.drawings[session.player] ?? [];
-		session.draw([...existing, { id, points: [point] }], { flush: true });
-	}
-
-	function ondrawmove(point: BoardPoint) {
-		if (!penHeld || !activeStrokeId || spectator) return;
-		const existing = session.drawings[session.player] ?? [];
-		const index = existing.findIndex(stroke => stroke.id === activeStrokeId);
-		if (index < 0) return;
-		const stroke = existing[index]!;
-		const last = stroke.points[stroke.points.length - 1];
-		if (last && Math.hypot(point.x - last.x, point.z - last.z) < 0.35) return;
-		const next = existing.slice();
-		next[index] = { id: stroke.id, points: [...stroke.points, point] };
-		session.draw(next);
-	}
-
-	function ondrawend() {
-		if (!activeStrokeId) return;
-		activeStrokeId = null;
-		const existing = session.drawings[session.player] ?? [];
-		session.draw(existing, { flush: true });
-	}
-
-	function applyErase(point: BoardPoint, radius: number) {
-		if (spectator) return;
-		for (const [owner, strokes] of Object.entries(session.drawings)) {
-			const result = eraseStrokesAlong(strokes, lastErasePoint, point, radius, nextStrokeId);
-			if (result.changed) {
-				erasedOwners.add(owner);
-				session.draw(result.strokes, { player: owner });
-			}
-		}
-		lastErasePoint = point;
-	}
-
-	function onerasestart(point: BoardPoint, radius: number) {
-		lastErasePoint = null;
-		erasedOwners.clear();
-		applyErase(point, radius);
-	}
-
-	function onerasemove(point: BoardPoint, radius: number) {
-		applyErase(point, radius);
-	}
-
-	function oneraseend() {
-		lastErasePoint = null;
-		if (!erasedOwners.size) return;
-		for (const owner of erasedOwners) {
-			session.draw(session.drawings[owner] ?? [], { player: owner, flush: true });
-		}
-		erasedOwners.clear();
-	}
-
-	function clearDrawings() {
-		activeStrokeId = null;
-		lastErasePoint = null;
-		erasedOwners.clear();
-		eraserActive = false;
-		session.clearDrawings();
-	}
 
 	/** Space advances the turn, Z undoes, F draws, E toggles eraser, Tab pings the map, ? opens hotkeys, Escape closes. */
 	function onkey(event: KeyboardEvent) {
@@ -1183,21 +1087,16 @@
 		const modalOpen = () => Boolean(document.querySelector('[aria-modal="true"], .tabletop-unboxing'));
 		if (event.key === 'Tab' && !spectator && !modalOpen()) {
 			event.preventDefault();
-			if (!event.repeat) {
-				const point = board?.pointerBoardPoint() ?? lastBoardPoint;
-				if (point) session.ping(point);
-			}
+			if (!event.repeat) tools.ping();
 			return;
 		}
 		const key = event.key.toLowerCase();
 		if (key === 'f' && !event.repeat && !spectator && !modalOpen()) {
-			eraserActive = false;
-			penHeld = true;
-			activeStrokeId = null;
+			tools.holdPen();
 			return;
 		}
-		if (key === 'e' && !event.repeat && !spectator && hasDrawings && !modalOpen()) {
-			eraserActive = !eraserActive;
+		if (key === 'e' && !event.repeat && !spectator && tools.hasDrawings && !modalOpen()) {
+			tools.toggleEraser();
 			return;
 		}
 		if (onButton(event) || !game) return;
@@ -1222,15 +1121,12 @@
 
 	function onkeyup(event: KeyboardEvent) {
 		if (event.key.toLowerCase() === 'f') {
-			ondrawend();
-			penHeld = false;
+			tools.releasePen();
 		}
 	}
 
 	function onblur() {
-		ondrawend();
-		oneraseend();
-		penHeld = false;
+		tools.letGo();
 	}
 
 	function downloadRecord() {
@@ -1347,10 +1243,10 @@
 		legacyOut={legacyDeckOut}
 		drawPlayer={drawPlayerAction}
 		drawInfection={drawInfectionAction}
-		hasDrawings={!spectator && hasDrawings}
-		erasing={drawTool === 'eraser'}
-		oneraser={() => (eraserActive = !eraserActive)}
-		onclear={clearDrawings}
+		hasDrawings={!spectator && tools.hasDrawings}
+		erasing={tools.tool === 'eraser'}
+		oneraser={() => tools.toggleEraser()}
+		onclear={tools.clear}
 		onreset={() => resetView++}
 		onmenu={() => (menu = !menu)}
 		onbox={() => (boxOpen = !boxOpen)}
@@ -1374,14 +1270,14 @@
 					}
 				: null}
 			onring={key => step({ t: 'start', a: key, via: 'ring' })}
-			onpointer={handleBoardPointer}
-			tool={drawTool}
-			{ondrawstart}
-			{ondrawmove}
-			{ondrawend}
-			{onerasestart}
-			{onerasemove}
-			{oneraseend}
+			onpointer={point => tools.pointer(point)}
+			tool={tools.tool}
+			ondrawstart={tools.drawStart}
+			ondrawmove={tools.drawMove}
+			ondrawend={tools.drawEnd}
+			onerasestart={tools.eraseStart}
+			onerasemove={tools.eraseMove}
+			oneraseend={tools.eraseEnd}
 			{resetView}
 			{covered}
 			focus={showFocus ?? focus}
