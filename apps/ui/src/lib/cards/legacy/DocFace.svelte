@@ -91,15 +91,31 @@
 	// 02-06's three 10s follow losingStreakBonusGames, which counts down at game end: during a game the
 	// cross-out from this setup is still ahead by one.
 	const FACES: Record<string, Face> = {
-		'00-01': {
-			family: 'paper',
-			kicker: 'Journal entry',
-			blocks: [
-				{ t: 'p', text: 'Priorities: We need to complete the following mandatory objective:' },
-				{ t: 'ul', items: ['Build 3 supply centers'] },
+		'00-01': now(
+			[
+				{ t: 'sub', text: 'Play using all the rules except:' },
+				{
+					t: 'ul',
+					items: [
+						'Do not open the Legacy deck.',
+						'Your character cannot get exposed.',
+						'You cannot do the Recon action.',
+						'You cannot do System-Wide Production when you play Produce Supplies cards.',
+						'Do not do Game End steps.',
+					],
+				},
+				{ t: 'sub', text: 'When you have played the Prologue enough times to feel comfortable:' },
+				{
+					t: 'ul',
+					items: [
+						'Destroy this card and the Prologue Objective card.',
+						'Open the Legacy deck.',
+						'Start your campaign.',
+					],
+				},
 			],
-			foot: JOURNAL,
-		},
+			'Prologue',
+		),
 		'01-01': { family: 'paper', kicker: 'Journal entry', blocks: [], foot: JOURNAL },
 
 		'02-01': report('Perimeter report', 'If you have not opened {{d:66}}, scratch the box below.', [
@@ -635,6 +651,7 @@
 	ul {
 		margin: 0;
 		padding-left: 1.1em;
+		list-style: disc;
 	}
 
 	li + li {

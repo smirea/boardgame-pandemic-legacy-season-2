@@ -34,11 +34,13 @@ const index = await json('legacy-deck/index.json');
 for (const entry of index.cards as { folder: string; cardCode: string; title: string }[]) {
 	const dir = `legacy-deck/${entry.folder}`;
 	const sidecar = await json(`${dir}/card.json`);
+	// The archive photographed 00-01 upside down: its side-a image is the face printed 00-01b.
+	const flipped = String(sidecar.printedCodes?.sideA ?? '').endsWith('b');
 	legacyPrint[entry.cardCode] = {
 		title: sidecar.title,
 		category: sidecar.category,
-		a: printSide(sidecar.sideA),
-		b: printSide(sidecar.sideB),
+		a: printSide(flipped ? sidecar.sideB : sidecar.sideA),
+		b: printSide(flipped ? sidecar.sideA : sidecar.sideB),
 		boxes: (sidecar.states as Record<string, string>[]).map(state => ({
 			condition: state.revealedCondition ?? '',
 			revealed: state.revealedText ?? state.revealedSummary ?? '',
@@ -46,7 +48,7 @@ for (const entry of index.cards as { folder: string; cardCode: string; title: st
 	};
 	// The last card's face is its side A (Congratulations); side B warns a reader who started at the wrong end.
 	const end = pack.legacyDeck.find(card => card.id === entry.cardCode)?.kind === 'end';
-	const [face, back] = end ? ['side-a', 'side-b'] : ['side-b', 'side-a'];
+	const [face, back] = end !== flipped ? ['side-a', 'side-b'] : ['side-b', 'side-a'];
 	legacy[entry.cardCode] = { title: entry.title, src: `${dir}/${face}.jpg`, back: `${dir}/${back}.jpg` };
 }
 const missing = pack.legacyDeck.filter(card => !legacy[card.id]).map(card => card.id);

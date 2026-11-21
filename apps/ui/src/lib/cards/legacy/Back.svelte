@@ -40,7 +40,7 @@
 		if (side.stopOrPause === 'PAUSE') return 'pause';
 		if (side.stopOrPause === 'CONTINUE') return 'keep';
 		if (side.header === 'TURNING POINT') return 'turning';
-		if (print.category === 'legacy_journal' || (card.kind === 'ending' && side.header)) return 'story';
+		if (/journal entry/i.test(side.header) || (card.kind === 'ending' && side.header)) return 'story';
 		if (side.header || side.text) return 'rules';
 		return 'blank';
 	});
