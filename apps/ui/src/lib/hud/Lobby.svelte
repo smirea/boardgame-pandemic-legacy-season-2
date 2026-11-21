@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { ending, score, SEAT_IDS, tablePlayers } from '@repo/game';
-	import { legacyScan, scan } from '#lib/scans.svelte.ts';
 	import type { Command, PlayerId, PublicState, SeatId, Start } from '@repo/game';
 	import { LS } from '#lib/storage.ts';
 	import { MONTHS, SEAT_COLORS } from './labels.svelte.ts';
@@ -53,11 +52,8 @@
 	{#if finished}
 		<h1>Campaign complete</h1>
 		<p class="ending">
-			<span {@attach scan(() => legacyScan(end.outcome), 'ending-outcome')}
-				>{campaign.sampleDelivered ? 'The sample was delivered.' : 'The sample was not delivered.'}</span
-			>
-			<b {@attach scan(() => legacyScan(end.tier), 'ending-tier')}>{end.bracket}</b>
-			<span class="hint">Point at either line to read the printed ending.</span>
+			<span>{campaign.sampleDelivered ? 'The sample was delivered.' : 'The sample was not delivered.'}</span>
+			<b>{end.bracket}</b>
 		</p>
 		<dl class="score">
 			<dt>Final score</dt>

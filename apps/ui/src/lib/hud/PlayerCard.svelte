@@ -24,7 +24,7 @@
 	import MapArt from '#lib/cards/MapArt.svelte';
 	import { inkOn } from '#lib/color.ts';
 	import { legacyScans } from '#lib/scans.generated.ts';
-	import { eventScan, originals, scan, scanUrl } from '#lib/scans.svelte.ts';
+	import { eventScan, originals, scanUrl } from '#lib/scans.svelte.ts';
 	import RichText from './RichText.svelte';
 
 	const hoverCard = getContext<((card: CardId | null) => void) | undefined>('card-hover');
@@ -96,7 +96,6 @@
 	disabled={!onclick}
 	{onclick}
 	title={face.text}
-	{@attach scan(() => (card.kind === 'event' ? eventScan(card.event) : []), `card:${card.id}`)}
 >
 	{#if originals.held && originalScan}
 		<img class="original-swap" src={scanUrl(originalScan.src)} alt={face.title} />

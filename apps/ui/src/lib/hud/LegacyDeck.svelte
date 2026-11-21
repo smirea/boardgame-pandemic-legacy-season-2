@@ -2,8 +2,6 @@
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { pack, sealKey } from '@repo/game';
 	import type { Campaign, LegacyCardDef } from '@repo/game';
-	import { legacyScan, scan } from '#lib/scans.svelte.ts';
-	import { legacyScans } from '#lib/scans.generated.ts';
 	import LegacyCard from '#lib/cards/LegacyCard.svelte';
 	import { MONTHS } from './labels.svelte.ts';
 	import RichText from './RichText.svelte';
@@ -92,17 +90,14 @@
 
 	<div class="top">
 		{#if next}
-			<span
-				class="back-wrap"
-				{@attach scan(() => [{ title: 'Next card, back', src: legacyScans[next.id]!.back! }], 'deck-next')}
-			>
+			<span class="back-wrap">
 				<LegacyCard card={next} side="a" size="thumb" {campaign} />
 			</span>
 		{/if}
 		<div>
 			<h3>Top of the deck</h3>
 			<p>{when}</p>
-			<p class="hint">Point at a card or hold O to see the printed original. Unread cards stay face down.</p>
+			<p class="hint">Hold O to see the printed original. Unread cards stay face down.</p>
 		</div>
 	</div>
 
@@ -117,7 +112,6 @@
 								class="card"
 								class:muted={status(card) === 'Not this ending' || status(card).startsWith('Destroyed')}
 								aria-label={`${card.id} ${card.title}: ${status(card)}`}
-								{@attach scan(() => legacyScan(card.id), `legacy:${card.id}`)}
 							>
 								<span class="code">{card.id}</span>
 								<span class="kind">{KIND[card.kind]}</span>

@@ -2,7 +2,6 @@
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { briefingSections, pack } from '@repo/game';
 	import type { BriefingEntry, Campaign } from '@repo/game';
-	import { scan, sourceScans } from '#lib/scans.svelte.ts';
 	import BriefPiece from './BriefPiece.svelte';
 	import ObjectiveTag from './ObjectiveTag.svelte';
 	import RichText from './RichText.svelte';
@@ -23,7 +22,7 @@
 	<div class="sections">
 		{#each sections as section, index (index)}
 			{#if section.t === 'card'}
-				<section class="card-text" {@attach scan(() => sourceScans(section.from), `brief:${index}`)}>
+				<section class="card-text">
 					<h3>{section.title}</h3>
 					{#if section.text}<p><RichText text={section.text} /></p>{/if}
 				</section>

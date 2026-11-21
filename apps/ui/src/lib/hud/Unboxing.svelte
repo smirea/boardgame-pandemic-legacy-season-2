@@ -15,7 +15,6 @@
 	import { cubicOut } from 'svelte/easing';
 	import { fade, fly, scale } from 'svelte/transition';
 	import LegacyCard from '#lib/cards/LegacyCard.svelte';
-	import { scan, sealScans, sourceScans } from '#lib/scans.svelte.ts';
 	import BriefPiece from './BriefPiece.svelte';
 	import Briefing from './Briefing.svelte';
 	import Crate from './Crate.svelte';
@@ -384,22 +383,12 @@
 					<div class="scattered" style:--tilt={`${(index % 3) * 2 - 2}deg`} in:fly={{ x: 60, y: -20, duration: 420 }}>
 						<div class="scattered-head">
 							{#if cardDef}
-								<span
-									class="mini-card"
-									data-stow-class="trash"
-									data-put="trash"
-									{@attach scan(() => sourceScans(item.from), `unbox:settled:${index}`)}
-								>
+								<span class="mini-card" data-stow-class="trash" data-put="trash">
 									<LegacyCard card={cardDef} side="b" size="thumb" {campaign} />
 								</span>
 							{/if}
 							{#each item.seals as seal, sIdx (`${seal.t}:${seal.id}:${sIdx}`)}
-								<span
-									class="mini-shell {seal.t}"
-									data-stow-class="trash"
-									data-put="trash"
-									{@attach scan(() => sealScans(seal), `unbox:settled-seal:${index}:${sIdx}`)}
-								>
+								<span class="mini-shell {seal.t}" data-stow-class="trash" data-put="trash">
 									{#if seal.t === 'package'}
 										<Crate id={seal.id} open={true} />
 									{:else}
@@ -447,7 +436,6 @@
 										data-stow-class={flipped ? 'trash' : undefined}
 										data-put="trash"
 										aria-label={needsFlip ? `Flip ${current.title}` : current.title}
-										{@attach scan(() => (flipped ? sourceScans(current.from) : []), `unbox:active:${drawn}`)}
 									>
 										<span class="flipper" class:flipped>
 											<span class="card-side front">
@@ -470,12 +458,7 @@
 										aria-label={needsFlip ? `Open ${current.title}` : current.title}
 									>
 										{#each current.seals as seal, sIdx (`${seal.t}:${seal.id}:${sIdx}`)}
-											<span
-												class="big-shell {seal.t}"
-												data-stow-class={flipped ? 'trash' : undefined}
-												data-put="trash"
-												{@attach scan(() => (flipped ? sealScans(seal) : []), `unbox:seal:${drawn}:${sIdx}`)}
-											>
+											<span class="big-shell {seal.t}" data-stow-class={flipped ? 'trash' : undefined} data-put="trash">
 												{#if seal.t === 'package'}
 													<Crate id={seal.id} open={flipped} />
 												{:else}
@@ -504,12 +487,7 @@
 								{#if flipped && cardDef && current.seals.length}
 									<div class="opened-seals" in:scale={{ start: 0.8, duration: 380 }}>
 										{#each current.seals as seal, sIdx (`${seal.t}:${seal.id}:${sIdx}`)}
-											<span
-												class="med-shell {seal.t}"
-												data-stow-class="trash"
-												data-put="trash"
-												{@attach scan(() => sealScans(seal), `unbox:card-seal:${drawn}:${sIdx}`)}
-											>
+											<span class="med-shell {seal.t}" data-stow-class="trash" data-put="trash">
 												{#if seal.t === 'package'}
 													<Crate id={seal.id} open={true} />
 												{:else}
@@ -570,22 +548,12 @@
 					>
 						<div class="scattered-head">
 							{#if cardDef}
-								<span
-									class="mini-card"
-									data-stow-class="trash"
-									data-put="trash"
-									{@attach scan(() => sourceScans(item.from), `unbox:settled:${index}`)}
-								>
+								<span class="mini-card" data-stow-class="trash" data-put="trash">
 									<LegacyCard card={cardDef} side="b" size="thumb" {campaign} />
 								</span>
 							{/if}
 							{#each item.seals as seal, sIdx (`${seal.t}:${seal.id}:${sIdx}`)}
-								<span
-									class="mini-shell {seal.t}"
-									data-stow-class="trash"
-									data-put="trash"
-									{@attach scan(() => sealScans(seal), `unbox:settled-seal:${index}:${sIdx}`)}
-								>
+								<span class="mini-shell {seal.t}" data-stow-class="trash" data-put="trash">
 									{#if seal.t === 'package'}
 										<Crate id={seal.id} open={true} />
 									{:else}

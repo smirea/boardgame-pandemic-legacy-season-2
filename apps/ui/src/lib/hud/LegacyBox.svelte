@@ -3,7 +3,7 @@
 	import { dossierView, rulebook, stickerStock } from '@repo/game';
 	import type { Campaign, DossierSlot } from '@repo/game';
 	import InfectionCard from '#lib/cards/InfectionCard.svelte';
-	import { scan, scanUrl, sealScans } from '#lib/scans.svelte.ts';
+	import { scanUrl, sealScans } from '#lib/scans.svelte.ts';
 	import Crate from './Crate.svelte';
 	import PlayerCard from './PlayerCard.svelte';
 	import DossierDoor from './DossierDoor.svelte';
@@ -84,11 +84,7 @@
 		<ol class="packages" {@attach feedback('Packages', () => ({ open: openPackages }))}>
 			{#each view.packages as slot (slot.id)}
 				<li class="package" class:open={slot.open}>
-					<button
-						aria-label={describe('Package', slot)}
-						{...look('Package', slot)}
-						{@attach scan(() => (slot.open ? sealScans(sealOf('Package', slot)) : []), `box:package:${slot.id}`)}
-					>
+					<button aria-label={describe('Package', slot)} {...look('Package', slot)}>
 						<span class="crate"><Crate id={slot.id} open={slot.open} /></span>
 						<span class="caption">{slot.open ? slot.name : 'Sealed'}</span>
 						{#if slot.id === STORAGE && slot.open}
@@ -112,11 +108,7 @@
 					<ol class="doors" aria-label={`Sheet ${index + 1}`}>
 						{#each sheet as door (door.id)}
 							<li>
-								<button
-									aria-label={describe('Door', door)}
-									{...look('Door', door)}
-									{@attach scan(() => (door.open ? sealScans(sealOf('Door', door)) : []), `box:door:${door.id}`)}
-								>
+								<button aria-label={describe('Door', door)} {...look('Door', door)}>
 									<DossierDoor id={door.id} open={door.open} />
 								</button>
 							</li>
@@ -157,13 +149,7 @@
 				{/if}
 				<div class="scans" aria-label="The printed originals">
 					{#each sealScans(sealOf(reading.kind, reading.slot)) as item (item.src)}
-						<img
-							src={scanUrl(item.src)}
-							alt={item.title}
-							title={item.title}
-							loading="lazy"
-							{@attach scan(() => [item], `box:scan:${item.src}`)}
-						/>
+						<img src={scanUrl(item.src)} alt={item.title} title={item.title} loading="lazy" />
 					{/each}
 				</div>
 			{/if}
