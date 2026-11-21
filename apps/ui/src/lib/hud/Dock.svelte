@@ -32,10 +32,26 @@
 		/** The ways to use a card in hand right now, shown as tags over the card. */
 		uses: (seat: SeatId, card: CardId) => { key: string; label: string; icon: Action['a'] | null; run: () => void }[];
 		onplaycard: (seat: SeatId, card: CardId) => void;
+		/** Active start-of-game infection sequence; while present, player deck setup waits until all cards finish. */
+		setupInfect?: { left: number; busy: boolean; onclick: () => void } | null;
 	};
 
-	let { snap, canAct, owns, seat, home, plays, decides, send, onview, aiming, oncancel, uses, onplaycard }: Props =
-		$props();
+	let {
+		snap,
+		canAct,
+		owns,
+		seat,
+		home,
+		plays,
+		decides,
+		send,
+		onview,
+		aiming,
+		oncancel,
+		uses,
+		onplaycard,
+		setupInfect = null,
+	}: Props = $props();
 
 	const world = $derived(snap.world);
 	const game = $derived(world.game!);
@@ -234,25 +250,45 @@
 				>
 			</div>
 		{:else if snap.phase === 'setup.events'}
-			<div class="setup">
-				<div>Pick <strong>{eventsNeeded}</strong> Rationed Events for the deck. {picked.length} chosen.</div>
-				<!-- Every Rationed Event as the card a hand holds, with its full text, so the choice never depends on memory. -->
-				<div class="events" data-testid="rationed-events" in:fly={{ y: 40, duration: 380 }}>
-					{#each rationed as card (card.id)}
-						{@const chosen = picked.includes(card.id)}
-						<div class="pick" class:picked={chosen} data-picked={chosen}>
-							<PlayerCard {card} tone={chosen ? 'play' : null} onclick={() => toggleEvent(card.id)} />
-							{#if chosen}<span class="check" aria-label="chosen" in:fly={{ y: -6, duration: 200 }}>✓</span>{/if}
-						</div>
-					{/each}
+			{#if setupInfect}
+				<div class="setup" data-testid="setup-infect-bar">
+					<div>
+						{#if setupInfect.left > 0}
+							<strong>{setupInfect.left}</strong> infection card{setupInfect.left === 1 ? '' : 's'} left to draw
+						{:else}
+							Finishing infection…
+						{/if}
+					</div>
+					<button
+						class="primary"
+						disabled={setupInfect.busy || setupInfect.left === 0}
+						onclick={setupInfect.onclick}
+						data-testid="setup-infect"
+					>
+						{setupInfect.busy ? 'Infecting…' : `Infect (${setupInfect.left} left)`}
+					</button>
 				</div>
-				<button
-					class="primary"
-					disabled={picked.length !== eventsNeeded}
-					onclick={() => send({ type: 'CONFIRM_EVENTS' })}
-					data-testid="confirm-events">Deal and begin</button
-				>
-			</div>
+			{:else}
+				<div class="setup">
+					<div>Pick <strong>{eventsNeeded}</strong> Rationed Events for the deck. {picked.length} chosen.</div>
+					<!-- Every Rationed Event as the card a hand holds, with its full text, so the choice never depends on memory. -->
+					<div class="events" data-testid="rationed-events" in:fly={{ y: 40, duration: 380 }}>
+						{#each rationed as card (card.id)}
+							{@const chosen = picked.includes(card.id)}
+							<div class="pick" class:picked={chosen} data-picked={chosen}>
+								<PlayerCard {card} tone={chosen ? 'play' : null} onclick={() => toggleEvent(card.id)} />
+								{#if chosen}<span class="check" aria-label="chosen" in:fly={{ y: -6, duration: 200 }}>✓</span>{/if}
+							</div>
+						{/each}
+					</div>
+					<button
+						class="primary"
+						disabled={picked.length !== eventsNeeded}
+						onclick={() => send({ type: 'CONFIRM_EVENTS' })}
+						data-testid="confirm-events">Deal and begin</button
+					>
+				</div>
+			{/if}
 		{:else if snap.phase === 'over'}
 			<div class="setup">
 				<div class:lost={!game.outcome?.won}>

@@ -1485,6 +1485,9 @@
 				oncancel={cancel}
 				uses={cardUses}
 				onplaycard={(seat, card) => step({ t: 'play', seat, card })}
+				setupInfect={snap.phase === 'setup.events' && (show.queued > 0 || show.playing)
+					? { left: show.queued, busy: show.playing, onclick: () => show.next() }
+					: null}
 			/>
 		</div>
 	{/if}
@@ -1542,9 +1545,13 @@
 		pointer-events: auto;
 	}
 
-	/* A seat's character sheet opens over the objectives and the targeting line, which share the layer. */
+	/* A seat's character sheet or expanded hand opens above the dock, objectives, actions panel, and prompts. */
 	.column:has(:global([data-testid='character-sheet'], [data-testid='corner-full-hand'])) {
-		z-index: 32;
+		z-index: 52;
+	}
+
+	.place:has(:global([data-testid='character-sheet'], [data-testid='corner-full-hand'])) {
+		z-index: 10;
 	}
 
 	.column.left {
@@ -1911,7 +1918,15 @@
 		display: grid;
 		place-items: center;
 		padding: 1rem;
+		overflow: hidden;
 		background: rgb(12 10 8 / 0.62);
+	}
+
+	.scrim > div {
+		display: flex;
+		max-width: 100%;
+		max-height: 100%;
+		min-height: 0;
 	}
 
 	.scrim.tabletop {
