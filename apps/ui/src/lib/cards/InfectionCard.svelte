@@ -1,9 +1,12 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
+	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { cityDef, pack } from '@repo/game';
 	import type { CardId, InfectionCard } from '@repo/game';
 	import { CITY_COLOR } from '#lib/board/CityMarker.svelte';
+	import RichText from '#lib/hud/RichText.svelte';
 	import MapArt from './MapArt.svelte';
+	import { fitText } from './fit.ts';
 	import { mapArt } from './mapArt.ts';
 
 	const hoverCard = getContext<((card: CardId | null) => void) | undefined>('card-hover');
@@ -17,6 +20,8 @@
 	const improvement = $derived(
 		card.kind === 'city' ? pack.infectionImprovements.find(item => item.id === card.improvement) : undefined,
 	);
+	const hollowRule =
+		'Discard this card and flip again until you reach a city. Place a Hollow Man there instead of infecting it.';
 	$effect(() => () => hoverCard?.(null));
 </script>
 
@@ -25,13 +30,14 @@
 	role="presentation"
 	onpointerenter={() => hoverCard?.(card.id)}
 	onpointerleave={() => hoverCard?.(null)}
+	{@attach feedback('Infection card', () => ({ card: card.id, kind: card.kind, improvement: improvement?.id }))}
 >
 	<button
 		class="card"
+		class:improved={!!improvement}
 		style:--accent={accent}
 		disabled={!onclick}
 		{onclick}
-		title={improvement?.text}
 		onfocus={() => hoverCard?.(card.id)}
 		onblur={() => hoverCard?.(null)}
 	>
@@ -40,14 +46,23 @@
 			<span class="plate">
 				<span class="kicker">Infection</span>
 				<span class="title">{city.name}</span>
-				<span class="meta">{mapArt(card.city).coordinates}</span>
+				{#if !improvement}<span class="meta">{mapArt(card.city).coordinates}</span>{/if}
 			</span>
-			{#if improvement}<span class="badge">{improvement.name}</span>{/if}
+			{#if improvement}
+				<span class="improvement" {@attach feedback('Infection improvement', () => ({ id: improvement?.id }))}>
+					<strong class="improvement-name">{improvement.name}</strong>
+					<span class="rule" {@attach fitText(improvement.text, { min: 0.57, max: 0.85 })}>
+						<RichText text={improvement.text} />
+					</span>
+				</span>
+			{/if}
 		{:else}
 			<span class="hollow">
 				<span class="kicker">Infection</span>
 				<span class="title">{card.kind === 'gather' ? 'Hollow Men gather' : 'Hollow Men assemble'}</span>
-				<span class="meta">The next city flipped gets a figure instead of an infection.</span>
+				<span class="hollow-rule" {@attach fitText(hollowRule, { min: 0.65, max: 0.86 })}>
+					<RichText text={hollowRule} />
+				</span>
 			</span>
 		{/if}
 		{#if note}<span class="note">{note}</span>{/if}
@@ -55,7 +70,6 @@
 </div>
 
 <style>
-	/* Infection cards are the dark half of the table: a night chart with the city's region colour as its pin. */
 	.card {
 		--tint: color-mix(in srgb, var(--accent) 55%, #f3e9d4);
 		--deep: color-mix(in srgb, var(--accent) 55%, #120d09);
@@ -80,9 +94,25 @@
 		cursor: pointer;
 	}
 
+	.card.improved,
+	.card:has(.hollow) {
+		height: 9em;
+	}
+
 	.art {
 		position: absolute;
 		inset: 0;
+	}
+
+	.improved .art {
+		inset: 0 0 auto;
+		height: 3.5em;
+	}
+
+	.improved .plate {
+		inset: 0 0 auto;
+		padding-top: 0.45em;
+		background: linear-gradient(to bottom, var(--deep), transparent);
 	}
 
 	.plate,
@@ -97,15 +127,22 @@
 
 	.hollow {
 		inset: 0;
-		justify-content: center;
 		gap: 0.2em;
+		padding-top: 0.45em;
 		background: repeating-linear-gradient(135deg, #1f1a24 0 0.5em, #261f2d 0.5em 1em);
+	}
+
+	.hollow-rule {
+		flex: 1;
+		min-height: 0;
+		line-height: 1.22;
 	}
 
 	.kicker {
 		color: var(--tint);
 		font-size: 0.66em;
 		font-weight: 600;
+		line-height: 1.2;
 	}
 
 	.title {
@@ -120,25 +157,38 @@
 		line-height: 1.3;
 	}
 
-	.badge,
+	.improvement {
+		position: absolute;
+		inset: 2.95em 0 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.12em;
+		padding: 0.34em 0.6em;
+		border-top: 1px solid var(--accent);
+		background: color-mix(in srgb, var(--deep) 90%, #130e0c);
+	}
+
+	.improvement-name {
+		color: var(--tint);
+		font-size: 0.76em;
+		line-height: 1.15;
+	}
+
+	.rule {
+		flex: 1;
+		min-height: 0;
+		line-height: 1.14;
+	}
+
 	.note {
 		position: absolute;
 		top: 0.4em;
+		right: 0.4em;
 		padding: 0.05em 0.45em;
 		border-radius: 0.15em;
-		font-size: 0.64em;
-		font-weight: 600;
-	}
-
-	.badge {
-		left: 0.4em;
-		background: var(--accent);
-		color: #f1e9d6;
-	}
-
-	.note {
-		right: 0.4em;
 		background: #e7dcc6;
 		color: #2a2017;
+		font-size: 0.64em;
+		font-weight: 600;
 	}
 </style>
