@@ -3,6 +3,7 @@ import {
 	PEER_ID_PATTERN,
 	SignalClose,
 	type ClientMessage,
+	type IceServer,
 	type ServerMessage,
 	type SignalRole,
 } from './signal-protocol.ts';
@@ -33,7 +34,8 @@ export function createWebRtcTransport(options: WebRtcTransportOptions): Transpor
 	const extra = options.iceServers ?? [];
 	if (!Array.isArray(extra) || !extra.every(server => typeof server?.urls === 'string' || Array.isArray(server?.urls)))
 		throw new TypeError('iceServers must be RTCIceServer objects with `urls`');
-	const rtcConfig: RTCConfiguration = { iceServers: [STUN, ...extra] };
+	// The signaling Worker hands out relay servers, when it has any, before it sends anything that starts a connection.
+	const rtcConfig = (relays: IceServer[]): RTCConfiguration => ({ iceServers: [STUN, ...extra, ...relays] });
 
 	const socketUrl = (role: SignalRole, id: PeerId) => {
 		const url = new URL(endpoint);
@@ -47,6 +49,7 @@ export function createWebRtcTransport(options: WebRtcTransportOptions): Transpor
 		listen(selfId, handlers) {
 			const pending = new Map<PeerId, { attempt: string; pc: RTCPeerConnection; link: Link }>();
 			let socket: SignalSocket | null = null;
+			let relays: IceServer[] = [];
 			let closed = false;
 			let failures = 0;
 			let retry: ReturnType<typeof setTimeout> | undefined;
@@ -54,7 +57,7 @@ export function createWebRtcTransport(options: WebRtcTransportOptions): Transpor
 			const onSignal = (from: PeerId, data: SignalData) => {
 				if (data.sdp?.type === 'offer') {
 					pending.get(from)?.link.close();
-					const pc = new RTCPeerConnection(rtcConfig);
+					const pc = new RTCPeerConnection(rtcConfig(relays));
 					const connection = wireConnection(pc, from);
 					const entry = { attempt: data.attempt, pc, link: connection.link };
 					pending.set(from, entry);
@@ -87,7 +90,8 @@ export function createWebRtcTransport(options: WebRtcTransportOptions): Transpor
 			const open = () => {
 				socket = openSignalSocket(socketUrl('host', selfId), {
 					message(msg) {
-						if (msg.t === 'ready') {
+						if (msg.t === 'ice') relays = msg.servers;
+						else if (msg.t === 'ready') {
 							failures = 0;
 							handlers.status('connected');
 						} else if (msg.t === 'signal') {
@@ -129,6 +133,7 @@ export function createWebRtcTransport(options: WebRtcTransportOptions): Transpor
 				let pc: RTCPeerConnection | null = null;
 				let link: Link | null = null;
 				let hostId: PeerId | null = null;
+				let relays: IceServer[] = [];
 
 				const finish = (error?: unknown) => {
 					if (settled) return;
@@ -146,7 +151,7 @@ export function createWebRtcTransport(options: WebRtcTransportOptions): Transpor
 
 				const start = (id: PeerId) => {
 					hostId = id;
-					pc = new RTCPeerConnection(rtcConfig);
+					pc = new RTCPeerConnection(rtcConfig(relays));
 					const connection = wireConnection(pc, id);
 					link = connection.link;
 					connection.attach(handlers);
@@ -163,7 +168,8 @@ export function createWebRtcTransport(options: WebRtcTransportOptions): Transpor
 
 				const socket = openSignalSocket(socketUrl('peer', selfId), {
 					message(msg) {
-						if (msg.t === 'host' && !pc) {
+						if (msg.t === 'ice') relays = msg.servers;
+						else if (msg.t === 'host' && !pc) {
 							const id = asPeerId(msg.id);
 							if (id) start(id);
 						} else if (msg.t === 'signal' && pc && msg.from === hostId) {
@@ -331,10 +337,19 @@ function parseServerMessage(text: string): ServerMessage | null {
 	try {
 		const raw: unknown = JSON.parse(text);
 		if (typeof raw !== 'object' || raw === null || !('t' in raw)) return null;
+		if (raw.t === 'ice' && !isIceServers((raw as { servers?: unknown }).servers)) return null;
 		return raw as ServerMessage;
 	} catch {
 		return null;
 	}
+}
+
+function isIceServers(value: unknown): value is IceServer[] {
+	const isUrls = (urls: unknown) =>
+		typeof urls === 'string' || (Array.isArray(urls) && urls.every(url => typeof url === 'string'));
+	return (
+		Array.isArray(value) && value.every(server => typeof server === 'object' && server !== null && isUrls(server.urls))
+	);
 }
 
 function parseSignalData(raw: unknown): SignalData | null {

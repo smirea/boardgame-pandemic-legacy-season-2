@@ -23,6 +23,8 @@ const { values: flags } = parseArgs({
 		peers: { type: 'string', default: '3' },
 		month: { type: 'string', default: '7' },
 		steps: { type: 'string', default: '60' },
+		/** Lets no browser connect directly, so the run proves the TURN relays the signal Worker hands out. */
+		relay: { type: 'boolean', default: false },
 		width: { type: 'string', default: '1440' },
 		height: { type: 'string', default: '810' },
 	},
@@ -60,11 +62,33 @@ declare const window: Window & {
 		sketch(): Sketch;
 	};
 	__traffic: Traffic;
+	__routes: () => Promise<string[]>;
 	__probe: Probe;
 };
 
 /** Counts every frame each data channel carries, by its label, and how long each animation frame took. */
-const INSTRUMENT = () => {
+const INSTRUMENT = (relayOnly: boolean) => {
+	const Native = RTCPeerConnection;
+	const made: RTCPeerConnection[] = [];
+	globalThis.RTCPeerConnection = new Proxy(Native, {
+		construct(target, [config]: [RTCConfiguration?]) {
+			const connection = new target(relayOnly ? { ...config, iceTransportPolicy: 'relay' } : config);
+			made.push(connection);
+			return connection;
+		},
+	});
+	/** How each open connection reaches the other side: `host` and `srflx` are direct, `relay` goes through TURN. */
+	window.__routes = async () => {
+		const routes: string[] = [];
+		for (const connection of made) {
+			if (connection.connectionState !== 'connected') continue;
+			const stats = [...(await connection.getStats()).values()] as Record<string, string>[];
+			const pair = stats.find(entry => entry['type'] === 'candidate-pair' && entry['state'] === 'succeeded');
+			const local = stats.find(entry => entry['id'] === pair?.['localCandidateId']);
+			routes.push(local?.['candidateType'] ?? 'unknown');
+		}
+		return routes;
+	};
 	const traffic: Traffic = (window.__traffic = { sent: {}, got: {} });
 	const tally = (side: Traffic['sent'], label: string, size: number) => {
 		const lane = (side[label] ??= { n: 0, bytes: 0 });
@@ -116,7 +140,7 @@ async function open(name: string, host: boolean): Promise<Tab> {
 		viewport: { width: Number(flags.width), height: Number(flags.height) },
 		deviceScaleFactor: 1,
 	});
-	await context.addInitScript(INSTRUMENT);
+	await context.addInitScript(INSTRUMENT, flags.relay);
 	const page = await context.newPage();
 	const tab: Tab = { name, context, page, errors: [] };
 	page.on('pageerror', error => tab.errors.push(error.message));
@@ -183,6 +207,11 @@ try {
 	});
 	const followed = await converged(host, peers, 30_000);
 	check(followed !== null, `after the host loaded a save, every peer followed it into that game`);
+	const routes = await host.page.evaluate(() => window.__routes());
+	check(
+		routes.length === PEERS && (!flags.relay || routes.every(route => route === 'relay')),
+		`the host reaches its ${PEERS} peers by: ${routes.join(', ')}`,
+	);
 	const seen = await connection(host);
 	check(seen?.peers === PEERS + 1, `the host counts ${PEERS + 1} players connected (${seen?.peers})`);
 	for (const tab of tabs) await tab.page.waitForSelector('.anchor[data-city]', { timeout: 60_000 });

@@ -18,4 +18,12 @@ export const KEEPALIVE = { ping: 'ping', pong: 'pong' } as const;
 
 export type ClientMessage = { t: 'signal'; to: string; data: unknown };
 
-export type ServerMessage = { t: 'ready' } | { t: 'host'; id: string } | { t: 'signal'; from: string; data: unknown };
+/** An `RTCIceServer`, spelled out because the Worker has no DOM types. */
+export type IceServer = { urls: string | string[]; username?: string; credential?: string };
+
+export type ServerMessage =
+	/** Sent first, before anything that starts a connection: relays for players whom no direct path reaches. */
+	| { t: 'ice'; servers: IceServer[] }
+	| { t: 'ready' }
+	| { t: 'host'; id: string }
+	| { t: 'signal'; from: string; data: unknown };

@@ -13,6 +13,10 @@ const wrangler = Bun.spawn(
 		String(env.DEV_SIGNAL_PORT),
 		'--var',
 		`SIGNAL_SECRET:${env.DEV_SIGNAL_SECRET}`,
+		// With a TURN key in `.env.local`, the dev Worker hands out relays as the deployed one does.
+		...(env.TURN_KEY_ID && env.TURN_KEY_API_TOKEN
+			? ['--var', `TURN_KEY_ID:${env.TURN_KEY_ID}`, '--var', `TURN_KEY_API_TOKEN:${env.TURN_KEY_API_TOKEN}`]
+			: []),
 		'--show-interactive-dev-session=false',
 	],
 	{ cwd: new URL('..', import.meta.url).pathname, stdio: ['inherit', 'inherit', 'inherit'] },

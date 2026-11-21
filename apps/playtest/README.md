@@ -72,6 +72,28 @@ Memory files live in `memory/` and are tracked, so a later run starts with what 
 
 Each reading waits for the rest of the machine to go quiet (`--quiet <cores>`, 1.5 by default), because a crowded machine pushes the browser onto its slow cores and inflates the CPU figures, and it prints how busy the machine was. Frame counts do not depend on that. A game at rest must read 0 frames drawn and list no animation still running.
 
+## Cost of playing
+
+`./apps/playtest/src/interact.ts` measures the game while it is played. It stands a real, GPU-backed Chromium window on a July game and makes each interaction with real input: the pointer crossing cities, the hand, the seats and the decks, a pan, a zoom, a line drawn and erased, the ring over a city, the Box and Legacy deck dialogs, moves, forty steps of turns, and undo. For each it prints the frames drawn and how many ran long, the script, style and layout time on the main thread, and the scripts behind any long frame. No interaction may draw a frame over 50 ms. Run it against a built app, since a dev server compiles while it runs.
+
+```sh
+bun run ui:build && bun run ui:preview -- --host 127.0.0.1 --port 6490 &
+./apps/playtest/src/interact.ts --url http://127.0.0.1:6490                  # every interaction
+./apps/playtest/src/interact.ts --url http://127.0.0.1:6490 --only turn --profile /tmp/play   # with a CPU profile
+./apps/playtest/src/interact.ts --url http://127.0.0.1:6490 --throttle 4    # on a CPU four times slower
+```
+
+## The table over the network
+
+`./apps/playtest/src/netcheck.ts` opens a host and several peers in real browsers, connected over real WebRTC through a signal Worker. Everyone arrives in the lobby and is seated, the host loads a game under way, every browser moves a pointer while commands are sent from each in turn, the host and a peer draw, erase and ping, and then a peer and the host each reload. After every step it checks that all browsers hold the host's state and the same drawings. It reports how long a command takes to reach everyone, what each browser sent and received on each lane, and how smoothly a peer drew. It needs `bun run dev` (or a built app whose `SIGNAL_URL` is a running signal Worker).
+
+```sh
+./apps/playtest/src/netcheck.ts --peers 3            # the owner's dev server
+./apps/playtest/src/netcheck.ts --peers 5 --relay    # nothing may connect directly: proves the TURN relays
+```
+
+Every window shares this machine's graphics card, so with four or more the frame rate it prints is the card's, and the main-thread share beside it is what tells whether the page is slow.
+
 ## Replays
 
 The replays page lists every recorded game of the run and plays any of them back on the real game screen: step, scrub, jump by turn, or let it run. The side panel shows each move with the reason the player gave for it, the table talk around it, and what the game logged. `lab start` and `lab replays` print its address. With `bun run dev` running, `/debug/runs` lists every run that recorded a game and opens any of them in the same page. The app's server and the lab serve the recordings through the same `/api/runs` routes in `src/replays.ts`.
