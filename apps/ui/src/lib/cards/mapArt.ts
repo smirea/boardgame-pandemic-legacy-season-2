@@ -1,6 +1,6 @@
 import { pack } from '@repo/game';
 import type { CityId, Color } from '@repo/game';
-import { geoGraticule10, geoMercator, geoPath } from 'd3-geo';
+import { geoBounds, geoGraticule10, geoMercator, geoPath } from 'd3-geo';
 import { feature } from 'topojson-client';
 import type { Topology } from 'topojson-specification';
 import landTopology from 'world-atlas/land-50m.json';
@@ -20,9 +20,36 @@ export type MapArt = {
 };
 
 const topology = landTopology as unknown as Topology;
-const land = feature(topology, topology.objects['land']!);
 const graticule = geoGraticule10();
 const cache = new Map<CityId, MapArt>();
+
+/** Degrees a card's frame can reach from its city, with room to spare: most of the world's coast is nowhere near it. */
+const REACH = { lon: SPAN, lat: 40 };
+/** One polygon of the land: its rings of [longitude, latitude] points, and the box they lie in. */
+type Landmass = {
+	rings: number[][][];
+	west: number;
+	east: number;
+	south: number;
+	north: number;
+};
+const landmasses: Landmass[] = (
+	feature(topology, topology.objects['land']!) as unknown as {
+		features: { geometry: { coordinates: number[][][][] } }[];
+	}
+).features.flatMap(({ geometry }) =>
+	geometry.coordinates.map(rings => {
+		const [[west, south], [east, north]] = geoBounds({ type: 'Polygon', coordinates: rings });
+		return { rings, west, east, south, north };
+	}),
+);
+/** True when the landmass comes within reach of the point. One that crosses the antimeridian has `west > east`. */
+const near = (mass: Landmass, lon: number, lat: number) => {
+	if (mass.north < lat - REACH.lat || mass.south > lat + REACH.lat) return false;
+	const span = (mass.east - mass.west + 360) % 360;
+	const fromWest = ((lon - mass.west + 540) % 360) - 180;
+	return fromWest > -REACH.lon && fromWest < span + REACH.lon;
+};
 
 const degrees = (value: number, positive: string, negative: string) =>
 	`${Math.abs(value).toFixed(1)}°${value >= 0 ? positive : negative}`;
@@ -44,7 +71,12 @@ export function mapArt(id: CityId): MapArt {
 			[0, 0],
 			[ART_WIDTH, ART_HEIGHT],
 		]);
-	const path = geoPath(projection);
+	// A card is a few hundred pixels wide, so a tenth of a unit of its 120 is finer than it can show.
+	const path = geoPath(projection).digits(1);
+	const land = {
+		type: 'MultiPolygon' as const,
+		coordinates: landmasses.filter(mass => near(mass, city.lon, city.lat)).map(mass => mass.rings),
+	};
 	const [x, y] = projection([city.lon, city.lat])!;
 	const neighbours = pack.cities.flatMap(other => {
 		if (other.id === id || other.lost) return [];
@@ -61,4 +93,17 @@ export function mapArt(id: CityId): MapArt {
 	};
 	cache.set(id, art);
 	return art;
+}
+
+// Each city's art takes a few milliseconds to draw, which a hand of cards dealt at once would spend in one frame.
+// So the page draws them all while it has nothing else to do, one city per idle moment.
+if (typeof requestIdleCallback === 'function') {
+	const waiting = pack.cities.map(city => city.id);
+	const warm = () => {
+		const id = waiting.pop();
+		if (!id) return;
+		mapArt(id);
+		requestIdleCallback(warm);
+	};
+	requestIdleCallback(warm);
 }

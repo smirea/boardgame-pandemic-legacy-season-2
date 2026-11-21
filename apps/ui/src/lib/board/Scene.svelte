@@ -47,6 +47,7 @@
 	import Ring from './Ring.svelte';
 	import Skull from './Skull.svelte';
 	import RouteTube from './RouteTube.svelte';
+	import { reconciler } from '#lib/reconcile.ts';
 	import { CITY_RADIUS, CITY_TOP } from './routes';
 	import Stockpile from './Stockpile.svelte';
 	import { PILE, STOCKPILE, STOCKPILE_REACH, supplyMoves } from './stockpile';
@@ -200,9 +201,18 @@
 	let lastReset = 0;
 	// A city's pieces and its printed name reach this far from its centre, so a fitted view keeps them on screen.
 	const MARKER_REACH = 3.5;
-	const visibleCities = $derived(pack.cities.filter(city => view.cities[city.id]!.revealed));
-	// A string, so the fitted view is worked out again only when the set of revealed cities changes.
-	const revealedKey = $derived(visibleCities.map(city => city.id).join());
+	// A string, so the cities shown, their names' places and the fitted view are worked out again only when the set
+	// of revealed cities changes, and not each time something happens in one of them.
+	const revealedKey = $derived(
+		pack.cities
+			.filter(city => view.cities[city.id]!.revealed)
+			.map(city => city.id)
+			.join(),
+	);
+	const visibleCities = $derived.by(() => {
+		const revealed = new Set(revealedKey.split(','));
+		return pack.cities.filter(city => revealed.has(city.id));
+	});
 	// The fitted view frames only what has been revealed (and the stockpile while a game is played). Before anything
 	// is explored, it frames every location.
 	const showStockpile = $derived(view.stockpile !== null);
@@ -230,6 +240,7 @@
 	});
 	// Keep light breathing room for the top objectives strip and bottom hand while letting the revealed map fill the
 	// screen; corner seats and the mid-side Actions panel float over the edges rather than shrinking the whole board.
+	const sameInsets = reconciler<{ left: number; right: number; top: number; bottom: number }>();
 	const insets = $derived.by(() => {
 		const width = Math.max(1, $size.width);
 		const height = Math.max(1, $size.height);
@@ -242,12 +253,12 @@
 			if (rect.y + rect.height / 2 < height / 2) top = Math.max(top, rect.y + rect.height);
 			else bottom = Math.max(bottom, height - rect.y);
 		}
-		return {
+		return sameInsets({
 			left: 0.02,
 			right: 0.02,
 			top: Math.min(0.08, top / height),
 			bottom: Math.min(0.11, bottom / height),
-		};
+		});
 	});
 	// `$size` subscribes to the store. Reading `size.current` would not rerun when the canvas is resized.
 	const aspect = $derived($size.width / Math.max(1, $size.height));
@@ -477,18 +488,21 @@
 	const routeKey = (route: { a: CityId; b: CityId; kind: string }) => `${route.kind}:${edgeKey(route.a, route.b)}`;
 	const initialEdges = new Set(untrack(() => view.edges.map(routeKey)));
 
-	// Names are printed at a fixed size on the chart, so their places depend only on which cities show.
-	const anchors = $derived(
-		fonts.ready
-			? layoutLabels(
-					visibleCities.map(city => ({
-						id: city.id,
-						width: nameWidth(view.cities[city.id]!.name, city.port, NAME_SIZE),
-						at: layout[city.id]!,
-					})),
-				)
-			: new Map<CityId, Placement>(),
-	);
+	// Names are printed at a fixed size on the chart, so their places depend only on which cities show and what
+	// they are called. Placing them is a search over every pair of cities, so it runs only when one of those changes.
+	const shownNames = $derived(visibleCities.map(city => view.cities[city.id]!.name).join('\n'));
+	const anchors = $derived.by(() => {
+		if (!fonts.ready) return new Map<CityId, Placement>();
+		const names = shownNames.split('\n');
+		return layoutLabels(
+			visibleCities.map((city, index) => ({
+				id: city.id,
+				width: nameWidth(names[index]!, city.port, NAME_SIZE),
+				at: layout[city.id]!,
+			})),
+		);
+	});
+	const UNPLACED: Placement = { x: 0, z: 3.4, leader: false };
 	const flagsByCity = $derived.by(() => {
 		const map = new Map<CityId, NonNullable<BoardView['marks']>['flags']>();
 		for (const flag of view.marks?.flags ?? []) map.set(flag.city, [...(map.get(flag.city) ?? []), flag]);
@@ -692,11 +706,14 @@
 {/each}
 
 {#each visibleCities as city (city.id)}
+	<!-- Each is its own value, so a city whose state and place did not change is not handed anything new. -->
+	{@const cityState = view.cities[city.id]!}
+	{@const placement = anchors.get(city.id) ?? UNPLACED}
 	<CityMarker
 		{city}
 		at={layout[city.id]!}
-		state={view.cities[city.id]!}
-		placement={anchors.get(city.id) ?? { x: 0, z: 3.4, leader: false }}
+		state={cityState}
+		{placement}
 		lit={hoverCity === city.id}
 		landing={landing.get(city.id) ?? 0}
 		onselect={() => oncity?.(city.id)}

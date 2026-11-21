@@ -6,7 +6,6 @@
 		checkAction,
 		cityDef,
 		insights,
-		isForsaken,
 		legalDecides,
 		legalPlays,
 		onGrid,
@@ -22,8 +21,7 @@
 	import Board from '#lib/board/Board.svelte';
 	import { eraseStrokesAlong } from '#lib/board/erase.ts';
 	import type { BoardPoint } from '#lib/board/projection.ts';
-	import { travelOf } from '#lib/board/travel.ts';
-	import type { BoardMarks, BoardView, CityView, Covered, CursorTool, Fx, FxKind, Travel } from '#lib/board/types.ts';
+	import type { BoardMarks, Covered, CursorTool, Fx, FxKind } from '#lib/board/types.ts';
 	import type { SessionView } from '#lib/session/session.svelte.ts';
 	import { inkOn } from '#lib/color.ts';
 	import { presentFeedback } from '#lib/feedback.ts';
@@ -35,6 +33,7 @@
 	import { backOut } from 'svelte/easing';
 	import { fade, fly, scale } from 'svelte/transition';
 	import ActionPanel from './ActionPanel.svelte';
+	import { createBoardView } from './boardView.svelte.ts';
 	import Corner from './Corner.svelte';
 	import { placeSeats } from './seats.ts';
 	import type { Place } from './seats.ts';
@@ -289,15 +288,6 @@
 
 	const send = (command: Command) => session.send(command);
 
-	/** How a pawn made its most recent move, which picks its vehicle and the way it goes. */
-	function lastMove(seat: SeatId): { travel: Travel; course: BoardPoint[] | null } {
-		const log = game?.log ?? [];
-		for (let index = log.length - 1; index >= 0; index--) {
-			const entry = log[index]!;
-			if (entry.t === 'move' && entry.seat === seat) return travelOf(entry, campaign.edges);
-		}
-		return { travel: 'land', course: null };
-	}
 	function act(action: Action) {
 		send({ type: 'ACTION', seat: game!.active, action });
 		dismiss();
@@ -1007,128 +997,72 @@
 		};
 	});
 
-	function playerColor(id: string): string {
-		const seat = world.table.seats.find(entry => entry.player === id)?.seat;
-		const seatIdx = seat && game ? game.seats.indexOf(seat) : -1;
-		if (seatIdx >= 0) return SEAT_COLORS[seatIdx]!;
-		if (id === session.player) return SEAT_COLORS[0]!;
-		const peerIdx = session.peers.findIndex(peer => peer.id === id);
-		return SEAT_COLORS[(Math.max(0, peerIdx) + 1) % SEAT_COLORS.length]!;
-	}
-
-	function playerName(id: string): string {
-		return (
-			world.table.seats.find(entry => entry.player === id)?.name ??
-			session.peers.find(peer => peer.id === id)?.name ??
-			'Player'
-		);
-	}
-
-	const boardView = $derived.by((): BoardView => {
-		// A target being aimed at wins over a card the pointer happens to rest on.
-		const targets = new Set(targeting ? targeting.cities.keys() : hoveredCards.length ? hoveredTargets.cities : []);
-		const showOdds = playing && info !== null;
-		const cities = Object.fromEntries(
-			pack.cities.map((city): [CityId, CityView] => {
-				const record = campaign.locations[city.id]!;
-				const location = game?.locations[city.id];
-				const lag = show.lag.cities[city.id];
-				return [
-					city.id,
-					{
-						name: cityName(city.id),
-						revealed: record.revealed,
-						onGrid: gridSet.has(city.id),
-						supplies: (location?.supplies ?? 0) - (lag?.supplies ?? 0),
-						plague: (location?.plague ?? 0) - (lag?.plague ?? 0),
-						hollow: (location?.hollow ?? 0) - (lag?.hollow ?? 0),
-						population: record.population,
-						port: city.port,
-						structures: (['center', 'tower', 'shelter'] as const)
-							.filter(kind => location?.[kind] ?? record.permanent.includes(kind))
-							.map(kind => ({ kind, permanent: record.permanent.includes(kind) })),
-						infested: record.infested,
-						forsaken: isForsaken(campaign, city.id),
-						lab: record.lab,
-						highlight: ring === city.id ? 'selected' : targets.has(city.id) ? 'target' : null,
-						infection: showOdds
-							? {
-									odds: info!.infection.odds[city.id] ?? 0,
-									inDeck: info!.infection.strata.reduce((sum, stratum) => sum + (stratum.cities[city.id] ?? 0), 0),
-									discarded: info!.infection.discard[city.id] ?? 0,
-								}
-							: null,
-						cards: showOdds ? (info!.playerDeck.cities[city.id] ?? { inDeck: 0, inHands: 0, discarded: 0 }) : null,
-					},
-				];
-			}),
-		) as Record<CityId, CityView>;
-		// The lines a player could draw show faintly while they pick where to draw one.
+	// A target being aimed at wins over a card the pointer happens to rest on.
+	const targetCities = $derived(
+		new Set(targeting ? targeting.cities.keys() : hoveredCards.length ? hoveredTargets.cities : []),
+	);
+	// The lines a player could draw show faintly while they pick where to draw one.
+	const ghostEdges = $derived.by((): EdgeDef[] => {
 		const drawing = targeting?.a === 'establishLine' || targeting?.a === 'chartLane' ? targeting.a : null;
-		const ghostEdges: EdgeDef[] =
-			here && drawing
-				? actions.flatMap(action =>
-						action.a === drawing
-							? [{ a: here, b: action.to, kind: drawing === 'establishLine' ? ('land' as const) : ('sea' as const) }]
-							: [],
-					)
-				: [];
-		return {
-			cities,
-			edges: campaign.edges,
-			ghostEdges,
-			recon: recons.map(box => ({
-				route: box.route.id,
-				city: box.route.city,
-				cityName: cityName(box.route.city),
-				name: box.name,
-				color: box.route.color,
-				count: box.route.count,
-				unique: box.route.unique,
-				needsCenter: box.route.needsCenter,
-				reveals: box.reveals,
-				...(spectator
-					? { state: 'idle' as const, reason: null }
-					: !canAct
-						? { state: 'blocked' as const, reason: 'Not your turn' }
-						: box.actions.length
-							? { state: 'ready' as const, reason: null }
-							: { state: 'blocked' as const, reason: box.reason }),
-			})),
-			pawns: (game?.seats ?? []).map((seat, index) => ({
-				id: seat,
-				city: game!.players[seat]!.location,
-				color: SEAT_COLORS[index]!,
-				name: seatName(world, seat),
-				active: game!.active === seat && playing,
-				lit: pointedSeat === seat || targeting?.pawn === seat || (targeting?.pawns?.has(seat) ?? false),
-				pickable: targeting?.pawns?.has(seat) ?? false,
-				carried: game!.players[seat]!.supplies,
-				...lastMove(seat),
-			})),
-			stockpile: game ? game.stockpile - show.lag.stockpile : null,
-			cursors: Object.entries(session.cursors).map(([id, point]) => ({
-				id,
-				name: playerName(id),
-				color: playerColor(id),
-				...point,
-			})),
-			drawings: Object.entries(session.drawings)
-				.filter(([, strokes]) => strokes.length > 0)
-				.map(([id, strokes]) => ({ id, color: playerColor(id), strokes })),
-			pings: session.pings.map(ping => ({
-				id: ping.id,
-				x: ping.x,
-				z: ping.z,
-				color: playerColor(ping.player),
-				name: solo ? null : playerName(ping.player),
-				createdAt: ping.createdAt,
-				duration: ping.duration,
-			})),
-			fx,
-			skull: show.skull,
-			marks,
-		};
+		if (!here || !drawing) return [];
+		const from = here;
+		return actions.flatMap(action =>
+			action.a === drawing
+				? [{ a: from, b: action.to, kind: drawing === 'establishLine' ? ('land' as const) : ('sea' as const) }]
+				: [],
+		);
+	});
+	const boardView = createBoardView({
+		get world() {
+			return world;
+		},
+		get playing() {
+			return playing;
+		},
+		get info() {
+			return info;
+		},
+		get onGrid() {
+			return gridSet;
+		},
+		get lag() {
+			return show.lag;
+		},
+		get skull() {
+			return show.skull;
+		},
+		get selected() {
+			return ring;
+		},
+		get targets() {
+			return targetCities;
+		},
+		get ghostEdges() {
+			return ghostEdges;
+		},
+		get recons() {
+			return recons;
+		},
+		get spectator() {
+			return spectator;
+		},
+		get canAct() {
+			return canAct;
+		},
+		get solo() {
+			return solo;
+		},
+		litPawn: seat => pointedSeat === seat || targeting?.pawn === seat || (targeting?.pawns?.has(seat) ?? false),
+		pickablePawn: seat => targeting?.pawns?.has(seat) ?? false,
+		get session() {
+			return session;
+		},
+		get fx() {
+			return fx;
+		},
+		get marks() {
+			return marks;
+		},
 	});
 
 	let penHeld = $state(false);
