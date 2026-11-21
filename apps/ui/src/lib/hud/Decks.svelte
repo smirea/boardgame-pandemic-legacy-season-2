@@ -60,29 +60,53 @@
 {/snippet}
 
 {#snippet deck(which: 'player' | 'infection', label: string, color: string, count: string, action: DeckAction)}
-	<div
-		class="deck"
-		class:actionable={Boolean(action && !action.busy)}
-		data-deck={which}
-		data-dest={which === 'player' ? 'playerDeck' : 'infectionDeck'}
-		role="button"
-		tabindex="0"
-		aria-label={action ? `${label} — click to draw (${action.left} left)` : label}
-		aria-expanded={open === which}
-		onclick={() => action && !action.busy && action.onclick()}
-		onkeydown={event => {
-			if ((event.key === 'Enter' || event.key === ' ') && action && !action.busy) {
-				event.preventDefault();
-				action.onclick();
-			}
-		}}
-		onpointerenter={() => (open = which)}
-		onpointerleave={() => (open = null)}
-		onfocus={() => (open = which)}
-		onblur={() => (open = null)}
-	>
-		{@render cardIcon(color, which === 'infection' ? '☣' : undefined)}
-		{#key count}<strong data-testid={`${which}-deck-count`} in:fly={{ y: -10, duration: 280 }}>{count}</strong>{/key}
+	{@const ready = Boolean(action && !action.busy)}
+	{@const lifted = which === 'player' && Boolean(action)}
+	<div class="deck-wrap" class:lifted>
+		<div
+			class="deck"
+			class:actionable={ready && !lifted}
+			class:hidden={lifted}
+			data-deck={which}
+			data-dest={which === 'player' ? 'playerDeck' : 'infectionDeck'}
+			role="button"
+			tabindex={lifted ? -1 : 0}
+			aria-label={action ? `${label} — click to draw (${action.left} left)` : label}
+			aria-expanded={!action && open === which}
+			onclick={() => ready && action!.onclick()}
+			onkeydown={event => {
+				if ((event.key === 'Enter' || event.key === ' ') && ready) {
+					event.preventDefault();
+					action!.onclick();
+				}
+			}}
+			onpointerenter={() => !action && (open = which)}
+			onpointerleave={() => (open = null)}
+			onfocus={() => !action && (open = which)}
+			onblur={() => (open = null)}
+		>
+			{@render cardIcon(color, which === 'infection' ? '☣' : undefined)}
+			{#key count}<strong data-testid={`${which}-deck-count`} in:fly={{ y: -10, duration: 280 }}>{count}</strong>{/key}
+		</div>
+		{#if lifted && action}
+			<button
+				class="draw-pile"
+				class:pulsing={ready}
+				disabled={!ready}
+				onclick={() => ready && action.onclick()}
+				data-testid="player-draw-deck"
+				aria-label={`Draw from the Player deck (${action.left} left)`}
+				in:fly={{ y: -16, duration: 260 }}
+				out:fade={{ duration: 160 }}
+			>
+				<span class="pile-card">
+					<span class="pile-emblem" aria-hidden="true">✦</span>
+					<span class="pile-label">PLAYER</span>
+					<strong class="pile-count">{count}</strong>
+				</span>
+				<span class="pile-badge">Draw · {action.left} left</span>
+			</button>
+		{/if}
 	</div>
 {/snippet}
 
@@ -110,7 +134,7 @@
 		drawInfection,
 	)}
 
-	{#if open === 'player'}
+	{#if open === 'player' && !drawPlayer}
 		<div class="tip" role="tooltip" data-testid="player-deck-tip" transition:fade={{ duration: 140 }}>
 			{#if dealt}
 				<strong>Player deck, {player.cards} cards</strong>
@@ -140,7 +164,7 @@
 				<p>Shuffled with its Epidemics and dealt once setup is done.</p>
 			{/if}
 		</div>
-	{:else if open === 'infection'}
+	{:else if open === 'infection' && !drawInfection}
 		<div class="tip wide" role="tooltip" data-testid="infection-deck-tip" transition:fade={{ duration: 140 }}>
 			<strong>Infection deck, {infectionCards} cards</strong>
 			<dl>
@@ -211,6 +235,114 @@
 		display: flex;
 		align-items: center;
 		gap: 0.9rem;
+	}
+
+	.deck-wrap {
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+	}
+
+	.deck.hidden {
+		visibility: hidden;
+		pointer-events: none;
+	}
+
+	.draw-pile {
+		position: absolute;
+		top: -0.15rem;
+		left: 50%;
+		transform: translateX(-50%);
+		z-index: 60;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.35rem;
+		padding: 0;
+		border: 0;
+		background: none;
+		color: var(--ink);
+		font: inherit;
+		cursor: pointer;
+	}
+
+	.draw-pile:disabled {
+		cursor: default;
+		opacity: 0.7;
+	}
+
+	.draw-pile.pulsing .pile-card {
+		animation: playerDeckPulse 1.6s ease-in-out infinite;
+	}
+
+	.draw-pile.pulsing:hover .pile-card {
+		transform: scale(1.07);
+	}
+
+	.pile-card {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: space-between;
+		width: 4.5rem;
+		height: 6.2rem;
+		padding: 0.55rem 0.4rem;
+		border: 1.5px solid #e3b23c;
+		border-radius: 6px;
+		background:
+			radial-gradient(circle at 50% 35%, rgb(227 178 60 / 0.2), transparent 65%),
+			linear-gradient(165deg, #5d5446 0%, #3d352a 65%, #2a241c 100%);
+		box-shadow:
+			inset 0 0 0 2px rgb(255 248 228 / 0.16),
+			3px 3px 0 #8a7c64,
+			6px 6px 0 #5b5140,
+			0 0.8rem 1.8rem rgb(0 0 0 / 0.65);
+		color: #f6ead4;
+		transition: transform 180ms ease;
+	}
+
+	.pile-emblem {
+		font-size: 1.15rem;
+		color: #e3b23c;
+		line-height: 1;
+	}
+
+	.pile-label {
+		font-size: 0.56rem;
+		font-weight: 700;
+		letter-spacing: 0.14em;
+		color: rgb(246 234 212 / 0.78);
+	}
+
+	.pile-count {
+		font-family: var(--font-display);
+		font-size: 1.5rem;
+		font-weight: 400;
+		line-height: 1;
+	}
+
+	.pile-badge {
+		padding: 0.16rem 0.6rem;
+		border-radius: 999px;
+		background: rgb(16 13 10 / 0.9);
+		border: 1px solid rgb(227 178 60 / 0.65);
+		color: var(--paper);
+		font-size: 0.72rem;
+		font-weight: 600;
+		white-space: nowrap;
+		box-shadow: 0 0.35rem 0.9rem rgb(0 0 0 / 0.5);
+	}
+
+	@keyframes playerDeckPulse {
+		0%,
+		100% {
+			transform: scale(1);
+			filter: drop-shadow(0 0.25rem 0.7rem rgb(227 178 60 / 0.35));
+		}
+		50% {
+			transform: scale(1.06);
+			filter: drop-shadow(0 0.45rem 1.3rem rgb(227 178 60 / 0.85));
+		}
 	}
 
 	.deck {

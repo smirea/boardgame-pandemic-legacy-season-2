@@ -68,9 +68,41 @@
 						<span class="pip" class:on={index === game.rateIndex} class:past={index < game.rateIndex}>{rate}</span>
 					{/each}
 				</div>
-
-				<Decks {info} {dealt} {drawPlayer} {drawInfection} />
 			{/if}
+
+			<div class="deck-strip">
+				{#if game && info}
+					<Decks {info} {dealt} {drawPlayer} {drawInfection} />
+				{/if}
+
+				<div class="legacy-wrap">
+					<button
+						class="legacy"
+						class:out={legacyOut}
+						onclick={() => {
+							legacyPeek = false;
+							ondeck();
+						}}
+						aria-label={`Legacy deck, ${legacyLeft} cards left`}
+						aria-expanded={legacyPeek}
+						data-testid="open-legacy-deck"
+						data-dest="legacyDeck"
+						onpointerenter={() => (legacyPeek = true)}
+						onpointerleave={() => (legacyPeek = false)}
+						onfocus={() => (legacyPeek = true)}
+						onblur={() => (legacyPeek = false)}
+					>
+						{#if nextLegacy}<LegacyCard card={nextLegacy} side="a" size="mini" />{/if}
+						<span>{legacyLeft}</span>
+					</button>
+					{#if legacyPeek && nextLegacy && !legacyOut}
+						<div class="legacy-tip" role="tooltip" data-testid="legacy-deck-tip" transition:fade={{ duration: 140 }}>
+							<LegacyCard card={nextLegacy} side="a" size="full" {campaign} />
+							<span class="legacy-tip-note">{legacyLeft} cards left · click to open</span>
+						</div>
+					{/if}
+				</div>
+			</div>
 		</div>
 		<div class="right">
 			{#if !solo}
@@ -85,39 +117,18 @@
 				data-testid="open-box"
 				data-dest="box">Box</button
 			>
-			<div class="legacy-wrap">
-				<button
-					class="legacy"
-					class:out={legacyOut}
-					onclick={() => {
-						legacyPeek = false;
-						ondeck();
-					}}
-					aria-label={`Legacy deck, ${legacyLeft} cards left`}
-					aria-expanded={legacyPeek}
-					data-testid="open-legacy-deck"
-					data-dest="legacyDeck"
-					onpointerenter={() => (legacyPeek = true)}
-					onpointerleave={() => (legacyPeek = false)}
-					onfocus={() => (legacyPeek = true)}
-					onblur={() => (legacyPeek = false)}
-				>
-					{#if nextLegacy}<LegacyCard card={nextLegacy} side="a" size="mini" />{/if}
-					<span>{legacyLeft}</span>
-				</button>
-				{#if legacyPeek && nextLegacy && !legacyOut}
-					<div class="legacy-tip" role="tooltip" data-testid="legacy-deck-tip" transition:fade={{ duration: 140 }}>
-						<LegacyCard card={nextLegacy} side="a" size="full" {campaign} />
-						<span class="legacy-tip-note">{legacyLeft} cards left · click to open</span>
-					</div>
-				{/if}
-			</div>
 			<button onclick={onmenu}>Menu</button>
 		</div>
 	</header>
 </div>
 
 <style>
+	.deck-strip {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.9rem;
+	}
+
 	.legacy-wrap {
 		position: relative;
 		display: inline-flex;
@@ -126,8 +137,14 @@
 	.legacy {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.35rem;
-		padding-left: 0.3rem;
+		gap: 0.4rem;
+		padding: 0.15rem 0.25rem;
+		border: 0;
+		background: transparent;
+	}
+
+	.legacy:hover {
+		border-color: transparent;
 	}
 
 	.legacy-tip {

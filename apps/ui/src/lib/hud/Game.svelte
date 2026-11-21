@@ -1125,9 +1125,9 @@
 
 <svelte:window onkeydown={onkey} {onkeyup} {onblur} onpointerup={ondrawend} />
 
-{#snippet actionPanel()}
-	{#if game && !spectator && actionChoices.length}
-		<div class="actions-slot">
+{#snippet actionPanel(side: 'left' | 'right')}
+	{#if game && !spectator && actionChoices.length && canAct && snap.phase === 'playing.actions'}
+		<div class="actions-slot" transition:fly={{ x: side === 'left' ? -320 : 320, duration: 360, opacity: 0 }}>
 			<ActionPanel
 				{snap}
 				seat={game.active}
@@ -1253,12 +1253,12 @@
 		{#if game && seatAt && snap.phase !== 'upkeep'}
 			<div class="column left" bind:this={leftColumn}>
 				{@render seated('tl')}
-				{#if seatAt.has('tr')}{@render actionPanel()}{/if}
+				{#if seatAt.has('tr')}{@render actionPanel('left')}{/if}
 				{@render seated('bl')}
 			</div>
 			<div class="column right" bind:this={rightColumn}>
 				{@render seated('tr')}
-				{#if !seatAt.has('tr')}{@render actionPanel()}{/if}
+				{#if !seatAt.has('tr')}{@render actionPanel('right')}{/if}
 				{@render seated('br')}
 			</div>
 		{/if}
@@ -1563,6 +1563,7 @@
 				oncancel={cancel}
 				uses={cardUses}
 				onplaycard={(seat, card) => step({ t: 'play', seat, card })}
+				onlockdown={card => step({ t: 'lockdown', card })}
 				setupInfect={snap.phase === 'setup.events' && (show.queued > 0 || show.playing)
 					? { left: show.queued, busy: show.playing, onclick: () => show.next() }
 					: null}

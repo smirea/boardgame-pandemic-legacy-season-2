@@ -32,6 +32,8 @@
 		/** The ways to use a card in hand right now, shown as tags over the card. */
 		uses: (seat: SeatId, card: CardId) => { key: string; label: string; icon: Action['a'] | null; run: () => void }[];
 		onplaycard: (seat: SeatId, card: CardId) => void;
+		/** Destroying a Lockdown card costs a Player card, so the screen asks whose. */
+		onlockdown?: (card: CardId) => void;
 		/** Active start-of-game infection sequence; while present, player deck setup waits until all cards finish. */
 		setupInfect?: { left: number; busy: boolean; onclick: () => void } | null;
 	};
@@ -50,6 +52,7 @@
 		oncancel,
 		uses,
 		onplaycard,
+		onlockdown,
 		setupInfect = null,
 	}: Props = $props();
 
@@ -75,6 +78,15 @@
 	});
 
 	const pending = $derived(game.pending[0]);
+	const lockable = $derived(
+		game.infectionDiscard.flatMap(id => {
+			const card = world.campaign.infectionCards[id];
+			return card?.kind === 'city' && card.improvement === 'lockdown' ? [{ id, city: card.city }] : [];
+		}),
+	);
+	const anyLockPay = $derived(
+		game.seats.flatMap(other => game.players[other]!.hand.map(pay => ({ seat: other, pay })))[0] ?? null,
+	);
 	const cardsOf = (other: SeatId) =>
 		(game.players[other]?.hand ?? []).flatMap(id => world.campaign.playerCards[id] ?? []);
 	const handCards = $derived(sortHand(cardsOf(seat), card => cardName(world, card.id)));
@@ -395,13 +407,25 @@
 						{:else}
 							<p class="waiting">Waiting for {seatName(world, decider)}.</p>
 						{/if}
-						{#if elsewhere.length}
+						{#if elsewhere.length || (pending.t === 'intensify' && lockable.length && onlockdown)}
 							<div class="chips" data-testid="play-elsewhere">
 								{#each elsewhere as option (option.card)}
 									<button onclick={() => onplaycard(option.seat, option.card)}>
 										{seatName(world, option.seat)}: play {cardName(world, option.card)}
 									</button>
 								{/each}
+								{#if pending.t === 'intensify' && onlockdown}
+									{#each lockable as card (card.id)}
+										<button
+											disabled={!anyLockPay ||
+												reject(world, snap.phase, { type: 'LOCKDOWN', card: card.id, ...anyLockPay }) !== null}
+											onclick={() => onlockdown(card.id)}
+											data-testid="lockdown"
+										>
+											Lockdown: destroy {cityName(card.city)}
+										</button>
+									{/each}
+								{/if}
 							</div>
 						{/if}
 					</div>
