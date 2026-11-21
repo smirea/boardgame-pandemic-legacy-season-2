@@ -31,6 +31,8 @@
 
 	/** Story the print opens with before its instructions; it stays on the scan. */
 	const STORY_LEAD: Record<string, number> = { '08-04': 1, '11-05': 1 };
+	/** The paragraphs of a journal entry that are instructions; the rest of the entry is story. */
+	const JOURNAL_RULES: Record<string, number[]> = { '00-01': [0], '08-02': [1] };
 
 	// The last card is printed upside down at the bottom of the deck: its back is the archive's side B.
 	const side = $derived(card.kind === 'end' ? print.b : print.a);
@@ -53,6 +55,7 @@
 			.split(/\n\s*\n/)
 			.map(part => part.trim())
 			.filter(part => part && part.toUpperCase() !== header);
+		if (family === 'story') return (JOURNAL_RULES[card.id] ?? []).map(index => parts[index]!);
 		return parts.slice(STORY_LEAD[card.id] ?? 0);
 	});
 
@@ -62,7 +65,7 @@
 	);
 
 	const blocks = $derived.by((): Block[] => {
-		if (family === 'story' || family === 'blank') return [];
+		if (family === 'blank') return [];
 		if (family === 'stop' || family === 'pause') {
 			const trigger = side.trigger || paragraphs.at(-1) || '';
 			return [{ kind: 'line', text: sentence(trigger) }];
@@ -206,6 +209,11 @@
 	.blank,
 	.story {
 		justify-content: center;
+	}
+
+	.story .body {
+		flex: none;
+		text-align: left;
 	}
 
 	.stop,
