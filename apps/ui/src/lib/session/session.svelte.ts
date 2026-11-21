@@ -14,9 +14,20 @@ import { createHost, createMemoryTransport, createPeerId, createWebRtcTransport,
 import type { ConnectionStatus, PeerInfo, Session } from '@repo/net';
 import { LS } from '../storage';
 import { parseMsg, parsePresence } from './protocol';
-import type { Msg, Presence, Stroke } from './protocol';
+import type { CursorTool, Msg, Presence, Stroke } from './protocol';
 
 export type Mode = 'solo' | 'host' | 'join';
+
+export const PING_DURATION_MS = 10_000;
+
+export type MapPing = {
+	id: string;
+	player: string;
+	x: number;
+	z: number;
+	createdAt: number;
+	duration: number;
+};
 
 function storedId() {
 	const existing = LS.get('playerId');
@@ -93,11 +104,14 @@ export type SessionView = Pick<
 	| 'peers'
 	| 'cursors'
 	| 'drawings'
+	| 'pings'
 	| 'notice'
 	| 'mode'
 	| 'send'
 	| 'pointer'
 	| 'draw'
+	| 'clearDrawings'
+	| 'ping'
 	| 'exportSave'
 	| 'importSave'
 	| 'newCampaign'
@@ -118,8 +132,9 @@ export class GameSession {
 	state = $state.raw<PublicState | null>(null);
 	status = $state<ConnectionStatus>('connecting');
 	peers = $state.raw<PeerInfo[]>([]);
-	cursors = $state.raw<Record<string, { x: number; z: number }>>({});
+	cursors = $state.raw<Record<string, { x: number; z: number; tool?: CursorTool }>>({});
 	drawings = $state.raw<Record<string, Stroke[]>>({});
+	pings = $state.raw<MapPing[]>([]);
 	notice = $state<{ text: string; at: number } | null>(null);
 	fatal = $state<string | null>(null);
 
@@ -134,6 +149,12 @@ export class GameSession {
 	#sender: { command: Command; by: string | null } | null = null;
 	/** Prevents re-seating a player mid-game after they explicitly vacated their seat. */
 	#resumedGame: number | null = null;
+	#pingSeq = 0;
+	readonly #pingTimers = new Map<string, ReturnType<typeof setTimeout>>();
+	readonly #drawFlush = new Map<
+		string,
+		{ timer: ReturnType<typeof setTimeout> | null; lastAt: number; pending: Stroke[] | null }
+	>();
 
 	/** False for a session that stands apart from this browser's campaign, which neither reads nor writes storage. */
 	readonly #persist: boolean;
@@ -160,9 +181,6 @@ export class GameSession {
 			this.peers = peers;
 			const present = new Set(peers.filter(peer => peer.connected).map(peer => peer.id as string));
 			this.cursors = Object.fromEntries(Object.entries(this.cursors).filter(([id]) => present.has(id)));
-			this.drawings = Object.fromEntries(
-				Object.entries(this.drawings).filter(([id]) => id === this.selfId || present.has(id)),
-			);
 			if (this.#actor && this.state) {
 				this.#net.send({ t: 'state', state: this.state });
 				for (const [player, strokes] of Object.entries(this.drawings))
@@ -189,12 +207,25 @@ export class GameSession {
 				if (reason) this.#net.send({ t: 'rejected', reason }, from);
 			}
 			if (msg.t === 'draw') {
-				const owner = this.#actor ? (from as string) : msg.player;
-				if (!this.#actor && owner === this.selfId) return;
-				const { [owner]: _gone, ...rest } = this.drawings;
-				this.drawings = msg.strokes.length ? { ...rest, [owner]: msg.strokes } : rest;
-				if (this.#actor && this.#net.status !== 'closed')
-					this.#net.send({ t: 'draw', player: owner, strokes: msg.strokes });
+				const { [msg.player]: _gone, ...rest } = this.drawings;
+				this.drawings = msg.strokes.length ? { ...rest, [msg.player]: msg.strokes } : rest;
+				if (this.#actor) this.#relay({ t: 'draw', player: msg.player, strokes: msg.strokes }, from);
+			}
+			if (msg.t === 'draw-clear') {
+				this.#cancelDrawFlushes();
+				this.drawings = {};
+				if (this.#actor) this.#relay({ t: 'draw-clear' }, from);
+			}
+			if (msg.t === 'ping') {
+				this.#addPing({
+					id: msg.id,
+					player: msg.player,
+					x: msg.x,
+					z: msg.z,
+					createdAt: performance.now(),
+					duration: PING_DURATION_MS,
+				});
+				if (this.#actor) this.#relay(msg, from);
 			}
 		});
 		this.status = this.#net.status;
@@ -342,11 +373,92 @@ export class GameSession {
 		if (this.status === 'connected') this.#net.sendPresence(point);
 	}
 
-	draw(strokes: Stroke[]) {
-		const id = this.selfId as string;
+	/** Relays a host-received message to every other connected peer without echoing back to the sender. */
+	#relay(msg: Msg, except?: string) {
+		if (!this.#actor || this.#net.status === 'closed') return;
+		for (const peer of this.peers) {
+			if (peer.connected && peer.id !== this.selfId && peer.id !== except) {
+				this.#net.send(msg, peer.id);
+			}
+		}
+	}
+
+	#cancelDrawFlushes() {
+		for (const entry of this.#drawFlush.values()) {
+			if (entry.timer !== null) clearTimeout(entry.timer);
+		}
+		this.#drawFlush.clear();
+	}
+
+	#sendDrawing(player: string, strokes: Stroke[], flush: boolean) {
+		if (this.status !== 'connected') return;
+		const DRAW_INTERVAL_MS = 33;
+		const now = performance.now();
+		let state = this.#drawFlush.get(player);
+		if (!state) {
+			state = { timer: null, lastAt: -Infinity, pending: null };
+			this.#drawFlush.set(player, state);
+		}
+		const sendNow = (payload: Stroke[]) => {
+			if (state!.timer !== null) {
+				clearTimeout(state!.timer);
+				state!.timer = null;
+			}
+			state!.pending = null;
+			state!.lastAt = performance.now();
+			if (this.status === 'connected') this.#net.send({ t: 'draw', player, strokes: payload });
+		};
+		if (flush || now - state.lastAt >= DRAW_INTERVAL_MS) {
+			sendNow(strokes);
+			return;
+		}
+		state.pending = strokes;
+		if (state.timer === null) {
+			state.timer = setTimeout(
+				() => {
+					if (state!.pending !== null) sendNow(state!.pending);
+					else state!.timer = null;
+				},
+				Math.max(0, state.lastAt + DRAW_INTERVAL_MS - now),
+			);
+		}
+	}
+
+	draw(strokes: Stroke[], options?: { player?: string; flush?: boolean }) {
+		const id = options?.player ?? (this.selfId as string);
 		const { [id]: _gone, ...rest } = this.drawings;
 		this.drawings = strokes.length ? { ...rest, [id]: strokes } : rest;
-		if (this.status === 'connected') this.#net.send({ t: 'draw', player: id, strokes });
+		this.#sendDrawing(id, strokes, options?.flush ?? false);
+	}
+
+	clearDrawings() {
+		this.#cancelDrawFlushes();
+		if (Object.keys(this.drawings).length === 0) return;
+		this.drawings = {};
+		if (this.status === 'connected') this.#net.send({ t: 'draw-clear' });
+	}
+
+	#addPing(ping: MapPing) {
+		this.pings = [...this.pings, ping];
+		const timer = setTimeout(() => {
+			this.#pingTimers.delete(ping.id);
+			this.pings = this.pings.filter(entry => entry.id !== ping.id);
+		}, ping.duration + 80);
+		this.#pingTimers.set(ping.id, timer);
+	}
+
+	ping(point: { x: number; z: number }) {
+		const id = `${this.selfId}-${Date.now()}-${++this.#pingSeq}`;
+		const player = this.selfId as string;
+		this.#addPing({
+			id,
+			player,
+			x: point.x,
+			z: point.z,
+			createdAt: performance.now(),
+			duration: PING_DURATION_MS,
+		});
+		if (this.status === 'connected') this.#net.send({ t: 'ping', id, player, x: point.x, z: point.z });
 	}
 
 	#save(): Save | null {
@@ -424,6 +536,9 @@ export class GameSession {
 	}
 
 	close() {
+		this.#cancelDrawFlushes();
+		for (const timer of this.#pingTimers.values()) clearTimeout(timer);
+		this.#pingTimers.clear();
 		this.#actor?.stop();
 		this.#net.close();
 	}

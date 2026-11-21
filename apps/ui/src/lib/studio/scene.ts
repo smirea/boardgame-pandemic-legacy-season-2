@@ -31,6 +31,7 @@ export type GameUi = {
 	menu: boolean;
 	box: boolean;
 	deck: boolean;
+	hotkeys?: boolean;
 	/** The clicks that led to the half-chosen action on screen. */
 	steps: UiStep[];
 	/** What is typed in the chooser's filter. */
@@ -75,6 +76,7 @@ export const restingUi = (): SceneUi => ({
 	menu: false,
 	box: false,
 	deck: false,
+	hotkeys: false,
 	steps: [],
 	filter: '',
 	toasts: [],

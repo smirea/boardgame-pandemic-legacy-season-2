@@ -6,7 +6,18 @@
 	import { onDestroy, untrack } from 'svelte';
 	import { cubicInOut } from 'svelte/easing';
 	import { Tween } from 'svelte/motion';
-	import { CanvasTexture, LinearFilter, MeshStandardMaterial, MOUSE, SRGBColorSpace, Texture, Vector3 } from 'three';
+	import {
+		CanvasTexture,
+		LinearFilter,
+		MeshStandardMaterial,
+		MOUSE,
+		Plane,
+		Raycaster,
+		SRGBColorSpace,
+		Texture,
+		Vector2,
+		Vector3,
+	} from 'three';
 	import type { PerspectiveCamera } from 'three';
 	import type { OrbitControls as OrbitControlsImpl } from 'three/examples/jsm/controls/OrbitControls.js';
 	import { typing } from '#lib/keys.ts';
@@ -27,6 +38,7 @@
 	import Pawn from './Pawn.svelte';
 	import { fonts, nameWidth } from './print.svelte';
 	import type { BoardBounds, BoardPoint } from './projection';
+	import MapPing from './MapPing.svelte';
 	import Pulse from './Pulse.svelte';
 	import ReconBox from './ReconBox.svelte';
 	import { placeReconBoxes } from './reconLayout';
@@ -40,7 +52,7 @@
 	import { PILE, STOCKPILE, STOCKPILE_REACH, supplyMoves } from './stockpile';
 	import type { Holder, SupplySnapshot } from './stockpile';
 	import Trail from './Trail.svelte';
-	import type { BoardView, Covered, ReconBoxView } from './types';
+	import type { BoardView, Covered, CursorTool, ReconBoxView } from './types';
 	import type { CameraPose } from '#lib/studio/scene.ts';
 
 	type Props = {
@@ -49,11 +61,10 @@
 		/** A click on a recon route's box. */
 		onrecon?: (route: string) => void;
 		onpointer?: (point: BoardPoint | null) => void;
-		/** True while the user holds F to draw on the board with the mouse. */
-		drawing?: boolean;
-		ondrawstart?: (point: BoardPoint) => void;
-		ondrawmove?: (point: BoardPoint) => void;
-		ondrawend?: () => void;
+		/** Active map drawing tool: pen (hold F) or eraser. Disables camera drag while active. */
+		tool?: CursorTool | null;
+		/** Local eraser ring preview shown on the board while eraser mode is active. */
+		eraserAt?: { x: number; z: number; radius: number } | null;
 		/** Bump to return the camera to the fitted view of everything explored. */
 		resetView?: number;
 		/** A pointer over part of a city, or off it when `event` is null, with where the city's name is printed. */
@@ -79,10 +90,8 @@
 		view,
 		oncity,
 		onpointer,
-		drawing = false,
-		ondrawstart,
-		ondrawmove,
-		ondrawend,
+		tool = null,
+		eraserAt = null,
 		onhint,
 		hoverCity = null,
 		onrecon,
@@ -410,6 +419,35 @@
 	export function pose(): CameraPose | null {
 		return userMoved ? where() : null;
 	}
+
+	const raycaster = new Raycaster();
+	const ndc = new Vector2();
+	const drawPlane = new Plane(new Vector3(0, 1, 0), -(CITY_TOP + 0.45));
+	const hitPoint = new Vector3();
+
+	/** Projects screen client coordinates directly onto the drawing plane, unaffected by tall pieces or HTML overlays. */
+	export function boardPoint(clientX: number, clientY: number): BoardPoint | null {
+		if (!camera || !renderer) return null;
+		const rect = renderer.domElement.getBoundingClientRect();
+		if (rect.width <= 0 || rect.height <= 0) return null;
+		ndc.set(((clientX - rect.left) / rect.width) * 2 - 1, -((clientY - rect.top) / rect.height) * 2 + 1);
+		raycaster.setFromCamera(ndc, camera);
+		if (!raycaster.ray.intersectPlane(drawPlane, hitPoint)) return null;
+		if (hitPoint.x < bounds.minX || hitPoint.x > bounds.maxX || hitPoint.z < bounds.minZ || hitPoint.z > bounds.maxZ)
+			return null;
+		return { x: hitPoint.x, z: hitPoint.z };
+	}
+
+	/** Board-unit eraser radius scaled gently to the current zoom distance. */
+	export function eraserRadius(): number {
+		const dist = cameraDistance > 0 ? cameraDistance : fit.distance;
+		return Math.max(1.4, Math.min(3.8, dist * 0.02));
+	}
+
+	$effect(() => {
+		void eraserAt;
+		invalidate();
+	});
 	// A pose asked for before the camera exists waits for it.
 	let wanted = $state.raw<{ pose: CameraPose | null } | null>(null);
 	/** Puts the camera where a drag left it, or back on the fitted view, at once. */
@@ -586,7 +624,7 @@
 <T.PerspectiveCamera makeDefault fov={FOV} near={1} far={900} bind:ref={camera}>
 	<OrbitControls
 		bind:ref={controls}
-		enabled={!drawing}
+		enabled={tool === null}
 		enableDamping
 		dampingFactor={0.12}
 		minDistance={25}
@@ -673,7 +711,7 @@
 		at={boxLayout.rects.get(box.route) ?? lastRects.get(box.route) ?? layout[box.city]!}
 		shown={liveRoutes.has(box.route)}
 		scale={boxScale}
-		passive={aimingCities}
+		passive={aimingCities || tool !== null}
 		onrecon={() => onrecon?.(box.route)}
 	/>
 {/each}
@@ -708,26 +746,21 @@
 	<Drawings drawings={view.drawings} />
 {/if}
 
-{#if drawing}
-	<T.Mesh
-		rotation.x={-Math.PI / 2}
-		position={[boardCentre.x, CITY_TOP + 0.45, boardCentre.z]}
-		onpointerdown={event => {
-			event.stopPropagation();
-			ondrawstart?.({ x: event.point.x, z: event.point.z });
-		}}
-		onpointermove={event => {
-			event.stopPropagation();
-			ondrawmove?.({ x: event.point.x, z: event.point.z });
-		}}
-		onpointerup={event => {
-			event.stopPropagation();
-			ondrawend?.();
-		}}
-	>
-		<T.PlaneGeometry args={[boardSize.width, boardSize.depth]} />
-		<T.MeshBasicMaterial transparent opacity={0} depthWrite={false} />
-	</T.Mesh>
+{#each view.pings ?? [] as ping (ping.id)}
+	<MapPing {ping} />
+{/each}
+
+{#if eraserAt}
+	<T.Group position={[eraserAt.x, CITY_TOP + 0.5, eraserAt.z]}>
+		<T.Mesh rotation.x={-Math.PI / 2} renderOrder={12}>
+			<T.CircleGeometry args={[eraserAt.radius, 36]} />
+			<T.MeshBasicMaterial color="#1a140e" transparent opacity={0.18} depthWrite={false} />
+		</T.Mesh>
+		<T.Mesh rotation.x={-Math.PI / 2} position.y={0.01} renderOrder={13}>
+			<T.RingGeometry args={[Math.max(0.2, eraserAt.radius - 0.16), eraserAt.radius, 36]} />
+			<T.MeshBasicMaterial color="#f5ecd8" transparent opacity={0.9} depthWrite={false} />
+		</T.Mesh>
+	</T.Group>
 {/if}
 
 {#each view.marks?.rings ?? [] as ring (`${ring.city}:${ring.color}`)}

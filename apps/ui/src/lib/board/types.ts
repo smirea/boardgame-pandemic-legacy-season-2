@@ -1,5 +1,8 @@
 import type { CityId, Color, EdgeDef, PlayerCardsAt, StructureKind } from '@repo/game';
+import type { CursorTool } from '#lib/session/protocol.ts';
 import type { BoardPoint } from './projection';
+
+export type { CursorTool };
 
 export type CityHighlight = 'target' | 'selected' | null;
 
@@ -51,9 +54,19 @@ export type PawnView = {
 	course: BoardPoint[] | null;
 };
 
-export type CursorView = { id: string; name: string; color: string; x: number; z: number };
+export type CursorView = { id: string; name: string; color: string; x: number; z: number; tool?: CursorTool };
 
 export type DrawingView = { id: string; color: string; strokes: { id: string; points: BoardPoint[] }[] };
+
+export type PingView = {
+	id: string;
+	x: number;
+	z: number;
+	color: string;
+	name: string | null;
+	createdAt: number;
+	duration: number;
+};
 
 export type FxKind = 'infect' | 'plague' | 'outbreak' | 'epidemic' | 'connected' | 'build' | 'hollow';
 
@@ -105,6 +118,7 @@ export type BoardView = {
 	recon: ReconBoxView[];
 	cursors: CursorView[];
 	drawings?: DrawingView[];
+	pings?: PingView[];
 	fx: Fx[];
 	/** A skull over a city struck by an incident, about to become the plague cube in slot `at`. */
 	skull: { key: number; city: CityId; at: number } | null;

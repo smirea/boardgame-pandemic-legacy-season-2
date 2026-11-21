@@ -20,6 +20,10 @@
 		legacyOut?: boolean;
 		drawPlayer?: DeckAction;
 		drawInfection?: DeckAction;
+		hasDrawings?: boolean;
+		erasing?: boolean;
+		oneraser?: () => void;
+		onclear?: () => void;
 		onreset: () => void;
 		onmenu: () => void;
 		onbox: () => void;
@@ -35,6 +39,10 @@
 		legacyOut = false,
 		drawPlayer = null,
 		drawInfection = null,
+		hasDrawings = false,
+		erasing = false,
+		oneraser,
+		onclear,
 		onreset,
 		onmenu,
 		onbox,
@@ -110,6 +118,42 @@
 			</div>
 		</div>
 		<div class="right">
+			{#if hasDrawings}
+				<div
+					class="draw-tools"
+					transition:fade={{ duration: 140 }}
+					{@attach feedback('Drawing tools', () => ({ erasing }))}
+				>
+					<button
+						type="button"
+						class="tool-btn"
+						class:active={erasing}
+						onclick={oneraser}
+						aria-pressed={erasing}
+						title="Erase parts of drawings (E)"
+						data-testid="draw-eraser"
+					>
+						<svg viewBox="0 0 16 16" aria-hidden="true">
+							<path d="M9.6 2.4 14 6.8l-6.2 6.2H3.6L1.8 11.2a1.4 1.4 0 0 1 0-2Z" />
+							<path d="M6.4 5.6 10.8 10" />
+							<path d="M7.8 13H14.5" />
+						</svg>
+						Eraser
+					</button>
+					<button
+						type="button"
+						class="tool-btn clear"
+						onclick={onclear}
+						title="Erase all drawings on the map"
+						data-testid="draw-clear"
+					>
+						<svg viewBox="0 0 16 16" aria-hidden="true">
+							<path d="M2.5 4h11M5.5 4V2.5h5V4M4 4l.8 9.5h6.4L12 4" />
+						</svg>
+						Erase all
+					</button>
+				</div>
+			{/if}
 			{#if !solo}
 				<span class="link" class:down={status !== 'connected'} title="Connection to the host"
 					>{status === 'connected' ? `${Math.max(1, players)} online` : status}</span
@@ -344,5 +388,42 @@
 
 	button:hover {
 		border-color: var(--line-strong);
+	}
+
+	.draw-tools {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.3rem;
+		padding-right: 0.45rem;
+		border-right: 1px solid var(--line);
+	}
+
+	.tool-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.32rem;
+		padding: 0.25rem 0.6rem;
+	}
+
+	.tool-btn svg {
+		width: 0.85rem;
+		height: 0.85rem;
+		fill: none;
+		stroke: currentColor;
+		stroke-width: 1.5;
+		stroke-linecap: round;
+		stroke-linejoin: round;
+	}
+
+	.tool-btn.active {
+		border-color: var(--paper);
+		background: var(--paper);
+		color: var(--paper-ink);
+		font-weight: 600;
+	}
+
+	.tool-btn.clear:hover {
+		border-color: var(--danger);
+		color: var(--danger);
 	}
 </style>

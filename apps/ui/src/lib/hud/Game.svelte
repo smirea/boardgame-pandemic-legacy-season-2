@@ -20,9 +20,10 @@
 	} from '@repo/game';
 	import type { Action, CardId, CityId, Command, EdgeDef, EventId, Play, SeatId } from '@repo/game';
 	import Board from '#lib/board/Board.svelte';
+	import { eraseStrokesAlong } from '#lib/board/erase.ts';
 	import type { BoardPoint } from '#lib/board/projection.ts';
 	import { travelOf } from '#lib/board/travel.ts';
-	import type { BoardMarks, BoardView, CityView, Covered, Fx, FxKind, Travel } from '#lib/board/types.ts';
+	import type { BoardMarks, BoardView, CityView, Covered, CursorTool, Fx, FxKind, Travel } from '#lib/board/types.ts';
 	import type { SessionView } from '#lib/session/session.svelte.ts';
 	import { inkOn } from '#lib/color.ts';
 	import { presentFeedback } from '#lib/feedback.ts';
@@ -59,6 +60,7 @@
 	import Unboxing from './Unboxing.svelte';
 	import LegacyBox from './LegacyBox.svelte';
 	import LegacyDeck from './LegacyDeck.svelte';
+	import Hotkeys from './Hotkeys.svelte';
 	import Objectives from './Objectives.svelte';
 	import SeatPicker from './SeatPicker.svelte';
 	import TopBar from './TopBar.svelte';
@@ -185,6 +187,7 @@
 	let menu = $state(false);
 	let boxOpen = $state(false);
 	let deckOpen = $state(false);
+	let hotkeysOpen = $state(false);
 	let legacyDeckOut = $state(false);
 	// Once the table knows which game is next, every game is set up by choosing who plays, over the whole table.
 	const choosingCharacters = $derived(snap.phase === 'lobby' && !spectator && tableStart(snap.world) !== null);
@@ -533,6 +536,7 @@
 			menu,
 			box: boxOpen,
 			deck: deckOpen,
+			hotkeys: hotkeysOpen,
 			steps: targeting || chooser || ring ? trail : [],
 			filter,
 			toasts: toasts.map(({ text, tone }) => ({ text, tone })),
@@ -556,6 +560,7 @@
 		menu = next.menu;
 		boxOpen = next.box;
 		deckOpen = next.deck;
+		hotkeysOpen = next.hotkeys ?? false;
 		viewing = next.viewing;
 		heldAnnouncements = next.toasts.length > 0 || next.banner !== null || next.turnBanner !== null;
 		toasts = next.toasts.map(entry => ({ id: nextFx++, ...entry }));
@@ -580,6 +585,10 @@
 
 	/** Escape and a right click put down whatever was half-chosen. */
 	function cancel() {
+		if (eraserActive) {
+			eraserActive = false;
+			return true;
+		}
 		if (!targeting && !chooser && !ring) return false;
 		dismiss();
 		return true;
@@ -998,6 +1007,23 @@
 		};
 	});
 
+	function playerColor(id: string): string {
+		const seat = world.table.seats.find(entry => entry.player === id)?.seat;
+		const seatIdx = seat && game ? game.seats.indexOf(seat) : -1;
+		if (seatIdx >= 0) return SEAT_COLORS[seatIdx]!;
+		if (id === session.player) return SEAT_COLORS[0]!;
+		const peerIdx = session.peers.findIndex(peer => peer.id === id);
+		return SEAT_COLORS[(Math.max(0, peerIdx) + 1) % SEAT_COLORS.length]!;
+	}
+
+	function playerName(id: string): string {
+		return (
+			world.table.seats.find(entry => entry.player === id)?.name ??
+			session.peers.find(peer => peer.id === id)?.name ??
+			'Player'
+		);
+	}
+
 	const boardView = $derived.by((): BoardView => {
 		// A target being aimed at wins over a card the pointer happens to rest on.
 		const targets = new Set(targeting ? targeting.cities.keys() : hoveredCards.length ? hoveredTargets.cities : []);
@@ -1081,25 +1107,24 @@
 				...lastMove(seat),
 			})),
 			stockpile: game ? game.stockpile - show.lag.stockpile : null,
-			cursors: Object.entries(session.cursors).map(([id, point], index) => ({
+			cursors: Object.entries(session.cursors).map(([id, point]) => ({
 				id,
-				name: session.peers.find(peer => peer.id === id)?.name ?? 'player',
-				color: SEAT_COLORS[(index + 1) % SEAT_COLORS.length]!,
+				name: playerName(id),
+				color: playerColor(id),
 				...point,
 			})),
 			drawings: Object.entries(session.drawings)
 				.filter(([, strokes]) => strokes.length > 0)
-				.map(([id, strokes], index) => {
-					const seat = world.table.seats.find(entry => entry.player === id)?.seat;
-					const seatIdx = seat && game ? game.seats.indexOf(seat) : -1;
-					const color =
-						seatIdx >= 0
-							? SEAT_COLORS[seatIdx]!
-							: id === session.player
-								? SEAT_COLORS[0]!
-								: SEAT_COLORS[(index + 1) % SEAT_COLORS.length]!;
-					return { id, color, strokes };
-				}),
+				.map(([id, strokes]) => ({ id, color: playerColor(id), strokes })),
+			pings: session.pings.map(ping => ({
+				id: ping.id,
+				x: ping.x,
+				z: ping.z,
+				color: playerColor(ping.player),
+				name: solo ? null : playerName(ping.player),
+				createdAt: ping.createdAt,
+				duration: ping.duration,
+			})),
 			fx,
 			skull: show.skull,
 			marks,
@@ -1107,15 +1132,42 @@
 	});
 
 	let penHeld = $state(false);
+	let eraserActive = $state(false);
 	let activeStrokeId: string | null = null;
 	let strokeSeq = 0;
+	let lastErasePoint: BoardPoint | null = null;
+	const erasedOwners = new Set<string>();
+	let lastBoardPoint: BoardPoint | null = null;
+
+	const hasDrawings = $derived(Object.values(session.drawings).some(strokes => strokes.length > 0));
+	const drawTool = $derived<CursorTool | null>(
+		spectator ? null : penHeld ? 'pen' : eraserActive && hasDrawings ? 'eraser' : null,
+	);
+	const nextStrokeId = () => `${Date.now()}-${++strokeSeq}`;
+
+	$effect(() => {
+		if (!hasDrawings && eraserActive) eraserActive = false;
+	});
+
+	$effect(() => {
+		const tool = drawTool;
+		untrack(() => {
+			const point = board?.pointerBoardPoint() ?? lastBoardPoint;
+			if (point) session.pointer(tool ? { ...point, tool } : point);
+		});
+	});
+
+	function handleBoardPointer(point: BoardPoint | null) {
+		lastBoardPoint = point;
+		session.pointer(point ? (drawTool ? { ...point, tool: drawTool } : point) : null);
+	}
 
 	function ondrawstart(point: BoardPoint) {
 		if (!penHeld || spectator) return;
-		const id = `${Date.now()}-${++strokeSeq}`;
+		const id = nextStrokeId();
 		activeStrokeId = id;
 		const existing = session.drawings[session.player] ?? [];
-		session.draw([...existing, { id, points: [point] }]);
+		session.draw([...existing, { id, points: [point] }], { flush: true });
 	}
 
 	function ondrawmove(point: BoardPoint) {
@@ -1125,33 +1177,93 @@
 		if (index < 0) return;
 		const stroke = existing[index]!;
 		const last = stroke.points[stroke.points.length - 1];
-		if (last && Math.hypot(point.x - last.x, point.z - last.z) < 0.4) return;
+		if (last && Math.hypot(point.x - last.x, point.z - last.z) < 0.35) return;
 		const next = existing.slice();
 		next[index] = { id: stroke.id, points: [...stroke.points, point] };
 		session.draw(next);
 	}
 
 	function ondrawend() {
+		if (!activeStrokeId) return;
 		activeStrokeId = null;
+		const existing = session.drawings[session.player] ?? [];
+		session.draw(existing, { flush: true });
 	}
 
-	/** Space advances the turn, Z undoes, F draws on the map (and clears your own drawing on press), Escape closes. */
+	function applyErase(point: BoardPoint, radius: number) {
+		if (spectator) return;
+		for (const [owner, strokes] of Object.entries(session.drawings)) {
+			const result = eraseStrokesAlong(strokes, lastErasePoint, point, radius, nextStrokeId);
+			if (result.changed) {
+				erasedOwners.add(owner);
+				session.draw(result.strokes, { player: owner });
+			}
+		}
+		lastErasePoint = point;
+	}
+
+	function onerasestart(point: BoardPoint, radius: number) {
+		lastErasePoint = null;
+		erasedOwners.clear();
+		applyErase(point, radius);
+	}
+
+	function onerasemove(point: BoardPoint, radius: number) {
+		applyErase(point, radius);
+	}
+
+	function oneraseend() {
+		lastErasePoint = null;
+		if (!erasedOwners.size) return;
+		for (const owner of erasedOwners) {
+			session.draw(session.drawings[owner] ?? [], { player: owner, flush: true });
+		}
+		erasedOwners.clear();
+	}
+
+	function clearDrawings() {
+		activeStrokeId = null;
+		lastErasePoint = null;
+		erasedOwners.clear();
+		eraserActive = false;
+		session.clearDrawings();
+	}
+
+	/** Space advances the turn, Z undoes, F draws, E toggles eraser, Tab pings the map, ? opens hotkeys, Escape closes. */
 	function onkey(event: KeyboardEvent) {
 		if (event.key === 'Escape') {
+			if (hotkeysOpen) {
+				hotkeysOpen = false;
+				return;
+			}
 			cancel();
 			menu = false;
 		}
 		if (typing(event) || event.metaKey || event.ctrlKey || event.altKey) return;
+		if (event.key === '?' && !spectator) {
+			event.preventDefault();
+			menu = false;
+			hotkeysOpen = !hotkeysOpen;
+			return;
+		}
+		const modalOpen = () => Boolean(document.querySelector('[aria-modal="true"], .tabletop-unboxing'));
+		if (event.key === 'Tab' && !spectator && !modalOpen()) {
+			event.preventDefault();
+			if (!event.repeat) {
+				const point = board?.pointerBoardPoint() ?? lastBoardPoint;
+				if (point) session.ping(point);
+			}
+			return;
+		}
 		const key = event.key.toLowerCase();
-		if (
-			key === 'f' &&
-			!event.repeat &&
-			!spectator &&
-			!document.querySelector('[aria-modal="true"], .tabletop-unboxing')
-		) {
+		if (key === 'f' && !event.repeat && !spectator && !modalOpen()) {
+			eraserActive = false;
 			penHeld = true;
 			activeStrokeId = null;
-			if ((session.drawings[session.player] ?? []).length) session.draw([]);
+			return;
+		}
+		if (key === 'e' && !event.repeat && !spectator && hasDrawings && !modalOpen()) {
+			eraserActive = !eraserActive;
 			return;
 		}
 		if (onButton(event) || !game) return;
@@ -1176,14 +1288,15 @@
 
 	function onkeyup(event: KeyboardEvent) {
 		if (event.key.toLowerCase() === 'f') {
+			ondrawend();
 			penHeld = false;
-			activeStrokeId = null;
 		}
 	}
 
 	function onblur() {
+		ondrawend();
+		oneraseend();
 		penHeld = false;
-		activeStrokeId = null;
 	}
 
 	function downloadRecord() {
@@ -1206,7 +1319,7 @@
 	}
 </script>
 
-<svelte:window onkeydown={onkey} {onkeyup} {onblur} onpointerup={ondrawend} />
+<svelte:window onkeydown={onkey} {onkeyup} {onblur} />
 
 {#snippet actionPanel(side: 'left' | 'right')}
 	{#if game && !spectator && actionChoices.length && canAct && snap.phase === 'playing.actions'}
@@ -1300,6 +1413,10 @@
 		legacyOut={legacyDeckOut}
 		drawPlayer={drawPlayerAction}
 		drawInfection={drawInfectionAction}
+		hasDrawings={!spectator && hasDrawings}
+		erasing={drawTool === 'eraser'}
+		oneraser={() => (eraserActive = !eraserActive)}
+		onclear={clearDrawings}
 		onreset={() => resetView++}
 		onmenu={() => (menu = !menu)}
 		onbox={() => (boxOpen = !boxOpen)}
@@ -1323,11 +1440,14 @@
 					}
 				: null}
 			onring={key => step({ t: 'start', a: key, via: 'ring' })}
-			onpointer={point => session.pointer(point)}
-			drawing={penHeld}
+			onpointer={handleBoardPointer}
+			tool={drawTool}
 			{ondrawstart}
 			{ondrawmove}
 			{ondrawend}
+			{onerasestart}
+			{onerasemove}
+			{oneraseend}
 			{resetView}
 			{covered}
 			focus={showFocus ?? focus}
@@ -1551,6 +1671,23 @@
 			</div>
 		{/if}
 
+		{#if hotkeysOpen}
+			<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_noninteractive_element_interactions -->
+			<div
+				class="scrim box-scrim"
+				role="dialog"
+				aria-modal="true"
+				aria-label="Keyboard shortcuts"
+				tabindex="-1"
+				transition:fade={{ duration: 160 }}
+				onclick={event => event.target === event.currentTarget && (hotkeysOpen = false)}
+			>
+				<div in:fly={{ y: 18, duration: 240 }}>
+					<Hotkeys onclose={() => (hotkeysOpen = false)} />
+				</div>
+			</div>
+		{/if}
+
 		{#if menu}
 			<div
 				class="menu"
@@ -1564,6 +1701,15 @@
 							// The capture waits for the menu's exit transition, so the screenshot shows the table without it.
 							setTimeout(() => void presentFeedback(), 220);
 						}}>Give feedback <kbd>⌥⌘ click</kbd></button
+					>
+				{/if}
+				{#if !spectator}
+					<button
+						onclick={() => {
+							menu = false;
+							hotkeysOpen = true;
+						}}
+						data-testid="open-hotkeys">Keyboard shortcuts <kbd>?</kbd></button
 					>
 				{/if}
 				{#if game && !solo && !spectator && mine.length > 0}
@@ -1611,7 +1757,6 @@
 						onchange={async event => session.importSave(await event.currentTarget.files![0]!.text())}
 					/>
 				{/if}
-				<div class="menu-hotkey">Show original scans <kbd>Hold O</kbd></div>
 			</div>
 		{/if}
 		{#if !spectator && game}
@@ -2211,29 +2356,6 @@
 		color: var(--muted);
 		font: inherit;
 		font-size: 0.75rem;
-	}
-
-	.menu-hotkey {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 0.75rem;
-		margin-top: 0.25rem;
-		padding: 0.4rem 0.7rem 0.15rem;
-		border-top: 1px solid var(--line);
-		color: var(--muted);
-		font-size: 0.76rem;
-	}
-
-	.menu-hotkey kbd {
-		margin-left: 0;
-		padding: 0.08rem 0.35rem;
-		border: 1px solid var(--line-strong);
-		border-radius: 3px;
-		background: var(--wash);
-		color: var(--ink);
-		font-size: 0.7rem;
-		font-weight: 600;
 	}
 
 	.menu .danger {

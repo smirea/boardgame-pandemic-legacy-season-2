@@ -17,7 +17,7 @@
 	import type { Placement } from './labels';
 	import type { BoardPoint } from './projection';
 	import Scene from './Scene.svelte';
-	import type { BoardView, Covered } from './types';
+	import type { BoardView, Covered, CursorTool } from './types';
 	import type { CameraPose } from '#lib/studio/scene.ts';
 
 	// The feedback editor (development only) and the studio's capture redraw the page, and a WebGL canvas reads blank
@@ -38,10 +38,13 @@
 		/** A right click on a city, which takes back what a click put there. */
 		oncityback?: (city: CityId) => void;
 		onpointer?: (point: BoardPoint | null) => void;
-		drawing?: boolean;
+		tool?: CursorTool | null;
 		ondrawstart?: (point: BoardPoint) => void;
 		ondrawmove?: (point: BoardPoint) => void;
 		ondrawend?: () => void;
+		onerasestart?: (point: BoardPoint, radius: number) => void;
+		onerasemove?: (point: BoardPoint, radius: number) => void;
+		oneraseend?: () => void;
 		resetView?: number;
 		covered?: Covered[];
 		focus?: { city: CityId; x: number; y: number; glide?: number; zoom?: number } | null;
@@ -62,10 +65,13 @@
 		onrecon,
 		oncityback,
 		onpointer,
-		drawing = false,
+		tool = null,
 		ondrawstart,
 		ondrawmove,
 		ondrawend,
+		onerasestart,
+		onerasemove,
+		oneraseend,
 		resetView,
 		covered,
 		focus,
@@ -78,8 +84,72 @@
 
 	let element = $state<HTMLElement>();
 	let scene = $state<Scene>();
+	let lastClient: { x: number; y: number } | null = null;
+	let toolDown = false;
+	let eraserAt = $state.raw<{ x: number; z: number; radius: number } | null>(null);
+
 	export const camera = () => scene?.pose() ?? null;
 	export const cameraNow = () => scene?.where() ?? null;
+	export const pointerBoardPoint = () => (lastClient ? (scene?.boardPoint(lastClient.x, lastClient.y) ?? null) : null);
+
+	$effect(() => {
+		const active = tool;
+		untrack(() => {
+			if (active !== null) hovered = null;
+			if (active === 'eraser' && lastClient && scene) {
+				const pt = scene.boardPoint(lastClient.x, lastClient.y);
+				eraserAt = pt ? { ...pt, radius: scene.eraserRadius() } : null;
+			} else {
+				eraserAt = null;
+			}
+			if (active === null && toolDown) {
+				toolDown = false;
+				ondrawend?.();
+				oneraseend?.();
+			}
+		});
+	});
+
+	function onToolDown(event: PointerEvent & { currentTarget: HTMLDivElement }) {
+		lastClient = { x: event.clientX, y: event.clientY };
+		if (event.button !== 0 || !tool) return;
+		event.preventDefault();
+		event.stopPropagation();
+		event.currentTarget.setPointerCapture(event.pointerId);
+		toolDown = true;
+		const pt = scene?.boardPoint(event.clientX, event.clientY) ?? null;
+		onpointer?.(pt);
+		if (!pt) return;
+		if (tool === 'pen') {
+			ondrawstart?.(pt);
+		} else {
+			const radius = scene?.eraserRadius() ?? 2.4;
+			eraserAt = { ...pt, radius };
+			onerasestart?.(pt, radius);
+		}
+	}
+
+	function onToolMove(event: PointerEvent) {
+		lastClient = { x: event.clientX, y: event.clientY };
+		const pt = scene?.boardPoint(event.clientX, event.clientY) ?? null;
+		onpointer?.(pt);
+		if (tool === 'eraser') {
+			eraserAt = pt ? { ...pt, radius: scene?.eraserRadius() ?? 2.4 } : null;
+		}
+		if (!toolDown || !pt || !tool) return;
+		if (tool === 'pen') {
+			ondrawmove?.(pt);
+		} else {
+			onerasemove?.(pt, scene?.eraserRadius() ?? 2.4);
+		}
+	}
+
+	function onToolUp() {
+		if (!toolDown) return;
+		toolDown = false;
+		if (tool === 'pen') ondrawend?.();
+		else if (tool === 'eraser') oneraseend?.();
+	}
 	// The scene mounts a moment after the board, so a pose set before then waits here.
 	let wanted: { pose: CameraPose | null } | null = null;
 	export function setCamera(pose: CameraPose | null) {
@@ -196,25 +266,39 @@
 
 <div
 	class="board"
-	class:drawing
+	class:pen={tool === 'pen'}
+	class:eraser={tool === 'eraser'}
 	role="presentation"
 	{@attach feedback(undefined, () => ({ hovered: hovered?.city ?? null }))}
 	bind:this={element}
 	oncontextmenu={event => {
-		if (drawing) return;
+		if (tool === 'pen') {
+			event.preventDefault();
+			return;
+		}
+		if (tool === 'eraser') {
+			event.preventDefault();
+			oncancel?.();
+			return;
+		}
 		if (hovered?.city && oncityback) {
 			event.preventDefault();
 			oncityback(hovered.city);
 		} else if (oncancel?.()) event.preventDefault();
 	}}
 	onpointerdown={event => (downAt = { x: event.clientX, y: event.clientY })}
+	onpointermove={event => {
+		lastClient = { x: event.clientX, y: event.clientY };
+	}}
 	onclick={event => {
-		if (drawing) return;
+		if (tool !== null) return;
 		// A drag pans the chart, and a click on a city is the city's. Anything else on the board is a miss.
 		const dragged = Math.abs(event.clientX - downAt.x) + Math.abs(event.clientY - downAt.y) > 6;
 		if (!dragged && !hovered?.city && !(event.target as Element).closest('.ring')) onmiss?.();
 	}}
 	onpointerleave={() => {
+		lastClient = null;
+		eraserAt = null;
 		onpointer?.(null);
 		hovered = null;
 	}}
@@ -223,13 +307,11 @@
 		<Scene
 			bind:this={scene}
 			{view}
-			oncity={city => !drawing && oncity?.(city)}
+			oncity={city => tool === null && oncity?.(city)}
 			{onrecon}
-			{onpointer}
-			{drawing}
-			{ondrawstart}
-			{ondrawmove}
-			{ondrawend}
+			onpointer={point => tool === null && onpointer?.(point)}
+			{tool}
+			{eraserAt}
 			{onhint}
 			hoverCity={hovered?.city ?? null}
 			{onstockpile}
@@ -240,6 +322,22 @@
 			{focus}
 		/>
 	</Canvas>
+	{#if tool !== null}
+		<!-- Captures pen and eraser input above canvas, tall 3D pieces, and HTML board overlays. -->
+		<div
+			class="tool-capture"
+			class:pen={tool === 'pen'}
+			class:eraser={tool === 'eraser'}
+			role="presentation"
+			data-testid="board-tool-capture"
+			data-tool={tool}
+			onpointerdown={onToolDown}
+			onpointermove={onToolMove}
+			onpointerup={onToolUp}
+			onpointercancel={onToolUp}
+			onlostpointercapture={onToolUp}
+		></div>
+	{/if}
 	{#if ring && ringAt}
 		{#key ring.city}
 			<div
@@ -392,12 +490,29 @@
 			radial-gradient(ellipse at 50% 50%, #221e18 0%, var(--table) 78%);
 	}
 
-	.board.drawing,
-	.board.drawing :global(canvas) {
+	.tool-capture {
+		position: absolute;
+		inset: 0;
+		z-index: 45;
+		touch-action: none;
+	}
+
+	.board.pen,
+	.board.pen :global(canvas),
+	.tool-capture.pen {
 		cursor:
 			url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23f5ecd8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath fill='%23221a12' d='M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z'/%3E%3C/svg%3E")
 				2 22,
 			crosshair;
+	}
+
+	.board.eraser,
+	.board.eraser :global(canvas),
+	.tool-capture.eraser {
+		cursor:
+			url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23f5ecd8' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='8' fill='%231a140e' fill-opacity='0.35'/%3E%3Cpath d='M9.5 14.5 14.5 9.5'/%3E%3C/svg%3E")
+				12 12,
+			cell;
 	}
 
 	/* A paper slip beside the pointer, tinted with the city's colour, its heading a band of that colour:

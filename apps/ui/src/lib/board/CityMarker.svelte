@@ -24,6 +24,7 @@
 	import type { Placement } from './labels';
 	import Pop from './Pop.svelte';
 	import { fonts, printDisc, printName, printSticker } from './print.svelte';
+	import type { PrintedKind } from './print.svelte';
 	import Printed from './Printed.svelte';
 	import type { BoardPoint } from './projection';
 	import { LAND_HEIGHT } from './projection';
@@ -80,7 +81,12 @@
 	// Prints lie just above the fog's lowest sheet, so a name running out over unexplored sea stays legible.
 	const INK = 0.2;
 
-	const name = $derived(fonts.ready ? printName(state.name, city.port, NAME_SIZE, !state.onGrid, lit) : null);
+	// A print is a canvas and a texture. `state` is a new object whenever anything about the city changes, so each
+	// print reads what it shows through a value of its own and is made again only when that value changes.
+	const label = $derived(state.name);
+	const onGrid = $derived(state.onGrid);
+	const population = $derived(state.population);
+	const name = $derived(fonts.ready ? printName(label, city.port, NAME_SIZE, !onGrid, lit) : null);
 	// A name that stands off from its city is tied back to the disc by a fine ruled line.
 	const leader = $derived.by(() => {
 		if (!placement.leader || !name) return null;
@@ -96,18 +102,24 @@
 		const mid = DISC_REACH + length / 2;
 		return { x: ux * mid, z: uz * mid, length, angle: Math.atan2(-uz, ux) };
 	});
-	const face = $derived(fonts.ready ? printDisc(state.population, 2.8, inkOn(color)) : null);
-	const permanent = $derived(state.structures.filter(structure => structure.permanent));
+	const discTone = $derived<'plain' | 'infested' | 'forsaken'>(
+		state.forsaken ? 'forsaken' : state.infested ? 'infested' : 'plain',
+	);
+	const face = $derived(fonts.ready ? printDisc(population, 2.8, inkOn(color), discTone) : null);
+	const printedKinds = $derived(
+		[
+			...state.structures.filter(structure => structure.permanent).map(structure => structure.kind),
+			...(state.lab ? ['lab' as const] : []),
+			...(state.infested ? ['infested' as const] : []),
+		].join(),
+	);
 	const stickers = $derived(
-		fonts.ready
-			? [
-					...permanent.map(structure => ({
-						part: { structure: structure.kind, permanent: true },
-						kind: structure.kind,
-					})),
-					...(state.lab ? [{ part: 'lab' as const, kind: 'lab' as const }] : []),
-					...(state.infested ? [{ part: 'city' as const, kind: 'infested' as const }] : []),
-				].map(entry => ({ ...entry, print: printSticker(entry.kind, entry.kind === 'infested' ? 2.0 : 2.1) }))
+		fonts.ready && printedKinds
+			? (printedKinds.split(',') as PrintedKind[]).map(kind => ({
+					part: (kind === 'lab' ? 'lab' : kind === 'infested' ? 'city' : { structure: kind, permanent: true }) as Part,
+					kind,
+					print: printSticker(kind, kind === 'infested' ? 2.0 : 2.1),
+				}))
 			: [],
 	);
 	const built = (kind: 'center' | 'tower' | 'shelter') =>
