@@ -605,12 +605,12 @@ function phaseValue(phase: Phase) {
 }
 
 /** Starts a new campaign from a seed, or resumes one from a plain `{ phase, world }` save. */
-export function createGameActor(options: { seed: number; save?: Save | null }) {
+export function createGameActor(options: { seed: number; save?: Save | null; undo?: World[] }) {
 	const input = { seed: options.seed };
 	if (!options.save) return createActor(gameMachine, { input });
 	const snapshot = gameMachine.resolveState({
 		value: phaseValue(options.save.phase) as never,
-		context: { world: options.save.world, undo: [] },
+		context: { world: options.save.world, undo: options.undo ?? [] },
 	});
 	return createActor(gameMachine, { snapshot, input });
 }

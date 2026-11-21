@@ -201,8 +201,9 @@ export class GameSession {
 
 		if (options.mode !== 'join') {
 			const save = options.save === undefined ? storedSave() : options.save;
+			const savedUndo = this.#persist && save ? ((LS.get('undo') as Save['world'][] | null) ?? []) : [];
 			this.#record = this.#persist ? storedRecord(save) : null;
-			this.#actor = createGameActor({ seed: Math.floor(Math.random() * 2 ** 31), save });
+			this.#actor = createGameActor({ seed: Math.floor(Math.random() * 2 ** 31), save, undo: savedUndo });
 			this.#actor.subscribe(snapshot => {
 				const before = this.state;
 				this.state = publicState(snapshot);
@@ -213,7 +214,7 @@ export class GameSession {
 						this.#tidyLobby();
 						this.#sitDown();
 					});
-				if (this.#persist) LS.set({ save: this.#save() });
+				if (this.#persist) LS.set({ save: this.#save(), undo: snapshot.context.undo });
 				if (this.#net.status !== 'closed') this.#net.send({ t: 'state', state: this.state });
 			});
 			this.#actor.start();
@@ -367,12 +368,14 @@ export class GameSession {
 		if (!this.#actor) throw new Error('Only the host can load a campaign');
 		const save: unknown = typeof raw === 'string' ? JSON.parse(raw) : raw;
 		LS.delete('record');
+		LS.delete('undo');
 		LS.set({ save: parseSave(save) });
 		location.reload();
 	}
 
 	newCampaign() {
 		LS.delete('save');
+		LS.delete('undo');
 		LS.delete('record');
 		location.reload();
 	}

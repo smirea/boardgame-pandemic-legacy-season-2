@@ -13,9 +13,12 @@
 
 	let { cards, draw = null }: Props = $props();
 
-	/** The card leaves the Infection deck in the top bar, small and face down, and flips up as it lands (50% slower). */
+	/** The card leaves the active Infection draw deck (over hand or top bar), small and face down, and flips up as it lands. */
 	function fromDeck(node: HTMLElement) {
-		const deck = document.querySelector('[data-deck="infection"]')?.getBoundingClientRect();
+		const deck = (
+			document.querySelector('[data-testid="infection-draw-deck"] .pile-card') ??
+			document.querySelector('[data-deck="infection"]')
+		)?.getBoundingClientRect();
 		const card = node.getBoundingClientRect();
 		const dx = deck ? deck.left + deck.width / 2 - (card.left + card.width / 2) : 0;
 		const dy = deck ? deck.top + deck.height / 2 - (card.top + card.height / 2) : -40;

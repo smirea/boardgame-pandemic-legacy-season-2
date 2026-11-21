@@ -94,6 +94,8 @@
 	</span>
 {:else if piece?.t === 'action'}
 	<ActionIcon action={piece.action} {size} />
+{:else if unlock.t === 'rule' && unlock.rule === 'storage'}
+	<span class="sticker storage-pkg" style:--size={size}>Package 6</span>
 {:else if STICKER[unlock.t]}
 	<span class="sticker" style:--size={size}>{STICKER[unlock.t]}</span>
 {/if}
@@ -142,6 +144,12 @@
 		font-weight: 700;
 		letter-spacing: 0.04em;
 		text-transform: uppercase;
+	}
+
+	.sticker.storage-pkg {
+		border-color: #5b3e1a;
+		background: linear-gradient(180deg, #c99f67, #a47b47);
+		color: #241607;
 	}
 
 	.cubes i {

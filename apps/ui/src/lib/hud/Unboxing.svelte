@@ -60,6 +60,8 @@
 			case 'actions':
 				return { cls: 'mechanic', dest: ['actions', 'box'] };
 			case 'rule':
+				if (unlock.rule === 'storage' || unlock.rule === 'epidemicFromStorage')
+					return { cls: 'mechanic', dest: ['storage', 'box'] };
 				return { cls: 'mechanic', dest: ['box'] };
 			default:
 				return { cls: 'box', dest: ['box'] };

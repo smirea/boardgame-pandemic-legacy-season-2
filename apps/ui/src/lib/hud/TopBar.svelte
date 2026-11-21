@@ -7,6 +7,7 @@
 	import Calendar from './Calendar.svelte';
 	import Decks from './Decks.svelte';
 	import { MONTHS } from './labels.svelte.ts';
+	import StorageDeck from './StorageDeck.svelte';
 
 	type DeckAction = { left: number; busy?: boolean; onclick: () => void } | null;
 	type Props = {
@@ -48,6 +49,7 @@
 	let room = $state(0);
 	const nextLegacy = $derived(pack.legacyDeck[campaign.legacyIndex]);
 	const legacyLeft = $derived(pack.legacyDeck.length - campaign.legacyIndex);
+	const hasStorage = $derived(campaign.rules.includes('storage'));
 	let legacyPeek = $state(false);
 </script>
 
@@ -60,6 +62,9 @@
 			{#if !MONTHS[campaign.month]}<strong>Campaign over</strong>{/if}
 			<Calendar {campaign} {room} />
 		</div>
+		{#if hasStorage}
+			<StorageDeck {campaign} onopen={onbox} />
+		{/if}
 		<div class="stats">
 			{#if game && info}
 				<div class="track" title="Infection rate: cards flipped at the end of every turn">

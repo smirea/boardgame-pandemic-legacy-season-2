@@ -13,6 +13,8 @@ export const LS = new LocalStorage<{
 	mode: Mode | null;
 	/** The host's campaign save: plain `{ phase, world }` JSON. */
 	save: unknown;
+	/** The host's current-turn undo stack, kept alongside `save` so a reload does not drop Undo. */
+	undo: unknown[];
 	debugSnapshot: unknown;
 	/** Named saves to return to (`DEBUG.checkpoint`), newest last. */
 	checkpoints: { name: string; save: unknown }[];
@@ -30,6 +32,7 @@ export const LS = new LocalStorage<{
 		passphrase: '',
 		mode: null,
 		save: null,
+		undo: [],
 		debugSnapshot: null,
 		checkpoints: [],
 		record: null,
