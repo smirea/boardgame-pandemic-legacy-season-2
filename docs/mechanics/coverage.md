@@ -93,7 +93,8 @@ A real group's campaign table, between July and August, was read piece by piece 
 
 The extracted archive in `docs/assets` (every card, sticker, door and package, November 2026) was compared with the engine, and these differences were fixed:
 
-- The Legacy deck is the printed deck, card by card. The five extra Epidemics arrive with `03-07` to `03-11`. December's last cards are read after a win or the second loss, and the ending tier for the score shows at the end of the campaign.
+- The Legacy deck is the printed deck, card by card. The five extra Epidemics arrive with `03-07` to `03-11`. December's last cards are read after a win or the second loss, down to `12-13` (Congratulations), and the ending tier for the score shows at the end of the campaign.
+- The Pearl lab (door 22) opens on the first arrival at Lake Baikal only once Package 8 is open, so the sample cannot be reached before December.
 - Buenos Aires and Johannesburg searches each place their lab and open door 20 (which opens 61, 30 and 13) with their own door (18 or 46). Only the lost-haven boxes give an action once their haven is already found. Door 19 opens door 51, which puts Wellington on the map.
 - Produce Supplies cards carry 1, 2 or 3 boxes (three, three and two of them).
 - Riot Control goes to the Player discard pile. Utopia is not infested, and its cards cannot be improved. Relocation may be played between an Epidemic's infect and intensify steps. Biodome Prototype and the Builder place shelters only in cities on the grid. The Messenger (`porter`) has no once-per-turn limit. Atlanta's search may set aside any Infection discard, Gather cards included.

@@ -592,8 +592,9 @@ const legacyDeck: LegacyCardDef[] = [
 	tier('12-09', 'Did not deliver: 851 and above, 701 to 850', 'notDelivered'),
 	tier('12-10', 'Did not deliver: 551 to 700, 401 to 550, 400 and below', 'notDelivered'),
 	tier('12-11', 'Delivered: 851 and above, 701 to 850', 'delivered'),
-	{ ...tier('12-12', 'Delivered: 551 to 700, 401 to 550, 400 and below', 'delivered'), halt: 'stop' },
-	card('12-13', 'end', 'End of the Legacy deck', 'The bottom of the deck.'),
+	tier('12-12', 'Delivered: 551 to 700, 401 to 550, 400 and below', 'delivered'),
+	// Nothing printed stops the reading here, so the campaign ends on this card.
+	card('12-13', 'end', 'Congratulations', 'The end of the Legacy deck and of the campaign.'),
 ];
 
 export const pack: ContentPack = {

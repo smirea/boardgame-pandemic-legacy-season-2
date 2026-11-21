@@ -107,6 +107,7 @@ const arrivals: Record<string, Seal> = {
 	'haven-indian-ocean': { t: 'door', id: '11' },
 	'lake-baikal': { t: 'door', id: '22' },
 };
+const arrivalsAfter: Record<string, Seal> = { 'lake-baikal': { t: 'package', id: 8 } };
 
 export const regions: RegionDef[] = regionRows.map(([id, name, revealed = false]) => ({
 	id: id as RegionId,
@@ -138,6 +139,7 @@ export const cities: CityDef[] = Object.entries(cityRows).flatMap(([region, rows
 		...(flags.includes('i') ? { startsInfested: true } : {}),
 		...(flags.includes('x') ? { noInfectionCards: true } : {}),
 		...(arrivals[id] ? { arrival: arrivals[id] } : {}),
+		...(arrivalsAfter[id] ? { arrivalAfter: arrivalsAfter[id] } : {}),
 		...(groundWeights[id] ? { groundWeight: groundWeights[id] } : {}),
 	})),
 );

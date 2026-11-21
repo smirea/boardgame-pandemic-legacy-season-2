@@ -23,7 +23,7 @@ import type { CardId, CityId, PlayerId } from './ids';
 import { createGameActor, parseSave, phaseOf, reject } from './machine';
 import type { Command, GameActor, Phase, Save } from './machine';
 import { legalActions, legalPlays } from './options';
-import { applyUnlock, closeGame, newCampaign, openSeal, score } from './legacy';
+import { applyUnlock, closeGame, newCampaign, openSeal, readLegacy, score } from './legacy';
 import { newTable } from './table';
 import { decemberSave, octoberSave } from './scenarios';
 import { tabletopSave } from './tabletop';
@@ -1666,6 +1666,26 @@ test('the first pawn at the eastern Pacific haven opens Package 6: 15 new cubes,
 	expect(labs(gameOf(actor).playerDiscard)).toHaveLength(2);
 });
 
+test('the Pearl lab (door 22) opens on the first arrival at Lake Baikal only once Package 8 is open', () => {
+	const reach = (package8: boolean) => {
+		const actor = late((world, game) => {
+			world.campaign.opened = world.campaign.opened.filter(
+				key => key !== 'door:22' && (package8 || key !== 'package:8'),
+			);
+			if (package8 && !world.campaign.opened.includes('package:8')) world.campaign.opened.push('package:8');
+			game.players[A]!.location = city('seoul');
+			world.campaign.locations[city('seoul')]!.revealed = true;
+			world.campaign.locations[city('lake-baikal')]!.revealed = true;
+			world.campaign.edges.push({ a: city('seoul'), b: city('lake-baikal'), kind: 'land' });
+		});
+		act(actor, { a: 'drive', to: city('lake-baikal') });
+		expect(gameOf(actor).players[A]!.location).toBe(city('lake-baikal'));
+		return worldOf(actor).campaign.opened.includes('door:22');
+	};
+	expect(reach(false)).toBe(false);
+	expect(reach(true)).toBe(true);
+});
+
 test('the canonical tabletop campaign still builds against the pack, at the August lobby with no invariant broken', () => {
 	const save = parseSave(JSON.parse(JSON.stringify(tabletopSave())));
 	expect(save.phase).toBe('lobby');
@@ -1708,6 +1728,15 @@ test('running out of Hollow Men figures loses the game only once the September r
 		placeHollow(world, city('cairo'), infectionCards(world, 'cairo')[0]!);
 		expect(world.game!.outcome?.won).toBe(withRule ? false : undefined);
 	}
+});
+
+test('the second December game lost reads the Legacy deck down to its last card', () => {
+	const world = decemberSave().world;
+	world.campaign.legacyIndex = pack.legacyDeck.findIndex(card => card.id === '12-05');
+	world.campaign.legacyHalt = { kind: 'finale', month: 12 };
+	world.campaign.attempt = 2;
+	readLegacy(world, 'gameEnd', false);
+	expect(world.campaign.legacyIndex).toBe(pack.legacyDeck.length);
 });
 
 test('the final score counts population on the grid only', () => {

@@ -25,6 +25,8 @@ export type CityDef = {
 	noInfectionCards?: boolean;
 	/** Opened the first time a pawn arrives. */
 	arrival?: Seal;
+	/** An arrival counts only once this is open: Lake Baikal's Pearl lab waits for Package 8. */
+	arrivalAfter?: Seal;
 	/**
 	 * How much more ground the location claims than its nearest-location share, in squared board units:
 	 * a point belongs to the location with the least squared distance minus this. Negative claims less.

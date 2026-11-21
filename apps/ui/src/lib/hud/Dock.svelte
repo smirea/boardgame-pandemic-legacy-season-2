@@ -86,6 +86,16 @@
 	const fanAngle = (index: number) => (index - (handCards.length - 1) / 2) * Math.min(4.5, 22 / handCards.length);
 	const mustDiscard = $derived(owns(seat) && decides.some(decide => decide.d === 'discard' && decide.seat === seat));
 	const playable = $derived(new Set(plays.filter(option => option.seat === seat).map(option => option.card)));
+	// While a choice waits, an event another of this screen's seats may play now is offered on the prompt itself.
+	const elsewhere = $derived(
+		pending
+			? [
+					...new Map(
+						plays.filter(option => option.seat !== seat && owns(option.seat)).map(option => [option.card, option]),
+					).values(),
+				]
+			: [],
+	);
 	const decider = $derived(pending && 'seat' in pending && pending.seat ? pending.seat : game.active);
 	// A shared prompt shows each player only their own cards, and the player whose turn it is may pass on it.
 	const choices = $derived(
@@ -337,6 +347,15 @@
 							</div>
 						{:else}
 							<p class="waiting">Waiting for {seatName(world, decider)}.</p>
+						{/if}
+						{#if elsewhere.length}
+							<div class="chips" data-testid="play-elsewhere">
+								{#each elsewhere as option (option.card)}
+									<button onclick={() => onplaycard(option.seat, option.card)}>
+										{seatName(world, option.seat)}: play {cardName(world, option.card)}
+									</button>
+								{/each}
+							</div>
 						{/if}
 					</div>
 				{:else if snap.phase === 'playing.actions'}

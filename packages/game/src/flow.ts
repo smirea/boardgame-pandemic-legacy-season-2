@@ -19,7 +19,7 @@ import {
 	infest,
 } from './helpers';
 import type { CardId, CharacterId, CityId, RegionId, SeatId } from './ids';
-import { openSeal } from './legacy';
+import { isOpen, openSeal } from './legacy';
 import { nextInt, shuffle } from './rng';
 import type { Character, Game, GameLocation, World } from './state';
 
@@ -370,7 +370,8 @@ export function movePawn(world: World, seat: SeatId, to: CityId, by: string): bo
 		game.pending.push({ t: 'discard', seat, count: 1 });
 	const destination = cityDef(to);
 	if (destination.kind === 'haven' && destination.lost) setProgress(world, 'lostHaven', 1);
-	if (destination.arrival) openSeal(world, destination.arrival, false, seat);
+	if (destination.arrival && (!destination.arrivalAfter || isOpen(world.campaign, destination.arrivalAfter)))
+		openSeal(world, destination.arrival, false, seat);
 	checkDelivery(world);
 	return true;
 }

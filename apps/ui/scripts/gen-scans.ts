@@ -16,7 +16,10 @@ const legacy: Record<string, Scan> = {};
 const index = await json('legacy-deck/index.json');
 for (const entry of index.cards as { folder: string; cardCode: string; title: string }[]) {
 	const dir = `legacy-deck/${entry.folder}`;
-	legacy[entry.cardCode] = { title: entry.title, src: `${dir}/side-b.jpg`, back: `${dir}/side-a.jpg` };
+	// The last card's face is its side A (Congratulations); side B warns a reader who started at the wrong end.
+	const end = pack.legacyDeck.find(card => card.id === entry.cardCode)?.kind === 'end';
+	const [face, back] = end ? ['side-a', 'side-b'] : ['side-b', 'side-a'];
+	legacy[entry.cardCode] = { title: entry.title, src: `${dir}/${face}.jpg`, back: `${dir}/${back}.jpg` };
 }
 const missing = pack.legacyDeck.filter(card => !legacy[card.id]).map(card => card.id);
 if (missing.length) throw new Error(`No scan for Legacy cards ${missing.join(', ')}`);
