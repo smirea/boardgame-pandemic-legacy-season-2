@@ -2,6 +2,9 @@
 	import { createGameActor, pack } from '@repo/game';
 	import type { InfectionCard as InfectionCardData, PlayerCard as PlayerCardData } from '@repo/game';
 	import InfectionCard from '#lib/cards/InfectionCard.svelte';
+	import LegacyCard from '#lib/cards/LegacyCard.svelte';
+	import { legacyScans } from '#lib/scans.generated.ts';
+	import { scanUrl } from '#lib/scans.svelte.ts';
 	import PlayerCard from '#lib/hud/PlayerCard.svelte';
 
 	// Every card comes from a fresh campaign, so this page shows exactly what the generator produces.
@@ -39,6 +42,10 @@
 		{ id: 'a' as never, kind: 'assemble' },
 	];
 	let size = $state(1);
+	let legacyFilter = $state('');
+	const legacyCards = $derived(
+		pack.legacyDeck.filter(card => !legacyFilter || `${card.id} ${card.kind} ${card.title}`.includes(legacyFilter)),
+	);
 </script>
 
 <svelte:head>
@@ -61,6 +68,19 @@
 	<section data-testid="infection-cards">
 		{#each [...infectionCards, ...hollow] as card (card.id)}<InfectionCard {card} />{/each}
 	</section>
+	<h2>Legacy deck, generated beside the printed original</h2>
+	<label class="filter">Filter <input bind:value={legacyFilter} placeholder="id, kind or title" /></label>
+	{#each legacyCards as card (card.id)}
+		<section class="legacy" data-legacy-row={card.id}>
+			<LegacyCard {card} side="a" {campaign} />
+			{#if legacyScans[card.id]?.back}<img
+					src={scanUrl(legacyScans[card.id]!.back!)}
+					alt={`${card.id}a printed`}
+				/>{/if}
+			<LegacyCard {card} side="b" {campaign} />
+			<img src={scanUrl(legacyScans[card.id]!.src)} alt={`${card.id}b printed`} />
+		</section>
+	{/each}
 </main>
 
 <style>
@@ -103,6 +123,22 @@
 		font-family: var(--font-display);
 		font-size: 1.3rem;
 		font-weight: 400;
+	}
+
+	.filter {
+		display: block;
+		margin-bottom: 0.8rem;
+	}
+
+	.legacy {
+		align-items: center;
+		margin-bottom: 1.2rem;
+	}
+
+	.legacy img {
+		max-width: 23.5rem;
+		max-height: 20.4rem;
+		border-radius: 7px;
 	}
 
 	section {
