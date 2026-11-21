@@ -158,13 +158,9 @@ async function converged(host: Tab, tabs: Tab[], timeout = 10_000): Promise<numb
 
 const tabs: Tab[] = [];
 try {
+	// Everyone arrives in the lobby of a new campaign, where each browser is seated as it joins.
 	const host = await open('host', true);
 	tabs.push(host);
-	const save = actionSave(Number(flags.month));
-	await Promise.all([host.page.waitForEvent('load'), host.page.evaluate(next => window.DEBUG!.setState(next), save)]);
-	await host.page.waitForFunction(phase => (window.DEBUG?.getState() as Save | null)?.phase === phase, save.phase, {
-		timeout: 30_000,
-	});
 	const joinStarted = performance.now();
 	const peers = await Promise.all(Array.from({ length: PEERS }, (_, index) => open(`peer${index + 1}`, false)));
 	tabs.push(...peers);
@@ -173,6 +169,20 @@ try {
 		joined !== null,
 		`${PEERS} peers joined and hold the host's state (${((performance.now() - joinStarted) / 1000).toFixed(1)} s)`,
 	);
+	const seated = async () => (JSON.parse(await stateOf(host)) as Save).world.table.seats.length;
+	for (const started = performance.now(); (await seated()) < PEERS + 1 && performance.now() - started < 5000;)
+		await sleep(50);
+	check((await seated()) === PEERS + 1, `everyone was seated in the lobby as they arrived (${await seated()} seats)`);
+	check((await converged(host, peers, 5000)) !== null, `and every browser shows the same table`);
+
+	// The host loads a game under way, which restarts it, and the peers follow it there.
+	const save = actionSave(Number(flags.month));
+	await Promise.all([host.page.waitForEvent('load'), host.page.evaluate(next => window.DEBUG!.setState(next), save)]);
+	await host.page.waitForFunction(phase => (window.DEBUG?.getState() as Save | null)?.phase === phase, save.phase, {
+		timeout: 30_000,
+	});
+	const followed = await converged(host, peers, 30_000);
+	check(followed !== null, `after the host loaded a save, every peer followed it into that game`);
 	const seen = await connection(host);
 	check(seen?.peers === PEERS + 1, `the host counts ${PEERS + 1} players connected (${seen?.peers})`);
 	for (const tab of tabs) await tab.page.waitForSelector('.anchor[data-city]', { timeout: 60_000 });

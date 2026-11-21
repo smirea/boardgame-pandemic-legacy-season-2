@@ -255,6 +255,30 @@ const scenarios: Scenario[] = [
 		settle: 1500,
 	},
 	{
+		// A long line with the pen held, then the eraser dragged back across it.
+		id: 'draw',
+		async run() {
+			const at = (step: number) => ({ x: 420 + step * 2.6, y: 400 + Math.sin(step / 9) * 130 });
+			await page.mouse.move(at(0).x, at(0).y);
+			await page.keyboard.down('f');
+			await page.mouse.down();
+			for (let step = 1; step <= 260; step++) {
+				await page.mouse.move(at(step).x, at(step).y);
+				await sleep(8);
+			}
+			await page.mouse.up();
+			await page.keyboard.up('f');
+			await page.keyboard.press('e');
+			await page.mouse.down();
+			for (let step = 260; step >= 120; step -= 2) {
+				await page.mouse.move(at(step).x, at(step).y);
+				await sleep(8);
+			}
+			await page.mouse.up();
+			await page.keyboard.press('e');
+		},
+	},
+	{
 		id: 'ring',
 		async run() {
 			for (const point of (await cities()).slice(0, 6)) {
