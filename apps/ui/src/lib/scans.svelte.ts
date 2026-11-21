@@ -43,6 +43,9 @@ type Peek = { scans: Scan[]; anchor: DOMRect; label: string };
 /** What the pointer rests on, shown at the side by `ScanPeek.svelte`. */
 export const peek = $state<{ current: Peek | null }>({ current: null });
 
+/** True while the user holds the `O` debug hotkey to swap all generated cards with their printed original scans. */
+export const originals = $state({ held: false });
+
 /**
  * Shows the original printed component beside the element while the pointer or focus rests on it. `scans` is read
  * when the pointer arrives, so it follows the state.

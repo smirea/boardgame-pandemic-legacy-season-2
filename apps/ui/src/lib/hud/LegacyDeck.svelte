@@ -2,9 +2,11 @@
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { pack, sealKey } from '@repo/game';
 	import type { Campaign, LegacyCardDef } from '@repo/game';
-	import { legacyScan, scan, scanUrl } from '#lib/scans.svelte.ts';
+	import { legacyScan, scan } from '#lib/scans.svelte.ts';
 	import { legacyScans } from '#lib/scans.generated.ts';
+	import LegacyCard from '#lib/cards/LegacyCard.svelte';
 	import { MONTHS } from './labels.svelte.ts';
+	import RichText from './RichText.svelte';
 
 	type Props = { campaign: Campaign; onclose: () => void };
 
@@ -90,17 +92,17 @@
 
 	<div class="top">
 		{#if next}
-			<img
-				class="back"
-				src={scanUrl(legacyScans[next.id]!.back!)}
-				alt="The back of the next Legacy card"
+			<span
+				class="back-wrap"
 				{@attach scan(() => [{ title: 'Next card, back', src: legacyScans[next.id]!.back! }], 'deck-next')}
-			/>
+			>
+				<LegacyCard card={next} side="a" size="thumb" {campaign} />
+			</span>
 		{/if}
 		<div>
 			<h3>Top of the deck</h3>
 			<p>{when}</p>
-			<p class="hint">Point at a card to see the printed original. Unread cards stay face down.</p>
+			<p class="hint">Point at a card or hold O to see the printed original. Unread cards stay face down.</p>
 		</div>
 	</div>
 
@@ -120,7 +122,7 @@
 								<span class="code">{card.id}</span>
 								<span class="kind">{KIND[card.kind]}</span>
 								<strong>{card.title}</strong>
-								<span class="text">{card.text}</span>
+								<span class="text"><RichText text={card.text} /></span>
 								{#if card.kind === 'scanner'}
 									<span class="boxes" aria-label="Frequencies scratched">
 										{#each frequencies as label, index (label)}
@@ -204,9 +206,9 @@
 		margin: 0 0 0.2rem;
 	}
 
-	.back {
-		height: 7.5rem;
-		border-radius: 4px;
+	.back-wrap {
+		display: inline-flex;
+		border-radius: 5px;
 		box-shadow:
 			2px 2px 0 #b9ab8e,
 			4px 4px 0 #a99a7c,

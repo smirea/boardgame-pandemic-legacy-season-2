@@ -23,7 +23,9 @@
 	import { fitText } from '#lib/cards/fit.ts';
 	import MapArt from '#lib/cards/MapArt.svelte';
 	import { inkOn } from '#lib/color.ts';
-	import { eventScan, scan } from '#lib/scans.svelte.ts';
+	import { legacyScans } from '#lib/scans.generated.ts';
+	import { eventScan, originals, scan, scanUrl } from '#lib/scans.svelte.ts';
+	import RichText from './RichText.svelte';
 
 	const hoverCard = getContext<((card: CardId | null) => void) | undefined>('card-hover');
 
@@ -70,11 +72,18 @@
 				};
 		}
 	});
+	const originalScan = $derived.by(() => {
+		if (small) return null;
+		if (card.kind === 'event') return eventScan(card.event)[0] ?? null;
+		if (card.kind === 'epidemic') return legacyScans['03-07'] ?? null;
+		return null;
+	});
 </script>
 
 <button
 	class="card {card.kind}"
 	data-card={card.id}
+	data-original-active={originals.held && Boolean(originalScan)}
 	onmouseenter={() => hoverCard?.(card.id)}
 	onmouseleave={() => hoverCard?.(null)}
 	onfocus={() => hoverCard?.(card.id)}
@@ -89,27 +98,31 @@
 	title={face.text}
 	{@attach scan(() => (card.kind === 'event' ? eventScan(card.event) : []), `card:${card.id}`)}
 >
-	<span class="head">
-		<span class="kicker">{face.kicker}</span>
-		<span class="title" {@attach fitText(face.title, { max: 1.18, min: 0.7, across: true })}>{face.title}</span>
-	</span>
-	{#if !small}
-		{#if card.kind === 'city'}
-			<span class="art"><MapArt city={card.city} accent={face.color} /></span>
-			<span class="foot">
-				<span class="pips" title="Population when the campaign began">
-					{#each { length: cityDef(card.city).population } as _, index (index)}<i></i>{/each}
+	{#if originals.held && originalScan}
+		<img class="original-swap" src={scanUrl(originalScan.src)} alt={face.title} />
+	{:else}
+		<span class="head">
+			<span class="kicker">{face.kicker}</span>
+			<span class="title" {@attach fitText(face.title, { max: 1.18, min: 0.7, across: true })}>{face.title}</span>
+		</span>
+		{#if !small}
+			{#if card.kind === 'city'}
+				<span class="art"><MapArt city={card.city} accent={face.color} /></span>
+				<span class="foot">
+					<span class="pips" title="Population when the campaign began">
+						{#each { length: cityDef(card.city).population } as _, index (index)}<i></i>{/each}
+					</span>
+					{#if face.badge}<span class="badge" title={face.text}>{face.badge}</span>{/if}
+					{#each card.search as box, index (index)}
+						<span class="box" class:used={box.scratched} title={`${box.scope} search${box.scratched ? ', used' : ''}`}
+							>{box.scope === 'sea' ? '≈' : '⌕'}</span
+						>
+					{/each}
 				</span>
-				{#if face.badge}<span class="badge" title={face.text}>{face.badge}</span>{/if}
-				{#each card.search as box, index (index)}
-					<span class="box" class:used={box.scratched} title={`${box.scope} search${box.scratched ? ', used' : ''}`}
-						>{box.scope === 'sea' ? '≈' : '⌕'}</span
-					>
-				{/each}
-			</span>
-		{:else}
-			<span class="glyph" aria-hidden="true">{GLYPH[card.kind]}</span>
-			<span class="text" {@attach fitText(face.text, { max: 0.98, min: 0.62 })}>{face.text}</span>
+			{:else}
+				<span class="glyph" aria-hidden="true">{GLYPH[card.kind]}</span>
+				<span class="text" {@attach fitText(face.text, { max: 0.98, min: 0.62 })}><RichText text={face.text} /></span>
+			{/if}
 		{/if}
 	{/if}
 </button>
@@ -149,6 +162,13 @@
 	.card.small {
 		width: 7.6em;
 		height: 3em;
+	}
+
+	.original-swap {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
 	}
 
 	.card:not(:disabled) {

@@ -1,14 +1,23 @@
 <script lang="ts">
+	import { packageScans } from '#lib/scans.generated.ts';
+	import { originals, scanUrl } from '#lib/scans.svelte.ts';
+
 	/** A numbered cardboard package: taped shut while sealed, its lid lifted once open. */
 	type Props = { id: number; open: boolean };
 
 	let { id, open }: Props = $props();
+
+	const originalSrc = $derived(packageScans[id]?.[0]?.src ? scanUrl(packageScans[id]![0]!.src) : null);
 </script>
 
-<span class="crate" class:open aria-hidden="true">
-	<span class="lid"></span>
-	<span class="front"><b>{id}</b></span>
-	{#if !open}<span class="tape"></span>{/if}
+<span class="crate" class:open data-original-active={originals.held && Boolean(originalSrc)} aria-hidden="true">
+	{#if originals.held && originalSrc}
+		<img class="original-seal" src={originalSrc} alt="" />
+	{:else}
+		<span class="lid"></span>
+		<span class="front"><b>{id}</b></span>
+		{#if !open}<span class="tape"></span>{/if}
+	{/if}
 </span>
 
 <style>
@@ -77,5 +86,13 @@
 		translate: -50% 0;
 		background: rgb(236 228 206 / 0.82);
 		box-shadow: 0 0 0 1px rgb(60 44 28 / 0.12);
+	}
+	.original-seal {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		border-radius: 3px;
+		box-shadow: 0 0.4rem 0.8rem rgb(40 24 8 / 0.35);
 	}
 </style>

@@ -8,6 +8,22 @@
 
 {#if glyph === 'port'}
 	<b class="glyph port" aria-hidden="true">{'⚓︎'}</b>
+{:else if glyph === 'epidemic'}
+	<b class="glyph epidemic" aria-hidden="true">☣</b>
+{:else if glyph === 'event'}
+	<b class="glyph event" aria-hidden="true">✦</b>
+{:else if glyph === 'objective'}
+	<b class="glyph objective" aria-hidden="true">★</b>
+{:else if glyph === 'scar'}
+	<b class="glyph scar" aria-hidden="true">⚡</b>
+{:else if glyph === 'package'}
+	<b class="glyph package" aria-hidden="true">▣</b>
+{:else if glyph === 'door'}
+	<b class="glyph door" aria-hidden="true">▤</b>
+{:else if glyph === 'lab'}
+	<b class="glyph lab" aria-hidden="true">⬠</b>
+{:else if glyph === 'haven'}
+	<b class="glyph haven" aria-hidden="true">⬡</b>
 {:else}
 	<b class="glyph {glyph}" style:--band={color} aria-hidden="true"></b>
 {/if}
@@ -85,5 +101,57 @@
 		height: 0.48rem;
 		border-radius: 0.48rem 0.48rem 0 0;
 		background: currentColor;
+	}
+
+	.epidemic {
+		display: inline-grid;
+		place-items: center;
+		width: 0.85em;
+		height: 1.05em;
+		border-radius: 2px;
+		background: #a8261c;
+		color: #f6ead4;
+		font-size: 0.82em;
+	}
+
+	.event {
+		display: inline-grid;
+		place-items: center;
+		width: 0.85em;
+		height: 1.05em;
+		border-radius: 2px;
+		background: #b08628;
+		color: #fff6e0;
+		font-size: 0.78em;
+	}
+
+	.objective {
+		color: #d9a72e;
+		font-size: 0.95em;
+	}
+
+	.scar {
+		color: #c84232;
+		font-size: 0.92em;
+	}
+
+	.package {
+		color: #a97a46;
+		font-size: 0.95em;
+	}
+
+	.door {
+		color: #c89d4c;
+		font-size: 0.95em;
+	}
+
+	.lab {
+		color: #d9a72e;
+		font-size: 0.92em;
+	}
+
+	.haven {
+		color: #3f9169;
+		font-size: 0.95em;
 	}
 </style>

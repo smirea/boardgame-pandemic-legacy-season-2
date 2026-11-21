@@ -1,17 +1,28 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { openings, pack, tablePlayers } from '@repo/game';
-	import type { BriefedUnlock, BriefingEntry, Campaign, Command, Opening, PlayerId, Table } from '@repo/game';
+	import type {
+		BriefedUnlock,
+		BriefingEntry,
+		Campaign,
+		Command,
+		LegacyCardDef,
+		Opening,
+		PlayerId,
+		Table,
+	} from '@repo/game';
 	import { onDestroy, onMount, tick } from 'svelte';
+	import { cubicOut } from 'svelte/easing';
 	import { fade, fly, scale } from 'svelte/transition';
-	import { legacyScans } from '#lib/scans.generated.ts';
-	import { scan, scanUrl, sealScans, sourceScans } from '#lib/scans.svelte.ts';
+	import LegacyCard from '#lib/cards/LegacyCard.svelte';
+	import { scan, sealScans, sourceScans } from '#lib/scans.svelte.ts';
 	import BriefPiece from './BriefPiece.svelte';
 	import Briefing from './Briefing.svelte';
 	import Crate from './Crate.svelte';
 	import DossierDoor from './DossierDoor.svelte';
 	import { destination, flyTo } from './flight.ts';
 	import ObjectiveTag from './ObjectiveTag.svelte';
+	import RichText from './RichText.svelte';
 	import { keep } from './viewState.ts';
 
 	type Props = {
@@ -77,28 +88,45 @@
 	);
 	const showObjectives = $derived([...objectiveSteps].some(idx => idx < drawn - 1 || (idx === drawn - 1 && flipped)));
 
-	// The back image shown on top of the Legacy deck pile on the table.
-	const deckBack = $derived.by(() => {
-		const nextStep = steps[drawn];
-		if (nextStep?.from.t === 'legacy' && legacyScans[nextStep.from.card]?.back) {
-			return scanUrl(legacyScans[nextStep.from.card]!.back!);
+	function legacyCardOf(opening: Opening): LegacyCardDef | null {
+		if (opening.from.t === 'legacy') {
+			const id = opening.from.card;
+			return pack.legacyDeck.find(card => card.id === id) ?? null;
 		}
-		const nextCard = pack.legacyDeck[campaign.legacyIndex];
-		return nextCard && legacyScans[nextCard.id]?.back ? scanUrl(legacyScans[nextCard.id]!.back!) : null;
+		if (opening.from.t === 'turningPoint') {
+			return pack.legacyDeck.find(card => card.id === '02-06') ?? null;
+		}
+		return null;
+	}
+
+	const nextDeckCard = $derived.by(() => {
+		const nextStep = steps[drawn];
+		const fromStep = nextStep ? legacyCardOf(nextStep) : null;
+		if (fromStep) return fromStep;
+		return pack.legacyDeck[campaign.legacyIndex] ?? pack.legacyDeck[pack.legacyDeck.length - 1] ?? null;
 	});
 	const deckCount = $derived(remaining > 0 ? remaining : pack.legacyDeck.length - campaign.legacyIndex);
 
-	const cardImages = (step: Opening) => {
-		if (step.from.t === 'legacy' && legacyScans[step.from.card]) {
-			const entry = legacyScans[step.from.card]!;
-			return { back: entry.back ? scanUrl(entry.back) : null, face: scanUrl(entry.src) };
-		}
-		if (step.from.t === 'turningPoint' && legacyScans['02-06']) {
-			const entry = legacyScans['02-06']!;
-			return { back: entry.back ? scanUrl(entry.back) : null, face: scanUrl(entry.src) };
-		}
-		return null;
-	};
+	function fromLegacyDeck(node: HTMLElement) {
+		if (still) return { duration: 120, css: (t: number) => `opacity: ${t};` };
+		const deck = deckEl ?? root?.querySelector<HTMLElement>('[data-testid="legacy-draw-deck"]');
+		const from = deck?.getBoundingClientRect();
+		const to = node.getBoundingClientRect();
+		const dx = from && to.width ? from.left + from.width / 2 - (to.left + to.width / 2) : 0;
+		const dy = from && to.height ? from.top + from.height / 2 - (to.top + to.height / 2) : -120;
+		const sx = from && to.width ? Math.min(0.65, Math.max(0.28, from.width / to.width)) : 0.45;
+		const sy = from && to.height ? Math.min(0.65, Math.max(0.28, from.height / to.height)) : 0.45;
+		return {
+			duration: 540,
+			easing: cubicOut,
+			css: (t: number, u: number) => {
+				const scaleX = sx + (1 - sx) * t;
+				const scaleY = sy + (1 - sy) * t;
+				const rot = -5 * u;
+				return `transform: translate(${dx * u}px, ${dy * u}px) scale(${scaleX}, ${scaleY}) rotate(${rot}deg); opacity: ${Math.min(1, t * 1.45)};`;
+			},
+		};
+	}
 
 	const players = $derived(tablePlayers(table));
 	const multi = $derived(!solo && players.length > 1);
@@ -310,8 +338,8 @@
 							: 'Legacy deck'}
 				>
 					<span class="stack">
-						{#if deckBack}
-							<img src={deckBack} alt="Legacy deck" />
+						{#if nextDeckCard}
+							<LegacyCard card={nextDeckCard} side="a" size="deck" {campaign} />
 						{:else}
 							<span class="fallback-card">Legacy</span>
 						{/if}
@@ -351,18 +379,18 @@
 			<!-- Left wing of previously drawn & opened items -->
 			<div class="wing left">
 				{#each leftWing as { step: item, index } (index)}
-					{@const imgs = cardImages(item)}
+					{@const cardDef = legacyCardOf(item)}
 					{@const pieces = item.items.filter(entry => entry.unlock.t !== 'objectives')}
 					<div class="scattered" style:--tilt={`${(index % 3) * 2 - 2}deg`} in:fly={{ x: 60, y: -20, duration: 420 }}>
 						<div class="scattered-head">
-							{#if imgs}
+							{#if cardDef}
 								<span
 									class="mini-card"
 									data-stow-class="trash"
 									data-put="trash"
 									{@attach scan(() => sourceScans(item.from), `unbox:settled:${index}`)}
 								>
-									<img src={imgs.face} alt={item.title} />
+									<LegacyCard card={cardDef} side="b" size="thumb" {campaign} />
 								</span>
 							{/if}
 							{#each item.seals as seal, sIdx (`${seal.t}:${seal.id}:${sIdx}`)}
@@ -392,7 +420,7 @@
 										title={entry.text}
 									>
 										<BriefPiece unlock={entry.unlock} {campaign} size="2.2rem" />
-										<span class="chip-label">{entry.text}</span>
+										<span class="chip-label"><RichText text={entry.text} /></span>
 									</div>
 								{/each}
 							</div>
@@ -405,11 +433,11 @@
 			<div class="center">
 				{#if current}
 					{#key drawn}
-						{@const imgs = cardImages(current)}
+						{@const cardDef = legacyCardOf(current)}
 						{@const pieces = current.items.filter(entry => entry.unlock.t !== 'objectives')}
-						<div class="spotlight" in:fly={{ y: -90, duration: 460 }}>
+						<div class="spotlight" in:fromLegacyDeck>
 							<div class="spotlight-top">
-								{#if imgs}
+								{#if cardDef}
 									<button
 										class="flip-card"
 										class:flipped
@@ -421,17 +449,15 @@
 										aria-label={needsFlip ? `Flip ${current.title}` : current.title}
 										{@attach scan(() => (flipped ? sourceScans(current.from) : []), `unbox:active:${drawn}`)}
 									>
-										<span class="flipper" class:flipped={flipped || !imgs.back}>
-											{#if imgs.back}
-												<span class="card-side front">
-													<img class="card-img back" src={imgs.back} alt="Back of Legacy card" />
-												</span>
-											{/if}
+										<span class="flipper" class:flipped>
+											<span class="card-side front">
+												<LegacyCard card={cardDef} side="a" size="full" {campaign} />
+											</span>
 											<span class="card-side back-face">
-												<img class="card-img face" src={imgs.face} alt={current.title} />
+												<LegacyCard card={cardDef} side="b" size="full" {campaign} />
 											</span>
 										</span>
-										{#if needsFlip && imgs.back}
+										{#if needsFlip}
 											<span class="flip-hint">Click to flip</span>
 										{/if}
 									</button>
@@ -470,12 +496,12 @@
 										aria-label={needsFlip ? `Reveal ${current.title}` : current.title}
 									>
 										<strong>{current.title}</strong>
-										{#if flipped && current.text}<span>{current.text}</span>{/if}
+										{#if flipped && current.text}<span><RichText text={current.text} /></span>{/if}
 										{#if needsFlip}<span class="flip-hint">Click to reveal</span>{/if}
 									</button>
 								{/if}
 
-								{#if flipped && imgs && current.seals.length}
+								{#if flipped && cardDef && current.seals.length}
 									<div class="opened-seals" in:scale={{ start: 0.8, duration: 380 }}>
 										{#each current.seals as seal, sIdx (`${seal.t}:${seal.id}:${sIdx}`)}
 											<span
@@ -498,7 +524,7 @@
 							{#if flipped}
 								<div class="caption-plate" in:fade={{ duration: 240 }}>
 									<h2>{current.title}</h2>
-									{#if current.text && !imgs}<p>{current.text}</p>{/if}
+									{#if current.text && !cardDef}<p><RichText text={current.text} /></p>{/if}
 								</div>
 
 								{#if pieces.length}
@@ -513,7 +539,7 @@
 												<span class="piece-token" data-stow-class={stow?.cls} data-put={stow?.dest.join(' ')}>
 													<BriefPiece unlock={entry.unlock} {campaign} size="2.8rem" />
 												</span>
-												<p>{entry.text}</p>
+												<p><RichText text={entry.text} /></p>
 											</li>
 										{/each}
 									</ul>
@@ -535,7 +561,7 @@
 			<!-- Right wing of previously drawn & opened items -->
 			<div class="wing right">
 				{#each rightWing as { step: item, index } (index)}
-					{@const imgs = cardImages(item)}
+					{@const cardDef = legacyCardOf(item)}
 					{@const pieces = item.items.filter(entry => entry.unlock.t !== 'objectives')}
 					<div
 						class="scattered"
@@ -543,14 +569,14 @@
 						in:fly={{ x: -60, y: -20, duration: 420 }}
 					>
 						<div class="scattered-head">
-							{#if imgs}
+							{#if cardDef}
 								<span
 									class="mini-card"
 									data-stow-class="trash"
 									data-put="trash"
 									{@attach scan(() => sourceScans(item.from), `unbox:settled:${index}`)}
 								>
-									<img src={imgs.face} alt={item.title} />
+									<LegacyCard card={cardDef} side="b" size="thumb" {campaign} />
 								</span>
 							{/if}
 							{#each item.seals as seal, sIdx (`${seal.t}:${seal.id}:${sIdx}`)}
@@ -580,7 +606,7 @@
 										title={entry.text}
 									>
 										<BriefPiece unlock={entry.unlock} {campaign} size="2.2rem" />
-										<span class="chip-label">{entry.text}</span>
+										<span class="chip-label"><RichText text={entry.text} /></span>
 									</div>
 								{/each}
 							</div>
@@ -658,7 +684,7 @@
 		display: flex;
 		justify-content: center;
 		align-items: flex-start;
-		min-height: 7.4rem;
+		min-height: 11.4rem;
 		z-index: 4;
 	}
 
@@ -706,7 +732,7 @@
 	}
 
 	.stack {
-		display: block;
+		display: inline-flex;
 		border-radius: 6px;
 		box-shadow:
 			3px 3px 0 #c9bc9c,
@@ -714,25 +740,18 @@
 			0 0.9rem 2rem rgb(0 0 0 / 0.65);
 	}
 
-	.stack img {
-		display: block;
-		height: 6.4rem;
-		width: auto;
-		border-radius: 5px;
-	}
-
 	.fallback-card {
 		display: grid;
 		place-items: center;
-		width: 4.6rem;
-		height: 6.4rem;
+		width: 7rem;
+		height: 9.6rem;
 		border-radius: 5px;
 		background: linear-gradient(160deg, #3d3326, #241d14);
 		font-family: var(--font-display);
 	}
 
 	.seal-icon {
-		width: 6.5rem;
+		width: 9rem;
 	}
 
 	.badge {
@@ -799,13 +818,9 @@
 		flex-wrap: wrap;
 	}
 
-	.mini-card img {
-		display: block;
-		max-height: 7.5rem;
-		max-width: 10.5rem;
-		width: auto;
-		height: auto;
-		border-radius: 4px;
+	.mini-card {
+		display: inline-flex;
+		border-radius: 5px;
 		box-shadow: 0 0.35rem 0.9rem rgb(0 0 0 / 0.5);
 	}
 
@@ -944,19 +959,13 @@
 		transform: rotateY(180deg);
 	}
 
-	.card-img {
-		display: block;
-		max-height: min(24rem, 48vh);
-		max-width: min(30rem, 46vw);
-		width: auto;
-		height: auto;
-		border-radius: 7px;
+	.card-side :global(.legacy-card) {
 		box-shadow: 0 1.4rem 3.2rem rgb(0 0 0 / 0.65);
 	}
 
-	.flip-card.clickable .card-img.back {
+	.flip-card.clickable .card-side.front :global(.legacy-card) {
 		box-shadow:
-			0 0 0 2px rgb(227 178 60 / 0.75),
+			0 0 0 2px rgb(227 178 60 / 0.8),
 			0 1.4rem 3.2rem rgb(0 0 0 / 0.65);
 	}
 

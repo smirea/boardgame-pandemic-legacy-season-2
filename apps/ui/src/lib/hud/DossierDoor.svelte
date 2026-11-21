@@ -1,4 +1,7 @@
 <script lang="ts">
+	import { doorScans } from '#lib/scans.generated.ts';
+	import { originals, scanUrl } from '#lib/scans.svelte.ts';
+
 	/**
 	 * A tear-off dossier door: perforated with its number while sealed, a hole once open. `tearing` plays the door
 	 * coming off, which leaves the hole behind it.
@@ -6,11 +9,17 @@
 	type Props = { id: string; open: boolean; tearing?: boolean };
 
 	let { id, open, tearing = false }: Props = $props();
+
+	const originalSrc = $derived(doorScans[id]?.[0]?.src ? scanUrl(doorScans[id]![0]!.src) : null);
 </script>
 
-<span class="door" class:open aria-hidden="true">
-	<span class="hole">{open ? id : ''}</span>
-	{#if !open || tearing}<span class="flap" class:tearing>{id}</span>{/if}
+<span class="door" class:open data-original-active={originals.held && Boolean(originalSrc)} aria-hidden="true">
+	{#if originals.held && originalSrc}
+		<img class="original-seal" src={originalSrc} alt="" />
+	{:else}
+		<span class="hole">{open ? id : ''}</span>
+		{#if !open || tearing}<span class="flap" class:tearing>{id}</span>{/if}
+	{/if}
 </span>
 
 <style>
@@ -60,5 +69,12 @@
 			transform: translate(20%, 160%) rotate(65deg);
 			opacity: 0;
 		}
+	}
+	.original-seal {
+		grid-area: 1 / 1;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		border-radius: 2px;
 	}
 </style>

@@ -5,6 +5,7 @@
 	import { scan, sourceScans } from '#lib/scans.svelte.ts';
 	import BriefPiece from './BriefPiece.svelte';
 	import ObjectiveTag from './ObjectiveTag.svelte';
+	import RichText from './RichText.svelte';
 
 	// Unlocks that show as a card or cubes get a grid, so the pieces line up.
 	const PIECES = new Set(['cityImprovement', 'infectionImprovement', 'event', 'gather', 'assemble', 'stockpileBonus']);
@@ -24,7 +25,7 @@
 			{#if section.t === 'card'}
 				<section class="card-text" {@attach scan(() => sourceScans(section.from), `brief:${index}`)}>
 					<h3>{section.title}</h3>
-					{#if section.text}<p>{section.text}</p>{/if}
+					{#if section.text}<p><RichText text={section.text} /></p>{/if}
 				</section>
 			{:else}
 				<section>
@@ -43,7 +44,7 @@
 							{#each section.items as item, index (index)}
 								<li {@attach feedback('Unlock', () => item.unlock)}>
 									<BriefPiece unlock={item.unlock} {campaign} />
-									<p>{item.text}</p>
+									<p><RichText text={item.text} /></p>
 								</li>
 							{/each}
 						</ul>

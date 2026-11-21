@@ -1453,6 +1453,7 @@
 						onchange={async event => session.importSave(await event.currentTarget.files![0]!.text())}
 					/>
 				{/if}
+				<div class="menu-hotkey">Show original scans <kbd>Hold O</kbd></div>
 			</div>
 		{/if}
 	</main>
@@ -2022,6 +2023,29 @@
 		color: var(--muted);
 		font: inherit;
 		font-size: 0.75rem;
+	}
+
+	.menu-hotkey {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.75rem;
+		margin-top: 0.25rem;
+		padding: 0.4rem 0.7rem 0.15rem;
+		border-top: 1px solid var(--line);
+		color: var(--muted);
+		font-size: 0.76rem;
+	}
+
+	.menu-hotkey kbd {
+		margin-left: 0;
+		padding: 0.08rem 0.35rem;
+		border: 1px solid var(--line-strong);
+		border-radius: 3px;
+		background: var(--wash);
+		color: var(--ink);
+		font-size: 0.7rem;
+		font-weight: 600;
 	}
 
 	.menu .danger {

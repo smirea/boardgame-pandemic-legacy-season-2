@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { pack } from '@repo/game';
-	import { scan, scanUrl } from '#lib/scans.svelte.ts';
+	import { scan } from '#lib/scans.svelte.ts';
 	import { legacyScans } from '#lib/scans.generated.ts';
+	import LegacyCard from '#lib/cards/LegacyCard.svelte';
 	import type { Insights, PublicState } from '@repo/game';
 	import Calendar from './Calendar.svelte';
 	import Decks from './Decks.svelte';
@@ -97,7 +98,7 @@
 					'legacy-pile',
 				)}
 			>
-				{#if nextLegacy}<img src={scanUrl(legacyScans[nextLegacy.id]!.back!)} alt="" />{/if}
+				{#if nextLegacy}<LegacyCard card={nextLegacy} side="a" size="mini" />{/if}
 				<span>{legacyLeft}</span>
 			</button>
 			<button onclick={onmenu}>Menu</button>
@@ -118,9 +119,7 @@
 		pointer-events: none;
 	}
 
-	.legacy img {
-		height: 1.9rem;
-		border-radius: 2px;
+	.legacy :global(.legacy-card) {
 		box-shadow:
 			1px 1px 0 rgb(0 0 0 / 0.5),
 			2px 2px 0 rgb(231 220 198 / 0.25);

@@ -7,7 +7,22 @@ export type HintTone = 'bad' | 'good' | null;
 export type HintRow = { label: string; value: string; tone?: HintTone };
 
 /** A piece, card or printed mark drawn as a small glyph, the way the table shows it. */
-export type Glyph = 'port' | StructureKind | 'supplies' | 'plague' | 'hollow' | 'card' | 'infection';
+export type Glyph =
+	| 'port'
+	| StructureKind
+	| 'supplies'
+	| 'plague'
+	| 'hollow'
+	| 'card'
+	| 'infection'
+	| 'epidemic'
+	| 'event'
+	| 'scar'
+	| 'package'
+	| 'door'
+	| 'objective'
+	| 'lab'
+	| 'haven';
 
 export type HintCount = { glyph: 'supplies' | 'plague' | 'hollow'; count: number; tone?: HintTone };
 

@@ -21,29 +21,59 @@ export const HOLLOW_COLOR = '#4e3b63';
 
 const COLORS = new Set<string>(['blue', 'yellow', 'black', 'red']);
 
-// The nouns written in rules text and the engine's reasons, each given the glyph of what it names. A colour named
-// before a card gives the card that colour.
+// The nouns written in rules text, cards and the engine's reasons, each given the glyph of what it names.
+// A colour named before a card gives the card that colour.
 const NOUNS =
-	/\b(?:(blue|yellow|black|red) )?(?:City )?cards? of (?:its|this) colour\b|\b(?:(blue|yellow|black|red) )?City cards?\b|\b(blue|yellow|black|red) cards?\b|\bInfection cards?\b|\bPlague cubes?\b|\b(?:supply )?cubes?\b|\bHollow M[ae]n\b/g;
+	/\b(?:(blue|yellow|black|red) )?(?:City )?cards? of (?:its|this) colour\b|\b(?:(blue|yellow|black|red) )?City cards?\b|\b(blue|yellow|black|red) cards?\b|\bPlayer cards?\b|\bProduce Supplies(?: cards?)?\b|\b(?:Infection|Gather|Assemble) cards?\b|\b(?:Rationed |Unrationed )?Events?(?: cards?)?\b|\bEpidemics?(?: cards?)?\b|\bPlague cubes?\b|\b(?:Supply |supply |reserve )?cubes?\b|\bHollow M[ae]n\b|\bsupply centers?\b|\bsatellite towers?\b|\bshelters?\b|\bhavens?\b|\blabs?\b|\bscars?\b|\bobjectives?\b|\bPackages? \d+\b|\bdoors? [A-Z0-9]+\b/gi;
 
-/** Text from the rules or the engine, with a glyph before every game object it names. */
+/** Text from the rules, cards or engine, with a sharp symbol before every game object it names. */
 export function withGlyphs(text: string): Rich {
 	const parts: Rich = [];
 	let from = 0;
 	for (const match of text.matchAll(NOUNS)) {
 		const words = match[0];
-		const color = [match[1], match[2], match[3]].find(name => name && COLORS.has(name)) as Color | undefined;
-		const glyph: Glyph = words.startsWith('Infection')
-			? 'infection'
-			: words.startsWith('Plague')
-				? 'plague'
-				: words.startsWith('Hollow')
-					? 'hollow'
-					: /cube/.test(words)
-						? 'supplies'
-						: 'card';
+		const lower = words.toLowerCase();
+		const color = [match[1], match[2], match[3]]
+			.map(name => name?.toLowerCase())
+			.find(name => name && COLORS.has(name)) as Color | undefined;
+		let glyph: Glyph;
+		let glyphColor: string | undefined = color ? CITY_COLOR[color] : undefined;
+		if (lower.startsWith('infection') || lower.startsWith('gather') || lower.startsWith('assemble')) {
+			glyph = 'infection';
+			if (lower.startsWith('gather') || lower.startsWith('assemble')) glyphColor = HOLLOW_COLOR;
+		} else if (lower.startsWith('plague')) {
+			glyph = 'plague';
+		} else if (lower.startsWith('hollow')) {
+			glyph = 'hollow';
+		} else if (lower.includes('cube')) {
+			glyph = 'supplies';
+		} else if (lower.startsWith('epidemic')) {
+			glyph = 'epidemic';
+		} else if (lower.includes('event')) {
+			glyph = 'event';
+		} else if (lower.startsWith('supply center')) {
+			glyph = 'center';
+		} else if (lower.startsWith('satellite tower')) {
+			glyph = 'tower';
+		} else if (lower.startsWith('shelter')) {
+			glyph = 'shelter';
+		} else if (lower.startsWith('haven')) {
+			glyph = 'haven';
+		} else if (lower.startsWith('lab')) {
+			glyph = 'lab';
+		} else if (lower.startsWith('scar')) {
+			glyph = 'scar';
+		} else if (lower.startsWith('objective')) {
+			glyph = 'objective';
+		} else if (lower.startsWith('package')) {
+			glyph = 'package';
+		} else if (lower.startsWith('door')) {
+			glyph = 'door';
+		} else {
+			glyph = 'card';
+		}
 		if (match.index > from) parts.push(text.slice(from, match.index));
-		parts.push({ glyph, ...(color ? { color: CITY_COLOR[color] } : {}), text: words });
+		parts.push({ glyph, ...(glyphColor ? { color: glyphColor } : {}), text: words });
 		from = match.index + words.length;
 	}
 	if (from < text.length) parts.push(text.slice(from));
