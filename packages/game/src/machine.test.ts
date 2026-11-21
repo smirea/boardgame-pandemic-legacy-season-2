@@ -887,7 +887,7 @@ describe('events and companions', () => {
 		surplus: world => void world.game!.players[A]!.used.push('madeSupplies'),
 	};
 
-	test('a drawn Epidemic steps through Increase, Infect, and Intensify, pausing for Antidote before Increase', () => {
+	test('a drawn Epidemic steps through Increase, Infect, and Intensify, pausing for TOPAZ Experimental Vaccine before Increase', () => {
 		const drawing = (antidote: boolean) =>
 			late((world, game) => {
 				if (antidote) conjure(world, B, { kind: 'event', event: 'antidote' });
@@ -1574,7 +1574,7 @@ const inInfectStep = (edit?: (world: World) => void) =>
 		edit?.(world);
 	}, 'playing.infect');
 
-test('Quiet Night played before the first flip skips the Infect step it is played in', () => {
+test('One Quiet Night played before the first flip skips the Infect step it is played in', () => {
 	let card = '' as CardId;
 	const actor = inInfectStep(world => (card = conjure(world, B, { kind: 'event', event: 'quietNight' })));
 	const cubes = gameOf(actor).locations[city('cairo')]!.supplies;
@@ -1585,7 +1585,7 @@ test('Quiet Night played before the first flip skips the Infect step it is playe
 	expect(gameOf(actor).skipInfection).toBe(false);
 });
 
-test('Quiet Night played after a flip leaves this step alone and skips the next one', () => {
+test('One Quiet Night played after a flip leaves this step alone and skips the next one', () => {
 	let card = '' as CardId;
 	const actor = inInfectStep(world => (card = conjure(world, B, { kind: 'event', event: 'quietNight' })));
 	send(actor, { type: 'INFECT' });
@@ -1596,7 +1596,7 @@ test('Quiet Night played after a flip leaves this step alone and skips the next 
 	expect(gameOf(actor).skipInfection).toBe(true);
 });
 
-test('Second Wind is refused once the action step is over, and the card stays in hand', () => {
+test('Extended Time is refused once the action step is over, and the card stays in hand', () => {
 	for (const at of ['playing.draw', 'playing.infect'] as const) {
 		let card = '' as CardId;
 		const actor = late((world, game) => {
@@ -1654,6 +1654,17 @@ test('opening a package, even by a perimeter report, opens the doors its report 
 		'door:14',
 	]);
 	expect(world.campaign.forced).toEqual(['package:2']);
+});
+
+test('the March perimeter report scratches its first box only while door 67 is sealed', () => {
+	const [box] = pack.legacyDeck.find(card => card.id === '03-01')!.unlocks;
+	const sealed: World = { campaign: newCampaign(5), game: null, table: newTable() };
+	applyUnlock(sealed, box!);
+	expect(sealed.campaign.scratched).toEqual(['03-01:1']);
+	const opened: World = { campaign: newCampaign(5), game: null, table: newTable() };
+	openSeal(opened, { t: 'door', id: '67' }, false);
+	applyUnlock(opened, box!);
+	expect(opened.campaign.scratched).toEqual([]);
 });
 
 test('the first pawn at the eastern Pacific haven opens Package 6: 15 new cubes, one Lab card in hand and two in the discard pile', () => {
@@ -1866,7 +1877,7 @@ test('a recon objective for a region already reconned counts as complete', () =>
 	expect(world.game!.outcome).toMatchObject({ won: true });
 });
 
-test('Card Swap offers every pair of cards, not only the first in each hand', () => {
+test('Data Transfer offers every pair of cards, not only the first in each hand', () => {
 	const actor = late(world => {
 		give(world, A, cityCards(world, 'cairo', 2));
 		give(world, B, [...cityCards(world, 'lagos', 2), ...cityCards(world, 'london')]);
@@ -1876,7 +1887,7 @@ test('Card Swap offers every pair of cards, not only the first in each hand', ()
 	expect(swaps).toHaveLength(2 * 3);
 });
 
-test('an Epidemic waits for a Resilience holder before the discard pile is reshuffled', () => {
+test('an Epidemic waits for a Resilient Population holder before the discard pile is reshuffled', () => {
 	let card = '' as CardId;
 	const actor = late((world, game) => {
 		card = conjure(world, B, { kind: 'event', event: 'resilience' });
@@ -1953,7 +1964,7 @@ test('a supply center build offers each set of cards that wastes none, so the pl
 	for (const build of builds) expect(refuses(actor, build)).toBeNull();
 });
 
-test('Resilience can set aside two discarded Infection cards of one city', () => {
+test('Resilient Population can set aside two discarded Infection cards of one city', () => {
 	const actor = late((world, game) => {
 		conjure(world, A, { kind: 'event', event: 'resilience' });
 		const wanted = infectionCards(world, 'cairo', 2);
@@ -2131,7 +2142,7 @@ describe('drawing connections: what a line may not cross', () => {
 		expect(checkEdge(campaign, city('washington'), city('lagos'), 'sea')).toBeNull();
 	});
 
-	test('a sea lane may cross one region line, and Open Waters lifts only that limit', () => {
+	test('a sea lane may cross one region line, and Expeditionary Voyage lifts only that limit', () => {
 		const campaign = fresh();
 		reveal(
 			campaign,
@@ -2204,7 +2215,7 @@ test('a draw that cannot be made loses the game', () => {
 	expect(gameOf(actor).outcome).toEqual({ won: false, reason: 'The Player deck ran out' });
 });
 
-test('Scavenge and Monitor need 4 Player cards left to reveal', () => {
+test('Cautious Approach and Monitor need 4 Player cards left to reveal', () => {
 	const actor = late((world, game) => {
 		conjure(world, A, { kind: 'event', event: 'scavenge' });
 		game.locations[game.players[A]!.location]!.tower = true;
@@ -2814,7 +2825,7 @@ test('a prologue game leaves no permanent mark on the campaign', () => {
 	expect(after.results).toHaveLength(1);
 });
 
-test('Resilience refuses the same card twice', () => {
+test('Resilient Population refuses the same card twice', () => {
 	const actor = january((world, game) => {
 		const id = 'resilience#901' as CardId;
 		world.campaign.playerCards[id] = { id, kind: 'event', event: 'resilience', mode: 'rationed' };

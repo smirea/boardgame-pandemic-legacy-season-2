@@ -64,9 +64,9 @@ function pendingLine(world: World, pending: Decision): string {
 		case 'giveCard':
 			return `${who} may give a card from their hand to another player`;
 		case 'intensify':
-			return 'An Epidemic just struck and its discard pile is about to be reshuffled onto the deck. A player holding Resilience or Mass Inoculation may play it now. Otherwise the active player passes with `do decide:skip`';
+			return 'An Epidemic just struck and its discard pile is about to be reshuffled onto the deck. A player holding Resilient Population or Inoculation Unit may play it now. Otherwise the active player passes with `do decide:skip`';
 		case 'epidemicDrawn':
-			return 'An Epidemic was just drawn and has not struck yet. A player holding Antidote may play it now to discard the Epidemic with no effect. Otherwise advance Step 1 (Increase) with `do decide:skip`';
+			return 'An Epidemic was just drawn and has not struck yet. A player holding TOPAZ Experimental Vaccine may play it now to discard the Epidemic with no effect. Otherwise advance Step 1 (Increase) with `do decide:skip`';
 		case 'epidemicInfect':
 			return 'Epidemic Step 1 (Increase) is done. Advance Step 2 (draw the bottom Infection card) with `do decide:skip`';
 		case 'cordon':
@@ -595,7 +595,7 @@ export function renderDecks(world: World): string {
 		`Player deck: ${found.playerDeck.cards} cards · by kind ${JSON.stringify(found.playerDeck.byKind)}`,
 		`Player discard (${game.playerDiscard.length}): ${game.playerDiscard.map(id => `${enc(id)} [${cardName(world, id)}]`).join(', ') || 'empty'}`,
 		`Infection discard (${game.infectionDiscard.length}): ${game.infectionDiscard.map(id => `${enc(id)} [${cardName(world, id)}]`).join(', ') || 'empty'}`,
-		`Game End area (${game.gameEndArea.length}; cards out of this game: set aside by Resilience or a search, or of cities that joined the grid this game): ${game.gameEndArea.map(id => cardName(world, id)).join(', ') || 'empty'}`,
+		`Game End area (${game.gameEndArea.length}; cards out of this game: set aside by Resilient Population or a search, or of cities that joined the grid this game): ${game.gameEndArea.map(id => cardName(world, id)).join(', ') || 'empty'}`,
 		`Storage (inoculated cards, out of the decks${world.campaign.rules.includes('epidemicFromStorage') ? '. With the September rule in play, each Epidemic pulls one stored Infection card back out, strikes its city, and returns the card to the deck' : ' for the rest of the year unless a later rule brings them back'}): ${world.campaign.stored.player.length} Player, ${world.campaign.stored.infection.length} Infection${world.campaign.stored.infection.length ? `: ${world.campaign.stored.infection.map(id => cardName(world, id)).join(', ')}` : ''}`,
 		'Infection deck layers, top first (cards known to be in each layer):',
 	];

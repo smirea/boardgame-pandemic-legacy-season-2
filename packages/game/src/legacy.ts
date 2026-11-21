@@ -82,6 +82,7 @@ export function newCampaign(seed: number): Campaign {
 		stockpileBonus: 0,
 		freeAbilityUnits: 0,
 		frequenciesUsed: [],
+		scratched: [],
 		planRecons: [],
 		dosesUsed: 0,
 		seating: [],
@@ -351,6 +352,9 @@ export function applyUnlock(world: World, unlock: Unlock, by?: SeatId) {
 			return;
 		case 'open':
 			return openSeal(world, unlock.seal, false, by);
+		case 'scratch':
+			if (!isOpen(campaign, unlock.unlessOpen)) campaign.scratched.push(unlock.box);
+			return;
 		case 'perimeter':
 			if (isOpen(campaign, unlock.seal)) return;
 			openSeal(world, unlock.seal, true);

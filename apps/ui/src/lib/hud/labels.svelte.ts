@@ -435,9 +435,10 @@ const DECISION_TITLES: Record<Decision['t'], string> = {
 	giveCard: 'Give a card to another player',
 	shield: 'Discard a matching card to keep the cube?',
 	cordon: 'Discard any card to stop the rest of this Infect step?',
-	epidemicDrawn: 'Epidemic drawn — play Antidote to cancel, or start the Epidemic.',
+	epidemicDrawn: 'Epidemic drawn — play TOPAZ Experimental Vaccine to cancel, or start the Epidemic.',
 	epidemicInfect: 'Epidemic Step 2: Infect — draw the bottom Infection card.',
-	intensify: 'Epidemic Step 3: Intensify — play Resilience, Mass Inoculation, Exile, or Lockdown now, or reshuffle.',
+	intensify:
+		'Epidemic Step 3: Intensify — play Resilient Population, Inoculation Unit, Relocation, or Lockdown now, or reshuffle.',
 };
 
 /** The prompt for a pending choice, naming who and where it concerns. */

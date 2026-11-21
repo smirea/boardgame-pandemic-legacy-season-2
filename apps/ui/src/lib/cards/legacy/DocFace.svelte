@@ -25,6 +25,7 @@
 		| { rule: 'package'; id: number; body: Block[] }
 		| { rule: 'door'; id: string; body: Block[] }
 		| { rule: 'tools'; body: Block[] }
+		| { rule: 'scratched'; box: string; body: Block[] }
 		| { rule: 'sealed'; short?: boolean };
 	type Face = {
 		family: 'paper' | 'report' | 'priorities' | 'now' | 'turn' | 'close' | 'last' | 'end';
@@ -87,7 +88,7 @@
 	});
 
 	// Instructions only. Narrative on the same face is left off. Dates and titles stay, because they name the paper.
-	// 03-01's two boxes are not stored on the campaign (the report forces nothing), so they stay covered.
+	// 03-01's second box is a decoy the card never asks players to scratch, so it stays covered.
 	// 02-06's three 10s follow losingStreakBonusGames, which counts down at game end: during a game the
 	// cross-out from this setup is still ahead by one.
 	const FACES: Record<string, Face> = {
@@ -126,7 +127,16 @@
 			),
 		]),
 		'03-01': report('Perimeter report', 'If you have not opened {{d:67}}, scratch the first box below.', [
-			{ rule: 'sealed' },
+			{
+				rule: 'scratched',
+				box: '03-01:1',
+				body: [
+					{
+						t: 'p',
+						text: "It's critical that we Recon South America soon, before the Hollow Men sabotage anything important.",
+					},
+				],
+			},
 			{ rule: 'sealed', short: true },
 		]),
 		'04-01': report('Perimeter report', 'If you have not opened {{d:67}} (South America), scratch the box below.', [
@@ -452,7 +462,7 @@
 	});
 
 	const fitKey = $derived(
-		`${card.id}|${campaign?.legacyIndex ?? ''}|${campaign?.forced.join(',') ?? ''}|${campaign?.turningPoints.join(',') ?? ''}|${campaign?.losingStreakBonusGames ?? ''}`,
+		`${card.id}|${campaign?.legacyIndex ?? ''}|${campaign?.forced.join(',') ?? ''}|${campaign?.turningPoints.join(',') ?? ''}|${campaign?.losingStreakBonusGames ?? ''}|${campaign?.scratched.join(',') ?? ''}`,
 	);
 
 	const bonusUsed = $derived.by(() => {
@@ -466,6 +476,7 @@
 		if (!campaign || box.rule === 'sealed') return false;
 		if (box.rule === 'package') return campaign.forced.includes(sealKey({ t: 'package', id: box.id }));
 		if (box.rule === 'door') return campaign.forced.includes(sealKey({ t: 'door', id: box.id }));
+		if (box.rule === 'scratched') return campaign.scratched.includes(box.box);
 		const index = pack.legacyDeck.findIndex(entry => entry.id === '02-06');
 		return campaign.legacyIndex > index && !campaign.turningPoints.includes('losingStreak');
 	}

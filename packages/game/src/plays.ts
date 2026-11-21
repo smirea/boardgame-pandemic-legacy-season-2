@@ -95,7 +95,7 @@ function tally<T>(items: readonly T[]): Map<T, number> {
 /** The plays that may wait on an Epidemic's reshuffle, since they act on the discard pile it is about to take. */
 export const DURING_INTENSIFY = new Set<Play['e']>(['resilience', 'massInoculation', 'exile']);
 
-/** The top of the Infection deck that Forecast rearranges. */
+/** The top of the Infection deck that Extended Forecast rearranges. */
 export function forecastCards(game: Game): CardId[] {
 	return game.infectionDeck.order.slice(0, FORECAST);
 }
@@ -190,7 +190,7 @@ export function checkPlay(world: World, seat: SeatId, card: CardId, play: Play, 
 							...world,
 							game: {
 								...game,
-								// The Encore card is already played, so the event it takes cannot be aimed at it.
+								// The It Worked the First Time card is already played, so the event it takes cannot be aimed at it.
 								players: {
 									...game.players,
 									[seat]: { ...owner, hand: [...owner.hand.filter(id => id !== card), play.card] },
@@ -206,7 +206,7 @@ export function checkPlay(world: World, seat: SeatId, card: CardId, play: Play, 
 				: 'Pick another Rationed Event from the Player discard pile';
 		}
 		case 'secondWind':
-			return phase === 'playing.actions' ? ok : 'Second Wind is played during the action step';
+			return phase === 'playing.actions' ? ok : 'Extended Time is played during the action step';
 		case 'massInoculation': {
 			if (!campaign.rules.includes('storage')) return 'Package 6 is not open yet';
 			const cards = play.cards;
@@ -456,7 +456,10 @@ function resolvePlay(world: World, seat: SeatId, card: CardId, play: Play) {
 				owner.hand.push(...kept);
 				game.playerDiscard.push(...dropped);
 				const names = (cards: CardId[]) => cards.map(id => cardLabel(campaign, id)).join(', ') || 'nothing';
-				log(game, { t: 'note', text: `Scavenge kept ${names(kept)} and discarded ${names(dropped)} with no effect` });
+				log(game, {
+					t: 'note',
+					text: `Cautious Approach kept ${names(kept)} and discarded ${names(dropped)} with no effect`,
+				});
 			}
 			return;
 		case 'openWaters':

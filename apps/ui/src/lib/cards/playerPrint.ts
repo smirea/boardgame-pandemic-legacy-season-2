@@ -388,21 +388,15 @@ export const OBJECTIVE_PRINT: Record<string, ObjectivePrint> = {
 
 export type ScannerSlot = {
 	label: string;
-	reveal: { kind: 'cards'; count: 1 | 2 } | { kind: 'door'; door: string };
+	reveal: { kind: 'cards'; count: number } | { kind: 'door'; door: string };
 };
 
-export const SCANNER_SLOTS: readonly ScannerSlot[] = [
-	{ label: '8.24', reveal: { kind: 'cards', count: 1 } },
-	{ label: '8.81', reveal: { kind: 'cards', count: 1 } },
-	{ label: '9.1', reveal: { kind: 'cards', count: 1 } },
-	{ label: '9.2', reveal: { kind: 'door', door: '52' } },
-	{ label: '9.31', reveal: { kind: 'cards', count: 2 } },
-	{ label: '9.58', reveal: { kind: 'cards', count: 1 } },
-	{ label: '9.75', reveal: { kind: 'cards', count: 1 } },
-	{ label: '10.31', reveal: { kind: 'cards', count: 1 } },
-	{ label: '10.57', reveal: { kind: 'cards', count: 1 } },
-	{ label: '11.88', reveal: { kind: 'door', door: '43' } },
-];
+export const SCANNER_SLOTS: readonly ScannerSlot[] = pack.frequencies.map((reward, index) => {
+	const label = pack.frequencyLabels[index]!;
+	if (reward && 'take' in reward) return { label, reveal: { kind: 'cards', count: reward.take } };
+	if (reward?.seal.t === 'door') return { label, reveal: { kind: 'door', door: reward.seal.id } };
+	throw new Error(`Monitor frequency ${label} has no printed reward`);
+});
 
 export type ReckoningRow = {
 	label: string;

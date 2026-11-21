@@ -141,6 +141,8 @@ export type Campaign = {
 	stockpileBonus: number;
 	freeAbilityUnits: number;
 	frequenciesUsed: number[];
+	/** The Legacy cards' scratch-off boxes scratched so far that nothing else records, as `<code>:<n>`. */
+	scratched: string[];
 	planRecons: string[];
 	/** Self-Infect doses used. Pearl has 4 for the whole campaign, and a dose ending in a skull is used too. */
 	dosesUsed: number;
