@@ -3,7 +3,6 @@
 	import {
 		actionMenu,
 		cardTargets,
-		cityDef,
 		insights,
 		legalDecides,
 		legalPlays,
@@ -17,11 +16,10 @@
 	} from '@repo/game';
 	import type { CardId, CityId, Command, EdgeDef, SeatId } from '@repo/game';
 	import Board from '#lib/board/Board.svelte';
-	import type { BoardMarks, Covered, Fx, FxKind } from '#lib/board/types.ts';
+	import type { BoardMarks, Fx, FxKind } from '#lib/board/types.ts';
 	import type { SessionView } from '#lib/session/session.svelte.ts';
 	import { inkOn } from '#lib/color.ts';
 	import { presentFeedback } from '#lib/feedback.ts';
-	import { CITY_COLOR } from '#lib/board/CityMarker.svelte';
 	import { onButton, typing } from '#lib/keys.ts';
 	import { LS } from '#lib/storage.ts';
 	import { setContext, tick, untrack } from 'svelte';
@@ -32,6 +30,8 @@
 	import { createBoardView } from './boardView.svelte.ts';
 	import { createChoosing } from './choosing.svelte.ts';
 	import { MapTools } from './mapTools.svelte.ts';
+	import { flyToStorage } from './storageFlight.ts';
+	import { measurePanels } from './panels.svelte.ts';
 	import Corner from './Corner.svelte';
 	import { placeSeats } from './seats.ts';
 	import type { Place } from './seats.ts';
@@ -144,89 +144,25 @@
 	// Everyone sits round the table in turn order, clockwise, with this browser's player at the bottom right.
 	// A replay seats the first player there.
 	const seatAt = $derived(game ? placeSeats(game.seats, me) : null);
-	// Where the panels on the board's sides sit, so the fitted view keeps cities out from under them.
-	let covered = $state.raw<Covered[]>([]);
-	// How far the side columns' panels reach in beside the floating hand (`low`) and beside the objectives (`high`),
-	// so each stays between them however wide they grow. Only the panels at its own height count: the Actions panel
-	// stands mid-side, and the hand has the room under it.
-	let sides = $state.raw({ low: { left: 0, right: 0 }, high: { left: 0, right: 0 } });
 	const listed = $derived(actionChoices.length > 0);
 	let actionColumns = $state(1);
-	$effect(() => {
-		void seatAt;
+	const panels = measurePanels({
+		get stage() {
+			return stage;
+		},
+		get leftColumn() {
+			return leftColumn;
+		},
+		get rightColumn() {
+			return rightColumn;
+		},
+		get goals() {
+			return goals;
+		},
 		// The Actions panel comes and goes with the turn's steps and grows columns, and is one of the panels measured.
-		void listed;
-		void actionColumns;
-		// `bind:this` hands back null, not undefined, once a column leaves the screen.
-		const columns = [leftColumn, rightColumn].filter((column): column is HTMLElement => column instanceof HTMLElement);
-		if (!stage) return void (covered = []);
-		// The columns run the full height but only their panels cover the board, so the panels are what is measured.
-		// The dock layer follows the stage and lies over its bottom edge.
-		const panels = [
-			...columns.flatMap(column => [...column.children]),
-			...[goals, stage.nextElementSibling].filter(element => element instanceof HTMLElement),
-		];
-		// A box drawn outside its element, like the dock's cards above its frame, still covers the board.
-		const extent = (element: Element) => {
-			const boxes = [element, ...element.children].map(child => child.getBoundingClientRect());
-			const left = Math.min(...boxes.map(box => box.left));
-			const top = Math.min(...boxes.map(box => box.top));
-			const right = Math.max(...boxes.map(box => box.right));
-			const bottom = Math.max(...boxes.map(box => box.bottom));
-			return { left, top, width: right - left, height: bottom - top };
-		};
-		const measure = () => {
-			const origin = stage!.getBoundingClientRect();
-			const next = panels.map(panel => {
-				const box = extent(panel);
-				return {
-					x: box.left - origin.x,
-					y: box.top - origin.y,
-					width: box.width,
-					height: box.height,
-					// The Actions panel stands mid-side over the board and grows a column rather than hide a row, so
-					// the board always makes room for all of it.
-					firm: panel.classList.contains('actions-slot'),
-				};
-			});
-			const reach = (column: HTMLElement | null | undefined, side: 'left' | 'right', top: number, bottom: number) =>
-				column instanceof HTMLElement
-					? Math.max(
-							0,
-							...[...column.children].map(child => {
-								const box = child.getBoundingClientRect();
-								if (box.bottom <= top || box.top >= bottom) return 0;
-								return side === 'left' ? box.right - origin.left : origin.right - box.left;
-							}),
-						)
-					: 0;
-			const band = (top: number, bottom: number) => ({
-				left: reach(leftColumn, 'left', top, bottom),
-				right: reach(rightColumn, 'right', top, bottom),
-			});
-			const dock = stage!.nextElementSibling;
-			const reached = {
-				low: band(dock instanceof HTMLElement ? extent(dock).top : origin.bottom, Infinity),
-				high: band(-Infinity, goals instanceof HTMLElement ? extent(goals).top + extent(goals).height : origin.top),
-			};
-			untrack(() => {
-				// A new array restarts the camera's glide even when nothing moved, and a glide under a click reads as a drag.
-				if (JSON.stringify(next) !== JSON.stringify(covered)) covered = next;
-				if (JSON.stringify(reached) !== JSON.stringify(sides)) sides = reached;
-			});
-		};
-		// A measure moves the floating hand, so it waits a frame rather than run inside the observer's own delivery.
-		let frame = 0;
-		const observer = new ResizeObserver(() => {
-			cancelAnimationFrame(frame);
-			frame = requestAnimationFrame(measure);
-		});
-		for (const element of [stage, ...panels]) observer.observe(element);
-		measure();
-		return () => {
-			cancelAnimationFrame(frame);
-			observer.disconnect();
-		};
+		get layout() {
+			return [seatAt, listed, actionColumns];
+		},
 	});
 	let resetView = $state(0);
 
@@ -432,7 +368,7 @@
 		const y = (stage?.clientHeight ?? 0) * 0.45;
 		let left = 0;
 		let right = width;
-		for (const rect of covered) {
+		for (const rect of panels.covered) {
 			if (rect.y > y || rect.y + rect.height < y) continue;
 			if (rect.x + rect.width / 2 < width / 2) left = Math.max(left, rect.x + rect.width);
 			else right = Math.min(right, rect.x);
@@ -464,70 +400,7 @@
 			];
 			seenStoredPlayer = new Set(nextPlayer);
 			seenStoredInfection = new Set(nextInfection);
-			if (!lived || added.length === 0 || added.length > 6 || typeof document === 'undefined') return;
-			const targetEl = document.querySelector<HTMLElement>('[data-dest="storage"]');
-			if (!targetEl) return;
-			const to = targetEl.getBoundingClientRect();
-			if (!to.width) return;
-			added.forEach(({ id, pile }, index) => {
-				const sourceEl = document.querySelector<HTMLElement>(`[data-deck="${pile}"]`);
-				if (!sourceEl) return;
-				const from = sourceEl.getBoundingClientRect();
-				const card = pile === 'player' ? campaign.playerCards[id] : campaign.infectionCards[id];
-				const city = card && 'city' in card ? cityDef(card.city) : null;
-				const band = city ? CITY_COLOR[city.color ?? 'haven'] : '#4e3b63';
-				const label = city ? cityName(city.id) : cardName(world, id);
-				const ghost = document.createElement('div');
-				ghost.dataset.testid = 'inoculate-flight';
-				Object.assign(ghost.style, {
-					position: 'fixed',
-					left: `${from.left + from.width / 2}px`,
-					top: `${from.top + from.height / 2}px`,
-					zIndex: '95',
-					display: 'grid',
-					placeItems: 'center',
-					width: pile === 'infection' ? '4.8rem' : '3.6rem',
-					height: pile === 'infection' ? '3.3rem' : '4.8rem',
-					padding: '0.2rem 0.3rem',
-					border: `2px solid ${band}`,
-					borderRadius: '4px',
-					background: pile === 'infection' ? `linear-gradient(90deg, ${band} 0 28%, #26212c 28%)` : band,
-					color: '#fff8ec',
-					fontSize: '0.62rem',
-					fontWeight: '700',
-					textAlign: 'center',
-					lineHeight: '1.1',
-					boxShadow: '0 0.7rem 1.8rem rgb(0 0 0 / 0.6)',
-					pointerEvents: 'none',
-					transform: 'translate(-50%, -50%)',
-				});
-				ghost.textContent = label;
-				document.body.append(ghost);
-				const dx = to.left + to.width / 2 - (from.left + from.width / 2);
-				const dy = to.top + to.height / 2 - (from.top + from.height / 2);
-				const anim = ghost.animate(
-					[
-						{ transform: 'translate(-50%, -50%) scale(0.4)', opacity: 0.2 },
-						{
-							transform: `translate(calc(-50% + ${dx * 0.35}px), calc(-50% + ${dy * 0.35 + 64}px)) scale(1.12) rotate(-6deg)`,
-							opacity: 1,
-							offset: 0.38,
-						},
-						{
-							transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(0.32) rotate(4deg)`,
-							opacity: 0.9,
-						},
-					],
-					{
-						duration: 780,
-						delay: index * 140,
-						easing: 'cubic-bezier(0.35, 0, 0.2, 1)',
-						fill: 'forwards',
-					},
-				);
-				anim.onfinish = () => ghost.remove();
-				anim.oncancel = () => ghost.remove();
-			});
+			if (lived) flyToStorage(world, added);
 		});
 	});
 
@@ -793,10 +666,10 @@
 
 <div
 	class="game"
-	style:--left={`${sides.low.left}px`}
-	style:--right={`${sides.low.right}px`}
-	style:--high-left={`${sides.high.left}px`}
-	style:--high-right={`${sides.high.right}px`}
+	style:--left={`${panels.sides.low.left}px`}
+	style:--right={`${panels.sides.low.right}px`}
+	style:--high-left={`${panels.sides.high.left}px`}
+	style:--high-right={`${panels.sides.high.right}px`}
 	data-card-cities={hoveredTargets.cities.join(' ')}
 	data-card-seats={hoveredTargets.seats.join(' ')}
 	{@attach feedback('Game', () => ({
@@ -852,7 +725,7 @@
 			onerasemove={tools.eraseMove}
 			oneraseend={tools.eraseEnd}
 			{resetView}
-			{covered}
+			covered={panels.covered}
 			focus={showFocus ?? focus}
 		/>
 
