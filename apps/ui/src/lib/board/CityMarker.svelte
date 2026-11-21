@@ -86,7 +86,12 @@
 	const label = $derived(state.name);
 	const onGrid = $derived(state.onGrid);
 	const population = $derived(state.population);
-	const name = $derived(fonts.ready ? printName(label, city.port, NAME_SIZE, !onGrid, lit) : null);
+	const name = $derived(fonts.ready ? printName(label, city.port, NAME_SIZE, !onGrid, false) : null);
+	// The lit name is printed the first time the pointer rests on the city and kept beside the plain one, so a
+	// pointer crossing the map lights names without painting any of them again.
+	let wasLit = false;
+	const everLit = $derived.by(() => (wasLit ||= lit));
+	const litName = $derived(fonts.ready && everLit ? printName(label, city.port, NAME_SIZE, !onGrid, true) : null);
 	// A name that stands off from its city is tied back to the disc by a fine ruled line.
 	const leader = $derived.by(() => {
 		if (!placement.leader || !name) return null;
@@ -173,7 +178,22 @@
 
 <T.Group position={[at.x, LAND_HEIGHT, at.z]}>
 	{#if name}
-		<Printed print={name} position={[placement.x, INK, placement.z]} opacity={ink.current} order={4} />
+		<Printed
+			print={name}
+			position={[placement.x, INK, placement.z]}
+			opacity={ink.current}
+			order={4}
+			visible={!lit || !litName}
+		/>
+		{#if litName}
+			<Printed
+				print={litName}
+				position={[placement.x, INK, placement.z]}
+				opacity={ink.current}
+				order={4}
+				visible={lit}
+			/>
+		{/if}
 		{#if leader}
 			<T.Mesh position={[leader.x, INK, leader.z]} rotation={[-Math.PI / 2, 0, leader.angle]} renderOrder={4}>
 				<T.PlaneGeometry args={[leader.length, 0.13]} />

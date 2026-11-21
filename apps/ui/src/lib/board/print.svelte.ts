@@ -25,7 +25,9 @@ function sheet(width: number, height: number, paint: (context: CanvasRenderingCo
 	const canvas = document.createElement('canvas');
 	canvas.width = Math.ceil(width * PX_PER_UNIT);
 	canvas.height = Math.ceil(height * PX_PER_UNIT);
-	const context = canvas.getContext('2d')!;
+	// Kept in memory, not on the graphics card: a print is painted once and read once, into its texture, and reading
+	// a canvas back from the card stalls the frame for a few milliseconds each time a name lights up.
+	const context = canvas.getContext('2d', { willReadFrequently: true })!;
 	context.scale(PX_PER_UNIT, PX_PER_UNIT);
 	paint(context);
 	const texture = new CanvasTexture(canvas);
