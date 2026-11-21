@@ -89,6 +89,14 @@ describe('reliable messages', () => {
 		}
 	});
 
+	test('a host relay reaches every peer but the one it came from', async () => {
+		const { h, a, b } = await table();
+		h.session.send({ n: 7 }, { except: ALICE });
+		await settle();
+		expect(a.messages).toEqual([]);
+		expect(b.messages.map(m => m.msg.n)).toEqual([7]);
+	});
+
 	test('a peer message reaches the host under the id of the link it came on', async () => {
 		const { h, a, b } = await table();
 		a.session.send({ n: 1 });
