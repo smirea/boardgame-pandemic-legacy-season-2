@@ -14,8 +14,14 @@ export function characterTraits(character: Character): Trait[] {
 		const scar = pack.scars.find(candidate => candidate.id === character.jobScar);
 		if (scar) lines.push({ kind: 'scar', name: scar.name, text: scar.text });
 	}
+	// A scar printed across two slots, such as Carrier, is one sticker: it is listed once.
+	const spanning = new Set<string>();
 	for (const slot of character.slots) {
 		if (!slot) continue;
+		if (slot.kind === 'scar' && (pack.scars.find(scar => scar.id === slot.id)?.slots ?? 1) > 1) {
+			if (spanning.has(slot.id)) continue;
+			spanning.add(slot.id);
+		}
 		const def =
 			slot.kind === 'ability'
 				? pack.abilities.find(ability => ability.id === slot.id)

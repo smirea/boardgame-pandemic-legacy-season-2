@@ -177,7 +177,7 @@
 				</span>
 				{#if player && character}
 					<span class="traits">
-						{#each traits as trait (`${trait.kind}:${trait.name}`)}
+						{#each traits as trait, index (`${trait.kind}:${trait.name}:${index}`)}
 							<span class="trait {trait.kind}" class:struck={trait.struck}>
 								{#if trait.kind === 'scar'}<CardIcon path={SCAR_ICON} size="0.75rem" />{/if}
 								<b>{trait.name}</b>
@@ -200,7 +200,7 @@
 				}))}
 				transition:fly={{ x: right ? 18 : -18, duration: 200, easing: cubicOut }}
 			>
-				{#each traits as trait (`${trait.kind}:${trait.name}`)}
+				{#each traits as trait, index (`${trait.kind}:${trait.name}:${index}`)}
 					<div class="line {trait.kind}" class:struck={trait.struck}>
 						<span class="kind">
 							{#if trait.kind === 'scar'}<CardIcon path={SCAR_ICON} size="0.85rem" />{/if}
