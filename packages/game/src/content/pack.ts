@@ -1,5 +1,5 @@
-import type { CityId, RegionId, SeaId } from '../ids';
-import { candidateEdges, positions, redLines, routeCourses, seaPositions } from './geometry.generated';
+import type { CityId, RegionId, UnchartedId } from '../ids';
+import { candidateEdges, positions, redLines, routeCourses, unchartedPositions } from './geometry.generated';
 import { sealKey } from './types';
 import type {
 	Color,
@@ -17,7 +17,7 @@ import type {
 	Seal,
 	Unlock,
 } from './types';
-import { cities, darkSeas, edge, regions, startingEdges } from './world';
+import { cities, uncharted, edge, regions, startingEdges } from './world';
 
 const city = (id: string) => id as CityId;
 const pkg = (id: number): Seal => ({ t: 'package', id });
@@ -645,10 +645,10 @@ export const pack: ContentPack = {
 	positions,
 	routeCourses,
 	redLines,
-	darkSeas: darkSeas.map(sea => {
-		const at = seaPositions[sea.id];
-		if (!at) throw new Error(`No position for the dark sea ${sea.id}: rerun gen-geometry.ts`);
-		return { id: sea.id as SeaId, at, revealedWith: sea.revealedWith as CityId | null };
+	uncharted: uncharted.map(patch => {
+		const at = unchartedPositions[patch.id];
+		if (!at) throw new Error(`No position for the uncharted ground ${patch.id}: rerun gen-geometry.ts`);
+		return { id: patch.id as UnchartedId, at, revealedWith: patch.revealedWith as CityId | null };
 	}),
 	reconRoutes,
 	searches: searches as ContentPack['searches'],

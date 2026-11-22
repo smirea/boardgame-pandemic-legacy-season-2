@@ -187,7 +187,7 @@
 
 	// Every location owns ground, lost havens included: the rules count theirs as unexplored too. So does each dark
 	// sea, hidden until the location it opens with is revealed, or for good.
-	const grounds: GroundId[] = [...pack.cities.map(city => city.id), ...pack.darkSeas.map(sea => sea.id)];
+	const grounds: GroundId[] = [...pack.cities.map(city => city.id), ...pack.uncharted.map(patch => patch.id)];
 	const hiddenGround = (id: GroundId) => {
 		const city = groundCity(id);
 		return city === null || hidden(city);

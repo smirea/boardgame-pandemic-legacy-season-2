@@ -74,7 +74,7 @@ export {
 	hasCityImprovementSlot,
 	hasInfectionImprovementSlot,
 	isForsaken,
-	isSea,
+	isUncharted,
 	LABS,
 	nearestGround,
 	neighbours,

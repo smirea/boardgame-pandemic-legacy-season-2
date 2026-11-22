@@ -7,7 +7,7 @@ import { layoutCities, project } from '../src/lib/board/projection.ts';
 import { edgeKey } from '../../../packages/game/src/ids.ts';
 import {
 	cities,
-	darkSeas,
+	uncharted,
 	documentedEdges,
 	redLines,
 	regions,
@@ -53,19 +53,19 @@ const redLinesOnBoard: Point[][] = redLines.map(({ corners }) =>
 );
 const MAX_RED_LINES = 1;
 
-const seaPositions = Object.fromEntries(
-	darkSeas.map(sea => {
-		const at = project(sea.lat, sea.lon);
-		return [sea.id, { x: Math.round(at.x * 100) / 100, z: Math.round(at.z * 100) / 100 }];
+const unchartedPositions = Object.fromEntries(
+	uncharted.map(patch => {
+		const at = project(patch.lat, patch.lon);
+		return [patch.id, { x: Math.round(at.x * 100) / 100, z: Math.round(at.z * 100) / 100 }];
 	}),
 );
 
 /**
  * `nearestGround` from the rules, over the positions laid out here rather than the ones last generated: the
- * location or dark sea that owns a point.
+ * location or uncharted ground that owns a point.
  */
 function nearest(point: Point) {
-	let best: { city: (typeof cities)[number] } | { sea: (typeof darkSeas)[number] } = { city: cities[0]! };
+	let best: { city: (typeof cities)[number] } | { patch: (typeof uncharted)[number] } = { city: cities[0]! };
 	let closest = Number.POSITIVE_INFINITY;
 	for (const city of cities) {
 		const at = positions[city.id];
@@ -75,12 +75,12 @@ function nearest(point: Point) {
 			best = { city };
 		}
 	}
-	for (const sea of darkSeas) {
-		const at = seaPositions[sea.id]!;
+	for (const patch of uncharted) {
+		const at = unchartedPositions[patch.id]!;
 		const distance = (at.x - point.x) ** 2 + (at.z - point.z) ** 2;
 		if (distance < closest) {
 			closest = distance;
-			best = { sea };
+			best = { patch };
 		}
 	}
 	return best;
@@ -89,7 +89,7 @@ function nearest(point: Point) {
 /** Where a lane may go at all: off the ocean that stays dark for the whole campaign. */
 const neverDark: Ground = point => {
 	const owner = nearest(point);
-	return 'city' in owner || owner.sea.revealedWith !== null;
+	return 'city' in owner || owner.patch.revealedWith !== null;
 };
 
 // A starting lane is on the board before anyone explores, so its course keeps to ground revealed at the
@@ -409,8 +409,8 @@ export const routeCourses: Record<string, [number, number][]> = ${JSON.stringify
 	),
 )};
 
-/** Where each dark sea owns ground from, in board units. */
-export const seaPositions: Record<string, { x: number; z: number }> = ${JSON.stringify(seaPositions)};
+/** Where each uncharted ground owns ground from, in board units. */
+export const unchartedPositions: Record<string, { x: number; z: number }> = ${JSON.stringify(unchartedPositions)};
 
 /** The red region lines printed on the board and its stickers, in board units. */
 export const redLines: [number, number][][] = ${JSON.stringify(

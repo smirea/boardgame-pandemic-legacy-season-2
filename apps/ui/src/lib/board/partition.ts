@@ -3,8 +3,8 @@ import type { GroundId } from '@repo/game';
 import type { BoardBounds, BoardPoint } from './projection';
 
 /**
- * The board's partition drawn exactly: the ground that `nearestGround` assigns to each location or dark sea is
- * its cell of the power diagram over `pack.positions`, `pack.darkSeas` and each location's `groundWeight`, whose edges
+ * The board's partition drawn exactly: the ground that `nearestGround` assigns to each location or uncharted ground is
+ * its cell of the power diagram over `pack.positions`, `pack.uncharted` and each location's `groundWeight`, whose edges
  * are straight, so the cells are cut with half-planes rather than sampled.
  * `partition.test.ts` checks them against `nearestGround` and `regionAt` themselves.
  */
@@ -21,9 +21,9 @@ const sites: [GroundId, Site][] = [
 	...(Object.entries(pack.positions) as [GroundId, BoardPoint][]).map(
 		([id, at]) => [id, { at, weight: cityDef(id as never).groundWeight ?? 0 }] as [GroundId, Site],
 	),
-	...pack.darkSeas.map(sea => [sea.id, { at: sea.at, weight: 0 }] as [GroundId, Site]),
+	...pack.uncharted.map(patch => [patch.id, { at: patch.at, weight: 0 }] as [GroundId, Site]),
 ];
-/** The region a cell lies in, or null for a dark sea that stays dark. */
+/** The region a cell lies in, or null for uncharted ground that stays dark. */
 const regionOf = (id: GroundId) => {
 	const city = groundCity(id);
 	return city && cityDef(city).region;

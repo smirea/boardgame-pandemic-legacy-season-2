@@ -2519,6 +2519,17 @@ describe('drawing connections: what a line may not cross', () => {
 		expect(checkEdge(campaign, city('lagos'), city('antananarivo'), 'sea')).toBe('It would cross unexplored map');
 	});
 
+	test('no supply line crosses Central Asia, which no map sticker ever covers', () => {
+		const campaign = fresh();
+		reveal(
+			campaign,
+			pack.cities.map(entry => entry.id),
+		);
+		campaign.edges.push({ a: city('istanbul'), b: city('moscow'), kind: 'land' });
+		expect(checkEdge(campaign, city('moscow'), city('delhi'), 'land')).toBe('It would cross unexplored map');
+		expect(checkEdge(campaign, city('moscow'), city('tehran'), 'land')).not.toBe('It would cross unexplored map');
+	});
+
 	test('the Bay of Bengal stays dark until South East Asia is revealed, as the printed board leaves it', () => {
 		const campaign = fresh();
 		reveal(

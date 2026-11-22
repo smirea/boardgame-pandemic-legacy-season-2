@@ -587,7 +587,7 @@ export class FogMask {
 			return { a: border.a, b: border.b, path };
 		});
 		this.#cells = partition(bounds).cells.map(cell => {
-			const at = pack.positions[cell.id as CityId] ?? pack.darkSeas.find(sea => sea.id === cell.id)!.at;
+			const at = pack.positions[cell.id as CityId] ?? pack.uncharted.find(patch => patch.id === cell.id)!.at;
 			const path = new Path2D();
 			cell.outline.forEach((corner, index) =>
 				index ? path.lineTo(corner.x, corner.z) : path.moveTo(corner.x, corner.z),

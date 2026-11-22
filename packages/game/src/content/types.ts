@@ -1,4 +1,4 @@
-import type { CityId, RegionId, SeaId } from '../ids';
+import type { CityId, RegionId, UnchartedId } from '../ids';
 
 export type Color = 'blue' | 'yellow' | 'black' | 'red';
 export type EdgeKind = 'land' | 'sea';
@@ -397,7 +397,7 @@ export type ContentPack = {
 	/** The red region lines printed on the board, in board units. A sea lane may cross at most one. */
 	redLines: [number, number][][];
 	/** Ocean the printed board leaves dark, owning ground in the partition. `revealedWith` is the location that uncovers it, if any. */
-	darkSeas: { id: SeaId; at: { x: number; z: number }; revealedWith: CityId | null }[];
+	uncharted: { id: UnchartedId; at: { x: number; z: number }; revealedWith: CityId | null }[];
 	reconRoutes: ReconRoute[];
 	searches: Record<CityId, SearchBoxDef[]>;
 	jobs: JobDef[];

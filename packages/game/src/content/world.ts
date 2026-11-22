@@ -228,7 +228,7 @@ export const documentedEdges: EdgeDef[] = [
 /**
  * The red region lines printed on the board and its map stickers, as `[lat, lon]` corners. A sea lane may
  * cross at most one. Each starts on land, as printed. Where the printed line stops at ocean the board leaves
- * dark, it runs on into the dark sea (`darkSeas`) to the edge of the chart, so no course slips round its end.
+ * dark, it runs on into the uncharted ground (`uncharted`) to the edge of the chart, so no course slips round its end.
  * The southern ones run well past the frame, because a course rounding a cape may bow a little beyond it.
  * Longitudes run past 180 where the chart does (it is centred on 11°E).
  */
@@ -290,14 +290,20 @@ export const redLines: { printed: string; corners: [lat: number, lon: number][] 
 ];
 
 /**
- * Ocean the printed board leaves dark: water no map sticker covers, so no lane may cross it. Each owns the ground
- * nearest it, beside the locations, in the one partition that decides what is unexplored. The Bay of Bengal is
- * covered by the South East Asia sticker, which prints the lane from Kolkata to Jakarta across it, so it opens with
- * Jakarta; the rest stay dark for good. Longitudes run past 180 where the chart does.
+ * Ground the printed board leaves dark: sea and land no map sticker covers, so no line may cross it. Each owns the
+ * ground nearest it, beside the locations, in the one partition that decides what is unexplored, and lies under the
+ * fog. The Bay of Bengal is covered by the South East Asia sticker, which prints the lane from Kolkata to Jakarta
+ * across it, so it opens with Jakarta; the rest stay dark for good. Central Asia lies between the Europe sticker,
+ * which ends just east of Moscow, and the Middle East sticker, whose top edge runs above Tehran and Delhi; Tibet and
+ * Myanmar between that sticker's east edge, past Kolkata, and the East Asia stickers.
+ * Longitudes run past 180 where the chart does.
  */
-export const darkSeas: { id: string; lat: number; lon: number; revealedWith: string | null }[] = [
+export const uncharted: { id: string; lat: number; lon: number; revealedWith: string | null }[] = [
 	{ id: 'bay-of-bengal', lat: 12, lon: 88, revealedWith: 'jakarta' },
 	{ id: 'indian-ocean', lat: -15, lon: 80, revealedWith: null },
+	{ id: 'central-asia', lat: 47, lon: 64, revealedWith: null },
+	{ id: 'tibet', lat: 34, lon: 88, revealedWith: null },
+	{ id: 'myanmar', lat: 24, lon: 93, revealedWith: null },
 	{ id: 'north-pacific', lat: 20, lon: 160, revealedWith: null },
 	{ id: 'south-pacific', lat: -25, lon: 182, revealedWith: null },
 	{ id: 'east-pacific', lat: 5, lon: -135, revealedWith: null },
