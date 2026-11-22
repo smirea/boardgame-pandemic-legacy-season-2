@@ -29,6 +29,8 @@
 		oneraser?: () => void;
 		onclear?: () => void;
 		onreset: () => void;
+		/** Shown while something covers the board: lifts it off to see the board, and puts it back. */
+		peek?: { on: boolean; toggle: () => void } | null;
 		onmenu: () => void;
 		onbox: () => void;
 		ondeck: () => void;
@@ -50,6 +52,7 @@
 		oneraser,
 		onclear,
 		onreset,
+		peek = null,
 		onmenu,
 		onbox,
 		ondeck,
@@ -161,6 +164,25 @@
 				<span class="link" class:down={status !== 'connected'}
 					>{status === 'connected' ? `${Math.max(1, players)} online` : status}</span
 				>
+			{/if}
+			{#if peek}
+				<button
+					class="peek"
+					class:on={peek.on}
+					aria-pressed={peek.on}
+					onclick={peek.toggle}
+					data-testid="show-board"
+					transition:fade={{ duration: 160 }}
+				>
+					<svg viewBox="0 0 16 16" aria-hidden="true"
+						><path d="M1.5 8s2.4-4.5 6.5-4.5S14.5 8 14.5 8 12.1 12.5 8 12.5 1.5 8 1.5 8Z" /><circle
+							cx="8"
+							cy="8"
+							r="2"
+						/></svg
+					>
+					{peek.on ? 'Back' : 'Show board'}
+				</button>
 			{/if}
 			<button onclick={onreset}>Fit map</button>
 			<button onclick={onbox} data-testid="open-box" data-dest="box">Box</button>
@@ -289,6 +311,26 @@
 
 	.link {
 		color: var(--good);
+	}
+
+	.peek {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+	}
+
+	.peek.on {
+		border-color: var(--warn);
+		background: var(--warn);
+		color: #1c140a;
+	}
+
+	.peek svg {
+		width: 0.95rem;
+		height: 0.95rem;
+		fill: none;
+		stroke: currentColor;
+		stroke-width: 1.4;
 	}
 
 	.link.down {

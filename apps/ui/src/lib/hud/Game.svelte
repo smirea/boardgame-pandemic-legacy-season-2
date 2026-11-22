@@ -54,6 +54,7 @@
 	import Hotkeys from './Hotkeys.svelte';
 	import Objectives from './Objectives.svelte';
 	import ScannerDialog from './ScannerDialog.svelte';
+	import ScarChoice from './ScarChoice.svelte';
 	import SeatPicker from './SeatPicker.svelte';
 	import TopBar from './TopBar.svelte';
 	import Upkeep from './Upkeep.svelte';
@@ -155,6 +156,11 @@
 	}
 	// Once the table knows which game is next, every game is set up by choosing who plays, over the whole table.
 	const choosingCharacters = $derived(snap.phase === 'lobby' && !spectator && tableStart(snap.world) !== null);
+	/** A scar being chosen fills every screen, so the whole table sees the card it lands on. */
+	const scarOwed = $derived.by(() => {
+		const pending = playing ? game?.pending[0] : undefined;
+		return pending?.t === 'scar' ? { seat: pending.seat, chooser: pending.seat ?? game!.active } : null;
+	});
 	// A haven the character screen points at, which the camera looks at behind it.
 	let focus = $state.raw<{ city: CityId; x: number; y: number } | null>(null);
 	let stage = $state<HTMLElement | null>();
@@ -290,6 +296,23 @@
 	let briefingRead = $state('');
 	const briefingKey = $derived(JSON.stringify(campaign.briefing));
 	const briefingOpen = $derived(campaign.briefing.length > 0 && briefingRead !== briefingKey);
+	/** Anything that covers the board. While one does, Show board lifts it off the table and puts it back. */
+	const covered = $derived(
+		briefingOpen ||
+			choosingCharacters ||
+			snap.phase === 'lobby' ||
+			snap.phase === 'finished' ||
+			snap.phase === 'upkeep' ||
+			scarOwed !== null ||
+			boxOpen ||
+			deckOpen ||
+			scannerOpen ||
+			choosing.chooser?.action === 'monitor',
+	);
+	let peeking = $state(false);
+	$effect(() => {
+		if (!covered) peeking = false;
+	});
 	// The closing dialog keeps what it said while it fades, so its objectives are still there to fly to the board.
 	let shownBriefing = $state.raw(untrack(() => campaign.briefing));
 	$effect.pre(() => {
@@ -622,6 +645,10 @@
 	/** Space advances the turn, Z undoes, F draws, E toggles eraser, Tab pings the map, ? opens hotkeys, Escape closes. */
 	function onkey(event: KeyboardEvent) {
 		if (event.key === 'Escape') {
+			if (peeking) {
+				peeking = false;
+				return;
+			}
 			if (hotkeysOpen) {
 				hotkeysOpen = false;
 				return;
@@ -811,6 +838,7 @@
 
 <div
 	class="game"
+	class:peeking
 	style:--left={`${panels.sides.low.left}px`}
 	style:--right={`${panels.sides.low.right}px`}
 	style:--high-left={`${panels.sides.high.left}px`}
@@ -840,6 +868,7 @@
 		oneraser={() => tools.toggleEraser()}
 		onclear={tools.clear}
 		onreset={() => resetView++}
+		peek={covered ? { on: peeking, toggle: () => (peeking = !peeking) } : null}
 		onmenu={() => (menu = !menu)}
 		onbox={() => (boxOpen = !boxOpen)}
 		ondeck={() => (deckOpen = !deckOpen)}
@@ -1066,6 +1095,25 @@
 		{:else if snap.phase === 'upkeep'}
 			<div class="scrim" role="dialog" aria-modal="true" aria-label="Between games" transition:fade={{ duration: 200 }}>
 				<Upkeep {snap} {send} />
+			</div>
+		{/if}
+
+		{#if scarOwed && game}
+			<div
+				class="scrim scar-scrim"
+				role="dialog"
+				aria-modal="true"
+				aria-label="Choose a scar"
+				transition:fade={{ duration: 200 }}
+			>
+				<ScarChoice
+					{world}
+					seat={scarOwed.seat}
+					{decides}
+					chooser={scarOwed.chooser}
+					canChoose={owns(scarOwed.chooser)}
+					{send}
+				/>
 			</div>
 		{/if}
 
@@ -1703,6 +1751,24 @@
 
 	.scrim.box-scrim {
 		z-index: 70;
+	}
+
+	.scrim.scar-scrim {
+		z-index: 65;
+	}
+
+	/* Show board: every cover steps off the table and lets the board be panned and read, until Back. */
+	.scrim {
+		transition: opacity 200ms ease;
+	}
+
+	.peeking .scrim {
+		opacity: 0;
+		visibility: hidden;
+		pointer-events: none;
+		transition:
+			opacity 200ms ease,
+			visibility 0s 200ms;
 	}
 
 	.scrim.open {

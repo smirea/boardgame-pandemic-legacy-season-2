@@ -454,7 +454,7 @@
 							is finished.
 						</p>
 					</div>
-				{:else if pending && (!epidemicStep || elsewhere.length || lockableHere.length)}
+				{:else if pending && pending.t !== 'scar' && (!epidemicStep || elsewhere.length || lockableHere.length)}
 					<div class="slip">
 						<p class="prompt">{decisionTitle(world, pending)}</p>
 						{#if choices.length}
