@@ -181,16 +181,21 @@
 				}
 			}
 			cardCols = bestCols;
-			let next = Math.max(0.75, Math.min(1.85, bestScale));
-			cardScale = Number(next.toFixed(3));
+			const most = Math.max(0.75, Math.min(1.85, bestScale));
+			cardScale = Number(most.toFixed(3));
 			await tick();
-			// If a card with many traits still overflows vertically, dial the scale down until everything fits without scroll.
-			for (let step = 0; step < 12 && mine === run; step++) {
-				if (element.scrollHeight <= element.clientHeight + 2 || next <= 0.72) break;
-				next = Math.max(0.72, next * 0.92);
-				cardScale = Number(next.toFixed(3));
+			if (mine !== run || !overflowing(element)) return;
+			// A card with many traits still overflows: find the largest scale at which every card fits.
+			let fits = 0.72;
+			let over = most;
+			for (let step = 0; step < 7 && mine === run; step++) {
+				const mid = (fits + over) / 2;
+				cardScale = Number(mid.toFixed(3));
 				await tick();
+				if (overflowing(element)) over = mid;
+				else fits = mid;
 			}
+			if (mine === run) cardScale = Number(fits.toFixed(3));
 		};
 		let frame = 0;
 		const observer = new ResizeObserver(() => {
@@ -205,6 +210,19 @@
 			observer.disconnect();
 		};
 	});
+	// Each card against its own parts, never the grid's scrollHeight or any position: a claim reorders the cards, and
+	// while their flip runs they stand in their old places, which overflowed the grid and once shrank every card to the
+	// floor for good. Fractional heights, since the face stretches to fill a card that fits and rounding decides the
+	// rest. The flip scales a card and its parts alike, so the comparison holds mid-flight.
+	function overflowing(grid: HTMLElement) {
+		return [...grid.children].some(card => {
+			const parts = [...card.children];
+			const scale = card.getBoundingClientRect().height / ((card as HTMLElement).offsetHeight || 1);
+			const gap = (parseFloat(getComputedStyle(card).rowGap) || 0) * scale;
+			const need = parts.reduce((sum, part) => sum + part.getBoundingClientRect().height, 0) + gap * (parts.length - 1);
+			return need > card.getBoundingClientRect().height + scale;
+		});
+	}
 	// The map shows through wherever the character cards leave room left of the form: beside them or below them.
 	function look(city: CityId) {
 		if (!screen || !cards || !form || !footer) return;
