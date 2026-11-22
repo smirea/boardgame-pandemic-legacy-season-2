@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
-	import { SEAT_IDS, tablePlayers } from '@repo/game';
-	import type { Action, Command, PlayerId, TableUndoVote, UndoVoteChoice, World } from '@repo/game';
+	import { pack, SEAT_IDS, tablePlayers } from '@repo/game';
+	import type { Action, Command, Play, PlayerId, TableUndoVote, UndoSubject, UndoVoteChoice, World } from '@repo/game';
 	import { ACTION_NAMES, SEAT_COLORS, seatName } from './labels.svelte.ts';
 
 	type Props = {
@@ -13,7 +13,7 @@
 
 	let { world, vote, player, send }: Props = $props();
 
-	const SHAME_TEXT: Partial<Record<Action['a'], string>> = {
+	const ACTION_SHAME_TEXT: Partial<Record<Action['a'], string>> = {
 		monitor:
 			'They already peeked at the frequency and saw the cards. Pretending it never happened requires unanimous absolution.',
 		search:
@@ -21,6 +21,38 @@
 		recon: 'They already cracked open the unknown. Un-discovering the world requires unanimous absolution.',
 		selfInject: 'They already poked the sample and saw how it went. Un-poking it requires unanimous absolution.',
 	};
+
+	const PLAY_SHAME_TEXT: Partial<Record<Play['e'], string>> = {
+		forecast:
+			'They already peeked at the top of the Infection deck. Un-seeing the future requires unanimous absolution.',
+		scavenge:
+			'They already drew 4 cards off the Player deck and saw what came up. Putting them back requires unanimous absolution.',
+		encore:
+			'They already replayed a card that leaked secret information. Rewinding the encore requires unanimous absolution.',
+	};
+
+	function subjectLabel(subject: UndoSubject): string {
+		switch (subject.kind) {
+			case 'action':
+				return ACTION_NAMES[subject.action];
+			case 'play':
+				return (
+					pack.events.find(entry => entry.id === subject.play)?.name ??
+					pack.companions.find(entry => entry.id === subject.play)?.name ??
+					subject.play
+				);
+			case 'lockdown':
+				return 'Lockdown';
+			case 'waive':
+				return 'waiving an objective';
+		}
+	}
+
+	function subjectShame(subject: UndoSubject): string {
+		if (subject.kind === 'action' && ACTION_SHAME_TEXT[subject.action]) return ACTION_SHAME_TEXT[subject.action]!;
+		if (subject.kind === 'play' && PLAY_SHAME_TEXT[subject.play]) return PLAY_SHAME_TEXT[subject.play]!;
+		return 'That move already leaked secret information. Pretending it never happened requires unanimous absolution.';
+	}
 
 	const table = $derived(world.table);
 	const players = $derived(tablePlayers(table));
@@ -30,11 +62,8 @@
 	const culprit = $derived(
 		(vote.by ? table.seats.find(entry => entry.player === vote.by)?.name : null) ?? seatName(world, vote.seat),
 	);
-	const actionLabel = $derived(ACTION_NAMES[vote.action]);
-	const subtext = $derived(
-		SHAME_TEXT[vote.action] ??
-			'That action already leaked secret information. Pretending it never happened requires unanimous absolution.',
-	);
+	const actionLabel = $derived(subjectLabel(vote.subject));
+	const subtext = $derived(subjectShame(vote.subject));
 	const waitingOn = $derived(
 		players.filter(who => vote.votes[who] === undefined).map(who => (who === player ? 'you' : firstSeat(who).name)),
 	);
@@ -51,7 +80,7 @@
 <section
 	class="tribunal"
 	data-testid="undo-vote"
-	{@attach feedback('UndoVote', () => ({ action: vote.action, votes: vote.votes }))}
+	{@attach feedback('UndoVote', () => ({ subject: vote.subject, votes: vote.votes }))}
 >
 	<span class="stamp">Shameful undo request</span>
 	<h1>{culprit} is shamefully trying to undo {actionLabel}</h1>

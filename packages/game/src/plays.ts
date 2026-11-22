@@ -93,6 +93,13 @@ function tally<T>(items: readonly T[]): Map<T, number> {
 	return counts;
 }
 
+/** Whether playing this card reveals hidden deck information, so undoing it requires a consensus vote. */
+export function playReveals(play: Play): boolean {
+	if (play.e === 'forecast' || play.e === 'scavenge') return true;
+	if (play.e === 'encore') return playReveals(play.played);
+	return false;
+}
+
 /** The top of the Infection deck that Extended Forecast rearranges. */
 export function forecastCards(game: Game): CardId[] {
 	return game.infectionDeck.order.slice(0, FORECAST);

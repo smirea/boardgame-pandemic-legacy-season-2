@@ -134,7 +134,7 @@ export class GameSession {
 			const rawUndo = this.#persist && save ? LS.get('undo') : null;
 			const savedUndo = Array.isArray(rawUndo)
 				? rawUndo.filter((entry): entry is UndoEntry =>
-						Boolean(entry && typeof entry === 'object' && 'world' in entry && 'action' in entry),
+						Boolean(entry && typeof entry === 'object' && 'world' in entry && 'subject' in entry),
 					)
 				: [];
 			this.#record = this.#persist ? storedRecord(save) : null;

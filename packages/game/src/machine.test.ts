@@ -1366,7 +1366,12 @@ describe('game end and the campaign', () => {
 
 		// Requesting undo opens a vote and blocks other actions until resolved.
 		send(actor, { type: 'UNDO', by: ann });
-		expect(worldOf(actor).table.undoVote).toMatchObject({ seat: A, action: 'search', by: ann, votes: {} });
+		expect(worldOf(actor).table.undoVote).toMatchObject({
+			seat: A,
+			subject: { kind: 'action', action: 'search' },
+			by: ann,
+			votes: {},
+		});
 		expect(publicState(actor.getSnapshot()).canUndo).toBe(false);
 		expect(reject(worldOf(actor), 'playing.actions', { type: 'END_ACTIONS', seat: A })).toBe(
 			'Finish the undo vote first',
@@ -1386,6 +1391,95 @@ describe('game end and the campaign', () => {
 		expect(worldOf(actor).table.undoVote).toBeNull();
 		expect(scratched()).toBe(false);
 		expect(publicState(actor.getSnapshot()).canUndo).toBe(true);
+	});
+
+	test('playing a non-revealing event during actions keeps undo and restores the card and cubes immediately', () => {
+		const actor = late((world, game) => {
+			const stockUp = Object.values(world.campaign.playerCards).find(
+				card => card.kind === 'event' && card.event === 'stockUp',
+			)!.id;
+			game.reserve = 10;
+			game.stockpile = 2;
+			give(world, A, [stockUp]);
+		});
+		const ann = 'ann' as PlayerId;
+		const ben = 'ben' as PlayerId;
+		send(actor, { type: 'TAKE_SEAT', player: ann, name: 'Ann', seat: A });
+		send(actor, { type: 'TAKE_SEAT', player: ben, name: 'Ben', seat: B });
+		const stockUp = gameOf(actor).players[A]!.hand[0]!;
+		const initialSupplies = gameOf(actor).players[A]!.supplies;
+
+		act(actor, { a: 'makeSupplies' });
+		const beforeEvent = {
+			stockpile: gameOf(actor).stockpile,
+			reserve: gameOf(actor).reserve,
+			supplies: gameOf(actor).players[A]!.supplies,
+		};
+
+		send(actor, { type: 'PLAY', seat: A, card: stockUp, play: { e: 'stockUp' } });
+		expect(publicState(actor.getSnapshot()).canUndo).toBe(true);
+		expect(gameOf(actor).stockpile).toBe(beforeEvent.stockpile + 8);
+		expect(gameOf(actor).reserve).toBe(beforeEvent.reserve - 8);
+		expect(gameOf(actor).players[A]!.hand).not.toContain(stockUp);
+
+		// Undoing stockUp succeeds immediately without a vote and restores card + cubes.
+		send(actor, { type: 'UNDO', by: ann });
+		expect(worldOf(actor).table.undoVote).toBeNull();
+		expect(gameOf(actor).stockpile).toBe(beforeEvent.stockpile);
+		expect(gameOf(actor).reserve).toBe(beforeEvent.reserve);
+		expect(gameOf(actor).players[A]!.hand).toContain(stockUp);
+		expect(worldOf(actor).campaign.playerCards[stockUp]).toBeDefined();
+
+		// Earlier action from the same turn is still undoable too.
+		expect(publicState(actor.getSnapshot()).canUndo).toBe(true);
+		send(actor, { type: 'UNDO', by: ann });
+		expect(gameOf(actor).players[A]!.supplies).toBe(initialSupplies);
+		expect(publicState(actor.getSnapshot()).canUndo).toBe(false);
+	});
+
+	test('undoing a revealing event played during actions requires unanimous table consensus', () => {
+		const actor = late((world, game) => {
+			const forecast = Object.values(world.campaign.playerCards).find(
+				card => card.kind === 'event' && card.event === 'forecast',
+			)!.id;
+			give(world, A, [forecast]);
+			// Ensure at least 2 cards in infection deck to reorder visibly.
+			if (game.infectionDeck.order.length < 2) throw new Error('expected infection cards');
+		});
+		const ann = 'ann' as PlayerId;
+		const ben = 'ben' as PlayerId;
+		send(actor, { type: 'TAKE_SEAT', player: ann, name: 'Ann', seat: A });
+		send(actor, { type: 'TAKE_SEAT', player: ben, name: 'Ben', seat: B });
+		const forecast = gameOf(actor).players[A]!.hand[0]!;
+		const originalTop = gameOf(actor).infectionDeck.order.slice(0, 8);
+		const reversed = [...originalTop].reverse();
+
+		send(actor, { type: 'PLAY', seat: A, card: forecast, play: { e: 'forecast', order: reversed } });
+		expect(publicState(actor.getSnapshot()).canUndo).toBe(true);
+		expect(gameOf(actor).infectionDeck.order.slice(0, 8)).toEqual(reversed);
+
+		// Requesting undo opens a consensus vote naming the forecast play.
+		send(actor, { type: 'UNDO', by: ann });
+		expect(worldOf(actor).table.undoVote).toMatchObject({
+			seat: A,
+			subject: { kind: 'play', play: 'forecast' },
+			by: ann,
+			votes: {},
+		});
+
+		// Split vote denies the undo.
+		send(actor, { type: 'UNDO_VOTE', player: ann, vote: 'yes' });
+		send(actor, { type: 'UNDO_VOTE', player: ben, vote: 'no' });
+		expect(worldOf(actor).table.undoVote).toBeNull();
+		expect(gameOf(actor).infectionDeck.order.slice(0, 8)).toEqual(reversed);
+
+		// Unanimous yes undoes the forecast and restores the card and deck order.
+		send(actor, { type: 'UNDO', by: ann });
+		send(actor, { type: 'UNDO_VOTE', player: ann, vote: 'yes' });
+		send(actor, { type: 'UNDO_VOTE', player: ben, vote: 'yes' });
+		expect(worldOf(actor).table.undoVote).toBeNull();
+		expect(gameOf(actor).infectionDeck.order.slice(0, 8)).toEqual(originalTop);
+		expect(gameOf(actor).players[A]!.hand).toContain(forecast);
 	});
 
 	test('resolving a pending decision keeps the action undoable', () => {

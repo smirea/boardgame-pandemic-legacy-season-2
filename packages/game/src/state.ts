@@ -1,5 +1,6 @@
 import type { Action } from './actions';
 import type { BriefedUnlock } from './briefing';
+import type { Play } from './plays';
 import type {
 	AbilityId,
 	ActionId,
@@ -303,11 +304,17 @@ export type TableBriefing = {
 
 export type UndoVoteChoice = 'yes' | 'no';
 
+export type UndoSubject =
+	| { kind: 'action'; action: Action['a'] }
+	| { kind: 'play'; play: Play['e'] }
+	| { kind: 'lockdown' }
+	| { kind: 'waive' };
+
 export type TableUndoVote = {
-	/** The seat whose revealing action is being undone. */
+	/** The seat whose revealing move is being undone. */
 	seat: SeatId;
-	/** The kind of action being undone. */
-	action: Action['a'];
+	/** What kind of move is being undone. */
+	subject: UndoSubject;
 	/** The player who requested the undo, if initiated by a seated player. */
 	by: PlayerId | null;
 	/** Each seated player's vote. Full consensus of 'yes' is required to allow the undo. */

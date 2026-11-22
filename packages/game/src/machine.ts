@@ -34,8 +34,8 @@ import {
 	resolveGameEnd,
 } from './legacy';
 import type { Decide, Play } from './plays';
-import { applyDecide, applyPlay, autoResolve, checkDecide, checkPlay } from './plays';
-import type { World } from './state';
+import { applyDecide, applyPlay, autoResolve, checkDecide, checkPlay, playReveals } from './plays';
+import type { UndoSubject, World } from './state';
 import type { TableCommand } from './table';
 import {
 	applyTable,
@@ -100,7 +100,7 @@ export type Phase =
 	| 'upkeep'
 	| 'finished';
 
-export type UndoEntry = { world: World; seat: SeatId; action: Action; reveals: boolean };
+export type UndoEntry = { world: World; seat: SeatId; subject: UndoSubject; reveals: boolean };
 type Context = { world: World; undo: UndoEntry[] };
 type Of<T extends Command['type']> = Extract<Command, { type: T }>;
 
@@ -324,10 +324,10 @@ function autoSupply(world: World) {
 /** Commands open in every step of a turn. Each step passes its own phase, because a few of them depend on it. */
 const anyStep = (phase: Phase) =>
 	({
-		PLAY: { guard: { type: 'legal', params: phase }, actions: 'play' },
+		PLAY: { guard: { type: 'legal', params: phase }, actions: { type: 'play', params: phase } },
 		DECIDE: { guard: { type: 'legal', params: phase }, actions: 'decide' },
-		LOCKDOWN: { guard: { type: 'legal', params: phase }, actions: 'lockdown' },
-		WAIVE_OBJECTIVE: { guard: { type: 'legal', params: phase }, actions: 'waive' },
+		LOCKDOWN: { guard: { type: 'legal', params: phase }, actions: { type: 'lockdown', params: phase } },
+		WAIVE_OBJECTIVE: { guard: { type: 'legal', params: phase }, actions: { type: 'waive', params: phase } },
 	}) as const;
 
 /** Who sits where can change in any phase: a newcomer takes an open seat, anyone gets up. */
@@ -497,7 +497,10 @@ export const gameMachine = setup({
 					applyAction(draft, seat, action);
 					autoResolve(draft);
 				}),
-				undo: [...context.undo, { world: context.world, seat, action, reveals: actionReveals(action) }],
+				undo: [
+					...context.undo,
+					{ world: context.world, seat, subject: { kind: 'action', action: action.a }, reveals: actionReveals(action) },
+				],
 			};
 		}),
 		startUndoVote: assign(({ context, event }: Args) => {
@@ -505,7 +508,7 @@ export const gameMachine = setup({
 			const by = (event as Of<'UNDO'>).by ?? null;
 			return {
 				world: produce(context.world, draft => {
-					draft.table.undoVote = { seat: top.seat, action: top.action.a, by, votes: {} };
+					draft.table.undoVote = { seat: top.seat, subject: top.subject, by, votes: {} };
 				}),
 			};
 		}),
@@ -527,12 +530,22 @@ export const gameMachine = setup({
 		openingInfect: assign(change(openingInfectStep)),
 		infect: assign(change(infectStep)),
 		endTurn: assign(change(endTurn)),
-		play: assign(
-			change((world, event) => {
-				const { seat, card, play } = event as Of<'PLAY'>;
-				applyPlay(world, seat, card, play);
-			}),
-		),
+		play: assign(({ context, event }: Args, phase: Phase) => {
+			const { seat, card, play } = event as Of<'PLAY'>;
+			return {
+				world: produce(context.world, draft => {
+					applyPlay(draft, seat, card, play);
+					autoResolve(draft);
+				}),
+				undo:
+					phase === 'playing.actions'
+						? [
+								...context.undo,
+								{ world: context.world, seat, subject: { kind: 'play', play: play.e }, reveals: playReveals(play) },
+							]
+						: [],
+			};
+		}),
 		decide: assign(({ context, event }: Args) => ({
 			world: produce(context.world, draft => {
 				applyDecide(draft, (event as Of<'DECIDE'>).decide);
@@ -540,26 +553,41 @@ export const gameMachine = setup({
 			}),
 			undo: context.undo,
 		})),
-		lockdown: assign(
-			change((world, event) => {
-				const { card, seat, pay } = event as Of<'LOCKDOWN'>;
-				discardFromHand(world.game!, seat, pay);
-				const destroyed = world.campaign.infectionCards[card]!;
-				world.game!.infectionDiscard.splice(world.game!.infectionDiscard.indexOf(card), 1);
-				delete world.campaign.infectionCards[card];
-				if (destroyed.kind === 'city')
-					log(world.game!, {
-						t: 'note',
-						text: `Lockdown destroyed an Infection card of ${cityDef(destroyed.city).name} for good`,
-					});
+		lockdown: assign(({ context, event }: Args, phase: Phase) => {
+			const { card, seat, pay } = event as Of<'LOCKDOWN'>;
+			return {
+				world: produce(context.world, draft => {
+					discardFromHand(draft.game!, seat, pay);
+					const destroyed = draft.campaign.infectionCards[card]!;
+					draft.game!.infectionDiscard.splice(draft.game!.infectionDiscard.indexOf(card), 1);
+					delete draft.campaign.infectionCards[card];
+					if (destroyed.kind === 'city')
+						log(draft.game!, {
+							t: 'note',
+							text: `Lockdown destroyed an Infection card of ${cityDef(destroyed.city).name} for good`,
+						});
+					autoResolve(draft);
+				}),
+				undo:
+					phase === 'playing.actions'
+						? [...context.undo, { world: context.world, seat, subject: { kind: 'lockdown' }, reveals: false }]
+						: [],
+			};
+		}),
+		waive: assign(({ context, event }: Args, phase: Phase) => ({
+			world: produce(context.world, draft => {
+				draft.game!.waived.push((event as Of<'WAIVE_OBJECTIVE'>).objective);
+				checkWin(draft);
+				autoResolve(draft);
 			}),
-		),
-		waive: assign(
-			change((world, event) => {
-				world.game!.waived.push((event as Of<'WAIVE_OBJECTIVE'>).objective);
-				checkWin(world);
-			}),
-		),
+			undo:
+				phase === 'playing.actions'
+					? [
+							...context.undo,
+							{ world: context.world, seat: context.world.game!.active, subject: { kind: 'waive' }, reveals: false },
+						]
+					: [],
+		})),
 		resolveGameEnd: assign(change(resolveGameEnd)),
 		purchase: assign(change((world, event) => applyPurchase(world, (event as Of<'PURCHASE'>).purchase))),
 		refund: assign(change((world, event) => refundPurchase(world, (event as Of<'REFUND'>).index))),
