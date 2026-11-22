@@ -304,6 +304,24 @@ try {
 	moving = false;
 	await Promise.all(wandering);
 
+	// The last Infection card may still be playing out, and it moves the camera. A line is drawn on the board, so one
+	// drawn before the camera settles is elsewhere on the screen by the time the eraser comes for it.
+	const cityAt = (tab: Tab) =>
+		tab.page.evaluate(() => {
+			const box = document.querySelector('.anchor[data-city]')!.getBoundingClientRect();
+			return `${box.x.toFixed(1)},${box.y.toFixed(1)},${box.width.toFixed(1)}`;
+		});
+	for (const tab of [host, watched]) {
+		let still = 0;
+		for (let last = '', tries = 0; still < 4 && tries < 120; tries++) {
+			const now = await cityAt(tab);
+			still = now === last ? still + 1 : 0;
+			last = now;
+			await sleep(250);
+		}
+		check(still >= 4, `${tab.name}'s board came to rest before anyone drew on it`);
+	}
+
 	// The host draws on the map with the pen held, a peer adds a line, pings and erases, and everyone sees the same.
 	const sketches = () => Promise.all(tabs.map(tab => tab.page.evaluate(() => JSON.stringify(window.DEBUG!.sketch()))));
 	// A ping lasts ten seconds and is not sent to a browser that joins later, so `lines` leaves pings out.

@@ -68,6 +68,8 @@ export type Command =
 	| { type: 'END_ACTIONS'; seat: SeatId }
 	| { type: 'DRAW' }
 	| { type: 'INFECT' }
+	/** The player whose turn it is passes it on, once every Infection card of the turn is flipped. */
+	| { type: 'END_TURN'; seat: SeatId }
 	| { type: 'PLAY'; seat: SeatId; card: CardId; play: Play }
 	| { type: 'DECIDE'; decide: Decide }
 	/** Destroying a Lockdown card costs whoever does it a Player card from their hand. */
@@ -223,6 +225,10 @@ export function reject(world: World, phase: Phase, command: Command): string | n
 			return blocked(world) || game!.infectionsLeft === 0
 				? 'Resolve the pending choice first'
 				: inPhase('playing.infect', 'setup.infect');
+		case 'END_TURN':
+			if (command.seat !== game?.active) return 'Not your turn';
+			if (game.infectionsLeft > 0) return 'Flip the Infection cards first';
+			return blocked(world) ? 'Resolve the pending choice first' : inPhase('playing.infect');
 		case 'PLAY':
 			return (
 				inPhase('playing.actions', 'playing.draw', 'playing.infect') ??
@@ -328,7 +334,7 @@ export const gameMachine = setup({
 		over: ({ context }: Args) => isOver(context.world),
 		drawsDone: ({ context }: Args) =>
 			!isOver(context.world) && context.world.game!.drawsLeft === 0 && !blocked(context.world),
-		infectionsDone: ({ context }: Args) =>
+		openingDone: ({ context }: Args) =>
 			!isOver(context.world) && context.world.game!.infectionsLeft === 0 && !blocked(context.world),
 		campaignEnding: ({ context }: Args) => {
 			const { campaign, game } = context.world;
@@ -534,7 +540,7 @@ export const gameMachine = setup({
 				},
 				// The cards that open a game are flipped one command at a time, by anyone at the table.
 				infect: {
-					always: { guard: 'infectionsDone', target: 'events' },
+					always: { guard: 'openingDone', target: 'events' },
 					on: {
 						...seatEvents('setup.infect'),
 						INFECT: { guard: { type: 'legal', params: 'setup.infect' }, actions: 'openingInfect' },
@@ -574,12 +580,13 @@ export const gameMachine = setup({
 						DRAW: { guard: { type: 'legal', params: 'playing.draw' }, actions: 'draw' },
 					},
 				},
+				// The turn stays with its player after the last card, for an Event or a look at the board, until they pass it on.
 				infect: {
-					always: { guard: 'infectionsDone', target: 'actions', actions: 'endTurn' },
 					on: {
 						...anyStep('playing.infect'),
 						...seatEvents('playing.infect'),
 						INFECT: { guard: { type: 'legal', params: 'playing.infect' }, actions: 'infect' },
+						END_TURN: { guard: { type: 'legal', params: 'playing.infect' }, target: 'actions', actions: 'endTurn' },
 					},
 				},
 			},

@@ -527,7 +527,9 @@ function needsByKey(state: PublicState, who: Who): string[] {
 								: null
 							: reject(world, phase, { type: 'INFECT' }) === null
 								? `YOUR TURN: flip ${game.infectionsLeft} Infection card(s) with \`do infect\`.`
-								: null;
+								: reject(world, phase, { type: 'END_TURN', seat: who.seat }) === null
+									? 'YOUR TURN: every Infection card is flipped. An Event can still be played. `do done` ends your turn.'
+									: null;
 				if (step) out.push(step);
 			}
 			break;

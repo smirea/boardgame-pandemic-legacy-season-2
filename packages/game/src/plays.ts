@@ -92,9 +92,6 @@ function tally<T>(items: readonly T[]): Map<T, number> {
 	return counts;
 }
 
-/** The plays that may wait on an Epidemic's reshuffle, since they act on the discard pile it is about to take. */
-export const DURING_INTENSIFY = new Set<Play['e']>(['resilience', 'massInoculation', 'exile']);
-
 /** The top of the Infection deck that Extended Forecast rearranges. */
 export function forecastCards(game: Game): CardId[] {
 	return game.infectionDeck.order.slice(0, FORECAST);
@@ -132,10 +129,9 @@ export function checkPlay(world: World, seat: SeatId, card: CardId, play: Play, 
 	const id = held.kind === 'event' ? held.event : held.kind === 'city' ? held.companion : null;
 	if (id !== play.e) return 'That card does not do that';
 	// No Event may be played between drawing a card and resolving it, except one whose text names that window.
+	// An Epidemic that has been started is the table's exception: any Event may be played between its steps.
 	const unresolved = game.pending[0]?.t;
 	if (unresolved === 'shield' || unresolved === 'cordon') return 'Resolve the card that was just drawn first';
-	if (unresolved === 'intensify' && !DURING_INTENSIFY.has(play.e)) return 'The Epidemic must finish first';
-	if (unresolved === 'epidemicInfect') return 'Draw the bottom Infection card first';
 	if (unresolved === 'epidemicDrawn' && play.e !== 'antidote') return 'The Epidemic must strike first';
 	const onGrid = grid(campaign);
 	const onMap = (city: CityId) => campaign.locations[city]?.revealed === true;

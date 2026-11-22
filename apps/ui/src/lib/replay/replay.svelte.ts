@@ -152,6 +152,8 @@ export function commandLabel(world: World, command: Command | null): { who: stri
 		case 'INFECT':
 			// Before the first turn the cards that open a game are flipped by the table, not by a player.
 			return { who: world.game?.turn ? seatName(world, world.game.active) : null, text: 'Flips an Infection card' };
+		case 'END_TURN':
+			return { who: seatName(world, command.seat), text: 'Ends the turn' };
 		case 'PLAY': {
 			const detail = playGroup(world, command.play);
 			return {

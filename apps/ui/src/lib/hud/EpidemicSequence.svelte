@@ -10,32 +10,22 @@
 
 	type Props = {
 		world: World;
-		/** This browser's player is the one resolving the Epidemic. */
-		canAct: boolean;
-		/** Something may still be played before the last step, so it waits for the player in place of running on. */
-		held: boolean;
-		/** Whose turn it is, for everyone who is waiting on them. */
-		who: string;
-		/** Takes the last step now. */
-		onadvance: () => void;
+		/** The beat in which the infection rate is shown moving on, before the bottom card may be drawn. */
+		increasing: boolean;
+		/** The side of the table it stands aside to, away from the turn desk where its steps are taken. */
+		side: 'left' | 'right';
 	};
 
-	let { world, canAct, held, who, onadvance }: Props = $props();
+	let { world, increasing, side }: Props = $props();
 
 	const game = $derived(world.game);
 	const pending = $derived(game?.pending[0]?.t ?? null);
 	// The card lies beside the deck until its player starts it. This opens once the first step has been taken.
 	const stage = $derived(pending === 'epidemicInfect' || pending === 'intensify' ? pending : null);
-	// It stands aside for the second step, so the city that is struck shows on the board.
-	const docked = $derived(stage === 'intensify');
-	// The first step is shown as just taken for a beat, and then the second as the one about to be.
-	const INCREASE_MS = 1200;
-	let increased = $state(false);
-	$effect(() => {
-		if (stage !== 'epidemicInfect') return void (increased = false);
-		const timer = setTimeout(() => (increased = true), INCREASE_MS);
-		return () => clearTimeout(timer);
-	});
+	// It holds the table for the first step, then stands aside: the next two are taken at the turn desk, and the
+	// city that is struck shows on the board.
+	const docked = $derived(!increasing);
+	const increased = $derived(!increasing);
 
 	const rates = pack.numbers.infectionRates;
 	const currentRate = $derived(game ? (rates[game.rateIndex] ?? rates.at(-1)!) : rates[0]!);
@@ -66,7 +56,7 @@
 		<div class="scrim" transition:fade={{ duration: 260 }}></div>
 	{/if}
 	<div
-		class="epidemic-layer"
+		class="epidemic-layer {side}"
 		class:docked
 		data-testid="epidemic-sequence"
 		data-stage={stage}
@@ -155,19 +145,6 @@
 							<p>
 								<RichText text="Shuffle the Infection discard pile and place it on top of the Infection deck." />
 							</p>
-							{#if intensifyState === 'active' && held}
-								<!-- An Event or a Lockdown may come first, so this step waits for its player. -->
-								<div class="hold">
-									{#if canAct}
-										<button class="go" onclick={onadvance} data-testid="epidemic-advance" title="Space"
-											>Intensify</button
-										>
-										<span>An Event or a Lockdown may be played first.</span>
-									{:else}
-										<span>Waiting for {who}.</span>
-									{/if}
-								</div>
-							{/if}
 						</div>
 					</li>
 				</ol>
@@ -193,28 +170,6 @@
 		pointer-events: none;
 	}
 
-	.hold {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: 0.5rem;
-		margin-top: 0.45rem;
-		font-size: 0.74rem;
-		color: #f0d7b4;
-	}
-
-	.go {
-		padding: 0.3rem 0.9rem;
-		border: 0;
-		border-radius: 3px;
-		background: #e3b23c;
-		color: #1c140a;
-		font: inherit;
-		font-size: 0.84rem;
-		font-weight: 700;
-		cursor: pointer;
-	}
-
 	.epi-card {
 		position: absolute;
 		left: 50%;
@@ -238,10 +193,17 @@
 			box-shadow 420ms ease;
 	}
 
+	/* Small enough to stand between the seats of its side, clear of the piles under the top one. */
+	.right .epi-card.docked {
+		left: calc(100% - 1.1rem);
+		transform: translate(-100%, -50%) scale(0.8);
+		transform-origin: right center;
+	}
+
 	.epi-card.docked {
 		left: 1.1rem;
-		top: 46%;
-		transform: translate(0, -50%) scale(0.88);
+		top: 52%;
+		transform: translate(0, -50%) scale(0.8);
 		transform-origin: left center;
 		box-shadow:
 			0 1rem 2.4rem rgb(0 0 0 / 0.65),

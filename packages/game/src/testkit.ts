@@ -30,6 +30,9 @@ export function setUp(actor: GameActor) {
 	send(actor, { type: 'CONFIRM_EVENTS' });
 }
 
+/** The player whose turn it is passes it on, as they do once the last Infection card is flipped. */
+export const passTurn = (actor: GameActor) => send(actor, { type: 'END_TURN', seat: gameOf(actor).active });
+
 export const act = (actor: GameActor, action: Action, seat = A) => send(actor, { type: 'ACTION', seat, action });
 export const refuses = (actor: GameActor, action: Action, seat = A) =>
 	reject(worldOf(actor), phase(actor), { type: 'ACTION', seat, action });

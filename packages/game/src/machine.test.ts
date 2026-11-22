@@ -43,6 +43,7 @@ import {
 	give,
 	infectionCards,
 	late,
+	passTurn,
 	phase,
 	refuses,
 	send,
@@ -648,6 +649,7 @@ describe('Hollow Men and forsaken cities', () => {
 			game.players[B]!.location = city('cairo');
 		}, 'playing.infect');
 		send(actor, { type: 'INFECT' });
+		passTurn(actor);
 		expect(gameOf(actor).gameEndArea).toEqual(infectionCards(worldOf(actor), 'cairo', 1));
 		expect(gameOf(actor).locations[city('lagos')]!.supplies).toBe(1);
 		expect(gameOf(actor).active).toBe(B);
@@ -665,6 +667,7 @@ describe('Hollow Men and forsaken cities', () => {
 		}, 'playing.infect');
 		expect(worldOf(actor).campaign.locations[city('delhi')]!.infested).toBe(true);
 		send(actor, { type: 'INFECT' });
+		passTurn(actor);
 		expect(gameOf(actor).active).toBe(B);
 		expect(character(worldOf(actor), B).exposure).toBe(0);
 	});
@@ -794,6 +797,7 @@ describe('exposure and the carrier', () => {
 			game.infectionsLeft = 1;
 		}, 'playing.infect');
 		send(actor, { type: 'INFECT' });
+		passTurn(actor);
 		expect(gameOf(actor).players[B]).toMatchObject({ hand: [], location: character(worldOf(actor), B).home });
 		expect(gameOf(actor).actionsLeft).toBe(0);
 	});
@@ -939,6 +943,48 @@ describe('events and companions', () => {
 		send(held, { type: 'PLAY', seat: B, card: antidote, play: { e: 'antidote' } });
 		expect(gameOf(held).pending).toEqual([]);
 		expect(gameOf(held).epidemics).toBe(0);
+	});
+
+	test('once an Epidemic has started, any Event may be played between its steps', () => {
+		let card = '' as CardId;
+		const actor = late((world, game) => {
+			card = conjure(world, B, { kind: 'event', event: 'airlift' });
+			const epidemic = Object.values(world.campaign.playerCards).find(entry => entry.kind === 'epidemic')!.id;
+			game.playerDeck.order = [epidemic, ...game.playerDeck.order.filter(id => id !== epidemic)];
+			game.playerDeck.piles = [{ size: game.playerDeck.order.length, epidemics: 10 }];
+			game.drawsLeft = 2;
+		}, 'playing.draw');
+		const airlift = (): Command => ({
+			type: 'PLAY',
+			seat: B,
+			card,
+			play: { e: 'airlift', pawn: A, to: city('lagos') },
+		});
+		send(actor, { type: 'DRAW' });
+		expect(reject(worldOf(actor), phase(actor), airlift())).not.toBeNull();
+		send(actor, { type: 'DECIDE', decide: { d: 'skip' } });
+		expect(gameOf(actor).pending).toEqual([{ t: 'epidemicInfect' }]);
+		expect(reject(worldOf(actor), phase(actor), airlift())).toBeNull();
+		send(actor, { type: 'DECIDE', decide: { d: 'skip' } });
+		expect(gameOf(actor).pending).toEqual([{ t: 'intensify' }]);
+		send(actor, airlift());
+		expect(gameOf(actor).players[A]!.location).toBe(city('lagos'));
+		expect(gameOf(actor).pending).toEqual([{ t: 'intensify' }]);
+	});
+
+	test('a turn stays with its player after the last Infection card until they end it', () => {
+		const actor = late((world, game) => {
+			stackInfection(world, ['lagos']);
+			game.infectionsLeft = 1;
+		}, 'playing.infect');
+		expect(reject(worldOf(actor), phase(actor), { type: 'END_TURN', seat: A })).not.toBeNull();
+		send(actor, { type: 'INFECT' });
+		expect(phase(actor)).toBe('playing.infect');
+		expect(gameOf(actor).active).toBe(A);
+		expect(reject(worldOf(actor), phase(actor), { type: 'END_TURN', seat: B })).not.toBeNull();
+		send(actor, { type: 'END_TURN', seat: A });
+		expect(phase(actor)).toBe('playing.actions');
+		expect(gameOf(actor).active).toBe(B);
 	});
 
 	test('with Opal found and door 13 open, making supplies at a haven or supply center takes 2 cubes, elsewhere 1', () => {
@@ -1269,6 +1315,8 @@ test('a Cordon card lets any player discard to end the Infect step', () => {
 	expect(gameOf(actor).pending[0]).toEqual({ t: 'cordon' });
 	send(actor, { type: 'DECIDE', decide: { d: 'cordon', seat: C, card: gameOf(actor).players[C]!.hand[0]! } });
 	expect(gameOf(actor).locations[city('lagos')]!.supplies).toBe(2);
+	expect(reject(worldOf(actor), phase(actor), { type: 'INFECT' })).not.toBeNull();
+	passTurn(actor);
 	expect(gameOf(actor).active).toBe(B);
 });
 
@@ -1602,6 +1650,8 @@ test('One Quiet Night played before the first flip skips the Infect step it is p
 	const actor = inInfectStep(world => (card = conjure(world, B, { kind: 'event', event: 'quietNight' })));
 	const cubes = gameOf(actor).locations[city('cairo')]!.supplies;
 	send(actor, { type: 'PLAY', seat: B, card, play: { e: 'quietNight' } });
+	expect(reject(worldOf(actor), phase(actor), { type: 'INFECT' })).not.toBeNull();
+	passTurn(actor);
 	expect(phase(actor)).toBe('playing.actions');
 	expect(gameOf(actor).active).toBe(B);
 	expect(gameOf(actor).locations[city('cairo')]!.supplies).toBe(cubes);
@@ -2495,6 +2545,7 @@ describe('infection', () => {
 		send(actor, { type: 'INFECT' });
 		expect(gameOf(actor).locations[city('lagos')]).toMatchObject({ supplies: 0, plague: 1 });
 		expect(gameOf(actor).incidents).toBe(1);
+		passTurn(actor);
 		expect(phaseOf(actor.getSnapshot())).toBe('playing.actions');
 		expect(gameOf(actor).active).toBe(B);
 	});
@@ -2724,6 +2775,7 @@ describe('turn flow', () => {
 			game.infectionsLeft = 1;
 		}, 'playing.infect');
 		send(actor, { type: 'INFECT' });
+		passTurn(actor);
 		expect(gameOf(actor).active).toBe(B);
 		const bo = Object.values(worldOf(actor).campaign.characters).find(character => character.name === 'Bo')!;
 		expect(bo).toMatchObject({ dead: true, diedAt: city('cairo') });
@@ -2957,6 +3009,7 @@ describe('scars and the sticker pool', () => {
 			edit(world, game);
 		}, 'playing.infect');
 		send(actor, { type: 'INFECT' });
+		passTurn(actor);
 		return actor;
 	};
 

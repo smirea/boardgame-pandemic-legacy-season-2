@@ -43,8 +43,12 @@ function boardOf(world: World): Board | null {
 	return { cities, stockpile: game.stockpile };
 }
 
-/** The steps in which Infection cards are flipped one after another: a turn's Infect step and the cards that open a game. */
-const flipping = (phase: Phase | null) => phase === 'playing.infect' || phase === 'setup.infect';
+/**
+ * When the cards flipped stay out on the desk: through a turn's Infect step until its player ends the turn, while
+ * the cards that open a game are flipped, and through an Epidemic from its bottom card to its reshuffle.
+ */
+const holds = (phase: Phase, step: string | null) =>
+	phase === 'playing.infect' || phase === 'setup.infect' || step === 'epidemicInfect' || step === 'intensify';
 
 /**
  * Plays each Infection card flipped, one at a time and in the order the state flipped them, lingering on each city
@@ -54,6 +58,8 @@ const flipping = (phase: Phase | null) => phase === 'playing.infect' || phase ==
 export class InfectionShow {
 	/** All Infection cards drawn in the current phase, newest first. */
 	stack = $state.raw<DrawnInfection[]>([]);
+	/** Where the cards went when the stack was last cleared: an Epidemic's reshuffle puts them back on the deck. */
+	exit = $state<'discard' | 'deck'>('discard');
 	focus = $state.raw<CityId | null>(null);
 	skull = $state.raw<{ key: number; city: CityId; at: number } | null>(null);
 	/** The incident track is drawn large while a marker goes into it. */
@@ -69,6 +75,8 @@ export class InfectionShow {
 	private board: Board | null = null;
 	private run = 0;
 	private phase: Phase | null = null;
+	private step: string | null = null;
+	private held = false;
 	private clearTimer: ReturnType<typeof setTimeout> | null = null;
 
 	constructor(private pulse: (city: CityId, kind: FxKind) => void) {}
@@ -88,7 +96,11 @@ export class InfectionShow {
 	/** Takes in the newest state. `live` is false for a jump that nobody lived through, which only catches up. */
 	observe(world: World, live: boolean, phase: Phase) {
 		const prevPhase = this.phase;
+		const prevStep = this.step;
+		const wasHeld = this.held;
 		this.phase = phase;
+		this.step = world.game?.pending[0]?.t ?? null;
+		this.held = holds(phase, this.step);
 		const log = world.game?.log ?? [];
 		const newest = log.at(-1)?.seq ?? -1;
 		const before = this.board;
@@ -100,9 +112,11 @@ export class InfectionShow {
 		this.reconcile(this.board);
 		const beats = this.beats(world, fresh, before, this.board);
 		if (beats.length > MOST_BEATS) return this.stop();
+		// Intensify takes every card flipped so far back onto the deck.
+		if (prevStep === 'intensify' && this.step !== 'intensify') this.clear('deck');
+		else if (!wasHeld && this.held && !this.playing) this.clear('discard');
 		if (beats.length > 0) {
 			this.cancelClear();
-			if (!flipping(prevPhase) && flipping(phase) && this.queue.length === 0) this.stack = [];
 			this.queue.push(...beats);
 			this.hidden = [
 				...this.hidden,
@@ -112,8 +126,8 @@ export class InfectionShow {
 			if (!this.playing) void this.play(this.run);
 			return;
 		}
-		// Leaving the step with nothing left to play zooms back out to fit.
-		if (flipping(prevPhase) && !flipping(phase) && !this.playing) this.scheduleClear();
+		// The step is over and nothing is left to play, so the cards go and the camera zooms back out to fit.
+		if (wasHeld && !this.held && !this.playing) this.clear('discard');
 		// The first turn begins with a clear table, whatever of the opening cards is still up.
 		if (prevPhase?.startsWith('setup') && phase.startsWith('playing') && (this.playing || this.stack.length > 0))
 			this.stop();
@@ -132,6 +146,13 @@ export class InfectionShow {
 		this.surge = false;
 	}
 
+	private clear(exit: 'discard' | 'deck') {
+		this.cancelClear();
+		this.exit = exit;
+		this.stack = [];
+		if (!this.playing) this.focus = null;
+	}
+
 	private cancelClear() {
 		if (this.clearTimer) {
 			clearTimeout(this.clearTimer);
@@ -144,9 +165,8 @@ export class InfectionShow {
 		const token = this.run;
 		this.clearTimer = setTimeout(() => {
 			this.clearTimer = null;
-			if (this.run !== token || this.playing || flipping(this.phase)) return;
-			this.focus = null;
-			this.stack = [];
+			if (this.run !== token || this.playing || this.held) return;
+			this.clear('discard');
 		}, delay);
 	}
 
@@ -282,7 +302,7 @@ export class InfectionShow {
 		}
 		this.playing = false;
 		// The camera stays on the city while more cards are to come, and zooms back out once the step is over.
-		if (!flipping(this.phase)) this.scheduleClear(950);
+		if (!this.held) this.scheduleClear(950);
 	}
 
 	private lagged(city: CityId, piece: Piece) {

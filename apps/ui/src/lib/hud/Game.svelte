@@ -416,9 +416,6 @@
 		get lived() {
 			return !spectator || announce;
 		},
-		get playable() {
-			return plays.length;
-		},
 		show,
 		send,
 	});
@@ -632,12 +629,8 @@
 		}
 		if (!canAct) return;
 		event.preventDefault();
-		const pending = game.pending[0]?.t;
-		if (pending === 'epidemicDrawn' || pending === 'epidemicInfect' || pending === 'intensify') {
-			send({ type: 'DECIDE', decide: { d: 'skip' } });
-			return;
-		}
-		// A card still face up beside the deck is read before the next one is turned.
+		if (admin.epidemic) return admin.start();
+		// Space is the desk's next click: a card, an Epidemic's step, or Done.
 		if (snap.phase !== 'playing.actions') {
 			if (admin.action && !admin.action.busy) admin.action.onclick();
 			return;
@@ -697,11 +690,13 @@
 				deck={admin.deck}
 				count={admin.count}
 				left={admin.left}
+				task={admin.task}
 				action={admin.action}
 				name={admin.seat ? seatName(world, admin.seat) : null}
 				color={admin.seat ? (SEAT_COLORS[game.seats.indexOf(admin.seat)] ?? '#fff') : '#f4e8cd'}
 				epidemic={admin.epidemic !== null}
 				stack={show.stack}
+				exit={show.exit}
 			/>
 		</div>
 	{:else if game && !spectator && actionChoices.length && canAct && snap.phase === 'playing.actions'}
@@ -1192,13 +1187,7 @@
 			</div>
 		{/if}
 		{#if !spectator && game}
-			<EpidemicSequence
-				{world}
-				{canAct}
-				held={admin.held}
-				who={seatName(world, game.active)}
-				onadvance={admin.advance}
-			/>
+			<EpidemicSequence {world} increasing={admin.increasing} side={seatAt?.has('tr') ? 'right' : 'left'} />
 		{/if}
 	</main>
 
@@ -1241,7 +1230,7 @@
 			epidemic={admin.epidemic}
 			canStart={canAct && !spectator}
 			who={seatName(world, game.active)}
-			onstart={admin.advance}
+			onstart={admin.start}
 			onlanded={key => admin.turn.landed(key)}
 			dest={flightDest}
 		/>

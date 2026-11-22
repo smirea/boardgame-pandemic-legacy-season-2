@@ -198,6 +198,7 @@ If 2 Epidemics are drawn together, resolve all three steps once, then again. Dis
 
 - Playing an Event is not an action.
 - Any player may play an Event at any time, on any turn, except between drawing a card and fully resolving it. A card whose text grants a specific timing window is the exception [C, designer ruling].
+- This game plays it more openly for an Epidemic: once its player has started it, any Event may be played between its steps (see [coverage.md](coverage.md), Built differently).
 - The player who plays it decides how it is used.
 - A Rationed Event goes to the Player discard pile. An Unrationed Event is destroyed after use.
 - No Event may be played after the game has ended. Win and loss are immediate ([C-10](#c-10-game-end-r)).

@@ -1,5 +1,5 @@
 import { reject } from '@repo/game';
-import type { Command, Insights, Phase, PlayerCard, World } from '@repo/game';
+import type { Command, Insights, Phase, PlayerCard, SeatId, World } from '@repo/game';
 import { untrack } from 'svelte';
 import type { InfectionShow } from './infectionShow.svelte.ts';
 import { TurnShow } from './turnShow.svelte.ts';
@@ -15,22 +15,35 @@ export type TurnAdminSource = {
 	readonly spectator: boolean;
 	/** False for a jump nobody lived through, such as a replay seeking. */
 	readonly lived: boolean;
-	/** How many Events could be played right now, by anyone. */
-	readonly playable: number;
 	readonly show: InfectionShow;
 	send(command: Command): void;
 };
 
-/** How long each step of an Epidemic stays up before the next is taken, so the whole table can follow it. */
-const INFECT_AFTER_MS = 2300;
-const INTENSIFY_AFTER_MS = 1500;
+/**
+ * The next thing the desk asks of its player: a card from the Player deck, an Infection card, the bottom card an
+ * Epidemic strikes with, the reshuffle that ends an Epidemic, or passing the turn on.
+ */
+export type DeskTask = 'draw' | 'flip' | 'bottom' | 'intensify' | 'done';
+
+/** How long the rate marker's move is shown before an Epidemic's bottom card may be drawn. */
+const INCREASE_MS = 1200;
 
 const SKIP = { type: 'DECIDE', decide: { d: 'skip' } } as const satisfies Command;
 
+const commandFor = (task: DeskTask, active: SeatId): Command =>
+	task === 'draw'
+		? { type: 'DRAW' }
+		: task === 'flip'
+			? { type: 'INFECT' }
+			: task === 'done'
+				? { type: 'END_TURN', seat: active }
+				: SKIP;
+
 /**
- * Everything after a player's actions, in one place on the screen: the Player deck, an Epidemic, then the Infection
- * deck. It says which deck is out, who may take the next card from it, and paces an Epidemic's steps once its player
- * has started it. Create it while a component is being set up: it keeps effects.
+ * Everything after a player's actions, in one place on the screen: the Player deck, an Epidemic, the Infection deck,
+ * and Done. It says which deck is out, what the next click there does and who may make it. Every step is a command
+ * its player sends, so an Event can be played before any of them. Create it while a component is being set up: it
+ * keeps effects.
  */
 export function createTurnAdmin(source: TurnAdminSource) {
 	const turn = new TurnShow();
@@ -52,17 +65,35 @@ export function createTurnAdmin(source: TurnAdminSource) {
 		const card = drawn?.t === 'draw' ? source.world.campaign.playerCards[drawn.card] : undefined;
 		return card?.kind === 'epidemic' ? card : null;
 	});
-	/** True while an Epidemic's steps are being taken, when the desk makes way for them. */
-	const resolving = $derived(step === 'epidemicInfect' || step === 'intensify');
 	/** The cards that open a game are anyone's to flip: no turn has begun, so no seat is the active one. */
 	const opening = $derived(source.phase === 'setup.infect');
 
+	// An Epidemic's first step is done by the time it shows, so it is held up for a beat as the step just taken.
+	let increased = $state(-1);
+	const increasing = $derived(step === 'epidemicInfect' && increased !== game?.epidemics);
+	$effect(() => {
+		if (step !== 'epidemicInfect') return;
+		const count = game!.epidemics;
+		const timer = setTimeout(() => (increased = count), INCREASE_MS);
+		return () => clearTimeout(timer);
+	});
+
 	const deck = $derived.by((): 'player' | 'infection' | null => {
-		if (!game || resolving) return null;
+		if (!game) return null;
+		if (step === 'epidemicInfect' || step === 'intensify') return 'infection';
 		if (source.phase === 'playing.draw') return 'player';
 		// The last card of a turn is still being played out on the board when the next player's turn has begun.
 		if (source.phase === 'playing.infect' || opening || show.playing || show.stack.length > 0) return 'infection';
 		return turn.reveals.length > 0 ? 'player' : null;
+	});
+
+	const task = $derived.by((): DeskTask | null => {
+		if (!game || deck === null) return null;
+		if (step === 'epidemicInfect') return 'bottom';
+		if (step === 'intensify') return 'intensify';
+		if (deck === 'player') return source.phase === 'playing.draw' && game.drawsLeft > 0 ? 'draw' : null;
+		if (source.phase !== 'playing.infect' && !opening) return null;
+		return game.infectionsLeft > 0 ? 'flip' : opening ? null : 'done';
 	});
 
 	// Whose turn is being wound up. The last Infection card is still played out after the next turn has begun, and
@@ -76,11 +107,12 @@ export function createTurnAdmin(source: TurnAdminSource) {
 
 	const allowed = (command: Command) => reject(source.world, source.phase, command) === null;
 	const action = $derived.by(() => {
-		if (source.spectator || !game || deck === null) return null;
-		const busy = turn.busy || show.playing;
+		if (source.spectator || !game || !task) return null;
 		if (!source.canAct && !opening) return null;
-		const command: Command = deck === 'player' ? { type: 'DRAW' } : { type: 'INFECT' };
-		return allowed(command) ? { busy, onclick: () => source.send(command) } : null;
+		const command = commandFor(task, game.active);
+		if (!allowed(command)) return null;
+		// A card still face up beside the deck, or still being played out on the board, is read before the next step.
+		return { busy: turn.busy || show.playing || increasing, onclick: () => source.send(command) };
 	});
 	const left = $derived(!game ? 0 : deck === 'player' ? game.drawsLeft : game.infectionsLeft);
 	const count = $derived.by(() => {
@@ -90,34 +122,10 @@ export function createTurnAdmin(source: TurnAdminSource) {
 		return info.infection.opening ? (info.infection.strata[0]?.size ?? 0) : info.infection.deck;
 	});
 
-	// The last step waits for its player while an Event or a Lockdown card could still be played before it.
-	const held = $derived(
-		source.playable > 0 ||
-			(game?.infectionDiscard.some(id => {
-				const card = source.world.campaign.infectionCards[id];
-				return card?.kind === 'city' && card.improvement === 'lockdown';
-			}) ??
-				false),
-	);
-
-	/** Starts the Epidemic that was drawn, or takes its next step now. */
-	const advance = () => {
-		if (allowed(SKIP)) source.send(SKIP);
+	/** Starts the Epidemic that was drawn. */
+	const start = () => {
+		if (step === 'epidemicDrawn' && allowed(SKIP)) source.send(SKIP);
 	};
-
-	// Once started, the steps follow on their own from the browser of the player whose turn it is.
-	$effect(() => {
-		if (source.spectator || !source.canAct) return;
-		const wait =
-			step === 'epidemicInfect'
-				? INFECT_AFTER_MS
-				: step === 'intensify' && !held && !show.playing
-					? INTENSIFY_AFTER_MS
-					: null;
-		if (wait === null) return;
-		const timer = setTimeout(advance, wait);
-		return () => clearTimeout(timer);
-	});
 
 	return {
 		turn,
@@ -128,6 +136,9 @@ export function createTurnAdmin(source: TurnAdminSource) {
 		/** The deck that is out on the desk, or null when the desk is put away. */
 		get deck() {
 			return deck;
+		},
+		get task() {
+			return task;
 		},
 		/** The seat whose turn the desk is winding up, or null while the table opens a game. */
 		get seat() {
@@ -145,9 +156,10 @@ export function createTurnAdmin(source: TurnAdminSource) {
 		get epidemic() {
 			return epidemic;
 		},
-		get held() {
-			return held;
+		/** True for the beat in which an Epidemic that was just started shows the infection rate moving on. */
+		get increasing() {
+			return increasing;
 		},
-		advance,
+		start,
 	};
 }

@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
-	import { flip } from 'svelte/animate';
 	import { cubicIn, cubicOut } from 'svelte/easing';
 	import { fly } from 'svelte/transition';
 	import InfectionCard from '#lib/cards/InfectionCard.svelte';
 	import { inkOn } from '#lib/color.ts';
 	import type { DrawnInfection } from './infectionShow.svelte.ts';
+	import type { DeskTask } from './turnAdmin.svelte.ts';
 
 	type Props = {
 		/** The side column it stands in, so the deck keeps to the screen's edge and cards are shown inward of it. */
@@ -15,7 +15,9 @@
 		count: number;
 		/** How many more cards this step takes. */
 		left: number;
-		/** A click on the deck, when this browser's player is the one to take the next card. */
+		/** What the turn asks for next, or null while nothing can be done here. */
+		task: DeskTask | null;
+		/** The click that does it, when this browser's player is the one to make it. */
 		action: { busy: boolean; onclick: () => void } | null;
 		/** Whose turn it is, shown to everyone, or null while the whole table flips the cards that open a game. */
 		name: string | null;
@@ -24,21 +26,38 @@
 		epidemic: boolean;
 		/** The Infection cards flipped in this step, newest first. */
 		stack: DrawnInfection[];
+		/** Where the cards flipped go when they leave: an Epidemic's reshuffle puts them back on the deck. */
+		exit: 'discard' | 'deck';
 	};
 
-	let { side, deck, count, left, action, name, color, epidemic, stack }: Props = $props();
+	let { side, deck, count, left, task, action, name, color, epidemic, stack, exit }: Props = $props();
 
-	const ready = $derived(action !== null && !action.busy);
+	// A card comes off the deck with a click on the deck. A step that turns no card over has a button under it.
+	const fromPile = $derived(task === 'draw' || task === 'flip' || task === 'bottom');
+	const ready = $derived(fromPile && action !== null && !action.busy);
+	const go = $derived(action && task === 'intensify' ? 'Intensify' : action && task === 'done' ? 'Done' : null);
 	const badge = $derived(
 		epidemic
 			? 'Epidemic drawn'
-			: left === 0
-				? deck === 'player'
-					? 'Cards drawn'
-					: 'Cities infected'
-				: action
-					? `${deck === 'player' ? 'Draw' : 'Flip'} · ${left} left`
-					: `${left} to ${deck === 'player' ? 'draw' : 'flip'}`,
+			: task === 'bottom'
+				? action
+					? 'Draw the bottom card'
+					: 'Bottom card to draw'
+				: task === 'intensify'
+					? 'Intensify to come'
+					: task === 'draw'
+						? action
+							? `Draw · ${left} left`
+							: `${left} to draw`
+						: task === 'flip'
+							? action
+								? `Flip · ${left} left`
+								: `${left} to flip`
+							: task === 'done'
+								? 'Turn ending'
+								: deck === 'player'
+									? 'Cards drawn'
+									: 'Cities infected',
 	);
 	const away = $derived(side === 'left' ? -1 : 1);
 
@@ -56,11 +75,24 @@
 		};
 	}
 
-	function leave(_node: HTMLElement) {
+	/** Cards done with go to the discard pile. After an Epidemic's reshuffle they go back onto the deck, one by one. */
+	function leave(node: HTMLElement) {
+		if (exit !== 'deck')
+			return {
+				duration: 280,
+				easing: cubicIn,
+				css: (t: number) => `transform: translateY(${(1 - t) * -18}px) scale(${0.9 + t * 0.1}); opacity: ${t}`,
+			};
+		const pile = node.closest('.desk')?.querySelector('[data-turn-deck]')?.getBoundingClientRect();
+		const card = node.getBoundingClientRect();
+		const dx = pile ? pile.left + pile.width / 2 - (card.left + card.width / 2) : 0;
+		const dy = pile ? pile.top + pile.height / 2 - (card.top + card.height / 2) : 0;
 		return {
-			duration: 280,
+			delay: Number(node.dataset['order'] ?? 0) * 60,
+			duration: 420,
 			easing: cubicIn,
-			css: (t: number) => `transform: translateY(${(1 - t) * -18}px) scale(${0.9 + t * 0.1}); opacity: ${t}`,
+			css: (t: number) =>
+				`transform: translate(${dx * (1 - t)}px, ${dy * (1 - t)}px) scale(${0.35 + 0.65 * t}) rotateY(${(1 - t) * 180}deg); opacity: ${Math.min(1, t * 2.5)}`,
 		};
 	}
 </script>
@@ -78,7 +110,16 @@
 		: `${name}'s turn: ${deck === 'player' ? 'draw Player cards' : 'flip Infection cards'}`}
 	data-testid="turn-desk"
 	data-deck={deck}
-	{@attach feedback('Turn desk', () => ({ deck, left, count, epidemic, mine: action !== null, flipped: stack.length }))}
+	data-task={task}
+	{@attach feedback('Turn desk', () => ({
+		deck,
+		task,
+		left,
+		count,
+		epidemic,
+		mine: action !== null,
+		flipped: stack.length,
+	}))}
 >
 	<div class="well">
 		{#key deck}
@@ -91,7 +132,9 @@
 				data-testid={deck === 'player' ? 'player-draw-deck' : 'infection-draw-deck'}
 				aria-label={deck === 'player'
 					? `Draw from the Player deck (${left} left)`
-					: `Flip an Infection card (${left} left)`}
+					: task === 'bottom'
+						? 'Draw the bottom Infection card'
+						: `Flip an Infection card (${left} left)`}
 				title={ready ? 'Space' : undefined}
 				in:fly={{ x: away * 160, duration: 380, delay: 220 }}
 				out:fly={{ x: away * 160, duration: 240 }}
@@ -114,13 +157,23 @@
 			</button>
 		{/key}
 		<span class="who"><i></i>{name ?? 'Everyone'}</span>
-		<span class="badge" class:alarm={epidemic} data-testid="turn-desk-badge">{badge}</span>
+		{#if go}
+			<button
+				class="go"
+				disabled={action!.busy}
+				onclick={() => !action!.busy && action!.onclick()}
+				title="Space"
+				data-testid="turn-desk-go">{go}</button
+			>
+		{:else}
+			<span class="badge" class:alarm={epidemic || task === 'bottom'} data-testid="turn-desk-badge">{badge}</span>
+		{/if}
 	</div>
 	<!-- A drawn Player card is laid over this by `CardFlights`, which finds it by its mark. -->
 	<div class="slot" data-turn-slot data-testid="infection-draw">
 		{#each stack as entry, index (entry.key)}
-			<div class="layer" class:older={index > 0} animate:flip={{ duration: 320 }} in:fromDeck out:leave>
-				<InfectionCard card={entry.card} note={entry.note} alarm={entry.alarm} />
+			<div class="layer" style:--z={stack.length - index} data-order={index} in:fromDeck out:leave>
+				<div class="whole"><InfectionCard card={entry.card} note={entry.note} alarm={entry.alarm} /></div>
 			</div>
 		{/each}
 	</div>
@@ -288,12 +341,41 @@
 		color: #fff3e6;
 	}
 
-	/* The newest card stands whole at the foot, level with the deck. Each one before it shows the strip with its name. */
+	.go {
+		padding: 0.34rem 1.1rem;
+		border: 0;
+		border-radius: 3px;
+		background: #e3b23c;
+		color: #1c140a;
+		font: inherit;
+		font-size: 0.92rem;
+		font-weight: 700;
+		cursor: pointer;
+		box-shadow: 0 0.4rem 1rem rgb(0 0 0 / 0.45);
+		/* A few beats and then still, like the deck. */
+		animation: beckon 1.5s ease-in-out 6;
+	}
+
+	.go:disabled {
+		opacity: 0.55;
+		cursor: default;
+		animation: none;
+	}
+
+	.go:not(:disabled):hover,
+	.go:not(:disabled):focus-visible {
+		background: #f0c455;
+	}
+
+	/*
+	 * Every card flipped stays whole. The first lies at the foot, level with the deck, and each one after it is laid
+	 * on top a little higher, so the name at the foot of every card under it still shows.
+	 */
 	.slot {
 		position: relative;
 		display: flex;
-		flex-direction: column-reverse;
-		gap: 0.2rem;
+		flex-direction: column;
+		justify-content: flex-end;
 		width: 9.6rem;
 		min-height: 9.4rem;
 		--card-size: 0.86rem;
@@ -304,23 +386,31 @@
 		align-items: flex-end;
 	}
 
+	/* A layer is as tall as the strip a card keeps in view. Its card stands on the layer's foot and reaches up past it. */
 	.layer {
-		display: flex;
+		position: relative;
+		z-index: var(--z);
 		flex: none;
-		align-items: flex-end;
-		max-height: 9.2em;
-		border-radius: 0.35em;
+		width: 11em;
+		height: 2.75em;
 		font-size: var(--card-size);
-		overflow: hidden;
+		pointer-events: none;
+	}
+
+	.whole {
+		position: absolute;
+		bottom: 0;
+		left: 0;
 		pointer-events: auto;
-		transition: max-height 320ms cubic-bezier(0.3, 0, 0.2, 1);
+		transition: translate 180ms ease;
 	}
 
-	.layer.older {
-		max-height: 2.75em;
+	/* A card under the others comes to the front while the pointer rests on its name. */
+	.layer:hover {
+		z-index: 40;
 	}
 
-	.layer.older:hover {
-		max-height: 9.2em;
+	.layer:hover .whole {
+		translate: 0 -0.3em;
 	}
 </style>

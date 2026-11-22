@@ -128,6 +128,7 @@ export function optionsFor(state: PublicState, who: Who, seating: (CharacterId |
 		add('end', 'flow', 'end your actions and move to the draw step', { type: 'END_ACTIONS', seat: who.seat });
 		add('draw', 'flow', 'draw one Player card', { type: 'DRAW' });
 		add('infect', 'flow', 'flip one Infection card', { type: 'INFECT' });
+		add('done', 'flow', 'end your turn, once every Infection card is flipped', { type: 'END_TURN', seat: who.seat });
 		if (state.canUndo) add('undo', 'flow', 'take back your last action', { type: 'UNDO' });
 	}
 	for (const { seat, card, play } of legalPlays(world, phase)) {
@@ -334,9 +335,13 @@ export function mayRaw(state: PublicState, who: Who, command: Command): string |
 			return null;
 		case 'ACTION':
 		case 'END_ACTIONS':
+		case 'END_TURN':
 			return command.seat === who.seat ? null : 'That is not your seat';
-		case 'DRAW':
 		case 'INFECT':
+			// The cards that open a game are the lead's to flip, like every other setup step.
+			if (state.phase === 'setup.infect') return who.lead ? null : 'Setup belongs to the lead';
+			return game?.active === who.seat ? null : 'It is not your turn';
+		case 'DRAW':
 		case 'UNDO':
 			return game?.active === who.seat ? null : 'It is not your turn';
 		case 'PLAY':

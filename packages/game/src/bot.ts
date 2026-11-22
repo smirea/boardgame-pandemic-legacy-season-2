@@ -68,7 +68,8 @@ export function botCommand(world: World, phase: Phase, rng: RngState, seats = 2)
 				if (plays.length) return { type: 'PLAY', ...pick(rng, plays) };
 			}
 			if (phase === 'playing.draw') return { type: 'DRAW' };
-			if (phase === 'playing.infect') return { type: 'INFECT' };
+			if (phase === 'playing.infect')
+				return game!.infectionsLeft > 0 ? { type: 'INFECT' } : { type: 'END_TURN', seat: game!.active };
 			const actions = legalActions(world, game!.active).filter(
 				action => action.a !== 'selfInject' || nextFloat(rng) < 0.3,
 			);
