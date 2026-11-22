@@ -125,6 +125,84 @@ for (const [sheet, ids] of pack.dossier.sheets.entries()) {
 	}
 }
 
+const slug = (name: string) =>
+	name
+		.toLowerCase()
+		.normalize('NFD')
+		.replace(/[\u0300-\u036f]/g, '')
+		.replace(/[^a-z0-9]+/g, '-')
+		.replace(/^-|-$/g, '');
+
+const cityIdBySlug = new Map(pack.cities.map(city => [slug(city.name), city.id]));
+const cities: Record<string, Scan> = {};
+const searchCities: Record<string, Scan[]> = {};
+
+for (const city of pack.cities) {
+	if (city.kind !== 'city' || city.playerCards === 0) continue;
+	const baseSrc = `base/player-deck/city-${city.id}.jpg`;
+	if (await exists(baseSrc)) cities[city.id] = { title: city.name, src: baseSrc };
+}
+
+for (const id of pack.dossier.packages) {
+	const dir = `packages/package-${id}`;
+	const def = await json(`${dir}/package.json`);
+	for (const card of def.cards as { json: string; title: string; category: string }[]) {
+		if (!card.category.includes('player')) continue;
+		const cityId = cityIdBySlug.get(slug(card.title));
+		if (!cityId) continue;
+		const folder = `${dir}/${card.json.replace(/\/card\.json$/, '')}`;
+		const data = await json(card.json.startsWith('/') ? card.json : `${dir}/${card.json}`);
+		const baseSrc = `${folder}/${data.images.sideB}`;
+		if (!(await exists(baseSrc))) throw new Error(`Missing player card scan ${baseSrc}`);
+		const states = (data.states ?? []) as { state: number; images?: { sideB?: string } }[];
+		if (states.length > 0) {
+			const ordered = [baseSrc];
+			for (const stateNum of [2, 3, 4]) {
+				const state = states.find(item => item.state === stateNum);
+				if (!state?.images?.sideB) continue;
+				const src = `${folder}/${state.images.sideB}`;
+				if (!(await exists(src))) throw new Error(`Missing search state scan ${src}`);
+				ordered.push(src);
+			}
+			searchCities[cityId] = ordered.map(src => ({ title: card.title, src }));
+			if (!cities[cityId]) cities[cityId] = { title: card.title, src: baseSrc };
+		} else {
+			cities[cityId] = { title: card.title, src: baseSrc };
+		}
+	}
+}
+
+for (const city of pack.cities) {
+	if (city.kind !== 'city' || city.playerCards === 0) continue;
+	if (!cities[city.id]) throw new Error(`No player card scan for city ${city.id}`);
+}
+for (const [cityId, boxes] of Object.entries(pack.searches)) {
+	const expected = boxes.length === 1 ? 2 : 4;
+	const scans = searchCities[cityId];
+	if (!scans || scans.length !== expected)
+		throw new Error(`Expected ${expected} search scans for ${cityId}, found ${scans?.length ?? 0}`);
+}
+
+const produce: Record<number, Scan> = {};
+for (const boxes of [1, 2, 3]) {
+	const src = `base/player-deck/produce-supplies-0${boxes}.jpg`;
+	if (!(await exists(src))) throw new Error(`Missing produce supplies scan ${src}`);
+	produce[boxes] = { title: 'Produce Supplies', src };
+}
+
+const IMPROVEMENT_SCANS: Record<string, string> = {
+	double: 'base/upgrades/player-card/foundations.jpg',
+	triple: 'base/upgrades/player-card/infrastructure.jpg',
+	wild: 'dossiers/folder-4/door-43/item-01_decryption-key.jpg',
+	redWild: 'dossiers/folder-4/door-45/item-01_local-operatives.jpg',
+};
+const cityImprovements: Record<string, Scan> = {};
+for (const improvement of pack.cityImprovements) {
+	const src = IMPROVEMENT_SCANS[improvement.id];
+	if (!src || !(await exists(src))) throw new Error(`Missing city improvement scan for ${improvement.id}`);
+	cityImprovements[improvement.id] = { title: improvement.name, src };
+}
+
 const out = new URL('../src/lib/scans.generated.ts', import.meta.url);
 await Bun.write(
 	out,
@@ -133,7 +211,11 @@ await Bun.write(
 		`export const legacyScans: Record<string, Scan> = ${JSON.stringify(legacy)};\n` +
 		`export const packageScans: Record<number, Scan[]> = ${JSON.stringify(packages)};\n` +
 		`export const doorScans: Record<string, Scan[]> = ${JSON.stringify(doors)};\n` +
-		`export const eventScans: Record<string, Scan> = ${JSON.stringify(events)};\n`,
+		`export const eventScans: Record<string, Scan> = ${JSON.stringify(events)};\n` +
+		`export const produceScans: Record<number, Scan> = ${JSON.stringify(produce)};\n` +
+		`export const cityScans: Record<string, Scan> = ${JSON.stringify(cities)};\n` +
+		`export const searchCityScans: Record<string, Scan[]> = ${JSON.stringify(searchCities)};\n` +
+		`export const cityImprovementScans: Record<string, Scan> = ${JSON.stringify(cityImprovements)};\n`,
 );
 await Bun.write(
 	new URL('../src/lib/cards/print.generated.ts', import.meta.url),

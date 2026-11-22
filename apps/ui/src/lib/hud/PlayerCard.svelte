@@ -30,8 +30,7 @@
 		producePrint,
 	} from '#lib/cards/playerPrint.ts';
 	import { inkOn } from '#lib/color.ts';
-	import { legacyScans } from '#lib/scans.generated.ts';
-	import { eventScan, originals, scanUrl } from '#lib/scans.svelte.ts';
+	import { originals, playerCardScan, scanUrl } from '#lib/scans.svelte.ts';
 	import RichText from './RichText.svelte';
 
 	const hoverCard = getContext<((card: CardId | null) => void) | undefined>('card-hover');
@@ -113,16 +112,7 @@
 		}
 	});
 
-	const originalScan = $derived.by(() => {
-		if (small) return null;
-		if (card.kind === 'event') return eventScan(card.event)[0] ?? null;
-		if (card.kind === 'epidemic') return legacyScans['03-07'] ?? null;
-		if (card.kind === 'produce') {
-			const n = Math.min(3, Math.max(1, card.boxesLeft));
-			return { title: 'Produce Supplies', src: `base/player-deck/produce-supplies-0${n}.jpg` };
-		}
-		return null;
-	});
+	const originalScan = $derived(small ? null : playerCardScan(card));
 </script>
 
 <button
@@ -144,7 +134,10 @@
 	{onclick}
 >
 	{#if originals.held && originalScan}
-		<img class="original-swap" src={scanUrl(originalScan.src)} alt={face.title} />
+		<img class="original-swap" src={scanUrl(originalScan.card.src)} alt={face.title} />
+		{#if originalScan.sticker}
+			<img class="original-sticker" src={scanUrl(originalScan.sticker.src)} alt={originalScan.sticker.title} />
+		{/if}
 	{:else if small}
 		<span class="head">
 			<span class="kicker">{face.kicker}</span>
@@ -358,6 +351,18 @@
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
+	}
+
+	.original-sticker {
+		position: absolute;
+		left: 11%;
+		top: 50%;
+		width: 78%;
+		height: auto;
+		transform: translateY(-50%);
+		border-radius: 0.16em;
+		box-shadow: 0 1px 4px rgb(0 0 0 / 0.45);
+		pointer-events: none;
 	}
 
 	.card:not(:disabled) {

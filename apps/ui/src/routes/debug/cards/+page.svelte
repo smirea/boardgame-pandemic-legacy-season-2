@@ -4,8 +4,8 @@
 	import InfectionCard from '#lib/cards/InfectionCard.svelte';
 	import LegacyCard from '#lib/cards/LegacyCard.svelte';
 	import { EVENT_PRINT } from '#lib/cards/playerPrint.ts';
-	import { eventScans, legacyScans } from '#lib/scans.generated.ts';
-	import { scanUrl } from '#lib/scans.svelte.ts';
+	import { legacyScans } from '#lib/scans.generated.ts';
+	import { playerCardScan, scanUrl } from '#lib/scans.svelte.ts';
 	import PlayerCard from '#lib/hud/PlayerCard.svelte';
 
 	// Every card comes from a fresh campaign, so this page shows exactly what the generator produces.
@@ -56,13 +56,7 @@
 			mode: EVENT_PRINT[event.id].mode,
 		})),
 	];
-	const playerScanOf = (card: PlayerCardData): string | null => {
-		if (card.kind === 'event') return eventScans[card.event]?.src ?? null;
-		if (card.kind === 'epidemic') return 'base/player-deck/epidemic.jpg';
-		if (card.kind === 'produce')
-			return `base/player-deck/produce-supplies-0${Math.min(3, Math.max(1, card.boxesLeft))}.jpg`;
-		return null;
-	};
+	const playerScanOf = (card: PlayerCardData): string | null => playerCardScan(card)?.card.src ?? null;
 	const hollow: InfectionCardData[] = [
 		{ id: 'g' as never, kind: 'gather' },
 		{ id: 'a' as never, kind: 'assemble' },
