@@ -1,4 +1,4 @@
-import { breakthrough, inoculation, isForsaken, LABS, pack } from '@repo/game';
+import { breakthrough, inoculation, isForsaken, LABS, mapNotes, pack } from '@repo/game';
 import type { CityId, EdgeDef, Insights, ReconBox, SeatId, World } from '@repo/game';
 import { travelOf } from '#lib/board/travel.ts';
 import type { BoardMarks, BoardView, CityView, Fx, LabInfo } from '#lib/board/types.ts';
@@ -179,6 +179,9 @@ export function createBoardView(source: BoardSource): BoardView {
 		),
 	);
 
+	const sameNotes = reconciler<BoardView['notes']>();
+	const notes = $derived(sameNotes(mapNotes(campaign)));
+
 	// How each pawn made its most recent move, which picks its vehicle and the way it goes. Worked out apart from the
 	// pawns, since it reads the whole log and a pawn lights up far more often than it moves.
 	const sameMoves = reconciler<Partial<Record<SeatId, ReturnType<typeof travelOf>>>>();
@@ -262,6 +265,9 @@ export function createBoardView(source: BoardSource): BoardView {
 		},
 		get recon() {
 			return recon;
+		},
+		get notes() {
+			return notes;
 		},
 		get pawns() {
 			return pawns;

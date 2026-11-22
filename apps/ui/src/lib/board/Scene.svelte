@@ -30,17 +30,18 @@
 	import { restWhenStill } from './frameLoop';
 	import Fog from './Fog.svelte';
 	import type { Part } from './hints';
-	import { layoutLabels, NAME_SIZE } from './labels';
+	import { DISC_REACH, layoutLabels, layoutNotes, NAME_SIZE } from './labels';
 	import type { Placement } from './labels';
 	import { buildLandGeometry, mapToSheet } from './land';
 	import { LAND_HEIGHT } from './projection';
 	import FlyingCube from './FlyingCube.svelte';
 	import { pieceModels } from './models.svelte';
 	import Pawn from './Pawn.svelte';
-	import { fonts, nameWidth } from './print.svelte';
+	import { fonts, nameWidth, noteSize } from './print.svelte';
 	import type { BoardBounds, BoardPoint } from './projection';
 	import MapPing from './MapPing.svelte';
 	import Pulse from './Pulse.svelte';
+	import MapNote, { NOTE } from './MapNote.svelte';
 	import ReconBox from './ReconBox.svelte';
 	import { placeReconBoxes } from './reconLayout';
 	import type { ReconRect } from './reconLayout';
@@ -517,6 +518,28 @@
 		);
 	});
 	const UNPLACED: Placement = { x: 0, z: 3.4, leader: false };
+	// Notes keep clear of every disc and printed name, so they are placed after the names.
+	const noteSpots = $derived.by(() => {
+		if (!fonts.ready) return new Map<string, BoardPoint>();
+		const taken = visibleCities.flatMap(city => {
+			const at = layout[city.id]!;
+			const disc = { x: at.x, z: at.z, width: DISC_REACH * 2, depth: DISC_REACH * 2 };
+			const name = anchors.get(city.id);
+			if (!name) return [disc];
+			const width = nameWidth(view.cities[city.id]!.name, city.port, NAME_SIZE);
+			return [disc, { x: at.x + name.x, z: at.z + name.z, width, depth: NAME_SIZE * 1.1 }];
+		});
+		const shown = new Set(visibleCities.map(city => city.id));
+		return layoutNotes(
+			view.notes.map(note => ({
+				id: note.id,
+				at: layout[note.city]!,
+				...noteSize(note.text, NOTE.size, NOTE.width),
+				hidden: !shown.has(note.city),
+			})),
+			taken,
+		);
+	});
 	const flagsByCity = $derived.by(() => {
 		const map = new Map<CityId, NonNullable<BoardView['marks']>['flags']>();
 		for (const flag of view.marks?.flags ?? []) map.set(flag.city, [...(map.get(flag.city) ?? []), flag]);
@@ -541,6 +564,7 @@
 		void anchors;
 		void aspect;
 		void showStockpile;
+		void noteSpots;
 		return untrack(() => {
 			// A box keeps one size on screen, so its footprint on the board follows the zoom of the fitted view.
 			const zoom = fitBoard(citiesBounds, aspect, FOV, DEFAULT_TILT, { bounds: citiesBounds, ...insets });
@@ -559,6 +583,13 @@
 				for (const x of [-STOCKPILE_REACH.x, 0, STOCKPILE_REACH.x])
 					for (const z of [-STOCKPILE_REACH.north, 0, STOCKPILE_REACH.south])
 						taken.push({ x: STOCKPILE.x + x, z: STOCKPILE.z + z });
+			for (const note of view.notes) {
+				const at = noteSpots.get(note.id);
+				if (!at) continue;
+				const { width, depth } = noteSize(note.text, NOTE.size, NOTE.width);
+				for (const x of [-width / 2, 0, width / 2])
+					for (const z of [-depth / 2, 0, depth / 2]) taken.push({ x: at.x + x, z: at.z + z });
+			}
 			const rects = placeReconBoxes(
 				view.recon.map(box => ({ route: box.route, from: layout[box.city]!, toward: middleOf(box.reveals) })),
 				taken,
@@ -733,6 +764,11 @@
 		onselect={() => oncity?.(city.id)}
 		onhint={(part, event) => onhint?.(city.id, part, event, anchors.get(city.id))}
 	/>
+{/each}
+
+{#each view.notes as note (note.id)}
+	{@const at = noteSpots.get(note.id)}
+	{#if at}<MapNote text={note.text} {at} />{/if}
 {/each}
 
 {#each printedBoxes as box (box.route)}

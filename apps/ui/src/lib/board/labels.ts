@@ -92,3 +92,54 @@ export function layoutLabels(cities: { id: CityId; width: number; at: BoardPoint
 		}),
 	);
 }
+
+/** A rectangle on the board by its centre and full size. */
+export type Box = { x: number; z: number; width: number; depth: number };
+
+const NOTE_GAP = 0.6;
+/** The directions a note tries, in degrees with south (below) at 90: below and above first, fanning out to the sides. */
+const NOTE_ANGLES = [90, 270, 67.5, 112.5, 292.5, 247.5, 45, 135, 315, 225, 22.5, 157.5, 337.5, 202.5, 0, 180];
+
+/**
+ * Where each map note is centred: beside its location, as close as it can stand while covering no disc, name or
+ * earlier note, trying every direction at each distance before stepping further out (below and above first). Where
+ * nowhere near is clear it takes the spot it overlaps least. A location still hidden has nothing printed round it, so
+ * its note stands on its own ground, as a sticker's words do over the region it covers.
+ */
+export function layoutNotes(
+	notes: { id: string; at: BoardPoint; width: number; depth: number; hidden: boolean }[],
+	taken: Box[],
+): Map<string, BoardPoint> {
+	const placed = new Map<string, BoardPoint>();
+	const blocked = [...taken];
+	const covered = (box: Box) =>
+		blocked.reduce((total, other) => {
+			const width = (box.width + other.width + NOTE_GAP) / 2 - Math.abs(box.x - other.x);
+			const depth = (box.depth + other.depth + NOTE_GAP) / 2 - Math.abs(box.z - other.z);
+			return total + (width > 0 && depth > 0 ? width * depth : 0);
+		}, 0);
+	for (const note of notes) {
+		const size = { width: note.width, depth: note.depth };
+		const candidates: BoardPoint[] = note.hidden ? [note.at] : [];
+		for (let reach = DISC_REACH; reach <= DISC_REACH + 16; reach += 1.5)
+			for (const degrees of NOTE_ANGLES) {
+				const ux = Math.cos((degrees * Math.PI) / 180);
+				const uz = Math.sin((degrees * Math.PI) / 180);
+				const span = reach + (Math.abs(ux) * note.width) / 2 + (Math.abs(uz) * note.depth) / 2;
+				candidates.push({ x: note.at.x + ux * span, z: note.at.z + uz * span });
+			}
+		let best = candidates[0]!;
+		let least = Number.POSITIVE_INFINITY;
+		for (const candidate of candidates) {
+			const overlap = covered({ ...candidate, ...size });
+			if (overlap < least) {
+				least = overlap;
+				best = candidate;
+			}
+			if (overlap === 0) break;
+		}
+		placed.set(note.id, best);
+		blocked.push({ ...best, ...size });
+	}
+	return placed;
+}

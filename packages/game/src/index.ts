@@ -52,8 +52,8 @@ export {
 } from './options';
 export type { ActionChoice } from './options';
 export { violations } from './invariants';
-export type { Insights, PlayerCardsAt, PlayerDeckKind, PublicState, ReconBox } from './view';
-export { inoculation, insights, onGrid, publicState, reconBoxes } from './view';
+export type { Insights, MapNote, PlayerCardsAt, PlayerDeckKind, PublicState, ReconBox } from './view';
+export { inoculation, insights, mapNotes, onGrid, publicState, reconBoxes } from './view';
 export {
 	breakthrough,
 	canImproveCityCard,

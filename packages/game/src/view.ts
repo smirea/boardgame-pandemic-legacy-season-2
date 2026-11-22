@@ -3,7 +3,9 @@ import { openingInfectionsLeft } from './flow';
 import { cityDef, grid, isForsaken, reconned, sealDef, unlocksBehind } from './helpers';
 import type { CardId, CityId } from './ids';
 import { AWAY_FROM_ROUTE, type Action } from './actions';
-import type { ReconRoute } from './content/types';
+import type { DoorId, ReconRoute, Seal } from './content/types';
+import { isOpen } from './legacy';
+import type { Campaign } from './state';
 import type { GameSnapshot, Phase } from './machine';
 import { phaseOf, reject } from './machine';
 import { legalActions } from './options';
@@ -244,4 +246,36 @@ export function reconBoxes(world: World, phase: Phase): ReconBox[] {
 			},
 		];
 	});
+}
+
+/** Rules text the map stickers print on the board, standing beside `city` while it still applies. */
+export type MapNote = { id: string; city: CityId; text: string };
+
+const door = (id: DoorId): Seal => ({ t: 'door', id });
+const box = (id: number): Seal => ({ t: 'package', id });
+
+/**
+ * The words the map stickers print on the board, each while it still applies: which first arrival opens what, the
+ * haven in ruins, the wall around Utopia, and the recon out of Kolkata nobody knows yet. Story is left out, and the
+ * recon instructions are the recon boxes'.
+ */
+export function mapNotes(campaign: Campaign): MapNote[] {
+	const open = (seal: Seal) => isOpen(campaign, seal);
+	const revealed = (city: string) => campaign.locations[city as CityId]?.revealed === true;
+	const notes: MapNote[] = [];
+	const note = (id: string, city: string, text: string) => notes.push({ id, city: city as CityId, text });
+	if (open(door('53')) && !open(door('52')))
+		note('kolkata-recon', 'kolkata', 'You do not yet know how to Recon out of Kolkata.');
+	if (!revealed('utopia')) {
+		if (open(door('58'))) note('utopia-plan', 'utopia', 'If you are able to execute the Plan, open Package 8.');
+		else if (open(door('56'))) note('utopia-wall', 'utopia', 'You cannot access Utopia until the Hollow Men defect.');
+	}
+	if (revealed('lake-baikal') && open(box(8)) && !open(door('22')))
+		note('baikal-arrival', 'lake-baikal', 'Open door 22 the first time you move to Lake Baikal.');
+	if (revealed('haven-indian-ocean') && !open(door('11')))
+		note('indian-ocean-arrival', 'haven-indian-ocean', 'Open door 11 the first time you move here.');
+	if (revealed('haven-eastern-pacific') && !open(box(6)))
+		note('eastern-pacific-arrival', 'haven-eastern-pacific', 'Open Package 6 the first time you move here.');
+	if (revealed('haven-coral-sea')) note('coral-sea-ruins', 'haven-coral-sea', 'This haven is in ruins.');
+	return notes;
 }

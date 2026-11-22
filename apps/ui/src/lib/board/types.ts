@@ -1,4 +1,4 @@
-import type { CityId, Color, EdgeDef, PlayerCardsAt, StructureKind } from '@repo/game';
+import type { CityId, Color, EdgeDef, MapNote, PlayerCardsAt, StructureKind } from '@repo/game';
 import type { CursorTool } from '#lib/session/protocol.ts';
 import type { BoardPoint } from './projection';
 
@@ -142,6 +142,8 @@ export type BoardView = {
 	/** Supply cubes held in reserve off the board, while a game is played. */
 	reserve: number | null;
 	recon: ReconBoxView[];
+	/** Rules text the map stickers print beside a location, while it still applies. */
+	notes: MapNote[];
 	cursors: CursorView[];
 	drawings?: DrawingView[];
 	pings?: PingView[];

@@ -146,6 +146,56 @@ export function printTitle(text: string, size: number, lit: boolean): Print {
 	});
 }
 
+/** Words broken into lines no wider than `width` board units in `font`. */
+function wrap(font: string, text: string, width: number): string[] {
+	const lines: string[] = [];
+	for (const word of text.split(' ')) {
+		const last = lines.at(-1);
+		if (last !== undefined && measure(font, 0, `${last} ${word}`) <= width) lines[lines.length - 1] = `${last} ${word}`;
+		else lines.push(word);
+	}
+	return lines;
+}
+
+/** The footprint of `printNote` in board units, to place it before it is painted. */
+export function noteSize(text: string, size: number, width: number) {
+	const font = `${NAME_STYLE} ${size}px ${NAME_FONT}`;
+	const lines = wrap(font, text, width);
+	const pad = size * 0.35;
+	return {
+		width: Math.max(...lines.map(line => measure(font, 0, line))) + pad * 2,
+		depth: lines.length * size * 1.2 + pad * 2,
+	};
+}
+
+/**
+ * Rules text a map sticker prints on the board, set in the names' italic as a short centred block no wider than
+ * `width`, with the same faint paper halo so it reads over coasts and lines.
+ */
+export function printNote(text: string, size: number, width: number): Print {
+	const font = `${NAME_STYLE} ${size}px ${NAME_FONT}`;
+	const lines = wrap(font, text, width);
+	const leading = size * 1.2;
+	const pad = size * 0.35;
+	const { width: sheetWidth, depth: sheetHeight } = noteSize(text, size, width);
+	return sheet(sheetWidth, sheetHeight, context => {
+		context.font = font;
+		context.textAlign = 'center';
+		context.textBaseline = 'middle';
+		context.lineJoin = 'round';
+		lines.forEach((line, index) => {
+			const y = pad + leading * (index + 0.5);
+			context.strokeStyle = PAPER;
+			context.globalAlpha = 0.45;
+			context.lineWidth = size * 0.22;
+			context.strokeText(line, sheetWidth / 2, y);
+			context.globalAlpha = 1;
+			context.fillStyle = INK;
+			context.fillText(line, sheetWidth / 2, y);
+		});
+	});
+}
+
 /** A berth ruled on the chart for a pile of pieces: a double rule with its corners cut. */
 export function printBerth(width: number, height: number): Print {
 	return sheet(width, height, context => {
