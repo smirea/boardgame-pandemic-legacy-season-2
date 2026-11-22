@@ -30,6 +30,8 @@ export type BoardSource = {
 	readonly onGrid: ReadonlySet<CityId>;
 	/** Changes the state already holds that the infection show has not played yet. */
 	readonly lag: Lag;
+	/** Game End's population changes the population show has not reached yet. */
+	readonly populationLag: Partial<Record<CityId, number>>;
 	readonly skull: BoardView['skull'];
 	/** The city whose ring of actions is open. */
 	readonly selected: CityId | null;
@@ -74,7 +76,7 @@ export function createBoardView(source: BoardSource): BoardView {
 	const sameCities = reconciler<Record<CityId, CityView>>();
 	const cities = $derived.by(() => {
 		const info = source.playing ? source.info : null;
-		const { lag, onGrid, selected, targets } = source;
+		const { lag, populationLag, onGrid, selected, targets } = source;
 		const stocks = inoculation(source.world);
 		const storageLeaks = campaign.rules.includes('epidemicFromStorage');
 		return sameCities(
@@ -109,7 +111,7 @@ export function createBoardView(source: BoardSource): BoardView {
 							supplies: (location?.supplies ?? 0) - (held?.supplies ?? 0),
 							plague: (location?.plague ?? 0) - (held?.plague ?? 0),
 							hollow: (location?.hollow ?? 0) - (held?.hollow ?? 0),
-							population: record.population,
+							population: record.population - (populationLag[city.id] ?? 0),
 							port: city.port,
 							haven: city.kind === 'haven',
 							structures: (['center', 'tower', 'shelter'] as const)
@@ -121,7 +123,7 @@ export function createBoardView(source: BoardSource): BoardView {
 								.filter(entry => entry.permanent || entry.placed),
 							inGame: game !== null,
 							infested: record.infested,
-							forsaken: isForsaken(campaign, city.id),
+							forsaken: isForsaken(campaign, city.id) && !populationLag[city.id],
 							lab: record.lab,
 							labInfo,
 							highlight: selected === city.id ? 'selected' : targets.has(city.id) ? 'target' : null,

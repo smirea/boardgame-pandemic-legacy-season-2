@@ -201,8 +201,15 @@ export function commandLabel(world: World, command: Command | null): { who: stri
 									: `Permanent ${purchase.structure}`;
 			return { who: null, text: `Buys ${what}: ${purchaseLabel(world, purchase)}` };
 		}
+		case 'REFUND': {
+			const entry = world.game?.upkeep?.bought[command.index];
+			return {
+				who: null,
+				text: entry ? `Gives back ${purchaseLabel(world, entry.purchase)}` : 'Gives back a purchase',
+			};
+		}
 		case 'FINISH_UPKEEP':
-			return { who: null, text: 'The game is closed' };
+			return { who: null, text: command.done ? 'Done spending' : 'Not done spending' };
 	}
 }
 

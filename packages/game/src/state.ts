@@ -23,6 +23,7 @@ import type {
 } from './content/types';
 import type { PiledDeck, StratifiedDeck } from './decks';
 import type { CardId, CharacterId, CityId, PlayerId, RegionId, SeatId } from './ids';
+import type { Purchase } from './legacy';
 import type { RngState } from './rng';
 
 export type SearchBox = { scope: 'land' | 'sea'; result: SearchResult; scratched: boolean };
@@ -263,9 +264,24 @@ export type Game = {
 	log: LogEntry[];
 	nextSeq: number;
 	/** Game-end bookkeeping the upkeep screen works through. */
-	upkeep: { units: number; populationChanges: { city: CityId; delta: number }[] } | null;
+	upkeep: Upkeep | null;
 	/** The campaign as it stood before a prologue game, put back when that game closes. */
 	prologueRestore: Campaign | null;
+};
+
+/** What moved a location's population at game end: plague or Hollow Men took 1, a supply center gave 1. */
+export type PopulationReason = 'plague' | 'hollow' | 'center';
+
+/** One purchase of the spending step, with what it took from each budget so it can be given back exactly. */
+export type Bought = { purchase: Purchase; units: number; free: number };
+
+export type Upkeep = {
+	units: number;
+	populationChanges: { city: CityId; delta: number; reason: PopulationReason }[];
+	/** Every purchase of this step, oldest first. */
+	bought: Bought[];
+	/** Who at the table is done spending. Any purchase or refund clears it, since the table agreed to what it saw. */
+	done: PlayerId[];
 };
 
 /** Which game the lobby is getting ready for: the practice prologue, or the campaign's month. */

@@ -19,7 +19,7 @@ import {
 import type { CardId, CityId, Decision, LogEntry, PublicState, SeatId, World } from '@repo/game';
 import type { Option, Who } from './commands.ts';
 import { flavorFor } from './flavor.ts';
-import { cardName, characterLine, cityName, enc, monthName, seatName } from './names.ts';
+import { cardName, characterLine, cityName, enc, human, monthName, seatName } from './names.ts';
 
 const pct = (value: number) => `${Math.round(value * 100)}%`;
 
@@ -304,7 +304,15 @@ function renderUpkeep(state: PublicState): string[] {
 	);
 	if (upkeep?.populationChanges.length)
 		lines.push(
-			`Population changes: ${upkeep.populationChanges.map(change => `${cityName(world, change.city)} ${change.delta > 0 ? '+' : ''}${change.delta}`).join(', ')}`,
+			`Population changes: ${upkeep.populationChanges.map(change => `${cityName(world, change.city)} ${change.delta > 0 ? '+' : ''}${change.delta} (${change.reason})`).join(', ')}`,
+		);
+	if (upkeep.bought.length)
+		lines.push(
+			`Bought this step: ${upkeep.bought.map((entry, index) => `[${index}] ${entry.purchase.t} ${human(world, Object.values(entry.purchase).slice(1)).replaceAll(' + ', ' ')} (${entry.units})`).join(', ')}`,
+		);
+	if (upkeep.done.length)
+		lines.push(
+			`Done: ${upkeep.done.map(player => world.table.seats.find(entry => entry.player === player)?.name ?? player).join(', ')}`,
 		);
 	const held = (Object.keys(game.locations) as CityId[]).filter(id => {
 		const location = game.locations[id]!;
@@ -345,7 +353,7 @@ function renderUpkeep(state: PublicState): string[] {
 			`For sale but beyond the units left, so not in \`options buy\`: ${costly.map(item => `${item.name} (${item.cost})`).join(', ')}.`,
 		);
 	lines.push(
-		'The lead buys with `do buy:...` (see `options`) and ends with `do finish-upkeep`. Everyone else advises with `say`.',
+		'The lead buys with `do buy:...` and gives one back with `do refund:<n>` (see `options`). Everyone then votes `do finish-upkeep`; the game closes once all have.',
 	);
 	return lines;
 }
