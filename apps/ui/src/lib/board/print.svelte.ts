@@ -11,9 +11,6 @@ const NAME_STYLE = `italic 400`;
 const NUMBER_FONT = '"Barlow Semi Condensed"';
 const INK = '#2a2017';
 const PAPER = '#e9dcbd';
-/** A fully inoculated city is lettered in vaccine blue, and lit in a brighter one. */
-const INOCULATED = '#1d5fa6';
-const INOCULATED_LIT = '#2f86d8';
 
 // A canvas paints with whatever font has loaded, and a fallback face would stay baked into the texture,
 // so prints wait for the faces they use.
@@ -62,14 +59,7 @@ export const nameWidth = (name: string, port: boolean, size: number) =>
  * coastlines and lines. A port's name opens with an anchor, the way the board marks the places sea movement may
  * start and end. A lit name is the one under the pointer.
  */
-export function printName(
-	name: string,
-	port: boolean,
-	size: number,
-	faded: boolean,
-	lit: boolean,
-	inoculated = false,
-): Print {
+export function printName(name: string, port: boolean, size: number, faded: boolean, lit: boolean): Print {
 	const font = `${NAME_STYLE} ${size}px ${NAME_FONT}`;
 	const pad = size * 0.3;
 	const width = nameWidth(name, port, size);
@@ -95,32 +85,13 @@ export function printName(
 		context.strokeText(name, text, baseline);
 		glyph(lit ? 0.9 : 0.5);
 		context.globalAlpha = faded && !lit ? 0.5 : 1;
-		context.fillStyle = inoculated ? (lit ? INOCULATED_LIT : INOCULATED) : lit ? '#8e2a12' : INK;
+		context.fillStyle = lit ? '#8e2a12' : INK;
 		context.strokeStyle = context.fillStyle;
 		context.fillText(name, text, baseline);
 		// The face ships in one weight only, so a hairline of ink over the fill is what makes it bolder.
 		context.lineWidth = size * 0.035;
 		context.strokeText(name, text, baseline);
 		glyph(0.2);
-	});
-}
-
-/** A soft blue halo the size of a city's printed name, laid under it while an inoculated name shimmers. */
-export function printNameGlow(name: string, port: boolean, size: number): Print {
-	const pad = size * 0.3;
-	const width = nameWidth(name, port, size);
-	const height = size * 1.5;
-	return sheet(width, height, context => {
-		const baseline = height / 2 + size * 0.3;
-		context.font = `${NAME_STYLE} ${size}px ${NAME_FONT}`;
-		context.letterSpacing = `${size * NAME_SPACING}px`;
-		context.lineJoin = 'round';
-		// Canvas blur is in pixels of the sheet, not board units.
-		context.shadowBlur = size * 0.35 * PX_PER_UNIT;
-		context.shadowColor = 'rgb(90 170 255 / 0.95)';
-		context.strokeStyle = 'rgb(150 205 255 / 0.85)';
-		context.lineWidth = size * 0.12;
-		context.strokeText(name, pad + (port ? size * ANCHOR_ROOM : 0), baseline);
 	});
 }
 
@@ -204,14 +175,15 @@ export function printBerth(width: number, height: number): Print {
 	});
 }
 
-export type DiscTone = 'plain' | 'infested' | 'forsaken';
+export type DiscTone = 'plain' | 'infested' | 'forsaken' | 'inoculated';
 
 const TONE_COLOR: Record<Exclude<DiscTone, 'plain'>, { fill: string; outline: string }> = {
 	infested: { fill: '#9ce022', outline: '#1b2e05' },
 	forsaken: { fill: '#ec2a20', outline: '#3b0806' },
+	inoculated: { fill: '#6cc4ff', outline: '#061b38' },
 };
 
-/** The face of a city's disc: its population as a numeral, in green or red when infested or forsaken. */
+/** The face of a city's disc: its population as a numeral, in green, red or blue when infested, forsaken or inoculated. */
 export function printDisc(population: number, size: number, color: string, tone: DiscTone = 'plain'): Print {
 	return sheet(size, size, context => {
 		const text = String(population);
@@ -229,6 +201,23 @@ export function printDisc(population: number, size: number, color: string, tone:
 			context.fillStyle = color;
 		}
 		context.fillText(text, size / 2, size * 0.54);
+	});
+}
+
+/** A soft blue halo around a disc's numeral, laid under it while an inoculated city's number shimmers. */
+export function printDiscGlow(population: number, size: number): Print {
+	return sheet(size, size, context => {
+		const text = String(population);
+		context.textAlign = 'center';
+		context.textBaseline = 'middle';
+		context.font = `700 ${size * 0.82}px ${NUMBER_FONT}`;
+		context.lineJoin = 'round';
+		// Canvas blur is in pixels of the sheet, not board units.
+		context.shadowBlur = size * 0.12 * PX_PER_UNIT;
+		context.shadowColor = 'rgb(110 200 255 / 1)';
+		context.strokeStyle = 'rgb(190 232 255 / 0.95)';
+		context.lineWidth = size * 0.1;
+		context.strokeText(text, size / 2, size * 0.54);
 	});
 }
 
