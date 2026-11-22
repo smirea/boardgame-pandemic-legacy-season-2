@@ -12,7 +12,7 @@
 	"color": "yellow",
 	"coordinates": "12°2'47\"S 77°2'34\"W",
 	"copies": 1,
-	"hasImprovementSlot": true,
+	"hasImprovementSlot": false,
 	"images": {
 		"sideA": "side-a.jpg",
 		"sideB": "side-b.jpg"
@@ -72,10 +72,7 @@
 	],
 	"mechanics": {
 		"opensDoors": [],
-		"rules": [
-			"Yellow Player city card.",
-			"One improvement sticker may be placed on this card. No empty sticker box is printed on the face."
-		],
+		"rules": ["Yellow Player city card.", "No improvement slot is printed on this search card."],
 		"notes": "Harbor card (anchor compass). State 2 reveals the land box only (Herbalist), state 3 the sea box only (door 60), state 4 both."
 	}
 }

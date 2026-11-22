@@ -340,6 +340,7 @@ export function createChoosing(source: ChoosingSource) {
 	/** Events that take several targets at once: they are ticked off a list and confirmed together. */
 	const SEVERAL: Partial<Record<EventId, Several>> = {
 		safeHouses: { field: 'cities', verb: 'Place shelters', max: 3, repeat: 1 },
+		mobileShelters: { field: 'cities', verb: 'Place shelters', max: 2, repeat: 1 },
 		handout: { field: 'cities', verb: 'Place cubes', max: 2, repeat: 2 },
 		cleanse: { field: 'cities', verb: 'Remove Plague cubes', max: 2, repeat: 2 },
 		spreadOut: { field: 'to', verb: 'Move cubes', max: 3, repeat: 3 },

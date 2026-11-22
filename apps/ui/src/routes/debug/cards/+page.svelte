@@ -1,176 +1,277 @@
 <script lang="ts">
-	import { createGameActor, pack } from '@repo/game';
-	import type { InfectionCard as InfectionCardData, PlayerCard as PlayerCardData } from '@repo/game';
+	import { feedback } from '@stefan.inc/feedback-engine/svelte';
+	import {
+		cityDef,
+		createGameActor,
+		hasCityImprovementSlot,
+		hasInfectionImprovementSlot,
+		pack,
+		paddedTrack,
+		searchCardCompanion,
+	} from '@repo/game';
+	import type {
+		CityImprovementId,
+		ExposureBox,
+		InfectionCard as InfectionCardData,
+		InfectionImprovementId,
+		PlayerCard as PlayerCardData,
+	} from '@repo/game';
+	import CharacterCardFace from '#lib/cards/CharacterCardFace.svelte';
 	import InfectionCard from '#lib/cards/InfectionCard.svelte';
 	import LegacyCard from '#lib/cards/LegacyCard.svelte';
 	import { EVENT_PRINT } from '#lib/cards/playerPrint.ts';
 	import { legacyScans } from '#lib/scans.generated.ts';
-	import { playerCardScan, scanUrl } from '#lib/scans.svelte.ts';
+	import { characterCardScan, infectionCardScan, playerCardScan, scanUrl } from '#lib/scans.svelte.ts';
+	import type { CardScan } from '#lib/scans.svelte.ts';
 	import PlayerCard, { HAND_CARD_SIZE } from '#lib/hud/PlayerCard.svelte';
-	import type { CityCardCopies } from '#lib/hud/PlayerCard.svelte';
+	import DebugCardStage from './DebugCardStage.svelte';
+	import type { CardControl, UpgradeControl } from './DebugCardStage.svelte';
 
-	// Every card comes from a fresh campaign, so this page shows exactly what the generator produces.
-	const campaign = createGameActor({ seed: 1 }).getSnapshot().context.world.campaign;
-	const firstPerCity = <T extends { kind: string }>(cards: T[]) => {
-		const seen = new Set<string>();
-		return cards.filter(card => {
-			const key =
-				'city' in card
-					? `${card.kind}:${String(card.city)}`
-					: card.kind === 'produce' && 'boxesLeft' in card
-						? `produce:${String(card.boxesLeft)}`
-						: `${card.kind}:${'event' in card ? String(card.event) : ''}`;
-			return !seen.has(key) && Boolean(seen.add(key));
-		});
+	type CharacterCardEntry = {
+		id: string;
+		label: string;
+		track: readonly ExposureBox[];
+		exposure: number;
 	};
-	const playerCards = firstPerCity(Object.values(campaign.playerCards)) as PlayerCardData[];
-	const infectionCards = firstPerCity(Object.values(campaign.infectionCards)) as InfectionCardData[];
-	const improvementCities = ['new-york', 'sao-paulo', 'cairo', 'ho-chi-minh-city'] as const;
-	const extras: { card: PlayerCardData; copies?: CityCardCopies }[] = [
-		...pack.cityImprovements.map((improvement, index) => ({
-			card: {
-				id: `i${index}` as never,
-				kind: 'city' as const,
-				city: improvementCities[index % improvementCities.length] as never,
-				improvement: improvement.id,
-				search: [],
-				companion: null,
-			},
-		})),
-		{
-			card: {
-				id: 'search-1' as never,
-				kind: 'city' as const,
-				city: 'chicago' as never,
-				improvement: null,
-				search: [{ scope: 'land' as const, result: { t: 'nothing' as const }, scratched: false }],
-				companion: null,
-			},
-		},
-		{
-			card: {
-				id: 'search-2' as never,
-				kind: 'city' as const,
-				city: 'new-mumbai' as never,
-				improvement: null,
-				search: [
-					{ scope: 'land' as const, result: { t: 'nothing' as const }, scratched: false },
-					{ scope: 'sea' as const, result: { t: 'nothing' as const }, scratched: false },
-				],
-				companion: null,
-			},
-			copies: { live: 1, discarded: 1, trashed: 0 },
-		},
-		{
-			card: {
-				id: 'search-2-upgrade' as never,
-				kind: 'city' as const,
-				city: 'new-mumbai' as never,
-				improvement: 'double' as const,
-				search: [
-					{ scope: 'land' as const, result: { t: 'nothing' as const }, scratched: false },
-					{ scope: 'sea' as const, result: { t: 'nothing' as const }, scratched: false },
-				],
-				companion: null,
-			},
-		},
-		{
-			card: {
-				id: 'search-1-upgrade' as never,
-				kind: 'city' as const,
-				city: 'st-petersburg' as never,
-				improvement: 'wild' as const,
-				search: [
-					{ scope: 'land' as const, result: { t: 'nothing' as const }, scratched: true },
-					{ scope: 'sea' as const, result: { t: 'nothing' as const }, scratched: false },
-				],
-				companion: null,
-			},
-		},
-		{
-			card: {
-				id: 'pips-mixed' as never,
-				kind: 'city' as const,
-				city: 'washington' as never,
-				improvement: null,
-				search: [],
-				companion: null,
-			},
-			copies: { live: 2, discarded: 1, trashed: 1 },
-		},
-		{
-			card: {
-				id: 'pips-discarded' as never,
-				kind: 'city' as const,
-				city: 'dar-es-salaam' as never,
-				improvement: null,
-				search: [],
-				companion: null,
-			},
-			copies: { live: 0, discarded: 1, trashed: 1 },
-		},
-		...pack.companions.map((companion, index) => ({
-			card: {
-				id: `c${index}` as never,
-				kind: 'city' as const,
-				city: 'cairo' as never,
-				improvement: null,
-				search: [],
-				companion: companion.id,
-			},
-		})),
-		{
-			card: {
-				id: 'ic-combo' as never,
-				kind: 'city' as const,
-				city: 'lima' as never,
-				improvement: 'wild' as const,
-				search: [
-					{ scope: 'land' as const, result: { t: 'companion' as const, companion: 'medic' as const }, scratched: true },
-					{ scope: 'sea' as const, result: { t: 'nothing' as const }, scratched: false },
-				],
-				companion: 'medic' as const,
-			},
-		},
-		...pack.events.map((event, index) => ({
-			card: {
-				id: `e${index}` as never,
-				kind: 'event' as const,
+
+	const baseCampaign = createGameActor({ seed: 1 }).getSnapshot().context.world.campaign;
+
+	function buildInitialPlayerCards(): PlayerCardData[] {
+		const seen = new Set<string>();
+		const cards: PlayerCardData[] = [];
+		for (const raw of Object.values(baseCampaign.playerCards)) {
+			if (raw.kind === 'event') continue;
+			const key =
+				raw.kind === 'city'
+					? `city:${raw.city}:${raw.search.length > 0 ? 'search' : 'plain'}`
+					: raw.kind === 'produce'
+						? `produce:${raw.boxesLeft}`
+						: raw.kind;
+			if (seen.has(key)) continue;
+			seen.add(key);
+			cards.push(structuredClone(raw));
+		}
+		for (const [index, event] of pack.events.entries()) {
+			cards.push({
+				id: `event-${index}` as never,
+				kind: 'event',
 				event: event.id,
 				mode: EVENT_PRINT[event.id].mode,
-			},
-		})),
-	];
-	const allPlayerItems = [...playerCards.map(card => ({ card, copies: undefined })), ...extras];
-	const playerScanOf = (card: PlayerCardData): string | null => playerCardScan(card)?.card.src ?? null;
-	const hollow: InfectionCardData[] = [
-		...pack.infectionImprovements.map((improvement, index) => ({
-			id: `inf-imp-${index}` as never,
-			kind: 'city' as const,
-			city: improvementCities[index % improvementCities.length] as never,
-			improvement: improvement.id,
-		})),
-		{ id: 'g' as never, kind: 'gather' },
-		{ id: 'a' as never, kind: 'assemble' },
-	];
+			});
+		}
+		return cards;
+	}
+
+	function buildInitialInfectionCards(): InfectionCardData[] {
+		const seen = new Set<string>();
+		const cards: InfectionCardData[] = [];
+		for (const raw of Object.values(baseCampaign.infectionCards)) {
+			if (raw.kind !== 'city') continue;
+			if (seen.has(raw.city)) continue;
+			seen.add(raw.city);
+			cards.push(structuredClone(raw));
+		}
+		cards.push({ id: 'hollow-gather' as never, kind: 'gather' }, { id: 'hollow-assemble' as never, kind: 'assemble' });
+		return cards;
+	}
+
+	function buildInitialCharacterCards(): CharacterCardEntry[] {
+		return pack.characterCards.map((track, index) => ({
+			id: `character-${String(index + 1).padStart(2, '0')}`,
+			label: `Character ${String(index + 1).padStart(2, '0')}`,
+			track: paddedTrack(track),
+			exposure: 0,
+		}));
+	}
+
+	let playerCards = $state<PlayerCardData[]>(buildInitialPlayerCards());
+	let infectionCards = $state<InfectionCardData[]>(buildInitialInfectionCards());
+	let characterCards = $state<CharacterCardEntry[]>(buildInitialCharacterCards());
+
 	let size = $state(HAND_CARD_SIZE);
 	let legacySize = $state<'full' | 'deck'>('full');
-	let comparePlayer = $state(false);
+	let compareScans = $state(false);
+	let cardFilter = $state('');
 	let legacyFilter = $state('');
+
+	function resetAll() {
+		playerCards = buildInitialPlayerCards();
+		infectionCards = buildInitialInfectionCards();
+		characterCards = buildInitialCharacterCards();
+	}
+
+	function playerCardLabel(card: PlayerCardData): string {
+		if (card.kind === 'city') {
+			const name = cityDef(card.city).name;
+			const comp = card.companion ? pack.companions.find(item => item.id === card.companion)?.name : '';
+			const imp = card.improvement ? pack.cityImprovements.find(item => item.id === card.improvement)?.name : '';
+			return `${card.id} ${card.city} ${name} ${card.search.length ? 'search' : 'plain'} ${comp ?? ''} ${imp ?? ''}`.toLowerCase();
+		}
+		if (card.kind === 'event') {
+			const name = pack.events.find(item => item.id === card.event)?.name ?? card.event;
+			return `${card.id} ${card.event} ${name} event ${card.mode}`.toLowerCase();
+		}
+		if (card.kind === 'produce') return `${card.id} produce supplies ${card.boxesLeft}`.toLowerCase();
+		return `${card.id} epidemic`.toLowerCase();
+	}
+
+	function infectionCardLabel(card: InfectionCardData): string {
+		if (card.kind === 'city') {
+			const name = cityDef(card.city).name;
+			const imp = card.improvement ? pack.infectionImprovements.find(item => item.id === card.improvement)?.name : '';
+			return `${card.id} ${card.city} ${name} ${imp ?? ''}`.toLowerCase();
+		}
+		return `${card.id} hollow men ${card.kind}`.toLowerCase();
+	}
+
+	const query = $derived(cardFilter.trim().toLowerCase());
+	const shownPlayerCards = $derived(
+		query ? playerCards.filter(card => playerCardLabel(card).includes(query)) : playerCards,
+	);
+	const shownInfectionCards = $derived(
+		query ? infectionCards.filter(card => infectionCardLabel(card).includes(query)) : infectionCards,
+	);
+	const shownCharacterCards = $derived(
+		query
+			? characterCards.filter(entry => `${entry.id} ${entry.label} character`.toLowerCase().includes(query))
+			: characterCards,
+	);
 	const legacyCards = $derived(
 		pack.legacyDeck.filter(card => !legacyFilter || `${card.id} ${card.kind} ${card.title}`.includes(legacyFilter)),
 	);
+
+	function playerControlsLabel(card: PlayerCardData): string {
+		if (card.kind === 'city' && card.search.length > 0) return 'Search';
+		if (card.kind === 'produce') return 'System-wide uses';
+		return 'Card state';
+	}
+
+	function playerControls(card: PlayerCardData): CardControl[] {
+		if (card.kind === 'city' && card.search.length > 0) {
+			return card.search.map(box => {
+				const single = card.search.length === 1;
+				const label = single
+					? box.scratched
+						? 'Unsearch'
+						: 'Search'
+					: box.scope === 'land'
+						? box.scratched
+							? 'Unsearch land'
+							: 'Search land'
+						: box.scratched
+							? 'Unsearch sea'
+							: 'Search sea';
+				return {
+					id: single ? 'search' : `search-${box.scope}`,
+					label,
+					active: box.scratched,
+					onclick: () => {
+						box.scratched = !box.scratched;
+						card.companion = searchCardCompanion(card.search);
+					},
+				};
+			});
+		}
+		if (card.kind === 'produce') {
+			return [1, 2, 3].map(count => ({
+				id: `boxes-${count}`,
+				label: `${count} use${count === 1 ? '' : 's'}`,
+				active: card.boxesLeft === count,
+				onclick: () => {
+					card.boxesLeft = count;
+				},
+			}));
+		}
+		return [];
+	}
+
+	function playerUpgrades(card: PlayerCardData): UpgradeControl[] {
+		if (card.kind !== 'city') return [];
+		return pack.cityImprovements.map(improvement => ({
+			id: improvement.id,
+			label: improvement.name,
+			active: card.improvement === improvement.id,
+			onclick: () => {
+				card.improvement = card.improvement === improvement.id ? null : (improvement.id as CityImprovementId);
+			},
+		}));
+	}
+
+	function infectionUpgrades(card: InfectionCardData): UpgradeControl[] {
+		if (card.kind !== 'city') return [];
+		return pack.infectionImprovements.map(improvement => ({
+			id: improvement.id,
+			label: improvement.name,
+			active: card.improvement === improvement.id,
+			onclick: () => {
+				card.improvement = card.improvement === improvement.id ? null : (improvement.id as InfectionImprovementId);
+			},
+		}));
+	}
+
+	function characterControls(entry: CharacterCardEntry): CardControl[] {
+		const max = entry.track.length;
+		return [
+			{
+				id: 'expose',
+				label: 'Expose (+1)',
+				disabled: entry.exposure >= max,
+				onclick: () => {
+					entry.exposure = Math.min(max, entry.exposure + 1);
+				},
+			},
+			{
+				id: 'unexpose',
+				label: 'Unexpose (−1)',
+				disabled: entry.exposure <= 0,
+				onclick: () => {
+					entry.exposure = Math.max(0, entry.exposure - 1);
+				},
+			},
+			{
+				id: 'reveal-all',
+				label: 'Reveal all',
+				disabled: entry.exposure >= max,
+				onclick: () => {
+					entry.exposure = max;
+				},
+			},
+			{
+				id: 'reset',
+				label: 'Reset to base',
+				disabled: entry.exposure <= 0,
+				onclick: () => {
+					entry.exposure = 0;
+				},
+			},
+		];
+	}
+
+	function characterScanOf(entry: CharacterCardEntry): CardScan | null {
+		const scan = characterCardScan(entry.track, entry.exposure);
+		return scan ? { card: scan } : null;
+	}
 </script>
 
 <svelte:head>
 	<title>Legacy: cards</title>
 </svelte:head>
 
-<main style:--card-size={`${size}rem`}>
+<main
+	style:--card-size={`${size}rem`}
+	{@attach feedback('Card debug page', () => ({
+		playerCards: shownPlayerCards.length,
+		infectionCards: shownInfectionCards.length,
+		characterCards: shownCharacterCards.length,
+		compareScans,
+	}))}
+>
 	<header>
 		<h1>Cards</h1>
 		<label>Size <input type="range" min="0.6" max="1.6" step="0.01" bind:value={size} /> {size.toFixed(2)}rem</label>
-		<label><input type="checkbox" bind:checked={comparePlayer} /> Compare player scans</label>
+		<label><input type="checkbox" bind:checked={compareScans} data-testid="compare-scans" /> Compare scans</label>
+		<label>Filter <input bind:value={cardFilter} placeholder="city, search, event, character" /></label>
+		<button type="button" class="reset-btn" onclick={resetAll} data-testid="reset-all">Reset all to base</button>
 		<label>
 			Legacy size
 			<select bind:value={legacySize}>
@@ -179,37 +280,84 @@
 			</select>
 		</label>
 		<span data-testid="counts"
-			>{playerCards.length + extras.length} player, {infectionCards.length + hollow.length} infection</span
+			>{shownPlayerCards.length} player, {shownInfectionCards.length} infection, {shownCharacterCards.length} character</span
 		>
 	</header>
+	<p class="hint">
+		All cards start at base state (unscratched searches, 0 exposure, no stickers). Hover or focus a card to toggle
+		searches, exposure, or attach and remove upgrades. Hold <kbd>O</kbd> to swap faces with printed scans.
+	</p>
+
 	<h2>Player cards</h2>
 	<section class="player-grid" data-testid="player-cards">
-		{#each allPlayerItems as item (item.card.id)}
-			{@const scan = comparePlayer ? playerScanOf(item.card) : null}
-			{#if scan}
-				<div class="player-pair" data-player-card={item.card.id}>
-					<PlayerCard card={item.card} copies={item.copies} />
-					<img class="player-scan" src={scanUrl(scan)} alt={`${item.card.id} printed`} />
-				</div>
-			{:else}
-				<PlayerCard card={item.card} copies={item.copies} />
-			{/if}
+		{#each shownPlayerCards as card (card.id)}
+			<DebugCardStage
+				id={card.id}
+				kind="player"
+				compare={compareScans}
+				scan={compareScans ? playerCardScan(card) : null}
+				controlsLabel={playerControlsLabel(card)}
+				controls={playerControls(card)}
+				upgrades={playerUpgrades(card)}
+				noSlotNote={card.kind === 'city' && !hasCityImprovementSlot(card)}
+				onremoveUpgrade={card.kind === 'city'
+					? () => {
+							card.improvement = null;
+						}
+					: undefined}
+			>
+				<PlayerCard {card} />
+			</DebugCardStage>
 		{/each}
 	</section>
+
 	<h2>Infection cards</h2>
 	<section data-testid="infection-cards">
-		{#each [...infectionCards, ...hollow] as card (card.id)}<InfectionCard {card} />{/each}
+		{#each shownInfectionCards as card (card.id)}
+			<DebugCardStage
+				id={card.id}
+				kind="infection"
+				compare={compareScans}
+				scan={compareScans ? infectionCardScan(card) : null}
+				upgrades={infectionUpgrades(card)}
+				noSlotNote={card.kind === 'city' && !hasInfectionImprovementSlot(card)}
+				onremoveUpgrade={card.kind === 'city'
+					? () => {
+							card.improvement = null;
+						}
+					: undefined}
+			>
+				<InfectionCard {card} />
+			</DebugCardStage>
+		{/each}
 	</section>
+
+	<h2>Character cards</h2>
+	<section data-testid="character-cards">
+		{#each shownCharacterCards as entry (entry.id)}
+			<DebugCardStage
+				id={entry.id}
+				kind="character"
+				compare={compareScans}
+				scan={compareScans ? characterScanOf(entry) : null}
+				controlsLabel="Exposure"
+				controls={characterControls(entry)}
+			>
+				<CharacterCardFace exposureTrack={entry.track} exposure={entry.exposure} label={entry.label} />
+			</DebugCardStage>
+		{/each}
+	</section>
+
 	<h2>Legacy deck, generated beside the printed original</h2>
 	<label class="filter">Filter <input bind:value={legacyFilter} placeholder="id, kind or title" /></label>
 	{#each legacyCards as card (card.id)}
 		<section class="legacy" data-legacy-row={card.id}>
-			<LegacyCard {card} side="a" size={legacySize} {campaign} />
+			<LegacyCard {card} side="a" size={legacySize} campaign={baseCampaign} />
 			{#if legacyScans[card.id]?.back}<img
 					src={scanUrl(legacyScans[card.id]!.back!)}
 					alt={`${card.id}a printed`}
 				/>{/if}
-			<LegacyCard {card} side="b" size={legacySize} {campaign} />
+			<LegacyCard {card} side="b" size={legacySize} campaign={baseCampaign} />
 			<img src={scanUrl(legacyScans[card.id]!.src)} alt={`${card.id}b printed`} />
 		</section>
 	{/each}
@@ -226,8 +374,9 @@
 
 	header {
 		display: flex;
-		align-items: baseline;
-		gap: 1.5rem;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.9rem 1.4rem;
 		color: var(--muted);
 		font-size: 0.9rem;
 	}
@@ -235,7 +384,41 @@
 	header label {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: 0.45rem;
+	}
+
+	.reset-btn {
+		padding: 0.28rem 0.65rem;
+		border: 1px solid rgb(231 220 198 / 0.35);
+		border-radius: 0.25rem;
+		background: rgb(255 248 228 / 0.08);
+		color: var(--ink);
+		font: inherit;
+		font-size: 0.84rem;
+		cursor: pointer;
+	}
+
+	.reset-btn:hover {
+		border-color: var(--paper);
+		background: rgb(255 248 228 / 0.16);
+	}
+
+	.hint {
+		margin: 0.65rem 0 0;
+		color: var(--muted);
+		font-size: 0.84rem;
+		line-height: 1.4;
+	}
+
+	.hint kbd {
+		padding: 0.05rem 0.32rem;
+		border: 1px solid rgb(231 220 198 / 0.35);
+		border-radius: 0.2rem;
+		background: rgb(255 248 228 / 0.08);
+		color: var(--ink);
+		font-family: var(--font-ui);
+		font-size: 0.78rem;
+		font-weight: 700;
 	}
 
 	input[type='range'] {
@@ -285,17 +468,5 @@
 
 	.player-grid :global(.card[data-floating-upgrade]) {
 		margin-top: 3.8em;
-	}
-
-	.player-pair {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.45rem;
-	}
-
-	.player-scan {
-		height: calc(var(--card-size) * 10.6);
-		width: auto;
-		border-radius: 0.4em;
 	}
 </style>

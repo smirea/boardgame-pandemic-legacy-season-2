@@ -56,8 +56,11 @@ export type { Insights, PlayerCardsAt, PlayerDeckKind, PublicState, ReconBox } f
 export { insights, onGrid, publicState, reconBoxes } from './view';
 export {
 	breakthrough,
+	canImproveCityCard,
+	canImproveInfectionCard,
 	cardValue,
 	characterAt,
+	characterCardIndex,
 	cityDef,
 	crossesEdge,
 	crossesUnexplored,
@@ -65,6 +68,8 @@ export {
 	gridCityCount,
 	handLimit,
 	has,
+	hasCityImprovementSlot,
+	hasInfectionImprovementSlot,
 	isForsaken,
 	LABS,
 	nearestLocation,
@@ -75,6 +80,7 @@ export {
 	routeCourse,
 	reconned,
 	sealDef,
+	searchCardCompanion,
 	SEAT_IDS,
 	seaRoute,
 	tableSeating,

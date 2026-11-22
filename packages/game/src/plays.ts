@@ -20,6 +20,7 @@ import {
 	discardFromHand,
 	grid,
 	handLimit,
+	has,
 	log,
 	player,
 	removeFromHand,
@@ -228,7 +229,9 @@ export function checkPlay(world: World, seat: SeatId, card: CardId, play: Play, 
 		}
 		case 'purge':
 		case 'purifier':
-			return (game.locations[play.city]?.plague ?? 0) > 0 ? ok : 'No Plague cubes there';
+			return onGrid.has(play.city) && (game.locations[play.city]?.plague ?? 0) > 0
+				? ok
+				: 'Pick a location on the grid with Plague cubes';
 		case 'stockUp':
 			return game.reserve > 0 ? ok : 'The reserve is empty, so there is nothing to move';
 		case 'exile':
@@ -263,20 +266,24 @@ export function checkPlay(world: World, seat: SeatId, card: CardId, play: Play, 
 				: 'Pick one card from each of two players';
 		}
 		case 'surplus':
-			if (seat !== game.active || !player(game, seat).used.includes('madeSupplies'))
+			if (phase !== 'playing.actions' || seat !== game.active || !player(game, seat).used.includes('madeSupplies'))
 				return 'Play it after you Make Supplies this turn';
-			return game.stockpile > 0 ? ok : 'The stockpile is empty';
+			return game.stockpile > 0 || (has(world, seat, 'immunologist') && game.reserve > 0)
+				? ok
+				: 'No cubes left to take';
 		case 'medic':
 			return game.locations[here]!.plague > 0 ? ok : 'No Plague cubes in your location';
 		case 'shelterWright':
 			return game.locations[play.city] &&
 				!game.locations[play.city].shelter &&
-				isGridCity(grid(campaign), play.city) &&
+				isGridCity(onGrid, play.city) &&
 				game.pieces.shelter > 0
 				? ok
 				: 'Pick a city on the grid without a shelter';
 		case 'marksman':
-			return (game.locations[play.city]?.hollow ?? 0) > 0 ? ok : 'No Hollow Men there';
+			return onGrid.has(play.city) && (game.locations[play.city]?.hollow ?? 0) > 0
+				? ok
+				: 'Pick a location on the grid with Hollow Men';
 		case 'riotControl':
 		case 'informant':
 			return utopiaDiscards(world).length > 0 ? ok : 'No Utopia Infection cards in the discard pile';
@@ -449,7 +456,7 @@ function resolvePlay(world: World, seat: SeatId, card: CardId, play: Play) {
 					const drawn = drawPiled(game.playerDeck, id => campaign.playerCards[id]!.kind === 'epidemic')!;
 					(campaign.playerCards[drawn]!.kind === 'city' ? kept : dropped).push(drawn);
 				}
-				owner.hand.push(...kept);
+				player(game, game.active).hand.push(...kept);
 				game.playerDiscard.push(...dropped);
 				const names = (cards: CardId[]) => cards.map(id => cardLabel(campaign, id)).join(', ') || 'nothing';
 				log(game, {
@@ -493,9 +500,16 @@ function resolvePlay(world: World, seat: SeatId, card: CardId, play: Play) {
 			player(game, play.b).hand.push(play.cardA);
 			return;
 		case 'surplus': {
-			const amount = Math.min(SURPLUS, game.stockpile);
-			game.stockpile -= amount;
-			owner.supplies += amount;
+			let remaining = SURPLUS;
+			if (has(world, seat, 'immunologist') && game.reserve > 0) {
+				const fromReserve = Math.min(remaining, game.reserve);
+				game.reserve -= fromReserve;
+				owner.supplies += fromReserve;
+				remaining -= fromReserve;
+			}
+			const fromStockpile = Math.min(remaining, game.stockpile);
+			game.stockpile -= fromStockpile;
+			owner.supplies += fromStockpile;
 			return;
 		}
 		case 'medic':
@@ -534,7 +548,7 @@ const PASSED: Partial<Record<string, string>> = {
 	removeHollow: 'no Hollow Men removed',
 	quarantineCard: 'no Infection card quarantined',
 	giveCard: 'no card given',
-	cordon: 'the Cordon was not used',
+	cordon: 'Broken Link was not used',
 };
 
 const OPTIONAL = new Set([
@@ -730,7 +744,7 @@ export function applyDecide(world: World, decide: Decide) {
 			game.infectionsLeft = 0;
 			log(game, {
 				t: 'note',
-				text: `${characterOf(world, decide.seat).name} discarded a card to Cordon: the rest of this Infect step is called off`,
+				text: `${characterOf(world, decide.seat).name} discarded a card for Broken Link: the rest of this Infect step is called off`,
 			});
 			return;
 		case 'shield': {
@@ -758,6 +772,7 @@ export function autoResolve(world: World) {
 		if (pending.t === 'scar' && !scarFor.some(seat => canTakeScar(world, characterOf(world, seat))))
 			game.pending.shift();
 		else if (pending.t === 'discard' && player(game, pending.seat).hand.length === 0) game.pending.shift();
+		else if (pending.t === 'giveCard' && player(game, pending.seat).hand.length === 0) game.pending.shift();
 		else return;
 	}
 }

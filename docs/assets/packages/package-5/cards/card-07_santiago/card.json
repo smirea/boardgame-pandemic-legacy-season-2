@@ -12,7 +12,7 @@
 	"color": "yellow",
 	"coordinates": "33°26'56\"S 70°40'9\"W",
 	"copies": 1,
-	"hasImprovementSlot": true,
+	"hasImprovementSlot": false,
 	"images": {
 		"sideA": "side-a.jpg",
 		"sideB": "side-b.jpg"
@@ -45,10 +45,7 @@
 	],
 	"mechanics": {
 		"opensDoors": [],
-		"rules": [
-			"Yellow Player city card.",
-			"One improvement sticker may be placed on this card. No empty sticker box is printed on the face."
-		],
+		"rules": ["Yellow Player city card.", "No improvement slot is printed on this search card."],
 		"notes": "One scratch-off box, labeled SEARCH: (not land or sea). State 2 is that box revealed. Side A stays the Player deck back."
 	}
 }

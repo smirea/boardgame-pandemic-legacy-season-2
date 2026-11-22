@@ -12,7 +12,7 @@
 	"color": "blue",
 	"coordinates": "39°44'21\"N 104°59'25\"W",
 	"copies": 1,
-	"hasImprovementSlot": false,
+	"hasImprovementSlot": true,
 	"images": {
 		"sideA": "side-a.jpg",
 		"sideB": "side-b.jpg"

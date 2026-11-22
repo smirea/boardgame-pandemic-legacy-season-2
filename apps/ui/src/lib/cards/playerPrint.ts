@@ -1,5 +1,5 @@
 import { pack } from '@repo/game';
-import type { CityImprovementId, CompanionId, EventId } from '@repo/game';
+import type { CityImprovementId, CompanionId, EventId, InfectionImprovementId } from '@repo/game';
 
 export type EventPrint = {
 	mode: 'rationed' | 'unrationed' | 'permanent';
@@ -207,51 +207,84 @@ export const IMPROVEMENT_PRINT: Record<CityImprovementId, ImprovementPrint> = {
 	},
 };
 
-export type CompanionPrint = { text: string; cards?: readonly ('A' | 'B')[] };
+export type CompanionPrint = { text: string; reuse: 'in-hand' | 'discard'; cards?: readonly ('A' | 'B')[] };
 
 export const COMPANION_PRINT: Record<CompanionId, CompanionPrint> = {
 	builder: {
+		reuse: 'in-hand',
 		text: 'In hand: 1 fewer card to Build Supply Center (may include this card).',
 	},
 	lineman: {
+		reuse: 'in-hand',
 		text: 'In hand: 1 fewer Supply cube to Establish Supply Lines.',
 	},
 	rigger: {
+		reuse: 'in-hand',
 		text: 'In hand: 1 fewer Supply cube to Build Satellite Tower.',
 	},
 	tracker: {
+		reuse: 'in-hand',
 		text: 'In hand: Search is a free action.',
 	},
 	fieldSurgeon: {
+		reuse: 'in-hand',
 		text: 'In hand: no exposure when starting a turn in an infested city.',
 	},
 	trader: {
+		reuse: 'in-hand',
 		text: 'Action (in hand): discard a City card (or this) for a same-color City card from Player discard.',
 	},
 	porter: {
+		reuse: 'in-hand',
 		text: 'Free action (in hand): move Supply cubes from an adjacent location into yours.',
 	},
 	medic: {
-		text: 'Play any time: remove 1 Plague cube from your location.',
+		reuse: 'discard',
+		text: 'Play any time (discard): remove 1 Plague cube from your location.',
 	},
 	purifier: {
-		text: 'Play any time: remove all Plague cubes from 1 location on the grid.',
+		reuse: 'discard',
+		text: 'Play any time (discard): remove all Plague cubes from 1 location on the grid.',
 	},
 	shelterWright: {
-		text: 'Play any time: place a shelter on 1 city on the grid.',
+		reuse: 'discard',
+		text: 'Play any time (discard): place a shelter on 1 city on the grid.',
 	},
 	marksman: {
-		text: 'Play any time: remove 1 Hollow Men figure from anywhere on the grid.',
+		reuse: 'discard',
+		text: 'Play any time (discard): remove 1 Hollow Men figure from anywhere on the grid.',
 	},
 	quartermaster: {
+		reuse: 'in-hand',
 		text: 'In hand: discard any color City card (or this) for Build Shelter.',
 	},
 	doubleAgent: {
+		reuse: 'discard',
 		text: 'Counts as 2 unique red cards for Recon.',
 		cards: ['A', 'B'],
 	},
 	informant: {
-		text: 'Play any time: move up to 4 "Utopia" Infection cards from discard to Game End.',
+		reuse: 'discard',
+		text: 'Play any time (discard): move up to 4 "Utopia" Infection cards from discard to Game End.',
+	},
+};
+
+export const INFECTION_IMPROVEMENT_PRINT: Record<InfectionImprovementId, { name: string; text: string }> = {
+	wellStocked: {
+		name: 'Well Stocked',
+		text: 'If there are 2 or more Supply cubes in this city when drawn, do not remove any Supply cubes.',
+	},
+	lockdown: {
+		name: 'Lockdown',
+		text: 'While in the Infection discard pile, any player may discard a Player card to destroy this card at any time.',
+	},
+	rebirth: {
+		name: 'Rebirth',
+		text: 'If the city is recovering (pop 6+), this card will not infect it. Hollow Men Gather still takes effect.',
+	},
+	cordon: {
+		name: 'Broken Link',
+		text: 'After discarding this card, any player may discard a Player card to stop drawing Infection cards this turn. (Not setup or epidemics.)',
 	},
 };
 

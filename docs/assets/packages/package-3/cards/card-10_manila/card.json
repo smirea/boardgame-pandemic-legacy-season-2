@@ -13,7 +13,7 @@
 	"coordinates": "14°35'58\"N 120°59'3\"E",
 	"port": true,
 	"copies": 1,
-	"hasImprovementSlot": false,
+	"hasImprovementSlot": true,
 	"images": {
 		"sideA": "side-a.jpg",
 		"sideB": "side-b.jpg"
@@ -29,7 +29,7 @@
 			"Red Player card for Manila.",
 			"Port city: the compass is marked with an anchor.",
 			"No search box. Nothing on this card is scratched.",
-			"No improvement slot is printed on this face."
+			"A dashed improvement slot is printed across the map."
 		],
 		"notes": [
 			"Card id 10709. One copy.",

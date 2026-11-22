@@ -749,6 +749,7 @@
 				menu={actionChoices}
 				{live}
 				{canAct}
+				{owns}
 				aiming={choosing.targeting?.a ?? null}
 				onchoose={choice => choosing.step({ t: 'start', a: choice.a, via: 'panel' })}
 				{send}

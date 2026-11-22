@@ -74,7 +74,7 @@ export function payments(
 		const card = world.campaign.playerCards[id]!;
 		const value = cardValue(world.campaign, id, color, purpose);
 		if (card.kind !== 'city' || value === 0) return [];
-		const kind = `${card.city}:${card.improvement ?? ''}:${card.search.map(box => (box.scratched ? 'x' : 'o')).join('')}`;
+		const kind = `${card.city}:${card.improvement ?? ''}:${card.companion ?? ''}:${card.search.map(box => (box.scratched ? 'x' : 'o')).join('')}`;
 		return [{ id, value, city: card.city, kind }];
 	});
 	const found = new Map<string, CardId[]>();
@@ -159,7 +159,7 @@ function candidateActions(world: World, seat: SeatId): Action[] {
 			const moveFrom = (Object.keys(game.locations) as CityId[]).find(
 				id => game.locations[id]!.center && !campaign.locations[id]!.permanent.includes('center'),
 			);
-			for (let needed = pack.numbers.costs.center; needed >= 2; needed--) {
+			for (let needed = pack.numbers.costs.center + 1; needed >= 1; needed--) {
 				for (const cards of payments(world, hand, def.color, needed, 'build'))
 					candidates.push({
 						a: 'buildCenter',
@@ -256,6 +256,8 @@ const NEEDS: Partial<Record<ActionId, string>> = {
 	broadcast: 'No Hollow Men on the board',
 	sabotage: 'Needs a City card and Hollow Men on the board',
 	broker: 'Needs a City card in hand and one in the discard pile',
+	trade: 'Needs a City card in hand and one in the discard pile',
+	carry: 'No supply cubes in adjacent locations',
 	investigate: 'Needs a card in hand and a City card in the discard pile',
 	misinform: 'No Hollow Men here',
 	rehab: 'Needs 2 cards in hand and a stored City card',
@@ -531,7 +533,12 @@ export function cardTargets(world: World, phase: Phase, card: CardId): { cities:
 			const play = entry.play;
 			switch (play.e) {
 				case 'secondWind':
+				case 'scavenge':
 					seats.add(world.game!.active);
+					break;
+				case 'riotControl':
+				case 'informant':
+					cities.add('utopia' as CityId);
 					break;
 				case 'surplus':
 					seats.add(entry.seat);
