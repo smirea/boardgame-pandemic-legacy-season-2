@@ -26,7 +26,7 @@ export type HandGroup = {
 /**
  * A hand as the seat card shows it: interchangeable cards stack, and a card that carries its own state or ability
  * stands alone. Plain city cards are interchangeable by colour, since colour is what they pay for building and recon.
- * A city card with an improvement or search boxes, and every companion, is its own card. Events stack only with the
+ * A city card with an improvement or open search boxes, and every companion, is its own card. Events stack only with the
  * same event in the same mode, and Produce Supplies only with the same boxes left. Groups follow the hand's one order
  * (`sortHand`), each where its first card falls.
  */
@@ -39,10 +39,13 @@ export function handGroups(hand: PlayerCard[], name: (card: PlayerCard) => strin
 	return [...groups].map(([key, cards]) => describe(key, cards, name));
 }
 
+/** A spent search box leaves nothing to do, so the card is as plain as any other of its colour. */
+const openSearches = (card: Extract<PlayerCard, { kind: 'city' }>) => card.search.filter(box => !box.scratched).length;
+
 function keyOf(card: PlayerCard): string {
 	switch (card.kind) {
 		case 'city':
-			return card.improvement || card.search.length || card.companion
+			return card.improvement || openSearches(card) || card.companion
 				? `card:${card.id}`
 				: `color:${regionOf(card.city)}`;
 		case 'event':
@@ -60,14 +63,15 @@ function describe(key: string, cards: PlayerCard[], name: (card: PlayerCard) => 
 	switch (card.kind) {
 		case 'city': {
 			const region = regionOf(card.city);
-			if (cards.length === 1 && (card.improvement || card.search.length || card.companion)) {
+			const open = openSearches(card);
+			if (cards.length === 1 && (card.improvement || open || card.companion)) {
 				const improvement = pack.cityImprovements.find(item => item.id === card.improvement);
 				const companion = pack.companions.find(item => item.id === card.companion);
 				const mark = card.improvement ? IMPROVEMENT_MARK[card.improvement] : undefined;
 				const extras = [
 					improvement && `${improvement.name}: ${improvement.text}`,
 					companion && `${companion.name}: ${companion.text}`,
-					card.search.length && `${card.search.length} search box${card.search.length === 1 ? '' : 'es'}`,
+					open && `${open} search box${open === 1 ? '' : 'es'}`,
 				].filter(Boolean);
 				return {
 					key,
