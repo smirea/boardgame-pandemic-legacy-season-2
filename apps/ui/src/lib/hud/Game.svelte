@@ -1160,15 +1160,13 @@
 				transition:scale={{ start: 0.92, duration: 180, opacity: 0 }}
 				{@attach feedback('Menu', () => undefined)}
 			>
-				{#if import.meta.env.DEV}
-					<button
-						onclick={() => {
-							menu = false;
-							// The capture waits for the menu's exit transition, so the screenshot shows the table without it.
-							setTimeout(() => void presentFeedback(), 220);
-						}}>Give feedback <kbd>⌥⌘ click</kbd></button
-					>
-				{/if}
+				<button
+					onclick={() => {
+						menu = false;
+						// The capture waits for the menu's exit transition, so the screenshot shows the table without it.
+						setTimeout(() => void presentFeedback(), 220);
+					}}>Give feedback <kbd>⌥⌘ click</kbd></button
+				>
 				{#if !spectator}
 					<button
 						onclick={() => {

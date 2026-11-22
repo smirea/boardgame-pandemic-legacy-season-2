@@ -20,7 +20,7 @@
 	});
 
 	onMount(blockAutofill);
-	if (import.meta.env.DEV) onMount(startFeedback);
+	onMount(startFeedback);
 
 	function onkeydown(event: KeyboardEvent) {
 		if (event.repeat || typing(event) || event.metaKey || event.ctrlKey || event.altKey) return;

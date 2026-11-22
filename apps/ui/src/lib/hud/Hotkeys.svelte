@@ -29,7 +29,7 @@
 			rows: [
 				{ keys: ['Hold O'], label: 'Show printed original scans' },
 				{ keys: ['?'], label: 'Show or hide keyboard shortcuts' },
-				...(import.meta.env.DEV ? [{ keys: ['⌥⌘ Click'], label: 'Give feedback on an element' }] : []),
+				{ keys: ['⌥⌘ Click'], label: 'Give feedback on an element' },
 			],
 		},
 	];
