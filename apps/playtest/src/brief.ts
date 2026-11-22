@@ -4,7 +4,7 @@ import { pack, reconned } from '@repo/game';
 import type { PublicState } from '@repo/game';
 import { untouched } from './audit.ts';
 import type { Audit } from './audit.ts';
-import type { LabConfig } from './config.ts';
+import type { LabConfig, PlayerConfig } from './config.ts';
 import { labRoot, repoRoot } from './config.ts';
 import { monthName } from './names.ts';
 
@@ -55,6 +55,84 @@ function toTry(audit: Audit, state: PublicState): string[] {
 	return lines;
 }
 
+/** The brief of a player who has only the screen. It names no control and no place on the screen: finding them is the test. */
+function screenBrief(input: {
+	player: PlayerConfig;
+	others: string[];
+	game: string;
+	lead: PlayerConfig;
+	isLead: boolean;
+	history: string[];
+	suggestions: string[];
+	report: string;
+	month: number;
+}): string {
+	const { player, others, game, lead, isLead, history, suggestions, report } = input;
+	return [
+		`# Brief for ${player.name}: ${game}`,
+		'',
+		`You are **${player.name}**, one of three playtesters at a co-op board game played on a laptop each. The other two are ${others.join(' and ')}. This session is one game: **${game}**.`,
+		'',
+		'Read these two files first, in this order:',
+		'',
+		`1. The playtester guide: \`${join(labRoot, 'GUIDE-screen.md')}\``,
+		`2. Who you are: \`${player.persona}\``,
+		'',
+		'## Your command',
+		'',
+		'```',
+		`cd ${repoRoot}`,
+		`./apps/playtest/play ${player.id} <command>`,
+		'```',
+		'',
+		`Your id is \`${player.id}\`. At the table you are called ${player.name}: keep that name. Your laptop is already open on the game, and the three of you are connected.`,
+		'',
+		'## This session',
+		'',
+		history.length
+			? `The campaign is under way. The year so far: ${history.join(', ')}. Other testers played those games, and you remember nothing of them. What they changed for good is on the board and in whatever records the game keeps. Finding out where the campaign stands is part of your review.`
+			: 'This is the first game of the campaign. Nothing has been played. The table has agreed to start with January and to skip the Prologue.',
+		'',
+		isLead
+			? '**You are the lead this game.** The steps that are for the whole table are yours to press. Ask the table before you decide anything that spends or commits something, and tell them what you learn when the game presents something new.'
+			: `**${lead.name} is the lead this game** and presses the steps that are for the whole table. You do your own part of each, play your turns, answer what the screen asks of you, and tell the lead what you think.`,
+		'',
+		...(suggestions.length
+			? [
+					'## Not yet seen in this campaign',
+					'',
+					'Nobody has done these yet. Do them if a real chance comes up, and say how the screen handled it:',
+					'',
+					...suggestions.map(line => `- ${line}`),
+					'',
+				]
+			: []),
+		'## Rules of the session',
+		'',
+		'- Keep going until `wait` says **SESSION COMPLETE**. That comes after the game ends and the spending after it is finished. The others can take several minutes over a turn. Keep running `wait`, and use the time to explore your screen. Do not stop early for any reason short of the lab not answering three times in a row.',
+		'- Play to win, in character, and review as you go. Both matter.',
+		'- `say` your plan before each of your turns.',
+		'- `report` every finding the moment you meet it.',
+		'',
+		'## When the session is complete',
+		'',
+		`Run \`myreports\`, then write your review to \`${report}\`. Write it for the people who build the game. Be specific and be honest: no praise to be polite, no complaint to fill a section.`,
+		'',
+		'1. **The game in five lines**: who you played, what happened, how it ended.',
+		'2. **Could a new player play this?** What you understood at once, what took you a while, what you never worked out. How you learned where the campaign stands and what was new this month.',
+		'3. **Friction, worst first**: each thing that was slow, annoying or took too many steps. What you were doing, what it took, what it should take.',
+		'4. **Inconsistencies**: the same thing behaving or looking different in two places.',
+		'5. **How it looks**: layout, legibility, hierarchy, colour, motion. What works and what does not, with positions on the screen.',
+		'6. **Bugs**: what was wrong, and how to see it again.',
+		'7. **What you explored**: every panel, tool and way of doing things you found, and what you could not find or did not get to.',
+		'8. **Your five best suggestions**, in order of how much they would improve the game.',
+		'9. **Scores out of 10** for: learning it, the speed of playing a turn, knowing what is going on, and looks. One line of reason each.',
+		'',
+		'Then reply with a ten-line summary: the result, your worst three findings, your best suggestion, and anything that stopped you playing properly.',
+		'',
+	].join('\n');
+}
+
 /** Writes one brief per player for the game about to start and returns the paths. */
 export function writeBriefs(input: BriefInput): string[] {
 	const { config, state, audit } = input;
@@ -75,6 +153,22 @@ export function writeBriefs(input: BriefInput): string[] {
 		const slug = `g${String(campaign.results.length).padStart(2, '0')}-${month.toLowerCase()}-${attempt}`;
 		const report = join(input.reports, `${slug}-${player.id}.md`);
 		const isLead = index === input.leadIndex;
+		if (player.harness === 'screen') {
+			const text = screenBrief({
+				player,
+				others,
+				game,
+				lead,
+				isLead,
+				history,
+				suggestions,
+				report,
+				month: campaign.month,
+			});
+			const path = join(input.dir, `${player.id}.md`);
+			writeFileSync(path, text);
+			return path;
+		}
 		const text = [
 			`# Brief for ${player.name}: ${game}`,
 			'',

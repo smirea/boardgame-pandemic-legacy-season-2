@@ -12,6 +12,7 @@ import {
 	gameIndexOf,
 	newCampaign,
 	newTable,
+	openings,
 	overLimit,
 	parseRecord,
 	parseSave,
@@ -29,6 +30,19 @@ import type { Who } from './commands.ts';
 import { loadConfig, repoRoot } from './config.ts';
 import { coverageOfRun } from './coverage.ts';
 import { recordFile, replaysUrl, servePages } from './replays.ts';
+import {
+	clickAt,
+	closeTool,
+	dragTo,
+	moveTo,
+	point,
+	pressCombo,
+	scrollAt,
+	shot,
+	typeText,
+	VIEW,
+	zoom,
+} from './screen.ts';
 import { labScenarios, stages } from './stages.ts';
 import type { RecordMeta } from './replays.ts';
 import { isCity, monthName } from './names.ts';
@@ -70,6 +84,7 @@ const dirs = {
 	briefs: join(runDir, 'briefs'),
 	reports: join(runDir, 'reports'),
 	records: join(runDir, 'records'),
+	screens: join(runDir, 'screens'),
 };
 for (const dir of Object.values(dirs)) mkdirSync(dir, { recursive: true });
 
@@ -195,12 +210,14 @@ for (const deadline = performance.now() + 60_000; ;) {
 }
 
 await Bun.$`bun x playwright install chromium-headless-shell`.cwd(uiDir).quiet();
-const { browser, context } = await launch(config.headed);
+// A browser each: pages that share one take turns drawing, and a page that is not drawing freezes its animations.
+const browsers: Awaited<ReturnType<typeof launch>>[] = [];
 const tabUrl = (id: string) => `http://127.0.0.1:${pages.port}/?DEBUG_ID=${config.run}-${id}`;
 const tabs: Tab[] = [];
 for (const [index, player] of config.players.entries()) {
+	browsers.push(await launch(config.headed));
 	tabs.push(
-		await openTab(context, {
+		await openTab(browsers.at(-1)!.context, {
 			id: player.id,
 			url: tabUrl(player.id),
 			name: player.name,
@@ -367,7 +384,13 @@ function whoOf(id: string): Who | null {
 	const index = config.players.findIndex(player => player.id === id);
 	if (index < 0) return null;
 	const leadIndex = (lab.session?.startIndex ?? (current ? gameIndex(current) : 0)) % config.players.length;
-	return { index, id, name: config.players[index]!.name, seat: seatOf(index), lead: index === leadIndex };
+	const name = config.players[index]!.name;
+	// A player on the screen sits where the lobby put them, which is seat order only while nobody has moved.
+	const seat =
+		config.players[index]!.harness === 'screen'
+			? (current?.world.table.seats.find(entry => entry.name === name)?.seat ?? seatOf(index))
+			: seatOf(index);
+	return { index, id, name, seat, lead: index === leadIndex };
 }
 
 /** Who plays whom. A click-only player is dealt a character when the table readies, so has no pick before. */
@@ -380,8 +403,44 @@ const forScreen = (line: string) =>
 
 /** What the game is waiting on this player for. Empty means it is someone else's move. */
 function needs(state: PublicState, who: Who): string[] {
+	const harness = config.players[who.index]!.harness;
+	if (harness === 'screen') return needsOnScreen(state, who);
 	const lines = needsByKey(state, who);
-	return config.players[who.index]!.harness === 'ui' ? lines.map(forScreen) : lines;
+	return harness === 'ui' ? lines.map(forScreen) : lines;
+}
+
+const SESSION_COMPLETE =
+	'SESSION COMPLETE. This game and its game-end step are finished. Write your report now, then stop.';
+
+/**
+ * Whether the table waits on a player who has only the screen. It says that much and no more:
+ * what to do about it is for the screen to tell them.
+ */
+function needsOnScreen(state: PublicState, who: Who): string[] {
+	if (sessionDone(state)) return [SESSION_COMPLETE];
+	const { world, phase } = state;
+	const { campaign, table } = world;
+	const yours = 'The table is waiting on you. Look at your screen.';
+	const lead = 'The table is waiting on you: this step is for the whole table, and you are this game’s lead.';
+	const me = table.seats.find(entry => entry.name === who.name)?.player ?? null;
+	if (phase === 'finished') return ['The campaign is over. Write your report now, then stop.'];
+	if (campaign.briefing.length && phase !== 'lobby') {
+		if (table.briefing.stowing) return [];
+		const opened = table.briefing.drawn >= openings(campaign.briefing).length && table.briefing.flipped;
+		if (!opened) return who.lead ? [lead] : [];
+		return me && table.briefing.ready.includes(me) ? [] : [yours];
+	}
+	switch (phase) {
+		case 'lobby':
+			return me && table.ready[me] !== undefined ? [] : [yours];
+		case 'setup.supply':
+		case 'setup.events':
+		case 'over':
+		case 'upkeep':
+			return who.lead ? [lead] : [];
+		default:
+			return needsByKey(state, who).length ? [yours] : [];
+	}
 }
 
 function needsByKey(state: PublicState, who: Who): string[] {
@@ -500,6 +559,11 @@ function digest(state: PublicState, who: Who): string[] {
 	lab.chatSeen[who.id] = lab.chat.length;
 	if (unread.length) lines.push('TABLE TALK:', ...unread.map(message => `  ${message.from}: ${message.text}`));
 	const game = state.world.game;
+	if (config.players[who.index]!.harness === 'screen') {
+		const list = needs(state, who);
+		lines.push(...(list.length ? list : ['Nothing is waiting on you right now.']));
+		return lines;
+	}
 	if (game) {
 		const seen = lab.logSeen[who.id];
 		const after = seen && seen.game === gameIndex(state) ? seen.seq : -1;
@@ -598,6 +662,8 @@ function report(who: Who | null, agent: string, severity: string, text: string):
 		save: saved,
 	};
 	appendFileSync(files.issues, `${JSON.stringify(issue)}\n`);
+	if (who && config.players[who.index]!.harness === 'screen')
+		void tabs[who.index]!.page.screenshot({ path: saved.replace(/\.json$/, '.png') }).catch(() => {});
 	note('issue', issue.agent, `[${severity}] ${text}`);
 	journal({ kind: 'issue', ...issue });
 	return `Recorded issue ${count} with a save of this moment.`;
@@ -627,6 +693,113 @@ const HELP = `Commands (run as: ./play <you> <command>):
     do play:safeHouses.241:cairo+lagos+london   or   do decide:removeHollow:tehran+riyadh
   raw '<json>'        send a command that options does not list
 UI harness only: look · click <number|text> · tap <city-id> · choose <number> <entry> · type <number> <text> · key <key> · shot`;
+
+const SCREEN_HELP = `You have the screen and nothing else. Run as: ./apps/playtest/play <you> <command>
+  shot [seconds]          take a picture of your screen (after waiting that many seconds) and print its path.
+                          The screen is ${VIEW.width} by ${VIEW.height}. A position is x across from the left edge and y down from the top
+  shot grid               the same picture with a grid every 100 pixels, to check your aim
+  zoom <x> <y> <w> <h>    a picture of that part of the screen at three times the size, for small print
+  click <x> <y>           move the pointer there and click
+  rclick <x> <y>          right click
+  dblclick <x> <y>        double click
+  move <x> <y>            rest the pointer there without clicking, as you would to read a tooltip
+  drag <x1> <y1> <x2> <y2>   press at the first position, move to the second, let go
+  scroll <x> <y> <amount>  turn the wheel there: a positive amount scrolls down, about 100 a notch
+  key <key>               press a key: Escape, Enter, Space, Tab, ArrowLeft, a, 1, or a combination such as Shift+Tab
+  type <text>             type into whatever has the keyboard
+  wait [seconds]          block until the table is waiting on you or someone speaks (default 45)
+  say <text>              talk to the table, as you would out loud
+  listen [seconds]        block until another player speaks
+  report <bug|ux|visual|rules|idea> <text>   record a finding, with a picture of your screen at that moment
+  myreports               the findings you have recorded this game
+Every pointer and keyboard command answers with a new picture of the screen, taken half a second later.`;
+
+let screenShots = 0;
+
+/** The commands of a player who has only the screen: pictures out, pointer and keys in. */
+async function handleScreen(who: Who, tab: Tab, verb: string, rest: string[]): Promise<string> {
+	const dir = join(dirs.screens, who.id);
+	mkdirSync(dir, { recursive: true });
+	const next = (kind: string) =>
+		join(dir, `${tag(current!)}-${String(Date.now()).slice(-9)}-${String(++screenShots).padStart(4, '0')}-${kind}.png`);
+	const after = async (did: string, pause = 500) => {
+		journal({ kind: 'screen', agent: who.id, verb, args: rest });
+		await tab.page.waitForTimeout(pause);
+		return `${did}\nScreen now: ${await shot(tab, next(verb))}`;
+	};
+	switch (verb) {
+		case 'help':
+			return SCREEN_HELP;
+		case 'shot': {
+			const grid = rest[0] === 'grid';
+			const seconds = Math.min(Number(grid ? rest[1] : rest[0]) || 0, 20);
+			if (seconds) await tab.page.waitForTimeout(seconds * 1000);
+			return shot(tab, next(grid ? 'grid' : 'shot'), grid);
+		}
+		case 'zoom': {
+			const [x, y, width, height] = rest.map(Number);
+			const fits =
+				rest.length === 4 &&
+				[x, y, width, height].every(Number.isFinite) &&
+				x! >= 0 &&
+				y! >= 0 &&
+				width! >= 20 &&
+				height! >= 20 &&
+				x! + width! <= VIEW.width &&
+				y! + height! <= VIEW.height;
+			if (!fits)
+				return `usage: zoom <x> <y> <width> <height>, a box inside the ${VIEW.width} by ${VIEW.height} screen and at least 20 on a side`;
+			return zoom(tab, next('zoom'), { x: x!, y: y!, width: width!, height: height! });
+		}
+		case 'click':
+		case 'rclick':
+		case 'dblclick': {
+			const at = point(rest[0], rest[1]);
+			if (typeof at === 'string') return `usage: ${verb} <x> <y>. ${at}`;
+			return after(await clickAt(tab, at, verb === 'rclick' ? 'right' : 'left', verb === 'dblclick' ? 2 : 1));
+		}
+		case 'move': {
+			const at = point(rest[0], rest[1]);
+			if (typeof at === 'string') return `usage: move <x> <y>. ${at}`;
+			return after(await moveTo(tab, at), 900);
+		}
+		case 'drag': {
+			const from = point(rest[0], rest[1]);
+			const to = point(rest[2], rest[3]);
+			if (typeof from === 'string' || typeof to === 'string')
+				return `usage: drag <x1> <y1> <x2> <y2>. ${typeof from === 'string' ? from : to}`;
+			return after(await dragTo(tab, from, to));
+		}
+		case 'scroll': {
+			const at = point(rest[0], rest[1]);
+			const amount = Number(rest[2]);
+			if (typeof at === 'string' || !Number.isFinite(amount) || amount === 0)
+				return `usage: scroll <x> <y> <amount>. ${typeof at === 'string' ? at : 'A positive amount scrolls down.'}`;
+			return after(await scrollAt(tab, at, amount));
+		}
+		case 'key':
+			if (!rest[0]) return 'usage: key <key>';
+			return after(await pressCombo(tab, rest[0]));
+		case 'type':
+			if (!rest.length) return 'usage: type <text>';
+			return after(await typeText(tab, rest.join(' ')));
+		case 'myreports': {
+			const mine = issues().filter(
+				issue =>
+					issue.agent === who.name &&
+					issue.month === current!.world.campaign.month &&
+					issue.attempt === current!.world.campaign.attempt,
+			);
+			return mine.length
+				? mine
+						.map((issue, index) => `${index + 1}. [${issue.severity}] turn ${issue.turn ?? '-'}: ${issue.text}`)
+						.join('\n')
+				: 'You have recorded nothing this game.';
+		}
+		default:
+			return `You have the screen and nothing else this run: "${verb}" is not one of your commands.\n${SCREEN_HELP}`;
+	}
+}
 
 async function handle(agent: string, words: string[]): Promise<string> {
 	const [verb = 'status', ...rest] = words;
@@ -715,6 +888,8 @@ async function handle(agent: string, words: string[]): Promise<string> {
 	if (!who) return `Unknown player "${agent}". Players: ${config.players.map(player => player.id).join(', ')}.`;
 	const harness = config.players[who.index]!.harness;
 	const tab = tabs[who.index]!;
+	if (harness === 'screen' && !['wait', 'listen', 'say', 'report'].includes(verb))
+		return handleScreen(who, tab, verb, rest);
 
 	switch (verb) {
 		case 'help':
@@ -732,12 +907,13 @@ async function handle(agent: string, words: string[]): Promise<string> {
 				await locked(() => refresh());
 				const unread = lab.chat.slice(lab.chatSeen[who.id] ?? 0).some(message => message.from !== who.name);
 				if (needs(current!, who).length || unread) {
-					const lines = [renderHeader(current!), ...digest(current!, who)];
+					const lines = [...(harness === 'screen' ? [] : [renderHeader(current!)]), ...digest(current!, who)];
 					persist();
 					return lines.join('\n');
 				}
 				if (Date.now() > deadline) {
 					const now = current!;
+					if (harness === 'screen') return 'Nothing is waiting on you yet. Run `wait` again.';
 					const active = now.world.game && now.phase.startsWith('playing') ? now.world.game.active : null;
 					const on = active
 						? now.world.campaign.characters[now.world.game!.players[active]!.character]?.name
@@ -826,7 +1002,7 @@ async function handle(agent: string, words: string[]): Promise<string> {
 		}
 		case 'report': {
 			const [severity, ...text] = rest;
-			if (!severity || !text.length) return 'usage: report <bug|rules|ux|idea> <text>';
+			if (!severity || !text.length) return 'usage: report <bug|rules|ux|visual|idea> <text>';
 			return report(who, agent, severity, text.join(' '));
 		}
 		case 'do':
@@ -925,7 +1101,8 @@ async function shutdown() {
 	if (current) writeFileSync(files.parity, renderParity(audit, current.world, issues()));
 	persist();
 	rmSync(files.pid, { force: true });
-	await browser.close().catch(() => {});
+	await closeTool();
+	for (const { browser } of browsers) await browser.close().catch(() => {});
 	wrangler.kill();
 	await pages.stop(true);
 	await control.stop(true);

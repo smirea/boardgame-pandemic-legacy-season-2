@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
 
-export type Harness = 'api' | 'ui';
+export type Harness = 'api' | 'ui' | 'screen';
 
 export type PlayerConfig = {
 	/** Short id used on the command line, such as `vex`. */
@@ -9,9 +9,12 @@ export type PlayerConfig = {
 	name: string;
 	/** Markdown file describing how this player thinks and talks. */
 	persona: string;
-	/** Markdown file the player reads at the start of a game and rewrites at the end. */
-	memory: string;
-	/** `api` sends commands through the tab's debug API. `ui` may only click what a person could click. */
+	/** Markdown file the player reads at the start of a game and rewrites at the end. Left out, every game starts from nothing. */
+	memory?: string;
+	/**
+	 * `api` sends commands through the tab's debug API. `ui` may only click what a person could click, found
+	 * by its text. `screen` has pictures of the screen and a pointer and keyboard aimed by pixel, and nothing else.
+	 */
 	harness: Harness;
 	/** The T3 provider and model that plays this seat, recorded so a run can be repeated. */
 	provider: string;
@@ -62,11 +65,12 @@ export function loadConfig(path: string): LabConfig & { file: string; runDir: st
 	if (ids.size !== players.length || ids.has('lab'))
 		throw new Error(`${file}: player ids must be unique and not "lab"`);
 	for (const player of players) {
-		for (const key of ['id', 'name', 'persona', 'memory', 'harness', 'provider', 'model', 'effort'] as const)
+		for (const key of ['id', 'name', 'persona', 'harness', 'provider', 'model', 'effort'] as const)
 			if (!player[key]) throw new Error(`${file}: player "${player.id ?? '?'}" needs "${key}"`);
-		if (player.harness !== 'api' && player.harness !== 'ui') throw new Error(`${file}: harness is "api" or "ui"`);
+		if (!['api', 'ui', 'screen'].includes(player.harness))
+			throw new Error(`${file}: harness is "api", "ui" or "screen"`);
 		player.persona = fromLab(player.persona);
-		player.memory = fromLab(player.memory);
+		if (player.memory) player.memory = fromLab(player.memory);
 		if (!existsSync(player.persona)) throw new Error(`${file}: no persona file at ${player.persona}`);
 	}
 	const start = raw.start ?? {};
