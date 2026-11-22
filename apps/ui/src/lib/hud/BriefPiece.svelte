@@ -151,6 +151,7 @@
 		border: 1.5px solid var(--paper-ink);
 		border-radius: 999px;
 		background: var(--slip);
+		color: var(--paper-ink);
 		box-shadow: 0 1px 2px rgb(40 26 12 / 0.35);
 		font-size: 0.72rem;
 		font-weight: 700;
