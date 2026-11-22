@@ -40,7 +40,6 @@
 >
 	<button
 		class="card"
-		class:improved={!!improvement}
 		data-card={card.id}
 		data-original-active={originals.held && Boolean(originalScan)}
 		style:--accent={accent}
@@ -63,17 +62,20 @@
 			</span>
 		{:else if card.kind === 'city' && city}
 			<span class="art"><MapArt city={card.city} {accent} tone="night" /></span>
-			<span class="plate">
-				<span class="title" {@attach fitText(city.name, { max: 1.24, min: 0.72, across: true })}>{city.name}</span>
-			</span>
 			{#if improvement}
 				<span class="improvement" {@attach feedback('Infection improvement', () => ({ id: improvement?.id }))}>
-					<strong class="improvement-name">{improvement.name}</strong>
-					<span class="rule" {@attach fitText(improvement.text, { min: 0.52, max: 0.84 })}>
+					<span
+						class="sticker-fit"
+						{@attach fitText(`${improvement.name}: ${improvement.text}`, { min: 0.46, max: 0.78 })}
+					>
+						<strong class="improvement-name">{improvement.name}:</strong>
 						<RichText text={improvement.text} />
 					</span>
 				</span>
 			{/if}
+			<span class="plate">
+				<span class="title" {@attach fitText(city.name, { max: 1.24, min: 0.72, across: true })}>{city.name}</span>
+			</span>
 		{:else}
 			<span class="hollow">
 				<span class="title" {@attach fitText(hollowTitle, { max: 1.2, min: 0.72, across: true })}>{hollowTitle}</span>
@@ -158,30 +160,41 @@
 		white-space: normal;
 	}
 
+	.card :global(.glyph.supplies),
+	.card :global(.glyph.plague) {
+		width: 0.72em;
+		height: 0.72em;
+	}
+
+	.card :global(.glyph.hollow) {
+		width: 0.7em;
+		height: 0.88em;
+	}
+
+	.card :global(.glyph.card) {
+		width: 0.66em;
+		height: 0.9em;
+	}
+
+	.card :global(.glyph.infection) {
+		width: 0.9em;
+		height: 0.66em;
+	}
+
 	.art {
 		position: absolute;
 		inset: 0;
-	}
-
-	.improved .art {
-		inset: 0 0 auto;
-		height: 2.6em;
-	}
-
-	.improved .plate {
-		inset: 0 0 auto;
-		padding: 0.38em 0.6em 0.5em;
-		background: linear-gradient(to bottom, var(--deep) 45%, transparent);
 	}
 
 	.plate,
 	.hollow {
 		position: absolute;
 		inset: auto 0 0 0;
+		z-index: 2;
 		display: flex;
 		flex-direction: column;
-		padding: 1.1em 0.6em 0.48em;
-		background: linear-gradient(to top, var(--deep) 55%, transparent);
+		padding: 1.05em 0.6em 0.44em;
+		background: linear-gradient(to top, var(--deep) 58%, transparent);
 	}
 
 	.hollow {
@@ -207,36 +220,47 @@
 
 	.improvement {
 		position: absolute;
-		inset: 2.15em 0 0;
+		left: 50%;
+		top: 2.65em;
+		z-index: 3;
 		display: flex;
 		flex-direction: column;
-		gap: 0.14em;
-		padding: 0.34em 0.6em 0.4em;
-		border-top: 1px solid var(--accent);
-		background: color-mix(in srgb, var(--deep) 90%, #130e0c);
+		width: 9.4em;
+		max-height: 4em;
+		padding: 0.34em 0.48em;
+		border: 1px solid rgb(34 25 16 / 0.45);
+		border-radius: 0.22em;
+		background: linear-gradient(168deg, #fcf7ea, #eee2c4);
+		color: #1a140e;
+		box-shadow: 0 0.2em 0.55em rgb(0 0 0 / 0.48);
+		transform: translate(-50%, -50%) rotate(-4.5deg);
+		overflow: hidden;
+	}
+
+	.sticker-fit {
+		display: block;
+		flex: 0 1 auto;
+		min-height: 0;
+		line-height: 1.2;
+		overflow: hidden;
 	}
 
 	.improvement-name {
-		color: var(--tint);
-		font-size: 0.76em;
-		line-height: 1.15;
-	}
-
-	.rule {
-		flex: 1;
-		min-height: 0;
-		line-height: 1.16;
-		overflow: hidden;
+		margin-right: 0.22em;
+		font-weight: 700;
 	}
 
 	.note {
 		position: absolute;
 		top: 0.4em;
 		right: 0.4em;
+		z-index: 4;
 		padding: 0.05em 0.45em;
+		border: 1px solid rgb(42 32 23 / 0.35);
 		border-radius: 0.15em;
 		background: #e7dcc6;
 		color: #2a2017;
+		box-shadow: 0 0.12em 0.35em rgb(0 0 0 / 0.45);
 		font-size: 0.64em;
 		font-weight: 600;
 	}
