@@ -53,7 +53,7 @@ export {
 export type { ActionChoice } from './options';
 export { violations } from './invariants';
 export type { Insights, MapNote, PlayerCardsAt, PlayerDeckKind, PublicState, ReconBox } from './view';
-export { inoculation, insights, mapNotes, onGrid, publicState, reconBoxes } from './view';
+export { hollowInPlay, inoculation, insights, mapNotes, onGrid, publicState, reconBoxes } from './view';
 export {
 	breakthrough,
 	canImproveCityCard,

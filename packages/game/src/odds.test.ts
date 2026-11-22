@@ -1,35 +1,107 @@
 import { describe, expect, test } from 'bun:test';
 import { drawBottom, drawPiled, drawTop, newDeck, newPiledDeck, stackOnTop } from './decks';
 import type { CardId } from './ids';
-import { drawOdds, drawsUntilEpidemicCertain, epidemicOdds, expectedDraws } from './odds';
+import { drawsUntilEpidemicCertain, epidemicOdds, expectedDraws, infectOdds } from './odds';
 
 const cards = (...names: string[]) => names as CardId[];
 const cityOf = (card: CardId) => card.split('#')[0]!;
 
+const step = (infects: number, hollows = 0, gathering = false) => ({ infects, hollows, gathering });
+const gatherOr = (card: CardId) => (card.startsWith('gather') ? null : cityOf(card));
+
+/** Plays every order of one stratum through the Infect step's rules and counts what each city takes. */
+function enumerate(stratum: CardId[], infects: number) {
+	const orders = (left: CardId[]): CardId[][] =>
+		left.length === 0 ? [[]] : left.flatMap((card, i) => orders(left.toSpliced(i, 1)).map(rest => [card, ...rest]));
+	const infected = new Map<string, number>();
+	const hollowed = new Map<string, number>();
+	const all = orders(stratum);
+	for (const order of all) {
+		const hit = { infect: new Set<string>(), hollow: new Set<string>() };
+		let flipped = 0;
+		let gathering = false;
+		for (const card of order) {
+			if (flipped === infects) break;
+			const city = gatherOr(card);
+			if (city === null) {
+				gathering = true;
+				continue;
+			}
+			hit[gathering ? 'hollow' : 'infect'].add(city);
+			gathering = false;
+			flipped++;
+		}
+		for (const city of hit.infect) infected.set(city, (infected.get(city) ?? 0) + 1 / all.length);
+		for (const city of hit.hollow) hollowed.set(city, (hollowed.get(city) ?? 0) + 1 / all.length);
+	}
+	return { infected, hollowed };
+}
+
 describe('infection draw odds', () => {
 	test('a stratum that is fully drawn is certain', () => {
-		const odds = drawOdds([cards('paris#1', 'cairo#1'), cards('lima#1', 'lagos#1', 'tokyo#1')], 2, cityOf);
-		expect(odds.get('paris')).toBe(1);
-		expect(odds.get('cairo')).toBe(1);
-		expect(odds.get('lima')).toBe(0);
+		const { infect } = infectOdds(
+			[cards('paris#1', 'cairo#1'), cards('lima#1', 'lagos#1', 'tokyo#1')],
+			step(2),
+			cityOf,
+		);
+		expect(infect.get('paris')).toBe(1);
+		expect(infect.get('cairo')).toBe(1);
+		expect(infect.get('lima')).toBe(0);
 	});
 
 	test('a partly drawn stratum is hypergeometric, and copies raise the odds', () => {
-		const odds = drawOdds([cards('paris#1', 'paris#2', 'cairo#1', 'lima#1')], 2, cityOf);
-		expect(odds.get('cairo')).toBeCloseTo(0.5);
-		expect(odds.get('paris')).toBeCloseTo(1 - 1 / 6);
+		const { infect } = infectOdds([cards('paris#1', 'paris#2', 'cairo#1', 'lima#1')], step(2), cityOf);
+		expect(infect.get('cairo')).toBeCloseTo(0.5);
+		expect(infect.get('paris')).toBeCloseTo(1 - 1 / 6);
 	});
 
 	test('draws spill from the top stratum into the next', () => {
-		const odds = drawOdds([cards('paris#1'), cards('cairo#1', 'lima#1', 'lagos#1')], 2, cityOf);
-		expect(odds.get('paris')).toBe(1);
-		expect(odds.get('cairo')).toBeCloseTo(1 / 3);
+		const { infect } = infectOdds([cards('paris#1'), cards('cairo#1', 'lima#1', 'lagos#1')], step(2), cityOf);
+		expect(infect.get('paris')).toBe(1);
+		expect(infect.get('cairo')).toBeCloseTo(1 / 3);
 	});
 
 	test('expected copies sum to the number of draws', () => {
 		const expected = expectedDraws([cards('paris#1', 'paris#2', 'cairo#1')], 2, cityOf);
 		expect(expected.get('paris')).toBeCloseTo(4 / 3);
 		expect([...expected.values()].reduce((sum, value) => sum + value, 0)).toBeCloseTo(2);
+	});
+});
+
+describe('Hollow Men odds', () => {
+	test('the city flipped after a Gather card gets a Hollow Man, and the Gather card does not count toward the rate', () => {
+		const { infect, hollow } = infectOdds(
+			[cards('gather#1'), cards('paris#1'), cards('cairo#1'), cards('lima#1')],
+			step(2),
+			gatherOr,
+		);
+		expect(hollow.get('paris')).toBe(1);
+		expect(infect.get('paris')).toBe(0);
+		expect(infect.get('cairo')).toBe(1);
+		expect(infect.get('lima')).toBe(0);
+	});
+
+	test('a Gather card already face up sends the first city flipped a Hollow Man', () => {
+		const { infect, hollow } = infectOdds([cards('paris#1'), cards('cairo#1')], step(2, 0, true), gatherOr);
+		expect(hollow.get('paris')).toBe(1);
+		expect(infect.get('cairo')).toBe(1);
+	});
+
+	test('the last setup flips place Hollow Men', () => {
+		const { infect, hollow } = infectOdds([cards('paris#1'), cards('cairo#1'), cards('lima#1')], step(1, 2), gatherOr);
+		expect(infect.get('paris')).toBe(1);
+		expect(hollow.get('cairo')).toBe(1);
+		expect(hollow.get('lima')).toBe(1);
+	});
+
+	test('the odds are exact over every order of a shuffled stratum', () => {
+		const stratum = cards('gather#1', 'gather#2', 'paris#1', 'paris#2', 'cairo#1', 'lima#1', 'lagos#1');
+		const { infect, hollow } = infectOdds([stratum], step(2), gatherOr);
+		const truth = enumerate(stratum, 2);
+		for (const city of ['paris', 'cairo', 'lima', 'lagos']) {
+			expect(infect.get(city)).toBeCloseTo(truth.infected.get(city) ?? 0, 12);
+			expect(hollow.get(city)).toBeCloseTo(truth.hollowed.get(city) ?? 0, 12);
+		}
 	});
 });
 

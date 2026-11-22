@@ -138,6 +138,7 @@ export function createBoardView(source: BoardSource): BoardView {
 								info && city.kind !== 'haven'
 									? {
 											odds: info.infection.odds[city.id] ?? 0,
+											hollow: info.infection.hollow ? (info.infection.hollow[city.id] ?? 0) : null,
 											inDeck: info.infection.strata.reduce((sum, stratum) => sum + (stratum.cities[city.id] ?? 0), 0),
 											discarded: info.infection.discard[city.id] ?? 0,
 										}

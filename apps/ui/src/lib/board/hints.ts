@@ -128,6 +128,12 @@ export function cityHint(city: CityView): HintText {
 			value: percent(city.infection.odds),
 			tone: city.infection.odds > 0 && city.supplies === 0 ? 'bad' : null,
 		});
+	if (city.infection?.hollow != null)
+		rows.push({
+			label: 'Hollow Men next',
+			value: percent(city.infection.hollow),
+			tone: city.infection.hollow > 0 ? 'bad' : null,
+		});
 	if (city.stock) {
 		const piles = city.infection
 			? [`${city.infection.inDeck} in deck`, `${city.infection.discarded} discarded`]

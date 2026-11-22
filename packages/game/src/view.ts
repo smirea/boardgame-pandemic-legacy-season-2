@@ -9,7 +9,7 @@ import type { Campaign } from './state';
 import type { GameSnapshot, Phase } from './machine';
 import { phaseOf, reject } from './machine';
 import { legalActions } from './options';
-import { drawOdds, drawsUntilEpidemicCertain, epidemicOdds, expectedDraws } from './odds';
+import { drawsUntilEpidemicCertain, epidemicOdds, expectedDraws, infectOdds } from './odds';
 import type { PlayerCard, World } from './state';
 import type { Color } from './content/types';
 
@@ -53,8 +53,10 @@ export type Insights = {
 		rate: number;
 		nextRate: number;
 		deck: number;
-		/** Chance each city is hit at least once in the next Infect step. */
+		/** Chance each city is infected at least once in the next Infect step. */
 		odds: Record<CityId, number>;
+		/** Chance each city gets at least one Hollow Man in the next Infect step, or null before Hollow Men are in play. */
+		hollow: Record<CityId, number> | null;
 		expected: Record<CityId, number>;
 		/** Top stratum first: the cards known to be in each layer of the deck, `cards` sorted so it never tells their order. */
 		strata: { size: number; cities: Record<CityId, number>; cards: CardId[] }[];
@@ -118,13 +120,19 @@ export function insights(world: World): Insights | null {
 	const layers = unbuilt ? [openingDeck] : game.infectionDeck.strata;
 	const strata = layers.map(stratum => stratum.filter(infects));
 	const hollowSetup = world.campaign.rules.includes('hollowSetup');
+	const setupHollows = hollowSetup ? 3 : 0;
 	const rate = unbuilt
-		? pack.numbers.setupInfections - (hollowSetup ? 3 : 0)
+		? pack.numbers.setupInfections - setupHollows
 		: opening
 			? openingInfectionsLeft(world)
 			: rates[game.rateIndex]!;
+	const hollows = !opening ? 0 : unbuilt ? setupHollows : Math.min(setupHollows, game.infectionsLeft);
 	const keyOf = (card: CardId) => cityOfInfection(world, card);
-	const odds = Object.fromEntries(drawOdds(strata, rate, keyOf)) as Record<CityId, number>;
+	const flips = infectOdds(strata, { infects: rate, hollows, gathering: game.gathering }, card => {
+		const key = keyOf(card);
+		return key === 'hollow' ? null : key;
+	});
+	const odds = Object.fromEntries(flips.infect) as Record<CityId, number>;
 	const expected = Object.fromEntries(expectedDraws(strata, rate, keyOf)) as Record<CityId, number>;
 	const byKind: Partial<Record<PlayerDeckKind, number>> = {};
 	for (const id of game.playerDeck.order) {
@@ -133,8 +141,8 @@ export function insights(world: World): Insights | null {
 		byKind[key] = (byKind[key] ?? 0) + 1;
 	}
 	const epidemicsLeft = game.playerDeck.piles.reduce((sum, pile) => sum + pile.epidemics, 0);
-	const atRisk = (Object.entries(odds) as [CityId | 'hollow', number][])
-		.filter(([city, chance]) => city !== 'hollow' && chance > 0 && game.locations[city]!.supplies === 0)
+	const atRisk = (Object.entries(odds) as [CityId, number][])
+		.filter(([city, chance]) => chance > 0 && game.locations[city]!.supplies === 0)
 		.map(([city, chance]) => ({
 			city: city as CityId,
 			odds: chance,
@@ -158,6 +166,7 @@ export function insights(world: World): Insights | null {
 			nextRate: rates[Math.min(game.rateIndex + 1, rates.length - 1)]!,
 			deck: game.infectionDeck.order.length,
 			odds,
+			hollow: hollowInPlay(world.campaign) ? (Object.fromEntries(flips.hollow) as Record<CityId, number>) : null,
 			expected,
 			strata: layers.map(stratum => ({
 				size: stratum.length,
@@ -174,6 +183,11 @@ export function insights(world: World): Insights | null {
 		incidentsLeft: pack.numbers.incidentLimit - game.incidents,
 	};
 }
+
+/** Whether the campaign has unlocked Hollow Men: Gather cards among the Infection cards, or Hollow Men at setup. */
+export const hollowInPlay = (campaign: Campaign): boolean =>
+	campaign.rules.includes('hollowSetup') ||
+	Object.values(campaign.infectionCards).some(card => card.kind === 'gather' || card.kind === 'assemble');
 
 export const onGrid = (world: World): CityId[] => [...grid(world.campaign)];
 

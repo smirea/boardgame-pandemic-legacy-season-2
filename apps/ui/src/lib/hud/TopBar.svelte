@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
-	import { pack } from '@repo/game';
+	import { hollowInPlay, pack } from '@repo/game';
 	import { fade } from 'svelte/transition';
 	import LegacyCard from '#lib/cards/LegacyCard.svelte';
 	import type { Insights, PublicState } from '@repo/game';
@@ -66,11 +66,7 @@
 	const legacyLeft = $derived(pack.legacyDeck.length - campaign.legacyIndex);
 	const hasStorage = $derived(campaign.rules.includes('storage'));
 	const hasScanner = $derived(campaign.actions.includes('monitor'));
-	const hasHollow = $derived(
-		game !== null &&
-			(campaign.rules.includes('hollowSetup') ||
-				Object.values(campaign.infectionCards).some(card => card.kind === 'gather' || card.kind === 'assemble')),
-	);
+	const hasHollow = $derived(game !== null && hollowInPlay(campaign));
 	let legacyPeek = $state(false);
 </script>
 
