@@ -12,7 +12,6 @@ function procrastimate(passphrase: string) {
 	if (import.meta.env.DEV || !passphrase) return undefined;
 	return {
 		url: `/__feedback/procrastimate/${encodeURIComponent(passphrase)}`,
-		project: 'a/bg-pandemic-2',
 		projects: ['a/bg-pandemic-2'],
 	};
 }

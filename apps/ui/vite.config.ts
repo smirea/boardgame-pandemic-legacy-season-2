@@ -13,7 +13,6 @@ export default defineConfig(({ command }) => ({
 		// Only the dev server forwards to ProcrastiMate. A built site has no proxy, so it must not offer the entry.
 		feedbackProcrastimate({
 			token: command === 'serve' ? env.PROCRASTIMATE_TOKEN : undefined,
-			project: 'a/bg-pandemic-2',
 			projects: ['a/bg-pandemic-2'],
 		}),
 		sveltekit({
