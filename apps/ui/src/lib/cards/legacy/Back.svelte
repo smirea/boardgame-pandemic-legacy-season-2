@@ -33,6 +33,7 @@
 	const STORY_LEAD: Record<string, number> = { '08-04': 1, '11-05': 1 };
 	/** The paragraphs of a journal entry that are instructions; the rest of the entry is story. */
 	const JOURNAL_RULES: Record<string, number[]> = { '00-01': [0], '08-02': [1] };
+	const BAND = /^(DID NOT DELIVER|DELIVERED):/;
 
 	// The last card is printed upside down at the bottom of the deck: its back is the archive's side B.
 	const side = $derived(card.kind === 'end' ? print.b : print.a);
@@ -47,7 +48,14 @@
 		return 'blank';
 	});
 
-	const title = $derived(side.header ? sentence(side.header) : '');
+	/** An ending's back prints the story for two score bands, each under its band. */
+	const titles = $derived.by(() => {
+		const bands = card.kind === 'ending' ? side.text.split('\n').filter(line => BAND.test(line.trim())) : [];
+		return (bands.length ? bands : [side.header])
+			.filter(Boolean)
+			.map(line => sentence(line.trim()).replace(/(\d)-(\d)/, '$1\u2013\u2060$2'));
+	});
+	const storied = $derived(family === 'story' || card.id in STORY_LEAD);
 
 	const paragraphs = $derived.by(() => {
 		const header = side.header.trim().toUpperCase();
@@ -127,7 +135,7 @@
 			</svg>
 		{/if}
 	</div>
-	{#if title}<strong class="title">{title}</strong>{/if}
+	{#each titles as title (title)}<strong class="title">{title}</strong>{/each}
 	{#if blocks.length}
 		<div class="body" {@attach fitText(fitKey, { max: 1.05, min: 0.45 })}>
 			{#each blocks as block, index (index)}
@@ -141,6 +149,7 @@
 			{/each}
 		</div>
 	{/if}
+	{#if storied}<p class="story-hint">Hold <kbd>O</kbd> for the printed story</p>{/if}
 	<span class="code">{code}</span>
 </div>
 
@@ -351,7 +360,24 @@
 		justify-content: center;
 	}
 
+	.story-hint {
+		margin: 0;
+		font-size: 0.74em;
+		font-style: italic;
+		opacity: 0.6;
+	}
+
+	kbd {
+		padding: 0 0.35em;
+		border: 1px solid currentColor;
+		border-radius: 0.2em;
+		font-family: inherit;
+		font-style: normal;
+		font-weight: 700;
+	}
+
 	:global(.legacy-card.size-mini) .back::before,
+	:global(.legacy-card.size-mini) .story-hint,
 	:global(.legacy-card.size-mini) .warning,
 	:global(.legacy-card.size-mini) .title,
 	:global(.legacy-card.size-mini) .body {

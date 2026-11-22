@@ -117,7 +117,12 @@
 			],
 			'Prologue',
 		),
-		'01-01': { family: 'paper', kicker: 'Journal entry', blocks: [], foot: JOURNAL },
+		'01-01': {
+			family: 'paper',
+			kicker: 'Journal entry',
+			blocks: [{ t: 'p', text: 'Priorities: Find our leaders. Find more supplies.' }],
+			foot: JOURNAL,
+		},
 
 		'02-01': report('Perimeter report', 'If you have not opened {{d:66}}, scratch the box below.', [
 			openPkg(
@@ -226,7 +231,7 @@
 		'04-02': archive('Year 42', {
 			t: 'coords',
 			rows: [
-				['J', '26°11\'28"S  28°02\'45"E'],
+				['J', '26°11\'28"S  28°02\'43"E'],
 				['O', '34°29\'38"S  58°31\'35"W'],
 				['T', '41°11\'46"S  174°56\'29"E'],
 				['P', '53°19\'21"N  1'],
@@ -609,6 +614,9 @@
 		{#each face.blocks as block, index (index)}
 			{@render show(block)}
 		{/each}
+		{#if face.family === 'paper' || face.family === 'close'}
+			<p class="story-hint">Hold <kbd>O</kbd> for the printed story</p>
+		{/if}
 	</div>
 	{#if face.foot}<p class="foot">{face.foot}</p>{/if}
 	<span class="code">{code}</span>
@@ -667,6 +675,31 @@
 
 	li + li {
 		margin-top: 0.15em;
+	}
+
+	.story-hint {
+		margin-top: auto;
+		font-size: 0.74em;
+		font-style: italic;
+		text-align: center;
+		opacity: 0.6;
+	}
+
+	.sheet:has(> .story-hint:only-child) {
+		justify-content: center;
+	}
+
+	.story-hint:only-child {
+		margin-top: 0;
+	}
+
+	kbd {
+		padding: 0 0.35em;
+		border: 1px solid currentColor;
+		border-radius: 0.2em;
+		font-family: inherit;
+		font-style: normal;
+		font-weight: 700;
 	}
 
 	.foot {
