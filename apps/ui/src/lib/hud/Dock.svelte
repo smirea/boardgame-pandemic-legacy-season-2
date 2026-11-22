@@ -9,7 +9,7 @@
 	import { cityName, decideLabel, decisionTitle, seatName, SEAT_COLORS, cardName } from './labels.svelte.ts';
 	import { deal } from './deal.ts';
 	import { sortHand } from './handOrder.ts';
-	import PlayerCard from './PlayerCard.svelte';
+	import PlayerCard, { HAND_CARD_SIZE } from './PlayerCard.svelte';
 	import { keep } from './viewState.ts';
 
 	type Props = {
@@ -291,6 +291,7 @@
 						data-testid="hand"
 						bind:this={hand}
 						bind:clientWidth={handWidth}
+						style:--card-size={`${HAND_CARD_SIZE}rem`}
 						style:--overlap={`${overlap}rem`}
 						in:fade={{ duration: 220 }}
 					>
@@ -726,7 +727,6 @@
 	}
 
 	.hand {
-		--card-size: 1.04rem;
 		display: flex;
 		align-self: stretch;
 		justify-content: center;

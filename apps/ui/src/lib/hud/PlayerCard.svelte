@@ -9,6 +9,8 @@
 		epidemic: '#a8261c',
 	} as const;
 
+	export const HAND_CARD_SIZE = 1.04;
+
 	export const GLYPH = { event: '✦', produce: '▦', epidemic: '☣' } as const;
 
 	/** The colour a card is known by at a glance: its city's region, or its kind. */

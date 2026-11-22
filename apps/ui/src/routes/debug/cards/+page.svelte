@@ -6,7 +6,7 @@
 	import { EVENT_PRINT } from '#lib/cards/playerPrint.ts';
 	import { legacyScans } from '#lib/scans.generated.ts';
 	import { playerCardScan, scanUrl } from '#lib/scans.svelte.ts';
-	import PlayerCard from '#lib/hud/PlayerCard.svelte';
+	import PlayerCard, { HAND_CARD_SIZE } from '#lib/hud/PlayerCard.svelte';
 
 	// Every card comes from a fresh campaign, so this page shows exactly what the generator produces.
 	const campaign = createGameActor({ seed: 1 }).getSnapshot().context.world.campaign;
@@ -61,7 +61,7 @@
 		{ id: 'g' as never, kind: 'gather' },
 		{ id: 'a' as never, kind: 'assemble' },
 	];
-	let size = $state(1);
+	let size = $state(HAND_CARD_SIZE);
 	let legacySize = $state<'full' | 'deck'>('full');
 	let comparePlayer = $state(false);
 	let legacyFilter = $state('');
@@ -77,7 +77,7 @@
 <main style:--card-size={`${size}rem`}>
 	<header>
 		<h1>Cards</h1>
-		<label>Size <input type="range" min="0.6" max="1.6" step="0.05" bind:value={size} /></label>
+		<label>Size <input type="range" min="0.6" max="1.6" step="0.01" bind:value={size} /> {size.toFixed(2)}rem</label>
 		<label><input type="checkbox" bind:checked={comparePlayer} /> Compare player scans</label>
 		<label>
 			Legacy size
@@ -194,7 +194,7 @@
 	}
 
 	.player-scan {
-		height: calc(var(--card-size, 1rem) * 10.6);
+		height: calc(var(--card-size) * 10.6);
 		width: auto;
 		border-radius: 0.4em;
 	}
