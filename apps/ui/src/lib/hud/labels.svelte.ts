@@ -119,7 +119,7 @@ export const ACTION_TEXT: Record<Action['a'], string> = {
 	rehab: 'Discard 2 cards to take a stored City card',
 	selfInject: 'Carry the sample, taking a scar',
 	pickUp: 'Take cubes from this city',
-	transfer: 'Pass cubes to or from a player',
+	transfer: 'Give cubes to a player, or take theirs',
 	inoculate: "Store this city's card out of the decks",
 	salvage: 'Discard 2 cards to take one back',
 	destroyInfection: "Destroy this city's Infection card",
