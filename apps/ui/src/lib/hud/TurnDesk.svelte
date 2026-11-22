@@ -17,8 +17,8 @@
 		left: number;
 		/** A click on the deck, when this browser's player is the one to take the next card. */
 		action: { busy: boolean; onclick: () => void } | null;
-		/** Whose turn it is, shown to everyone. */
-		name: string;
+		/** Whose turn it is, shown to everyone, or null while the whole table flips the cards that open a game. */
+		name: string | null;
 		color: string;
 		/** An Epidemic lies beside the deck and nothing else is drawn until it is started. */
 		epidemic: boolean;
@@ -73,7 +73,9 @@
 	class="desk {side}"
 	style:--seat={color}
 	style:--on={inkOn(color)}
-	aria-label={`${name}'s turn: ${deck === 'player' ? 'draw Player cards' : 'flip Infection cards'}`}
+	aria-label={name === null
+		? 'Opening infection: flip Infection cards'
+		: `${name}'s turn: ${deck === 'player' ? 'draw Player cards' : 'flip Infection cards'}`}
 	data-testid="turn-desk"
 	data-deck={deck}
 	{@attach feedback('Turn desk', () => ({ deck, left, count, epidemic, mine: action !== null, flipped: stack.length }))}
@@ -111,7 +113,7 @@
 				</span>
 			</button>
 		{/key}
-		<span class="who"><i></i>{name}</span>
+		<span class="who"><i></i>{name ?? 'Everyone'}</span>
 		<span class="badge" class:alarm={epidemic} data-testid="turn-desk-badge">{badge}</span>
 	</div>
 	<!-- A drawn Player card is laid over this by `CardFlights`, which finds it by its mark. -->

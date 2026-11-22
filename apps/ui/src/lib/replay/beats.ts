@@ -29,7 +29,7 @@ function seatOf(state: PublicState, command: Command | null): SeatId | null {
 	if ('seat' in command && typeof command.seat === 'string') return command.seat;
 	if (command.type === 'DECIDE' && 'seat' in command.decide && command.decide.seat) return command.decide.seat;
 	if (command.type === 'DRAW' || command.type === 'INFECT' || command.type === 'UNDO')
-		return state.world.game?.active ?? null;
+		return state.world.game?.turn ? state.world.game.active : null;
 	return null;
 }
 

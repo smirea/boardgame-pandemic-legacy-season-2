@@ -49,6 +49,8 @@ export function botCommand(world: World, phase: Phase, rng: RngState, seats = 2)
 		}
 		case 'setup.supply':
 			return game!.stockpile > 0 ? { type: 'AUTO_SUPPLY' } : { type: 'CONFIRM_SUPPLY' };
+		case 'setup.infect':
+			return { type: 'INFECT' };
 		case 'setup.events':
 			return { type: 'CONFIRM_EVENTS' };
 		case 'playing.actions':

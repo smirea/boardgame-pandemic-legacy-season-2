@@ -11,6 +11,7 @@ export type TurnAdminSource = {
 	readonly info: Insights | null;
 	/** This browser plays the active seat. */
 	readonly canAct: boolean;
+	/** This browser plays no seat, or shows a recording. */
 	readonly spectator: boolean;
 	/** False for a jump nobody lived through, such as a replay seeking. */
 	readonly lived: boolean;
@@ -53,38 +54,35 @@ export function createTurnAdmin(source: TurnAdminSource) {
 	});
 	/** True while an Epidemic's steps are being taken, when the desk makes way for them. */
 	const resolving = $derived(step === 'epidemicInfect' || step === 'intensify');
-	const opening = $derived(source.phase === 'setup.events' && (show.queued > 0 || show.playing));
+	/** The cards that open a game are anyone's to flip: no turn has begun, so no seat is the active one. */
+	const opening = $derived(source.phase === 'setup.infect');
 
 	const deck = $derived.by((): 'player' | 'infection' | null => {
 		if (!game || resolving) return null;
 		if (source.phase === 'playing.draw') return 'player';
 		// The last card of a turn is still being played out on the board when the next player's turn has begun.
-		if (source.phase === 'playing.infect' || opening || show.playing || show.queued > 0 || show.stack.length > 0)
-			return 'infection';
+		if (source.phase === 'playing.infect' || opening || show.playing || show.stack.length > 0) return 'infection';
 		return turn.reveals.length > 0 ? 'player' : null;
 	});
 
 	// Whose turn is being wound up. The last Infection card is still played out after the next turn has begun, and
-	// the desk goes on naming the player who flipped it.
+	// the desk goes on naming the player who flipped it. Before the first turn it is nobody's.
 	let last = untrack(() => game?.active ?? null);
 	const seat = $derived.by(() => {
-		if (game && (source.phase === 'playing.draw' || source.phase === 'playing.infect')) last = game.active;
-		return last ?? game?.active ?? null;
+		if (!game || game.turn === 0) return null;
+		if (source.phase === 'playing.draw' || source.phase === 'playing.infect') last = game.active;
+		return last ?? game.active;
 	});
 
 	const allowed = (command: Command) => reject(source.world, source.phase, command) === null;
 	const action = $derived.by(() => {
 		if (source.spectator || !game || deck === null) return null;
 		const busy = turn.busy || show.playing;
-		// Cards already flipped by the state, such as the nine that open a game, are turned over one click at a time.
-		if (deck === 'infection' && show.queued > 0) return { busy, onclick: () => show.next() };
-		if (!source.canAct) return null;
+		if (!source.canAct && !opening) return null;
 		const command: Command = deck === 'player' ? { type: 'DRAW' } : { type: 'INFECT' };
 		return allowed(command) ? { busy, onclick: () => source.send(command) } : null;
 	});
-	const left = $derived(
-		!game ? 0 : deck === 'player' ? game.drawsLeft : show.queued > 0 ? show.queued : game.infectionsLeft,
-	);
+	const left = $derived(!game ? 0 : deck === 'player' ? game.drawsLeft : game.infectionsLeft);
 	const count = $derived.by(() => {
 		const { info } = source;
 		if (!info) return 0;
@@ -113,7 +111,7 @@ export function createTurnAdmin(source: TurnAdminSource) {
 		const wait =
 			step === 'epidemicInfect'
 				? INFECT_AFTER_MS
-				: step === 'intensify' && !held && !show.playing && show.queued === 0
+				: step === 'intensify' && !held && !show.playing
 					? INTENSIFY_AFTER_MS
 					: null;
 		if (wait === null) return;
@@ -123,11 +121,15 @@ export function createTurnAdmin(source: TurnAdminSource) {
 
 	return {
 		turn,
+		/** True while the cards that open a game are flipped, a step that belongs to the whole table. */
+		get opening() {
+			return opening;
+		},
 		/** The deck that is out on the desk, or null when the desk is put away. */
 		get deck() {
 			return deck;
 		},
-		/** The seat whose turn the desk is winding up. */
+		/** The seat whose turn the desk is winding up, or null while the table opens a game. */
 		get seat() {
 			return seat;
 		},

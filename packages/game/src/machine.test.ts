@@ -46,6 +46,7 @@ import {
 	phase,
 	refuses,
 	send,
+	setUp,
 	stackInfection,
 	worldOf,
 } from './testkit';
@@ -595,6 +596,27 @@ describe('Hollow Men and forsaken cities', () => {
 		expect(gameOf(empty).outcome).toMatchObject({ won: false });
 	});
 
+	test('each card that opens a game is flipped by its own command, and Events wait for the last', () => {
+		const actor = createGameActor({ seed: 5, save: decemberSave() }).start();
+		send(actor, {
+			type: 'START_GAME',
+			seating: Object.values(worldOf(actor).campaign.characters)
+				.slice(0, 2)
+				.map((entry, index) => ({ seat: [A, B][index]!, character: entry.id })),
+		});
+		send(actor, { type: 'AUTO_SUPPLY' });
+		send(actor, { type: 'CONFIRM_SUPPLY' });
+		const flipped = () => gameOf(actor).log.filter(entry => entry.t === 'infect' && entry.effect !== 'skipped').length;
+		expect(flipped()).toBe(0);
+		for (let card = 1; card <= 9; card++) {
+			expect(phase(actor)).toBe('setup.infect');
+			expect(reject(worldOf(actor), phase(actor), { type: 'CONFIRM_EVENTS' })).not.toBeNull();
+			send(actor, { type: 'INFECT' });
+			expect(flipped()).toBe(card);
+		}
+		expect(phase(actor)).toBe('setup.events');
+	});
+
 	test('from September the last three setup infections place Hollow Men instead', () => {
 		const actor = createGameActor({ seed: 5, save: decemberSave() }).start();
 		send(actor, {
@@ -605,6 +627,7 @@ describe('Hollow Men and forsaken cities', () => {
 		});
 		send(actor, { type: 'AUTO_SUPPLY' });
 		send(actor, { type: 'CONFIRM_SUPPLY' });
+		while (phase(actor) === 'setup.infect') send(actor, { type: 'INFECT' });
 		const game = gameOf(actor);
 		const hollow = Object.values(game.locations).reduce((sum, location) => sum + location.hollow, 0);
 		const cityDiscards = game.infectionDiscard.filter(
@@ -1284,7 +1307,7 @@ test('a scar owed from a forced opening goes to a character the group picks as t
 			{ seat: B, character: characters[1]!.id },
 		],
 	});
-	for (const type of ['AUTO_SUPPLY', 'CONFIRM_SUPPLY', 'CONFIRM_EVENTS'] as const) send(owed, { type });
+	setUp(owed);
 	expect(gameOf(owed).pending[0]).toEqual({ t: 'scar', seat: null });
 	send(owed, { type: 'DECIDE', decide: { d: 'scar', scar: 'smallHand', target: 2, seat: B } });
 	expect(character(worldOf(owed), B).slots[2]).toEqual({ kind: 'scar', id: 'smallHand' });
@@ -2446,7 +2469,7 @@ function january(edit?: (world: World, game: Game) => void, phase: Phase = 'play
 			character: character.id,
 		})),
 	});
-	for (const type of ['ACK_BRIEFING', 'AUTO_SUPPLY', 'CONFIRM_SUPPLY', 'CONFIRM_EVENTS'] as const) actor.send({ type });
+	setUp(actor);
 	const world = structuredClone(actor.getSnapshot().context.world);
 	const game = world.game!;
 	game.active = A;
@@ -2755,7 +2778,7 @@ describe('between games', () => {
 			character: character.id,
 		}));
 		send(actor, { type: 'START_GAME', seating });
-		for (const type of ['AUTO_SUPPLY', 'CONFIRM_SUPPLY', 'CONFIRM_EVENTS'] as const) send(actor, { type });
+		setUp(actor);
 		const second = structuredClone(worldOf(actor));
 		second.game!.outcome = { won: false, reason: 'test' };
 		const next = createGameActor({ seed: 1, save: { v: 1, phase: 'over', world: second } }).start();
@@ -2808,7 +2831,7 @@ test('a prologue game leaves no permanent mark on the campaign', () => {
 			character: character.id,
 		})),
 	});
-	for (const type of ['AUTO_SUPPLY', 'CONFIRM_SUPPLY', 'CONFIRM_EVENTS'] as const) send(actor, { type });
+	setUp(actor);
 	// A JSON round trip, as a save does: structuredClone would keep the restore copy aliased to the live campaign.
 	const world = JSON.parse(JSON.stringify(worldOf(actor))) as World;
 	world.game!.locations[city('london')]!.plague = 2;

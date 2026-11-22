@@ -188,7 +188,7 @@ function onGridCards(world: World) {
 	};
 }
 
-/** Setup steps 4: build the Infection deck and flip the opening infections. */
+/** Setup step 4: build the Infection deck. Its opening cards are then flipped one command at a time, so every screen sees each one. */
 export function setupInfection(world: World) {
 	const { campaign, game } = world as { campaign: World['campaign']; game: Game };
 	const cards = onGridCards(world);
@@ -208,14 +208,25 @@ export function setupInfection(world: World) {
 			t: 'note',
 			text: `Utopia was opened by the perimeter report, so its ${late.length} Infection cards start in the discard pile and enter the deck with the first Epidemic`,
 		});
-	const hollowFrom = hasRule(campaign, 'hollowSetup') ? numbers.setupInfections - 3 : numbers.setupInfections;
-	for (let flipped = 0; flipped < numbers.setupInfections && !isOver(world); flipped++) {
-		const card = drawInfectionCard(world, 'top');
-		if (!card) break;
-		if (flipped >= hollowFrom) placeHollow(world, card.city, card.id);
-		else infectCity(world, card.city, card.id);
-		game.infectionDiscard.push(card.id);
-	}
+	game.infectionsLeft = numbers.setupInfections;
+}
+
+/** How many of the opening flips still to come infect a city. From September the last 3 place a Hollow Man instead. */
+export function openingInfectionsLeft(world: World): number {
+	const hollow = hasRule(world.campaign, 'hollowSetup') ? 3 : 0;
+	return Math.max(0, world.game!.infectionsLeft - hollow);
+}
+
+/** Flips one of the cards that open a game. */
+export function openingInfectStep(world: World) {
+	const game = world.game!;
+	const infects = openingInfectionsLeft(world) > 0;
+	const card = drawInfectionCard(world, 'top');
+	if (!card) return void (game.infectionsLeft = 0);
+	game.infectionsLeft -= 1;
+	if (infects) infectCity(world, card.city, card.id);
+	else placeHollow(world, card.city, card.id);
+	game.infectionDiscard.push(card.id);
 }
 
 export function epidemicCount(cityCards: number): number {

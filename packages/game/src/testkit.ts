@@ -21,6 +21,15 @@ export function send(actor: GameActor, command: Command) {
 	actor.send(command);
 }
 
+/** Takes a game just started through setup to its first action step: supplies spread, the opening cards flipped, hands dealt. */
+export function setUp(actor: GameActor) {
+	if (worldOf(actor).campaign.briefing.length) actor.send({ type: 'ACK_BRIEFING' });
+	send(actor, { type: 'AUTO_SUPPLY' });
+	send(actor, { type: 'CONFIRM_SUPPLY' });
+	while (phase(actor) === 'setup.infect') send(actor, { type: 'INFECT' });
+	send(actor, { type: 'CONFIRM_EVENTS' });
+}
+
 export const act = (actor: GameActor, action: Action, seat = A) => send(actor, { type: 'ACTION', seat, action });
 export const refuses = (actor: GameActor, action: Action, seat = A) =>
 	reject(worldOf(actor), phase(actor), { type: 'ACTION', seat, action });
@@ -105,7 +114,7 @@ export function late(edit?: (world: World, game: Game) => void, at: Phase = 'pla
 			.slice(0, 3)
 			.map((entry, index) => ({ seat: seats[index]!, character: entry.id })),
 	});
-	for (const type of ['ACK_BRIEFING', 'AUTO_SUPPLY', 'CONFIRM_SUPPLY', 'CONFIRM_EVENTS'] as const) actor.send({ type });
+	setUp(actor);
 	const world = JSON.parse(JSON.stringify(worldOf(actor))) as World;
 	const game = world.game!;
 	game.active = A;

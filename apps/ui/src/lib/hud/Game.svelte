@@ -393,7 +393,7 @@
 		const next = world;
 		const lived = !spectator || announce;
 		const phase = snap.phase;
-		untrack(() => show.observe(next, lived, phase, !spectator));
+		untrack(() => show.observe(next, lived, phase));
 	});
 	$effect(() => () => show.stop());
 
@@ -412,7 +412,7 @@
 			return canAct;
 		},
 		get spectator() {
-			return spectator;
+			return spectator || (!solo && mine.length === 0);
 		},
 		get lived() {
 			return !spectator || announce;
@@ -625,9 +625,10 @@
 		if (onButton(event) || !game) return;
 		if (key === 'z' && snap.canUndo && canAct) send({ type: 'UNDO' });
 		if (key !== ' ') return;
-		if (show.queued > 0 && !show.playing && !spectator) {
+		// The cards that open a game are anyone's to flip.
+		if (admin.opening) {
 			event.preventDefault();
-			show.next();
+			if (admin.action && !admin.action.busy) admin.action.onclick();
 			return;
 		}
 		if (!canAct) return;
@@ -698,8 +699,8 @@
 				count={admin.count}
 				left={admin.left}
 				action={admin.action}
-				name={seatName(world, admin.seat ?? game.active)}
-				color={SEAT_COLORS[game.seats.indexOf(admin.seat ?? game.active)] ?? '#fff'}
+				name={admin.seat ? seatName(world, admin.seat) : null}
+				color={admin.seat ? (SEAT_COLORS[game.seats.indexOf(admin.seat)] ?? '#fff') : '#f4e8cd'}
 				epidemic={admin.epidemic !== null}
 				stack={show.stack}
 			/>
@@ -1232,9 +1233,7 @@
 				onplaycard={(seat, card) => choosing.step({ t: 'play', seat, card })}
 				onlockdown={card => choosing.step({ t: 'lockdown', card })}
 				arriving={admin.turn.arriving}
-				setupInfect={snap.phase === 'setup.events' && (show.queued > 0 || show.playing)
-					? { left: show.queued, busy: show.playing }
-					: null}
+				opening={admin.opening || (snap.phase === 'setup.events' && show.playing) ? game.infectionsLeft : null}
 			/>
 		</div>
 	{/if}

@@ -446,6 +446,7 @@ function needsOnScreen(state: PublicState, who: Who): string[] {
 		case 'lobby':
 			return me && table.ready[me] !== undefined ? [] : [yours];
 		case 'setup.supply':
+		case 'setup.infect':
 		case 'setup.events':
 		case 'over':
 		case 'upkeep':
@@ -487,6 +488,12 @@ function needsByKey(state: PublicState, who: Who): string[] {
 		case 'setup.supply':
 			if (who.lead)
 				out.push('LEAD: place the supply cubes (`supply <city> <n>`, `do autosupply`), then `do confirm-supply`.');
+			break;
+		case 'setup.infect':
+			if (who.lead)
+				out.push(
+					`LEAD: flip the ${game?.infectionsLeft ?? 0} Infection card(s) that open the game, one at a time, with \`do infect\`.`,
+				);
 			break;
 		case 'setup.events':
 			if (who.lead) out.push('LEAD: pick the Rationed Events (`events <card> ...`), then `do confirm-events`.');

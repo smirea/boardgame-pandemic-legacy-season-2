@@ -12,6 +12,7 @@ import {
 	endTurn,
 	infectStep,
 	isOver,
+	openingInfectStep,
 	setupInfection,
 	setupPlayerDeck,
 	startDrawStep,
@@ -82,6 +83,7 @@ export type Command =
 export type Phase =
 	| 'lobby'
 	| 'setup.supply'
+	| 'setup.infect'
 	| 'setup.events'
 	| 'playing.actions'
 	| 'playing.draw'
@@ -220,7 +222,7 @@ export function reject(world: World, phase: Phase, command: Command): string | n
 		case 'INFECT':
 			return blocked(world) || game!.infectionsLeft === 0
 				? 'Resolve the pending choice first'
-				: inPhase('playing.infect');
+				: inPhase('playing.infect', 'setup.infect');
 		case 'PLAY':
 			return (
 				inPhase('playing.actions', 'playing.draw', 'playing.infect') ??
@@ -448,6 +450,7 @@ export const gameMachine = setup({
 		startDraw: assign(change(startDrawStep)),
 		draw: assign(change(drawPlayerCard)),
 		startInfect: assign(change(startInfectStep)),
+		openingInfect: assign(change(openingInfectStep)),
 		infect: assign(change(infectStep)),
 		endTurn: assign(change(endTurn)),
 		play: assign(
@@ -524,9 +527,17 @@ export const gameMachine = setup({
 						PURCHASE: { guard: { type: 'legal', params: 'setup.supply' }, actions: 'purchase' },
 						CONFIRM_SUPPLY: {
 							guard: { type: 'legal', params: 'setup.supply' },
-							target: 'events',
+							target: 'infect',
 							actions: 'confirmSupply',
 						},
+					},
+				},
+				// The cards that open a game are flipped one command at a time, by anyone at the table.
+				infect: {
+					always: { guard: 'infectionsDone', target: 'events' },
+					on: {
+						...seatEvents('setup.infect'),
+						INFECT: { guard: { type: 'legal', params: 'setup.infect' }, actions: 'openingInfect' },
 					},
 				},
 				events: {

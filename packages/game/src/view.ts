@@ -1,4 +1,5 @@
 import { pack } from './content/pack';
+import { openingInfectionsLeft } from './flow';
 import { cityDef, grid, isForsaken, reconned, sealDef, unlocksBehind } from './helpers';
 import type { CardId, CityId } from './ids';
 import { AWAY_FROM_ROUTE, type Action } from './actions';
@@ -41,7 +42,7 @@ export type Insights = {
 		cities: Record<CityId, PlayerCardsAt>;
 	};
 	infection: {
-		/** True during setup, when the odds describe the opening infection, not a turn's Infect step. */
+		/** True until the cards that open a game are all flipped: the odds describe those flips, not a turn's Infect step. */
 		opening: boolean;
 		rate: number;
 		nextRate: number;
@@ -96,7 +97,8 @@ export function insights(world: World): Insights | null {
 	if (!game) return null;
 	const rates = pack.numbers.infectionRates;
 	// Before the opening infection the deck is not built yet, but its contents are known: every card of a city on the grid.
-	const opening = game.infectionDeck.order.length === 0 && game.infectionDiscard.length === 0 && game.turn === 0;
+	const unbuilt = game.infectionDeck.order.length === 0 && game.infectionDiscard.length === 0 && game.turn === 0;
+	const opening = unbuilt || (game.turn === 0 && game.infectionsLeft > 0);
 	const onGridNow = grid(world.campaign);
 	const stored = new Set(world.campaign.stored.infection);
 	const openingDeck = Object.values(world.campaign.infectionCards)
@@ -107,10 +109,14 @@ export function insights(world: World): Insights | null {
 		const found = world.campaign.infectionCards[card];
 		return found?.kind !== 'city' || !isForsaken(world.campaign, found.city);
 	};
-	const layers = opening ? [openingDeck] : game.infectionDeck.strata;
+	const layers = unbuilt ? [openingDeck] : game.infectionDeck.strata;
 	const strata = layers.map(stratum => stratum.filter(infects));
 	const hollowSetup = world.campaign.rules.includes('hollowSetup');
-	const rate = opening ? pack.numbers.setupInfections - (hollowSetup ? 3 : 0) : rates[game.rateIndex]!;
+	const rate = unbuilt
+		? pack.numbers.setupInfections - (hollowSetup ? 3 : 0)
+		: opening
+			? openingInfectionsLeft(world)
+			: rates[game.rateIndex]!;
 	const keyOf = (card: CardId) => cityOfInfection(world, card);
 	const odds = Object.fromEntries(drawOdds(strata, rate, keyOf)) as Record<CityId, number>;
 	const expected = Object.fromEntries(expectedDraws(strata, rate, keyOf)) as Record<CityId, number>;

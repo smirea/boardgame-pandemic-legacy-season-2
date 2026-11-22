@@ -82,7 +82,9 @@ export function optionsFor(state: PublicState, who: Who, seating: (CharacterId |
 			});
 		}
 		add('autosupply', 'setup', 'spread the remaining stockpile cubes over the grid', { type: 'AUTO_SUPPLY' });
-		add('confirm-supply', 'setup', 'finish placing supplies and run the opening infection', { type: 'CONFIRM_SUPPLY' });
+		add('confirm-supply', 'setup', 'finish placing supplies and build the Infection deck', { type: 'CONFIRM_SUPPLY' });
+		if (phase === 'setup.infect')
+			add('infect', 'setup', 'flip one of the Infection cards that open the game', { type: 'INFECT' });
 		add('confirm-events', 'setup', 'deal hands and begin', { type: 'CONFIRM_EVENTS' });
 		add('continue', 'flow', 'go to the game-end step', { type: 'CONTINUE' });
 		add('finish-upkeep', 'flow', 'end the game-end step; unspent units are lost', { type: 'FINISH_UPKEEP' });

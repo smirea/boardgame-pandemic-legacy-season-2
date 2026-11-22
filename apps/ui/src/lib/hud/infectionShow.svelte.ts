@@ -43,9 +43,13 @@ function boardOf(world: World): Board | null {
 	return { cities, stockpile: game.stockpile };
 }
 
+/** The steps in which Infection cards are flipped one after another: a turn's Infect step and the cards that open a game. */
+const flipping = (phase: Phase | null) => phase === 'playing.infect' || phase === 'setup.infect';
+
 /**
- * Plays each Infection card one at a time, 50% slower, lingering on each drawn city and stacking drawn cards
- * so every city name remains visible until the phase ends (when the camera zooms back out to fit).
+ * Plays each Infection card flipped, one at a time and in the order the state flipped them, lingering on each city
+ * and stacking the cards so every city name stays in view until the step ends, when the camera zooms back out. Every
+ * flip is a command of its own, so each browser plays it as it arrives and nobody flips a card the others cannot see.
  */
 export class InfectionShow {
 	/** All Infection cards drawn in the current phase, newest first. */
@@ -56,10 +60,8 @@ export class InfectionShow {
 	surge = $state(false);
 	/** Incidents the state holds whose marker has not gone onto the track yet. */
 	heldIncidents = $state(0);
-	/** True while a drawn card's animation is in flight. */
+	/** True while a flipped card is being played out, or more wait their turn. */
 	playing = $state(false);
-	/** Queued beats waiting for the player to click to flip one at a time (e.g. setup's 9 opening infections). */
-	queued = $state(0);
 
 	private hidden = $state.raw<Hidden[]>([]);
 	private queue: Beat[] = [];
@@ -67,7 +69,6 @@ export class InfectionShow {
 	private board: Board | null = null;
 	private run = 0;
 	private phase: Phase | null = null;
-	private manual = true;
 	private clearTimer: ReturnType<typeof setTimeout> | null = null;
 
 	constructor(private pulse: (city: CityId, kind: FxKind) => void) {}
@@ -85,10 +86,9 @@ export class InfectionShow {
 	});
 
 	/** Takes in the newest state. `live` is false for a jump that nobody lived through, which only catches up. */
-	observe(world: World, live: boolean, phase: Phase, manual = true) {
+	observe(world: World, live: boolean, phase: Phase) {
 		const prevPhase = this.phase;
 		this.phase = phase;
-		this.manual = manual;
 		const log = world.game?.log ?? [];
 		const newest = log.at(-1)?.seq ?? -1;
 		const before = this.board;
@@ -102,48 +102,27 @@ export class InfectionShow {
 		if (beats.length > MOST_BEATS) return this.stop();
 		if (beats.length > 0) {
 			this.cancelClear();
-			// A new infect phase starts a fresh stack.
-			if (prevPhase !== 'playing.infect' && phase === 'playing.infect' && this.queue.length === 0) {
-				this.stack = [];
-			}
+			if (!flipping(prevPhase) && flipping(phase) && this.queue.length === 0) this.stack = [];
 			this.queue.push(...beats);
-			this.queued = this.queue.length;
 			this.hidden = [
 				...this.hidden,
 				...beats.flatMap(beat => [...beat.strike, ...beat.incidents.flatMap(i => i.hidden)]),
 			];
 			this.heldIncidents += beats.reduce((sum, beat) => sum + beat.incidents.length, 0);
-			// Single-card draws (e.g. clicking INFECT or an Epidemic) play immediately; multi-card batches (setup's 9)
-			// wait for the player to click one card at a time unless this is a passive replay/spectator.
-			if (!this.playing && (!manual || beats.length === 1)) void this.playStep(this.run, !manual);
+			if (!this.playing) void this.play(this.run);
 			return;
 		}
-		// Leaving the infect phase with nothing left queued or animating zooms back out to fit.
-		if (prevPhase === 'playing.infect' && phase !== 'playing.infect' && !this.playing && this.queue.length === 0) {
-			this.scheduleClear();
-		}
-		// Moving into play from setup catches up any unflipped setup cards cleanly.
-		if (
-			prevPhase === 'setup.events' &&
-			phase.startsWith('playing') &&
-			(this.queue.length > 0 || this.stack.length > 0)
-		) {
+		// Leaving the step with nothing left to play zooms back out to fit.
+		if (flipping(prevPhase) && !flipping(phase) && !this.playing) this.scheduleClear();
+		// The first turn begins with a clear table, whatever of the opening cards is still up.
+		if (prevPhase?.startsWith('setup') && phase.startsWith('playing') && (this.playing || this.stack.length > 0))
 			this.stop();
-		}
-	}
-
-	/** Draws and animates the next queued Infection card (used for click-to-draw setup infections). */
-	next() {
-		if (this.playing || this.queue.length === 0) return;
-		this.cancelClear();
-		void this.playStep(this.run, false);
 	}
 
 	stop() {
 		this.cancelClear();
 		this.run++;
 		this.queue = [];
-		this.queued = 0;
 		this.playing = false;
 		this.hidden = [];
 		this.heldIncidents = 0;
@@ -165,7 +144,7 @@ export class InfectionShow {
 		const token = this.run;
 		this.clearTimer = setTimeout(() => {
 			this.clearTimer = null;
-			if (this.run !== token || this.playing || this.queue.length > 0 || this.phase === 'playing.infect') return;
+			if (this.run !== token || this.playing || flipping(this.phase)) return;
 			this.focus = null;
 			this.stack = [];
 		}, delay);
@@ -264,14 +243,13 @@ export class InfectionShow {
 		this.hidden = this.hidden.filter(entry => !gone.has(entry));
 	}
 
-	/** Plays one beat (or all queued beats when `drain` is true for spectators), 50% slower, lingering on the city. */
-	private async playStep(run: number, drain: boolean) {
+	/** Plays every beat that waits, one after another, lingering on each city. */
+	private async play(run: number) {
 		this.playing = true;
 		const wait = (ms: number) => new Promise<boolean>(done => setTimeout(() => done(this.run === run), ms));
-		do {
+		for (;;) {
 			const beat = this.queue.shift();
 			if (!beat) break;
-			this.queued = this.queue.length;
 			const slow = beat.incidents.length > 0;
 			this.stack = [
 				{ key: beat.seq, card: beat.card, note: beat.note, alarm: beat.alarm, city: beat.city },
@@ -301,12 +279,10 @@ export class InfectionShow {
 				if (!(await wait(525))) return;
 			}
 			if (!(await wait(slow ? 750 : 650))) return;
-		} while (drain && this.queue.length > 0);
-		this.playing = false;
-		// Linger on the drawn city while more cards remain in this phase; zoom back out only once the phase finishes.
-		if (this.queue.length === 0 && this.phase !== 'playing.infect') {
-			this.scheduleClear(950);
 		}
+		this.playing = false;
+		// The camera stays on the city while more cards are to come, and zooms back out once the step is over.
+		if (!flipping(this.phase)) this.scheduleClear(950);
 	}
 
 	private lagged(city: CityId, piece: Piece) {

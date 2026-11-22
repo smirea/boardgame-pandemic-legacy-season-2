@@ -217,7 +217,7 @@
 			{/each}
 			<section>
 				<h4>
-					Discard pile <b>{infection.opening ? 0 : Object.values(infection.discard).reduce((a, b) => a + b, 0)}</b>
+					Discard pile <b>{Object.values(infection.discard).reduce((a, b) => a + b, 0)}</b>
 				</h4>
 				<p>
 					{#if discard.length}<RichText text={discard} />{:else}empty{/if}

@@ -250,7 +250,7 @@ function renderSetup(state: PublicState): string[] {
 					]
 				: []),
 			`Supply setup: ${game.stockpile} cubes left to place. Cities with no cubes take a Plague cube when infected.`,
-			'Place by hand with `supply <city-id> <count>`: a number adds, a negative number takes back, `=2` sets the city to exactly 2. `do autosupply` spreads the rest. Then `do confirm-supply`, which cannot be undone.',
+			'Place by hand with `supply <city-id> <count>`: a number adds, a negative number takes back, `=2` sets the city to exactly 2. `do autosupply` spreads the rest. Then `do confirm-supply`, which cannot be undone, and the lead flips the opening Infection cards one at a time.',
 			`Grid cities (cubes now, population, chance to lose a cube in the opening infection${campaign.rules.includes('hollowSetup') ? '. The last 3 of the 9 flips place a Hollow Man and take no cube' : ''}):`,
 		];
 		for (const city of grid(campaign)) {
@@ -260,6 +260,12 @@ function renderSetup(state: PublicState): string[] {
 			);
 		}
 		return lines;
+	}
+	if (phase === 'setup.infect') {
+		const hollow = campaign.rules.includes('hollowSetup') ? Math.min(3, game.infectionsLeft) : 0;
+		return [
+			`Opening infection: ${game.infectionsLeft} Infection card(s) left to flip, one per \`do infect\`${hollow ? `. The last ${hollow} place a Hollow Man and take no cube` : ''}.`,
+		];
 	}
 	const reserve = Object.values(campaign.playerCards).filter(
 		card => card.kind === 'event' && card.mode === 'rationed' && !campaign.stored.player.includes(card.id),

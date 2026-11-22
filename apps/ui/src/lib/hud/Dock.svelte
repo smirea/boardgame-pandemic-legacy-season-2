@@ -33,8 +33,8 @@
 		onplaycard: (seat: SeatId, card: CardId) => void;
 		/** Destroying a Lockdown card costs a Player card, so the screen asks whose. */
 		onlockdown?: (card: CardId) => void;
-		/** The opening infection being turned over at the turn desk. While it lasts, picking Events waits. */
-		setupInfect?: { left: number; busy: boolean } | null;
+		/** How many of the cards that open a game are still to flip at the turn desk. Picking Events waits for the last. */
+		opening?: number | null;
 		/** Cards drawn into a hand whose flight there has not landed: the hand keeps their place and hides them. */
 		arriving?: ReadonlySet<CardId>;
 	};
@@ -54,7 +54,7 @@
 		uses,
 		onplaycard,
 		onlockdown,
-		setupInfect = null,
+		opening = null,
 		arriving = new Set(),
 	}: Props = $props();
 
@@ -208,43 +208,41 @@
 					data-testid="confirm-supply">Infect 9 cities</button
 				>
 			</div>
-		{:else if snap.phase === 'setup.events'}
-			{#if setupInfect}
-				<div class="setup" data-testid="setup-infect-bar">
-					<div>
-						{#if setupInfect.left > 0}
-							<strong>{setupInfect.left}</strong> Infection card{setupInfect.left === 1 ? '' : 's'} left to flip. Click the
-							Infection deck, or press Space.
-						{:else}
-							Finishing infection…
-						{/if}
-					</div>
-				</div>
-			{:else}
-				<div class="setup">
-					{#if eventsNeeded === 0}
-						<div data-testid="no-funding">No funding — no rationed events for you.</div>
+		{:else if opening !== null}
+			<div class="setup" data-testid="setup-infect-bar">
+				<div>
+					{#if opening > 0}
+						<strong>{opening}</strong> Infection card{opening === 1 ? '' : 's'} left to flip. Anyone can click the Infection
+						deck, or press Space.
 					{:else}
-						<div>Pick <strong>{eventsNeeded}</strong> Rationed Events for the deck. {picked.length} chosen.</div>
-						<!-- Every Rationed Event as the card a hand holds, with its full text, so the choice never depends on memory. -->
-						<div class="events" data-testid="rationed-events" in:fly={{ y: 40, duration: 380 }}>
-							{#each rationed as card (card.id)}
-								{@const chosen = picked.includes(card.id)}
-								<div class="pick" class:picked={chosen} data-picked={chosen}>
-									<PlayerCard {card} tone={chosen ? 'play' : null} onclick={() => toggleEvent(card.id)} />
-									{#if chosen}<span class="check" aria-label="chosen" in:fly={{ y: -6, duration: 200 }}>✓</span>{/if}
-								</div>
-							{/each}
-						</div>
+						The last city is infected
 					{/if}
-					<button
-						class="primary"
-						disabled={picked.length !== eventsNeeded}
-						onclick={() => send({ type: 'CONFIRM_EVENTS' })}
-						data-testid="confirm-events">Deal and begin</button
-					>
 				</div>
-			{/if}
+			</div>
+		{:else if snap.phase === 'setup.events'}
+			<div class="setup">
+				{#if eventsNeeded === 0}
+					<div data-testid="no-funding">No funding — no rationed events for you.</div>
+				{:else}
+					<div>Pick <strong>{eventsNeeded}</strong> Rationed Events for the deck. {picked.length} chosen.</div>
+					<!-- Every Rationed Event as the card a hand holds, with its full text, so the choice never depends on memory. -->
+					<div class="events" data-testid="rationed-events" in:fly={{ y: 40, duration: 380 }}>
+						{#each rationed as card (card.id)}
+							{@const chosen = picked.includes(card.id)}
+							<div class="pick" class:picked={chosen} data-picked={chosen}>
+								<PlayerCard {card} tone={chosen ? 'play' : null} onclick={() => toggleEvent(card.id)} />
+								{#if chosen}<span class="check" aria-label="chosen" in:fly={{ y: -6, duration: 200 }}>✓</span>{/if}
+							</div>
+						{/each}
+					</div>
+				{/if}
+				<button
+					class="primary"
+					disabled={picked.length !== eventsNeeded}
+					onclick={() => send({ type: 'CONFIRM_EVENTS' })}
+					data-testid="confirm-events">Deal and begin</button
+				>
+			</div>
 		{:else if snap.phase === 'over'}
 			<div class="setup">
 				<div class:lost={!game.outcome?.won}>
