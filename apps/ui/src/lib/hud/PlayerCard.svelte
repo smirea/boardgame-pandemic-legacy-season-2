@@ -31,6 +31,7 @@
 		EPIDEMIC_STEPS,
 		EVENT_PRINT,
 		IMPROVEMENT_PRINT,
+		companionArtUrl,
 		eventArtUrl,
 		producePrint,
 	} from '#lib/cards/playerPrint.ts';
@@ -68,7 +69,7 @@
 			? (() => {
 					const name = pack.companions.find(item => item.id === card.companion)!.name;
 					const print = COMPANION_PRINT[card.companion];
-					return { name, ...print, plain: `Companion ${name}: ${print.text}` };
+					return { id: card.companion, name, ...print, plain: `${name}: ${print.text}` };
 				})()
 			: null;
 		const exposedSearches = card.search
@@ -84,10 +85,9 @@
 							? 'Search the sea'
 							: 'Search',
 			}));
-		const hasMapOverlay = exposedSearches.length > 0 || Boolean(companion);
-		const floatingUpgrade = Boolean(improvement && hasMapOverlay);
-		const diagonalUpgrade = Boolean(improvement && !hasMapOverlay);
-		return { city, improvement, companion, exposedSearches, hasMapOverlay, floatingUpgrade, diagonalUpgrade };
+		const floatingUpgrade = Boolean(improvement && companion);
+		const diagonalUpgrade = Boolean(improvement && !companion);
+		return { city, improvement, companion, exposedSearches, floatingUpgrade, diagonalUpgrade };
 	});
 
 	const cityCopies = $derived.by(() => {
@@ -235,42 +235,49 @@
 				{#if cityDetails.city.port}{@render portAnchor()}{/if}
 			</span>
 			<span class="art">
-				<MapArt city={card.city} accent={face.color} />
-				{#if cityDetails.hasMapOverlay}
-					<span
-						class="map-overlays"
-						class:single={cityDetails.exposedSearches.length === 1 && !cityDetails.companion}
-						class:companion-only={cityDetails.exposedSearches.length === 0 && Boolean(cityDetails.companion)}
-					>
-						{#if cityDetails.companion}
-							<span class="companion-box">
-								<span class="overlay-kicker">Companion</span>
-								<span class="companion-fit" {@attach fitText(cityDetails.companion.plain, { max: 0.78, min: 0.44 })}>
-									<span class="slip-head">
-										<strong>{cityDetails.companion.name}:</strong>
-										{#if cityDetails.companion.cards}
-											{#each cityDetails.companion.cards as letter (letter)}
-												<i class="mini-red-card">{letter}</i>
-											{/each}
-										{/if}
-									</span>
-									<RichText text={cityDetails.companion.text} />
-								</span>
+				{#if cityDetails.companion}
+					<img class="companion-art" src={companionArtUrl(cityDetails.companion.id)} alt="" aria-hidden="true" />
+					{#if cityDetails.exposedSearches.length > 0}
+						<span class="search-stack top">
+							{#each cityDetails.exposedSearches as search, index (index)}
+								<span class="search-chip" role="note" aria-label={search.label}>{search.label}</span>
+							{/each}
+						</span>
+					{/if}
+					<span class="companion-scrim">
+						<span class="overlay-kicker">Companion</span>
+						<span class="companion-fit" {@attach fitText(cityDetails.companion.plain, { max: 0.74, min: 0.44 })}>
+							<span class="slip-head">
+								<strong>{cityDetails.companion.name}:</strong>
+								{#if cityDetails.companion.cards}
+									{#each cityDetails.companion.cards as letter (letter)}
+										<i class="mini-red-card">{letter}</i>
+									{/each}
+								{/if}
 							</span>
-						{/if}
-						{#each cityDetails.exposedSearches as search, index (index)}
-							<span class="search-box" role="note" aria-label={search.label}>
-								<span class="search-label">{search.label}</span>
-								<span class="search-foil" aria-hidden="true"></span>
-							</span>
-						{/each}
-					</span>
-				{:else if cityDetails.diagonalUpgrade && cityDetails.improvement}
-					<span class="upgrade-sticker upgrade-diagonal">
-						<span class="sticker-fit" {@attach fitText(cityDetails.improvement.plain, { max: 0.76, min: 0.48 })}>
-							{@render upgradeBody(cityDetails.improvement)}
+							<RichText text={cityDetails.companion.text} />
 						</span>
 					</span>
+				{:else}
+					<MapArt city={card.city} accent={face.color} />
+					{#if cityDetails.diagonalUpgrade && cityDetails.improvement}
+						<span
+							class="upgrade-sticker upgrade-diagonal"
+							class:above-one={cityDetails.exposedSearches.length === 1}
+							class:above-two={cityDetails.exposedSearches.length >= 2}
+						>
+							<span class="sticker-fit" {@attach fitText(cityDetails.improvement.plain, { max: 0.76, min: 0.46 })}>
+								{@render upgradeBody(cityDetails.improvement)}
+							</span>
+						</span>
+					{/if}
+					{#if cityDetails.exposedSearches.length > 0}
+						<span class="search-stack" class:compact={cityDetails.diagonalUpgrade}>
+							{#each cityDetails.exposedSearches as search, index (index)}
+								<span class="search-chip" role="note" aria-label={search.label}>{search.label}</span>
+							{/each}
+						</span>
+					{/if}
 				{/if}
 			</span>
 			<span class="foot">
@@ -572,97 +579,94 @@
 		overflow: hidden;
 	}
 
-	.map-overlays {
+	.companion-art {
 		position: absolute;
 		inset: 0;
-		z-index: 1;
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		gap: 0.32em;
-		padding: 0.34em 0.38em;
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		object-position: center 20%;
 	}
 
-	.map-overlays.single {
-		justify-content: flex-start;
-		padding-top: 0.44em;
-	}
-
-	.search-box {
-		flex: 1;
-		min-height: 0;
+	.search-stack {
+		position: absolute;
+		left: 0.34em;
+		right: 0.34em;
+		bottom: 0.32em;
+		z-index: 2;
 		display: flex;
 		flex-direction: column;
+		gap: 0.22em;
+	}
+
+	.search-stack.compact {
+		bottom: 0.24em;
 		gap: 0.16em;
-		padding: 0.24em 0.3em 0.28em;
-		border: 1px solid rgb(24 30 36 / 0.36);
-		border-radius: 0.22em;
-		background: rgb(232 238 240 / 0.56);
+	}
+
+	.search-stack.top {
+		top: 0.28em;
+		bottom: auto;
+	}
+
+	.search-chip {
+		display: block;
+		padding: 0.24em 0.38em;
+		border: 1px solid rgb(24 30 36 / 0.38);
+		border-radius: 0.2em;
+		background:
+			repeating-linear-gradient(-35deg, rgb(255 255 255 / 0.22) 0 0.24em, transparent 0.24em 0.52em),
+			rgb(220 229 233 / 0.74);
 		backdrop-filter: blur(1.5px);
-		box-shadow: 0 0.08em 0.24em rgb(0 0 0 / 0.18);
+		box-shadow: 0 0.08em 0.22em rgb(0 0 0 / 0.22);
 		color: #14191e;
-	}
-
-	.map-overlays.single .search-box {
-		flex: 0 0 54%;
-	}
-
-	.map-overlays:has(.companion-box) .search-box {
-		flex: 0 0 2.2em;
-	}
-
-	.search-label {
-		flex: none;
 		font-size: 0.56em;
 		font-weight: 850;
 		letter-spacing: 0.05em;
 		text-transform: uppercase;
-		line-height: 1.05;
-		color: #14191e;
+		line-height: 1.1;
+		text-align: center;
 	}
 
-	.search-foil {
-		flex: 1;
-		min-height: 0.85em;
-		border: 1px solid rgb(255 255 255 / 0.44);
-		border-radius: 0.14em;
-		background:
-			repeating-linear-gradient(-35deg, rgb(255 255 255 / 0.24) 0 0.24em, transparent 0.24em 0.52em),
-			linear-gradient(155deg, rgb(186 194 202 / 0.56), rgb(154 164 174 / 0.48));
-		box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.12);
+	.search-stack.compact .search-chip,
+	.search-stack.top .search-chip {
+		padding: 0.18em 0.34em;
+		font-size: 0.52em;
 	}
 
-	.companion-box {
-		flex: 1;
-		min-height: 0;
-		max-height: 4.5em;
+	.companion-scrim {
+		position: absolute;
+		inset: auto 0 0 0;
+		z-index: 2;
 		display: flex;
 		flex-direction: column;
-		gap: 0.14em;
-		padding: 0.28em 0.36em;
-		border: 1px solid rgb(32 24 16 / 0.36);
-		border-radius: 0.22em;
-		background: rgb(247 241 226 / 0.88);
-		backdrop-filter: blur(2px);
-		box-shadow: 0 0.12em 0.32em rgb(0 0 0 / 0.24);
-		color: #1a140e;
-		line-height: 1.2;
+		gap: 0.1em;
+		max-height: 4.9em;
+		padding: 1.25em 0.44em 0.34em;
+		background: linear-gradient(
+			to top,
+			rgb(12 10 8 / 0.94) 0%,
+			rgb(12 10 8 / 0.84) 68%,
+			rgb(12 10 8 / 0.36) 88%,
+			transparent 100%
+		);
+		color: #f5eee0;
 		overflow: hidden;
-	}
-
-	.map-overlays.companion-only .companion-box {
-		flex: 0 1 auto;
-		max-height: 6.2em;
 	}
 
 	.overlay-kicker {
 		flex: none;
-		font-size: 0.52em;
+		font-size: 0.48em;
 		font-weight: 800;
-		letter-spacing: 0.07em;
+		letter-spacing: 0.08em;
 		text-transform: uppercase;
-		color: #6b5842;
+		color: #d8c296;
 		line-height: 1;
+	}
+
+	.companion-scrim .slip-head strong {
+		color: #f7de9a;
 	}
 
 	.companion-fit,
@@ -671,7 +675,7 @@
 		flex: 0 1 auto;
 		min-height: 0;
 		overflow: hidden;
-		line-height: 1.22;
+		line-height: 1.2;
 	}
 
 	.upgrade-sticker {
@@ -690,10 +694,24 @@
 		position: absolute;
 		left: 50%;
 		top: 50%;
-		z-index: 2;
+		z-index: 3;
 		width: 7.5em;
 		max-height: 4.5em;
 		transform: translate(-50%, -50%) rotate(-7deg);
+	}
+
+	.upgrade-diagonal.above-one {
+		top: 2.85em;
+		max-height: 4.1em;
+		transform: translate(-50%, -50%) rotate(-5.5deg);
+	}
+
+	.upgrade-diagonal.above-two {
+		top: 2.32em;
+		width: 7.6em;
+		max-height: 3.65em;
+		padding: 0.28em 0.42em;
+		transform: translate(-50%, -50%) rotate(-4.5deg);
 	}
 
 	.upgrade-float {

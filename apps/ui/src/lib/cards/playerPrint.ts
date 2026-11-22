@@ -434,6 +434,7 @@ export const RECKONING_ROWS: readonly ReckoningRow[] = [
 ];
 
 export const eventArtUrl = (id: EventId): string => `/events/${id}.webp`;
+export const companionArtUrl = (id: CompanionId): string => `/companions/${id}.webp`;
 
 export function eventPlainText(id: EventId): string {
 	return EVENT_PRINT[id].rules.join(' ');
