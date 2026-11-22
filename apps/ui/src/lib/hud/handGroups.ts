@@ -1,5 +1,5 @@
 import { pack } from '@repo/game';
-import type { PlayerCard, PlayerDeckKind } from '@repo/game';
+import type { PlayerCard } from '@repo/game';
 import {
 	COMPANION_ICON,
 	EPIDEMIC_ICON,
@@ -9,13 +9,14 @@ import {
 	SEARCH_ICON,
 } from '#lib/cards/icons.ts';
 import { regionOf, sortHand } from './handOrder.ts';
+import { cardColor } from './PlayerCard.svelte';
 
 export type HandGroup = {
 	/** Stable while the group exists, so a card joining or leaving animates within it. */
 	key: string;
 	cards: PlayerCard[];
-	/** Which band it wears: a city's colour, or the card's kind. */
-	tone: PlayerDeckKind;
+	/** The colour its cards' faces wear (`cardColor`), so a pile never disagrees with the cards in it. */
+	color: string;
 	icon?: string;
 	/** A short mark printed instead of an icon, such as an improvement's card value. */
 	mark?: string;
@@ -76,7 +77,7 @@ function describe(key: string, cards: PlayerCard[], name: (card: PlayerCard) => 
 				return {
 					key,
 					cards,
-					tone: region,
+					color: cardColor(card),
 					icon: mark?.icon ?? (mark ? undefined : card.companion ? COMPANION_ICON[card.companion] : SEARCH_ICON),
 					mark: mark?.text,
 					title: `${name(card)} (${extras.join('; ')})`,
@@ -86,7 +87,7 @@ function describe(key: string, cards: PlayerCard[], name: (card: PlayerCard) => 
 			return {
 				key,
 				cards,
-				tone: region,
+				color: cardColor(card),
 				title: `${cards.length} ${what} card${cards.length === 1 ? '' : 's'}: ${listed}`,
 			};
 		}
@@ -96,7 +97,7 @@ function describe(key: string, cards: PlayerCard[], name: (card: PlayerCard) => 
 			return {
 				key,
 				cards,
-				tone: 'event',
+				color: cardColor(card),
 				icon: EVENT_ICON[card.event],
 				title: `${listed} (event${mode}): ${event.text}`,
 			};
@@ -105,12 +106,12 @@ function describe(key: string, cards: PlayerCard[], name: (card: PlayerCard) => 
 			return {
 				key,
 				cards,
-				tone: 'produce',
+				color: cardColor(card),
 				icon: PRODUCE_ICON,
 				title: `${listed} (${card.boxesLeft} ${card.boxesLeft === 1 ? 'use' : 'uses'} left)`,
 			};
 		case 'epidemic':
-			return { key, cards, tone: 'epidemic', icon: EPIDEMIC_ICON, title: listed };
+			return { key, cards, color: cardColor(card), icon: EPIDEMIC_ICON, title: listed };
 	}
 }
 
