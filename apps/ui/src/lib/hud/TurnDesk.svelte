@@ -121,7 +121,7 @@
 		flipped: stack.length,
 	}))}
 >
-	<div class="well">
+	<div class="well" data-turn-well>
 		{#key deck}
 			<button
 				class="deck {deck}"

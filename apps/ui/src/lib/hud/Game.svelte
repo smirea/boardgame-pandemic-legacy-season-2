@@ -465,7 +465,12 @@
 			// A screen that never showed the panel, such as another player's, stands the desk on the seat below it.
 			const seat = node.parentElement?.querySelector<HTMLElement>(':scope > .place.bl, :scope > .place.br');
 			const floor = seat ? seat.offsetTop - 10 : (node.parentElement?.clientHeight ?? 0) * 0.62;
-			node.style.top = `${Math.min(panelFoot[side] ?? floor, floor)}px`;
+			// The panel is as short as the actions left to take, so its foot can be high up the column. The deck still
+			// has to stand clear of the seat above it and that seat's piles.
+			const above = node.parentElement?.querySelector<HTMLElement>(':scope > .place.tl, :scope > .place.tr');
+			const deck = node.querySelector<HTMLElement>('[data-turn-well]')?.offsetHeight ?? 0;
+			const ceiling = above ? above.offsetTop + above.offsetHeight + 10 + deck : 0;
+			node.style.top = `${Math.min(Math.max(panelFoot[side] ?? floor, ceiling), floor)}px`;
 		};
 
 	// Animate cards flying out of the Player/Infection deck into Package 6 when inoculated.
