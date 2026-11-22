@@ -1,6 +1,7 @@
 import { pack } from './content/pack';
 import { openingInfectionsLeft } from './flow';
-import { cityDef, grid, isForsaken, reconned, sealDef, unlocksBehind } from './helpers';
+import { cityDef, grid, groundRevealed, isForsaken, nearestGround, reconned, sealDef, unlocksBehind } from './helpers';
+import type { Point } from './helpers';
 import type { CardId, CityId } from './ids';
 import { AWAY_FROM_ROUTE, type Action } from './actions';
 import type { DoorId, ReconRoute, Seal } from './content/types';
@@ -267,7 +268,11 @@ export function reconBoxes(world: World, phase: Phase): ReconBox[] {
 }
 
 /** Rules text the map stickers print on the board, standing beside `city` while it still applies. */
-export type MapNote = { id: string; city: CityId; text: string };
+/**
+ * Rules text printed on the board while it still applies. It stands beside `city`, or beside `line`, the first red
+ * line players can see, of which they may see only stretches.
+ */
+export type MapNote = { id: string; text: string } & ({ city: CityId; line?: never } | { line: Point[]; city?: never });
 
 const door = (id: DoorId): Seal => ({ t: 'door', id });
 const box = (id: number): Seal => ({ t: 'package', id });
@@ -295,5 +300,9 @@ export function mapNotes(campaign: Campaign): MapNote[] {
 	if (revealed('haven-eastern-pacific') && !open(box(6)))
 		note('eastern-pacific-arrival', 'haven-eastern-pacific', 'Open Package 6 the first time you move here.');
 	if (revealed('haven-coral-sea')) note('coral-sea-ruins', 'haven-coral-sea', 'This haven is in ruins.');
+	const line = pack.redLines
+		.map(corners => corners.map(([x, z]) => ({ x, z })))
+		.find(points => points.some(point => groundRevealed(campaign, nearestGround(point))));
+	if (line) notes.push({ id: 'red-lines', line, text: 'A sea lane cannot cross more than one red region line.' });
 	return notes;
 }

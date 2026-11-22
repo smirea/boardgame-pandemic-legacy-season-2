@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { edgeKey, pack } from '@repo/game';
+	import { edgeKey, groundCity, nearestGround, pack } from '@repo/game';
 	import type { CityId } from '@repo/game';
 	import { T, useThrelte } from '@threlte/core';
 	import { interactivity, OrbitControls } from '@threlte/extras';
@@ -33,7 +33,7 @@
 	import { DISC_REACH, layoutLabels, layoutNotes, NAME_SIZE } from './labels';
 	import type { Placement } from './labels';
 	import { buildLandGeometry, mapToSheet } from './land';
-	import { LAND_HEIGHT } from './projection';
+	import { FRAME, LAND_HEIGHT } from './projection';
 	import FlyingCube from './FlyingCube.svelte';
 	import { pieceModels } from './models.svelte';
 	import Pawn from './Pawn.svelte';
@@ -519,25 +519,71 @@
 	});
 	const UNPLACED: Placement = { x: 0, z: 3.4, leader: false };
 	// Notes keep clear of every disc and printed name, so they are placed after the names.
+	// Like the names, notes are placed again only when what shows, its names or the notes change, never as pieces move.
 	const noteSpots = $derived.by(() => {
 		if (!fonts.ready) return new Map<string, BoardPoint>();
-		const taken = visibleCities.flatMap(city => {
+		const names = shownNames.split('\n');
+		const taken = visibleCities.flatMap((city, index) => {
 			const at = layout[city.id]!;
 			const disc = { x: at.x, z: at.z, width: DISC_REACH * 2, depth: DISC_REACH * 2 };
 			const name = anchors.get(city.id);
 			if (!name) return [disc];
-			const width = nameWidth(view.cities[city.id]!.name, city.port, NAME_SIZE);
+			const width = nameWidth(names[index]!, city.port, NAME_SIZE);
 			return [disc, { x: at.x + name.x, z: at.z + name.z, width, depth: NAME_SIZE * 1.1 }];
 		});
+		// Notes keep off the red lines they would hide, and off the stockpile's berth.
+		for (const line of pack.redLines) for (const [x, z] of line) taken.push({ x, z, width: 0.6, depth: 0.6 });
+		if (showStockpile)
+			taken.push({
+				x: STOCKPILE.x,
+				z: STOCKPILE.z + (STOCKPILE_REACH.south - STOCKPILE_REACH.north) / 2,
+				width: STOCKPILE_REACH.x * 2,
+				depth: STOCKPILE_REACH.north + STOCKPILE_REACH.south,
+			});
 		const shown = new Set(visibleCities.map(city => city.id));
+		const revealed = (point: BoardPoint) => {
+			const city = groundCity(nearestGround(point));
+			return city !== null && shown.has(city);
+		};
+		// The fog billows past the ground it hides, so ground counts as in sight only this far inside it.
+		const SIGHT = 2.5;
+		const inSight = (point: BoardPoint) =>
+			point.x > FRAME.minX &&
+			point.x < FRAME.maxX &&
+			point.z > FRAME.minZ &&
+			point.z < FRAME.maxZ &&
+			[
+				[0, 0],
+				[SIGHT, 0],
+				[-SIGHT, 0],
+				[0, SIGHT],
+				[0, -SIGHT],
+			].every(([dx, dz]) => revealed({ x: point.x + dx!, z: point.z + dz! }));
+		const onChart = (point: BoardPoint) =>
+			point.x > FRAME.minX && point.x < FRAME.maxX && point.z > FRAME.minZ && point.z < FRAME.maxZ;
+		/**
+		 * Where a line's note stands: in the first stretch of it players can see, counting from where it is printed to
+		 * start, at the middle of the part well clear of the fog, or of the whole stretch when none is.
+		 */
+		const lineAnchor = (line: BoardPoint[]) => {
+			const first: BoardPoint[] = [];
+			for (const point of line) {
+				if (onChart(point) && revealed(point)) first.push(point);
+				else if (first.length) break;
+			}
+			const clear = first.filter(inSight);
+			const pick = clear.length ? clear : first;
+			return pick[Math.floor(pick.length / 2)];
+		};
 		return layoutNotes(
-			view.notes.map(note => ({
-				id: note.id,
-				at: layout[note.city]!,
-				...noteSize(note.text, NOTE.size, NOTE.width),
-				hidden: !shown.has(note.city),
-			})),
+			view.notes.flatMap(note => {
+				const size = noteSize(note.text, NOTE.size, NOTE.width);
+				if (!note.line) return [{ id: note.id, at: layout[note.city]!, ...size, hidden: !shown.has(note.city) }];
+				const at = lineAnchor(note.line);
+				return at ? [{ id: note.id, at, ...size, hidden: false, seen: true }] : [];
+			}),
 			taken,
+			inSight,
 		);
 	});
 	const flagsByCity = $derived.by(() => {

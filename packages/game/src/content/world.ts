@@ -227,12 +227,22 @@ export const documentedEdges: EdgeDef[] = [
 
 /**
  * The red region lines printed on the board and its map stickers, as `[lat, lon]` corners. A sea lane may
- * cross at most one. Each starts on land, as printed. Where the printed line stops at ocean the board leaves
+ * cross at most one. Each starts on the coast or just inland, as printed. Where the printed line stops at ocean the board leaves
  * dark, it runs on into the uncharted ground (`uncharted`) to the edge of the chart, so no course slips round its end.
  * The southern ones run well past the frame, because a course rounding a cape may bow a little beyond it.
- * Longitudes run past 180 where the chart does (it is centred on 11°E).
+ * Longitudes run past 180 where the chart does (it is centred on 11°E). Listed in the order players come upon them
+ * (100°W beside Mexico City in North America, then the Drake Passage, then the rest), so the board's note on what they
+ * mean stands by the first one found.
  */
 export const redLines: { printed: string; corners: [lat: number, lon: number][] }[] = [
+	// From the Mexican coast, as printed beneath it, so none of it runs over Mexico City's ground.
+	{
+		printed: 'door 60',
+		corners: [
+			[16.95, -100],
+			[-75, -100],
+		],
+	},
 	// Through the Magellan Strait and Tierra del Fuego, then across the Drake Passage.
 	{
 		printed: 'board',
@@ -246,13 +256,6 @@ export const redLines: { printed: string; corners: [lat: number, lon: number][] 
 		corners: [
 			[-34.3, 20],
 			[-75, 20],
-		],
-	},
-	{
-		printed: 'door 60',
-		corners: [
-			[17.6, -100],
-			[-75, -100],
 		],
 	},
 	// Down the Somali coast to the northern tip of Madagascar, west of the Indian Ocean haven.
