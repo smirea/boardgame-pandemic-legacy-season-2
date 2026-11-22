@@ -8,14 +8,17 @@ import {
 	PRODUCE_ICON,
 	SEARCH_ICON,
 } from '#lib/cards/icons.ts';
+import { EVENT_PRINT } from '#lib/cards/playerPrint.ts';
 import { regionOf, sortHand } from './handOrder.ts';
+
+export type HandTone = Exclude<PlayerDeckKind, 'event'> | 'event-rationed' | 'event-unrationed' | 'event-permanent';
 
 export type HandGroup = {
 	/** Stable while the group exists, so a card joining or leaving animates within it. */
 	key: string;
 	cards: PlayerCard[];
-	/** Which band it wears: a city's colour, or the card's kind. */
-	tone: PlayerDeckKind;
+	/** Which band it wears: a city's colour, or the card's kind (and event mode). */
+	tone: HandTone;
 	icon?: string;
 	/** A short mark printed instead of an icon, such as an improvement's card value. */
 	mark?: string;
@@ -92,11 +95,12 @@ function describe(key: string, cards: PlayerCard[], name: (card: PlayerCard) => 
 		}
 		case 'event': {
 			const event = pack.events.find(item => item.id === card.event)!;
-			const mode = card.mode === 'unrationed' ? ', one use' : '';
+			const eventMode = EVENT_PRINT[card.event].mode;
+			const mode = eventMode === 'unrationed' ? ', one use' : '';
 			return {
 				key,
 				cards,
-				tone: 'event',
+				tone: `event-${eventMode}`,
 				icon: EVENT_ICON[card.event],
 				title: `${listed} (event${mode}): ${event.text}`,
 			};

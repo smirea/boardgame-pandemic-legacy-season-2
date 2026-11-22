@@ -3,7 +3,7 @@
 	import type { CardId } from '@repo/game';
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { pack, SEAT_IDS } from '@repo/game';
-	import type { PlayerDeckKind, SeatId, World } from '@repo/game';
+	import type { SeatId, World } from '@repo/game';
 	import { inkOn } from '#lib/color.ts';
 	import Bubble from '#lib/replay/Bubble.svelte';
 	import type { SaidNote } from '#lib/replay/replay.svelte.ts';
@@ -16,6 +16,7 @@
 	import { SCAR_ICON } from '#lib/cards/icons.ts';
 	import { deal } from './deal.ts';
 	import { handGroups } from './handGroups.ts';
+	import type { HandTone } from './handGroups.ts';
 	import { sortHand } from './handOrder.ts';
 	import { cardName } from './labels.svelte.ts';
 	import PlayerCard, { KIND_COLOR } from './PlayerCard.svelte';
@@ -89,8 +90,14 @@
 		),
 	);
 	const groups = $derived(handGroups(hand, named));
-	const toneColor = (tone: PlayerDeckKind) =>
-		tone in CITY_COLOR ? CITY_COLOR[tone as keyof typeof CITY_COLOR] : KIND_COLOR[tone as keyof typeof KIND_COLOR];
+	const TONE_COLOR: Record<HandTone, string> = {
+		...CITY_COLOR,
+		produce: KIND_COLOR.produce,
+		epidemic: KIND_COLOR.epidemic,
+		'event-rationed': '#e2ba46',
+		'event-unrationed': '#df9032',
+		'event-permanent': '#274782',
+	};
 	const steps = $derived(active && acting ? turnSteps(world, seat) : []);
 	let reading = $state(false);
 
@@ -259,7 +266,7 @@
 				</div>
 			{/if}
 			{#each groups as group (group.key)}
-				{@const color = toneColor(group.tone)}
+				{@const color = TONE_COLOR[group.tone]}
 				{@const ids = group.cards.map(card => card.id)}
 				<button
 					class="mini"
