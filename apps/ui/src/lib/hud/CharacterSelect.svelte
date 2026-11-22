@@ -516,7 +516,6 @@
 				{send}
 				{start}
 				label={`Ready for ${title}`}
-				big
 				disabled={!table.ready[player] && readyRefusal !== null}
 			/>
 		</div>
@@ -1197,21 +1196,6 @@
 	.starts {
 		display: flex;
 		gap: 0.8rem;
-	}
-
-	.starts :global(.ready.big) {
-		gap: 0.3rem;
-		min-width: 11rem;
-		padding: 0.4rem 1.4rem 0.35rem;
-	}
-
-	.starts :global(.ready.big .label) {
-		font-size: 1.35rem;
-	}
-
-	.starts :global(.ready.big .pips i) {
-		width: 0.7rem;
-		height: 0.7rem;
 	}
 
 	.hint {
