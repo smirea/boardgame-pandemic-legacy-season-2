@@ -1,3 +1,5 @@
+import { keep } from './viewState.ts';
+
 /**
  * A tooltip the pointer can walk into, whose sections lay out their cards while the pointer or focus rests on them.
  * The region (trigger and tooltip together) keeps it open; leaving waits a beat, so crossing the gap between the
@@ -7,6 +9,19 @@ export class HoverTip<T extends string = string> {
 	open = $state<T | null>(null);
 	section = $state<string | null>(null);
 	#closing: ReturnType<typeof setTimeout> | undefined;
+
+	/** Made while a component starts, so a studio scene keeps which tooltip and section are open under `name`. */
+	constructor(name: string) {
+		keep(
+			name,
+			() => ({ open: this.open, section: this.section }),
+			(value: { open: T | null; section: string | null }) => {
+				clearTimeout(this.#closing);
+				this.open = value.open;
+				this.section = value.section;
+			},
+		);
+	}
 
 	show = (which: T) => {
 		clearTimeout(this.#closing);

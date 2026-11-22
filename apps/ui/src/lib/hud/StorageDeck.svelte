@@ -20,7 +20,7 @@
 
 	let { campaign, onopen }: Props = $props();
 
-	const tip = new HoverTip<'storage'>();
+	const tip = new HoverTip<'storage'>('storageDeck');
 	const open = $derived(tip.open === 'storage');
 	let buttonEl = $state<HTMLButtonElement>();
 

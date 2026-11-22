@@ -90,7 +90,7 @@
 		]);
 	});
 
-	const tip = new HoverTip<'player' | 'infection'>();
+	const tip = new HoverTip<'player' | 'infection'>('decks');
 	const kindOf = (card: PlayerCard): PlayerDeckKind =>
 		card.kind === 'city' ? (cityDef(card.city).color ?? 'haven') : card.kind;
 	const playerCards = (ids: readonly CardId[]) =>
