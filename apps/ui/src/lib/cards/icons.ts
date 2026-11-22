@@ -1,32 +1,6 @@
-import type { CityImprovementId, CompanionId, EventId } from '@repo/game';
+import type { CityImprovementId, CompanionId } from '@repo/game';
 
 /** Line icons on a 16-unit square, stroked in the card's ink. Hand spines carry these instead of names. */
-export const EVENT_ICON: Record<EventId, string> = {
-	airlift: 'M2 8.5 14 3l-4 11-2.2-4.6zM7.8 9.4 14 3',
-	quietNight: 'M11 2.5a6 6 0 1 0 2.8 8.8A5 5 0 0 1 11 2.5z',
-	resilience: 'M8 2l5 2v4c0 3-2.2 5-5 6-2.8-1-5-3-5-6V4z',
-	handout: 'M2.5 9.5h11V14h-11zM5 6l3-3 3 3M8 3v6.5',
-	spreadOut: 'M8 8V2M8 8l5.5 4M8 8l-5.5 4M6 3.5l2-2 2 2',
-	cleanse: 'M8 2v3M8 11v3M2 8h3M11 8h3M4 4l2 2M10 10l2 2M12 4l-2 2M4 12l2-2',
-	forecast: 'M3 3h7v4H3zM6 9h7v4H6zM12 3.5v3l-1.5-1.5M4 12.5v-3l1.5 1.5',
-	cache: 'M2.5 5.5h11v8h-11zM2.5 5.5 5 2.5h6l2.5 3M8 7.5v4M6 9.5h4',
-	encore: 'M12.5 8A4.5 4.5 0 1 1 8 3.5h3M9.5 1.5l2 2-2 2',
-	massInoculation: 'M2 14l3-3M4 10l6-6 2 2-6 6zM9 3l4 4M11.5 1.5l3 3',
-	exile: 'M4 2.5h8v11H4zM6 6l4 4M10 6l-4 4',
-	antidote: 'M6 2h4M6.5 2v4L3.5 12.5a1 1 0 0 0 1 1.5h7a1 1 0 0 0 1-1.5L9.5 6V2M5 10h6',
-	mentor: 'M8 8.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM3 14c.8-2.6 2.7-4 5-4s4.2 1.4 5 4',
-	secondWind: 'M3 4l4 4-4 4M9 4l4 4-4 4',
-	scavenge: 'M3 5.5h6.5V14H3zM6 5.5V2.5h6.5V11H9.5',
-	openWaters: 'M2 6c2-2 4 2 6 0s4 2 6 0M2 10.5c2-2 4 2 6 0s4 2 6 0',
-	safeHouses: 'M2.5 8.5 8 3l5.5 5.5M4 7v6.5h8V7M7 13.5v-3h2v3',
-	purge: 'M8 2c3 3 4.5 5 4.5 7.5a4.5 4.5 0 0 1-9 0C3.5 7 5.5 5.5 8 2zM6 8.5l4 4M10 8.5l-4 4',
-	stockUp: 'M2.5 9.5V14h11V9.5M8 2v8.5M5 7.5l3 3 3-3',
-	cardSwap: 'M3 5.5h10M10 2.5l3 3-3 3M13 10.5H3M6 7.5l-3 3 3 3',
-	surplus: 'M7 3.5l4.5 2.5v5L7 13.5 2.5 11V6zM2.5 6 7 8.5 11.5 6M7 8.5v5M13.5 1.5v4M11.5 3.5h4',
-	riotControl: 'M3 2.5h10v5c0 3-2.2 5-5 6-2.8-1-5-3-5-6zM5.5 6.5h5M5.5 9h5',
-	mobileShelters: 'M1.5 9 5 5.5 8.5 9M2.5 8v4.5h5V8M7.5 9 11 5.5 14.5 9M8.5 8v4.5h5V8',
-};
-
 export const COMPANION_ICON: Record<CompanionId, string> = {
 	builder: 'M2.5 13.5 9 7M7.5 4.5 10 2l4 4-2.5 2.5z',
 	lineman:

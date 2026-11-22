@@ -5,7 +5,9 @@
 	import { untrack } from 'svelte';
 	import { fade, fly } from 'svelte/transition';
 	import { CITY_COLOR } from '#lib/board/CityMarker.svelte';
-	import { sortHand } from './handOrder.ts';
+	import CardSpread from './CardSpread.svelte';
+	import { sortHand, sortInfection } from './handOrder.ts';
+	import { HoverTip } from './hoverTip.svelte.ts';
 	import { cardColor } from './PlayerCard.svelte';
 	import { HOLLOW_COLOR } from './rich.ts';
 	import type { Rich } from './rich.ts';
@@ -18,7 +20,8 @@
 
 	let { campaign, onopen }: Props = $props();
 
-	let open = $state(false);
+	const tip = new HoverTip<'storage'>('storageDeck');
+	const open = $derived(tip.open === 'storage');
 	let buttonEl = $state<HTMLButtonElement>();
 
 	const cityName = (id: Parameters<typeof cityDef>[0]) => campaign.names[id] ?? cityDef(id).name;
@@ -90,6 +93,30 @@
 			]);
 	});
 
+	const spread = $derived(
+		tip.section === 'player'
+			? {
+					label: 'Player cards in Package 6',
+					cards: {
+						player: sortHand(
+							campaign.stored.player.flatMap(id => campaign.playerCards[id] ?? []),
+							card => cardLabel(card.id),
+						),
+					},
+				}
+			: tip.section === 'infection'
+				? {
+						label: 'Infection cards in Package 6',
+						cards: {
+							infection: sortInfection(
+								campaign.stored.infection.flatMap(id => campaign.infectionCards[id] ?? []),
+								card => cardLabel(card.id),
+							),
+						},
+					}
+				: null,
+	);
+
 	const total = $derived(campaign.stored.player.length + campaign.stored.infection.length);
 	const cap = pack.numbers.storageCap;
 	const strikesStorage = $derived(campaign.rules.includes('epidemicFromStorage'));
@@ -112,6 +139,9 @@
 
 <div
 	class="storage-wrap"
+	{...tip.region}
+	role="group"
+	aria-label="Package 6"
 	{@attach feedback('Package 6 inoculation deck', () => ({
 		player: campaign.stored.player.length,
 		infection: campaign.stored.infection.length,
@@ -122,17 +152,15 @@
 		class="storage"
 		bind:this={buttonEl}
 		onclick={() => {
-			open = false;
+			tip.close();
 			onopen?.();
 		}}
 		data-testid="storage-deck"
 		data-dest="storage"
 		aria-label={`Package 6 — Inoculation deck: ${total} cards stored`}
 		aria-expanded={open}
-		onpointerenter={() => (open = true)}
-		onpointerleave={() => (open = false)}
-		onfocus={() => (open = true)}
-		onblur={() => (open = false)}
+		onpointerenter={() => tip.show('storage')}
+		onfocus={() => tip.show('storage')}
 	>
 		<span class="pkg-icon" aria-hidden="true">
 			<span class="pkg-lid"></span>
@@ -142,15 +170,21 @@
 	</button>
 
 	{#if open}
-		<div class="tip" role="tooltip" data-testid="storage-deck-tip" transition:fade={{ duration: 140 }}>
+		<div
+			class="tip"
+			role="group"
+			aria-label="Package 6 contents"
+			data-testid="storage-deck-tip"
+			transition:fade={{ duration: 140 }}
+		>
 			<strong>Package 6 · Inoculation deck</strong>
-			<section>
+			<section {...tip.sectionOf('player', `Player cards: ${campaign.stored.player.length} of ${cap}`)}>
 				<h4>Player cards <b>{campaign.stored.player.length} / {cap}</b></h4>
 				<p>
 					{#if playerCards.length}<RichText text={playerCards} />{:else}none{/if}
 				</p>
 			</section>
-			<section>
+			<section {...tip.sectionOf('infection', `Infection cards: ${campaign.stored.infection.length} of ${cap}`)}>
 				<h4>Infection cards <b>{campaign.stored.infection.length} / {cap}</b></h4>
 				<p>
 					{#if infectionCards.length}<RichText text={infectionCards} />{:else}none{/if}
@@ -163,6 +197,11 @@
 					<RichText text="Inoculated City cards stay in Package 6, out of the decks." />
 				{/if}
 			</p>
+			{#if spread}
+				{#key tip.section}
+					<CardSpread beside="left" label={spread.label} cards={spread.cards} testid="storage-section-cards" />
+				{/key}
+			{/if}
 		</div>
 	{/if}
 </div>
@@ -250,7 +289,28 @@
 		font-size: 0.78rem;
 		line-height: 1.3;
 		white-space: normal;
-		pointer-events: none;
+	}
+
+	.tip::before {
+		position: absolute;
+		inset: -0.6rem 0 100%;
+		content: '';
+	}
+
+	[data-section] {
+		margin-inline: -0.3rem;
+		padding-inline: 0.3rem;
+		border-radius: 2px;
+		outline: none;
+		cursor: default;
+	}
+
+	[data-section][aria-expanded='true'] {
+		background: rgb(42 32 23 / 0.08);
+	}
+
+	[data-section]:focus-visible {
+		outline: 1px solid var(--slip-line);
 	}
 
 	.tip > strong {

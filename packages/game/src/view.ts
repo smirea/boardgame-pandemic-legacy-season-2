@@ -56,8 +56,8 @@ export type Insights = {
 		/** Chance each city is hit at least once in the next Infect step. */
 		odds: Record<CityId, number>;
 		expected: Record<CityId, number>;
-		/** Top stratum first: the cards known to be in each layer of the deck. */
-		strata: { size: number; cities: Record<CityId, number> }[];
+		/** Top stratum first: the cards known to be in each layer of the deck, `cards` sorted so it never tells their order. */
+		strata: { size: number; cities: Record<CityId, number>; cards: CardId[] }[];
 		discard: Record<CityId, number>;
 		/** Infection cards set aside in the Game End area, out of play until the game ends. */
 		gameEnd: Record<CityId, number>;
@@ -159,7 +159,11 @@ export function insights(world: World): Insights | null {
 			deck: game.infectionDeck.order.length,
 			odds,
 			expected,
-			strata: layers.map(stratum => ({ size: stratum.length, cities: countCities(world, stratum) })),
+			strata: layers.map(stratum => ({
+				size: stratum.length,
+				cities: countCities(world, stratum),
+				cards: stratum.toSorted(),
+			})),
 			discard: countCities(world, game.infectionDiscard),
 			gameEnd: countCities(
 				world,

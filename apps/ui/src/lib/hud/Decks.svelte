@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { cityDef, pack } from '@repo/game';
-	import type { CityId, Insights, PlayerDeckKind, World } from '@repo/game';
+	import type { CardId, CityId, InfectionCard, Insights, PlayerCard, PlayerDeckKind, World } from '@repo/game';
 	import { fade, fly } from 'svelte/transition';
 	import { CITY_COLOR } from '#lib/board/CityMarker.svelte';
 	import { inkOn } from '#lib/color.ts';
-	import { sortHand } from './handOrder.ts';
+	import CardSpread from './CardSpread.svelte';
+	import { sortHand, sortInfection } from './handOrder.ts';
+	import { HoverTip } from './hoverTip.svelte.ts';
 	import { cardName, cityName } from './labels.svelte.ts';
 	import { cardColor, GLYPH, KIND_COLOR } from './PlayerCard.svelte';
 	import { HOLLOW_COLOR } from './rich.ts';
@@ -57,6 +59,7 @@
 			]);
 	const discard = $derived(names(infection.discard));
 	const setAside = $derived(names(infection.gameEnd));
+	const discardCount = $derived(Object.values(infection.discard).reduce((a, b) => a + b, 0));
 	const playerDiscardIds = $derived(world?.game?.playerDiscard ?? []);
 	const playerDiscard = $derived.by((): Rich => {
 		if (!world || !playerDiscardIds.length) return [];
@@ -87,7 +90,50 @@
 		]);
 	});
 
-	let open = $state<'player' | 'infection' | null>(null);
+	const tip = new HoverTip<'player' | 'infection'>('decks');
+	const kindOf = (card: PlayerCard): PlayerDeckKind =>
+		card.kind === 'city' ? (cityDef(card.city).color ?? 'haven') : card.kind;
+	const playerCards = (ids: readonly CardId[]) =>
+		world ? ids.flatMap(id => world.campaign.playerCards[id] ?? []) : [];
+	const infectionOf = (ids: readonly CardId[]) =>
+		world
+			? sortInfection(
+					ids.flatMap(id => world.campaign.infectionCards[id] ?? []),
+					card => (card.kind === 'city' ? cityName(card.city) : card.kind),
+				)
+			: [];
+
+	/**
+	 * The cards of the section the pointer rests on. Only what the players may know: the deck's cards as a set where
+	 * the tooltip already counts them, the discard piles and the Game End area, never the order of an undrawn deck.
+	 */
+	const spread = $derived.by(
+		(): { label: string; cards: { player: PlayerCard[] } | { infection: InfectionCard[] } } | null => {
+			const key = tip.section;
+			const game = world?.game;
+			if (!key || !game || !world) return null;
+			const named = (card: PlayerCard) => cardName(world, card.id);
+			if (key.startsWith('kind:')) {
+				const kind = key.slice(5);
+				const entry = KINDS.find(candidate => candidate.kind === kind);
+				const cards = playerCards(game.playerDeck.order).filter(card => kindOf(card) === kind);
+				return { label: `${entry?.name ?? kind} in the Player deck`, cards: { player: sortHand(cards, named) } };
+			}
+			if (key === 'player-discard')
+				return { label: 'Player discard pile', cards: { player: sortHand(playerCards(game.playerDiscard), named) } };
+			if (key.startsWith('stratum:')) {
+				const index = Number(key.slice(8));
+				const stratum = infection.strata[index];
+				return stratum
+					? { label: `Infection deck layer ${index + 1}`, cards: { infection: infectionOf(stratum.cards) } }
+					: null;
+			}
+			if (key === 'infection-discard')
+				return { label: 'Infection discard pile', cards: { infection: infectionOf(game.infectionDiscard) } };
+			if (key === 'game-end') return { label: 'Game End area', cards: { infection: infectionOf(game.gameEndArea) } };
+			return null;
+		},
+	);
 </script>
 
 {#snippet cardIcon(color: string, glyph?: string)}
@@ -115,25 +161,35 @@
 		role="button"
 		tabindex="0"
 		aria-label={label}
-		aria-expanded={open === which}
-		onpointerenter={() => (open = which)}
-		onpointerleave={() => (open = null)}
-		onfocus={() => (open = which)}
-		onblur={() => (open = null)}
+		aria-expanded={tip.open === which}
+		onpointerenter={() => tip.show(which)}
+		onfocus={() => tip.show(which)}
 	>
 		{@render cardIcon(color, which === 'infection' ? '☣' : undefined)}
 		{#key count}<strong data-testid={`${which}-deck-count`} in:fly={{ y: -10, duration: 280 }}>{count}</strong>{/key}
 	</div>
 {/snippet}
 
+{#snippet laid()}
+	{#if spread}
+		{#key tip.section}
+			<CardSpread beside="left" label={spread.label} cards={spread.cards} testid="deck-section-cards" />
+		{/key}
+	{/if}
+{/snippet}
+
 <div
 	class="decks"
+	{...tip.region}
+	role="group"
+	aria-label="Decks"
 	{@attach feedback('Decks', () => ({
 		player: player.cards,
 		epidemicsLeft: player.epidemicsLeft,
 		infection: infectionCards,
 		rateIndex,
 		discard: infection.discard,
+		section: tip.section,
 	}))}
 >
 	{@render deck(
@@ -142,15 +198,14 @@
 		'#5d5446',
 		dealt ? String(player.cards) : '–',
 	)}
-	{@render deck(
-		'infection',
-		`Infection deck: ${infectionCards} cards, rate ${rates[rateIndex]}`,
-		INFECTION,
-		String(infectionCards),
-	)}
-
-	{#if open === 'player'}
-		<div class="tip" role="tooltip" data-testid="player-deck-tip" transition:fade={{ duration: 140 }}>
+	{#if tip.open === 'player'}
+		<div
+			class="tip"
+			role="group"
+			aria-label="Player deck"
+			data-testid="player-deck-tip"
+			transition:fade={{ duration: 140 }}
+		>
 			{#if dealt}
 				<strong>Player deck, {player.cards} cards</strong>
 				<dl>
@@ -165,24 +220,44 @@
 				</dl>
 				<ul>
 					{#each kinds as entry (entry.kind)}
-						<li data-kind={entry.kind}>
+						<li
+							data-kind={entry.kind}
+							{...tip.sectionOf(`kind:${entry.kind}`, `${entry.name}: ${entry.count} in the deck`)}
+						>
 							{@render cardIcon(entry.color, entry.glyph)}<span>{entry.name}</span><b>{entry.count}</b>
 						</li>
 					{/each}
 				</ul>
-				<section data-testid="player-discard-section">
+				<section
+					data-testid="player-discard-section"
+					{...tip.sectionOf('player-discard', `Discard pile: ${playerDiscardIds.length} cards`)}
+				>
 					<h4>Discard pile <b>{playerDiscardIds.length}</b></h4>
 					<p>
 						{#if playerDiscard.length}<RichText text={playerDiscard} />{:else}empty{/if}
 					</p>
 				</section>
+				{@render laid()}
 			{:else}
 				<strong>Player deck</strong>
 				<p><RichText text="Shuffled with its Epidemics and dealt once setup is done." /></p>
 			{/if}
 		</div>
-	{:else if open === 'infection'}
-		<div class="tip wide" role="tooltip" data-testid="infection-deck-tip" transition:fade={{ duration: 140 }}>
+	{/if}
+	{@render deck(
+		'infection',
+		`Infection deck: ${infectionCards} cards, rate ${rates[rateIndex]}`,
+		INFECTION,
+		String(infectionCards),
+	)}
+	{#if tip.open === 'infection'}
+		<div
+			class="tip wide"
+			role="group"
+			aria-label="Infection deck"
+			data-testid="infection-deck-tip"
+			transition:fade={{ duration: 140 }}
+		>
 			<strong>Infection deck, {infectionCards} cards</strong>
 			<dl>
 				<dt>Infection rate</dt>
@@ -199,26 +274,23 @@
 				{/if}
 			</dl>
 			{#each infection.strata as stratum, index (index)}
-				<section>
-					<h4>
-						{infection.strata.length > 1
-							? index === 0
-								? 'On top, in no known order'
-								: `Layer ${index + 1}`
-							: infection.opening
-								? 'In the deck'
-								: 'In the deck, in no known order'}
-						<b>{stratum.size}</b>
-					</h4>
+				{@const title =
+					infection.strata.length > 1
+						? index === 0
+							? 'On top, in no known order'
+							: `Layer ${index + 1}`
+						: infection.opening
+							? 'In the deck'
+							: 'In the deck, in no known order'}
+				<section {...tip.sectionOf(`stratum:${index}`, `${title}: ${stratum.size} cards`)}>
+					<h4>{title} <b>{stratum.size}</b></h4>
 					<p>
 						{#if Object.keys(stratum.cities).length}<RichText text={names(stratum.cities)} />{:else}empty{/if}
 					</p>
 				</section>
 			{/each}
-			<section>
-				<h4>
-					Discard pile <b>{Object.values(infection.discard).reduce((a, b) => a + b, 0)}</b>
-				</h4>
+			<section {...tip.sectionOf('infection-discard', `Discard pile: ${discardCount} cards`)}>
+				<h4>Discard pile <b>{discardCount}</b></h4>
 				<p>
 					{#if discard.length}<RichText text={discard} />{:else}empty{/if}
 				</p>
@@ -227,14 +299,16 @@
 					</p>{/if}
 			</section>
 			{#if setAside.length}
-				<section>
-					<h4>Game End area <b>{Object.values(infection.gameEnd).reduce((a, b) => a + b, 0)}</b></h4>
+				{@const asideCount = Object.values(infection.gameEnd).reduce((a, b) => a + b, 0)}
+				<section {...tip.sectionOf('game-end', `Game End area: ${asideCount} cards`)}>
+					<h4>Game End area <b>{asideCount}</b></h4>
 					<p><RichText text={setAside} /></p>
 					<p class="note">
 						Out of play until the game ends: new cities' cards, forsaken cities' and quarantined cards.
 					</p>
 				</section>
 			{/if}
+			{@render laid()}
 		</div>
 	{/if}
 </div>
@@ -325,7 +399,13 @@
 		font-size: 0.78rem;
 		line-height: 1.3;
 		white-space: normal;
-		pointer-events: none;
+	}
+
+	/* Bridges the gap under the decks, so the pointer walks into the tooltip without leaving it. */
+	.tip::before {
+		position: absolute;
+		inset: -0.6rem 0 100%;
+		content: '';
 	}
 
 	.tip.wide {
@@ -401,7 +481,26 @@
 	}
 
 	li {
-		display: contents;
+		display: grid;
+		grid-column: 1 / -1;
+		grid-template-columns: subgrid;
+		align-items: center;
+	}
+
+	[data-section] {
+		margin-inline: -0.3rem;
+		padding-inline: 0.3rem;
+		border-radius: 2px;
+		outline: none;
+		cursor: default;
+	}
+
+	[data-section][aria-expanded='true'] {
+		background: rgb(42 32 23 / 0.08);
+	}
+
+	[data-section]:focus-visible {
+		outline: 1px solid var(--slip-line);
 	}
 
 	li b {
@@ -412,11 +511,6 @@
 	section {
 		padding-top: 0.35rem;
 		border-top: 1px solid var(--slip-line);
-	}
-
-	.tip > strong + section {
-		padding-top: 0;
-		border-top: 0;
 	}
 
 	h4 {

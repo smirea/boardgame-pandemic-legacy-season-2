@@ -29,7 +29,8 @@ export const fitText =
 			element.style.fontSize = `${low}em`;
 		};
 		let live = true;
-		fit();
+		// No fit on mount: the observer's first call comes after the first layout and before paint, so a pile of cards
+		// mounting together lays the page out once instead of once per card.
 		void document.fonts.ready.then(() => live && fit());
 		const observer = new ResizeObserver(fit);
 		observer.observe(element);
