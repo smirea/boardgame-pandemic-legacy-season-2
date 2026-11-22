@@ -1593,6 +1593,8 @@
 		gap: 0.6rem;
 		width: 15.5rem;
 		pointer-events: none;
+		/* A seat card is narrower than the column, which the Actions panel and the desk still fill. */
+		--seat-card: 11.6rem;
 	}
 
 	.column > :global(*) {
@@ -1619,7 +1621,7 @@
 
 	.place,
 	.seated {
-		width: 100%;
+		width: var(--seat-card);
 	}
 
 	.place.bl,

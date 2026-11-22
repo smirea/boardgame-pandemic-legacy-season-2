@@ -13,6 +13,7 @@
 	import CardIcon from '#lib/cards/CardIcon.svelte';
 	import OccupationIcon from '#lib/occupations/OccupationIcon.svelte';
 	import { SCAR_ICON } from '#lib/cards/icons.ts';
+	import { fitText } from '#lib/cards/fit.ts';
 	import { deal } from './deal.ts';
 	import { handGroups } from './handGroups.ts';
 	import { sortHand } from './handOrder.ts';
@@ -146,21 +147,20 @@
 				<Portrait
 					portrait={character?.portrait ?? SEAT_IDS.indexOf(seat)}
 					{color}
-					job={character?.job}
 					hooded={character?.worker ?? false}
 					dead={character?.dead ?? false}
 				/>
+				{#if player?.supplies}
+					<span class="cubes" role="img" aria-label={`${player.supplies} supply cubes carried`}>
+						{#each { length: player.supplies } as _, index (index)}<i></i>{/each}
+					</span>
+				{/if}
 			</span>
 			<span class="body">
 				<span class="head">
-					<strong>{name}</strong>
+					{#key name}<strong {@attach fitText(name, { min: 0.4, across: true })}>{name}</strong>{/key}
 					{#if character?.carrier}
 						<span class="carrier-badge" data-testid="carrier-badge">Sample</span>
-					{/if}
-					{#if player}
-						<span class="cubes" role="img" aria-label={`${player.supplies} supply cubes carried`}>
-							{#each { length: player.supplies } as _, index (index)}<i></i>{/each}
-						</span>
 					{/if}
 				</span>
 				{#if player && character}
@@ -458,20 +458,23 @@
 		align-items: center;
 		gap: 0.5rem;
 		min-height: 1.35rem;
-	}
-
-	strong {
-		overflow: hidden;
 		font-family: var(--font-display);
 		font-size: 1.3rem;
+	}
+
+	/* The whole name on one line, its size fitted to the room the card leaves it. */
+	strong {
+		flex: 1 1 0;
+		min-width: 0;
+		overflow: hidden;
 		font-weight: 400;
-		line-height: 1;
-		text-overflow: ellipsis;
+		line-height: 1.1;
 		white-space: nowrap;
 	}
 
 	.carrier-badge {
 		flex: none;
+		font-family: var(--font-ui);
 		padding: 0.08rem 0.36rem;
 		border: 1px solid #3fe3b0;
 		border-radius: 999px;
@@ -488,15 +491,16 @@
 		color: #166b52;
 	}
 
-	/* Keep even a full reserve of carried cubes beside the name. */
+	/* Carried cubes stand along the foot of the portrait, piling up in rows as more are carried. */
 	.cubes {
+		position: absolute;
+		right: 3px;
+		bottom: 3px;
+		left: 3px;
 		display: flex;
-		flex: none;
-		flex-wrap: wrap;
-		justify-content: flex-end;
-		max-width: 3.75rem;
+		flex-wrap: wrap-reverse;
 		gap: 2px;
-		margin-left: auto;
+		filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.6));
 	}
 
 	@keyframes active-border {
@@ -515,8 +519,8 @@
 
 	.cubes i {
 		flex: none;
-		width: 0.5rem;
-		height: 0.5rem;
+		width: 0.8rem;
+		height: 0.8rem;
 		border: 1px solid rgb(20 12 4 / 0.55);
 		border-radius: 1px;
 		background: conic-gradient(from 30deg at 50% 35%, #b1a38a 0deg 120deg, #e0d5bb 120deg 240deg, #fff5dc 240deg);
