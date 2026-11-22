@@ -216,6 +216,10 @@ const cubeCount = (count: number): Rich => [
 	{ glyph: 'supplies', alt: count === 1 ? 'cube' : 'cubes' },
 ];
 
+/** Action heading aimed at a single city, e.g. "Drive / Ferry to Cairo" or "Sabotage in Cairo". */
+export const actionAt = (a: Action['a'], target: CityId) =>
+	`${ACTION_NAMES[a]} ${a === 'sabotage' ? 'in' : 'to'} ${cityName(target)}`;
+
 /** The city an action is aimed at, when clicking that city on the board should trigger it. */
 export function actionTarget(world: World, action: Action): CityId | null {
 	switch (action.a) {
@@ -228,6 +232,8 @@ export function actionTarget(world: World, action: Action): CityId | null {
 			return action.to;
 		case 'run':
 			return action.to;
+		case 'sabotage':
+			return action.city;
 		case 'supply': {
 			const card = world.campaign.playerCards[action.card];
 			return card?.kind === 'city' ? card.city : null;

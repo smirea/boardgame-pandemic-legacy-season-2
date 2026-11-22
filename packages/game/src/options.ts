@@ -123,9 +123,9 @@ function candidateActions(world: World, seat: SeatId): Action[] {
 		for (const toll of tolls) candidates.push({ a: 'drive', to, card: toll.id });
 	}
 	for (const card of held) candidates.push({ a: 'sail', card: card.id });
-	const ticket = held.find(card => card.city === here);
+	const tickets = held.filter(card => card.city === here);
 	for (const to of ports) {
-		if (ticket) candidates.push({ a: 'charter', card: ticket.id, to });
+		for (const ticket of tickets) candidates.push({ a: 'charter', card: ticket.id, to });
 		for (const card of held) candidates.push({ a: 'captainSail', card: card.id, to });
 	}
 	for (const id of hand) {
@@ -155,18 +155,21 @@ function candidateActions(world: World, seat: SeatId): Action[] {
 		);
 	}
 	if (def.color) {
-		for (const laborer of [false, true]) {
-			const moveFrom = (Object.keys(game.locations) as CityId[]).find(
-				id => game.locations[id]!.center && !campaign.locations[id]!.permanent.includes('center'),
-			);
-			for (let needed = pack.numbers.costs.center + 1; needed >= 1; needed--) {
-				for (const cards of payments(world, hand, def.color, needed, 'build'))
-					candidates.push({
-						a: 'buildCenter',
-						cards,
-						laborer,
-						...(game.pieces.center === 0 && moveFrom ? { moveFrom } : {}),
-					});
+		const centerMoves =
+			game.pieces.center > 0
+				? [undefined]
+				: (Object.keys(game.locations) as CityId[]).filter(id => game.locations[id]!.center);
+		for (const moveFrom of centerMoves.length ? centerMoves : [undefined]) {
+			for (const laborer of [false, true]) {
+				for (let needed = pack.numbers.costs.center + 1; needed >= 1; needed--) {
+					for (const cards of payments(world, hand, def.color, needed, 'build'))
+						candidates.push({
+							a: 'buildCenter',
+							cards,
+							laborer,
+							...(moveFrom ? { moveFrom } : {}),
+						});
+				}
 			}
 		}
 	}

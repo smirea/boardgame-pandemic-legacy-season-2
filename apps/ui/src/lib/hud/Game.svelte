@@ -15,7 +15,7 @@
 		sealKey,
 		tableStart,
 	} from '@repo/game';
-	import type { CardId, CityId, Command, EdgeDef, SeatId } from '@repo/game';
+	import type { CardId, CityId, Command, Decide, EdgeDef, SeatId } from '@repo/game';
 	import Board from '#lib/board/Board.svelte';
 	import type { BoardMarks, Fx, FxKind } from '#lib/board/types.ts';
 	import type { SessionView } from '#lib/session/session.svelte.ts';
@@ -131,11 +131,6 @@
 	const actions = $derived(live ? actionChoices.flatMap(choice => choice.actions) : []);
 	const plays = $derived(playing ? legalPlays(world, snap.phase) : []);
 	const decides = $derived(playing ? legalDecides(world) : []);
-	$effect(() => {
-		// When one of this client's characters has to discard, the dock turns to that hand.
-		const owed = decides.find(decide => decide.d === 'discard' && owns(decide.seat));
-		if (owed?.d === 'discard') viewing = owed.seat;
-	});
 
 	let menu = $state(false);
 	let boxOpen = $state(false);
@@ -222,6 +217,49 @@
 		owns,
 		send,
 		toast,
+	});
+
+	$effect(() => {
+		// When an action, Lockdown, or pending choice needs cards from a hand, turn the dock to a seat that can answer.
+		const pick = choosing.handPick;
+		if (pick) {
+			if (pick.seat && owns(pick.seat)) {
+				viewing = pick.seat;
+			} else if (pick.seat === null && game) {
+				const current = untrack(() => viewing ?? home);
+				if (!current || !owns(current) || pick.eligible(current).size === 0) {
+					const fallback = game.seats.find(other => owns(other) && pick.eligible(other).size > 0);
+					if (fallback) viewing = fallback;
+				}
+			}
+			return;
+		}
+		const owed = decides.find(decide => decide.d === 'discard' && owns(decide.seat));
+		if (owed?.d === 'discard') {
+			viewing = owed.seat;
+			return;
+		}
+		const pending = game?.pending[0];
+		if (pending?.t === 'giveCard' && owns(pending.seat)) {
+			viewing = pending.seat;
+			return;
+		}
+		if (pending?.t === 'cordon' || pending?.t === 'shield') {
+			const seatsWithCards = [
+				...new Set(
+					decides
+						.filter(
+							(decide): decide is Extract<Decide, { d: 'cordon' | 'shield' }> =>
+								decide.d === pending.t && owns(decide.seat),
+						)
+						.map(decide => decide.seat),
+				),
+			];
+			const current = untrack(() => viewing ?? home);
+			if (seatsWithCards.length && (!current || !seatsWithCards.includes(current))) {
+				viewing = seatsWithCards[0]!;
+			}
+		}
 	});
 
 	const view = provideViewState();
@@ -696,6 +734,9 @@
 				send({ type: 'CANCEL_UNDO_VOTE', player: session.player });
 				return;
 			}
+			if (document.activeElement instanceof HTMLElement && document.activeElement.classList.contains('focus-only')) {
+				document.activeElement.blur();
+			}
 			cancel();
 			menu = false;
 		}
@@ -721,9 +762,15 @@
 			tools.toggleEraser();
 			return;
 		}
-		if (onButton(event) || !game || modalOpen()) return;
-		if (key === 'z' && snap.canUndo && canAct) send({ type: 'UNDO', by: session.player });
+		const focused = event.composedPath()[0];
+		const onFocusOnly = focused instanceof HTMLButtonElement && focused.classList.contains('focus-only');
+		if ((onButton(event) && !onFocusOnly) || !game || modalOpen()) return;
+		if (key === 'z' && snap.canUndo && canAct) {
+			if (onFocusOnly) focused.blur();
+			send({ type: 'UNDO', by: session.player });
+		}
 		if (key !== ' ') return;
+		if (onFocusOnly) focused.blur();
 		// The cards that open a game are anyone's to flip.
 		if (admin.opening) {
 			event.preventDefault();
@@ -817,7 +864,7 @@
 				{live}
 				{canAct}
 				{owns}
-				aiming={choosing.targeting?.a ?? null}
+				aiming={choosing.targeting?.a ?? choosing.handPick?.a ?? choosing.dockChoice?.a ?? null}
 				onchoose={choice => choosing.step({ t: 'start', a: choice.a, via: 'panel' })}
 				{send}
 				onlockdown={card => choosing.step({ t: 'lockdown', card })}
@@ -1366,9 +1413,21 @@
 									: `Click one of the ${choosing.targeting.cities.size} lit cities on the map.`,
 						}
 					: null}
+				handPick={choosing.handPick}
+				dockChoice={choosing.dockChoice}
+				onhandcard={(seat, card) => choosing.step({ t: 'handCard', seat, card })}
+				onhandconfirm={() => choosing.step({ t: 'handConfirm' })}
+				onhandtoggle={() => choosing.step({ t: 'handToggle' })}
 				oncancel={cancel}
 				uses={choosing.cardUses}
 				onplaycard={(seat, card) => choosing.step({ t: 'play', seat, card })}
+				onproducecard={(seat, card) => {
+					const produceUses = choosing.cardUses(seat, card).filter(tag => tag.key.startsWith('produce:'));
+					const legal = produceUses.filter(tag => !tag.disabled);
+					if (legal.length === 1) legal[0]!.run();
+					else if (legal.length > 1) choosing.step({ t: 'start', a: 'produce', via: { card } });
+					else produceUses[0]?.run();
+				}}
 				onlockdown={card => choosing.step({ t: 'lockdown', card })}
 				arriving={admin.turn.arriving}
 				opening={admin.opening || (snap.phase === 'setup.events' && show.playing) ? game.infectionsLeft : null}

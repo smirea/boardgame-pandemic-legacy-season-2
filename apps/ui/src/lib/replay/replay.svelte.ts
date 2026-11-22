@@ -18,6 +18,7 @@ import { plain } from '#lib/hud/rich.ts';
 export type { GameNotes, IndexGame, ReplayIndex } from '@repo/game';
 import {
 	ACTION_NAMES,
+	actionAt,
 	actionDetail,
 	actionTarget,
 	cardName,
@@ -147,7 +148,7 @@ export function commandLabel(world: World, command: Command | null): { who: stri
 			const detail = plain(actionDetail(world, action));
 			return {
 				who: seatName(world, command.seat),
-				text: [ACTION_NAMES[action.a], target ? `to ${cityName(target)}` : '', detail ? `(${detail})` : '']
+				text: [target ? actionAt(action.a, target) : ACTION_NAMES[action.a], detail ? `(${detail})` : '']
 					.filter(Boolean)
 					.join(' '),
 			};

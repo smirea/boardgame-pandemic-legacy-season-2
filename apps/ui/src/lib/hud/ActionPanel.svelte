@@ -3,7 +3,15 @@
 	import { actionCost, isFreeAction, pack, reject } from '@repo/game';
 	import type { Action, ActionChoice, CardId, Command, PlayerId, PublicState, SeatId } from '@repo/game';
 	import ActionIcon from './ActionIcon.svelte';
-	import { ACTION_NAMES, actionDetail, actionTarget, actionText, cityName, sharedCost } from './labels.svelte.ts';
+	import {
+		ACTION_NAMES,
+		actionAt,
+		actionDetail,
+		actionTarget,
+		actionText,
+		cityName,
+		sharedCost,
+	} from './labels.svelte.ts';
 	import RichText from './RichText.svelte';
 	import { keep } from './viewState.ts';
 	import { ways } from './ways.ts';
@@ -59,7 +67,7 @@
 			return {
 				choice,
 				open: live && choice.actions.length > 0,
-				title: ACTION_NAMES[choice.a] + (live && target ? ` to ${cityName(target)}` : ''),
+				title: live && target ? actionAt(choice.a, target) : ACTION_NAMES[choice.a],
 				text:
 					live && choice.reason ? choice.reason : live && detail?.length ? detail : actionText(world, seat, choice.a),
 				count: live && offered.length > 1 ? offered.length : null,

@@ -2,10 +2,12 @@
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { handLimit, pack, reject } from '@repo/game';
 	import type { Action, CardId, CharacterId, Command, Decide, Play, PublicState, Purchase, SeatId } from '@repo/game';
+	import { untrack } from 'svelte';
 	import { flip } from 'svelte/animate';
 	import { cubicIn } from 'svelte/easing';
 	import { fade, fly } from 'svelte/transition';
 	import ActionIcon from './ActionIcon.svelte';
+	import type { CardUse, DockChoice, HandPick } from './choosing.svelte.ts';
 	import { cityName, decideLabel, decisionTitle, seatName, SEAT_COLORS, cardName } from './labels.svelte.ts';
 	import { deal } from './deal.ts';
 	import { sortHand } from './handOrder.ts';
@@ -25,13 +27,21 @@
 		decides: Decide[];
 		send: (command: Command) => void;
 		onview: (seat: SeatId) => void;
-		/** An action or card waiting for a city on the map. */
 		/** What waits for a click on the map, and what the slip asks for. */
 		aiming: { label: string; a: Action['a'] | null; prompt: string } | null;
+		/** An action or Lockdown waiting for card(s) to be clicked directly in the hand. */
+		handPick?: HandPick | null;
+		/** An inline mode choice in the dock slip (such as Produce Supplies local vs system-wide). */
+		dockChoice?: DockChoice | null;
+		onhandcard?: (seat: SeatId, card: CardId) => void;
+		onhandconfirm?: () => void;
+		onhandtoggle?: () => void;
 		oncancel: () => void;
 		/** The ways to use a card in hand right now, shown as tags over the card. */
-		uses: (seat: SeatId, card: CardId) => { key: string; label: string; icon: Action['a'] | null; run: () => void }[];
+		uses: (seat: SeatId, card: CardId) => CardUse[];
 		onplaycard: (seat: SeatId, card: CardId) => void;
+		/** Clicking a Produce Supplies card directly runs its sole mode, opens its inline choice, or reports why it cannot run. */
+		onproducecard?: (seat: SeatId, card: CardId) => void;
 		/** Destroying a Lockdown card costs a Player card, so the screen asks whose. */
 		onlockdown?: (card: CardId) => void;
 		/** How many of the cards that open a game are still to flip at the turn desk. Picking Events waits for the last. */
@@ -51,9 +61,15 @@
 		send,
 		onview,
 		aiming,
+		handPick = null,
+		dockChoice = null,
+		onhandcard,
+		onhandconfirm,
+		onhandtoggle,
 		oncancel,
 		uses,
 		onplaycard,
+		onproducecard,
 		onlockdown,
 		opening = null,
 		arriving = new Set(),
@@ -161,6 +177,54 @@
 	const fanAngle = (index: number) => (index - (handCards.length - 1) / 2) * Math.min(4.5, 22 / handCards.length);
 	const mustDiscard = $derived(owns(seat) && decides.some(decide => decide.d === 'discard' && decide.seat === seat));
 	const playable = $derived(new Set(plays.filter(option => option.seat === seat).map(option => option.card)));
+	// Pending decisions where the player picks a card directly from hand (cordon, shield, giveCard).
+	const pendingHandKind = $derived(
+		pending && (pending.t === 'cordon' || pending.t === 'shield' || pending.t === 'giveCard') ? pending.t : null,
+	);
+	let pickedGiveCard = $state<CardId | null>(null);
+	let lastPending = untrack(() => pending);
+	$effect(() => {
+		if (pending === lastPending) return;
+		lastPending = pending;
+		pickedGiveCard = null;
+	});
+	const pendingHandSeats = $derived.by(() => {
+		if (!pendingHandKind) return [] as SeatId[];
+		if (pendingHandKind === 'giveCard') {
+			return pending?.t === 'giveCard' && owns(pending.seat) ? [pending.seat] : [];
+		}
+		return [
+			...new Set(
+				decides
+					.filter(
+						(decide): decide is Extract<Decide, { d: 'cordon' | 'shield' }> =>
+							decide.d === pendingHandKind && owns(decide.seat),
+					)
+					.map(decide => decide.seat),
+			),
+		];
+	});
+	const pendingHandMap = $derived.by(() => {
+		const map = new Map<CardId, Decide[]>();
+		if (!pendingHandKind || !owns(seat)) return map;
+		for (const decide of decides) {
+			if (decide.d === 'cordon' || decide.d === 'shield') {
+				if (decide.d === pendingHandKind && decide.seat === seat)
+					map.set(decide.card, [...(map.get(decide.card) ?? []), decide]);
+			} else if (decide.d === 'giveCard' && pending?.t === 'giveCard' && pending.seat === seat) {
+				map.set(decide.card, [...(map.get(decide.card) ?? []), decide]);
+			}
+		}
+		return map;
+	});
+	const pendingHandActive = $derived(pendingHandSeats.length > 0);
+	const handPickEligible = $derived(handPick ? handPick.eligible(seat) : new Set<CardId>());
+	const handPickSeats = $derived(
+		handPick && handPick.seat === null
+			? game.seats.filter(other => owns(other) && handPick.eligible(other).size > 0)
+			: [],
+	);
+	const handSelectionMode = $derived(Boolean(handPick) || mustDiscard || pendingHandActive);
 	// While a choice waits, an event another of this screen's seats may play now is offered on the prompt itself.
 	const elsewhere = $derived(
 		pending
@@ -172,15 +236,35 @@
 			: [],
 	);
 	const decider = $derived(pending && 'seat' in pending && pending.seat ? pending.seat : game.active);
-	// A shared prompt shows each player only their own cards, and the player whose turn it is may pass on it.
+	// Card-discard / card-give decisions are answered by clicking a card in hand; the slip keeps only non-card choices (such as Skip).
 	const choices = $derived(
 		decides.filter(decide => {
 			if (decide.d === 'discard') return false;
+			if (decide.d === 'shield' || decide.d === 'cordon' || decide.d === 'giveCard') return false;
 			if (epidemicStep && decide.d === 'skip') return false;
-			if (decide.d === 'shield' || decide.d === 'cordon') return owns(decide.seat);
 			return owns(decider);
 		}),
 	);
+	const giveRecipients = $derived(
+		pickedGiveCard
+			? decides.filter(
+					(decide): decide is Extract<Decide, { d: 'giveCard' }> =>
+						decide.d === 'giveCard' && decide.card === pickedGiveCard,
+				)
+			: [],
+	);
+	function clickPendingHandCard(card: CardId) {
+		const options = pendingHandMap.get(card);
+		if (!options?.length) return;
+		if (pendingHandKind === 'giveCard') {
+			pickedGiveCard = pickedGiveCard === card ? null : card;
+			return;
+		}
+		if (options.length === 1) {
+			send({ type: 'DECIDE', decide: options[0]! });
+			pickedGiveCard = null;
+		}
+	}
 	const overLimit = $derived(game.seats.filter(other => game.players[other]!.hand.length > handLimit(world, other)));
 	// The hand limit waits until both cards of a draw are in hand, so being over it does not always mean discarding now.
 	const discarding = $derived(
@@ -195,8 +279,11 @@
 	let draft = $state<CardId[] | null>(null);
 	keep(
 		'dock',
-		() => ({ draft }),
-		saved => (draft = saved.draft),
+		() => ({ draft, pickedGiveCard }),
+		saved => {
+			draft = saved.draft ?? null;
+			pickedGiveCard = saved.pickedGiveCard ?? null;
+		},
 	);
 	const picked = $derived(draft ?? game.pickedEvents);
 
@@ -208,8 +295,17 @@
 	}
 </script>
 
+<svelte:window onkeydown={event => event.key === 'Escape' && (pickedGiveCard = null)} />
+
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	class="frame"
+	oncontextmenu={event => {
+		if (handPick || dockChoice || aiming) {
+			event.preventDefault();
+			oncancel();
+		}
+	}}
 	{@attach feedback(undefined, () => ({
 		seat,
 		home,
@@ -387,6 +483,7 @@
 				{#key seat}
 					<div
 						class="hand"
+						class:picking={handSelectionMode}
 						data-testid="hand"
 						bind:this={hand}
 						bind:clientWidth={handWidth}
@@ -395,26 +492,75 @@
 						in:fade={{ duration: 220 }}
 					>
 						{#each handCards as card, index (card.id)}
+							{@const tags = handSelectionMode
+								? (mustDiscard || pendingHandKind === 'giveCard') && playable.has(card.id)
+									? uses(seat, card.id).filter(tag => tag.key === 'play')
+									: []
+								: uses(seat, card.id)}
+							{@const inHandPick = handPick !== null}
+							{@const pickEligible = inHandPick && handPickEligible.has(card.id)}
+							{@const pickSelected = inHandPick && handPick!.selected.includes(card.id)}
+							{@const pendingEligible = !inHandPick && !mustDiscard && pendingHandActive && pendingHandMap.has(card.id)}
+							{@const pendingSelected = pendingHandKind === 'giveCard' && pickedGiveCard === card.id}
+							{@const produceReady =
+								!handSelectionMode &&
+								card.kind === 'produce' &&
+								tags.some(tag => tag.key.startsWith('produce:') && !tag.disabled)}
+							{@const searchReady =
+								!handSelectionMode && card.kind === 'city' && tags.some(tag => tag.key.startsWith('search:'))}
+							{@const cardTone = inHandPick
+								? pickEligible
+									? 'discard'
+									: null
+								: mustDiscard
+									? 'discard'
+									: pendingEligible
+										? pendingHandKind === 'giveCard'
+											? 'play'
+											: 'discard'
+										: playable.has(card.id) || produceReady || searchReady
+											? 'play'
+											: null}
+							{@const cardDimmed =
+								(inHandPick && !pickEligible) || (!inHandPick && !mustDiscard && pendingHandActive && !pendingEligible)}
+							{@const cardClick = inHandPick
+								? pickEligible
+									? () => onhandcard?.(seat, card.id)
+									: undefined
+								: mustDiscard
+									? () => send({ type: 'DECIDE', decide: { d: 'discard', seat, cards: [card.id] } })
+									: pendingEligible
+										? () => clickPendingHandCard(card.id)
+										: playable.has(card.id)
+											? () => onplaycard(seat, card.id)
+											: card.kind === 'produce' && onproducecard
+												? () => onproducecard(seat, card.id)
+												: undefined}
 							<div
 								class="slot"
 								class:arriving={arriving.has(card.id)}
+								class:selected={pickSelected || pendingSelected}
 								data-card={card.id}
 								animate:flip={{ duration: 320 }}
 								in:deal
 								out:fly={{ y: -140, duration: 260, easing: cubicIn }}
 							>
-								{#if !mustDiscard}
-									{@const tags = uses(seat, card.id)}
-									{#if tags.length}
-										<div class="tags" data-testid="card-uses">
-											{#each tags as tag, order (tag.key)}
-												<button style:--i={order} data-use={tag.key} onclick={tag.run}>
-													{#if tag.icon}<ActionIcon action={tag.icon} size="1.5rem" />{:else}<i class="star">✦</i>{/if}
-													{tag.label}
-												</button>
-											{/each}
-										</div>
-									{/if}
+								{#if tags.length}
+									<div class="tags" data-testid="card-uses">
+										{#each tags as tag, order (tag.key)}
+											<button
+												type="button"
+												class:muted={tag.disabled}
+												style:--i={order}
+												data-use={tag.key}
+												aria-disabled={tag.disabled ? 'true' : undefined}
+												onclick={tag.run}
+											>
+												{#if tag.icon}<ActionIcon action={tag.icon} size="1.5rem" />{:else}<i class="star">✦</i>{/if}
+												{tag.label}
+											</button>
+										{/each}
+									</div>
 								{/if}
 								<div
 									class="lift"
@@ -423,13 +569,15 @@
 								>
 									<PlayerCard
 										{card}
-										tone={mustDiscard ? 'discard' : playable.has(card.id) ? 'play' : null}
-										onclick={mustDiscard
-											? () => send({ type: 'DECIDE', decide: { d: 'discard', seat, cards: [card.id] } })
-											: playable.has(card.id)
-												? () => onplaycard(seat, card.id)
-												: undefined}
+										tone={cardTone}
+										selected={pickSelected || pendingSelected}
+										dimmed={cardDimmed}
+										focusable={!cardClick && tags.length > 0}
+										onclick={cardClick}
 									/>
+									{#if pickSelected || pendingSelected}
+										<span class="hand-check" aria-hidden="true">✓</span>
+									{/if}
 								</div>
 							</div>
 						{:else}
@@ -440,7 +588,63 @@
 			</div>
 
 			<div class="middle">
-				{#if discarding.length}
+				{#if handPick}
+					<div class="slip step aiming" data-testid="hand-pick">
+						{#if handPick.a}<ActionIcon action={handPick.a} size="2.4rem" />{/if}
+						<div class="say">
+							<strong>{handPick.title}</strong>
+							<span>{handPick.prompt} Esc or a right click cancels.</span>
+							{#if handPickSeats.length > 1}
+								<div class="hand-switch" data-testid="hand-pick-seats">
+									<span>Hand:</span>
+									{#each handPickSeats as other (other)}
+										<button type="button" class:current={other === seat} onclick={() => onview(other)}>
+											{seatName(world, other)}
+										</button>
+									{/each}
+								</div>
+							{/if}
+						</div>
+						<div class="step-actions">
+							{#if handPick.toggle && onhandtoggle}
+								<button
+									type="button"
+									class:active={handPick.toggle.active}
+									data-testid="hand-pick-toggle"
+									onclick={onhandtoggle}
+								>
+									{handPick.toggle.label}
+								</button>
+							{/if}
+							{#if handPick.multi && onhandconfirm}
+								<button
+									type="button"
+									class="primary"
+									disabled={!handPick.canConfirm}
+									data-testid="hand-pick-confirm"
+									onclick={onhandconfirm}
+								>
+									{handPick.confirmLabel ?? 'Confirm'}
+								</button>
+							{/if}
+							<button type="button" onclick={oncancel} data-testid="cancel-aim">Cancel</button>
+						</div>
+					</div>
+				{:else if dockChoice}
+					<div class="slip step aiming" data-testid="dock-choice">
+						{#if dockChoice.a}<ActionIcon action={dockChoice.a} size="2.4rem" />{/if}
+						<div class="say">
+							<strong>{dockChoice.title}</strong>
+							<span>{dockChoice.prompt} Esc or a right click cancels.</span>
+							<div class="chips">
+								{#each dockChoice.options as option (option.key)}
+									<button type="button" data-use={option.key} onclick={option.run}>{option.label}</button>
+								{/each}
+							</div>
+						</div>
+						<button type="button" onclick={oncancel} data-testid="cancel-aim">Cancel</button>
+					</div>
+				{:else if discarding.length}
 					<div class="slip">
 						<p class="prompt">
 							{discarding.map(other => seatName(world, other)).join(', ')} must discard down to the hand limit.
@@ -456,14 +660,47 @@
 					</div>
 				{:else if pending && pending.t !== 'scar' && (!epidemicStep || elsewhere.length || lockableHere.length)}
 					<div class="slip">
-						<p class="prompt">{decisionTitle(world, pending)}</p>
+						<p class="prompt">
+							{decisionTitle(world, pending)}
+							{#if pendingHandActive && pendingHandKind === 'giveCard' && !pickedGiveCard}
+								Click a card in your hand to give{playable.size ? ', or play an event' : ''}.
+							{:else if pendingHandActive && (pendingHandKind === 'cordon' || pendingHandKind === 'shield')}
+								Click a highlighted card in hand to discard.
+							{/if}
+						</p>
+						{#if pendingHandSeats.length > 1}
+							<div class="hand-switch" data-testid="pending-hand-seats">
+								<span>Hand:</span>
+								{#each pendingHandSeats as other (other)}
+									<button type="button" class:current={other === seat} onclick={() => onview(other)}>
+										{seatName(world, other)}
+									</button>
+								{/each}
+							</div>
+						{/if}
+						{#if pendingHandKind === 'giveCard' && pickedGiveCard && giveRecipients.length}
+							<div class="chips" data-testid="give-card-recipients">
+								{#each giveRecipients as decide (decide.to)}
+									<button
+										type="button"
+										onclick={() => {
+											send({ type: 'DECIDE', decide });
+											pickedGiveCard = null;
+										}}
+									>
+										Give {cardName(world, pickedGiveCard)} to {seatName(world, decide.to)}
+									</button>
+								{/each}
+								<button type="button" onclick={() => (pickedGiveCard = null)}>Pick another card</button>
+							</div>
+						{/if}
 						{#if choices.length}
 							<div class="chips">
 								{#each choices as decide, index (index)}
 									<button onclick={() => send({ type: 'DECIDE', decide })}>{decideLabel(world, decide)}</button>
 								{/each}
 							</div>
-						{:else if !epidemicStep}
+						{:else if !epidemicStep && !pendingHandActive}
 							<p class="waiting">Waiting for {seatName(world, decider)}.</p>
 						{/if}
 						{#if elsewhere.length || (lockableHere.length && onlockdown)}
@@ -493,7 +730,7 @@
 						<button onclick={oncancel} data-testid="cancel-aim">Cancel</button>
 					</div>
 				{/if}
-				{#if lockableHere.length && onlockdown && (discarding.length || !pending)}
+				{#if !handPick && !dockChoice && lockableHere.length && onlockdown && (discarding.length || !pending)}
 					<div class="slip">
 						<div class="chips" data-testid="lockdown-bar">
 							{#each lockableHere as card (card.id)}
@@ -541,9 +778,9 @@
 		border-color: var(--warn);
 	}
 
-	/* A slip asking for a click on the map holds its words on a few lines, however little room the hand leaves. */
+	/* A slip asking for a click on the map or hand holds its words cleanly while leaving the fan room to spread. */
 	.middle:has(.aiming) {
-		min-width: min(18rem, 48%);
+		min-width: min(16rem, 42%);
 	}
 
 	.step.aiming .say {
@@ -565,9 +802,85 @@
 		cursor: pointer;
 	}
 
-	.step.aiming button:hover {
+	.step.aiming button:hover:not(:disabled) {
 		border-color: var(--paper);
 		background: var(--wash);
+	}
+
+	.step.aiming button.primary {
+		border-color: var(--paper);
+		background: var(--paper);
+		color: var(--paper-ink);
+		font-weight: 700;
+	}
+
+	.step.aiming button.primary:hover:not(:disabled) {
+		background: #e9dec5;
+	}
+
+	.step.aiming button.active {
+		border-color: var(--warn);
+		background: rgb(227 178 60 / 0.22);
+		color: #fce29a;
+	}
+
+	.step-actions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.4rem;
+		margin-left: auto;
+	}
+
+	.step-actions button {
+		margin-left: 0;
+	}
+
+	.hand-switch {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.3rem;
+		margin-top: 0.25rem;
+		color: var(--muted);
+		font-size: 0.78rem;
+	}
+
+	.hand-switch button {
+		margin-left: 0;
+		padding: 0.14rem 0.5rem;
+		border: 1px solid var(--line-strong);
+		border-radius: 999px;
+		background: none;
+		color: var(--ink);
+		font: inherit;
+		font-size: 0.78rem;
+		cursor: pointer;
+	}
+
+	.hand-switch button.current {
+		border-color: var(--paper);
+		background: var(--wash);
+		font-weight: 700;
+	}
+
+	.hand-check {
+		position: absolute;
+		top: -0.5rem;
+		left: 0.35rem;
+		z-index: 3;
+		display: grid;
+		place-items: center;
+		width: 1.55rem;
+		height: 1.55rem;
+		border: 2px solid var(--table);
+		border-radius: 50%;
+		background: var(--good);
+		color: #101914;
+		font-size: 0.9rem;
+		font-weight: 800;
+		box-shadow: 0 2px 6px rgb(0 0 0 / 0.45);
+		pointer-events: none;
 	}
 
 	/* A card on its way from the deck has its place in the hand kept, and shows once its flight lands. */
@@ -575,26 +888,46 @@
 		visibility: hidden;
 	}
 
-	/* Each way to use a card stands as a tag over it once it rises out of the fan. */
+	.slot.selected .lift {
+		transform: translateY(-0.95rem) rotate(calc(var(--angle) * 0.2));
+	}
+
+	/* Each way to use a card stands as a tag over it once it rises out of the fan. The bottom padding meets the
+	   top edge of the lifted card so moving the pointer from the card onto a tag never drops :hover. */
 	.tags {
 		position: absolute;
-		bottom: calc(100% + 4.35rem);
+		bottom: calc(100% + 3.9rem);
 		left: 50%;
 		z-index: 6;
 		display: none;
 		flex-direction: column;
 		align-items: center;
 		gap: 0.25rem;
+		padding-bottom: 0.45rem;
 		translate: -50% 0;
+		pointer-events: auto;
+	}
+
+	.hand.picking .tags {
+		bottom: calc(100% + 1.95rem);
+		padding-bottom: 0.45rem;
 	}
 
 	.slot:hover .tags,
-	.slot:focus-within .tags {
+	.slot:has(:focus-visible) .tags,
+	.slot:has(:global(.focus-only):focus) .tags,
+	.slot:has(.tags :focus) .tags {
 		display: flex;
 	}
 
 	.slot:has(:global([data-floating-upgrade])) .tags {
-		bottom: calc(100% + 9.1rem);
+		bottom: calc(100% + 8.1rem);
+		padding-bottom: 1rem;
+	}
+
+	.hand.picking .slot:has(:global([data-floating-upgrade])) .tags {
+		bottom: calc(100% + 5.6rem);
+		padding-bottom: 1rem;
 	}
 
 	.tags button {
@@ -618,7 +951,21 @@
 			scale 140ms ease;
 	}
 
-	.tags button:hover {
+	.tags button.muted {
+		border-color: rgb(231 220 198 / 0.28);
+		background: rgb(24 20 16 / 0.92);
+		color: var(--muted);
+		font-size: 0.78rem;
+		font-weight: 500;
+		font-style: italic;
+	}
+
+	.tags button.muted:hover {
+		background: rgb(32 27 22 / 0.95);
+		scale: 1;
+	}
+
+	.tags button:not(.muted):hover {
 		background: #fff8e6;
 		scale: 1.05;
 	}
@@ -1008,6 +1355,12 @@
 	}
 
 	.slot:hover {
+		z-index: 6;
+	}
+
+	.slot:has(:focus-visible),
+	.slot:has(:global(.focus-only):focus),
+	.slot:has(.tags :focus) {
 		z-index: 5;
 	}
 
@@ -1020,8 +1373,16 @@
 	}
 
 	/* A card pointed at rises out of the fan, mostly straightened and large enough to read. */
-	.slot:hover .lift {
+	.slot:hover .lift,
+	.slot:has(:focus-visible) .lift,
+	.slot:has(:global(.focus-only):focus) .lift {
 		transform: translateY(-0.65rem) rotate(calc(var(--angle) * 0.15)) scale(1.22);
+	}
+
+	/* While picking cards to discard, lift cleanly without scaling sideways over adjacent cards in tight fans. */
+	.hand.picking .slot:hover .lift,
+	.hand.picking .slot:has(:focus-visible) .lift {
+		transform: translateY(-1.15rem) rotate(calc(var(--angle) * 0.15)) scale(1.06);
 	}
 
 	.empty,

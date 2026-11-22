@@ -7,9 +7,13 @@ import type { Action, CardId, CityId, Save, SeatId } from '@repo/game';
  */
 export type UiStep =
 	/** One kind of action started from the Actions panel, from the ring round the city clicked before, or from a hand card's tag. */
-	| { t: 'start'; a: Action['a']; via: 'panel' | 'ring' | { card: CardId } }
+	| { t: 'start'; a: Action['a']; via: 'panel' | 'ring' | { card: CardId; box?: number; mode?: 'local' | 'system' } }
 	| { t: 'city'; city: CityId }
 	| { t: 'pawn'; seat: SeatId }
+	/** A card clicked in a player's hand during hand-card selection (discarding for an action or Lockdown). */
+	| { t: 'handCard'; seat: SeatId; card: CardId }
+	| { t: 'handConfirm' }
+	| { t: 'handToggle' }
 	/** A row of the open chooser, by its place in the unfiltered list. In a chooser that takes several, it ticks or unticks the row. */
 	| { t: 'option'; index: number }
 	| { t: 'recon'; route: string }
