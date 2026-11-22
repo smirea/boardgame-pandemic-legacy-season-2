@@ -35,7 +35,7 @@ import {
 } from './legacy';
 import type { Decide, Play } from './plays';
 import { applyDecide, applyPlay, autoResolve, checkDecide, checkPlay, playReveals } from './plays';
-import type { UndoSubject, World } from './state';
+import type { TableUndoVote, UndoSubject, World } from './state';
 import type { TableCommand } from './table';
 import {
 	applyTable,
@@ -771,6 +771,7 @@ const freshCharacter = createCharacter(newCampaign(0), { name: '', job: null, ho
 
 export function parseSave(raw: unknown): Save {
 	const save = raw as Partial<Save> | null;
+	upgradeUndoVote(save);
 	const lacks = (written: object | undefined, fresh: object) =>
 		!written || Object.keys(fresh).some(key => !(key in written));
 	if (
@@ -783,6 +784,17 @@ export function parseSave(raw: unknown): Save {
 	)
 		throw new Error('That is not a campaign save from this build');
 	return save as Save;
+}
+
+/**
+ * The one exception to refusing older saves: a live campaign was saved mid undo vote just before the vote
+ * learned to name Event plays, so its `{ action }` becomes `{ subject: { kind: 'action', action } }`.
+ */
+function upgradeUndoVote(save: Partial<Save> | null) {
+	const vote = save?.world?.table?.undoVote as (TableUndoVote & { action?: Action['a'] }) | null | undefined;
+	if (!vote || vote.subject || !vote.action) return;
+	vote.subject = { kind: 'action', action: vote.action };
+	delete vote.action;
 }
 
 /**

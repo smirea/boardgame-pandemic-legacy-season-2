@@ -3,7 +3,7 @@
 
 	let { error, session }: { error: unknown; session: GameSession } = $props();
 
-	const message = $derived(error instanceof Error ? error.message : String(error));
+	const message = $derived((error as { message?: unknown } | null)?.message?.toString() ?? String(error));
 
 	function download() {
 		const link = document.createElement('a');
