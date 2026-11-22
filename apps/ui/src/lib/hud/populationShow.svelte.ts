@@ -44,8 +44,9 @@ export class PopulationShow {
 	observe(world: World, live: boolean, phase: Phase, held: boolean) {
 		const previous = this.phase;
 		this.phase = phase;
-		if (phase !== 'upkeep') return this.stop();
-		if (previous === 'over' && live) {
+		// A jump, such as a replay seeking, shows the state it lands on at once.
+		if (phase !== 'upkeep' || !live) return this.stop();
+		if (previous === 'over') {
 			const changes = world.game?.upkeep?.populationChanges ?? [];
 			if (changes.length) {
 				this.stop();
