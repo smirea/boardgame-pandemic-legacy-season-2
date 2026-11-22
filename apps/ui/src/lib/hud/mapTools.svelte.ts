@@ -24,6 +24,7 @@ export class MapTools {
 	#erasedAt: BoardPoint | null = null;
 
 	readonly hasDrawings = $derived.by(() => Object.values(this.#session.drawings).some(strokes => strokes.length > 0));
+	readonly hasOwnDrawings = $derived((this.#session.drawings[this.#session.player]?.length ?? 0) > 0);
 	readonly tool = $derived.by((): CursorTool | null =>
 		!this.#enabled() ? null : this.penHeld ? 'pen' : this.#eraserOn && this.hasDrawings ? 'eraser' : null,
 	);
@@ -126,8 +127,7 @@ export class MapTools {
 	clear = () => {
 		this.#stroke = null;
 		this.#erasedAt = null;
-		this.#eraserOn = false;
-		this.#session.clearDrawings();
+		this.#session.clearMyDrawings();
 	};
 
 	ping() {

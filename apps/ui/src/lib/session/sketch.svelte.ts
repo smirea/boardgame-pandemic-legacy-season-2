@@ -78,12 +78,12 @@ export class Sketch {
 		this.#schedule(ERASE_INTERVAL_MS);
 	}
 
-	clear() {
+	/** Takes this player's strokes off the map and leaves everyone else's. */
+	clearMine() {
 		this.#pen.clear();
-		this.#erased.clear();
-		if (Object.keys(this.drawings).length === 0) return;
-		this.drawings = {};
-		this.#send({ t: 'draw-clear' });
+		if (!this.drawings[this.#self]) return;
+		this.redraw(this.#self, []);
+		this.flush();
 	}
 
 	ping(point: Point) {

@@ -31,7 +31,7 @@ export type SessionView = Pick<
 	| 'pointer'
 	| 'stroke'
 	| 'redraw'
-	| 'clearDrawings'
+	| 'clearMyDrawings'
 	| 'ping'
 	| 'exportSave'
 	| 'importSave'
@@ -361,8 +361,8 @@ export class GameSession {
 		this.#sketch.redraw(player, strokes);
 	}
 
-	clearDrawings() {
-		this.#sketch.clear();
+	clearMyDrawings() {
+		this.#sketch.clearMine();
 	}
 
 	ping(point: Point) {

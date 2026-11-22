@@ -23,6 +23,8 @@
 		canMonitor?: boolean;
 		monitorReason?: string | null;
 		hasDrawings?: boolean;
+		/** Whether any of the strokes on the map are this player's, which is all Erase mine takes off. */
+		hasOwnDrawings?: boolean;
 		erasing?: boolean;
 		oneraser?: () => void;
 		onclear?: () => void;
@@ -43,6 +45,7 @@
 		canMonitor = false,
 		monitorReason = null,
 		hasDrawings = false,
+		hasOwnDrawings = false,
 		erasing = false,
 		oneraser,
 		onclear,
@@ -146,12 +149,14 @@
 						</svg>
 						Eraser
 					</button>
-					<button type="button" class="tool-btn clear" onclick={onclear} data-testid="draw-clear">
-						<svg viewBox="0 0 16 16" aria-hidden="true">
-							<path d="M2.5 4h11M5.5 4V2.5h5V4M4 4l.8 9.5h6.4L12 4" />
-						</svg>
-						Erase all
-					</button>
+					{#if hasOwnDrawings}
+						<button type="button" class="tool-btn clear" onclick={onclear} data-testid="draw-clear">
+							<svg viewBox="0 0 16 16" aria-hidden="true">
+								<path d="M2.5 4h11M5.5 4V2.5h5V4M4 4l.8 9.5h6.4L12 4" />
+							</svg>
+							Erase mine
+						</button>
+					{/if}
 				</div>
 			{/if}
 			{#if !solo}

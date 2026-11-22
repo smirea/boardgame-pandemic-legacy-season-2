@@ -834,6 +834,7 @@
 		{canMonitor}
 		{monitorReason}
 		hasDrawings={!spectator && tools.hasDrawings}
+		hasOwnDrawings={!spectator && tools.hasOwnDrawings}
 		erasing={tools.tool === 'eraser'}
 		oneraser={() => tools.toggleEraser()}
 		onclear={tools.clear}

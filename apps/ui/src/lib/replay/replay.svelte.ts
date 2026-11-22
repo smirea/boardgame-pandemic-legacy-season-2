@@ -49,7 +49,7 @@ export class ReplaySession implements SessionView {
 	pointer() {}
 	stroke() {}
 	redraw() {}
-	clearDrawings() {}
+	clearMyDrawings() {}
 	ping() {}
 	importSave() {}
 	newCampaign() {}
