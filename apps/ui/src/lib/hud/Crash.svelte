@@ -3,7 +3,11 @@
 
 	let { error, session }: { error: unknown; session: GameSession } = $props();
 
-	const message = $derived((error as { message?: unknown } | null)?.message?.toString() ?? String(error));
+	const message = $derived.by(() => {
+		const shown = error as { message?: unknown; stack?: unknown } | null;
+		if (typeof shown?.message !== 'string') return String(error);
+		return typeof shown.stack === 'string' && shown.stack.includes(shown.message) ? shown.stack : shown.message;
+	});
 
 	function download() {
 		const link = document.createElement('a');
@@ -64,6 +68,9 @@
 		color: var(--danger);
 		font-size: 0.75rem;
 		white-space: pre-wrap;
+		overflow-wrap: anywhere;
+		max-height: 50vh;
+		overflow: auto;
 	}
 
 	div {
