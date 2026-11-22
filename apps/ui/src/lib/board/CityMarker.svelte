@@ -22,7 +22,7 @@
 	import type { Part } from './hints';
 	import { DISC_REACH, NAME_SIZE } from './labels';
 	import type { Placement } from './labels';
-	import { pieceMaterials, pieceModels } from './models.svelte';
+	import { cubeGeometries, cubeMaterials, pieceMaterials, pieceModels, shelterGeometry } from './models.svelte';
 	import Pop from './Pop.svelte';
 	import { fonts, printDisc, printName, printSticker } from './print.svelte';
 	import type { PrintedKind } from './print.svelte';
@@ -283,10 +283,13 @@
 
 	{#each supplies as cube, index (index)}
 		<Pop position={[cube.x, cube.y, cube.z]} delay={Math.min(index, 8) * 35}>
-			<T.Mesh castShadow>
-				<T.BoxGeometry args={[SUPPLY.size, SUPPLY.size, SUPPLY.size]} />
-				<T.MeshStandardMaterial color="#efe6d2" roughness={0.65} />
-			</T.Mesh>
+			<T.Mesh
+				geometry={cubeGeometries.supply}
+				material={cubeMaterials.supply}
+				castShadow
+				receiveShadow
+				dispose={false}
+			/>
 		</Pop>
 	{/each}
 	{#if supplies.length}
@@ -302,10 +305,13 @@
 
 	{#each plague as cube, index (index)}
 		<Pop position={[cube.x, cube.y, cube.z]} delay={index * 60}>
-			<T.Mesh castShadow>
-				<T.BoxGeometry args={[PLAGUE.size, PLAGUE.size, PLAGUE.size]} />
-				<T.MeshStandardMaterial color="#93b236" emissive="#3b5210" emissiveIntensity={0.6} roughness={0.65} />
-			</T.Mesh>
+			<T.Mesh
+				geometry={cubeGeometries.plague}
+				material={cubeMaterials.plague}
+				castShadow
+				receiveShadow
+				dispose={false}
+			/>
 		</Pop>
 	{/each}
 	{#if plague.length}
@@ -394,19 +400,17 @@
 	{#if placedStructure('shelter')}
 		{@const shelter = placedStructure('shelter')!}
 		<Pop position={[SPOT.shelter[0], INK + 0.02, SPOT.shelter[1]]}>
-			{#if pieceModels.station}
-				<T.Mesh
-					geometry={pieceModels.station}
-					material={pieceMaterials.shelter}
-					scale={1.5}
-					rotation.y={0.42}
-					castShadow
-					receiveShadow
-					dispose={false}
-				/>
-			{/if}
-			<T.Mesh position.y={0.8} {...explain({ structure: 'shelter', permanent: shelter.permanent, placed: true })}>
-				<T.CylinderGeometry args={[1.15, 1.15, 1.7, 12]} />
+			<T.Mesh
+				geometry={shelterGeometry}
+				material={pieceMaterials.shelter}
+				scale={1.25}
+				rotation.y={0.28}
+				castShadow
+				receiveShadow
+				dispose={false}
+			/>
+			<T.Mesh position.y={0.65} {...explain({ structure: 'shelter', permanent: shelter.permanent, placed: true })}>
+				<T.CylinderGeometry args={[1.15, 1.15, 1.4, 12]} />
 				<T.MeshBasicMaterial colorWrite={false} depthWrite={false} />
 			</T.Mesh>
 		</Pop>

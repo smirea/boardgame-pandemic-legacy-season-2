@@ -3,7 +3,7 @@
 	import { onMount, untrack } from 'svelte';
 	import { cubicInOut } from 'svelte/easing';
 	import { Tween } from 'svelte/motion';
-	import { CUBE } from './stockpile';
+	import { cubeGeometries, cubeMaterials } from './models.svelte';
 
 	type Point = { x: number; y: number; z: number };
 	type Props = { from: Point; to: Point; delay: number; onland: () => void };
@@ -31,7 +31,11 @@
 </script>
 
 <!-- It waits its turn where it starts, so a cube that has left the pile is still seen there. -->
-<T.Mesh {position} rotation={[t.current * Math.PI, t.current * Math.PI * 1.5, 0]} castShadow>
-	<T.BoxGeometry args={[CUBE, CUBE, CUBE]} />
-	<T.MeshStandardMaterial color="#efe6d2" roughness={0.65} />
-</T.Mesh>
+<T.Mesh
+	geometry={cubeGeometries.supply}
+	material={cubeMaterials.supply}
+	{position}
+	rotation={[t.current * Math.PI, t.current * Math.PI * 1.5, 0]}
+	castShadow
+	dispose={false}
+/>

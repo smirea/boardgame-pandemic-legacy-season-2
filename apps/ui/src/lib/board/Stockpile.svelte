@@ -3,11 +3,12 @@
 	import { T } from '@threlte/core';
 	import type { IntersectionEvent } from '@threlte/extras';
 	import { HTML } from '@threlte/extras';
+	import { cubeGeometries, cubeMaterials } from './models.svelte';
 	import Pop from './Pop.svelte';
 	import { fonts, printBerth, printTitle } from './print.svelte';
 	import Printed from './Printed.svelte';
 	import { LAND_HEIGHT } from './projection';
-	import { CUBE, PILE, STOCKPILE, STOCKPILE_TITLE_Z } from './stockpile';
+	import { PILE, STOCKPILE, STOCKPILE_TITLE_Z } from './stockpile';
 
 	type Props = {
 		/** Every cube in the stockpile, which the hover reports. */
@@ -43,10 +44,14 @@
 <T.Group position={[STOCKPILE.x, LAND_HEIGHT, STOCKPILE.z]}>
 	{#each cubes as cube, index (index)}
 		<Pop position={[cube.x, cube.y, cube.z]}>
-			<T.Mesh rotation.y={cube.turn} castShadow receiveShadow>
-				<T.BoxGeometry args={[CUBE, CUBE, CUBE]} />
-				<T.MeshStandardMaterial color="#efe6d2" roughness={0.65} />
-			</T.Mesh>
+			<T.Mesh
+				geometry={cubeGeometries.supply}
+				material={cubeMaterials.supply}
+				rotation.y={cube.turn}
+				castShadow
+				receiveShadow
+				dispose={false}
+			/>
 		</Pop>
 	{/each}
 	<Printed print={berth} position={[0, 0.2, 0]} opacity={0.75} order={4} />
