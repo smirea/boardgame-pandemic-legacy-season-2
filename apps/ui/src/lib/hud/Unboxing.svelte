@@ -23,6 +23,7 @@
 	import ObjectiveTag from './ObjectiveTag.svelte';
 	import RichText from './RichText.svelte';
 	import { keep } from './viewState.ts';
+	import { typing } from '#lib/keys.ts';
 
 	type Props = {
 		briefing: BriefingEntry[];
@@ -331,7 +332,7 @@
 			if (event.key === 'Escape') full = false;
 			return;
 		}
-		if (event.key === ' ' && !progress.stowing) {
+		if (event.key === ' ' && !progress.stowing && !typing(event)) {
 			event.preventDefault();
 			if (allDrawn) toggleReady();
 			else step();
