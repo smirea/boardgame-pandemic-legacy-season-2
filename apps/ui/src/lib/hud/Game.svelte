@@ -22,7 +22,8 @@
 	import { inkOn } from '#lib/color.ts';
 	import { presentFeedback } from '#lib/feedback.ts';
 	import { inFeedback, onButton, typing } from '#lib/keys.ts';
-	import { LS } from '#lib/storage.ts';
+	import { DEBUG_ID, LS } from '#lib/storage.ts';
+	import { keepRecord } from '#lib/replay/library.ts';
 	import { setContext, tick, untrack } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
 	import type { Snippet } from 'svelte';
@@ -848,14 +849,48 @@
 		tools.letGo();
 	}
 
-	function downloadRecord() {
-		const record = session.exportRecord();
+	/** The host's recording, which a peer has to ask the host for. Null, with the reason shown, when there is none. */
+	async function fetchRecord(): Promise<string | null> {
+		try {
+			const record = await session.exportRecord();
+			if (!record) toast('Nothing has been recorded yet: the recording starts with the first move of a game.');
+			return record;
+		} catch (error) {
+			toast(error instanceof Error ? error.message : String(error));
+			return null;
+		}
+	}
+
+	async function downloadRecord() {
+		menu = false;
+		const record = await fetchRecord();
 		if (!record) return;
 		const link = document.createElement('a');
 		link.href = URL.createObjectURL(new Blob([record], { type: 'application/json' }));
 		link.download = `recording-${(JSON.parse(record) as { id: string }).id}.json`;
 		link.click();
 		URL.revokeObjectURL(link.href);
+	}
+
+	const replayUrl = (game?: string) =>
+		`/replay?src=library${game ? `&game=${game}` : ''}${DEBUG_ID ? `&DEBUG_ID=${DEBUG_ID}` : ''}`;
+
+	/**
+	 * A peer keeps a copy of the host's recording in its own library and opens it there. The recording arrives within
+	 * the click's activation window, so the browser lets the tab open after it.
+	 */
+	async function replayTable() {
+		menu = false;
+		const record = await fetchRecord();
+		if (!record) return;
+		let game: string;
+		try {
+			game = await keepRecord(JSON.parse(record));
+		} catch (error) {
+			return toast(`This browser could not keep the recording: ${error instanceof Error ? error.message : error}`);
+		}
+		if (!open(replayUrl(game), '_blank'))
+			toast('The browser blocked the replay tab. Allow pop-ups for this site, or open Replays from the Menu again.');
 	}
 
 	let fileInput = $state<HTMLInputElement>();
@@ -1422,9 +1457,13 @@
 					>
 				{/if}
 				<button onclick={download}>Export campaign save</button>
-				{#if session.mode !== 'join' && !spectator}
+				{#if !spectator}
 					<button onclick={downloadRecord} data-testid="save-recording">Save this game's recording</button>
-					<a href="/replay?src=library" target="_blank" data-testid="open-replay">Replays</a>
+					{#if session.mode === 'join'}
+						<button onclick={replayTable} data-testid="open-replay">Replays</button>
+					{:else}
+						<a href={replayUrl()} target="_blank" data-testid="open-replay">Replays</a>
+					{/if}
 				{/if}
 				{#if session.mode !== 'join'}
 					<button onclick={() => fileInput?.click()}>Import campaign save</button>

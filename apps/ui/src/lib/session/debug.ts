@@ -33,6 +33,8 @@ export type DebugApi = {
 	/** What is drawn on the map and pointed at, as this browser holds it: strokes and their points by player, and pings. */
 	sketch: () => { strokes: Record<string, number>; points: number; pings: number };
 	getRecord: () => GameRecord | null;
+	/** The recording as the Menu saves it: the host's own, which a peer asks the host for. */
+	fetchRecord: () => Promise<string | null>;
 	/** Renames this player at the table, as the lobby's name field does. */
 	setName: (name: string) => void;
 };
@@ -91,6 +93,7 @@ export function createDebugApi(session: GameSession): DebugApi {
 			pings: session.pings.length,
 		}),
 		getRecord: () => session.record,
+		fetchRecord: () => session.exportRecord(),
 		setName: name => session.rename(name),
 	};
 }

@@ -60,6 +60,7 @@ declare const window: Window & {
 		send(command: unknown): string | null;
 		connection(): { status: string; peers: number; fatal: string | null };
 		sketch(): Sketch;
+		fetchRecord(): Promise<string | null>;
 	};
 	__traffic: Traffic;
 	__routes: () => Promise<string[]>;
@@ -280,6 +281,12 @@ try {
 	check(
 		stuck === 0,
 		`every browser held the host's state after each of ${latencies.length + stuck} commands (${stuck} did not)`,
+	);
+	const hostRecord = await host.page.evaluate(() => window.DEBUG!.fetchRecord());
+	const peerRecord = await watched.page.evaluate(() => window.DEBUG!.fetchRecord());
+	check(
+		hostRecord !== null && peerRecord === hostRecord,
+		`a peer saving the game's recording gets the host's (${peerRecord?.length ?? 0} bytes)`,
 	);
 	const sorted = latencies.toSorted((a, b) => a - b);
 	console.log(

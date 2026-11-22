@@ -11,8 +11,11 @@ import { Sketch } from './sketch.svelte';
 import { flushGames, keepSoon, keepStoredGame } from '../replay/library.ts';
 import { storedDrawings, storedId, storedName, storedRecord, storedSave } from './stored';
 
-const DRAWINGS_SAVE_MS = 1000;
 import { StateFeed, StateMirror } from './sync';
+
+const DRAWINGS_SAVE_MS = 1000;
+/** A recording runs to a few megabytes, which the host sends in 16 KB frames. */
+const RECORD_ASK_MS = 30_000;
 
 export type Mode = 'solo' | 'host' | 'join';
 export type { MapPing } from './sketch.svelte';
@@ -69,6 +72,8 @@ export class GameSession {
 	/** The game in progress, recorded step by step. Only the host keeps one. */
 	#record: GameRecord | null = null;
 	#sender: { command: Command; by: string | null } | null = null;
+	/** A peer's requests for the host's recording, answered together by the next one that arrives. */
+	#recordAsks: ((record: string | null) => void)[] = [];
 	/** Prevents re-seating a player mid-game after they explicitly vacated their seat. */
 	#resumedGame: number | null = null;
 	/** Where every other pointer is, as it arrives. The screen is handed them once a frame. */
@@ -209,6 +214,15 @@ export class GameSession {
 			}
 			case 'rejected':
 				return this.#say(msg.reason);
+			case 'record-ask':
+				if (this.#actor) this.#net.send({ t: 'record', record: this.#record }, from);
+				return;
+			case 'record': {
+				if (this.#actor) return;
+				const record = msg.record && JSON.stringify(msg.record);
+				for (const answer of this.#recordAsks.splice(0)) answer(record);
+				return;
+			}
 			case 'command': {
 				if (!this.#actor) return;
 				const reason = this.#apply(msg.command, this.#nameOf(from));
@@ -417,9 +431,25 @@ export class GameSession {
 		return JSON.stringify(this.save());
 	}
 
-	/** The recording of the game in progress, or of the last one until the next begins. Only the host has it. */
-	exportRecord(): string | null {
-		return this.#record ? JSON.stringify(this.#record) : null;
+	/**
+	 * The recording of the game in progress, or of the last one until the next begins. Only the host keeps one, so a
+	 * peer asks the host for it.
+	 */
+	exportRecord(): Promise<string | null> {
+		if (this.#actor) return Promise.resolve(this.#record ? JSON.stringify(this.#record) : null);
+		if (!this.online) return Promise.reject(new Error('Reconnecting to the host'));
+		return new Promise((resolve, reject) => {
+			const answer = (record: string | null) => {
+				clearTimeout(timer);
+				resolve(record);
+			};
+			const timer = setTimeout(() => {
+				this.#recordAsks = this.#recordAsks.filter(entry => entry !== answer);
+				reject(new Error('The host did not send the recording'));
+			}, RECORD_ASK_MS);
+			this.#recordAsks.push(answer);
+			this.#net.send({ t: 'record-ask' });
+		});
 	}
 
 	/** Replaces the campaign with a save. The page reloads so the actor restarts from it. */

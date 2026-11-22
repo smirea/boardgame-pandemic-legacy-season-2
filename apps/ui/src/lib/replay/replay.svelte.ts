@@ -55,7 +55,7 @@ export class ReplaySession implements SessionView {
 	importSave() {}
 	newCampaign() {}
 	exportRecord() {
-		return null;
+		return Promise.resolve(null);
 	}
 	exportSave() {
 		return JSON.stringify(this.state ? { v: 1, phase: this.state.phase, world: this.state.world } : null);

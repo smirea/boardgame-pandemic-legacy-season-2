@@ -1,4 +1,4 @@
-import type { Command } from '@repo/game';
+import type { Command, GameRecord } from '@repo/game';
 import type { StateMsg } from './sync';
 
 export type Point = { x: number; z: number };
@@ -22,6 +22,9 @@ export type Msg =
 	| { t: 'resync' }
 	| { t: 'command'; command: Command }
 	| { t: 'rejected'; reason: string }
+	/** A peer asks for the host's recording of the game, which only the host keeps. */
+	| { t: 'record-ask' }
+	| { t: 'record'; record: GameRecord | null }
 	| SketchMsg;
 
 /** A cursor position on the board plane, with the drawing tool held if any, or null when off the board. */
@@ -54,12 +57,15 @@ export function parseMsg(raw: unknown): Msg {
 					raw['patch'].every(entry => isRecord(entry) && Array.isArray(entry['p']))
 				);
 			case 'resync':
+			case 'record-ask':
 			case 'draw-clear':
 				return true;
 			case 'command':
 				return isRecord(raw['command']) && typeof raw['command']['type'] === 'string';
 			case 'rejected':
 				return typeof raw['reason'] === 'string';
+			case 'record':
+				return raw['record'] === null || isRecord(raw['record']);
 			case 'stroke':
 				return typeof raw['player'] === 'string' && typeof raw['id'] === 'string' && isPoints(raw['points']);
 			case 'strokes':
