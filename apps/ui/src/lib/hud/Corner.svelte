@@ -17,7 +17,7 @@
 	import { handGroups } from './handGroups.ts';
 	import { sortHand } from './handOrder.ts';
 	import { cardName } from './labels.svelte.ts';
-	import PlayerCard from './PlayerCard.svelte';
+	import CardSpread from './CardSpread.svelte';
 	import Portrait from './Portrait.svelte';
 	import type { Place } from './seats.ts';
 	import { characterTraits, TRAIT_KIND } from './traits.ts';
@@ -243,17 +243,14 @@
 		<div class="hand" style:--n={groups.length} data-testid="corner-hand">
 			{#if spread}
 				<!-- The whole hand as real cards, laid over the piles and growing away from the seat card. -->
-				<div
-					class="spread"
-					style:--cols={Math.min(3, hand.length)}
-					role="group"
-					aria-label="{name}'s hand"
-					data-testid="corner-full-hand"
-					{@attach feedback(undefined, () => ({ name, seat, hand: hand.map(named) }))}
-					transition:fly={{ y: top ? -10 : 10, duration: 180, easing: cubicOut }}
-				>
-					{#each hand as card (card.id)}<PlayerCard {card} onclick={onselect} />{/each}
-				</div>
+				<CardSpread
+					class="seat-spread"
+					label="{name}'s hand"
+					testid="corner-full-hand"
+					cards={{ player: hand }}
+					from={top ? -10 : 10}
+					{onselect}
+				/>
 			{/if}
 			{#each groups as group (group.key)}
 				{@const ids = group.cards.map(card => card.id)}
@@ -719,30 +716,19 @@
 		width: 100%;
 	}
 
-	/* Three real cards to a row, scaled 30% larger so every card reads cleanly on hover. */
-	.spread {
-		--card-size: 0.78rem;
-		position: absolute;
+	.hand > :global(.seat-spread) {
 		bottom: -0.35rem;
 		left: -0.35rem;
-		z-index: 10;
-		display: grid;
-		grid-template-columns: repeat(var(--cols), max-content);
-		gap: 0.35rem;
-		padding: 0.35rem;
-		border-radius: 4px;
-		background: rgb(20 12 4 / 0.6);
-		box-shadow: var(--slip-shadow);
 	}
 
-	.tl .spread,
-	.tr .spread {
+	.tl .hand > :global(.seat-spread),
+	.tr .hand > :global(.seat-spread) {
 		top: -0.35rem;
 		bottom: auto;
 	}
 
-	.tr .spread,
-	.br .spread {
+	.tr .hand > :global(.seat-spread),
+	.br .hand > :global(.seat-spread) {
 		right: -0.35rem;
 		left: auto;
 	}
