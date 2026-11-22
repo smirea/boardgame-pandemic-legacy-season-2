@@ -324,6 +324,8 @@
 	}
 
 	.seat {
+		--rail: 1.55rem;
+		--rail-gap: 0.4rem;
 		position: relative;
 		width: 100%;
 	}
@@ -376,13 +378,19 @@
 		outline-offset: 3px;
 	}
 
+	/* As tall as the card and moved with it, so its words sit at the card's middle. */
 	.turn-rail {
 		position: absolute;
-		top: 50%;
-		left: calc(100% + 0.4rem);
+		top: 0;
+		bottom: 0;
+		left: calc(100% + var(--rail-gap));
 		z-index: 38;
-		transform: translateY(-50%);
-		padding: 0.45rem 0.24rem;
+		display: grid;
+		place-items: center;
+		box-sizing: border-box;
+		width: var(--rail);
+		padding: 0.45rem 0;
+		translate: 0 0.25rem;
 		border: 1px solid rgb(247 214 139 / 0.72);
 		border-radius: 3px;
 		background: rgb(18 14 10 / 0.86);
@@ -407,8 +415,13 @@
 
 	.turn-rail.on-left {
 		left: auto;
-		right: calc(100% + 0.4rem);
-		transform: translateY(-50%) rotate(180deg);
+		right: calc(100% + var(--rail-gap));
+		rotate: 180deg;
+	}
+
+	.bl .turn-rail,
+	.br .turn-rail {
+		translate: 0 -0.25rem;
 	}
 
 	@keyframes turn-glow {
@@ -611,10 +624,11 @@
 	}
 
 	/* The active player's turn so far, floating beside the card toward the board. */
+	/* Only the active seat lists its steps, so they always clear its Current turn rail. */
 	.steps {
 		position: absolute;
 		top: 0;
-		left: calc(100% + 0.5rem);
+		left: calc(100% + var(--rail) + 2 * var(--rail-gap));
 		display: flex;
 		flex-direction: column;
 		gap: 0.25rem;
@@ -628,7 +642,7 @@
 
 	.tr .steps,
 	.br .steps {
-		right: calc(100% + 0.5rem);
+		right: calc(100% + var(--rail) + 2 * var(--rail-gap));
 		left: auto;
 		align-items: flex-end;
 	}
