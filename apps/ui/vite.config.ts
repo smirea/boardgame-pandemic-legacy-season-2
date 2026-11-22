@@ -14,6 +14,7 @@ export default defineConfig(({ command }) => ({
 		feedbackProcrastimate({
 			token: command === 'serve' ? env.PROCRASTIMATE_TOKEN : undefined,
 			project: 'a/bg-pandemic-2',
+			projects: ['a/bg-pandemic-2'],
 		}),
 		sveltekit({
 			preprocess: [feedbackEngine()],
