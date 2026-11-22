@@ -525,13 +525,13 @@
 		if (deckBuilt && info) {
 			const at = info.playerDeck.cities[city];
 			if (at || gridSet.has(city)) {
-				const live = (at?.inDeck ?? 0) + (at?.inHands ?? 0);
+				const inPlay = (at?.inDeck ?? 0) + (at?.inHands ?? 0);
 				const discarded = at?.discarded ?? 0;
-				return { live, discarded, trashed: Math.max(0, total - live - discarded) };
+				return { live: inPlay, discarded, trashed: Math.max(0, total - inPlay - discarded) };
 			}
 		}
-		const live = campaignCityCopies[city] ?? 0;
-		return { live, discarded: 0, trashed: Math.max(0, total - live) };
+		const inPlay = campaignCityCopies[city] ?? 0;
+		return { live: inPlay, discarded: 0, trashed: Math.max(0, total - inPlay) };
 	});
 	const hoveredTargets = $derived.by(() => {
 		const targets = hoveredCards.map(card => cardTargets(world, snap.phase, card));
