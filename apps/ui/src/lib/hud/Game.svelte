@@ -788,6 +788,7 @@
 							selected={viewing === seat}
 							showHand={seat !== dockSeat}
 							arriving={admin.turn.arriving}
+							acting={snap.phase === 'playing.actions'}
 							action="Show this hand in the dock"
 							selectedTag="Hand shown"
 							onselect={() => (viewing = seat)}

@@ -9,7 +9,7 @@
 	import type { SaidNote } from '#lib/replay/replay.svelte.ts';
 	import { flip } from 'svelte/animate';
 	import { cubicIn, cubicOut } from 'svelte/easing';
-	import { fly, scale } from 'svelte/transition';
+	import { fade, fly, scale } from 'svelte/transition';
 	import { CITY_COLOR } from '#lib/board/CityMarker.svelte';
 	import CardIcon from '#lib/cards/CardIcon.svelte';
 	import { SCAR_ICON } from '#lib/cards/icons.ts';
@@ -47,6 +47,8 @@
 		onnote?: (note: SaidNote) => void;
 		/** Cards drawn into this hand whose flight here has not landed: a pile made only of them is not shown yet. */
 		arriving?: ReadonlySet<CardId>;
+		/** Whether the active player is still taking actions. Once they draw, the turn's steps leave the seat. */
+		acting: boolean;
 	};
 
 	let {
@@ -65,6 +67,7 @@
 		onselect,
 		onnote = () => {},
 		arriving = new Set(),
+		acting,
 	}: Props = $props();
 
 	const game = $derived(world.game);
@@ -87,7 +90,7 @@
 	const groups = $derived(handGroups(hand, named));
 	const toneColor = (tone: PlayerDeckKind) =>
 		tone in CITY_COLOR ? CITY_COLOR[tone as keyof typeof CITY_COLOR] : KIND_COLOR[tone as keyof typeof KIND_COLOR];
-	const steps = $derived(active ? turnSteps(world, seat) : []);
+	const steps = $derived(active && acting ? turnSteps(world, seat) : []);
 	let reading = $state(false);
 
 	// The whole hand opens while the pointer rests anywhere on the seat: its card or its piles. Leaving waits a beat, so
@@ -215,7 +218,7 @@
 		{/if}
 		{#if steps.length}
 			<!-- The turn so far, beside the card on the side facing the board. -->
-			<ol class="steps" data-testid="turn-steps">
+			<ol class="steps" data-testid="turn-steps" out:fade={{ duration: 240 }}>
 				{#each steps as step (step.seq)}
 					<li
 						class={step.kind}

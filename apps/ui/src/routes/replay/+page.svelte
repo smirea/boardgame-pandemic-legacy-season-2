@@ -199,6 +199,7 @@
 						{seat}
 						color={member.color}
 						world={session.state!.world}
+						acting={session.state!.phase === 'playing.actions'}
 						{place}
 						notes={said.get(member.name) ?? []}
 						dimmed={follow !== null && follow !== member.name}
