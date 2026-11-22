@@ -35,7 +35,7 @@ Repo config for the global `task-orchestrator` skill (`~/code/ai-files/skills/ta
 ## Verification
 
 - Rules: `bun test` (the pre-commit hook runs the whole suite), and the playtest lab where a mechanic needs real play: `./apps/playtest/lab coverage` must stay at 227 of 227.
-- UI: `bun run dev` in your worktree and drive the real screen with T3's preview tools at a laptop width. `window.DEBUG` loads and sets state.
+- UI: no live browser check by default. This repo's rule overrides the brief's "proved the change the way Stefan will use it": lint, typecheck, tests and build are enough for most changes (copy, colours and styles from existing tokens, wiring, engine and rule changes, a fix whose cause you can read in the code). Open a browser only when the change's whole point is how something looks, fits or moves and the code can't settle it: a new layout, a new animation sequence, an interaction you built from scratch. Then use one headless capture at one laptop size (1440×900), not several sizes, a whole playthrough, or a dev server left running. Say in the report which kind your change was. `bun run dev` in your worktree with `window.DEBUG` to load and set state when you do need it.
 - Stored data: there is no backwards compatibility while the game is in development, so new state needs no default for old saves (`parseSave` refuses them).
 - Before the PR: `bun run lint:ci`, `bun run typecheck`, `bun run test`, and `bun run build`, as CI does.
 
