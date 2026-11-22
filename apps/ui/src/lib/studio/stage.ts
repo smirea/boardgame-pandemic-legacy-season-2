@@ -65,7 +65,7 @@ export type StudioApi = Pick<StageApi, 'scene' | 'state' | 'send' | 'bot' | 'pin
 	setViewport: (width: number, height: number) => Promise<void>;
 	/** Builds a scene from a save, with the screen at rest unless told otherwise. */
 	sceneOf: typeof sceneOf;
-	/** The saves the game's menu can load: `october()`, `december()` and `tabletop()`. */
+	/** The saves the game's menu can load: `october()`, `december()` and `canonical()`. */
 	scenarios: Record<string, () => Save>;
 };
 

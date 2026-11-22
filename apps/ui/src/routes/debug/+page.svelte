@@ -23,9 +23,9 @@
 			text: 'The playtest lab’s recorded games, each opened in the replay viewer.',
 		},
 		{
-			href: '/replay?src=local',
-			name: 'Replay',
-			text: 'The recording this browser holds of the game it last hosted.',
+			href: '/replay?src=library',
+			name: 'Replays',
+			text: 'Every game this browser has hosted, with who played which character.',
 		},
 	];
 </script>

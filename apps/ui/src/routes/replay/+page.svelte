@@ -5,6 +5,7 @@
 	import Corner from '#lib/hud/Corner.svelte';
 	import Panel from '#lib/replay/Panel.svelte';
 	import { bubblesAt, dwellAt } from '#lib/replay/pacing.ts';
+	import { keepStoredGame, LIBRARY_RUN, libraryIndex, libraryRecord } from '#lib/replay/library.ts';
 	import { load, marksAt, ReplaySession } from '#lib/replay/replay.svelte.ts';
 	import type { IndexGame, Loaded, PanelTab, ReplayIndex, SaidNote } from '#lib/replay/replay.svelte.ts';
 	import Transport, { SPEEDS } from '#lib/replay/Transport.svelte';
@@ -73,13 +74,22 @@
 	async function open(entry: IndexGame) {
 		busy = true;
 		try {
-			const raw = await fetchJson(new URL(entry.file, new URL(params.get('index')!, location.href)).href);
+			const library = index?.run === LIBRARY_RUN;
+			const raw = library
+				? await libraryRecord(entry.file)
+				: await fetchJson(new URL(entry.file, new URL(params.get('index')!, location.href)).href);
 			show(
 				raw,
 				entry.id,
 				entry.players.map(player => player.name),
 			);
-			history.replaceState(null, '', `?index=${encodeURIComponent(params.get('index')!)}&game=${entry.id}`);
+			history.replaceState(
+				null,
+				'',
+				library
+					? `?src=library&game=${entry.id}`
+					: `?index=${encodeURIComponent(params.get('index')!)}&game=${entry.id}`,
+			);
 		} catch (cause) {
 			error = cause instanceof Error ? cause.message : String(cause);
 		}
@@ -98,10 +108,16 @@
 					tab = 'games';
 					panel = true;
 				}
-			} else if (source === 'local') {
-				const record = LS.get('record');
-				if (record) show(record);
-				else error = 'This browser holds no recording. Host or play a game here first.';
+			} else if (source === 'library') {
+				await keepStoredGame().catch(cause => console.warn('The last recording was not kept:', cause));
+				index = await libraryIndex();
+				// The game just played is the one a player opening this from the game's menu wants.
+				const wanted = index.games.find(entry => entry.id === params.get('game')) ?? index.games.at(-1);
+				if (wanted) await open(wanted);
+				else {
+					tab = 'games';
+					panel = true;
+				}
 			} else if (source) {
 				show(await fetchJson(source));
 			}

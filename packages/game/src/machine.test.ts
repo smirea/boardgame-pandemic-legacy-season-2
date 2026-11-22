@@ -26,7 +26,7 @@ import { legalActions, legalDecides, legalPlays } from './options';
 import { applyUnlock, closeGame, newCampaign, openSeal, readLegacy, score } from './legacy';
 import type { Purchase } from './legacy';
 import { newTable } from './table';
-import { decemberSave, octoberSave } from './scenarios';
+import { canonicalSave, decemberSave, octoberSave } from './scenarios';
 import { tabletopSave } from './tabletop';
 import { violations } from './invariants';
 import type { Character, Game, World } from './state';
@@ -2061,6 +2061,13 @@ test('the canonical tabletop campaign still builds against the pack, at the Augu
 	const save = parseSave(JSON.parse(JSON.stringify(tabletopSave())));
 	expect(save.phase).toBe('lobby');
 	expect(save.world.campaign.month).toBe(8);
+	expect(violations(save.world, new Map())).toEqual([]);
+});
+
+test('the canonical save loads in this build, at the September lobby with no invariant broken', () => {
+	const save = canonicalSave();
+	expect(save.phase).toBe('lobby');
+	expect(save.world.campaign.month).toBe(9);
 	expect(violations(save.world, new Map())).toEqual([]);
 });
 

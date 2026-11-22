@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { tick } from 'svelte';
+	import { LIBRARY_RUN } from './library.ts';
 	import { gameTitle } from './replay.svelte.ts';
 	import type { IndexGame, Loaded, PanelTab, ReplayIndex, SaidNote } from './replay.svelte.ts';
 
@@ -77,7 +78,8 @@
 <aside class="side" data-testid="panel" {@attach feedback(undefined, () => ({ tab }))}>
 	<header>
 		<p class="crumb">
-			{#if index}<a href="/debug/runs">Runs</a> / {index.title}{:else}Replay{/if}
+			{#if index?.run === LIBRARY_RUN}{index.title}{:else if index}<a href="/debug/runs">Runs</a> /
+				{index.title}{:else}Replay{/if}
 		</p>
 		{#if loaded}
 			<h1>{gameTitle(loaded.record)}</h1>
@@ -116,7 +118,7 @@
 					}}
 				/></label
 			>
-			<a class="file" href="?src=local">Replay the game in this browser</a>
+			<a class="file" href="?src=library">Games played in this browser</a>
 		{:else if loaded && tab === 'timeline'}
 			<ol class="timeline">
 				{#each loaded.timeline as entry, at (entry.frame)}
@@ -186,7 +188,11 @@
 					</li>
 				{/each}
 			</ol>
-			{#if !index.games.length}<p class="hint">No game of this run has been recorded yet.</p>{/if}
+			{#if !index.games.length}<p class="hint">
+					{index.run === LIBRARY_RUN
+						? 'This browser has not hosted a game yet.'
+						: 'No game of this run has been recorded yet.'}
+				</p>{/if}
 		{/if}
 	</div>
 </aside>

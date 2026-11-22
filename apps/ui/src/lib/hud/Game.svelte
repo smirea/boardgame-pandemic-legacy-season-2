@@ -1424,16 +1424,16 @@
 				<button onclick={download}>Export campaign save</button>
 				{#if session.mode !== 'join' && !spectator}
 					<button onclick={downloadRecord} data-testid="save-recording">Save this game's recording</button>
-					<a href="/replay?src=local" target="_blank" data-testid="open-replay">Replay this game</a>
+					<a href="/replay?src=library" target="_blank" data-testid="open-replay">Replays</a>
 				{/if}
 				{#if session.mode !== 'join'}
 					<button onclick={() => fileInput?.click()}>Import campaign save</button>
 					<button
 						onclick={() =>
 							confirm(
-								'Load the canonical tabletop campaign at the August lobby? The current one is erased unless you exported it.',
-							) && session.importSave(scenarios.tabletop())}
-						data-testid="scenario-tabletop">Load canonical tabletop save</button
+								'Load the canonical campaign at the September lobby? The current one is erased unless you exported it.',
+							) && session.importSave(scenarios.canonical())}
+						data-testid="scenario-canonical">Load canonical save</button
 					>
 					<button onclick={() => session.importSave(scenarios.october())} data-testid="scenario-october"
 						>Load scenario: October</button

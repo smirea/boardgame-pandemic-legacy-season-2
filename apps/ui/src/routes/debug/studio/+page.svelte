@@ -184,7 +184,7 @@
 		'New campaign': freshCampaign,
 		'Scenario: October': () => scenarios.october(),
 		'Scenario: December': () => scenarios.december(),
-		'Canonical tabletop save (August lobby)': () => scenarios.tabletop(),
+		'Canonical save (September lobby)': () => scenarios.canonical(),
 	};
 	function startFrom(choice: string) {
 		if (choice === 'file') return saveInput?.click();

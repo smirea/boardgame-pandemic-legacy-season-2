@@ -1,0 +1,1292 @@
+{
+	"v": 1,
+	"phase": "lobby",
+	"world": {
+		"campaign": {
+			"rng": { "seed": -1012152048 },
+			"month": 9,
+			"attempt": 2,
+			"rationing": 2,
+			"results": [
+				{ "month": 0, "attempt": 1, "won": false, "gridCities": 0, "rationing": 4, "characters": [] },
+				{ "month": 1, "attempt": 1, "won": true, "gridCities": 10, "rationing": 4, "characters": [] },
+				{ "month": 2, "attempt": 1, "won": true, "gridCities": 10, "rationing": 2, "characters": [] },
+				{ "month": 3, "attempt": 1, "won": false, "gridCities": 11, "rationing": 0, "characters": [] },
+				{ "month": 3, "attempt": 2, "won": true, "gridCities": 11, "rationing": 2, "characters": [] },
+				{ "month": 4, "attempt": 1, "won": false, "gridCities": 11, "rationing": 0, "characters": [] },
+				{ "month": 4, "attempt": 2, "won": false, "gridCities": 11, "rationing": 2, "characters": [] },
+				{ "month": 5, "attempt": 1, "won": true, "gridCities": 12, "rationing": 4, "characters": [] },
+				{ "month": 6, "attempt": 1, "won": false, "gridCities": 13, "rationing": 2, "characters": [] },
+				{ "month": 6, "attempt": 2, "won": true, "gridCities": 13, "rationing": 4, "characters": [] },
+				{
+					"month": 7,
+					"attempt": 1,
+					"won": true,
+					"gridCities": 14,
+					"rationing": 2,
+					"characters": ["char-2", "char-3", "char-4"]
+				},
+				{
+					"month": 8,
+					"attempt": 1,
+					"won": true,
+					"gridCities": 27,
+					"rationing": 0,
+					"characters": ["char-4", "char-3", "char-2"]
+				},
+				{
+					"month": 9,
+					"attempt": 1,
+					"won": false,
+					"gridCities": 27,
+					"rationing": 0,
+					"characters": ["char-4", "char-3", "char-2"]
+				}
+			],
+			"rules": ["epidemicScaling", "storage", "forsaken", "epidemicFromStorage", "hollowSetup"],
+			"actions": [
+				"drive",
+				"sail",
+				"charter",
+				"makeSupplies",
+				"produce",
+				"deliver",
+				"share",
+				"buildCenter",
+				"pickUp",
+				"transfer",
+				"recon",
+				"establishLine",
+				"search",
+				"chartLane",
+				"shuttle",
+				"buildTower",
+				"transmit",
+				"inoculate",
+				"monitor"
+			],
+			"legacyIndex": 59,
+			"legacyHalt": { "kind": "stop", "month": 9 },
+			"briefing": [],
+			"opened": [
+				"package:1",
+				"door:66",
+				"door:J",
+				"door:23",
+				"door:L",
+				"door:39",
+				"door:34",
+				"package:5",
+				"door:67",
+				"door:K",
+				"door:24",
+				"door:47",
+				"door:E",
+				"door:42",
+				"door:60",
+				"package:4",
+				"door:64",
+				"door:31",
+				"door:36",
+				"package:7",
+				"door:57",
+				"door:F",
+				"door:14",
+				"door:44",
+				"door:49",
+				"package:2",
+				"door:62",
+				"door:53",
+				"package:6",
+				"door:A",
+				"door:12",
+				"door:50",
+				"door:35",
+				"door:M",
+				"door:25",
+				"door:29",
+				"door:48",
+				"door:65",
+				"door:R",
+				"door:55",
+				"door:D",
+				"door:Y",
+				"door:U",
+				"door:11",
+				"door:43",
+				"door:52",
+				"door:33"
+			],
+			"forced": ["door:60", "door:65"],
+			"routes": ["north-america", "south-america", "europe", "africa", "middle-east", "hidden:east-asia"],
+			"regions": ["atlantic", "north-america", "south-america", "europe", "africa", "middle-east"],
+			"locations": {
+				"haven-north-atlantic": { "population": 3, "infested": false, "revealed": true, "permanent": [], "lab": false },
+				"haven-mediterranean": { "population": 3, "infested": false, "revealed": true, "permanent": [], "lab": false },
+				"haven-south-atlantic": { "population": 3, "infested": false, "revealed": true, "permanent": [], "lab": false },
+				"new-york": { "population": 2, "infested": false, "revealed": true, "permanent": [], "lab": false },
+				"washington": { "population": 3, "infested": false, "revealed": true, "permanent": [], "lab": false },
+				"jacksonville": { "population": 2, "infested": false, "revealed": true, "permanent": [], "lab": false },
+				"sao-paulo": { "population": 4, "infested": false, "revealed": true, "permanent": [], "lab": false },
+				"london": { "population": 2, "infested": false, "revealed": true, "permanent": [], "lab": false },
+				"istanbul": { "population": 1, "infested": false, "revealed": true, "permanent": [], "lab": false },
+				"tripoli": { "population": 1, "infested": false, "revealed": true, "permanent": [], "lab": false },
+				"cairo": {
+					"population": 8,
+					"infested": false,
+					"revealed": true,
+					"permanent": ["center", "tower"],
+					"lab": false
+				},
+				"lagos": {
+					"population": 8,
+					"infested": false,
+					"revealed": true,
+					"permanent": ["center", "tower"],
+					"lab": false
+				},
+				"chicago": { "population": 0, "infested": true, "revealed": true, "permanent": [], "lab": false },
+				"san-francisco": { "population": 3, "infested": false, "revealed": true, "permanent": [], "lab": false },
+				"denver": {
+					"population": 4,
+					"infested": false,
+					"revealed": true,
+					"permanent": ["center", "tower"],
+					"lab": false
+				},
+				"atlanta": { "population": 5, "infested": false, "revealed": true, "permanent": [], "lab": false },
+				"los-angeles": { "population": 1, "infested": false, "revealed": true, "permanent": [], "lab": false },
+				"mexico-city": { "population": 2, "infested": false, "revealed": true, "permanent": [], "lab": false },
+				"bogota": { "population": 2, "infested": false, "revealed": true, "permanent": [], "lab": false },
+				"lima": { "population": 0, "infested": true, "revealed": true, "permanent": [], "lab": false },
+				"santiago": { "population": 2, "infested": false, "revealed": true, "permanent": [], "lab": false },
+				"buenos-aires": { "population": 0, "infested": true, "revealed": true, "permanent": [], "lab": false },
+				"paris": { "population": 1, "infested": false, "revealed": true, "permanent": [], "lab": false },
+				"frankfurt": { "population": 1, "infested": false, "revealed": true, "permanent": [], "lab": false },
+				"st-petersburg": { "population": 1, "infested": false, "revealed": true, "permanent": [], "lab": false },
+				"moscow": { "population": 8, "infested": false, "revealed": true, "permanent": ["center"], "lab": false },
+				"kinshasa": { "population": 0, "infested": true, "revealed": true, "permanent": [], "lab": false },
+				"khartoum": { "population": 0, "infested": true, "revealed": true, "permanent": [], "lab": false },
+				"dar-es-salaam": { "population": 0, "infested": true, "revealed": true, "permanent": [], "lab": false },
+				"antananarivo": { "population": 2, "infested": false, "revealed": true, "permanent": [], "lab": false },
+				"johannesburg": { "population": 3, "infested": false, "revealed": true, "permanent": [], "lab": false },
+				"baghdad": { "population": 1, "infested": true, "revealed": true, "permanent": [], "lab": false },
+				"riyadh": { "population": 1, "infested": false, "revealed": true, "permanent": [], "lab": false },
+				"tehran": { "population": 1, "infested": false, "revealed": true, "permanent": [], "lab": false },
+				"delhi": { "population": 1, "infested": true, "revealed": true, "permanent": [], "lab": false },
+				"new-mumbai": { "population": 1, "infested": true, "revealed": true, "permanent": [], "lab": false },
+				"kolkata": { "population": 2, "infested": true, "revealed": true, "permanent": ["center"], "lab": false },
+				"jakarta": { "population": 1, "infested": false, "revealed": false, "permanent": [], "lab": false },
+				"bangkok": { "population": 1, "infested": false, "revealed": false, "permanent": [], "lab": false },
+				"ho-chi-minh-city": { "population": 1, "infested": false, "revealed": false, "permanent": [], "lab": false },
+				"manila": { "population": 1, "infested": true, "revealed": false, "permanent": [], "lab": false },
+				"hong-kong": { "population": 1, "infested": false, "revealed": false, "permanent": [], "lab": false },
+				"shanghai": { "population": 1, "infested": true, "revealed": false, "permanent": [], "lab": false },
+				"seoul": { "population": 1, "infested": false, "revealed": false, "permanent": [], "lab": false },
+				"tokyo": { "population": 1, "infested": true, "revealed": false, "permanent": [], "lab": false },
+				"osaka": { "population": 1, "infested": true, "revealed": false, "permanent": [], "lab": false },
+				"haven-coral-sea": { "population": 1, "infested": false, "revealed": false, "permanent": [], "lab": false },
+				"wellington": { "population": 2, "infested": false, "revealed": false, "permanent": [], "lab": false },
+				"haven-eastern-pacific": {
+					"population": 3,
+					"infested": false,
+					"revealed": true,
+					"permanent": [],
+					"lab": false
+				},
+				"haven-indian-ocean": { "population": 3, "infested": false, "revealed": true, "permanent": [], "lab": false },
+				"utopia": { "population": 8, "infested": false, "revealed": false, "permanent": [], "lab": false },
+				"lake-baikal": { "population": 1, "infested": false, "revealed": false, "permanent": [], "lab": false }
+			},
+			"edges": [
+				{ "a": "new-york", "b": "washington", "kind": "sea" },
+				{ "a": "washington", "b": "jacksonville", "kind": "sea" },
+				{ "a": "new-york", "b": "haven-north-atlantic", "kind": "sea" },
+				{ "a": "london", "b": "haven-north-atlantic", "kind": "sea" },
+				{ "a": "haven-north-atlantic", "b": "haven-south-atlantic", "kind": "sea" },
+				{ "a": "haven-north-atlantic", "b": "haven-mediterranean", "kind": "sea" },
+				{ "a": "jacksonville", "b": "haven-south-atlantic", "kind": "sea" },
+				{ "a": "new-york", "b": "jacksonville", "kind": "sea" },
+				{ "a": "haven-mediterranean", "b": "tripoli", "kind": "sea" },
+				{ "a": "tripoli", "b": "istanbul", "kind": "sea" },
+				{ "a": "istanbul", "b": "cairo", "kind": "sea" },
+				{ "a": "tripoli", "b": "cairo", "kind": "sea" },
+				{ "a": "haven-mediterranean", "b": "haven-south-atlantic", "kind": "sea" },
+				{ "a": "haven-south-atlantic", "b": "lagos", "kind": "sea" },
+				{ "a": "haven-south-atlantic", "b": "sao-paulo", "kind": "sea" },
+				{ "a": "lagos", "b": "sao-paulo", "kind": "sea" },
+				{ "a": "chicago", "b": "washington", "kind": "land" },
+				{ "a": "buenos-aires", "b": "sao-paulo", "kind": "sea" },
+				{ "a": "lima", "b": "haven-eastern-pacific", "kind": "sea" },
+				{ "a": "paris", "b": "london", "kind": "land" },
+				{ "a": "kinshasa", "b": "lagos", "kind": "land" },
+				{ "a": "baghdad", "b": "cairo", "kind": "land" },
+				{ "a": "sao-paulo", "b": "santiago", "kind": "land" },
+				{ "a": "atlanta", "b": "jacksonville", "kind": "land" },
+				{ "a": "chicago", "b": "atlanta", "kind": "land" },
+				{ "a": "chicago", "b": "denver", "kind": "land" },
+				{ "a": "denver", "b": "atlanta", "kind": "land" },
+				{ "a": "denver", "b": "los-angeles", "kind": "land" },
+				{ "a": "denver", "b": "mexico-city", "kind": "land" },
+				{ "a": "denver", "b": "san-francisco", "kind": "land" },
+				{ "a": "lima", "b": "sao-paulo", "kind": "land" },
+				{ "a": "lima", "b": "lagos", "kind": "sea" },
+				{ "a": "frankfurt", "b": "istanbul", "kind": "land" },
+				{ "a": "frankfurt", "b": "moscow", "kind": "land" },
+				{ "a": "frankfurt", "b": "paris", "kind": "land" },
+				{ "a": "st-petersburg", "b": "frankfurt", "kind": "land" },
+				{ "a": "moscow", "b": "tehran", "kind": "land" },
+				{ "a": "lagos", "b": "antananarivo", "kind": "sea" },
+				{ "a": "kinshasa", "b": "khartoum", "kind": "land" },
+				{ "a": "kinshasa", "b": "johannesburg", "kind": "land" },
+				{ "a": "lagos", "b": "dar-es-salaam", "kind": "sea" },
+				{ "a": "khartoum", "b": "cairo", "kind": "land" },
+				{ "a": "tehran", "b": "new-mumbai", "kind": "land" },
+				{ "a": "tehran", "b": "delhi", "kind": "land" },
+				{ "a": "tehran", "b": "baghdad", "kind": "land" },
+				{ "a": "baghdad", "b": "riyadh", "kind": "land" },
+				{ "a": "haven-eastern-pacific", "b": "san-francisco", "kind": "sea" },
+				{ "a": "antananarivo", "b": "haven-indian-ocean", "kind": "sea" },
+				{ "a": "delhi", "b": "kolkata", "kind": "land" },
+				{ "a": "haven-indian-ocean", "b": "new-mumbai", "kind": "sea" },
+				{ "a": "johannesburg", "b": "dar-es-salaam", "kind": "land" },
+				{ "a": "new-mumbai", "b": "kolkata", "kind": "land" }
+			],
+			"names": {
+				"haven-south-atlantic": "Tiberian Sun",
+				"haven-north-atlantic": "Light of Heaven",
+				"haven-mediterranean": "Via Stafida",
+				"haven-eastern-pacific": "Forsaken America"
+			},
+			"characters": {
+				"char-1": {
+					"id": "char-1",
+					"name": "E. Holmes",
+					"job": null,
+					"jobScar": null,
+					"home": "haven-mediterranean",
+					"portrait": 0,
+					"slots": [{ "kind": "ability", "id": "helmsman" }, null, null, null],
+					"exposureTrack": ["empty", "empty", "scar", "scar", "skull", "empty", "empty"],
+					"exposure": 2,
+					"dead": false,
+					"diedAt": null,
+					"worker": false,
+					"carrier": false,
+					"player": null
+				},
+				"char-2": {
+					"id": "char-2",
+					"name": "Anki",
+					"job": "farmer",
+					"jobScar": null,
+					"home": "haven-north-atlantic",
+					"portrait": 1,
+					"slots": [
+						{ "kind": "ability", "id": "runner" },
+						{ "kind": "ability", "id": "foreman" },
+						{ "kind": "ability", "id": "courier" },
+						{ "kind": "ability", "id": "soldier" }
+					],
+					"exposureTrack": ["empty", "empty", "scar", "scar", "empty", "skull", "empty"],
+					"exposure": 1,
+					"dead": false,
+					"diedAt": null,
+					"worker": false,
+					"carrier": false,
+					"player": "6a3b1fbc-2c20-492c-b4a5-b8d38d215785"
+				},
+				"char-3": {
+					"id": "char-3",
+					"name": "Tib",
+					"job": "laborer",
+					"jobScar": null,
+					"home": "haven-south-atlantic",
+					"portrait": 2,
+					"slots": [
+						{ "kind": "ability", "id": "architect" },
+						{ "kind": "ability", "id": "facilitator" },
+						{ "kind": "ability", "id": "coordinator" },
+						{ "kind": "scar", "id": "reconExtraCard" }
+					],
+					"exposureTrack": ["empty", "scar", "empty", "skull", "empty", "empty", "empty"],
+					"exposure": 3,
+					"dead": false,
+					"diedAt": null,
+					"worker": false,
+					"carrier": false,
+					"player": "f88f4a5b-6cc8-4ad9-bc34-865db7697f07"
+				},
+				"char-4": {
+					"id": "char-4",
+					"name": "Unnamed Administrator",
+					"job": "administrator",
+					"jobScar": null,
+					"home": "haven-mediterranean",
+					"portrait": 3,
+					"slots": [
+						{ "kind": "scar", "id": "plagueShy" },
+						{ "kind": "scar", "id": "wary" },
+						{ "kind": "ability", "id": "supplier" },
+						{ "kind": "ability", "id": "outrider" }
+					],
+					"exposureTrack": ["scar", "empty", "scar", "empty", "skull", "empty", "empty"],
+					"exposure": 4,
+					"dead": false,
+					"diedAt": null,
+					"worker": false,
+					"carrier": false,
+					"player": "2e1f6d45-fd2a-4639-be2f-e4f28072d4bc"
+				},
+				"char-5": {
+					"id": "char-5",
+					"name": "Sanitation Officer",
+					"job": "sanitationOfficer",
+					"jobScar": null,
+					"home": "haven-mediterranean",
+					"portrait": 4,
+					"slots": [null, null, null, null],
+					"exposureTrack": ["empty", "scar", "empty", "scar", "empty", "skull", "empty"],
+					"exposure": 0,
+					"dead": false,
+					"diedAt": null,
+					"worker": false,
+					"carrier": false,
+					"player": null
+				},
+				"char-6": {
+					"id": "char-6",
+					"name": "Captain",
+					"job": "captain",
+					"jobScar": null,
+					"home": "haven-north-atlantic",
+					"portrait": 5,
+					"slots": [
+						{ "kind": "ability", "id": "broker" },
+						{ "kind": "ability", "id": "smuggler" },
+						{ "kind": "ability", "id": "investigator" },
+						null
+					],
+					"exposureTrack": ["empty", "scar", "empty", "empty", "scar", "scar", "skull"],
+					"exposure": 0,
+					"dead": false,
+					"diedAt": null,
+					"worker": false,
+					"carrier": false,
+					"player": null
+				}
+			},
+			"characterCards": [
+				{ "track": ["empty", "scar", "scar", "empty", "skull", "empty", "empty"], "exposure": 2 },
+				{ "track": ["scar", "empty", "scar", "empty", "scar", "empty", "skull"], "exposure": 0 },
+				{ "track": ["scar", "empty", "empty", "scar", "skull", "empty", "empty"], "exposure": 0 },
+				{ "track": ["scar", "empty", "scar", "empty", "scar", "skull", "empty"], "exposure": 0 }
+			],
+			"playerCards": {
+				"antananarivo#1": {
+					"id": "antananarivo#1",
+					"kind": "city",
+					"city": "antananarivo",
+					"improvement": null,
+					"search": [
+						{ "scope": "land", "result": { "t": "companion", "companion": "purifier" }, "scratched": false },
+						{
+							"scope": "sea",
+							"result": { "t": "discover", "seals": [{ "t": "door", "id": "65" }], "orAction": true },
+							"scratched": false
+						}
+					],
+					"companion": null
+				},
+				"antananarivo#2": {
+					"id": "antananarivo#2",
+					"kind": "city",
+					"city": "antananarivo",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"atlanta#3": {
+					"id": "atlanta#3",
+					"kind": "city",
+					"city": "atlanta",
+					"improvement": null,
+					"search": [{ "scope": "land", "result": { "t": "quarantineCard" }, "scratched": true }],
+					"companion": null
+				},
+				"baghdad#4": {
+					"id": "baghdad#4",
+					"kind": "city",
+					"city": "baghdad",
+					"improvement": null,
+					"search": [{ "scope": "land", "result": { "t": "actions", "amount": 2 }, "scratched": false }],
+					"companion": null
+				},
+				"baghdad#5": {
+					"id": "baghdad#5",
+					"kind": "city",
+					"city": "baghdad",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"bogota#6": {
+					"id": "bogota#6",
+					"kind": "city",
+					"city": "bogota",
+					"improvement": null,
+					"search": [{ "scope": "land", "result": { "t": "retrieve" }, "scratched": false }],
+					"companion": null
+				},
+				"bogota#7": {
+					"id": "bogota#7",
+					"kind": "city",
+					"city": "bogota",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"buenos-aires#8": {
+					"id": "buenos-aires#8",
+					"kind": "city",
+					"city": "buenos-aires",
+					"improvement": null,
+					"search": [
+						{
+							"scope": "land",
+							"result": {
+								"t": "discover",
+								"seals": [
+									{ "t": "door", "id": "18" },
+									{ "t": "door", "id": "20" }
+								],
+								"lab": "buenos-aires"
+							},
+							"scratched": false
+						},
+						{ "scope": "sea", "result": { "t": "supplies", "amount": 3, "from": "reserve" }, "scratched": false }
+					],
+					"companion": null
+				},
+				"buenos-aires#9": {
+					"id": "buenos-aires#9",
+					"kind": "city",
+					"city": "buenos-aires",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"cairo#10": {
+					"id": "cairo#10",
+					"kind": "city",
+					"city": "cairo",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"cairo#11": {
+					"id": "cairo#11",
+					"kind": "city",
+					"city": "cairo",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"cairo#12": {
+					"id": "cairo#12",
+					"kind": "city",
+					"city": "cairo",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"cairo#13": {
+					"id": "cairo#13",
+					"kind": "city",
+					"city": "cairo",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"chicago#14": {
+					"id": "chicago#14",
+					"kind": "city",
+					"city": "chicago",
+					"improvement": null,
+					"search": [
+						{ "scope": "land", "result": { "t": "supplies", "amount": 2, "from": "stockpile" }, "scratched": true }
+					],
+					"companion": null
+				},
+				"chicago#15": {
+					"id": "chicago#15",
+					"kind": "city",
+					"city": "chicago",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"dar-es-salaam#16": {
+					"id": "dar-es-salaam#16",
+					"kind": "city",
+					"city": "dar-es-salaam",
+					"improvement": null,
+					"search": [
+						{ "scope": "land", "result": { "t": "freeEdge", "kind": "land" }, "scratched": false },
+						{
+							"scope": "sea",
+							"result": { "t": "discover", "seals": [{ "t": "door", "id": "65" }], "orAction": true },
+							"scratched": false
+						}
+					],
+					"companion": null
+				},
+				"dar-es-salaam#17": {
+					"id": "dar-es-salaam#17",
+					"kind": "city",
+					"city": "dar-es-salaam",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"delhi#18": {
+					"id": "delhi#18",
+					"kind": "city",
+					"city": "delhi",
+					"improvement": null,
+					"search": [
+						{ "scope": "land", "result": { "t": "companion", "companion": "fieldSurgeon" }, "scratched": true }
+					],
+					"companion": "fieldSurgeon"
+				},
+				"denver#19": {
+					"id": "denver#19",
+					"kind": "city",
+					"city": "denver",
+					"improvement": null,
+					"search": [{ "scope": "land", "result": { "t": "companion", "companion": "lineman" }, "scratched": true }],
+					"companion": "lineman"
+				},
+				"denver#20": {
+					"id": "denver#20",
+					"kind": "city",
+					"city": "denver",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"frankfurt#21": {
+					"id": "frankfurt#21",
+					"kind": "city",
+					"city": "frankfurt",
+					"improvement": null,
+					"search": [{ "scope": "land", "result": { "t": "companion", "companion": "porter" }, "scratched": true }],
+					"companion": "porter"
+				},
+				"frankfurt#22": {
+					"id": "frankfurt#22",
+					"kind": "city",
+					"city": "frankfurt",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"istanbul#23": {
+					"id": "istanbul#23",
+					"kind": "city",
+					"city": "istanbul",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"istanbul#24": {
+					"id": "istanbul#24",
+					"kind": "city",
+					"city": "istanbul",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"istanbul#25": {
+					"id": "istanbul#25",
+					"kind": "city",
+					"city": "istanbul",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"istanbul#26": {
+					"id": "istanbul#26",
+					"kind": "city",
+					"city": "istanbul",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"jacksonville#27": {
+					"id": "jacksonville#27",
+					"kind": "city",
+					"city": "jacksonville",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"jacksonville#28": {
+					"id": "jacksonville#28",
+					"kind": "city",
+					"city": "jacksonville",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"jacksonville#29": {
+					"id": "jacksonville#29",
+					"kind": "city",
+					"city": "jacksonville",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"jacksonville#30": {
+					"id": "jacksonville#30",
+					"kind": "city",
+					"city": "jacksonville",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"johannesburg#31": {
+					"id": "johannesburg#31",
+					"kind": "city",
+					"city": "johannesburg",
+					"improvement": null,
+					"search": [
+						{
+							"scope": "land",
+							"result": {
+								"t": "discover",
+								"seals": [
+									{ "t": "door", "id": "46" },
+									{ "t": "door", "id": "20" }
+								],
+								"lab": "johannesburg"
+							},
+							"scratched": false
+						}
+					],
+					"companion": null
+				},
+				"johannesburg#32": {
+					"id": "johannesburg#32",
+					"kind": "city",
+					"city": "johannesburg",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"khartoum#33": {
+					"id": "khartoum#33",
+					"kind": "city",
+					"city": "khartoum",
+					"improvement": null,
+					"search": [{ "scope": "land", "result": { "t": "giveCard" }, "scratched": true }],
+					"companion": null
+				},
+				"kinshasa#34": {
+					"id": "kinshasa#34",
+					"kind": "city",
+					"city": "kinshasa",
+					"improvement": null,
+					"search": [{ "scope": "land", "result": { "t": "companion", "companion": "rigger" }, "scratched": false }],
+					"companion": null
+				},
+				"kolkata#35": {
+					"id": "kolkata#35",
+					"kind": "city",
+					"city": "kolkata",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"lagos#36": {
+					"id": "lagos#36",
+					"kind": "city",
+					"city": "lagos",
+					"improvement": "wild",
+					"search": [],
+					"companion": null
+				},
+				"lagos#37": {
+					"id": "lagos#37",
+					"kind": "city",
+					"city": "lagos",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"lagos#38": {
+					"id": "lagos#38",
+					"kind": "city",
+					"city": "lagos",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"lagos#39": {
+					"id": "lagos#39",
+					"kind": "city",
+					"city": "lagos",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"lima#40": {
+					"id": "lima#40",
+					"kind": "city",
+					"city": "lima",
+					"improvement": null,
+					"search": [
+						{ "scope": "land", "result": { "t": "companion", "companion": "medic" }, "scratched": true },
+						{
+							"scope": "sea",
+							"result": { "t": "discover", "seals": [{ "t": "door", "id": "60" }], "orAction": true },
+							"scratched": true
+						}
+					],
+					"companion": "medic"
+				},
+				"london#41": {
+					"id": "london#41",
+					"kind": "city",
+					"city": "london",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"london#42": {
+					"id": "london#42",
+					"kind": "city",
+					"city": "london",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"london#43": {
+					"id": "london#43",
+					"kind": "city",
+					"city": "london",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"london#44": {
+					"id": "london#44",
+					"kind": "city",
+					"city": "london",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"los-angeles#45": {
+					"id": "los-angeles#45",
+					"kind": "city",
+					"city": "los-angeles",
+					"improvement": null,
+					"search": [
+						{ "scope": "land", "result": { "t": "stockpile", "amount": 4 }, "scratched": true },
+						{
+							"scope": "sea",
+							"result": { "t": "discover", "seals": [{ "t": "door", "id": "60" }], "orAction": true },
+							"scratched": true
+						}
+					],
+					"companion": null
+				},
+				"mexico-city#46": {
+					"id": "mexico-city#46",
+					"kind": "city",
+					"city": "mexico-city",
+					"improvement": null,
+					"search": [{ "scope": "land", "result": { "t": "companion", "companion": "trader" }, "scratched": true }],
+					"companion": "trader"
+				},
+				"moscow#47": {
+					"id": "moscow#47",
+					"kind": "city",
+					"city": "moscow",
+					"improvement": null,
+					"search": [{ "scope": "land", "result": { "t": "giveCard" }, "scratched": false }],
+					"companion": null
+				},
+				"new-mumbai#48": {
+					"id": "new-mumbai#48",
+					"kind": "city",
+					"city": "new-mumbai",
+					"improvement": null,
+					"search": [
+						{ "scope": "land", "result": { "t": "actions", "amount": 1 }, "scratched": false },
+						{
+							"scope": "sea",
+							"result": { "t": "discover", "seals": [{ "t": "door", "id": "65" }], "orAction": true },
+							"scratched": false
+						}
+					],
+					"companion": null
+				},
+				"new-mumbai#49": {
+					"id": "new-mumbai#49",
+					"kind": "city",
+					"city": "new-mumbai",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"new-york#50": {
+					"id": "new-york#50",
+					"kind": "city",
+					"city": "new-york",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"new-york#51": {
+					"id": "new-york#51",
+					"kind": "city",
+					"city": "new-york",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"new-york#52": {
+					"id": "new-york#52",
+					"kind": "city",
+					"city": "new-york",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"new-york#53": {
+					"id": "new-york#53",
+					"kind": "city",
+					"city": "new-york",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"paris#54": {
+					"id": "paris#54",
+					"kind": "city",
+					"city": "paris",
+					"improvement": null,
+					"search": [{ "scope": "land", "result": { "t": "companion", "companion": "builder" }, "scratched": true }],
+					"companion": "builder"
+				},
+				"paris#55": {
+					"id": "paris#55",
+					"kind": "city",
+					"city": "paris",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"riyadh#56": {
+					"id": "riyadh#56",
+					"kind": "city",
+					"city": "riyadh",
+					"improvement": null,
+					"search": [{ "scope": "land", "result": { "t": "retrieve" }, "scratched": false }],
+					"companion": null
+				},
+				"riyadh#57": {
+					"id": "riyadh#57",
+					"kind": "city",
+					"city": "riyadh",
+					"improvement": "triple",
+					"search": [],
+					"companion": null
+				},
+				"san-francisco#58": {
+					"id": "san-francisco#58",
+					"kind": "city",
+					"city": "san-francisco",
+					"improvement": null,
+					"search": [
+						{ "scope": "land", "result": { "t": "supplies", "amount": 3, "from": "reserve" }, "scratched": true },
+						{
+							"scope": "sea",
+							"result": { "t": "discover", "seals": [{ "t": "door", "id": "60" }], "orAction": true },
+							"scratched": true
+						}
+					],
+					"companion": null
+				},
+				"san-francisco#59": {
+					"id": "san-francisco#59",
+					"kind": "city",
+					"city": "san-francisco",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"santiago#60": {
+					"id": "santiago#60",
+					"kind": "city",
+					"city": "santiago",
+					"improvement": null,
+					"search": [
+						{ "scope": "land", "result": { "t": "infest", "opens": { "t": "door", "id": "50" } }, "scratched": false }
+					],
+					"companion": null
+				},
+				"sao-paulo#61": {
+					"id": "sao-paulo#61",
+					"kind": "city",
+					"city": "sao-paulo",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"sao-paulo#62": {
+					"id": "sao-paulo#62",
+					"kind": "city",
+					"city": "sao-paulo",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"sao-paulo#63": {
+					"id": "sao-paulo#63",
+					"kind": "city",
+					"city": "sao-paulo",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"sao-paulo#64": {
+					"id": "sao-paulo#64",
+					"kind": "city",
+					"city": "sao-paulo",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"st-petersburg#65": {
+					"id": "st-petersburg#65",
+					"kind": "city",
+					"city": "st-petersburg",
+					"improvement": null,
+					"search": [
+						{ "scope": "land", "result": { "t": "companion", "companion": "tracker" }, "scratched": false },
+						{ "scope": "sea", "result": { "t": "freeEdge", "kind": "sea" }, "scratched": false }
+					],
+					"companion": null
+				},
+				"tehran#66": {
+					"id": "tehran#66",
+					"kind": "city",
+					"city": "tehran",
+					"improvement": null,
+					"search": [{ "scope": "land", "result": { "t": "removeHollow", "amount": 2 }, "scratched": true }],
+					"companion": null
+				},
+				"tripoli#67": {
+					"id": "tripoli#67",
+					"kind": "city",
+					"city": "tripoli",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"tripoli#68": {
+					"id": "tripoli#68",
+					"kind": "city",
+					"city": "tripoli",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"tripoli#69": {
+					"id": "tripoli#69",
+					"kind": "city",
+					"city": "tripoli",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"tripoli#70": {
+					"id": "tripoli#70",
+					"kind": "city",
+					"city": "tripoli",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"washington#71": {
+					"id": "washington#71",
+					"kind": "city",
+					"city": "washington",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"washington#72": {
+					"id": "washington#72",
+					"kind": "city",
+					"city": "washington",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"washington#73": {
+					"id": "washington#73",
+					"kind": "city",
+					"city": "washington",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"washington#74": {
+					"id": "washington#74",
+					"kind": "city",
+					"city": "washington",
+					"improvement": null,
+					"search": [],
+					"companion": null
+				},
+				"airlift#75": { "id": "airlift#75", "kind": "event", "event": "airlift", "mode": "rationed" },
+				"antidote#76": { "id": "antidote#76", "kind": "event", "event": "antidote", "mode": "unrationed" },
+				"cache#77": { "id": "cache#77", "kind": "event", "event": "cache", "mode": "rationed" },
+				"cardSwap#78": { "id": "cardSwap#78", "kind": "event", "event": "cardSwap", "mode": "rationed" },
+				"cleanse#79": { "id": "cleanse#79", "kind": "event", "event": "cleanse", "mode": "rationed" },
+				"encore#80": { "id": "encore#80", "kind": "event", "event": "encore", "mode": "rationed" },
+				"forecast#81": { "id": "forecast#81", "kind": "event", "event": "forecast", "mode": "rationed" },
+				"handout#82": { "id": "handout#82", "kind": "event", "event": "handout", "mode": "rationed" },
+				"massInoculation#83": {
+					"id": "massInoculation#83",
+					"kind": "event",
+					"event": "massInoculation",
+					"mode": "rationed"
+				},
+				"mentor#84": { "id": "mentor#84", "kind": "event", "event": "mentor", "mode": "unrationed" },
+				"openWaters#85": { "id": "openWaters#85", "kind": "event", "event": "openWaters", "mode": "rationed" },
+				"quietNight#86": { "id": "quietNight#86", "kind": "event", "event": "quietNight", "mode": "rationed" },
+				"resilience#87": { "id": "resilience#87", "kind": "event", "event": "resilience", "mode": "rationed" },
+				"secondWind#88": { "id": "secondWind#88", "kind": "event", "event": "secondWind", "mode": "rationed" },
+				"spreadOut#89": { "id": "spreadOut#89", "kind": "event", "event": "spreadOut", "mode": "rationed" },
+				"surplus#92": { "id": "surplus#92", "kind": "event", "event": "surplus", "mode": "permanent" },
+				"surplus#93": { "id": "surplus#93", "kind": "event", "event": "surplus", "mode": "permanent" },
+				"surplus#94": { "id": "surplus#94", "kind": "event", "event": "surplus", "mode": "permanent" },
+				"produce#95": { "id": "produce#95", "kind": "produce", "boxesLeft": 1 },
+				"produce#96": { "id": "produce#96", "kind": "produce", "boxesLeft": 1 },
+				"produce#97": { "id": "produce#97", "kind": "produce", "boxesLeft": 2 },
+				"produce#98": { "id": "produce#98", "kind": "produce", "boxesLeft": 2 },
+				"produce#99": { "id": "produce#99", "kind": "produce", "boxesLeft": 2 },
+				"produce#100": { "id": "produce#100", "kind": "produce", "boxesLeft": 3 },
+				"epidemic#101": { "id": "epidemic#101", "kind": "epidemic" },
+				"epidemic#102": { "id": "epidemic#102", "kind": "epidemic" },
+				"epidemic#103": { "id": "epidemic#103", "kind": "epidemic" },
+				"epidemic#104": { "id": "epidemic#104", "kind": "epidemic" },
+				"epidemic#105": { "id": "epidemic#105", "kind": "epidemic" },
+				"epidemic#106": { "id": "epidemic#106", "kind": "epidemic" },
+				"epidemic#107": { "id": "epidemic#107", "kind": "epidemic" },
+				"epidemic#108": { "id": "epidemic#108", "kind": "epidemic" },
+				"epidemic#109": { "id": "epidemic#109", "kind": "epidemic" },
+				"epidemic#110": { "id": "epidemic#110", "kind": "epidemic" },
+				"scavenge#176": { "id": "scavenge#176", "kind": "event", "event": "scavenge", "mode": "rationed" }
+			},
+			"infectionCards": {
+				"antananarivo#111": { "id": "antananarivo#111", "kind": "city", "city": "antananarivo", "improvement": null },
+				"antananarivo#112": { "id": "antananarivo#112", "kind": "city", "city": "antananarivo", "improvement": null },
+				"atlanta#113": { "id": "atlanta#113", "kind": "city", "city": "atlanta", "improvement": null },
+				"baghdad#114": { "id": "baghdad#114", "kind": "city", "city": "baghdad", "improvement": null },
+				"baghdad#115": { "id": "baghdad#115", "kind": "city", "city": "baghdad", "improvement": null },
+				"bogota#116": { "id": "bogota#116", "kind": "city", "city": "bogota", "improvement": null },
+				"bogota#117": { "id": "bogota#117", "kind": "city", "city": "bogota", "improvement": null },
+				"buenos-aires#118": { "id": "buenos-aires#118", "kind": "city", "city": "buenos-aires", "improvement": null },
+				"buenos-aires#119": { "id": "buenos-aires#119", "kind": "city", "city": "buenos-aires", "improvement": null },
+				"chicago#120": { "id": "chicago#120", "kind": "city", "city": "chicago", "improvement": null },
+				"chicago#121": { "id": "chicago#121", "kind": "city", "city": "chicago", "improvement": null },
+				"dar-es-salaam#122": {
+					"id": "dar-es-salaam#122",
+					"kind": "city",
+					"city": "dar-es-salaam",
+					"improvement": null
+				},
+				"dar-es-salaam#123": {
+					"id": "dar-es-salaam#123",
+					"kind": "city",
+					"city": "dar-es-salaam",
+					"improvement": null
+				},
+				"delhi#124": { "id": "delhi#124", "kind": "city", "city": "delhi", "improvement": null },
+				"denver#125": { "id": "denver#125", "kind": "city", "city": "denver", "improvement": "cordon" },
+				"denver#126": { "id": "denver#126", "kind": "city", "city": "denver", "improvement": "cordon" },
+				"frankfurt#127": { "id": "frankfurt#127", "kind": "city", "city": "frankfurt", "improvement": null },
+				"frankfurt#128": { "id": "frankfurt#128", "kind": "city", "city": "frankfurt", "improvement": null },
+				"istanbul#129": { "id": "istanbul#129", "kind": "city", "city": "istanbul", "improvement": null },
+				"istanbul#130": { "id": "istanbul#130", "kind": "city", "city": "istanbul", "improvement": null },
+				"istanbul#131": { "id": "istanbul#131", "kind": "city", "city": "istanbul", "improvement": null },
+				"jacksonville#132": { "id": "jacksonville#132", "kind": "city", "city": "jacksonville", "improvement": null },
+				"jacksonville#133": { "id": "jacksonville#133", "kind": "city", "city": "jacksonville", "improvement": null },
+				"jacksonville#134": { "id": "jacksonville#134", "kind": "city", "city": "jacksonville", "improvement": null },
+				"johannesburg#135": { "id": "johannesburg#135", "kind": "city", "city": "johannesburg", "improvement": null },
+				"johannesburg#136": { "id": "johannesburg#136", "kind": "city", "city": "johannesburg", "improvement": null },
+				"khartoum#137": { "id": "khartoum#137", "kind": "city", "city": "khartoum", "improvement": null },
+				"kinshasa#138": { "id": "kinshasa#138", "kind": "city", "city": "kinshasa", "improvement": null },
+				"kolkata#139": { "id": "kolkata#139", "kind": "city", "city": "kolkata", "improvement": null },
+				"lagos#140": { "id": "lagos#140", "kind": "city", "city": "lagos", "improvement": null },
+				"lagos#141": { "id": "lagos#141", "kind": "city", "city": "lagos", "improvement": null },
+				"lagos#142": { "id": "lagos#142", "kind": "city", "city": "lagos", "improvement": null },
+				"lima#143": { "id": "lima#143", "kind": "city", "city": "lima", "improvement": null },
+				"london#144": { "id": "london#144", "kind": "city", "city": "london", "improvement": null },
+				"london#145": { "id": "london#145", "kind": "city", "city": "london", "improvement": null },
+				"london#146": { "id": "london#146", "kind": "city", "city": "london", "improvement": null },
+				"los-angeles#147": { "id": "los-angeles#147", "kind": "city", "city": "los-angeles", "improvement": null },
+				"mexico-city#148": { "id": "mexico-city#148", "kind": "city", "city": "mexico-city", "improvement": null },
+				"moscow#149": { "id": "moscow#149", "kind": "city", "city": "moscow", "improvement": null },
+				"new-mumbai#150": { "id": "new-mumbai#150", "kind": "city", "city": "new-mumbai", "improvement": null },
+				"new-mumbai#151": { "id": "new-mumbai#151", "kind": "city", "city": "new-mumbai", "improvement": null },
+				"new-york#152": { "id": "new-york#152", "kind": "city", "city": "new-york", "improvement": null },
+				"new-york#153": { "id": "new-york#153", "kind": "city", "city": "new-york", "improvement": null },
+				"new-york#154": { "id": "new-york#154", "kind": "city", "city": "new-york", "improvement": null },
+				"paris#155": { "id": "paris#155", "kind": "city", "city": "paris", "improvement": "wellStocked" },
+				"paris#156": { "id": "paris#156", "kind": "city", "city": "paris", "improvement": "wellStocked" },
+				"riyadh#157": { "id": "riyadh#157", "kind": "city", "city": "riyadh", "improvement": null },
+				"riyadh#158": { "id": "riyadh#158", "kind": "city", "city": "riyadh", "improvement": null },
+				"san-francisco#159": {
+					"id": "san-francisco#159",
+					"kind": "city",
+					"city": "san-francisco",
+					"improvement": null
+				},
+				"san-francisco#160": {
+					"id": "san-francisco#160",
+					"kind": "city",
+					"city": "san-francisco",
+					"improvement": null
+				},
+				"sao-paulo#161": { "id": "sao-paulo#161", "kind": "city", "city": "sao-paulo", "improvement": null },
+				"sao-paulo#162": { "id": "sao-paulo#162", "kind": "city", "city": "sao-paulo", "improvement": null },
+				"sao-paulo#163": { "id": "sao-paulo#163", "kind": "city", "city": "sao-paulo", "improvement": null },
+				"st-petersburg#164": {
+					"id": "st-petersburg#164",
+					"kind": "city",
+					"city": "st-petersburg",
+					"improvement": null
+				},
+				"tripoli#166": { "id": "tripoli#166", "kind": "city", "city": "tripoli", "improvement": null },
+				"tripoli#167": { "id": "tripoli#167", "kind": "city", "city": "tripoli", "improvement": null },
+				"tripoli#168": { "id": "tripoli#168", "kind": "city", "city": "tripoli", "improvement": null },
+				"washington#169": { "id": "washington#169", "kind": "city", "city": "washington", "improvement": null },
+				"washington#170": { "id": "washington#170", "kind": "city", "city": "washington", "improvement": null },
+				"washington#171": { "id": "washington#171", "kind": "city", "city": "washington", "improvement": null },
+				"gather#172": { "id": "gather#172", "kind": "gather" },
+				"gather#173": { "id": "gather#173", "kind": "gather" },
+				"gather#174": { "id": "gather#174", "kind": "gather" },
+				"gather#175": { "id": "gather#175", "kind": "gather" }
+			},
+			"stored": {
+				"player": [
+					"atlanta#3",
+					"sao-paulo#62",
+					"sao-paulo#63",
+					"sao-paulo#64",
+					"khartoum#33",
+					"denver#19",
+					"cairo#13",
+					"cairo#12",
+					"jacksonville#29",
+					"jacksonville#28",
+					"lagos#38",
+					"lagos#36",
+					"lagos#37",
+					"cairo#11",
+					"johannesburg#32",
+					"delhi#18"
+				],
+				"infection": [
+					"dar-es-salaam#122",
+					"frankfurt#127",
+					"frankfurt#128",
+					"lagos#140",
+					"lagos#141",
+					"lagos#142",
+					"london#144",
+					"london#145",
+					"london#146",
+					"los-angeles#147",
+					"mexico-city#148",
+					"moscow#149",
+					"new-york#153",
+					"new-york#154",
+					"sao-paulo#163",
+					"st-petersburg#164",
+					"tripoli#168",
+					"washington#169",
+					"washington#170",
+					"washington#171",
+					"jacksonville#134",
+					"jacksonville#132",
+					"new-mumbai#151",
+					"new-mumbai#150",
+					"johannesburg#136",
+					"johannesburg#135",
+					"delhi#124"
+				]
+			},
+			"objectives": ["buildCenters", "connectCities", "searches", "reconEastAsia"],
+			"required": 3,
+			"carriedProgress": {},
+			"turningPoints": ["losingStreak"],
+			"abilitiesForSale": ["lookout", "scout", "navigator"],
+			"cityImprovementsForSale": ["double", "double", "double"],
+			"infectionImprovementsForSale": ["cordon", "lockdown"],
+			"permanentForSale": ["tower", "center"],
+			"scars": [
+				"buildExtraCard",
+				"haunted",
+				"grasping",
+				"oddHand",
+				"rattled",
+				"smallHand",
+				"frail",
+				"lineExtraCube",
+				"searchDiscard",
+				"laneExtraCube",
+				"wasteful",
+				"portBound",
+				"susceptible",
+				"fearOfNeedles",
+				"fearOfFlying"
+			],
+			"jobsFound": [],
+			"stockpileBonus": 30,
+			"freeAbilityUnits": 0,
+			"frequenciesUsed": [8, 9, 7, 4, 3, 6],
+			"scratched": ["03-01:1"],
+			"planRecons": [],
+			"dosesUsed": 0,
+			"seating": [
+				{ "seat": "seat-1", "character": "char-4" },
+				{ "seat": "seat-2", "character": "char-3" },
+				{ "seat": "seat-3", "character": "char-2" }
+			],
+			"sampleDelivered": false,
+			"losingStreakBonusGames": 0,
+			"owedScars": 0,
+			"nextCardId": 177
+		},
+		"game": null,
+		"table": {
+			"seats": [
+				{ "seat": "seat-1", "player": "2e1f6d45-fd2a-4639-be2f-e4f28072d4bc", "name": "Stefan" },
+				{ "seat": "seat-2", "player": "f88f4a5b-6cc8-4ad9-bc34-865db7697f07", "name": "Tib" },
+				{ "seat": "seat-3", "player": "6a3b1fbc-2c20-492c-b4a5-b8d38d215785", "name": "Lucia" }
+			],
+			"ready": {},
+			"start": null,
+			"briefing": { "drawn": 0, "flipped": false, "ready": [], "stowing": false },
+			"undoVote": null
+		}
+	}
+}

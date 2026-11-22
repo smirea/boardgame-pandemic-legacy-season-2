@@ -8,6 +8,7 @@ import type { DebugApi } from './debug';
 import { parseMsg, parsePresence } from './protocol';
 import type { CursorTool, Msg, Point, Presence, Stroke } from './protocol';
 import { Sketch } from './sketch.svelte';
+import { flushGames, keepSoon, keepStoredGame } from '../replay/library.ts';
 import { storedDrawings, storedId, storedName, storedRecord, storedSave } from './stored';
 
 const DRAWINGS_SAVE_MS = 1000;
@@ -137,6 +138,8 @@ export class GameSession {
 						Boolean(entry && typeof entry === 'object' && 'world' in entry && 'subject' in entry),
 					)
 				: [];
+			// Read before the first change can put a new game's recording in its place.
+			if (this.#persist) void keepStoredGame().catch(error => console.warn('The last recording was not kept:', error));
 			this.#record = this.#persist ? storedRecord(save) : null;
 			this.#actor = createGameActor({ seed: Math.floor(Math.random() * 2 ** 31), save, undo: savedUndo });
 			this.#actor.subscribe(snapshot => {
@@ -346,7 +349,9 @@ export class GameSession {
 		const sender = this.#sender;
 		this.#sender = null;
 		const entry = { at: Date.now(), by: sender?.by ?? null, command: sender?.command ?? null };
-		if (recordStep(this.#record, before, after, entry)) this.#store({ record: this.#record });
+		if (!recordStep(this.#record, before, after, entry)) return;
+		this.#store({ record: this.#record });
+		if (this.#persist) keepSoon(this.#record, after);
 	}
 
 	#apply(command: Command, by: string | null = this.mode === 'solo' ? null : this.#nameOf(this.selfId)): string | null {
@@ -420,20 +425,24 @@ export class GameSession {
 	/** Replaces the campaign with a save. The page reloads so the actor restarts from it. */
 	importSave(raw: unknown) {
 		if (!this.#actor) throw new Error('Only the host can load a campaign');
-		const save: unknown = typeof raw === 'string' ? JSON.parse(raw) : raw;
-		LS.delete('record');
-		LS.delete('undo');
-		LS.delete('drawings');
-		LS.set({ save: parseSave(save) });
-		location.reload();
+		const save = parseSave(typeof raw === 'string' ? JSON.parse(raw) : raw);
+		void flushGames().finally(() => {
+			LS.delete('record');
+			LS.delete('undo');
+			LS.delete('drawings');
+			LS.set({ save });
+			location.reload();
+		});
 	}
 
 	newCampaign() {
-		LS.delete('drawings');
-		LS.delete('save');
-		LS.delete('undo');
-		LS.delete('record');
-		location.reload();
+		void flushGames().finally(() => {
+			LS.delete('drawings');
+			LS.delete('save');
+			LS.delete('undo');
+			LS.delete('record');
+			location.reload();
+		});
 	}
 
 	debugApi(): DebugApi {
@@ -441,6 +450,7 @@ export class GameSession {
 	}
 
 	close() {
+		void flushGames();
 		this.#saveDrawings();
 		removeEventListener('pagehide', this.#saveDrawings);
 		cancelAnimationFrame(this.#pointersFrame);

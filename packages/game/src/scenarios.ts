@@ -8,7 +8,8 @@ import { applyUnlock, createCharacter, newCampaign, openSeal, readLegacy } from 
 import type { Save } from './machine';
 import type { World } from './state';
 import { newTable } from './table';
-import { tabletopSave } from './tabletop';
+import canonical from './canonical-save.json';
+import { parseSave } from './machine';
 
 const CAST: [name: string, job: JobId][] = [
 	['Ada', 'administrator'],
@@ -102,4 +103,7 @@ export function campaignAt(
 export const octoberSave = (seed?: number) => campaignAt(10, seed);
 export const decemberSave = (seed?: number) => campaignAt(12, seed);
 
-export const scenarios = { october: octoberSave, december: decemberSave, tabletop: tabletopSave };
+/** Our own group's campaign at the September lobby, as the deployed game exported it. */
+export const canonicalSave = () => parseSave(structuredClone(canonical));
+
+export const scenarios = { october: octoberSave, december: decemberSave, canonical: canonicalSave };
