@@ -36,16 +36,16 @@ function crossing(a: Point, b: Point, c: Point, d: Point): Point | null {
 	return { x: a.x + (b.x - a.x) * t, z: a.z + (b.z - a.z) * t };
 }
 
-/** The board draws a line from the rim of its location's disc (`CITY_RADIUS` in `board/routes.ts`), so lines leaving the same location meet unseen within it. */
-const AT_SHARED_END = 1.9;
-
-/** Whether two courses cross anywhere but at a location they share. */
+/**
+ * Whether two courses cross anywhere but near a location they share. Lanes into a port up a strait (Istanbul past
+ * the Dardanelles) meet in the strait, not at the disc's rim, so they may cross as far out as they may run together.
+ */
 export function coursesCross(one: Point[], other: Point[]) {
 	const shared = [one[0]!, one.at(-1)!].filter(end => sameEnd(end, other[0]!) || sameEnd(end, other.at(-1)!));
 	return legs(one).some(([a, b]) =>
 		legs(other).some(([c, d]) => {
 			const at = crossing(a, b, c, d);
-			return at !== null && shared.every(end => Math.hypot(at.x - end.x, at.z - end.z) >= AT_SHARED_END);
+			return at !== null && shared.every(end => Math.hypot(at.x - end.x, at.z - end.z) >= AWAY_FROM_ENDS);
 		}),
 	);
 }

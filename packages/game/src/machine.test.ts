@@ -2556,7 +2556,7 @@ describe('infection', () => {
 			Object.assign(game.locations[city('tripoli')]!, { supplies: 0, plague: 3 });
 			Object.assign(game.locations[city('cairo')]!, { supplies: 0, plague: 3 });
 			game.locations[city('haven-mediterranean')]!.supplies = 0;
-			game.locations[city('istanbul')]!.supplies = 2;
+			game.locations[city('istanbul')]!.supplies = 1;
 			game.infectionsLeft = 1;
 		}, 'playing.infect');
 		send(actor, { type: 'INFECT' });
