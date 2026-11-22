@@ -10,9 +10,10 @@
 		label: string;
 		send: (command: Command) => void;
 		big?: boolean;
+		disabled?: boolean;
 	};
 
-	let { table, player, start, label, send, big = false }: Props = $props();
+	let { table, player, start, label, send, big = false, disabled = false }: Props = $props();
 
 	const players = $derived(tablePlayers(table));
 	const firstSeat = (who: PlayerId) => table.seats.find(entry => entry.player === who)!;
@@ -25,7 +26,7 @@
 	class:big
 	class:on
 	aria-pressed={on}
-	disabled={!table.seats.some(entry => entry.player === player)}
+	disabled={disabled || !table.seats.some(entry => entry.player === player)}
 	onclick={() => send({ type: 'READY', player, start: on ? null : start })}
 	data-testid={`ready-${start}`}
 >

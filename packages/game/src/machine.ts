@@ -533,7 +533,13 @@ export const gameMachine = setup({
 				applyPlay(world, seat, card, play);
 			}),
 		),
-		decide: assign(change((world, event) => applyDecide(world, (event as Of<'DECIDE'>).decide))),
+		decide: assign(({ context, event }: Args) => ({
+			world: produce(context.world, draft => {
+				applyDecide(draft, (event as Of<'DECIDE'>).decide);
+				autoResolve(draft);
+			}),
+			undo: context.undo,
+		})),
 		lockdown: assign(
 			change((world, event) => {
 				const { card, seat, pay } = event as Of<'LOCKDOWN'>;

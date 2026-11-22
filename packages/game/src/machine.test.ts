@@ -1387,6 +1387,38 @@ describe('game end and the campaign', () => {
 		expect(scratched()).toBe(false);
 		expect(publicState(actor.getSnapshot()).canUndo).toBe(true);
 	});
+
+	test('resolving a pending decision keeps the action undoable', () => {
+		const actor = late((world, game) => {
+			world.campaign.frequenciesUsed = [];
+			game.players[A]!.location = city('lagos');
+			game.locations[city('lagos')]!.tower = true;
+			const nonEpidemics = game.playerDeck.order.filter(id => world.campaign.playerCards[id]!.kind !== 'epidemic');
+			const hand = nonEpidemics.slice(4, 11);
+			game.playerDeck.order = game.playerDeck.order.filter(id => !hand.includes(id));
+			game.playerDeck.piles = [{ size: game.playerDeck.order.length, epidemics: 0 }];
+			game.players[A]!.hand = hand;
+		});
+		const ann = 'ann' as PlayerId;
+		const ben = 'ben' as PlayerId;
+		send(actor, { type: 'TAKE_SEAT', player: ann, name: 'Ann', seat: A });
+		send(actor, { type: 'TAKE_SEAT', player: ben, name: 'Ben', seat: B });
+		const handBefore = [...gameOf(actor).players[A]!.hand];
+		const deckBefore = [...gameOf(actor).playerDeck.order];
+
+		act(actor, { a: 'monitor', frequency: 8 });
+		expect(gameOf(actor).players[A]!.hand).toHaveLength(8);
+		send(actor, { type: 'DECIDE', decide: { d: 'discard', seat: A, cards: [handBefore[0]!] } });
+		expect(gameOf(actor).players[A]!.hand).toHaveLength(7);
+		expect(publicState(actor.getSnapshot()).canUndo).toBe(true);
+
+		send(actor, { type: 'UNDO', by: ann });
+		send(actor, { type: 'UNDO_VOTE', player: ann, vote: 'yes' });
+		send(actor, { type: 'UNDO_VOTE', player: ben, vote: 'yes' });
+		expect(gameOf(actor).players[A]!.hand).toEqual(handBefore);
+		expect(gameOf(actor).playerDeck.order).toEqual(deckBefore);
+		expect(worldOf(actor).campaign.frequenciesUsed).toEqual([]);
+	});
 });
 
 test('Monitor frequencies that keep cards take the newest non-Epidemic discards', () => {

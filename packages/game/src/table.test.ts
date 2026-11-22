@@ -23,13 +23,43 @@ function lobby() {
 	return actor;
 }
 
-/** Everyone agrees on the game at month 0, then readies again once they have chosen characters. */
-function begin(actor: ReturnType<typeof lobby>, start: Start) {
-	for (let round = 0; round < 2 && phase(actor) === 'lobby'; round++)
-		for (const player of tablePlayers(worldOf(actor).table)) send(actor, { type: 'READY', player, start });
+/** Ensures every seated player has claimed or created a character for each seat they hold. */
+function pickCharacters(actor: ReturnType<typeof lobby>) {
+	const world = worldOf(actor);
+	for (const player of tablePlayers(world.table)) {
+		const seats = world.table.seats.filter(entry => entry.player === player);
+		const name = seats[0]!.name;
+		let owned = Object.values(worldOf(actor).campaign.characters).filter(
+			character => character.player === player && !character.dead && !character.worker,
+		).length;
+		for (let n = owned + 1; n <= seats.length; n++) {
+			const current = worldOf(actor);
+			const spare = Object.values(current.campaign.characters).find(
+				character => !character.dead && !character.worker && !character.player,
+			);
+			if (spare) send(actor, { type: 'CLAIM', player, character: spare.id });
+			else
+				send(actor, {
+					type: 'CREATE_CHARACTER',
+					name: n === 1 ? name : `${name} ${n}`,
+					job: freeJob(current),
+					home: HAVEN,
+					player,
+				});
+			owned++;
+		}
+	}
 }
 
-test('the lobby picks the game everyone readies for, then starts it once everyone is ready with characters', () => {
+/** Everyone agrees on the game at month 0, picks characters if needed, then readies to start. */
+function begin(actor: ReturnType<typeof lobby>, start: Start) {
+	for (const player of tablePlayers(worldOf(actor).table)) send(actor, { type: 'READY', player, start });
+	if (phase(actor) !== 'lobby') return;
+	pickCharacters(actor);
+	for (const player of tablePlayers(worldOf(actor).table)) send(actor, { type: 'READY', player, start });
+}
+
+test('the lobby picks the game everyone readies for, requires every player to pick characters, and starts once everyone is ready', () => {
 	const actor = lobby();
 	send(actor, { type: 'READY', player: ann, start: 'prologue' });
 	send(actor, { type: 'READY', player: ben, start: 'month' });
@@ -43,6 +73,13 @@ test('the lobby picks the game everyone readies for, then starts it once everyon
 	expect(reject(worldOf(actor), 'lobby', { type: 'READY', player: ann, start: 'prologue' })).toBe(
 		'The table has chosen its game',
 	);
+	expect(reject(worldOf(actor), 'lobby', { type: 'READY', player: ann, start: 'month' })).toBe(
+		'Pick or create a character first',
+	);
+	expect(reject(worldOf(actor), 'lobby', { type: 'READY', player: ben, start: 'month' })).toBe(
+		'Pick or create a character for each seat first',
+	);
+	pickCharacters(actor);
 	send(actor, { type: 'READY', player: ann, start: 'month' });
 	expect(phase(actor)).toBe('lobby');
 	send(actor, { type: 'READY', player: ben, start: 'month' });
@@ -114,6 +151,10 @@ test('loading a mid-campaign lobby starts at the lobby before moving to characte
 	send(actor, { type: 'READY', player: ben, start: 'month' });
 	expect(phase(actor)).toBe('lobby');
 	expect(tableStart(worldOf(actor))).toBe('month');
+	expect(reject(worldOf(actor), 'lobby', { type: 'READY', player: ann, start: 'month' })).toBe(
+		'Pick or create a character first',
+	);
+	pickCharacters(actor);
 	send(actor, { type: 'READY', player: ann, start: 'month' });
 	send(actor, { type: 'READY', player: ben, start: 'month' });
 	expect(phase(actor)).toBe('setup.supply');

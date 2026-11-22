@@ -67,6 +67,7 @@
 
 	const start = $derived(tableStart(world)!);
 	const title = $derived(start === 'prologue' ? 'Prologue' : MONTHS[Math.max(1, campaign.month)]!);
+	const readyRefusal = $derived(reject(world, snap.phase, { type: 'READY', player, start }));
 	const waitingOn = $derived(
 		players.filter(who => !table.ready[who]).map(who => (who === player ? 'you' : nameOf(who))),
 	);
@@ -493,6 +494,11 @@
 			<p class="hint" aria-live="polite">
 				{#if table.seats.length < 2}
 					A game needs two seats.
+				{:else if mine.length < hands}
+					Pick or create {hands - mine.length === 1 ? 'a character' : `${hands - mine.length} characters`} before readying
+					up.
+				{:else if choosing.length}
+					Waiting for {choosing.map(nameOf).join(', ')} to pick a character.
 				{:else if waitingOn.length}
 					Waiting for {waitingOn.join(', ')}.
 					{#if waitingOn.includes('you')}
@@ -501,13 +507,18 @@
 				{:else}
 					Starting.
 				{/if}
-				{#if choosing.length}
-					A player who has not chosen is dealt a free character, or a new one named after them.
-				{/if}
 			</p>
 		</div>
 		<div class="starts">
-			<Ready {table} {player} {send} {start} label={`Ready for ${title}`} big />
+			<Ready
+				{table}
+				{player}
+				{send}
+				{start}
+				label={`Ready for ${title}`}
+				big
+				disabled={!table.ready[player] && readyRefusal !== null}
+			/>
 		</div>
 	</footer>
 </div>

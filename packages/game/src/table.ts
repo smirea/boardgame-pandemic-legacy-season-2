@@ -1,8 +1,6 @@
 import { openings } from './briefing';
-import { pack } from './content/pack';
 import { SEAT_IDS } from './helpers';
 import type { CharacterId, PlayerId, SeatId } from './ids';
-import { createCharacter } from './legacy';
 import type { Start, Table, TableBriefing, UndoVoteChoice, World } from './state';
 
 export type TableCommand =
@@ -41,6 +39,10 @@ export const tableStart = (world: World): Start | null => world.table.start;
 const bySeat = (a: { seat: SeatId }, b: { seat: SeatId }) => SEAT_IDS.indexOf(a.seat) - SEAT_IDS.indexOf(b.seat);
 const freeSeat = (table: Table) => SEAT_IDS.find(seat => !table.seats.some(entry => entry.seat === seat));
 const seated = (table: Table, player: PlayerId) => table.seats.some(entry => entry.player === player);
+const claimedCount = (world: World, player: PlayerId) =>
+	Object.values(world.campaign.characters).filter(
+		character => character.player === player && !character.dead && !character.worker,
+	).length;
 const badName = (name: string) =>
 	name.trim().length === 0 || name.length > 24 ? 'Names run from 1 to 24 characters' : null;
 
@@ -73,13 +75,18 @@ export function rejectTable(world: World, lobby: boolean, command: TableCommand)
 			)
 				? null
 				: 'Not in that seat';
-		case 'READY':
+		case 'READY': {
 			if (!lobby) return 'Not available right now';
 			if (!seated(table, command.player)) return 'Sit down first';
 			if (command.start === 'prologue' && campaign.month !== 0) return 'The prologue is over';
-			return command.start && tableStart(world) && command.start !== tableStart(world)
-				? 'The table has chosen its game'
-				: null;
+			if (command.start && tableStart(world)) {
+				if (command.start !== tableStart(world)) return 'The table has chosen its game';
+				const needed = table.seats.filter(entry => entry.player === command.player).length;
+				if (claimedCount(world, command.player) < needed)
+					return needed === 1 ? 'Pick or create a character first' : 'Pick or create a character for each seat first';
+			}
+			return null;
+		}
 		case 'CLAIM': {
 			if (!lobby) return 'Characters are chosen before a game';
 			if (!seated(table, command.player)) return 'Sit down first';
@@ -257,14 +264,12 @@ export function readyStart(table: Table, command: Extract<TableCommand, { type: 
 }
 
 /**
- * Gives every seat a character: the one its player played last, else a living one nobody at the
- * table plays, else a new one named after the player. A haven worker takes the seat only when no
- * starting job is left to make a character with.
+ * Gives every seat one of the living characters its player picked, matching the seat they played it in last when
+ * possible. Never assigns an unpicked character or invents a plain one.
  */
 export function dealTable(world: World): { seat: SeatId; character: CharacterId }[] {
 	const { campaign, table } = world;
 	const seats = table.seats.toSorted(bySeat);
-	const present = new Set(seats.map(entry => entry.player));
 	const living = Object.values(campaign.characters).filter(character => !character.dead && !character.worker);
 	const dealt = new Map<SeatId, CharacterId>();
 	const taken = () => new Set(dealt.values());
@@ -280,31 +285,8 @@ export function dealTable(world: World): { seat: SeatId; character: CharacterId 
 	for (const entry of seats) {
 		if (dealt.has(entry.seat)) continue;
 		const own = living.find(character => character.player === entry.player && !taken().has(character.id));
-		if (own) dealt.set(entry.seat, own.id);
+		if (!own) throw new Error(`Player ${entry.name} has not picked a character for ${entry.seat}`);
+		dealt.set(entry.seat, own.id);
 	}
-	const home = pack.cities.find(city => city.kind === 'haven' && !city.lost)!.id;
-	for (const entry of seats) {
-		if (dealt.has(entry.seat)) continue;
-		const spare = living.find(
-			character => !taken().has(character.id) && !(character.player && present.has(character.player)),
-		);
-		if (spare) {
-			dealt.set(entry.seat, spare.id);
-			continue;
-		}
-		const job = pack.jobs.find(
-			candidate =>
-				candidate.starting && !Object.values(campaign.characters).some(character => character.job === candidate.id),
-		);
-		const names = new Set(living.map(character => character.name));
-		let name = entry.name;
-		for (let n = 2; names.has(name); n++) name = `${entry.name} ${n}`;
-		const created = job
-			? createCharacter(campaign, { name, job: job.id, home })
-			: createCharacter(campaign, { name: 'Haven worker', job: null, home, worker: true });
-		if (!created.worker) living.push(created);
-		dealt.set(entry.seat, created.id);
-	}
-	for (const entry of seats) campaign.characters[dealt.get(entry.seat)!]!.player = entry.player;
 	return seats.map(entry => ({ seat: entry.seat, character: dealt.get(entry.seat)! }));
 }
