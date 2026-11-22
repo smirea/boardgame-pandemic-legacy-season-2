@@ -323,6 +323,8 @@ export function universe(world: World): { key: string; live: boolean }[] {
 			'giveCard',
 			'shield',
 			'cordon',
+			'reveal',
+			'search',
 			'skip',
 		].map(key => ({ key: `decide:${key}`, live: true })),
 		...['ability', 'cityImprovement', 'infectionImprovement', 'population', 'restore', 'permanent'].map(key => ({

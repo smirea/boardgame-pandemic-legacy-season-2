@@ -62,7 +62,7 @@
 	import UndoVote from './UndoVote.svelte';
 	import Upkeep from './Upkeep.svelte';
 	import RichText from './RichText.svelte';
-	import SearchReveal from './SearchReveal.svelte';
+	import RevealShow from './RevealShow.svelte';
 	import type { CityCardCopies } from './PlayerCard.svelte';
 	import { provideViewState } from './viewState.ts';
 	import type { GameUi } from '#lib/studio/scene.ts';
@@ -283,7 +283,6 @@
 			filter: choosing.filter,
 			toasts: toasts.map(({ text, tone }) => ({ text, tone })),
 			banner: banner && { title: banner.title, text: banner.text },
-			search: searchShown,
 			parts: view.read(),
 		};
 	}
@@ -308,9 +307,6 @@
 		heldAnnouncements = next.toasts.length > 0 || next.banner !== null;
 		toasts = next.toasts.map(entry => ({ id: nextFx++, ...entry }));
 		banner = next.banner && { id: nextFx++, ...next.banner };
-		// A scene keeps the result up until it is clicked away, so loading and capturing it never races the timer.
-		clearTimeout(searchTimer);
-		searchShown = next.search ?? null;
 		view.write(next.parts);
 		board?.setCamera(next.camera);
 		for (const [index, entry] of next.steps.entries()) {
@@ -377,6 +373,11 @@
 		});
 	});
 	/** Anything that covers the board. While one does, Show board lifts it off the table and puts it back. */
+	/** Cards a Monitor, a Cautious Approach or a search turned over, in front of the whole table until put away. */
+	const revealing = $derived.by(() => {
+		const pending = playing ? game?.pending[0] : undefined;
+		return pending?.t === 'reveal' || pending?.t === 'search' ? pending : null;
+	});
 	const covered = $derived(
 		briefingOpen ||
 			recap !== null ||
@@ -388,6 +389,7 @@
 			boxOpen ||
 			deckOpen ||
 			scannerOpen ||
+			revealing !== null ||
 			choosing.chooser?.action === 'monitor',
 	);
 	let peeking = $state(false);
@@ -403,31 +405,6 @@
 	let fx = $state.raw<Fx[]>([]);
 	let toasts = $state.raw<{ id: number; text: string; tone: string }[]>([]);
 	let banner = $state.raw<{ id: number; title: string; text: string } | null>(null);
-	/** The search whose card is up, by its line in the log. */
-	let searchShown = $state.raw<number | null>(null);
-	let searchTimer: ReturnType<typeof setTimeout> | undefined;
-	const SEARCH_UP_MS = 6500;
-
-	function showSearch(seq: number | null) {
-		clearTimeout(searchTimer);
-		searchShown = seq;
-		if (seq !== null) searchTimer = setTimeout(() => (searchShown = null), SEARCH_UP_MS);
-	}
-
-	const searchReveal = $derived.by(() => {
-		const entry = searchShown === null ? null : game?.log.find(line => line.seq === searchShown);
-		if (entry?.t !== 'search') return null;
-		const card = campaign.playerCards[entry.card];
-		if (card?.kind !== 'city' || !game) return null;
-		return {
-			seq: entry.seq,
-			who: seatName(world, entry.seat),
-			color: SEAT_COLORS[game.seats.indexOf(entry.seat)] ?? '#f4e8cd',
-			city: cityName(entry.city),
-			card,
-			box: entry.box,
-		};
-	});
 	let lastSeq = untrack(() => game?.log.at(-1)?.seq ?? 0);
 	let lastGame = untrack(() => campaign.results.length);
 	let nextFx = 1;
@@ -454,7 +431,6 @@
 				toasts = [];
 				banner = null;
 				fx = [];
-				showSearch(null);
 			});
 			return;
 		}
@@ -491,7 +467,6 @@
 			else if (entry.t === 'exposure' && entry.result === 'scar')
 				toast(`${seatName(world, entry.seat)} takes a scar`, 'bad');
 			else if (entry.t === 'note') toast(entry.text, 'good');
-			else if (entry.t === 'search') untrack(() => showSearch(entry.seq));
 		}
 		untrack(() => {
 			fx = [...fx, ...added];
@@ -1163,21 +1138,6 @@
 			{/key}
 		{/if}
 
-		{#if searchReveal}
-			{#key searchReveal.seq}
-				<div class="search-reveal">
-					<SearchReveal
-						who={searchReveal.who}
-						color={searchReveal.color}
-						city={searchReveal.city}
-						card={searchReveal.card}
-						box={searchReveal.box}
-						onclose={() => showSearch(null)}
-					/>
-				</div>
-			{/key}
-		{/if}
-
 		{#if nextUp && !banner}
 			{#key nextUp.key}
 				<TurnInterlude
@@ -1298,6 +1258,18 @@
 					onaside={aside => (upkeepAsideChosen = aside)}
 					onskip={() => population.stop()}
 				/>
+			</div>
+		{/if}
+
+		{#if revealing && game}
+			<div
+				class="scrim tabletop reveal-scrim"
+				role="dialog"
+				aria-modal="true"
+				aria-label="Cards turned over"
+				transition:fade={{ duration: 220 }}
+			>
+				<RevealShow {world} pending={revealing} mine={!spectator && owns(revealing.seat)} {send} />
 			</div>
 		{/if}
 
@@ -1811,14 +1783,6 @@
 		text-align: right;
 	}
 
-	.search-reveal {
-		position: absolute;
-		top: 8.5rem;
-		left: 50%;
-		z-index: 44;
-		transform: translateX(-50%);
-	}
-
 	.toasts {
 		position: absolute;
 		top: 5.6rem;
@@ -1992,6 +1956,13 @@
 
 	.scrim.scar-scrim {
 		z-index: 65;
+	}
+
+	.scrim.reveal-scrim {
+		display: grid;
+		place-items: center;
+		padding: 1rem;
+		z-index: 64;
 	}
 
 	.scrim.undo-scrim {

@@ -16,6 +16,7 @@ export {
 } from './actions';
 export type { Decide, Play } from './plays';
 export { playDetail } from './plays';
+export { REVEAL_COUNT, revealDone, revealOutcome } from './reveal';
 export type { Purchase } from './legacy';
 export type { DossierSlot, DossierView, RulebookBlock, RulebookChapter, RulebookSection } from './dossier';
 export { dossierView, rulebook, stickerStock } from './dossier';
@@ -92,7 +93,7 @@ export {
 export { freeCharacters, scarTargets } from './flow';
 export { botCommand } from './bot';
 export { campaignAt, scenarios } from './scenarios';
-export { give, stackInfection } from './testkit';
+export { give, showReveals, stackInfection } from './testkit';
 export type {
 	GameNotes,
 	GameRecord,

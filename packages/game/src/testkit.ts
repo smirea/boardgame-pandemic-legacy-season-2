@@ -34,6 +34,13 @@ export function setUp(actor: GameActor) {
 export const passTurn = (actor: GameActor) => send(actor, { type: 'END_TURN', seat: gameOf(actor).active });
 
 export const act = (actor: GameActor, action: Action, seat = A) => send(actor, { type: 'ACTION', seat, action });
+/** Turns over every card a Monitor or Cautious Approach reveals and lets a scratched search take effect. */
+export function showReveals(actor: GameActor) {
+	for (let pending = gameOf(actor).pending[0]; pending?.t === 'reveal' || pending?.t === 'search';) {
+		send(actor, { type: 'DECIDE', decide: { d: pending.t } });
+		pending = gameOf(actor).pending[0];
+	}
+}
 export const refuses = (actor: GameActor, action: Action, seat = A) =>
 	reject(worldOf(actor), phase(actor), { type: 'ACTION', seat, action });
 export const character = (world: World, seat: SeatId) =>

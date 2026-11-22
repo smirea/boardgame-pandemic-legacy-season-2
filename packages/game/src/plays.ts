@@ -1,7 +1,7 @@
-import { addEdge, checkEdge } from './actions';
+import { addEdge, checkEdge, finishSearch } from './actions';
 import { pack } from './content/pack';
 import type { AbilityId, Color, ScarId } from './content/types';
-import { drawPiled, restackTop } from './decks';
+import { restackTop } from './decks';
 import {
 	canTakeScar,
 	epidemicIncrease,
@@ -29,7 +29,8 @@ import {
 import type { CardId, CharacterId, CityId, SeatId } from './ids';
 import { createCharacter } from './legacy';
 import type { Phase } from './machine';
-import type { Game, World } from './state';
+import { startReveal, stepReveal } from './reveal';
+import type { Decision, Game, World } from './state';
 
 const isGridCity = (onGrid: Set<CityId>, city: CityId) => onGrid.has(city) && cityDef(city).kind === 'city';
 
@@ -140,6 +141,7 @@ export function checkPlay(world: World, seat: SeatId, card: CardId, play: Play, 
 	// An Epidemic that has been started is the table's exception: any Event may be played between its steps.
 	const unresolved = game.pending[0]?.t;
 	if (unresolved === 'shield' || unresolved === 'cordon') return 'Resolve the card that was just drawn first';
+	if (unresolved === 'reveal' || unresolved === 'search') return 'Let the table see what was turned over first';
 	// A designer ruling: a Gather card and the city it gathers in are one draw, with no Event window between them.
 	if (game.gathering) return 'Flip the card the Hollow Men gather in first';
 	if (unresolved === 'epidemicDrawn' && play.e !== 'antidote') return 'The Epidemic must strike first';
@@ -458,21 +460,7 @@ function resolvePlay(world: World, seat: SeatId, card: CardId, play: Play) {
 			return;
 		}
 		case 'scavenge':
-			{
-				const kept: CardId[] = [];
-				const dropped: CardId[] = [];
-				for (let i = 0; i < 4 && game.playerDeck.order.length > 0; i++) {
-					const drawn = drawPiled(game.playerDeck, id => campaign.playerCards[id]!.kind === 'epidemic')!;
-					(campaign.playerCards[drawn]!.kind === 'city' ? kept : dropped).push(drawn);
-				}
-				player(game, game.active).hand.push(...kept);
-				game.playerDiscard.push(...dropped);
-				const names = (cards: CardId[]) => cards.map(id => cardLabel(campaign, id)).join(', ') || 'nothing';
-				log(game, {
-					t: 'note',
-					text: `Cautious Approach kept ${names(kept)} and discarded ${names(dropped)} with no effect`,
-				});
-			}
+			startReveal(game, game.active, { t: 'scavenge' });
 			return;
 		case 'openWaters':
 			addEdge(world, player(game, game.active).location, play.to, 'sea', true);
@@ -550,6 +538,10 @@ export type Decide =
 	| { d: 'giveCard'; card: CardId; to: SeatId }
 	| { d: 'shield'; seat: SeatId; card: CardId }
 	| { d: 'cordon'; seat: SeatId; card: CardId }
+	/** Turns over the next card of a reveal, or puts them all away once every one is face up. */
+	| { d: 'reveal' }
+	/** The table has seen the search: what it found happens. */
+	| { d: 'search' }
 	| { d: 'skip' };
 
 const PASSED: Partial<Record<string, string>> = {
@@ -638,6 +630,9 @@ export function checkDecide(world: World, decide: Decide): string | null {
 		}
 		case 'cordon':
 			return game.players[decide.seat]?.hand.includes(decide.card) ? ok : 'Discard a card from a hand';
+		case 'reveal':
+		case 'search':
+			return ok;
 		case 'shield': {
 			const card = campaign.playerCards[decide.card];
 			const color = (pending as { color: string }).color;
@@ -665,6 +660,7 @@ export function applyDecide(world: World, decide: Decide) {
 		}
 		return;
 	}
+	if (decide.d === 'reveal' && pending?.t === 'reveal') return stepReveal(world, pending);
 	if (decide.d === 'removeHollow' && pending?.t === 'removeHollow') {
 		game.locations[decide.city]!.hollow -= 1;
 		game.pieces.hollow += 1;
@@ -753,6 +749,10 @@ export function applyDecide(world: World, decide: Decide) {
 				text: `${characterOf(world, decide.seat).name} discarded a card for Broken Link: the rest of this Infect step is called off`,
 			});
 			return;
+		case 'search': {
+			const { card, box } = pending as Extract<Decision, { t: 'search' }>;
+			return finishSearch(world, seat, card, box);
+		}
 		case 'shield': {
 			const city = (pending as { city: CityId }).city;
 			discardFromHand(game, decide.seat, decide.card);

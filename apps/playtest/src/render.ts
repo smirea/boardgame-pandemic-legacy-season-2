@@ -74,6 +74,13 @@ function pendingLine(world: World, pending: Decision): string {
 			return 'Cordon: any player may discard a card to end this Infect step now, or the active player skips';
 		case 'shield':
 			return `Shield: any player may discard a ${pending.color} City card to save the cubes in ${cityName(world, pending.city)}, or skip`;
+		case 'reveal': {
+			const source = pending.by.t === 'monitor' ? 'Monitor' : 'Cautious Approach';
+			const shown = pending.cards.map(id => cardName(world, id)).join(', ') || 'none yet';
+			return `${source} is turning over the top Player cards (${shown}). ${who} turns the next one, then puts them away, with \`do decide:reveal\``;
+		}
+		case 'search':
+			return `${who} scratched a search box open. Its result happens when ${who} continues with \`do decide:search\``;
 	}
 }
 
@@ -203,6 +210,11 @@ export function renderLog(world: World, entry: LogEntry): string {
 			return `OBJECTIVE COMPLETE: ${objectiveDef(entry.objective).name}`;
 		case 'search':
 			return `${seat(entry.seat)} searched ${city(entry.city)} and found: ${SEARCH_FINDS[entry.result]}${searched(world, entry.card, entry.box)}`;
+		case 'revealed': {
+			const names = (cards: CardId[]) => cards.map(id => `[${cardName(world, id)}]`).join(', ') || 'nothing';
+			const source = entry.by.t === 'monitor' ? 'Monitor' : 'Cautious Approach';
+			return `${source} revealed ${names(entry.cards)}; ${seat(entry.seat)} kept ${names(entry.kept)}, the rest went to the discard pile with no effect`;
+		}
 		case 'note':
 			return entry.text;
 		case 'end':

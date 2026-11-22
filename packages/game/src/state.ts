@@ -195,7 +195,13 @@ export type Decision =
 	/** Step 2 (Infect) is done; waiting for Step 3 (Intensify) and any discard-pile Events or Lockdown. */
 	| { t: 'intensify' }
 	/** Any player may discard a card of this colour to stop the pending cube removal. */
-	| { t: 'shield'; city: CityId; color: Color };
+	| { t: 'shield'; city: CityId; color: Color }
+	/** Cards turned over from the top of the Player deck, one command each, in front of the whole table. */
+	| { t: 'reveal'; seat: SeatId; by: RevealSource; cards: CardId[] }
+	/** A search box was scratched open. Its result happens once its player has shown it to the table. */
+	| { t: 'search'; seat: SeatId; card: CardId; box: number };
+
+export type RevealSource = { t: 'monitor'; frequency: number } | { t: 'scavenge' };
 
 export type LogEntry = { seq: number } & (
 	| { t: 'turn'; seat: SeatId }
@@ -222,6 +228,7 @@ export type LogEntry = { seq: number } & (
 	| { t: 'unlock'; seal: SealKey; forced: boolean }
 	| { t: 'objective'; objective: ObjectiveId }
 	| { t: 'search'; seat: SeatId; city: CityId; card: CardId; box: number; result: SearchResult['t'] }
+	| { t: 'revealed'; seat: SeatId; by: RevealSource; cards: CardId[]; kept: CardId[] }
 	| { t: 'note'; text: string }
 	| { t: 'end'; won: boolean; reason: string }
 );

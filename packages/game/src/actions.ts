@@ -1,6 +1,6 @@
 import { pack } from './content/pack';
 import type { ActionId, CityDef, CompanionId, EdgeKind, RuleId, SearchResult } from './content/types';
-import { drawPiled } from './decks';
+import { startReveal } from './reveal';
 import {
 	bump,
 	checkDelivery,
@@ -13,7 +13,6 @@ import {
 	towerColours,
 } from './flow';
 import {
-	cardLabel,
 	cardValue,
 	characterOf,
 	cityDef,
@@ -261,6 +260,15 @@ function resolveSearch(ctx: Ctx, result: SearchResult, card: CardId) {
 		case 'nothing':
 			return;
 	}
+}
+
+/** What a scratched search box does, once the table has seen it. */
+export function finishSearch(world: World, seat: SeatId, card: CardId, box: number) {
+	const ctx = context(world, seat);
+	const held = ctx.campaign.playerCards[card]!;
+	if (held.kind !== 'city') return;
+	resolveSearch(ctx, held.search[box]!.result, card);
+	if (trait(ctx, 'searchDiscard') && ctx.me.hand.includes(card)) discardFromHand(ctx.game, ctx.seat, card);
 }
 
 const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
@@ -524,9 +532,8 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 			target.scratched = true;
 			ctx.game.searches += 1;
 			log(ctx.game, { t: 'search', seat: ctx.seat, city: ctx.here, card, box, result: target.result.t });
-			resolveSearch(ctx, target.result, card);
 			bump(ctx.world, 'searches');
-			if (trait(ctx, 'searchDiscard') && ctx.me.hand.includes(card)) discardFromHand(ctx.game, ctx.seat, card);
+			ctx.game.pending.push({ t: 'search', seat: ctx.seat, card, box });
 		},
 	},
 	shuttle: {
@@ -583,28 +590,8 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 			return ctx.game.playerDeck.order.length >= 4 ? ok : 'Fewer than 4 Player cards are left';
 		},
 		apply(ctx, { frequency }) {
-			const revealed: CardId[] = [];
-			for (let i = 0; i < 4 && ctx.game.playerDeck.order.length > 0; i++)
-				revealed.push(drawPiled(ctx.game.playerDeck, card => ctx.campaign.playerCards[card]!.kind === 'epidemic')!);
-			ctx.game.playerDiscard.push(...revealed);
 			ctx.campaign.frequenciesUsed.push(frequency);
-			const reward = pack.frequencies[frequency];
-			// Only what this Monitor revealed may be kept, never an older discard.
-			const keep =
-				reward && 'take' in reward
-					? revealed
-							.filter(id => ctx.campaign.playerCards[id]!.kind !== 'epidemic')
-							.toReversed()
-							.slice(0, reward.take)
-					: [];
-			const names = (cards: CardId[]) => cards.map(id => cardLabel(ctx.campaign, id)).join(', ') || 'nothing';
-			log(ctx.game, {
-				t: 'note',
-				text: `Monitor revealed ${names(revealed)}${keep.length ? `. ${characterOf(ctx.world, ctx.seat).name} kept ${names(keep)}` : ''}. The rest went to the discard pile. An Epidemic revealed this way has no effect`,
-			});
-			if (reward && 'seal' in reward) openSeal(ctx.world, reward.seal, false, ctx.seat);
-			ctx.game.playerDiscard = ctx.game.playerDiscard.filter(id => !keep.includes(id));
-			ctx.me.hand.push(...keep);
+			startReveal(ctx.game, ctx.seat, { t: 'monitor', frequency });
 		},
 	},
 	broadcast: {

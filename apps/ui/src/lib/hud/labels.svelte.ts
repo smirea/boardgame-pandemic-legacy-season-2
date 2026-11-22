@@ -1,4 +1,4 @@
-import { characterAt, cityDef, handLimit, has, pack, routeCost, sealDef, suppliesMade } from '@repo/game';
+import { characterAt, cityDef, handLimit, has, pack, revealDone, routeCost, sealDef, suppliesMade } from '@repo/game';
 import type { Action, CardId, CityId, Decide, Decision, LogEntry, Play, Purchase, SeatId, World } from '@repo/game';
 import { CITY_COLOR } from '#lib/board/CityMarker.svelte';
 import { cardColor } from './PlayerCard.svelte';
@@ -463,6 +463,14 @@ export function decideLabel(world: World, decide: Decide): string {
 			return `Give ${cardName(world, decide.card)} to ${seatName(world, decide.to)}`;
 		case 'shield':
 			return `${seatName(world, decide.seat)} discards ${cardName(world, decide.card)}`;
+		case 'reveal': {
+			const pending = world.game?.pending[0];
+			return pending?.t === 'reveal' && !revealDone(world.game!, pending)
+				? 'Turn over the next card'
+				: 'Put the cards away';
+		}
+		case 'search':
+			return 'Continue';
 		case 'skip': {
 			const pending = world.game?.pending[0]?.t;
 			if (pending === 'epidemicDrawn') return 'Start Epidemic';
@@ -489,6 +497,8 @@ const DECISION_TITLES: Record<Decision['t'], string> = {
 	epidemicInfect: 'Epidemic Step 2: Infect — draw the bottom Infection card.',
 	intensify:
 		'Epidemic Step 3: Intensify — play Resilient Population, Inoculation Unit, Relocation, or Lockdown now, or reshuffle.',
+	reveal: 'Turn over the top Player cards',
+	search: 'Show the table what the search found',
 };
 
 /** The prompt for a pending choice, naming who and where it concerns. */

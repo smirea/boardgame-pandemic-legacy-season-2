@@ -47,6 +47,7 @@ import {
 	passTurn,
 	phase,
 	refuses,
+	showReveals,
 	send,
 	setUp,
 	stackInfection,
@@ -256,6 +257,7 @@ describe('building', () => {
 		expect(gameOf(actor).players[C]!.hand).toEqual([lagos!]);
 		const discards = gameOf(actor).playerDiscard.length;
 		act(actor, { a: 'monitor', frequency: 3 });
+		showReveals(actor);
 		expect(gameOf(actor).playerDiscard.length).toBe(discards + 4);
 		expect(worldOf(actor).campaign.routes).toContain('hidden:east-asia');
 		expect(refuses(actor, { a: 'monitor', frequency: 3 })).toContain('used up');
@@ -328,6 +330,7 @@ describe('exploring', () => {
 			edit?.(world);
 		});
 		act(actor, { a: 'search', card: gameOf(actor).players[A]!.hand[0]!, box: 0 });
+		showReveals(actor);
 		return actor;
 	};
 
@@ -472,6 +475,7 @@ describe('exploring', () => {
 			game.players[A]!.location = city('denver');
 		});
 		act(actor, { a: 'search', card: cityCards(worldOf(actor), 'denver')[0]!, box: 0 });
+		showReveals(actor);
 		expect(gameOf(actor).searches).toBe(1);
 	});
 
@@ -1044,6 +1048,7 @@ describe('events and companions', () => {
 			const play = legalPlays(before, 'playing.actions').find(option => option.card === card);
 			expect(play).toBeDefined();
 			send(actor, { type: 'PLAY', ...play! });
+			showReveals(actor);
 			checks[event.id as EventId]!(before, worldOf(actor));
 			expect(gameOf(actor).playerDiscard).toContain(card);
 		});
@@ -1378,6 +1383,7 @@ describe('game end and the campaign', () => {
 		act(actor, { a: 'makeSupplies' });
 		expect(publicState(actor.getSnapshot()).canUndo).toBe(true);
 		act(actor, { a: 'search', card, box: 0 });
+		showReveals(actor);
 		expect(publicState(actor.getSnapshot()).canUndo).toBe(true);
 		expect(scratched()).toBe(true);
 
@@ -1518,6 +1524,7 @@ describe('game end and the campaign', () => {
 		const deckBefore = [...gameOf(actor).playerDeck.order];
 
 		act(actor, { a: 'monitor', frequency: 8 });
+		showReveals(actor);
 		expect(gameOf(actor).players[A]!.hand).toHaveLength(8);
 		send(actor, { type: 'DECIDE', decide: { d: 'discard', seat: A, cards: [handBefore[0]!] } });
 		expect(gameOf(actor).players[A]!.hand).toHaveLength(7);
@@ -1532,6 +1539,26 @@ describe('game end and the campaign', () => {
 	});
 });
 
+test('Monitor turns over one card per command, and the cards reach a hand or the discard pile only once put away', () => {
+	const actor = late((world, game) => {
+		world.campaign.frequenciesUsed = [];
+		game.players[A]!.location = city('lagos');
+		game.locations[city('lagos')]!.tower = true;
+	});
+	const top = gameOf(actor).playerDeck.order.slice(0, 4);
+	const hand = gameOf(actor).players[A]!.hand.length;
+	const discards = gameOf(actor).playerDiscard.length;
+	act(actor, { a: 'monitor', frequency: 4 });
+	for (let turned = 1; turned <= 4; turned++) {
+		send(actor, { type: 'DECIDE', decide: { d: 'reveal' } });
+		expect(gameOf(actor).pending[0]).toMatchObject({ t: 'reveal', cards: top.slice(0, turned) });
+		expect(gameOf(actor).players[A]!.hand.length + gameOf(actor).playerDiscard.length).toBe(hand + discards);
+	}
+	send(actor, { type: 'DECIDE', decide: { d: 'reveal' } });
+	expect(gameOf(actor).pending).toEqual([]);
+	expect(gameOf(actor).players[A]!.hand.length + gameOf(actor).playerDiscard.length).toBe(hand + discards + 4);
+});
+
 test('Monitor frequencies that keep cards take the newest non-Epidemic discards', () => {
 	const actor = late((world, game) => {
 		world.campaign.frequenciesUsed = [];
@@ -1542,6 +1569,7 @@ test('Monitor frequencies that keep cards take the newest non-Epidemic discards'
 		.playerDeck.order.slice(0, 4)
 		.filter(id => worldOf(actor).campaign.playerCards[id]!.kind !== 'epidemic');
 	act(actor, { a: 'monitor', frequency: 4 });
+	showReveals(actor);
 	expect(gameOf(actor).players[A]!.hand).toHaveLength(Math.min(2, top.length));
 	expect(top).toEqual(expect.arrayContaining(gameOf(actor).players[A]!.hand));
 });
@@ -2647,6 +2675,7 @@ test('Monitor keeps only cards it revealed, never an older discard', () => {
 	});
 	const frequency = pack.frequencies.findIndex(reward => reward && 'take' in reward);
 	act(actor, { a: 'monitor', frequency });
+	showReveals(actor);
 	expect(gameOf(actor).players[A]!.hand).toEqual([]);
 	expect(gameOf(actor).playerDiscard).toContain(cityCards(worldOf(actor), 'london', 1)[0]!);
 });
@@ -3415,6 +3444,7 @@ describe('scars and the sticker pool', () => {
 		});
 		const card = gameOf(actor).players[A]!.hand[0]!;
 		act(actor, { a: 'search', card, box: 0 });
+		showReveals(actor);
 		expect(gameOf(actor).players[A]!.hand).not.toContain(card);
 		expect(gameOf(actor).playerDiscard).toContain(card);
 	});
@@ -3524,6 +3554,7 @@ describe('card states, improvements and companion audit', () => {
 			game.playerDeck.piles = [{ size: game.playerDeck.order.length, epidemics: 0 }];
 		});
 		send(actor, { type: 'PLAY', seat: B, card: eventCard, play: { e: 'scavenge' } });
+		showReveals(actor);
 		expect(gameOf(actor).players[A]!.hand).toContain(keptCity);
 		expect(gameOf(actor).players[B]!.hand).not.toContain(keptCity);
 		expect(gameOf(actor).playerDiscard).toContain(discardedEvent);
@@ -3564,6 +3595,7 @@ describe('card states, improvements and companion audit', () => {
 		});
 		const moscow = gameOf(actor).players[A]!.hand[0]!;
 		act(actor, { a: 'search', card: moscow, box: 0 });
+		showReveals(actor);
 		expect(gameOf(actor).players[A]!.hand).toEqual([]);
 		expect(gameOf(actor).pending).toEqual([]);
 	});

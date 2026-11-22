@@ -43,8 +43,6 @@ export type GameUi = {
 	filter: string;
 	toasts: Announcement[];
 	banner: { title: string; text: string } | null;
-	/** The log line of the search whose result is up. */
-	search?: number | null;
 	/** State kept by the panels inside the screen, by the name each registers under `keep` (`hud/viewState.ts`). */
 	parts: Record<string, unknown>;
 };
