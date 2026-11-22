@@ -45,7 +45,7 @@ export type CityView = {
 	labInfo: LabInfo | null;
 	highlight: CityHighlight;
 	/** The city's Infection cards and its chance of being hit in the next Infect step, while a game is played. */
-	infection: { odds: number; inDeck: number; discarded: number } | null;
+	infection: { odds: number; hollow: number | null; inDeck: number; discarded: number } | null;
 	/** Where the city's player cards are, while a game is played. */
 	cards: PlayerCardsAt | null;
 	/** The city's Infection cards across the campaign: still in the deck or its discard pile, and inoculated. */
