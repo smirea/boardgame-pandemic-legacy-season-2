@@ -1,13 +1,7 @@
 import { pack } from '@repo/game';
 import type { PlayerCard } from '@repo/game';
-import {
-	COMPANION_ICON,
-	EPIDEMIC_ICON,
-	EVENT_ICON,
-	IMPROVEMENT_MARK,
-	PRODUCE_ICON,
-	SEARCH_ICON,
-} from '#lib/cards/icons.ts';
+import { COMPANION_ICON, EPIDEMIC_ICON, IMPROVEMENT_MARK, PRODUCE_ICON, SEARCH_ICON } from '#lib/cards/icons.ts';
+import { eventArtUrl } from '#lib/cards/playerPrint.ts';
 import { regionOf, sortHand } from './handOrder.ts';
 import { cardColor } from './PlayerCard.svelte';
 
@@ -18,6 +12,8 @@ export type HandGroup = {
 	/** The colour its cards' faces wear (`cardColor`), so a pile never disagrees with the cards in it. */
 	color: string;
 	icon?: string;
+	/** The card's own emblem, as its face prints it, shown in place of an icon. */
+	art?: string;
 	/** A short mark printed instead of an icon, such as an improvement's card value. */
 	mark?: string;
 	/** What is in the group, card by card, for the tooltip. */
@@ -98,7 +94,7 @@ function describe(key: string, cards: PlayerCard[], name: (card: PlayerCard) => 
 				key,
 				cards,
 				color: cardColor(card),
-				icon: EVENT_ICON[card.event],
+				art: eventArtUrl(card.event),
 				title: `${listed} (event${mode}): ${event.text}`,
 			};
 		}

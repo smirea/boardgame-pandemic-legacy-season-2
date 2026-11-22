@@ -283,7 +283,8 @@
 						></i>
 					{/each}
 					<span class="face">
-						{#if group.icon}<CardIcon path={group.icon} size="0.95rem" />{/if}
+						{#if group.art}<i class="art" style:--art="url({group.art})"></i>
+						{:else if group.icon}<CardIcon path={group.icon} size="0.95rem" />{/if}
 						{#if group.mark}<em>{group.mark}</em>{/if}
 						{#if group.cards.length > 1}
 							{#key group.cards.length}<b in:scale={{ start: 1.6, duration: 260 }}>{group.cards.length}</b>{/key}
@@ -826,6 +827,14 @@
 		font-size: 1.45rem;
 		font-weight: 400;
 		line-height: 1;
+	}
+
+	/* The emblem on the card's face, inked in the pile's colour like an icon. */
+	.face .art {
+		width: 1.6rem;
+		height: 1.6rem;
+		background: currentColor;
+		mask: var(--art) center / contain no-repeat;
 	}
 
 	.face em {
