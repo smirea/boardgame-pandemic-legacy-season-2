@@ -7,6 +7,7 @@
 	import { legacyScans } from '#lib/scans.generated.ts';
 	import { playerCardScan, scanUrl } from '#lib/scans.svelte.ts';
 	import PlayerCard, { HAND_CARD_SIZE } from '#lib/hud/PlayerCard.svelte';
+	import type { CityCardCopies } from '#lib/hud/PlayerCard.svelte';
 
 	// Every card comes from a fresh campaign, so this page shows exactly what the generator produces.
 	const campaign = createGameActor({ seed: 1 }).getSnapshot().context.world.campaign;
@@ -24,40 +25,131 @@
 	};
 	const playerCards = firstPerCity(Object.values(campaign.playerCards)) as PlayerCardData[];
 	const infectionCards = firstPerCity(Object.values(campaign.infectionCards)) as InfectionCardData[];
-	const extras: PlayerCardData[] = [
+	const improvementCities = ['new-york', 'sao-paulo', 'cairo', 'ho-chi-minh-city'] as const;
+	const extras: { card: PlayerCardData; copies?: CityCardCopies }[] = [
 		...pack.cityImprovements.map((improvement, index) => ({
-			id: `i${index}` as never,
-			kind: 'city' as const,
-			city: 'new-york' as never,
-			improvement: improvement.id,
-			search: [],
-			companion: null,
-		})),
-		...pack.companions.map((companion, index) => ({
-			id: `c${index}` as never,
-			kind: 'city' as const,
-			city: 'cairo' as never,
-			improvement: null,
-			search: [],
-			companion: companion.id,
+			card: {
+				id: `i${index}` as never,
+				kind: 'city' as const,
+				city: improvementCities[index % improvementCities.length] as never,
+				improvement: improvement.id,
+				search: [],
+				companion: null,
+			},
 		})),
 		{
-			id: 'ic-combo' as never,
-			kind: 'city' as const,
-			city: 'london' as never,
-			improvement: 'wild' as const,
-			search: [{ scope: 'land' as const, result: null as never, scratched: false }],
-			companion: 'trader' as const,
+			card: {
+				id: 'search-1' as never,
+				kind: 'city' as const,
+				city: 'chicago' as never,
+				improvement: null,
+				search: [{ scope: 'land' as const, result: { t: 'nothing' as const }, scratched: false }],
+				companion: null,
+			},
+		},
+		{
+			card: {
+				id: 'search-2' as never,
+				kind: 'city' as const,
+				city: 'new-mumbai' as never,
+				improvement: null,
+				search: [
+					{ scope: 'land' as const, result: { t: 'nothing' as const }, scratched: false },
+					{ scope: 'sea' as const, result: { t: 'nothing' as const }, scratched: false },
+				],
+				companion: null,
+			},
+			copies: { live: 1, discarded: 1, trashed: 0 },
+		},
+		{
+			card: {
+				id: 'search-2-upgrade' as never,
+				kind: 'city' as const,
+				city: 'new-mumbai' as never,
+				improvement: 'double' as const,
+				search: [
+					{ scope: 'land' as const, result: { t: 'nothing' as const }, scratched: false },
+					{ scope: 'sea' as const, result: { t: 'nothing' as const }, scratched: false },
+				],
+				companion: null,
+			},
+		},
+		{
+			card: {
+				id: 'search-1-upgrade' as never,
+				kind: 'city' as const,
+				city: 'st-petersburg' as never,
+				improvement: 'wild' as const,
+				search: [
+					{ scope: 'land' as const, result: { t: 'nothing' as const }, scratched: true },
+					{ scope: 'sea' as const, result: { t: 'nothing' as const }, scratched: false },
+				],
+				companion: null,
+			},
+		},
+		{
+			card: {
+				id: 'pips-mixed' as never,
+				kind: 'city' as const,
+				city: 'washington' as never,
+				improvement: null,
+				search: [],
+				companion: null,
+			},
+			copies: { live: 2, discarded: 1, trashed: 1 },
+		},
+		{
+			card: {
+				id: 'pips-discarded' as never,
+				kind: 'city' as const,
+				city: 'dar-es-salaam' as never,
+				improvement: null,
+				search: [],
+				companion: null,
+			},
+			copies: { live: 0, discarded: 1, trashed: 1 },
+		},
+		...pack.companions.map((companion, index) => ({
+			card: {
+				id: `c${index}` as never,
+				kind: 'city' as const,
+				city: 'cairo' as never,
+				improvement: null,
+				search: [],
+				companion: companion.id,
+			},
+		})),
+		{
+			card: {
+				id: 'ic-combo' as never,
+				kind: 'city' as const,
+				city: 'lima' as never,
+				improvement: 'wild' as const,
+				search: [
+					{ scope: 'land' as const, result: { t: 'companion' as const, companion: 'medic' as const }, scratched: true },
+					{ scope: 'sea' as const, result: { t: 'nothing' as const }, scratched: false },
+				],
+				companion: 'medic' as const,
+			},
 		},
 		...pack.events.map((event, index) => ({
-			id: `e${index}` as never,
-			kind: 'event' as const,
-			event: event.id,
-			mode: EVENT_PRINT[event.id].mode,
+			card: {
+				id: `e${index}` as never,
+				kind: 'event' as const,
+				event: event.id,
+				mode: EVENT_PRINT[event.id].mode,
+			},
 		})),
 	];
+	const allPlayerItems = [...playerCards.map(card => ({ card, copies: undefined })), ...extras];
 	const playerScanOf = (card: PlayerCardData): string | null => playerCardScan(card)?.card.src ?? null;
 	const hollow: InfectionCardData[] = [
+		...pack.infectionImprovements.map((improvement, index) => ({
+			id: `inf-imp-${index}` as never,
+			kind: 'city' as const,
+			city: improvementCities[index % improvementCities.length] as never,
+			improvement: improvement.id,
+		})),
 		{ id: 'g' as never, kind: 'gather' },
 		{ id: 'a' as never, kind: 'assemble' },
 	];
@@ -91,16 +183,16 @@
 		>
 	</header>
 	<h2>Player cards</h2>
-	<section data-testid="player-cards">
-		{#each [...playerCards, ...extras] as card (card.id)}
-			{@const scan = comparePlayer ? playerScanOf(card) : null}
+	<section class="player-grid" data-testid="player-cards">
+		{#each allPlayerItems as item (item.card.id)}
+			{@const scan = comparePlayer ? playerScanOf(item.card) : null}
 			{#if scan}
-				<div class="player-pair" data-player-card={card.id}>
-					<PlayerCard {card} />
-					<img class="player-scan" src={scanUrl(scan)} alt={`${card.id} printed`} />
+				<div class="player-pair" data-player-card={item.card.id}>
+					<PlayerCard card={item.card} copies={item.copies} />
+					<img class="player-scan" src={scanUrl(scan)} alt={`${item.card.id} printed`} />
 				</div>
 			{:else}
-				<PlayerCard {card} />
+				<PlayerCard card={item.card} copies={item.copies} />
 			{/if}
 		{/each}
 	</section>
@@ -185,6 +277,14 @@
 		display: flex;
 		flex-wrap: wrap;
 		gap: 0.8rem;
+	}
+
+	.player-grid {
+		align-items: flex-end;
+	}
+
+	.player-grid :global(.card[data-floating-upgrade]) {
+		margin-top: 3.8em;
 	}
 
 	.player-pair {

@@ -103,7 +103,7 @@ function describe(key: string, cards: PlayerCard[], name: (card: PlayerCard) => 
 				cards,
 				tone: 'produce',
 				icon: PRODUCE_ICON,
-				title: `${listed} (${card.boxesLeft} system-wide left)`,
+				title: `${listed} (${card.boxesLeft} ${card.boxesLeft === 1 ? 'use' : 'uses'} left)`,
 			};
 		case 'epidemic':
 			return { key, cards, tone: 'epidemic', icon: EPIDEMIC_ICON, title: listed };

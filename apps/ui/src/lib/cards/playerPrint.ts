@@ -22,7 +22,7 @@ export const EVENT_PRINT: Record<EventId, EventPrint> = {
 	airlift: {
 		mode: 'rationed',
 		banner: 'Rationed Event',
-		rules: ['Move any 1 pawn to any location (with that player’s permission).'],
+		rules: ['Move any 1 pawn to any location.'],
 		timing: 'Free · any time',
 	},
 	handout: {
@@ -58,7 +58,7 @@ export const EVENT_PRINT: Record<EventId, EventPrint> = {
 	forecast: {
 		mode: 'rationed',
 		banner: 'Rationed Event',
-		rules: ['Look at and reorder the top 8 Infection cards, then place them back on top.'],
+		rules: ['Look at and reorder the top 8 Infection cards.'],
 		timing: 'Free · any time',
 	},
 	cache: {
@@ -177,14 +177,16 @@ export const EPIDEMIC_STEPS = [
 	},
 ] as const;
 
-export const producePrint = (boxesLeft: number) => ({
-	cost: 'Action · at haven or center',
-	localTitle: 'Local',
-	local: 'Fill this location to population with Supply cubes.',
-	systemTitle: 'System-Wide',
-	system: 'Fill all havens & centers to population, then check a box.',
-	footer: boxesLeft <= 1 ? 'Last box — destroys this card' : `${boxesLeft} boxes left · destroy when checked`,
-});
+export const producePrint = (boxesLeft: number) => {
+	const usesLeft = Math.max(0, boxesLeft);
+	return {
+		localTitle: 'Local',
+		local: 'Fill this location to population with Supply cubes.',
+		systemTitle: 'System-Wide',
+		system: 'Fill all havens & centers to population.',
+		uses: `${usesLeft} ${usesLeft === 1 ? 'use' : 'uses'} left`,
+	};
+};
 
 export type ImprovementPrint = { text: string; swatch?: 'wild' | 'red' };
 
@@ -398,9 +400,10 @@ export const RECKONING_ROWS: readonly ReckoningRow[] = [
 	{ label: 'Grand Total', rule: 'Subtotal − Penalties', highlight: true },
 ];
 
+export const eventArtUrl = (id: EventId): string => `/events/${id}.webp`;
+
 export function eventPlainText(id: EventId): string {
-	const entry = EVENT_PRINT[id];
-	return [...entry.rules, entry.destroy, entry.timing].filter(Boolean).join(' ');
+	return EVENT_PRINT[id].rules.join(' ');
 }
 
 for (const event of pack.events)

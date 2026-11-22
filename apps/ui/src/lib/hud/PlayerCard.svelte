@@ -13,6 +13,8 @@
 
 	export const GLYPH = { event: '✦', produce: '▦', epidemic: '☣' } as const;
 
+	export type CityCardCopies = { live: number; discarded: number; trashed: number };
+
 	/** The colour a card is known by at a glance: its city's region, or its kind. */
 	export const cardColor = (card: PlayerCard) =>
 		card.kind === 'city' ? CITY_COLOR[cityDef(card.city).color ?? 'haven'] : KIND_COLOR[card.kind];
@@ -20,7 +22,7 @@
 
 <script lang="ts">
 	import { getContext } from 'svelte';
-	import type { CardId } from '@repo/game';
+	import type { CardId, CityId } from '@repo/game';
 	import { pack } from '@repo/game';
 	import { fitText } from '#lib/cards/fit.ts';
 	import MapArt from '#lib/cards/MapArt.svelte';
@@ -29,6 +31,7 @@
 		EPIDEMIC_STEPS,
 		EVENT_PRINT,
 		IMPROVEMENT_PRINT,
+		eventArtUrl,
 		producePrint,
 	} from '#lib/cards/playerPrint.ts';
 	import { inkOn } from '#lib/color.ts';
@@ -36,10 +39,18 @@
 	import RichText from './RichText.svelte';
 
 	const hoverCard = getContext<((card: CardId | null) => void) | undefined>('card-hover');
+	const copiesFromGame = getContext<((city: CityId) => CityCardCopies) | undefined>('card-copies');
 
-	type Props = { card: PlayerCard; onclick?: () => void; tone?: 'play' | 'discard' | null; small?: boolean };
+	type Props = {
+		card: PlayerCard;
+		onclick?: () => void;
+		tone?: 'play' | 'discard' | null;
+		small?: boolean;
+		/** Overrides live deck copy counts for a city card (used by debug showcases). */
+		copies?: CityCardCopies;
+	};
 
-	let { card, onclick, tone = null, small = false }: Props = $props();
+	let { card, onclick, tone = null, small = false, copies }: Props = $props();
 
 	const EPIDEMIC_PLAIN = EPIDEMIC_STEPS.map(step => `${step.heading}: ${step.text}`).join(' ');
 
@@ -47,24 +58,48 @@
 		if (card.kind !== 'city') return null;
 		const city = cityDef(card.city);
 		const improvement = card.improvement
-			? {
-					name: pack.cityImprovements.find(item => item.id === card.improvement)!.name,
-					...IMPROVEMENT_PRINT[card.improvement],
-				}
+			? (() => {
+					const name = pack.cityImprovements.find(item => item.id === card.improvement)!.name;
+					const print = IMPROVEMENT_PRINT[card.improvement];
+					return { name, ...print, plain: `${name}: ${print.text}` };
+				})()
 			: null;
 		const companion = card.companion
-			? {
-					name: pack.companions.find(item => item.id === card.companion)!.name,
-					...COMPANION_PRINT[card.companion],
-				}
+			? (() => {
+					const name = pack.companions.find(item => item.id === card.companion)!.name;
+					const print = COMPANION_PRINT[card.companion];
+					return { name, ...print, plain: `Companion ${name}: ${print.text}` };
+				})()
 			: null;
-		const plain = [
-			improvement && `${improvement.name}: ${improvement.text}`,
-			companion && `Companion: ${companion.name}. ${companion.text}`,
-		]
-			.filter(Boolean)
-			.join(' ');
-		return { city, improvement, companion, plain };
+		const exposedSearches = card.search
+			.filter(box => !box.scratched)
+			.map(box => ({
+				scope: box.scope,
+				label:
+					card.search.length > 1
+						? box.scope === 'sea'
+							? 'Search the sea'
+							: 'Search the land'
+						: box.scope === 'sea'
+							? 'Search the sea'
+							: 'Search',
+			}));
+		const hasMapOverlay = exposedSearches.length > 0 || Boolean(companion);
+		const floatingUpgrade = Boolean(improvement && hasMapOverlay);
+		const diagonalUpgrade = Boolean(improvement && !hasMapOverlay);
+		return { city, improvement, companion, exposedSearches, hasMapOverlay, floatingUpgrade, diagonalUpgrade };
+	});
+
+	const cityCopies = $derived.by(() => {
+		if (card.kind !== 'city') return null;
+		const counts = copies ??
+			copiesFromGame?.(card.city) ?? { live: cityDef(card.city).playerCards, discarded: 0, trashed: 0 };
+		const parts = [
+			counts.live > 0 && `${counts.live} in deck or hand`,
+			counts.discarded > 0 && `${counts.discarded} discarded`,
+			counts.trashed > 0 && `${counts.trashed} out of game`,
+		].filter(Boolean);
+		return { ...counts, label: parts.join(', ') || 'No copies remaining' };
 	});
 
 	const eventInfo = $derived.by(() => {
@@ -77,8 +112,8 @@
 	const produceInfo = $derived.by(() => {
 		if (card.kind !== 'produce') return null;
 		const print = producePrint(card.boxesLeft);
-		const plain = `${print.cost}. ${print.localTitle}: ${print.local} OR ${print.systemTitle}: ${print.system} ${print.footer}`;
-		return { print, plain, boxes: Math.max(0, card.boxesLeft) };
+		const plain = `${print.localTitle}: ${print.local} OR ${print.systemTitle} ${print.uses}: ${print.system}`;
+		return { print, plain, uses: Math.max(0, card.boxesLeft) };
 	});
 
 	const face = $derived.by(() => {
@@ -87,7 +122,7 @@
 				const { city, companion } = cityDetails!;
 				return {
 					title: city.name,
-					kicker: companion ? `${city.port ? 'Port' : 'City'} · ${companion.name}` : city.port ? 'Port' : 'City',
+					kicker: small && companion ? companion.name : '',
 					color: cardColor(card),
 				};
 			}
@@ -102,7 +137,7 @@
 			case 'produce':
 				return {
 					title: 'Produce Supplies',
-					kicker: `${card.boxesLeft} system-wide left`,
+					kicker: `${card.boxesLeft} ${card.boxesLeft === 1 ? 'use' : 'uses'} left`,
 					color: cardColor(card),
 				};
 			case 'epidemic':
@@ -115,14 +150,52 @@
 	});
 
 	const originalScan = $derived(small ? null : playerCardScan(card));
+	const showingOriginal = $derived(originals.held && Boolean(originalScan));
+	const floatUpgradeActive = $derived(!small && !showingOriginal && Boolean(cityDetails?.floatingUpgrade));
 </script>
+
+{#snippet portAnchor()}
+	<svg class="port-anchor" viewBox="0 0 24 24" role="img" aria-label="Port">
+		<circle cx="12" cy="5" r="2.3" fill="none" stroke="currentColor" stroke-width="2.1" />
+		<path d="M12 7.3V20M7.5 10.4h9" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" />
+		<path
+			d="M4.6 14.4a7.4 7.4 0 0 0 14.8 0"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="2.2"
+			stroke-linecap="round"
+		/>
+		<path
+			d="M2.6 15.8 4.6 13.1l2.4 1.9M17 15l2.4-1.9 2 2.7"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="1.9"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+		/>
+	</svg>
+{/snippet}
+
+{#snippet upgradeBody(improvement: NonNullable<NonNullable<typeof cityDetails>['improvement']>)}
+	<span class="slip-head">
+		{#if improvement.swatch === 'wild'}
+			<i class="swatch-wild" aria-hidden="true"></i>
+		{:else if improvement.swatch === 'red'}
+			<i class="swatch-red" aria-hidden="true"></i>
+		{/if}
+		<strong>{improvement.name}:</strong>
+	</span>
+	<RichText text={improvement.text} />
+{/snippet}
 
 <button
 	class="card {card.kind}"
 	class:unrationed={eventInfo?.print.mode === 'unrationed'}
 	class:permanent={eventInfo?.print.mode === 'permanent'}
+	class:floating-upgrade={floatUpgradeActive}
 	data-card={card.id}
-	data-original-active={originals.held && Boolean(originalScan)}
+	data-original-active={showingOriginal}
+	data-floating-upgrade={floatUpgradeActive ? '' : undefined}
 	onmouseenter={() => hoverCard?.(card.id)}
 	onmouseleave={() => hoverCard?.(null)}
 	onfocus={() => hoverCard?.(card.id)}
@@ -135,127 +208,159 @@
 	disabled={!onclick}
 	{onclick}
 >
-	{#if originals.held && originalScan}
+	{#if showingOriginal && originalScan}
 		<img class="original-swap" src={scanUrl(originalScan.card.src)} alt={face.title} />
 		{#if originalScan.sticker}
 			<img class="original-sticker" src={scanUrl(originalScan.sticker.src)} alt={originalScan.sticker.title} />
 		{/if}
 	{:else if small}
-		<span class="head">
-			<span class="kicker">{face.kicker}</span>
-			<span class="title" {@attach fitText(face.title, { max: 1.18, min: 0.7, across: true })}>{face.title}</span>
-		</span>
-	{:else if card.kind === 'city' && cityDetails}
-		<span class="head">
-			<span class="kicker">{face.kicker}</span>
-			<span class="title" {@attach fitText(face.title, { max: 1.2, min: 0.72, across: true })}>{face.title}</span>
-		</span>
-		<span
-			class="art"
-			class:compact={Boolean(cityDetails.improvement || cityDetails.companion)}
-			class:both={Boolean(cityDetails.improvement && cityDetails.companion)}
-		>
-			<MapArt city={card.city} accent={face.color} />
-		</span>
-		{#if cityDetails.improvement || cityDetails.companion}
-			<span class="city-slip" {@attach fitText(cityDetails.plain, { max: 0.78, min: 0.44 })}>
-				{#if cityDetails.improvement}
-					<span class="slip-block">
-						<span class="slip-head">
-							{#if cityDetails.improvement.swatch === 'wild'}
-								<i class="swatch-wild" aria-hidden="true"></i>
-							{:else if cityDetails.improvement.swatch === 'red'}
-								<i class="swatch-red" aria-hidden="true"></i>
-							{/if}
-							<strong>{cityDetails.improvement.name}:</strong>
-						</span>
-						<RichText text={cityDetails.improvement.text} />
-					</span>
-				{/if}
-				{#if cityDetails.companion}
-					<span class="slip-block">
-						<span class="slip-head">
-							<strong>{cityDetails.companion.name}:</strong>
-							{#if cityDetails.companion.cards}
-								{#each cityDetails.companion.cards as letter (letter)}
-									<i class="mini-red-card">{letter}</i>
-								{/each}
-							{/if}
-						</span>
-						<RichText text={cityDetails.companion.text} />
-					</span>
-				{/if}
+		{#if card.kind === 'city' && cityDetails}
+			<span class="head small-city">
+				<span class="city-title-row">
+					<span class="title" {@attach fitText(face.title, { max: 1.15, min: 0.56, across: true })}>{face.title}</span>
+					{#if cityDetails.city.port}{@render portAnchor()}{/if}
+				</span>
+				{#if face.kicker}<span class="kicker">{face.kicker}</span>{/if}
+			</span>
+		{:else}
+			<span class="head">
+				<span class="kicker">{face.kicker}</span>
+				<span class="title" {@attach fitText(face.title, { max: 1.18, min: 0.7, across: true })}>{face.title}</span>
 			</span>
 		{/if}
-		<span class="foot">
-			<span class="pips" role="img" aria-label={`Population ${cityDetails.city.population}`}>
-				{#each { length: cityDetails.city.population } as _, index (index)}<i></i>{/each}
+	{:else if card.kind === 'city' && cityDetails && cityCopies}
+		<span class="city-face">
+			<span class="city-head">
+				<span class="title" {@attach fitText(face.title, { max: 1.24, min: 0.52, across: true })}>{face.title}</span>
+				{#if cityDetails.city.port}{@render portAnchor()}{/if}
 			</span>
-			{#each card.search as box, index (index)}
-				<span
-					class="box"
-					class:used={box.scratched}
-					role="img"
-					aria-label={`${box.scope} search${box.scratched ? ', used' : ''}`}>{box.scope === 'sea' ? '≈' : '⌕'}</span
-				>
-			{/each}
+			<span class="art">
+				<MapArt city={card.city} accent={face.color} />
+				{#if cityDetails.hasMapOverlay}
+					<span
+						class="map-overlays"
+						class:single={cityDetails.exposedSearches.length === 1 && !cityDetails.companion}
+						class:companion-only={cityDetails.exposedSearches.length === 0 && Boolean(cityDetails.companion)}
+					>
+						{#if cityDetails.companion}
+							<span class="companion-box">
+								<span class="overlay-kicker">Companion</span>
+								<span class="companion-fit" {@attach fitText(cityDetails.companion.plain, { max: 0.78, min: 0.44 })}>
+									<span class="slip-head">
+										<strong>{cityDetails.companion.name}:</strong>
+										{#if cityDetails.companion.cards}
+											{#each cityDetails.companion.cards as letter (letter)}
+												<i class="mini-red-card">{letter}</i>
+											{/each}
+										{/if}
+									</span>
+									<RichText text={cityDetails.companion.text} />
+								</span>
+							</span>
+						{/if}
+						{#each cityDetails.exposedSearches as search, index (index)}
+							<span class="search-box" role="note" aria-label={search.label}>
+								<span class="search-label">{search.label}</span>
+								<span class="search-foil" aria-hidden="true"></span>
+							</span>
+						{/each}
+					</span>
+				{:else if cityDetails.diagonalUpgrade && cityDetails.improvement}
+					<span class="upgrade-sticker upgrade-diagonal">
+						<span class="sticker-fit" {@attach fitText(cityDetails.improvement.plain, { max: 0.76, min: 0.48 })}>
+							{@render upgradeBody(cityDetails.improvement)}
+						</span>
+					</span>
+				{/if}
+			</span>
+			<span class="foot">
+				<span class="pips" role="img" aria-label={cityCopies.label}>
+					{#each { length: cityCopies.live } as _, index (`l${index}`)}
+						<i class="pip live" aria-hidden="true"></i>
+					{/each}
+					{#each { length: cityCopies.discarded } as _, index (`d${index}`)}
+						<i class="pip discarded" aria-hidden="true"></i>
+					{/each}
+					{#each { length: cityCopies.trashed } as _, index (`t${index}`)}
+						<svg class="pip-trash" viewBox="0 0 16 16" aria-hidden="true">
+							<path
+								d="M5.5 2.5h5M2.8 4.2h10.4M4.3 4.2l.7 8.4a1.1 1.1 0 0 0 1.1 1h3.8a1.1 1.1 0 0 0 1.1-1l.7-8.4M6.8 6.8v4.3M9.2 6.8v4.3"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="1.45"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							/>
+						</svg>
+					{/each}
+				</span>
+			</span>
 		</span>
+		{#if cityDetails.floatingUpgrade && cityDetails.improvement}
+			<span class="upgrade-sticker upgrade-float">
+				<span class="sticker-fit" {@attach fitText(cityDetails.improvement.plain, { max: 0.72, min: 0.46 })}>
+					{@render upgradeBody(cityDetails.improvement)}
+				</span>
+			</span>
+		{/if}
 	{:else if card.kind === 'event' && eventInfo}
 		<span class="ev-top">
-			<span class="ev-kicker">{eventInfo.print.banner}</span>
+			<span class="ev-kicker-row">
+				<span class="ev-kicker">{eventInfo.print.banner}</span>
+				{#if eventInfo.print.destroy}
+					<span class="ev-once">Destroy</span>
+				{/if}
+			</span>
 			<span class="ev-title" {@attach fitText(eventInfo.name, { max: 1.08, min: 0.54, across: true })}
 				>{eventInfo.name}</span
 			>
 		</span>
-		<span class="ev-body" class:unrationed={eventInfo.print.mode === 'unrationed'}>
-			{#if eventInfo.print.mode === 'unrationed'}
-				<span class="ev-hazard" aria-hidden="true"></span>
-			{/if}
-			<span class="ev-rules" {@attach fitText(eventInfo.print.rules.join(' '), { max: 0.88, min: 0.48 })}>
+		{#if eventInfo.print.mode === 'unrationed'}
+			<span class="ev-hazard" aria-hidden="true"></span>
+		{/if}
+		<span class="ev-body" class:has-leaf={Boolean(eventInfo.print.timing)}>
+			<img class="ev-art" src={eventArtUrl(card.event)} alt="" aria-hidden="true" />
+			<span class="ev-rules" {@attach fitText(eventInfo.print.rules.join(' '), { max: 0.94, min: 0.5 })}>
 				{#each eventInfo.print.rules as line, idx (idx)}
 					<span class="rule-line"><RichText text={line} /></span>
 				{/each}
 			</span>
-			{#if eventInfo.print.timing || eventInfo.print.destroy}
-				<span class="ev-foot">
-					{#if eventInfo.print.timing}
-						<span class="ev-timing">{eventInfo.print.timing}</span>
-					{/if}
-					{#if eventInfo.print.destroy}
-						<span class="ev-destroy">Destroy</span>
-					{/if}
-				</span>
+			{#if eventInfo.print.timing}
+				<span class="ev-leaf">{eventInfo.print.timing}</span>
 			{/if}
 		</span>
 	{:else if card.kind === 'produce' && produceInfo}
 		<span class="prod-top">
-			<span class="prod-head" {@attach fitText('PRODUCE SUPPLIES', { max: 0.96, min: 0.62, across: true })}
+			<span class="prod-head" {@attach fitText('PRODUCE SUPPLIES', { max: 1.04, min: 0.62, across: true })}
 				>PRODUCE SUPPLIES</span
 			>
-			<span class="prod-cost">{produceInfo.print.cost}</span>
 		</span>
-		<span class="prod-body" {@attach fitText(produceInfo.plain, { max: 0.78, min: 0.48 })}>
+		<span class="prod-body" {@attach fitText(produceInfo.plain, { max: 0.9, min: 0.5 })}>
 			<span class="prod-choice">
 				<span class="prod-label">{produceInfo.print.localTitle}</span>
 				<span class="prod-text"><RichText text={produceInfo.print.local} /></span>
 			</span>
 			<span class="prod-or">OR</span>
-			<span class="prod-choice system">
+			<span class="prod-choice">
 				<span class="prod-label-row">
 					<span class="prod-label">{produceInfo.print.systemTitle}</span>
-					<span class="prod-boxes" aria-label={`${produceInfo.boxes} unchecked boxes`}>
-						{#each { length: produceInfo.boxes } as _, idx (idx)}<i class="prod-box"></i>{/each}
-					</span>
+					<span class="prod-uses" class:last={produceInfo.uses <= 1}>{produceInfo.print.uses}</span>
 				</span>
 				<span class="prod-text"><RichText text={produceInfo.print.system} /></span>
 			</span>
 		</span>
-		<span class="prod-foot" class:last={produceInfo.boxes <= 1}>{produceInfo.print.footer}</span>
 	{:else if card.kind === 'epidemic'}
 		<span class="ep-top">
 			<span class="ep-title">EPIDEMIC</span>
 		</span>
-		<span class="ep-body" {@attach fitText(EPIDEMIC_PLAIN, { max: 0.74, min: 0.46 })}>
+		<span class="ep-body" {@attach fitText(EPIDEMIC_PLAIN, { max: 0.78, min: 0.48 })}>
+			<svg class="ep-art" viewBox="0 0 24 24" aria-hidden="true">
+				<circle cx="12" cy="12" r="2.2" fill="currentColor" />
+				<path
+					d="M12 4.2a4.3 4.3 0 0 0-3.7 6.5l1.5-.9a2.6 2.6 0 1 1 4.4 0l1.5.9A4.3 4.3 0 0 0 12 4.2Zm-6.8 11.7a4.3 4.3 0 0 0 7.4-.1l-1.5-.9a2.6 2.6 0 1 1-2.2-3.8V9.4a4.3 4.3 0 0 0-3.7 6.5Zm13.6 0a4.3 4.3 0 0 0-3.7-6.5v1.7a2.6 2.6 0 1 1-2.2 3.8l-1.5.9a4.3 4.3 0 0 0 7.4.1Z"
+					fill="currentColor"
+				/>
+			</svg>
 			{#each EPIDEMIC_STEPS as step (step.heading)}
 				<span class="ep-step">
 					<strong>{step.heading}</strong>
@@ -379,10 +484,55 @@
 		outline-color: var(--danger);
 	}
 
+	/* City cards drop the inner inset frame so the map runs truly full bleed to the outer edge. */
+	.card.city:not(.small) {
+		box-shadow:
+			0 0.15em 0.3em rgb(0 0 0 / 0.35),
+			0 0.6em 1.4em rgb(0 0 0 / 0.25);
+	}
+
+	.card.floating-upgrade {
+		overflow: visible;
+	}
+
+	.city-face {
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+		height: 100%;
+		border-radius: calc(0.4em - 1px);
+		overflow: hidden;
+	}
+
 	.head {
 		display: flex;
 		flex-direction: column;
 		padding: 0.45em 0.55em 0.3em;
+	}
+
+	.small-city {
+		justify-content: center;
+		gap: 0.06em;
+		height: 100%;
+		padding: 0.24em 0.46em;
+	}
+
+	.city-head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.26em;
+		height: 1.72em;
+		padding: 0 0.46em;
+		flex: none;
+	}
+
+	.city-title-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.24em;
+		min-width: 0;
 	}
 
 	.kicker {
@@ -400,48 +550,165 @@
 		overflow-wrap: normal;
 	}
 
+	.city-head .title,
+	.city-title-row .title {
+		flex: 1;
+		min-width: 0;
+		white-space: nowrap;
+	}
+
+	.port-anchor {
+		flex: none;
+		width: 0.96em;
+		height: 0.96em;
+		color: var(--on);
+		opacity: 0.92;
+	}
+
 	.art {
+		position: relative;
 		flex: 1;
 		min-height: 0;
-		margin: 0 0.4em;
-		border: 1px solid rgb(0 0 0 / 0.3);
-		border-radius: 0.15em;
 		overflow: hidden;
-		box-shadow: 0 0 0 0.12em rgb(255 248 228 / 0.35);
 	}
 
-	.art.compact {
-		flex: 0 0 1.65em;
+	.map-overlays {
+		position: absolute;
+		inset: 0;
+		z-index: 1;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		gap: 0.32em;
+		padding: 0.34em 0.38em;
 	}
 
-	.art.compact.both {
-		flex: 0 0 1.2em;
+	.map-overlays.single {
+		justify-content: flex-start;
+		padding-top: 0.44em;
 	}
 
-	.city-slip {
+	.search-box {
 		flex: 1;
 		min-height: 0;
 		display: flex;
 		flex-direction: column;
-		justify-content: center;
-		gap: 0.28em;
-		margin: 0.25em 0.38em 0;
-		padding: 0.34em 0.44em;
-		border-left: 0.22em solid color-mix(in srgb, var(--band) 85%, #140c06);
-		border-radius: 0.2em;
-		background: rgb(252 248 237 / 0.96);
-		color: #19140e;
-		line-height: 1.24;
+		gap: 0.16em;
+		padding: 0.24em 0.3em 0.28em;
+		border: 1px solid rgb(24 30 36 / 0.36);
+		border-radius: 0.22em;
+		background: rgb(232 238 240 / 0.56);
+		backdrop-filter: blur(1.5px);
+		box-shadow: 0 0.08em 0.24em rgb(0 0 0 / 0.18);
+		color: #14191e;
+	}
+
+	.map-overlays.single .search-box {
+		flex: 0 0 54%;
+	}
+
+	.map-overlays:has(.companion-box) .search-box {
+		flex: 0 0 2.2em;
+	}
+
+	.search-label {
+		flex: none;
+		font-size: 0.56em;
+		font-weight: 850;
+		letter-spacing: 0.05em;
+		text-transform: uppercase;
+		line-height: 1.05;
+		color: #14191e;
+	}
+
+	.search-foil {
+		flex: 1;
+		min-height: 0.85em;
+		border: 1px solid rgb(255 255 255 / 0.44);
+		border-radius: 0.14em;
+		background:
+			repeating-linear-gradient(-35deg, rgb(255 255 255 / 0.24) 0 0.24em, transparent 0.24em 0.52em),
+			linear-gradient(155deg, rgb(186 194 202 / 0.56), rgb(154 164 174 / 0.48));
+		box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.12);
+	}
+
+	.companion-box {
+		flex: 1;
+		min-height: 0;
+		max-height: 4.5em;
+		display: flex;
+		flex-direction: column;
+		gap: 0.14em;
+		padding: 0.28em 0.36em;
+		border: 1px solid rgb(32 24 16 / 0.36);
+		border-radius: 0.22em;
+		background: rgb(247 241 226 / 0.88);
+		backdrop-filter: blur(2px);
+		box-shadow: 0 0.12em 0.32em rgb(0 0 0 / 0.24);
+		color: #1a140e;
+		line-height: 1.2;
 		overflow: hidden;
 	}
 
-	.slip-block {
-		display: block;
+	.map-overlays.companion-only .companion-box {
+		flex: 0 1 auto;
+		max-height: 6.2em;
 	}
 
-	.slip-block + .slip-block {
-		padding-top: 0.26em;
-		border-top: 1px solid rgb(25 20 14 / 0.14);
+	.overlay-kicker {
+		flex: none;
+		font-size: 0.52em;
+		font-weight: 800;
+		letter-spacing: 0.07em;
+		text-transform: uppercase;
+		color: #6b5842;
+		line-height: 1;
+	}
+
+	.companion-fit,
+	.sticker-fit {
+		display: block;
+		flex: 0 1 auto;
+		min-height: 0;
+		overflow: hidden;
+		line-height: 1.22;
+	}
+
+	.upgrade-sticker {
+		display: flex;
+		flex-direction: column;
+		padding: 0.36em 0.48em;
+		border: 1px solid rgb(34 25 16 / 0.45);
+		border-radius: 0.22em;
+		background: linear-gradient(168deg, #fcf7ea, #eee2c4);
+		color: #1a140e;
+		box-shadow: 0 0.2em 0.55em rgb(0 0 0 / 0.44);
+		overflow: hidden;
+	}
+
+	.upgrade-diagonal {
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		z-index: 2;
+		width: 7.5em;
+		max-height: 4.5em;
+		transform: translate(-50%, -50%) rotate(-7deg);
+	}
+
+	.upgrade-float {
+		position: absolute;
+		left: 50%;
+		bottom: calc(100% + 0.34em);
+		z-index: 4;
+		width: 8.6em;
+		max-height: 3.7em;
+		padding: 0.3em 0.44em;
+		transform: translateX(-50%);
+		border-bottom: 0.18em solid color-mix(in srgb, var(--band) 78%, #1a140e);
+		box-shadow:
+			0 0.28em 0.75em rgb(0 0 0 / 0.52),
+			0 0 0 1px rgb(255 250 238 / 0.22);
 	}
 
 	.slip-head {
@@ -487,66 +754,83 @@
 	.foot {
 		display: flex;
 		align-items: center;
-		gap: 0.3em;
-		height: 1.5em;
-		padding: 0 0.5em;
+		height: 1.45em;
+		padding: 0 0.48em;
+		flex: none;
 	}
 
 	.pips {
 		display: flex;
-		gap: 0.16em;
-		margin-right: auto;
+		align-items: center;
+		gap: 0.22em;
 	}
 
-	.pips i {
-		width: 0.42em;
-		height: 0.42em;
+	.pip {
+		display: block;
+		width: 0.44em;
+		height: 0.44em;
 		border-radius: 50%;
+		flex: none;
+	}
+
+	.pip.live {
 		background: var(--on);
 	}
 
-	.box {
-		display: grid;
-		place-items: center;
-		width: 1.24em;
-		height: 1.24em;
-		border: 1px solid var(--on);
-		border-radius: 0.16em;
-		font-size: 0.78em;
+	.pip.discarded {
+		border: 0.1em solid var(--on);
+		background: transparent;
+		box-sizing: border-box;
+		opacity: 0.85;
 	}
 
-	.box.used {
-		opacity: 0.35;
+	.pip-trash {
+		display: block;
+		width: 0.72em;
+		height: 0.72em;
+		flex: none;
+		color: var(--on);
+		opacity: 0.84;
 	}
 
 	/* === Event cards === */
 	.card.event:not(.small) {
-		padding: 0.34em;
-		gap: 0.26em;
-		background: linear-gradient(170deg, #d7aa2a, #ab7d15);
+		padding: 0;
+		gap: 0;
+		background:
+			radial-gradient(ellipse at 18% 12%, rgb(255 247 210 / 0.28), transparent 58%),
+			linear-gradient(170deg, #e2ba46, #bc8e1d);
 		border-color: #7c580b;
-		color: #1f1810;
+		color: #181209;
+		box-shadow:
+			0 0.15em 0.3em rgb(0 0 0 / 0.35),
+			0 0.6em 1.4em rgb(0 0 0 / 0.25);
 	}
 
 	.card.event.unrationed:not(.small) {
-		background: linear-gradient(170deg, #c77b24, #934a14);
+		background:
+			radial-gradient(ellipse at 18% 12%, rgb(255 232 195 / 0.24), transparent 58%),
+			linear-gradient(170deg, #df9032, #b55e18);
 		border-color: #69300a;
+		color: #191007;
 	}
 
 	.card.event.permanent:not(.small) {
-		background: linear-gradient(170deg, #2b4a86, #192d54);
-		border-color: #11203d;
-		color: #edf2fb;
+		background:
+			radial-gradient(ellipse at 18% 12%, rgb(160 205 255 / 0.16), transparent 58%),
+			linear-gradient(170deg, #274782, #15294e);
+		border-color: #101e3b;
+		color: #f0f5ff;
 	}
 
 	.ev-top {
 		display: flex;
 		flex-direction: column;
 		gap: 0.08em;
-		padding: 0.22em 0.36em 0.24em;
-		border-radius: 0.22em;
-		background: linear-gradient(165deg, #1b221c, #111612);
+		padding: 0.34em 0.5em 0.34em;
+		background: linear-gradient(165deg, #1b221c, #101511);
 		color: #a6e39d;
+		flex: none;
 	}
 
 	.card.event.unrationed .ev-top {
@@ -554,12 +838,19 @@
 	}
 
 	.card.event.permanent .ev-top {
-		background: rgb(255 255 255 / 0.94);
-		color: #1d3970;
+		background: #eef3fb;
+		color: #193263;
+	}
+
+	.ev-kicker-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.35em;
 	}
 
 	.ev-kicker {
-		font-size: 0.56em;
+		font-size: 0.54em;
 		font-weight: 800;
 		font-style: italic;
 		letter-spacing: 0.05em;
@@ -568,11 +859,20 @@
 	}
 
 	.card.event.unrationed .ev-kicker {
-		color: #f2a25c;
+		color: #f6a962;
 	}
 
 	.card.event.permanent .ev-kicker {
 		color: #466196;
+	}
+
+	.ev-once {
+		font-size: 0.5em;
+		font-weight: 800;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: #ff8e7b;
+		line-height: 1;
 	}
 
 	.ev-title {
@@ -582,94 +882,96 @@
 		letter-spacing: 0.02em;
 	}
 
+	.ev-hazard {
+		display: block;
+		flex: none;
+		height: 0.22em;
+		background: repeating-linear-gradient(-45deg, #c24b1c 0 0.34em, #18110c 0.34em 0.68em);
+	}
+
 	.ev-body {
 		position: relative;
 		flex: 1;
 		min-height: 0;
 		display: flex;
 		flex-direction: column;
-		justify-content: space-between;
-		gap: 0.26em;
-		padding: 0.4em 0.44em 0.32em;
-		border-radius: 0.22em;
-		background: #fcf8ed;
-		color: #19140e;
 		overflow: hidden;
 	}
 
-	.ev-hazard {
+	.ev-art {
 		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		height: 0.26em;
-		background: repeating-linear-gradient(-45deg, #c24b1c 0 0.34em, #241910 0.34em 0.68em);
+		right: -11%;
+		bottom: -11%;
+		z-index: 0;
+		width: 82%;
+		height: 82%;
+		object-fit: contain;
+		object-position: right bottom;
+		opacity: 0.21;
+		mix-blend-mode: multiply;
+		pointer-events: none;
+		user-select: none;
 	}
 
-	.ev-body.unrationed {
-		padding-top: 0.54em;
-	}
-
-	.card.event.permanent .ev-body {
-		background: linear-gradient(165deg, #151b26, #0f141d);
-		color: #f5d684;
+	.card.event.permanent .ev-art {
+		filter: invert(1);
+		opacity: 0.22;
+		mix-blend-mode: screen;
 	}
 
 	.ev-rules {
+		position: relative;
+		z-index: 1;
 		flex: 1;
 		min-height: 0;
 		display: flex;
 		flex-direction: column;
-		justify-content: center;
+		justify-content: flex-start;
 		gap: 0.35em;
+		padding: 0.48em 0.52em 0.52em;
 		overflow: hidden;
+		font-weight: 500;
 		line-height: 1.24;
+	}
+
+	.ev-body.has-leaf .ev-rules {
+		padding-bottom: 1.55em;
 	}
 
 	.rule-line {
 		display: block;
 	}
 
-	.ev-foot {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 0.25em;
-		padding-top: 0.24em;
-		border-top: 1px solid rgb(29 23 17 / 0.14);
-		flex: none;
-	}
-
-	.ev-destroy {
-		flex: none;
-		padding: 0.1em 0.34em;
-		border-radius: 0.18em;
-		background: #b82e20;
-		color: #fff8f0;
-		font-size: 0.52em;
-		font-weight: 800;
-		letter-spacing: 0.04em;
-		text-transform: uppercase;
-		line-height: 1.15;
-	}
-
-	.ev-timing {
-		color: #7c2c1d;
-		font-size: 0.56em;
+	.ev-leaf {
+		position: absolute;
+		left: 0;
+		bottom: 0;
+		z-index: 2;
+		padding: 0.22em 0.62em 0.2em 0.48em;
+		border-radius: 0 0.65em 0 0;
+		background: #171d18;
+		color: #f3e6c2;
+		font-size: 0.54em;
 		font-weight: 700;
-		line-height: 1.15;
+		letter-spacing: 0.02em;
+		line-height: 1.1;
 		white-space: nowrap;
+	}
+
+	.card.event.unrationed .ev-leaf {
+		color: #ffd89b;
 	}
 
 	/* === Produce Supplies === */
 	.card.produce:not(.small) {
-		padding: 0.3em 0.34em 0.28em;
-		gap: 0.22em;
-		background: linear-gradient(170deg, #1e557e, #12344f);
+		padding: 0;
+		gap: 0;
+		background:
+			radial-gradient(ellipse at 20% 10%, rgb(135 200 245 / 0.16), transparent 58%),
+			linear-gradient(170deg, #1e557e, #11314a);
 		border-color: #0b2234;
 		color: #f2f7fb;
 		box-shadow:
-			inset 0 0 0 0.16em rgb(230 198 62 / 0.24),
 			0 0.15em 0.3em rgb(0 0 0 / 0.35),
 			0 0.6em 1.4em rgb(0 0 0 / 0.25);
 	}
@@ -678,11 +980,9 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 0.05em;
-		padding: 0.18em 0.24em 0.18em;
-		border: 1px solid rgb(240 245 249 / 0.28);
-		border-radius: 0.2em;
-		background: rgb(9 24 38 / 0.52);
+		padding: 0.36em 0.46em 0.32em;
+		background: rgb(7 20 33 / 0.58);
+		border-bottom: 1px solid rgb(226 241 252 / 0.16);
 		flex: none;
 	}
 
@@ -696,53 +996,50 @@
 		color: #ffffff;
 	}
 
-	.prod-cost {
-		font-size: 0.55em;
-		font-weight: 600;
-		color: #bddcf2;
-		line-height: 1.1;
-	}
-
 	.prod-body {
 		flex: 1;
 		min-height: 0;
 		display: flex;
 		flex-direction: column;
-		justify-content: space-between;
-		gap: 0.18em;
+		justify-content: space-evenly;
+		gap: 0.32em;
+		padding: 0.48em 0.56em 0.54em;
 		overflow: hidden;
-		line-height: 1.2;
+		line-height: 1.24;
 	}
 
 	.prod-choice {
 		display: flex;
 		flex-direction: column;
-		gap: 0.12em;
-		padding: 0.24em 0.34em;
-		border: 1px solid rgb(226 241 252 / 0.22);
-		border-radius: 0.2em;
-		background: rgb(8 24 38 / 0.36);
-	}
-
-	.prod-choice.system {
-		border-color: rgb(243 215 75 / 0.42);
-		background: rgb(8 24 38 / 0.5);
+		gap: 0.16em;
 	}
 
 	.prod-label-row {
 		display: flex;
-		align-items: center;
+		align-items: baseline;
 		justify-content: space-between;
-		gap: 0.3em;
+		gap: 0.35em;
 	}
 
 	.prod-label {
-		font-size: 0.86em;
+		font-size: 0.84em;
 		font-weight: 800;
 		letter-spacing: 0.05em;
 		text-transform: uppercase;
 		color: #f3d74b;
 		line-height: 1.1;
+	}
+
+	.prod-uses {
+		font-size: 0.72em;
+		font-weight: 700;
+		font-variant-numeric: tabular-nums;
+		color: #c5e2f6;
+		white-space: nowrap;
+	}
+
+	.prod-uses.last {
+		color: #ff9c7a;
 	}
 
 	.prod-text {
@@ -753,9 +1050,9 @@
 	.prod-or {
 		display: flex;
 		align-items: center;
-		gap: 0.35em;
+		gap: 0.4em;
 		font-weight: 800;
-		font-size: 0.82em;
+		font-size: 0.78em;
 		letter-spacing: 0.08em;
 		color: #b7daf0;
 		line-height: 1;
@@ -766,64 +1063,34 @@
 		content: '';
 		flex: 1;
 		height: 1px;
-		background: rgb(183 218 240 / 0.38);
-	}
-
-	.prod-boxes {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.28em;
-		flex: none;
-	}
-
-	.prod-box {
-		width: 1.05em;
-		height: 1.05em;
-		border: 1.5px solid #f3d74b;
-		border-radius: 0.16em;
-		background: rgb(255 255 255 / 0.94);
-		box-shadow: 0 1px 2px rgb(0 0 0 / 0.35);
-	}
-
-	.prod-foot {
-		padding: 0.16em 0.25em;
-		border-radius: 0.16em;
-		background: rgb(8 24 38 / 0.4);
-		color: #f3d74b;
-		font-size: 0.55em;
-		font-weight: 700;
-		text-align: center;
-		line-height: 1.15;
-		flex: none;
-	}
-
-	.prod-foot.last {
-		background: #b82e20;
-		color: #fff6ea;
+		background: rgb(183 218 240 / 0.42);
 	}
 
 	/* === Epidemic === */
 	.card.epidemic:not(.small) {
-		padding: 0.38em 0.42em 0.36em;
-		gap: 0.26em;
+		padding: 0;
+		gap: 0;
 		background:
 			radial-gradient(circle at 50% 45%, rgb(130 210 95 / 0.16), transparent 65%),
 			linear-gradient(168deg, #215729, #123318);
 		border-color: #0e1d10;
 		color: #f6ea8e;
+		box-shadow:
+			0 0.15em 0.3em rgb(0 0 0 / 0.35),
+			0 0.6em 1.4em rgb(0 0 0 / 0.25);
 	}
 
 	.ep-top {
-		padding: 0.16em 0.3em;
-		border: 1px solid #f4eecc;
-		border-radius: 0.16em;
+		padding: 0.34em 0.4em 0.3em;
+		border-bottom: 1.5px solid rgb(244 238 204 / 0.42);
 		background: linear-gradient(180deg, #d86d24, #ecc63b);
 		text-align: center;
+		flex: none;
 	}
 
 	.ep-title {
 		font-family: var(--font-display);
-		font-size: 1em;
+		font-size: 1.06em;
 		font-weight: 700;
 		letter-spacing: 0.06em;
 		color: #8f1d14;
@@ -831,16 +1098,32 @@
 	}
 
 	.ep-body {
+		position: relative;
 		flex: 1;
 		min-height: 0;
 		display: flex;
 		flex-direction: column;
-		gap: 0.3em;
+		gap: 0.34em;
+		padding: 0.46em 0.52em 0.5em;
 		overflow: hidden;
-		line-height: 1.2;
+		line-height: 1.22;
+	}
+
+	.ep-art {
+		position: absolute;
+		right: -14%;
+		bottom: -14%;
+		z-index: 0;
+		width: 72%;
+		height: 72%;
+		color: #0a1f0d;
+		opacity: 0.32;
+		pointer-events: none;
 	}
 
 	.ep-step {
+		position: relative;
+		z-index: 1;
 		display: flex;
 		flex-direction: column;
 		gap: 0.04em;
