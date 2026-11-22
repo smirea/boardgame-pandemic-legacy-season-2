@@ -19,7 +19,11 @@ export type PublicState = { phase: Phase; world: World; canUndo: boolean };
  * every player holds enough to export a save.
  */
 export function publicState(snapshot: GameSnapshot): PublicState {
-	return { phase: phaseOf(snapshot), world: snapshot.context.world, canUndo: snapshot.context.undo.length > 0 };
+	return {
+		phase: phaseOf(snapshot),
+		world: snapshot.context.world,
+		canUndo: snapshot.context.undo.length > 0 && snapshot.context.world.table.undoVote === null,
+	};
 }
 
 export type PlayerDeckKind = Color | 'haven' | Exclude<PlayerCard['kind'], 'city'>;

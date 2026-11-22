@@ -36,7 +36,7 @@ export {
 	ending,
 } from './legacy';
 export { createGame } from './flow';
-export type { Command, GameActor, GameSnapshot, Phase, Save, Seating } from './machine';
+export type { Command, GameActor, GameSnapshot, Phase, Save, Seating, UndoEntry } from './machine';
 export { createGameActor, fillSave, gameMachine, parseSave, phaseOf, reject } from './machine';
 export type { TableCommand } from './table';
 export { claimant, newTable, newTableBriefing, tablePlayers, tableStart } from './table';

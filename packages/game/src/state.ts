@@ -1,3 +1,4 @@
+import type { Action } from './actions';
 import type { BriefedUnlock } from './briefing';
 import type {
 	AbilityId,
@@ -284,6 +285,19 @@ export type TableBriefing = {
 	stowing: boolean;
 };
 
+export type UndoVoteChoice = 'yes' | 'no';
+
+export type TableUndoVote = {
+	/** The seat whose revealing action is being undone. */
+	seat: SeatId;
+	/** The kind of action being undone. */
+	action: Action['a'];
+	/** The player who requested the undo, if initiated by a seated player. */
+	by: PlayerId | null;
+	/** Each seated player's vote. Full consensus of 'yes' is required to allow the undo. */
+	votes: Partial<Record<PlayerId, UndoVoteChoice>>;
+};
+
 /**
  * The people at the table, apart from the campaign: a prologue that rolls the campaign back leaves
  * them seated, and undo leaves them alone. One person may hold several seats.
@@ -295,6 +309,8 @@ export type Table = {
 	/** The game everyone agreed on in the lobby, after which the lobby moves on to choosing characters. */
 	start: Start | null;
 	briefing: TableBriefing;
+	/** Active consensus vote to undo an action that revealed hidden information. */
+	undoVote: TableUndoVote | null;
 };
 
 export type World = { campaign: Campaign; game: Game | null; table: Table };

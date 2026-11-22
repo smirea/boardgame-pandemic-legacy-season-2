@@ -32,9 +32,9 @@
 	<span class="label">{label}</span>
 	<span class="pips" role="img" aria-label={`${count} of ${players.length} ready`}>
 		{#each players as who (who)}
-			{@const ready = table.ready[who] === start}
+			{@const voted = table.ready[who] === start}
 			<!-- An empty socket for each player still to ready, filled with their colour once they are. -->
-			<i class:ready style:--seat={SEAT_COLORS[SEAT_IDS.indexOf(firstSeat(who).seat)]}></i>
+			<i class:voted style:--seat={SEAT_COLORS[SEAT_IDS.indexOf(firstSeat(who).seat)]}></i>
 		{/each}
 	</span>
 </button>
@@ -118,6 +118,7 @@
 
 	.pips {
 		display: flex;
+		align-items: center;
 		gap: 0.35rem;
 	}
 
@@ -126,6 +127,7 @@
 	}
 
 	.pips i {
+		flex: none;
 		width: 0.7rem;
 		height: 0.7rem;
 		border-radius: 50%;
@@ -134,8 +136,7 @@
 		transition:
 			background 220ms ease,
 			box-shadow 220ms ease,
-			opacity 220ms ease,
-			scale 220ms cubic-bezier(0.2, 0.9, 0.3, 1.6);
+			opacity 220ms ease;
 	}
 
 	.big .pips i {
@@ -143,12 +144,11 @@
 		height: 1rem;
 	}
 
-	.pips i.ready {
+	.pips i.voted {
 		background: var(--seat);
 		box-shadow:
-			0 0 0 1.5px rgb(255 252 242 / 0.7),
-			0 0 0.5rem var(--seat);
+			inset 0 0 0 1.5px rgb(255 252 242 / 0.75),
+			0 0 0.45rem var(--seat);
 		opacity: 1;
-		scale: 1.15;
 	}
 </style>

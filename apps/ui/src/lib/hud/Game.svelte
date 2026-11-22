@@ -57,6 +57,7 @@
 	import ScarChoice from './ScarChoice.svelte';
 	import SeatPicker from './SeatPicker.svelte';
 	import TopBar from './TopBar.svelte';
+	import UndoVote from './UndoVote.svelte';
 	import Upkeep from './Upkeep.svelte';
 	import RichText from './RichText.svelte';
 	import type { CityCardCopies } from './PlayerCard.svelte';
@@ -657,6 +658,10 @@
 				scannerOpen = false;
 				return;
 			}
+			if (world.table.undoVote && (!world.table.undoVote.by || world.table.undoVote.by === session.player)) {
+				send({ type: 'CANCEL_UNDO_VOTE', player: session.player });
+				return;
+			}
 			cancel();
 			menu = false;
 		}
@@ -682,8 +687,8 @@
 			tools.toggleEraser();
 			return;
 		}
-		if (onButton(event) || !game) return;
-		if (key === 'z' && snap.canUndo && canAct) send({ type: 'UNDO' });
+		if (onButton(event) || !game || modalOpen()) return;
+		if (key === 'z' && snap.canUndo && canAct) send({ type: 'UNDO', by: session.player });
 		if (key !== ' ') return;
 		// The cards that open a game are anyone's to flip.
 		if (admin.opening) {
@@ -772,6 +777,7 @@
 			<ActionPanel
 				{snap}
 				seat={game.active}
+				player={session.player}
 				name={seatName(world, game.active)}
 				menu={actionChoices}
 				{live}
@@ -1183,6 +1189,18 @@
 						}}
 					/>
 				</div>
+			</div>
+		{/if}
+
+		{#if world.table.undoVote && game && !spectator}
+			<div
+				class="scrim undo-scrim"
+				role="dialog"
+				aria-modal="true"
+				aria-label="Shameful undo vote"
+				transition:fade={{ duration: 180 }}
+			>
+				<UndoVote {world} vote={world.table.undoVote} player={session.player} {send} />
 			</div>
 		{/if}
 
@@ -1755,6 +1773,12 @@
 
 	.scrim.scar-scrim {
 		z-index: 65;
+	}
+
+	.scrim.undo-scrim {
+		z-index: 75;
+		background: rgb(14 9 8 / 0.78);
+		backdrop-filter: blur(8px);
 	}
 
 	/* Show board: every cover steps off the table and lets the board be panned and read, until Back. */

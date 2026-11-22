@@ -1,5 +1,5 @@
 import { createGameActor, gameIndexOf, parseSave, publicState, recordStep, reject, startRecord } from '@repo/game';
-import type { Command, GameActor, GameRecord, PlayerId, PublicState, Save } from '@repo/game';
+import type { Command, GameActor, GameRecord, PlayerId, PublicState, Save, UndoEntry } from '@repo/game';
 import { createHost, createMemoryTransport, createWebRtcTransport, joinHost, peerId } from '@repo/net';
 import type { ConnectionStatus, PeerId, PeerInfo, Session } from '@repo/net';
 import { LS } from '../storage';
@@ -131,7 +131,12 @@ export class GameSession {
 
 		if (options.mode !== 'join') {
 			const save = options.save === undefined ? storedSave() : options.save;
-			const savedUndo = this.#persist && save ? ((LS.get('undo') as Save['world'][] | null) ?? []) : [];
+			const rawUndo = this.#persist && save ? LS.get('undo') : null;
+			const savedUndo = Array.isArray(rawUndo)
+				? rawUndo.filter((entry): entry is UndoEntry =>
+						Boolean(entry && typeof entry === 'object' && 'world' in entry && 'action' in entry),
+					)
+				: [];
 			this.#record = this.#persist ? storedRecord(save) : null;
 			this.#actor = createGameActor({ seed: Math.floor(Math.random() * 2 ** 31), save, undo: savedUndo });
 			this.#actor.subscribe(snapshot => {
@@ -349,9 +354,7 @@ export class GameSession {
 		const current = publicState(snapshot);
 		const reason =
 			command.type === 'UNDO'
-				? current.canUndo
-					? null
-					: 'Nothing to undo'
+				? (reject(snapshot.context.world, current.phase, command) ?? (current.canUndo ? null : 'Nothing to undo'))
 				: reject(snapshot.context.world, current.phase, command);
 		if (!reason) {
 			this.#sender = { command, by };

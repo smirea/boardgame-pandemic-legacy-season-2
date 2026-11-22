@@ -1271,7 +1271,7 @@ describe('game end and the campaign', () => {
 		expect(game.epidemics + game.playerDeck.piles.reduce((sum, pile) => sum + pile.epidemics, 0)).toBe(10);
 	});
 
-	test('undo reaches back through the turn but not past an action that revealed something', () => {
+	test('undoing an action that revealed information requires unanimous table consensus', () => {
 		const actor = late((world, game) => {
 			const [card] = cityCards(world, 'denver');
 			(world.campaign.playerCards[card!] as { search: unknown[] }).search = [
@@ -1280,11 +1280,43 @@ describe('game end and the campaign', () => {
 			game.players[A]!.location = city('denver');
 			give(world, A, [card!]);
 		});
+		const ann = 'ann' as PlayerId;
+		const ben = 'ben' as PlayerId;
+		send(actor, { type: 'TAKE_SEAT', player: ann, name: 'Ann', seat: A });
+		send(actor, { type: 'TAKE_SEAT', player: ben, name: 'Ben', seat: B });
+		const card = gameOf(actor).players[A]!.hand[0]!;
+		const scratched = () => {
+			const held = worldOf(actor).campaign.playerCards[card]!;
+			return held.kind === 'city' && held.search[0]!.scratched;
+		};
 		act(actor, { a: 'makeSupplies' });
 		expect(publicState(actor.getSnapshot()).canUndo).toBe(true);
-		act(actor, { a: 'search', card: gameOf(actor).players[A]!.hand[0]!, box: 0 });
+		act(actor, { a: 'search', card, box: 0 });
+		expect(publicState(actor.getSnapshot()).canUndo).toBe(true);
+		expect(scratched()).toBe(true);
+
+		// Requesting undo opens a vote and blocks other actions until resolved.
+		send(actor, { type: 'UNDO', by: ann });
+		expect(worldOf(actor).table.undoVote).toMatchObject({ seat: A, action: 'search', by: ann, votes: {} });
 		expect(publicState(actor.getSnapshot()).canUndo).toBe(false);
-		expect(grid(worldOf(actor).campaign).has(city('denver'))).toBe(true);
+		expect(reject(worldOf(actor), 'playing.actions', { type: 'END_ACTIONS', seat: A })).toBe(
+			'Finish the undo vote first',
+		);
+
+		// A split vote denies the undo and keeps the action.
+		send(actor, { type: 'UNDO_VOTE', player: ann, vote: 'yes' });
+		expect(worldOf(actor).table.undoVote?.votes).toEqual({ [ann]: 'yes' });
+		send(actor, { type: 'UNDO_VOTE', player: ben, vote: 'no' });
+		expect(worldOf(actor).table.undoVote).toBeNull();
+		expect(scratched()).toBe(true);
+
+		// Unanimous yes allows the undo and restores state before the revealing action.
+		send(actor, { type: 'UNDO', by: ann });
+		send(actor, { type: 'UNDO_VOTE', player: ann, vote: 'yes' });
+		send(actor, { type: 'UNDO_VOTE', player: ben, vote: 'yes' });
+		expect(worldOf(actor).table.undoVote).toBeNull();
+		expect(scratched()).toBe(false);
+		expect(publicState(actor.getSnapshot()).canUndo).toBe(true);
 	});
 });
 

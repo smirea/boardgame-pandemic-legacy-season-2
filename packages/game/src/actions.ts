@@ -100,7 +100,7 @@ type Spec<A> = {
 	/** Actions that a campaign rule switches on, with no action sticker of their own. */
 	rule?: RuleId;
 	free?: boolean;
-	/** Reveals hidden information, so the turn's undo history ends here. */
+	/** Reveals hidden information, so undoing it requires a consensus vote. */
 	reveals?: boolean;
 	cost?: (ctx: Ctx, action: A) => number;
 	check: (ctx: Ctx, action: A) => string | null;

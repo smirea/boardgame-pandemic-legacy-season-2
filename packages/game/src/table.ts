@@ -3,7 +3,7 @@ import { pack } from './content/pack';
 import { SEAT_IDS } from './helpers';
 import type { CharacterId, PlayerId, SeatId } from './ids';
 import { createCharacter } from './legacy';
-import type { Start, Table, TableBriefing, World } from './state';
+import type { Start, Table, TableBriefing, UndoVoteChoice, World } from './state';
 
 export type TableCommand =
 	/** Sits a person down in the lobby, or renames them wherever they sit. */
@@ -20,10 +20,20 @@ export type TableCommand =
 	/** Draws the next Legacy card / package / door onto the table, or flips/opens the one just drawn. */
 	| { type: 'BRIEFING_STEP' }
 	/** Votes Done once everything in the current Legacy briefing has been drawn and opened. */
-	| { type: 'BRIEFING_READY'; player: PlayerId; ready: boolean };
+	| { type: 'BRIEFING_READY'; player: PlayerId; ready: boolean }
+	/** Votes on whether to allow undoing an action that revealed hidden information. */
+	| { type: 'UNDO_VOTE'; player: PlayerId; vote: UndoVoteChoice | null }
+	/** Withdraws an active undo vote. */
+	| { type: 'CANCEL_UNDO_VOTE'; player: PlayerId };
 
 export const newTableBriefing = (): TableBriefing => ({ drawn: 0, flipped: false, ready: [], stowing: false });
-export const newTable = (): Table => ({ seats: [], ready: {}, start: null, briefing: newTableBriefing() });
+export const newTable = (): Table => ({
+	seats: [],
+	ready: {},
+	start: null,
+	briefing: newTableBriefing(),
+	undoVote: null,
+});
 
 /** The game the lobby is choosing characters for, set once everyone readies in the lobby. */
 export const tableStart = (world: World): Start | null => world.table.start;
@@ -89,6 +99,17 @@ export function rejectTable(world: World, lobby: boolean, command: TableCommand)
 			if (total === 0 || table.briefing.stowing) return 'Nothing to confirm';
 			if (table.briefing.drawn < total || !table.briefing.flipped) return 'Draw and flip every card first';
 			if (table.seats.length > 0 && !seated(table, command.player)) return 'Sit down first';
+			return null;
+		}
+		case 'UNDO_VOTE': {
+			if (!table.undoVote) return 'No undo vote is open';
+			if (!seated(table, command.player)) return 'Sit down first';
+			return null;
+		}
+		case 'CANCEL_UNDO_VOTE': {
+			if (!table.undoVote) return 'No undo vote is open';
+			if (table.undoVote.by && table.undoVote.by !== command.player)
+				return 'Only the player who asked to undo can withdraw it';
 			return null;
 		}
 	}
@@ -179,6 +200,10 @@ export function applyTable(world: World, command: TableCommand) {
 				tablePlayers(table).every(player => table.briefing.ready.includes(player))
 			)
 				table.briefing.stowing = true;
+			if (table.undoVote) {
+				delete table.undoVote.votes[command.player];
+				if (tablePlayers(table).length === 0) table.undoVote = null;
+			}
 			break;
 		case 'READY':
 			if (command.start) table.ready[command.player] = command.start;
@@ -205,6 +230,20 @@ export function applyTable(world: World, command: TableCommand) {
 				state.stowing = true;
 			return;
 		}
+		case 'UNDO_VOTE': {
+			const vote = table.undoVote;
+			if (!vote) return;
+			if (command.vote) vote.votes[command.player] = command.vote;
+			else delete vote.votes[command.player];
+			const players = tablePlayers(table);
+			if (players.length > 0 && players.every(player => vote.votes[player] !== undefined)) {
+				if (!players.every(player => vote.votes[player] === 'yes')) table.undoVote = null;
+			}
+			return;
+		}
+		case 'CANCEL_UNDO_VOTE':
+			table.undoVote = null;
+			return;
 	}
 	table.seats.sort(bySeat);
 	table.ready = {};

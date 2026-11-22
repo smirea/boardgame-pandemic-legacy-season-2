@@ -43,6 +43,7 @@ import {
 	newTableBriefing,
 	readyStart,
 	rejectTable,
+	tablePlayers,
 	tableStart,
 } from './table';
 
@@ -76,7 +77,7 @@ export type Command =
 	| { type: 'LOCKDOWN'; card: CardId; seat: SeatId; pay: CardId }
 	/** The group's call that an objective cannot be completed any more, so the rest decide the game. */
 	| { type: 'WAIVE_OBJECTIVE'; objective: ObjectiveId }
-	| { type: 'UNDO' }
+	| { type: 'UNDO'; by?: PlayerId }
 	| { type: 'CONTINUE' }
 	| { type: 'PURCHASE'; purchase: Purchase }
 	| { type: 'FINISH_UPKEEP' }
@@ -94,7 +95,8 @@ export type Phase =
 	| 'upkeep'
 	| 'finished';
 
-type Context = { world: World; undo: World[] };
+export type UndoEntry = { world: World; seat: SeatId; action: Action; reveals: boolean };
+type Context = { world: World; undo: UndoEntry[] };
 type Of<T extends Command['type']> = Extract<Command, { type: T }>;
 
 const blocked = (world: World) => world.game!.pending.length > 0 || overLimit(world).length > 0;
@@ -128,6 +130,9 @@ export function reject(world: World, phase: Phase, command: Command): string | n
 				command.type !== 'BRIEFING_READY'
 				? 'The campaign is over'
 				: rejectTable(world, phase === 'lobby', command);
+		case 'UNDO_VOTE':
+		case 'CANCEL_UNDO_VOTE':
+			return inPhase('playing.actions') ?? rejectTable(world, false, command);
 		case 'CREATE_CHARACTER': {
 			const job = pack.jobs.find(candidate => candidate.id === command.job);
 			const home = pack.cities.find(candidate => candidate.id === command.home);
@@ -212,8 +217,10 @@ export function reject(world: World, phase: Phase, command: Command): string | n
 		case 'CONFIRM_EVENTS':
 			return inPhase('setup.events');
 		case 'ACTION':
+			if (world.table.undoVote) return 'Finish the undo vote first';
 			return inPhase('playing.actions') ?? checkAction(world, command.seat, command.action);
 		case 'END_ACTIONS':
+			if (world.table.undoVote) return 'Finish the undo vote first';
 			if (command.seat !== game?.active) return 'Not your turn';
 			return blocked(world) ? 'Resolve the pending choice first' : inPhase('playing.actions');
 		case 'DRAW':
@@ -230,13 +237,16 @@ export function reject(world: World, phase: Phase, command: Command): string | n
 			if (game.infectionsLeft > 0) return 'Flip the Infection cards first';
 			return blocked(world) ? 'Resolve the pending choice first' : inPhase('playing.infect');
 		case 'PLAY':
+			if (world.table.undoVote) return 'Finish the undo vote first';
 			return (
 				inPhase('playing.actions', 'playing.draw', 'playing.infect') ??
 				checkPlay(world, command.seat, command.card, command.play, phase)
 			);
 		case 'DECIDE':
+			if (world.table.undoVote) return 'Finish the undo vote first';
 			return inPhase('playing.actions', 'playing.draw', 'playing.infect') ?? checkDecide(world, command.decide);
 		case 'LOCKDOWN': {
+			if (world.table.undoVote) return 'Finish the undo vote first';
 			const card = campaign.infectionCards[command.card];
 			const armed =
 				game?.infectionDiscard.includes(command.card) && card?.kind === 'city' && card.improvement === 'lockdown';
@@ -245,6 +255,7 @@ export function reject(world: World, phase: Phase, command: Command): string | n
 			return inPhase('playing.actions', 'playing.draw', 'playing.infect');
 		}
 		case 'WAIVE_OBJECTIVE': {
+			if (world.table.undoVote) return 'Finish the undo vote first';
 			const live =
 				campaign.objectives.includes(command.objective) &&
 				!game?.completed.includes(command.objective) &&
@@ -255,7 +266,7 @@ export function reject(world: World, phase: Phase, command: Command): string | n
 				: 'The last objective cannot be waived';
 		}
 		case 'UNDO':
-			return inPhase('playing.actions');
+			return world.table.undoVote ? 'An undo vote is already open' : inPhase('playing.actions');
 		case 'CONTINUE':
 			return inPhase('over');
 		case 'PURCHASE':
@@ -330,7 +341,31 @@ export const gameMachine = setup({
 		allReady: ({ context, event }: Args) =>
 			reject(context.world, 'lobby', event) === null && readyStart(context.world.table, event as Of<'READY'>) !== null,
 		gameChosen: ({ context }: Args) => tableStart(context.world) !== null,
-		canUndo: ({ context }: Args) => context.undo.length > 0,
+		canUndo: ({ context }: Args) => context.undo.length > 0 && context.world.table.undoVote === null,
+		undoNeedsVote: ({ context }: Args) =>
+			Boolean(context.undo.at(-1)?.reveals) && tablePlayers(context.world.table).length > 0,
+		undoVoteApproved: ({ context, event }: Args) => {
+			if (reject(context.world, 'playing.actions', event) !== null) return false;
+			const vote = event as Of<'UNDO_VOTE'>;
+			if (vote.vote !== 'yes' || !context.world.table.undoVote || context.undo.length === 0) return false;
+			const nextVotes: NonNullable<World['table']['undoVote']>['votes'] = {
+				...context.world.table.undoVote.votes,
+				[vote.player]: 'yes',
+			};
+			const players = tablePlayers(context.world.table);
+			return players.length > 0 && players.every(player => nextVotes[player] === 'yes');
+		},
+		leaveApprovesUndo: ({ context, event }: Args) => {
+			if (reject(context.world, 'playing.actions', event) !== null) return false;
+			const vote = context.world.table.undoVote;
+			if (!vote || context.undo.length === 0) return false;
+			const leave = event as Of<'LEAVE'>;
+			const remainingSeats = context.world.table.seats.filter(
+				entry => entry.player !== leave.player || (leave.seat !== undefined && entry.seat !== leave.seat),
+			);
+			const remainingPlayers = [...new Set(remainingSeats.map(entry => entry.player))];
+			return remainingPlayers.length > 0 && remainingPlayers.every(player => vote.votes[player] === 'yes');
+		},
 		over: ({ context }: Args) => isOver(context.world),
 		drawsDone: ({ context }: Args) =>
 			!isOver(context.world) && context.world.game!.drawsLeft === 0 && !blocked(context.world),
@@ -445,14 +480,30 @@ export const gameMachine = setup({
 					applyAction(draft, seat, action);
 					autoResolve(draft);
 				}),
-				undo: actionReveals(action) ? [] : [...context.undo, context.world],
+				undo: [...context.undo, { world: context.world, seat, action, reveals: actionReveals(action) }],
+			};
+		}),
+		startUndoVote: assign(({ context, event }: Args) => {
+			const top = context.undo.at(-1)!;
+			const by = (event as Of<'UNDO'>).by ?? null;
+			return {
+				world: produce(context.world, draft => {
+					draft.table.undoVote = { seat: top.seat, action: top.action.a, by, votes: {} };
+				}),
 			};
 		}),
 		// Who sits where is not part of a move, so taking one back leaves the table as it is.
 		undo: assign(({ context }: Args) => ({
-			world: { ...context.undo.at(-1)!, table: context.world.table },
+			world: { ...context.undo.at(-1)!.world, table: { ...context.world.table, undoVote: null } },
 			undo: context.undo.slice(0, -1),
 		})),
+		leaveAndUndo: assign(({ context, event }: Args) => {
+			const updated = produce(context.world, draft => applyTable(draft, event as TableCommand));
+			return {
+				world: { ...context.undo.at(-1)!.world, table: { ...updated.table, undoVote: null } },
+				undo: context.undo.slice(0, -1),
+			};
+		}),
 		startDraw: assign(change(startDrawStep)),
 		draw: assign(change(drawPlayerCard)),
 		startInfect: assign(change(startInfectStep)),
@@ -567,8 +618,20 @@ export const gameMachine = setup({
 					on: {
 						...anyStep('playing.actions'),
 						...seatEvents('playing.actions'),
+						LEAVE: [
+							{ guard: 'leaveApprovesUndo', actions: 'leaveAndUndo' },
+							{ guard: { type: 'legal', params: 'playing.actions' }, actions: 'table' },
+						],
 						ACTION: { guard: { type: 'legal', params: 'playing.actions' }, actions: 'act' },
-						UNDO: { guard: 'canUndo', actions: 'undo' },
+						UNDO: [
+							{ guard: and(['canUndo', 'undoNeedsVote']), actions: 'startUndoVote' },
+							{ guard: 'canUndo', actions: 'undo' },
+						],
+						UNDO_VOTE: [
+							{ guard: 'undoVoteApproved', actions: 'undo' },
+							{ guard: { type: 'legal', params: 'playing.actions' }, actions: 'table' },
+						],
+						CANCEL_UNDO_VOTE: { guard: { type: 'legal', params: 'playing.actions' }, actions: 'table' },
 						END_ACTIONS: { guard: { type: 'legal', params: 'playing.actions' }, target: 'draw', actions: 'startDraw' },
 					},
 				},
@@ -623,7 +686,7 @@ function phaseValue(phase: Phase) {
 }
 
 /** Starts a new campaign from a seed, or resumes one from a plain `{ phase, world }` save. */
-export function createGameActor(options: { seed: number; save?: Save | null; undo?: World[] }) {
+export function createGameActor(options: { seed: number; save?: Save | null; undo?: UndoEntry[] }) {
 	const input = { seed: options.seed };
 	if (!options.save) return createActor(gameMachine, { input });
 	const snapshot = gameMachine.resolveState({

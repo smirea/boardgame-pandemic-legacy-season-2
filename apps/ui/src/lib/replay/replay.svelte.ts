@@ -118,6 +118,13 @@ export function commandLabel(world: World, command: Command | null): { who: stri
 			return { who: null, text: 'Drew or flipped a Legacy card' };
 		case 'BRIEFING_READY':
 			return { who: null, text: command.ready ? 'Ready to put Legacy cards away' : 'No longer ready' };
+		case 'UNDO_VOTE':
+			return {
+				who: null,
+				text: command.vote === null ? 'Clears their undo vote' : `Votes ${command.vote} on the undo`,
+			};
+		case 'CANCEL_UNDO_VOTE':
+			return { who: null, text: 'Withdraws the undo request' };
 		case 'PLACE_SUPPLY':
 			return {
 				who: null,
