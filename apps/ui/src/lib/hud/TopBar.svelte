@@ -4,6 +4,7 @@
 	import { fade } from 'svelte/transition';
 	import LegacyCard from '#lib/cards/LegacyCard.svelte';
 	import type { Insights, PublicState } from '@repo/game';
+	import AtRisk from './AtRisk.svelte';
 	import Calendar from './Calendar.svelte';
 	import CampaignStatus from './CampaignStatus.svelte';
 	import Decks from './Decks.svelte';
@@ -88,6 +89,9 @@
 		{/if}
 		{#if hasHollow}
 			<HollowSupply world={snap.world} />
+		{/if}
+		{#if game && info && dealt}
+			<AtRisk infection={info.infection} />
 		{/if}
 		<div class="stats">
 			<div class="deck-strip">
