@@ -358,6 +358,13 @@
 	// Once the whole table is done with a reading, each player keeps what it said until they close it themselves. It
 	// is this browser's alone and the game goes on under it.
 	let recap = $state.raw<BriefingEntry[] | null>(null);
+	// A studio scene keeps the recap, since the save it holds has already put the reading away.
+	$effect(() =>
+		view.register('recap', {
+			read: () => recap,
+			write: (value: BriefingEntry[] | null) => (recap = value),
+		}),
+	);
 	let lastBriefing = untrack(() => ({ entries: campaign.briefing, stowing: world.table.briefing.stowing }));
 	$effect.pre(() => {
 		const now = { entries: campaign.briefing, stowing: world.table.briefing.stowing };

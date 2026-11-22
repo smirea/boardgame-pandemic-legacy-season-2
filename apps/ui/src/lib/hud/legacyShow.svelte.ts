@@ -1,5 +1,5 @@
-import { edgeKey, openings, pack } from '@repo/game';
-import type { BriefedUnlock, CampaignLocation, CityId, EdgeDef, Opening, World } from '@repo/game';
+import { edgeKey, openings, pack, sealKey } from '@repo/game';
+import type { CampaignLocation, CityId, EdgeDef, Opening, Unlock, World } from '@repo/game';
 
 /** The parts of the map a Legacy reading can change, as the board last showed them. */
 type Chart = { locations: Record<CityId, CampaignLocation>; edges: EdgeDef[]; routes: string[] };
@@ -35,6 +35,16 @@ function middleOf(cities: CityId[]): CityId {
 	return cities.reduce((best, id) => (far(id) < far(best) ? id : best));
 }
 
+function contentOf(opening: Opening): Unlock[] {
+	const from = opening.from;
+	const card = from.t === 'legacy' ? pack.legacyDeck.find(entry => entry.id === from.card) : undefined;
+	const seals = new Set([...(from.t === 'seal' ? [from.seal] : []), ...opening.seals].map(sealKey));
+	return [
+		...(card?.unlocks ?? []),
+		...pack.seals.filter(def => seals.has(sealKey(def.seal))).flatMap(def => def.unlocks),
+	];
+}
+
 /** Each place a scene changes the map, in the order it names them, with what changes there. */
 function beatsOf(opening: Opening, before: Chart, after: Chart): Beat[] {
 	const beats: Beat[] = [];
@@ -52,9 +62,11 @@ function beatsOf(opening: Opening, before: Chart, after: Chart): Beat[] {
 			? [key]
 			: [];
 	};
-	const unlocks = opening.items.map(item => item.unlock);
+	// The briefing leaves out what it has nothing to say about, such as a region with no city infested from the start,
+	// so what the map took comes from what the cards and doors hold, with the briefing's own lines after them.
+	const unlocks = [...contentOf(opening), ...opening.items.map(item => item.unlock)];
 	const havens = new Set(unlocks.flatMap(unlock => (unlock.t === 'haven' ? [unlock.city] : [])));
-	for (const unlock of unlocks as BriefedUnlock[]) {
+	for (const unlock of unlocks) {
 		switch (unlock.t) {
 			case 'region': {
 				const opened = pack.cities.filter(city => city.region === unlock.region).map(city => city.id);
