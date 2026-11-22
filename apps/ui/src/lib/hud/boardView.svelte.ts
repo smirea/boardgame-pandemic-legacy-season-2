@@ -1,4 +1,4 @@
-import { breakthrough, isForsaken, LABS, pack } from '@repo/game';
+import { breakthrough, inoculation, isForsaken, LABS, pack } from '@repo/game';
 import type { CityId, EdgeDef, Insights, ReconBox, SeatId, World } from '@repo/game';
 import { travelOf } from '#lib/board/travel.ts';
 import type { BoardMarks, BoardView, CityView, Fx, LabInfo } from '#lib/board/types.ts';
@@ -75,6 +75,8 @@ export function createBoardView(source: BoardSource): BoardView {
 	const cities = $derived.by(() => {
 		const info = source.playing ? source.info : null;
 		const { lag, onGrid, selected, targets } = source;
+		const stocks = inoculation(source.world);
+		const storageLeaks = campaign.rules.includes('epidemicFromStorage');
 		return sameCities(
 			Object.fromEntries(
 				pack.cities.map((city): [CityId, CityView] => {
@@ -132,6 +134,9 @@ export function createBoardView(source: BoardSource): BoardView {
 										}
 									: null,
 							cards: info && city.kind !== 'haven' ? (info.playerDeck.cities[city.id] ?? NO_CARDS) : null,
+							stock: stocks[city.id] ?? null,
+							inoculated: (stocks[city.id]?.stored ?? 0) > 0 && stocks[city.id]!.inPlay === 0,
+							storageLeaks,
 						},
 					];
 				}),

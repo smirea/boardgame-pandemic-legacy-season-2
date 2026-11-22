@@ -71,16 +71,18 @@ export function cityHint(city: CityView): HintText {
 	if (city.plague) counts.push({ glyph: 'plague', count: city.plague, tone: 'bad' });
 	if (city.hollow) counts.push({ glyph: 'hollow', count: city.hollow, tone: 'bad' });
 	const rows: HintRow[] = [];
-	if (city.infection) {
+	if (city.infection)
 		rows.push({
 			label: 'Infected next',
 			value: percent(city.infection.odds),
 			tone: city.infection.odds > 0 && city.supplies === 0 ? 'bad' : null,
 		});
-		rows.push({
-			label: 'Infection cards',
-			value: `${city.infection.inDeck} in deck, ${city.infection.discarded} discarded`,
-		});
+	if (city.stock) {
+		const piles = city.infection
+			? [`${city.infection.inDeck} in deck`, `${city.infection.discarded} discarded`]
+			: [`${city.stock.inPlay} in the Infection deck`];
+		if (city.stock.stored) piles.push(`${city.stock.stored} inoculated`);
+		rows.push({ label: 'Infection cards', value: piles.join(', '), tone: city.inoculated ? 'good' : null });
 	}
 	if (city.cards)
 		rows.push({
@@ -116,6 +118,11 @@ export function cityHint(city: CityView): HintText {
 	const notes = [
 		...(city.haven ? ['No Infection card names a haven. An outbreak in a neighbouring city still strikes it.'] : []),
 		...(city.labInfo?.effect ? [`${city.labInfo.name}: ${city.labInfo.effect}`] : []),
+		...(city.inoculated
+			? [
+					`Fully inoculated: every Infection card of ${city.name} is in storage, so the Infection deck cannot infect it.${city.storageLeaks ? ' An Epidemic may still pull one back out.' : ''}`,
+				]
+			: []),
 	];
 	return { title: city.name, marks, counts, rows, notes };
 }

@@ -167,6 +167,22 @@ export function insights(world: World): Insights | null {
 
 export const onGrid = (world: World): CityId[] => [...grid(world.campaign)];
 
+/**
+ * Where each city's Infection cards are across the campaign: still in play (the Infection deck and its discard pile)
+ * or inoculated into storage. A city is fully inoculated once it has stored cards and none left in play.
+ */
+export function inoculation(world: World): Partial<Record<CityId, { inPlay: number; stored: number }>> {
+	const stored = new Set(world.campaign.stored.infection);
+	const counts: Partial<Record<CityId, { inPlay: number; stored: number }>> = {};
+	for (const card of Object.values(world.campaign.infectionCards)) {
+		if (card.kind !== 'city') continue;
+		const entry = (counts[card.city] ??= { inPlay: 0, stored: 0 });
+		if (stored.has(card.id)) entry.stored++;
+		else entry.inPlay++;
+	}
+	return counts;
+}
+
 /** A recon route still to be taken, as the board prints it beside its city. */
 export type ReconBox = {
 	route: ReconRoute;
