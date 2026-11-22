@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
-	import { cityDef, reject, SEAT_IDS, tablePlayers } from '@repo/game';
+	import { cityDef, reject, tablePlayers } from '@repo/game';
 	import type { CharacterId, Command, PlayerId, PublicState } from '@repo/game';
 	import { CITY_COLOR } from '#lib/board/CityMarker.svelte';
 	import { flip } from 'svelte/animate';
@@ -11,6 +11,8 @@
 	import { purchaseName, purchaseTarget, shopOf } from './upkeepShop.ts';
 	import type { SectionId, ShopTarget } from './upkeepShop.ts';
 	import { keep } from './viewState.ts';
+	import VoteButton from './VoteButton.svelte';
+	import { tableVoters, waitingOn } from './voters.ts';
 
 	type Props = {
 		snap: PublicState;
@@ -52,13 +54,8 @@
 	const seated = $derived(players.length === 0 || players.includes(player));
 	const canSpend = $derived(!spectator && seated);
 	const myDone = $derived(upkeep.done.includes(player));
-	const waiting = $derived(
-		players
-			.filter(who => !upkeep.done.includes(who))
-			.map(who => world.table.seats.find(entry => entry.player === who)!.name),
-	);
-	const seatColor = (who: PlayerId) =>
-		SEAT_COLORS[SEAT_IDS.indexOf(world.table.seats.find(entry => entry.player === who)!.seat)]!;
+	const voters = $derived(tableVoters(world.table, who => upkeep.done.includes(who)));
+	const waiting = $derived(waitingOn(voters, player));
 
 	/** A character's colour is the seat they played this game, else a neutral ink. */
 	function characterColor(id: CharacterId) {
@@ -242,22 +239,15 @@
 			{/if}
 		</section>
 		<div class="vote">
-			<button
-				class="done"
-				class:voted={myDone}
-				aria-pressed={myDone}
+			<VoteButton
+				label="Done"
+				tally="done"
+				{voters}
+				on={myDone}
 				disabled={spectator || !seated}
 				onclick={vote}
-				data-testid="finish-upkeep"
-			>
-				<span>{myDone ? 'Done ✓' : 'Done'}{players.length ? ` (${upkeep.done.length}/${players.length})` : ''}</span>
-				{#if players.length}
-					<span class="seats" role="img" aria-label={`${upkeep.done.length} of ${players.length} done`}>
-						{#each players as who (who)}<i class:voted={upkeep.done.includes(who)} style:--seat={seatColor(who)}
-							></i>{/each}
-					</span>
-				{/if}
-			</button>
+				testid="finish-upkeep"
+			/>
 			<small>
 				{#if waiting.length && upkeep.done.length}
 					Waiting for {waiting.join(', ')}
@@ -825,65 +815,5 @@
 	.vote small {
 		color: var(--muted);
 		font-size: 0.8rem;
-	}
-
-	.done {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 0.7rem;
-		min-width: 12rem;
-		padding: 0.6rem 1.2rem;
-		border: 1px solid var(--paper);
-		border-radius: 3px;
-		background: var(--paper);
-		color: var(--paper-ink);
-		font: inherit;
-		font-size: 1rem;
-		font-weight: 700;
-		cursor: pointer;
-	}
-
-	.done:hover:not(:disabled) {
-		background: #e9dec5;
-	}
-
-	.done.voted {
-		border-color: var(--ink-good);
-		background: var(--ink-good);
-		color: #f3ecdc;
-	}
-
-	.done.voted:hover:not(:disabled) {
-		background: #335c48;
-	}
-
-	.done:disabled {
-		opacity: 0.45;
-		cursor: default;
-	}
-
-	.seats {
-		display: flex;
-		gap: 0.3rem;
-	}
-
-	.seats i {
-		width: 0.75rem;
-		height: 0.75rem;
-		border-radius: 50%;
-		box-shadow: inset 0 0 0 1.5px currentColor;
-		opacity: 0.45;
-		transition:
-			background 220ms ease,
-			opacity 220ms ease;
-	}
-
-	.seats i.voted {
-		background: var(--seat);
-		box-shadow:
-			inset 0 0 0 1.5px rgb(255 252 242 / 0.75),
-			0 0 0.4rem var(--seat);
-		opacity: 1;
 	}
 </style>

@@ -24,6 +24,8 @@
 	import RichText from './RichText.svelte';
 	import { keep } from './viewState.ts';
 	import { typing } from '#lib/keys.ts';
+	import VoteButton from './VoteButton.svelte';
+	import { tableVoters, waitingOn as stillWaiting } from './voters.ts';
 
 	type Props = {
 		briefing: BriefingEntry[];
@@ -170,8 +172,8 @@
 	const players = $derived(tablePlayers(table));
 	const multi = $derived(!solo && players.length > 1);
 	const myReady = $derived(progress.ready.includes(player));
-	const nameOf = (who: PlayerId) => table.seats.find(entry => entry.player === who)?.name ?? 'Player';
-	const waitingOn = $derived(players.filter(who => !progress.ready.includes(who)).map(nameOf));
+	const voters = $derived(multi ? tableVoters(table, who => progress.ready.includes(who)) : []);
+	const waitingOn = $derived(stillWaiting(voters, player));
 
 	const still = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 	const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, still ? Math.min(ms, 80) : ms));
@@ -649,14 +651,8 @@
 
 			<div class="controls">
 				{#if allDrawn && !progress.stowing}
-					<button class="done-btn" class:voted={myReady} onclick={toggleReady} data-testid="ack-briefing">
-						{#if multi}
-							{myReady ? 'Ready ✓' : 'Done'} ({progress.ready.length}/{players.length})
-						{:else}
-							Done
-						{/if}
-					</button>
-					{#if multi && waitingOn.length}
+					<VoteButton label="Done" tally="done" {voters} on={myReady} onclick={toggleReady} testid="ack-briefing" />
+					{#if progress.ready.length && waitingOn.length}
 						<span class="waiting">Waiting for {waitingOn.join(', ')}</span>
 					{/if}
 				{:else if !progress.stowing}
@@ -1140,33 +1136,6 @@
 		flex-direction: column;
 		align-items: center;
 		gap: 0.35rem;
-	}
-
-	.done-btn {
-		padding: 0.55rem 2.2rem;
-		border: 2px solid var(--paper);
-		border-radius: 4px;
-		background: var(--paper);
-		color: var(--paper-ink);
-		font: inherit;
-		font-size: 1.05rem;
-		font-weight: 700;
-		cursor: pointer;
-		box-shadow: 0 0.7rem 1.8rem rgb(0 0 0 / 0.55);
-		transition:
-			transform 160ms ease,
-			background 160ms ease;
-	}
-
-	.done-btn:hover {
-		transform: translateY(-2px);
-		background: #efe5cf;
-	}
-
-	.done-btn.voted {
-		background: var(--good);
-		border-color: var(--good);
-		color: #141a12;
 	}
 
 	.waiting,

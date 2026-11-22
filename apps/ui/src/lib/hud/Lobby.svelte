@@ -114,7 +114,7 @@
 
 		<div class="starts">
 			{#each starts as option (option.start)}
-				<Ready {table} {player} {send} start={option.start} label={option.label} />
+				<Ready {table} {player} {send} start={option.start} label={option.label} surface="outline" />
 			{/each}
 		</div>
 		<p class="hint" aria-live="polite">
