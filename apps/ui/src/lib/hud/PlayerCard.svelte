@@ -27,7 +27,6 @@
 		EPIDEMIC_STEPS,
 		EVENT_PRINT,
 		IMPROVEMENT_PRINT,
-		eventPlainText,
 		producePrint,
 	} from '#lib/cards/playerPrint.ts';
 	import { inkOn } from '#lib/color.ts';
@@ -71,7 +70,7 @@
 		if (card.kind !== 'event') return null;
 		const def = pack.events.find(item => item.id === card.event)!;
 		const print = EVENT_PRINT[card.event];
-		return { name: def.name, print, plain: eventPlainText(card.event) };
+		return { name: def.name, print };
 	});
 
 	const produceInfo = $derived.by(() => {
@@ -84,21 +83,19 @@
 	const face = $derived.by(() => {
 		switch (card.kind) {
 			case 'city': {
-				const { city, companion, plain } = cityDetails!;
+				const { city, companion } = cityDetails!;
 				return {
 					title: city.name,
 					kicker: companion ? `${city.port ? 'Port' : 'City'} · ${companion.name}` : city.port ? 'Port' : 'City',
 					color: cardColor(card),
-					text: plain,
 				};
 			}
 			case 'event': {
-				const { name, print, plain } = eventInfo!;
+				const { name, print } = eventInfo!;
 				return {
 					title: name,
 					kicker: print.banner,
 					color: cardColor(card),
-					text: plain,
 				};
 			}
 			case 'produce':
@@ -106,14 +103,12 @@
 					title: 'Produce Supplies',
 					kicker: `${card.boxesLeft} system-wide left`,
 					color: cardColor(card),
-					text: produceInfo!.plain,
 				};
 			case 'epidemic':
 				return {
 					title: 'Epidemic',
 					kicker: '1-Increase · 2-Infect · 3-Intensify',
 					color: cardColor(card),
-					text: EPIDEMIC_PLAIN,
 				};
 		}
 	});
@@ -147,7 +142,6 @@
 	style:--on={inkOn(face.color)}
 	disabled={!onclick}
 	{onclick}
-	title={face.text}
 >
 	{#if originals.held && originalScan}
 		<img class="original-swap" src={scanUrl(originalScan.src)} alt={face.title} />
@@ -199,12 +193,15 @@
 			</span>
 		{/if}
 		<span class="foot">
-			<span class="pips" title="Population when the campaign began">
+			<span class="pips" role="img" aria-label={`Population ${cityDetails.city.population}`}>
 				{#each { length: cityDetails.city.population } as _, index (index)}<i></i>{/each}
 			</span>
 			{#each card.search as box, index (index)}
-				<span class="box" class:used={box.scratched} title={`${box.scope} search${box.scratched ? ', used' : ''}`}
-					>{box.scope === 'sea' ? '≈' : '⌕'}</span
+				<span
+					class="box"
+					class:used={box.scratched}
+					role="img"
+					aria-label={`${box.scope} search${box.scratched ? ', used' : ''}`}>{box.scope === 'sea' ? '≈' : '⌕'}</span
 				>
 			{/each}
 		</span>
@@ -230,7 +227,7 @@
 						<span class="ev-timing">{eventInfo.print.timing}</span>
 					{/if}
 					{#if eventInfo.print.destroy}
-						<span class="ev-destroy" title={eventInfo.print.destroy}>Destroy</span>
+						<span class="ev-destroy">Destroy</span>
 					{/if}
 				</span>
 			{/if}

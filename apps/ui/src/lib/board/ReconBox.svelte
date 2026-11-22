@@ -86,7 +86,6 @@
 				data-state={box.state}
 				disabled={box.state !== 'ready' || !shown}
 				aria-label="Recon {text.title}. {text.cost}. {text.where}.{text.status ? ` ${text.status}.` : ''}"
-				title={text.status ?? undefined}
 				onclick={onrecon}
 				{@attach keepFromCamera}
 			>

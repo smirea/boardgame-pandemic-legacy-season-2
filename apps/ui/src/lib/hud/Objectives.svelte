@@ -213,7 +213,7 @@
 		incidents: game?.incidents,
 	}))}
 >
-	<div class="tags" title={`Complete ${needed} of these to win`}>
+	<div class="tags">
 		{#each objectives as objective, index (objective.id)}
 			<span
 				class="slot"

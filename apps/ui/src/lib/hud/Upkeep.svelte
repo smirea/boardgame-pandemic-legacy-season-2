@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { keep } from './viewState.ts';
-	import { onGrid, pack, purchaseCost, reject } from '@repo/game';
+	import { onGrid, pack, reject } from '@repo/game';
 	import type { CardId, Command, PublicState, Purchase } from '@repo/game';
 	import { cityName, purchaseLabel } from './labels.svelte.ts';
 
@@ -140,7 +140,6 @@
 									];
 									send({ type: 'PURCHASE', purchase: offer.purchase });
 								}}
-								title={`${purchaseCost(offer.purchase)} units`}
 							>
 								{purchaseLabel(world, offer.purchase)}
 							</button>

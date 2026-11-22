@@ -142,7 +142,6 @@
 						data-pawn={pawn.id}
 						data-carrier={pawn.carrier ? 'true' : undefined}
 						aria-label={`Pick ${pawn.name}`}
-						title={pawn.name}
 						onclick={onpick}
 						{@attach keepFromCamera}
 						{@attach feedback(pawn.name, () => ({

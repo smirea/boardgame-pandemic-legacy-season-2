@@ -135,7 +135,6 @@
 					: task === 'bottom'
 						? 'Draw the bottom Infection card'
 						: `Flip an Infection card (${left} left)`}
-				title={ready ? 'Space' : undefined}
 				in:fly={{ x: away * 160, duration: 380, delay: 220 }}
 				out:fly={{ x: away * 160, duration: 240 }}
 			>
@@ -162,7 +161,6 @@
 				class="go"
 				disabled={action!.busy}
 				onclick={() => !action!.busy && action!.onclick()}
-				title="Space"
 				data-testid="turn-desk-go">{go}</button
 			>
 		{:else}

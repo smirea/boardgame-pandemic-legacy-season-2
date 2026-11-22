@@ -39,7 +39,7 @@
 		dimmed?: boolean;
 		/** Followed in a replay, or the hand the dock shows at a live table. */
 		selected: boolean;
-		/** What clicking the card does, as its tooltip. */
+		/** What clicking the card does. */
 		action: string;
 		/** Shown while selected, beside the name. */
 		selectedTag?: string;
@@ -140,15 +140,7 @@
 		role="group"
 		aria-label={name}
 	>
-		<button
-			class="slip"
-			class:highlighted
-			class:active
-			class:selected
-			onclick={onselect}
-			title={action}
-			aria-pressed={selected}
-		>
+		<button class="slip" class:highlighted class:active class:selected onclick={onselect} aria-pressed={selected}>
 			<span class="portrait">
 				<Portrait
 					portrait={character?.portrait ?? SEAT_IDS.indexOf(seat)}
@@ -162,19 +154,10 @@
 				<span class="head">
 					<strong>{name}</strong>
 					{#if character?.carrier}
-						<span
-							class="carrier-badge"
-							data-testid="carrier-badge"
-							title="Carrying the sample — deliver to a supply center in Johannesburg">Sample</span
-						>
+						<span class="carrier-badge" data-testid="carrier-badge">Sample</span>
 					{/if}
 					{#if player}
-						<span
-							class="cubes"
-							role="img"
-							aria-label={`${player.supplies} supply cubes carried`}
-							title={`${player.supplies} supply cubes carried`}
-						>
+						<span class="cubes" role="img" aria-label={`${player.supplies} supply cubes carried`}>
 							{#each { length: player.supplies } as _, index (index)}<i></i>{/each}
 						</span>
 					{/if}
@@ -240,7 +223,7 @@
 						in:fly={{ x: right ? 24 : -24, duration: 320 }}
 						animate:flip={{ duration: 260 }}
 					>
-						<i title={step.spent === null ? 'Cost no action' : `Action ${step.spent}`}>{step.spent ?? '·'}</i>
+						<i>{step.spent ?? '·'}</i>
 						<b>{step.name}</b>
 						{#if step.detail}<span>{step.detail}</span>{/if}
 					</li>
@@ -279,7 +262,6 @@
 					onblur={() => hoverCard?.(null)}
 					style:--band={color}
 					style:--ink={inkOn(color)}
-					title={group.title}
 					aria-label={group.title}
 					onclick={onselect}
 					data-group={group.key}

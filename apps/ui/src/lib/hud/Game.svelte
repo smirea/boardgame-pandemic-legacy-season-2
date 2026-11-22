@@ -1159,14 +1159,12 @@
 					<a href="/replay?src=local" target="_blank" data-testid="open-replay">Replay this game</a>
 				{/if}
 				{#if session.mode !== 'join'}
-					<button onclick={() => fileInput?.click()} title="A save exported from this game">Import campaign save</button
-					>
+					<button onclick={() => fileInput?.click()}>Import campaign save</button>
 					<button
 						onclick={() =>
 							confirm(
 								'Load the canonical tabletop campaign at the August lobby? The current one is erased unless you exported it.',
 							) && session.importSave(scenarios.tabletop())}
-						title="A real group's campaign after July, set up in this game"
 						data-testid="scenario-tabletop">Load canonical tabletop save</button
 					>
 					<button onclick={() => session.importSave(scenarios.october())} data-testid="scenario-october"

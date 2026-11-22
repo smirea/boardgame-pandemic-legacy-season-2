@@ -15,7 +15,6 @@
 	style:--who={color}
 	in:fly={{ y: above ? 10 : -10, duration: 260 }}
 	onclick={onopen}
-	title={folded ? 'Earlier. Click to find it in the timeline' : 'Find it in the timeline'}
 	data-testid="bubble"
 	data-kind={note.kind}
 >

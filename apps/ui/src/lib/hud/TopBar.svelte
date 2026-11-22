@@ -137,7 +137,6 @@
 						class:active={erasing}
 						onclick={oneraser}
 						aria-pressed={erasing}
-						title="Erase parts of drawings (E)"
 						data-testid="draw-eraser"
 					>
 						<svg viewBox="0 0 16 16" aria-hidden="true">
@@ -147,13 +146,7 @@
 						</svg>
 						Eraser
 					</button>
-					<button
-						type="button"
-						class="tool-btn clear"
-						onclick={onclear}
-						title="Erase all drawings on the map"
-						data-testid="draw-clear"
-					>
+					<button type="button" class="tool-btn clear" onclick={onclear} data-testid="draw-clear">
 						<svg viewBox="0 0 16 16" aria-hidden="true">
 							<path d="M2.5 4h11M5.5 4V2.5h5V4M4 4l.8 9.5h6.4L12 4" />
 						</svg>
@@ -162,17 +155,12 @@
 				</div>
 			{/if}
 			{#if !solo}
-				<span class="link" class:down={status !== 'connected'} title="Connection to the host"
+				<span class="link" class:down={status !== 'connected'}
 					>{status === 'connected' ? `${Math.max(1, players)} online` : status}</span
 				>
 			{/if}
-			<button onclick={onreset} title="Fit the revealed map">Fit map</button>
-			<button
-				onclick={onbox}
-				title="The packages and dossier doors opened so far"
-				data-testid="open-box"
-				data-dest="box">Box</button
-			>
+			<button onclick={onreset}>Fit map</button>
+			<button onclick={onbox} data-testid="open-box" data-dest="box">Box</button>
 			<button onclick={onmenu}>Menu</button>
 		</div>
 	</header>

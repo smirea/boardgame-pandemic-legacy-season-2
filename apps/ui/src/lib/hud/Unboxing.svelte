@@ -447,7 +447,6 @@
 										class:mechanic={stow?.cls === 'mechanic'}
 										data-stow-class={stow?.cls}
 										data-put={stow?.dest.join(' ')}
-										title={entry.text}
 									>
 										<BriefPiece unlock={entry.unlock} {campaign} size="2.2rem" />
 										<span class="chip-label"><RichText text={entry.text} /></span>
@@ -614,7 +613,6 @@
 										class:mechanic={stow?.cls === 'mechanic'}
 										data-stow-class={stow?.cls}
 										data-put={stow?.dest.join(' ')}
-										title={entry.text}
 									>
 										<BriefPiece unlock={entry.unlock} {campaign} size="2.2rem" />
 										<span class="chip-label"><RichText text={entry.text} /></span>

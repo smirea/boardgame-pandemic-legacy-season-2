@@ -149,7 +149,7 @@
 				{/if}
 				<div class="scans" aria-label="The printed originals">
 					{#each sealScans(sealOf(reading.kind, reading.slot)) as item (item.src)}
-						<img src={scanUrl(item.src)} alt={item.title} title={item.title} loading="lazy" />
+						<img src={scanUrl(item.src)} alt={item.title} loading="lazy" />
 					{/each}
 				</div>
 			{/if}

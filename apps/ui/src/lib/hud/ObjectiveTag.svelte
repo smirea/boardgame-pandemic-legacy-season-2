@@ -42,11 +42,6 @@
 		objective.id === 'plan' && campaign ? (pack.legacyDeck.find(card => card.id === '11-05') ?? null) : null,
 	);
 	let showPlan = $state(false);
-	const sampleNote = $derived(
-		objective.id === 'deliverSample' && campaign?.rules.includes('carrier')
-			? ` ${Math.max(0, pack.numbers.selfInfectDoses - campaign.dosesUsed)} of ${pack.numbers.selfInfectDoses} doses left.`
-			: '',
-	);
 </script>
 
 {#snippet glyph(kind: Glyph)}
@@ -85,7 +80,6 @@
 		class:waived
 		class:mandatory={objective.mandatory}
 		disabled={!onclick || done || waived}
-		title={`${objective.name}. ${objective.rule}${sampleNote}${objective.mandatory ? ' Mandatory.' : ''}${progress && objective.target > 1 ? ` ${progress} of ${objective.target} done.` : ''}${onclick ? ' Click to mark it impossible this game.' : ''}`}
 		{onclick}
 	>
 		<span class="face">

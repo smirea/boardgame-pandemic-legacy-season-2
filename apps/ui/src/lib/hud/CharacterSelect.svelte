@@ -246,7 +246,7 @@
 {#snippet you(color: string)}
 	<!-- Your own name, written where it shows: click it to change it. -->
 	{@render pawn(color)}
-	<label class="me" title="Change your name">
+	<label class="me">
 		<input
 			value={nameOf(player)}
 			maxlength="24"
@@ -311,11 +311,6 @@
 						onclick={() => (holder === player ? release(character) : take(character))}
 						disabled={holder !== null && holder !== player}
 						aria-pressed={holder === player}
-						title={holder === player
-							? 'Let this character go'
-							: holder
-								? `${nameOf(holder)} plays this character`
-								: 'Play this character'}
 						data-testid={`claim-${character.id}`}
 					>
 						<span class="top">
@@ -329,11 +324,7 @@
 						</span>
 						<span class="traits">
 							{#each traits as trait, index (`${trait.kind}:${trait.name}:${index}`)}
-								<span
-									class="line {trait.kind}"
-									class:struck={trait.struck}
-									title={trait.struck ? `${TRAIT_KIND[trait.kind]}, covered by a scar` : TRAIT_KIND[trait.kind]}
-								>
+								<span class="line {trait.kind}" class:struck={trait.struck}>
 									{#if trait.kind === 'job' && trait.job}
 										<span class="trait-icon"><OccupationIcon job={trait.job} /></span>
 									{:else if trait.kind === 'scar'}
@@ -345,7 +336,7 @@
 								</span>
 							{/each}
 							{#each { length: empty } as _, index (index)}
-								<span class="slot-empty" title="Empty slot for an ability or scar">
+								<span class="slot-empty">
 									<span class="sr-only">Empty slot</span>
 								</span>
 							{/each}
@@ -353,7 +344,7 @@
 						<span class="exposure" aria-label={`Exposure ${character.exposure} of ${character.exposureTrack.length}`}>
 							<span class="kind">Exposure</span>
 							{#each exposureShown(character) as box, index (index)}
-								<i class={box} title={box === 'hidden' ? 'Not yet scratched' : box}></i>
+								<i class={box}></i>
 							{/each}
 						</span>
 					</button>
@@ -391,11 +382,7 @@
 					<fieldset class="avatars">
 						<legend>Portrait</legend>
 						{#each portraits as index (index)}
-							<label
-								class="avatar"
-								class:worn={worn.has(index)}
-								title={worn.has(index) ? 'Worn by another character' : ''}
-							>
+							<label class="avatar" class:worn={worn.has(index)}>
 								<input
 									type="radio"
 									name="portrait"
@@ -425,7 +412,7 @@
 					<fieldset class="choices jobs" data-testid="new-job">
 						<legend>Occupation</legend>
 						{#each jobs as option (option.id)}
-							<label class="choice" class:used={option.refusal !== null} title={option.refusal ?? ''}>
+							<label class="choice" class:used={option.refusal !== null}>
 								<input
 									type="radio"
 									name="job"
@@ -439,9 +426,7 @@
 							</label>
 						{/each}
 					</fieldset>
-					<button class="make" disabled={refusal !== null} title={refusal ?? ''} data-testid="create-character"
-						>Create and take</button
-					>
+					<button class="make" disabled={refusal !== null} data-testid="create-character">Create and take</button>
 				{:else}
 					<p class="text">
 						Every starting occupation is taken. A seat with no character left gets a haven worker when the game starts.
@@ -464,18 +449,13 @@
 			{#if hands > 0}
 				<div class="hands" role="group" aria-label="Characters played on this screen">
 					<span>Characters on this screen</span>
-					<button
-						onclick={dropHand}
-						disabled={hands < 2}
-						title={hands < 2 ? 'You play at least one character' : 'Play one character fewer here'}
-						aria-label="One character fewer"
-						data-testid="hand-fewer">−</button
+					<button onclick={dropHand} disabled={hands < 2} aria-label="One character fewer" data-testid="hand-fewer"
+						>−</button
 					>
 					<b aria-live="polite">{hands}</b>
 					<button
 						onclick={() => send(addHand)}
 						disabled={cannotAdd !== null}
-						title={cannotAdd ?? 'Play one more character here'}
 						aria-label="One more character"
 						data-testid="hand-more">+</button
 					>

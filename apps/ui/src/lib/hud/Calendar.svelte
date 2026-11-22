@@ -84,7 +84,7 @@
 	{#if foldedPast.length}
 		<li
 			class="fold"
-			title={foldedPast.map(entry => `${entry.name}: ${entry.attempts.join(', ') || 'not played'}`).join('\n')}
+			aria-label={foldedPast.map(entry => `${entry.name}: ${entry.attempts.join(', ') || 'not played'}`).join('. ')}
 		>
 			⋯
 		</li>
@@ -134,7 +134,7 @@
 		</li>
 	{/each}
 	{#if foldedFuture.length}
-		<li class="fold" title={`Still to come: ${foldedFuture.map(entry => entry.name).join(', ')}`}>⋯</li>
+		<li class="fold" aria-label={`Still to come: ${foldedFuture.map(entry => entry.name).join(', ')}`}>⋯</li>
 	{/if}
 </ol>
 

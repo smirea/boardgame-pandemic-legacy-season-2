@@ -244,7 +244,7 @@
 
 <div class="studio" class:panel {@attach feedback('Studio', () => ({ viewport, info, shots: shots.length, selected }))}>
 	<header class="bar">
-		<a class="home" href="/debug" title="All debugging tools">Debug</a>
+		<a class="home" href="/debug">Debug</a>
 		<h1>Studio</h1>
 
 		<select
@@ -279,20 +279,20 @@
 			<button
 				disabled={!info || info.at <= 0}
 				onclick={() => void during('Rewinding', () => stage().rewind(info!.at - 1))}
-				title="The state before this one">◀</button
+				aria-label="The state before this one">◀</button
 			>
 			<span class="count" data-testid="history">{info ? `${info.at + 1} / ${info.states}` : '–'}</span>
 			<button
 				disabled={!info || info.at >= info.states - 1}
 				onclick={() => void during('Rewinding', () => stage().rewind(info!.at + 1))}
-				title="The state after this one">▶</button
+				aria-label="The state after this one">▶</button
 			>
 		</div>
 
 		<div class="group" role="group" aria-label="Random play">
 			<span class="label">Bot</span>
 			{#each [1, 10, 100] as steps (steps)}
-				<button onclick={() => stage().bot(steps)} title={`Play ${steps} random legal commands`}>+{steps}</button>
+				<button onclick={() => stage().bot(steps)}>+{steps}</button>
 			{/each}
 		</div>
 
@@ -303,13 +303,7 @@
 		<span class="spacer"></span>
 		{#if busy}<span class="busy">{busy}…</span>{/if}
 
-		<button
-			class:on={pinned !== null}
-			onclick={() => stage().pin(null)}
-			disabled={pinned === null}
-			title="Alt+P over the stage pins the pointer where it is, so its hover stays while you click here. Click to let go."
-			data-testid="pin"
-		>
+		<button class:on={pinned !== null} onclick={() => stage().pin(null)} disabled={pinned === null} data-testid="pin">
 			{pinned ? `Pointer pinned at ${Math.round(pinned.x)}, ${Math.round(pinned.y)} ×` : 'Pin pointer ⌥P'}
 		</button>
 		<button class="primary" disabled={!connected} onclick={() => void capture()} data-testid="capture"
@@ -320,9 +314,10 @@
 
 	<main class="room" bind:clientWidth={room.width} bind:clientHeight={room.height}>
 		<div class="frame" style:width={`${viewport.width * scale}px`} style:height={`${viewport.height * scale}px`}>
+			<!-- svelte-ignore a11y_missing_attribute -->
 			<iframe
 				bind:this={frame}
-				title="The game"
+				aria-label="The game"
 				src={`/debug/studio/stage${location.search}`}
 				style:width={`${viewport.width}px`}
 				style:height={`${viewport.height}px`}
@@ -345,7 +340,7 @@
 		<aside class="side" {@attach feedback('Scene JSON', () => ({ length: draft.length }))}>
 			<header>
 				<strong>Scene</strong>
-				<button onclick={readStage} title="Write down the stage as it stands">Read stage</button>
+				<button onclick={readStage}>Read stage</button>
 				<button
 					class="primary"
 					onclick={() => {
@@ -354,8 +349,7 @@
 						} catch (error) {
 							problems = [error instanceof Error ? error.message : String(error)];
 						}
-					}}
-					title="Put the stage the way this JSON says">Apply</button
+					}}>Apply</button
 				>
 			</header>
 			<textarea bind:value={draft} spellcheck="false" aria-label="Scene JSON" data-testid="scene-json"></textarea>
@@ -385,7 +379,7 @@
 			{#each shots as shot (shot.id)}
 				{@const chosen = selected.includes(shot.id)}
 				<li class:chosen data-shot={shot.id}>
-					<button class="thumb" onclick={() => show(shot)} title="Look at this shot">
+					<button class="thumb" onclick={() => show(shot)}>
 						<img src={urlOf(shot)} alt={shot.name} loading="lazy" />
 					</button>
 					<div class="meta">

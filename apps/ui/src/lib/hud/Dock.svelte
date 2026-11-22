@@ -193,10 +193,7 @@
 	<footer class="dock" data-dest="hand">
 		{#if snap.phase === 'setup.supply'}
 			<div class="setup">
-				<div
-					title="Click a city to place a cube from the stockpile, right-click to take it back."
-					data-testid="supply-left"
-				>
+				<div data-testid="supply-left">
 					<strong>{game.stockpile}</strong> cube{game.stockpile === 1 ? '' : 's'} left to place
 				</div>
 				{#if freeAbilities.length}
@@ -207,7 +204,7 @@
 						<div class="free-list">
 							{#each freeAbilities as purchase (`${purchase.ability}:${purchase.character}`)}
 								{@const def = pack.abilities.find(ability => ability.id === purchase.ability)!}
-								<button title={def.text} onclick={() => send({ type: 'PURCHASE', purchase })}>
+								<button onclick={() => send({ type: 'PURCHASE', purchase })}>
 									{def.name} ({def.cost}) for {world.campaign.characters[purchase.character]!.name}
 								</button>
 							{/each}

@@ -34,11 +34,7 @@
 		{#each players as who (who)}
 			{@const ready = table.ready[who] === start}
 			<!-- An empty socket for each player still to ready, filled with their colour once they are. -->
-			<i
-				class:ready
-				style:--seat={SEAT_COLORS[SEAT_IDS.indexOf(firstSeat(who).seat)]}
-				title={`${firstSeat(who).name}${ready ? ' is ready' : ''}`}
-			></i>
+			<i class:ready style:--seat={SEAT_COLORS[SEAT_IDS.indexOf(firstSeat(who).seat)]}></i>
 		{/each}
 	</span>
 </button>

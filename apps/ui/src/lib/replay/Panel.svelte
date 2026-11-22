@@ -77,7 +77,7 @@
 <aside class="side" data-testid="panel" {@attach feedback(undefined, () => ({ tab }))}>
 	<header>
 		<p class="crumb">
-			{#if index}<a href="/debug/runs" title="All runs">Runs</a> / {index.title}{:else}Replay{/if}
+			{#if index}<a href="/debug/runs">Runs</a> / {index.title}{:else}Replay{/if}
 		</p>
 		{#if loaded}
 			<h1>{gameTitle(loaded.record)}</h1>

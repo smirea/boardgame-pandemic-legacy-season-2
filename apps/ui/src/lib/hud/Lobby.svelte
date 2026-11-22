@@ -97,7 +97,6 @@
 							<button
 								class="drop"
 								aria-label={`Give up this seat`}
-								title="Give up this seat"
 								onclick={() => send({ type: 'LEAVE', player, seat })}>×</button
 							>
 						{/if}

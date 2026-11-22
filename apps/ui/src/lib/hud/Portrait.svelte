@@ -22,7 +22,7 @@
 	{@attach feedback('Portrait', () => ({ portrait, job, dead }))}
 />
 {#if job}
-	<span class="job" role="img" aria-label={occupation} title={occupation}><OccupationIcon {job} /></span>
+	<span class="job" role="img" aria-label={occupation}><OccupationIcon {job} /></span>
 {/if}
 
 <style>

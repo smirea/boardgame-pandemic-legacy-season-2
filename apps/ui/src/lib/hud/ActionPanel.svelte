@@ -153,7 +153,8 @@
 		{#if snap.phase === 'playing.actions'}
 			<span
 				class="pips"
-				title={`${game.actionsLeft} action${game.actionsLeft === 1 ? '' : 's'} left`}
+				role="img"
+				aria-label={`${game.actionsLeft} action${game.actionsLeft === 1 ? '' : 's'} left`}
 				data-testid="pips"
 			>
 				{#each { length: Math.max(pack.numbers.actionsPerTurn, game.actionsLeft) } as _, index (index)}
@@ -169,19 +170,17 @@
 				disabled={refused({ type: 'END_ACTIONS', seat: game.active })}
 				onclick={() => send({ type: 'END_ACTIONS', seat: game.active })}
 				data-testid="end-actions"
-				title="Space"
 			>
 				{game.actionsLeft > 0 ? 'End actions' : 'Draw cards'}
 			</button>
-			<button disabled={!snap.canUndo} onclick={() => send({ type: 'UNDO' })} data-testid="undo" title="Z">Undo</button>
+			<button disabled={!snap.canUndo} onclick={() => send({ type: 'UNDO' })} data-testid="undo">Undo</button>
 		{/if}
 		{#each lockable as card (card.id)}
 			<button
 				class="lockdown"
 				disabled={!anyPay || reject(world, snap.phase, { type: 'LOCKDOWN', card: card.id, ...anyPay }) !== null}
 				onclick={() => onlockdown(card.id)}
-				data-testid="lockdown"
-				title="Lockdown: destroy this Infection card for good">Lockdown: destroy {cityName(card.city)}</button
+				data-testid="lockdown">Lockdown: destroy {cityName(card.city)}</button
 			>
 		{/each}
 	</footer>

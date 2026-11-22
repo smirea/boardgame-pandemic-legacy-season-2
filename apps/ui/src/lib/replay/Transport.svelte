@@ -92,28 +92,20 @@
 	{@attach feedback(undefined, () => ({ frame, total, turn, playing, speed, follow }))}
 >
 	<div class="buttons">
-		<button onclick={() => go(0)} title="Start (Home)" aria-label="Start"><i class="icon first"></i></button>
-		<button onclick={() => onturn(-1)} title="Previous turn (↑)" aria-label="Previous turn"
-			><i class="icon back2"></i></button
-		>
-		<button onclick={() => go(frame - 1)} title="Step back (←)" aria-label="Step back" data-testid="step-back"
+		<button onclick={() => go(0)} aria-label="Start"><i class="icon first"></i></button>
+		<button onclick={() => onturn(-1)} aria-label="Previous turn"><i class="icon back2"></i></button>
+		<button onclick={() => go(frame - 1)} aria-label="Step back" data-testid="step-back"
 			><i class="icon back"></i></button
 		>
-		<button
-			class="play"
-			onclick={onplay}
-			title="Play or pause (space)"
-			aria-label={playing ? 'Pause' : 'Play'}
-			data-testid="play"><i class="icon" class:pause={playing} class:forward={!playing}></i></button
+		<button class="play" onclick={onplay} aria-label={playing ? 'Pause' : 'Play'} data-testid="play"
+			><i class="icon" class:pause={playing} class:forward={!playing}></i></button
 		>
-		<button onclick={() => go(frame + 1)} title="Step forward (→)" aria-label="Step forward" data-testid="step-forward"
+		<button onclick={() => go(frame + 1)} aria-label="Step forward" data-testid="step-forward"
 			><i class="icon forward"></i></button
 		>
-		<button onclick={() => onturn(1)} title="Next turn (↓)" aria-label="Next turn" data-testid="next-turn"
-			><i class="icon fwd2"></i></button
-		>
-		<button onclick={() => go(total)} title="End (End)" aria-label="End"><i class="icon last"></i></button>
-		<button class="speed" onclick={onspeed} title="Change speed (S)" data-testid="speed">{speed}×</button>
+		<button onclick={() => onturn(1)} aria-label="Next turn" data-testid="next-turn"><i class="icon fwd2"></i></button>
+		<button onclick={() => go(total)} aria-label="End"><i class="icon last"></i></button>
+		<button class="speed" onclick={onspeed} data-testid="speed">{speed}×</button>
 	</div>
 
 	<div class="scrubber">
@@ -185,31 +177,11 @@
 
 	<div class="toggles">
 		{#if follow}
-			<button class="chip on" onclick={onunfollow} title="Stop following (press the player's number again)"
-				>Following {follow}</button
-			>
+			<button class="chip on" onclick={onunfollow}>Following {follow}</button>
 		{/if}
-		<button
-			class="chip"
-			class:on={bubbles}
-			onclick={onbubbles}
-			title="Show or hide what players say (B)"
-			data-testid="toggle-bubbles">Bubbles</button
-		>
-		<button
-			class="chip"
-			class:on={panel}
-			onclick={onpanel}
-			title="Show or hide the side panel (T)"
-			data-testid="toggle-panel">Panel</button
-		>
-		<button
-			class="chip key"
-			class:on={keys}
-			onclick={onkeys}
-			title="Keyboard shortcuts (?)"
-			aria-label="Keyboard shortcuts">?</button
-		>
+		<button class="chip" class:on={bubbles} onclick={onbubbles} data-testid="toggle-bubbles">Bubbles</button>
+		<button class="chip" class:on={panel} onclick={onpanel} data-testid="toggle-panel">Panel</button>
+		<button class="chip key" class:on={keys} onclick={onkeys} aria-label="Keyboard shortcuts">?</button>
 	</div>
 
 	{#if keys}
