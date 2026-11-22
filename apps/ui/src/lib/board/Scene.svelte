@@ -116,7 +116,14 @@
 					z: cities.reduce((sum, city) => sum + pack.positions[city]!.z, 0) / cities.length,
 				}
 			: null;
-	const { size, dpr, renderer, invalidate } = useThrelte();
+	const { size, dpr, renderer, invalidate, scene: stage, camera: lens } = useThrelte();
+	// The board keeps no drawing buffer, so a presented frame reads blank. Captures (Feedback, the studio) read the canvas
+	// with one synchronous toDataURL, so drawing the frame again inside that call costs a frame per capture, not always.
+	const readCanvas = renderer.domElement.toDataURL.bind(renderer.domElement);
+	renderer.domElement.toDataURL = (type?: string, quality?: number) => {
+		renderer.render(stage, lens.current);
+		return readCanvas(type, quality);
+	};
 	// The canvas itself asks for a frame with the scheduler's own `invalidate`, which cannot wake a resting loop.
 	$effect(() => {
 		void $size;

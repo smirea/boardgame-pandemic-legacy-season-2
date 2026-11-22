@@ -175,14 +175,15 @@ export function printBerth(width: number, height: number): Print {
 	});
 }
 
-export type DiscTone = 'plain' | 'infested' | 'forsaken';
+export type DiscTone = 'plain' | 'infested' | 'forsaken' | 'inoculated';
 
 const TONE_COLOR: Record<Exclude<DiscTone, 'plain'>, { fill: string; outline: string }> = {
 	infested: { fill: '#9ce022', outline: '#1b2e05' },
 	forsaken: { fill: '#ec2a20', outline: '#3b0806' },
+	inoculated: { fill: '#6cc4ff', outline: '#061b38' },
 };
 
-/** The face of a city's disc: its population as a numeral, in green or red when infested or forsaken. */
+/** The face of a city's disc: its population as a numeral, in green, red or blue when infested, forsaken or inoculated. */
 export function printDisc(population: number, size: number, color: string, tone: DiscTone = 'plain'): Print {
 	return sheet(size, size, context => {
 		const text = String(population);
@@ -200,6 +201,23 @@ export function printDisc(population: number, size: number, color: string, tone:
 			context.fillStyle = color;
 		}
 		context.fillText(text, size / 2, size * 0.54);
+	});
+}
+
+/** A soft blue halo around a disc's numeral, laid under it while an inoculated city's number shimmers. */
+export function printDiscGlow(population: number, size: number): Print {
+	return sheet(size, size, context => {
+		const text = String(population);
+		context.textAlign = 'center';
+		context.textBaseline = 'middle';
+		context.font = `700 ${size * 0.82}px ${NUMBER_FONT}`;
+		context.lineJoin = 'round';
+		// Canvas blur is in pixels of the sheet, not board units.
+		context.shadowBlur = size * 0.12 * PX_PER_UNIT;
+		context.shadowColor = 'rgb(110 200 255 / 1)';
+		context.strokeStyle = 'rgb(190 232 255 / 0.95)';
+		context.lineWidth = size * 0.1;
+		context.strokeText(text, size / 2, size * 0.54);
 	});
 }
 

@@ -23,10 +23,14 @@
 		canMonitor?: boolean;
 		monitorReason?: string | null;
 		hasDrawings?: boolean;
+		/** Whether any of the strokes on the map are this player's, which is all Erase mine takes off. */
+		hasOwnDrawings?: boolean;
 		erasing?: boolean;
 		oneraser?: () => void;
 		onclear?: () => void;
 		onreset: () => void;
+		/** Shown while something covers the board: lifts it off to see the board, and puts it back. */
+		peek?: { on: boolean; toggle: () => void } | null;
 		onmenu: () => void;
 		onbox: () => void;
 		ondeck: () => void;
@@ -43,10 +47,12 @@
 		canMonitor = false,
 		monitorReason = null,
 		hasDrawings = false,
+		hasOwnDrawings = false,
 		erasing = false,
 		oneraser,
 		onclear,
 		onreset,
+		peek = null,
 		onmenu,
 		onbox,
 		ondeck,
@@ -56,8 +62,6 @@
 	const campaign = $derived(snap.world.campaign);
 	const game = $derived(snap.world.game);
 	const dealt = $derived(!snap.phase.startsWith('setup'));
-	/** The width left for the calendar once the rest of the bar has what it needs. */
-	let room = $state(0);
 	const nextLegacy = $derived(pack.legacyDeck[campaign.legacyIndex]);
 	const legacyLeft = $derived(pack.legacyDeck.length - campaign.legacyIndex);
 	const hasStorage = $derived(campaign.rules.includes('storage'));
@@ -75,9 +79,9 @@
 	{@attach feedback(undefined, () => ({ status, players, solo, month: campaign.month, phase: snap.phase }))}
 >
 	<header class="bar">
-		<div class="month" bind:clientWidth={room}>
+		<div class="month">
 			{#if !MONTHS[campaign.month]}<strong>Campaign over</strong>{/if}
-			<Calendar {campaign} {room} />
+			<Calendar {campaign} />
 		</div>
 		<CampaignStatus world={snap.world} onopen={onbox} />
 		{#if hasStorage}
@@ -146,18 +150,39 @@
 						</svg>
 						Eraser
 					</button>
-					<button type="button" class="tool-btn clear" onclick={onclear} data-testid="draw-clear">
-						<svg viewBox="0 0 16 16" aria-hidden="true">
-							<path d="M2.5 4h11M5.5 4V2.5h5V4M4 4l.8 9.5h6.4L12 4" />
-						</svg>
-						Erase all
-					</button>
+					{#if hasOwnDrawings}
+						<button type="button" class="tool-btn clear" onclick={onclear} data-testid="draw-clear">
+							<svg viewBox="0 0 16 16" aria-hidden="true">
+								<path d="M2.5 4h11M5.5 4V2.5h5V4M4 4l.8 9.5h6.4L12 4" />
+							</svg>
+							Erase mine
+						</button>
+					{/if}
 				</div>
 			{/if}
 			{#if !solo}
 				<span class="link" class:down={status !== 'connected'}
 					>{status === 'connected' ? `${Math.max(1, players)} online` : status}</span
 				>
+			{/if}
+			{#if peek}
+				<button
+					class="peek"
+					class:on={peek.on}
+					aria-pressed={peek.on}
+					onclick={peek.toggle}
+					data-testid="show-board"
+					transition:fade={{ duration: 160 }}
+				>
+					<svg viewBox="0 0 16 16" aria-hidden="true"
+						><path d="M1.5 8s2.4-4.5 6.5-4.5S14.5 8 14.5 8 12.1 12.5 8 12.5 1.5 8 1.5 8Z" /><circle
+							cx="8"
+							cy="8"
+							r="2"
+						/></svg
+					>
+					{peek.on ? 'Back' : 'Show board'}
+				</button>
 			{/if}
 			<button onclick={onreset}>Fit map</button>
 			<button onclick={onbox} data-testid="open-box" data-dest="box">Box</button>
@@ -252,7 +277,7 @@
 		}
 	}
 
-	/* Takes the room the rest of the bar leaves, whatever the calendar holds, so the calendar can fold to fit it. */
+	/* Takes the room the rest of the bar leaves, so the bar's other parts keep their places. */
 	.month {
 		display: flex;
 		flex: 1 1 0;
@@ -286,6 +311,26 @@
 
 	.link {
 		color: var(--good);
+	}
+
+	.peek {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+	}
+
+	.peek.on {
+		border-color: var(--warn);
+		background: var(--warn);
+		color: #1c140a;
+	}
+
+	.peek svg {
+		width: 0.95rem;
+		height: 0.95rem;
+		fill: none;
+		stroke: currentColor;
+		stroke-width: 1.4;
 	}
 
 	.link.down {

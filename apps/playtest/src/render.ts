@@ -1,4 +1,5 @@
 import {
+	searchFind,
 	briefingSections,
 	characterAt,
 	checkEdge,
@@ -149,6 +150,11 @@ const SEARCH_FINDS: Record<string, string> = {
 	nothing: 'nothing',
 };
 
+function searched(world: World, card: CardId, box: number): string {
+	const held = world.campaign.playerCards[card];
+	return held?.kind === 'city' && held.search[box] ? ` [${searchFind(held.search[box].result)}]` : '';
+}
+
 export function renderLog(world: World, entry: LogEntry): string {
 	const seat = (id: SeatId) => characterAt(world, id, entry.seq)?.name ?? seatName(world, id);
 	const city = (id: CityId) => cityName(world, id);
@@ -194,7 +200,7 @@ export function renderLog(world: World, entry: LogEntry): string {
 		case 'objective':
 			return `OBJECTIVE COMPLETE: ${objectiveDef(entry.objective).name}`;
 		case 'search':
-			return `${seat(entry.seat)} searched ${city(entry.city)} and found: ${SEARCH_FINDS[entry.result]}`;
+			return `${seat(entry.seat)} searched ${city(entry.city)} and found: ${SEARCH_FINDS[entry.result]}${searched(world, entry.card, entry.box)}`;
 		case 'note':
 			return entry.text;
 		case 'end':

@@ -1,5 +1,5 @@
 import { pack } from './content/pack';
-import type { ActionId, RuleId, Seal, Unlock } from './content/types';
+import type { ActionId, RuleId, SearchResult, Seal, Unlock } from './content/types';
 import { sealKey } from './content/types';
 import type { BriefingEntry, BriefingSource, Campaign } from './state';
 
@@ -286,5 +286,40 @@ function unlockLine(campaign: Campaign, unlock: BriefedUnlock): string | null {
 			const name = pack.cities.find(entry => entry.id === unlock.city)!.name;
 			return `${name} is forsaken and infested.`;
 		}
+	}
+}
+
+const sealName = (seal: Seal) => (seal.t === 'door' ? `door ${seal.id}` : `package ${seal.id}`);
+
+/** What a scratched search box found, short enough to stay printed on the City card. */
+export function searchFind(result: SearchResult): string {
+	switch (result.t) {
+		case 'supplies':
+			return `${result.amount} cubes here from the ${result.from}`;
+		case 'stockpile':
+			return `${result.amount} cubes to the stockpile`;
+		case 'actions':
+			return `${result.amount} extra action${result.amount === 1 ? '' : 's'}`;
+		case 'retrieve':
+			return 'Take a card from the discard';
+		case 'giveCard':
+			return 'Give a card to a player';
+		case 'quarantineCard':
+			return 'Set an Infection card aside';
+		case 'removeHollow':
+			return `Remove ${result.amount} Hollow Men`;
+		case 'freeEdge':
+			return result.kind === 'sea' ? 'A free sea lane' : 'A free supply line';
+		case 'discover': {
+			const opens = `Open ${result.seals.map(sealName).join(' and ')}`;
+			if (result.lab) return `Lab found. ${opens}`;
+			return result.orAction ? `${opens}, or 1 action` : opens;
+		}
+		case 'companion':
+			return `Companion: ${pack.companions.find(companion => companion.id === result.companion)!.name}`;
+		case 'infest':
+			return result.opens ? `Infested. Open ${sealName(result.opens)}` : 'Infested';
+		case 'nothing':
+			return 'Nothing';
 	}
 }

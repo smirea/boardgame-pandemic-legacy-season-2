@@ -100,7 +100,7 @@ type Spec<A> = {
 	/** Actions that a campaign rule switches on, with no action sticker of their own. */
 	rule?: RuleId;
 	free?: boolean;
-	/** Reveals hidden information, so the turn's undo history ends here. */
+	/** Reveals hidden information, so undoing it requires a consensus vote. */
 	reveals?: boolean;
 	cost?: (ctx: Ctx, action: A) => number;
 	check: (ctx: Ctx, action: A) => string | null;
@@ -523,7 +523,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 			const target = held.search[box]!;
 			target.scratched = true;
 			ctx.game.searches += 1;
-			log(ctx.game, { t: 'search', seat: ctx.seat, city: ctx.here, result: target.result.t });
+			log(ctx.game, { t: 'search', seat: ctx.seat, city: ctx.here, card, box, result: target.result.t });
 			resolveSearch(ctx, target.result, card);
 			bump(ctx.world, 'searches');
 			if (trait(ctx, 'searchDiscard') && ctx.me.hand.includes(card)) discardFromHand(ctx.game, ctx.seat, card);

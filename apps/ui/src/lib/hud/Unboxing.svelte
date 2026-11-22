@@ -23,6 +23,7 @@
 	import ObjectiveTag from './ObjectiveTag.svelte';
 	import RichText from './RichText.svelte';
 	import { keep } from './viewState.ts';
+	import { typing } from '#lib/keys.ts';
 
 	type Props = {
 		briefing: BriefingEntry[];
@@ -327,6 +328,7 @@
 
 <svelte:window
 	onkeydown={event => {
+		if (typing(event)) return;
 		if (full) {
 			if (event.key === 'Escape') full = false;
 			return;

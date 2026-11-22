@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { typing } from '#lib/keys.ts';
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { pack, sealKey } from '@repo/game';
 	import type { Campaign, LegacyCardDef } from '@repo/game';
@@ -76,7 +77,7 @@
 	const PLAN = ['red', 'black', 'yellow', 'blue'] as const;
 </script>
 
-<svelte:window onkeydown={event => event.key === 'Escape' && onclose()} />
+<svelte:window onkeydown={event => event.key === 'Escape' && !typing(event) && onclose()} />
 
 <section
 	class="deck"

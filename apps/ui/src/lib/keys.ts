@@ -1,11 +1,12 @@
 const notTyping = new Set(['range', 'checkbox', 'radio', 'button', 'submit', 'reset', 'color', 'file']);
 
 /**
- * Whether a key goes into something the player is typing in, so a page shortcut must leave it alone. Reads the
- * composed path, because a field inside a shadow root, such as the feedback editor's, retargets `event.target` to
- * the shadow host.
+ * Whether a key belongs to something other than the game, so a game hotkey must leave it alone: a field the player is
+ * typing in, or anything inside the feedback editor, whose shadow root retargets `event.target` to its host. Reads the
+ * composed path for both.
  */
 export function typing(event: KeyboardEvent) {
+	if (inFeedback(event)) return true;
 	const target = event.composedPath()[0];
 	if (target instanceof HTMLInputElement) return !notTyping.has(target.type);
 	return (
@@ -14,6 +15,10 @@ export function typing(event: KeyboardEvent) {
 		(target instanceof HTMLElement && target.isContentEditable)
 	);
 }
+
+/** Whether a key was pressed anywhere in the feedback editor, which is never the game's, Escape included. */
+export const inFeedback = (event: KeyboardEvent) =>
+	event.composedPath().some(node => node instanceof Element && node.hasAttribute('data-feedback-engine'));
 
 /** Whether a key lands on a focused button, which Space and Enter already press. */
 export const onButton = (event: KeyboardEvent) => event.composedPath()[0] instanceof HTMLButtonElement;

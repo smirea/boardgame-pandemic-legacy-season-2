@@ -48,6 +48,12 @@ export type CityView = {
 	infection: { odds: number; inDeck: number; discarded: number } | null;
 	/** Where the city's player cards are, while a game is played. */
 	cards: PlayerCardsAt | null;
+	/** The city's Infection cards across the campaign: still in the deck or its discard pile, and inoculated. */
+	stock: { inPlay: number; stored: number } | null;
+	/** Every Infection card of the city is in storage, so the Infection deck cannot name it. */
+	inoculated: boolean;
+	/** An Epidemic may pull a stored Infection card back out (a campaign rule). */
+	storageLeaks: boolean;
 };
 
 /** How a pawn made its last move, which decides the vehicle it travels in. */

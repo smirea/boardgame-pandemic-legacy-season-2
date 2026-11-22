@@ -3,21 +3,21 @@
 	import type { CardId } from '@repo/game';
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { pack, SEAT_IDS } from '@repo/game';
-	import type { PlayerDeckKind, SeatId, World } from '@repo/game';
+	import type { SeatId, World } from '@repo/game';
 	import { inkOn } from '#lib/color.ts';
 	import Bubble from '#lib/replay/Bubble.svelte';
 	import type { SaidNote } from '#lib/replay/replay.svelte.ts';
 	import { flip } from 'svelte/animate';
 	import { cubicIn, cubicOut } from 'svelte/easing';
-	import { fly, scale } from 'svelte/transition';
-	import { CITY_COLOR } from '#lib/board/CityMarker.svelte';
+	import { fade, fly, scale } from 'svelte/transition';
 	import CardIcon from '#lib/cards/CardIcon.svelte';
+	import OccupationIcon from '#lib/occupations/OccupationIcon.svelte';
 	import { SCAR_ICON } from '#lib/cards/icons.ts';
 	import { deal } from './deal.ts';
 	import { handGroups } from './handGroups.ts';
 	import { sortHand } from './handOrder.ts';
 	import { cardName } from './labels.svelte.ts';
-	import PlayerCard, { KIND_COLOR } from './PlayerCard.svelte';
+	import PlayerCard from './PlayerCard.svelte';
 	import Portrait from './Portrait.svelte';
 	import type { Place } from './seats.ts';
 	import { characterTraits, TRAIT_KIND } from './traits.ts';
@@ -47,6 +47,8 @@
 		onnote?: (note: SaidNote) => void;
 		/** Cards drawn into this hand whose flight here has not landed: a pile made only of them is not shown yet. */
 		arriving?: ReadonlySet<CardId>;
+		/** Whether the active player is still taking actions. Once they draw, the turn's steps leave the seat. */
+		acting: boolean;
 	};
 
 	let {
@@ -65,6 +67,7 @@
 		onselect,
 		onnote = () => {},
 		arriving = new Set(),
+		acting,
 	}: Props = $props();
 
 	const game = $derived(world.game);
@@ -85,9 +88,7 @@
 		),
 	);
 	const groups = $derived(handGroups(hand, named));
-	const toneColor = (tone: PlayerDeckKind) =>
-		tone in CITY_COLOR ? CITY_COLOR[tone as keyof typeof CITY_COLOR] : KIND_COLOR[tone as keyof typeof KIND_COLOR];
-	const steps = $derived(active ? turnSteps(world, seat) : []);
+	const steps = $derived(active && acting ? turnSteps(world, seat) : []);
 	let reading = $state(false);
 
 	// The whole hand opens while the pointer rests anywhere on the seat: its card or its piles. Leaving waits a beat, so
@@ -196,18 +197,21 @@
 			>
 				{#if character?.carrier}
 					<div class="line carrier">
-						<span class="kind">Sample carrier</span>
 						<b>Carrying the Pearl Lab sample</b>
 						<p>Deliver to a supply center in Johannesburg to complete the final objective.</p>
 					</div>
 				{/if}
 				{#each traits as trait, index (`${trait.kind}:${trait.name}:${index}`)}
 					<div class="line {trait.kind}" class:struck={trait.struck}>
-						<span class="kind">
-							{#if trait.kind === 'scar'}<CardIcon path={SCAR_ICON} size="0.85rem" />{/if}
-							{TRAIT_KIND[trait.kind]}{trait.struck ? ', covered by a scar' : ''}
-						</span>
-						<b>{trait.name}</b>
+						<span class="sr-only">{TRAIT_KIND[trait.kind]}{trait.struck ? ', covered by a scar' : ''}: </span>
+						<b>
+							{#if trait.kind === 'job' && trait.job}
+								<span class="mark"><OccupationIcon job={trait.job} /></span>
+							{:else if trait.kind === 'scar'}
+								<span class="mark"><CardIcon path={SCAR_ICON} size="0.9rem" /></span>
+							{/if}
+							{trait.name}
+						</b>
 						<p>{trait.text}</p>
 					</div>
 				{/each}
@@ -215,7 +219,7 @@
 		{/if}
 		{#if steps.length}
 			<!-- The turn so far, beside the card on the side facing the board. -->
-			<ol class="steps" data-testid="turn-steps">
+			<ol class="steps" data-testid="turn-steps" out:fade={{ duration: 240 }}>
 				{#each steps as step (step.seq)}
 					<li
 						class={step.kind}
@@ -252,7 +256,6 @@
 				</div>
 			{/if}
 			{#each groups as group (group.key)}
-				{@const color = toneColor(group.tone)}
 				{@const ids = group.cards.map(card => card.id)}
 				<button
 					class="mini"
@@ -260,8 +263,8 @@
 					onmouseleave={() => hoverCard?.(null)}
 					onfocus={() => hoverCard?.(ids)}
 					onblur={() => hoverCard?.(null)}
-					style:--band={color}
-					style:--ink={inkOn(color)}
+					style:--band={group.color}
+					style:--ink={inkOn(group.color)}
 					aria-label={group.title}
 					onclick={onselect}
 					data-group={group.key}
@@ -324,6 +327,8 @@
 	}
 
 	.seat {
+		--rail: 1.55rem;
+		--rail-gap: 0.4rem;
 		position: relative;
 		width: 100%;
 	}
@@ -376,13 +381,19 @@
 		outline-offset: 3px;
 	}
 
+	/* As tall as the card and moved with it, so its words sit at the card's middle. */
 	.turn-rail {
 		position: absolute;
-		top: 50%;
-		left: calc(100% + 0.4rem);
+		top: 0;
+		bottom: 0;
+		left: calc(100% + var(--rail-gap));
 		z-index: 38;
-		transform: translateY(-50%);
-		padding: 0.45rem 0.24rem;
+		display: grid;
+		place-items: center;
+		box-sizing: border-box;
+		width: var(--rail);
+		padding: 0.45rem 0;
+		translate: 0 0.25rem;
 		border: 1px solid rgb(247 214 139 / 0.72);
 		border-radius: 3px;
 		background: rgb(18 14 10 / 0.86);
@@ -407,8 +418,13 @@
 
 	.turn-rail.on-left {
 		left: auto;
-		right: calc(100% + 0.4rem);
-		transform: translateY(-50%) rotate(180deg);
+		right: calc(100% + var(--rail-gap));
+		rotate: 180deg;
+	}
+
+	.bl .turn-rail,
+	.br .turn-rail {
+		translate: 0 -0.25rem;
 	}
 
 	@keyframes turn-glow {
@@ -470,7 +486,7 @@
 		line-height: 1.15;
 	}
 
-	.line.carrier .kind {
+	.line.carrier b {
 		color: #166b52;
 	}
 
@@ -577,18 +593,30 @@
 		bottom: 0;
 	}
 
-	.line .kind {
-		display: flex;
-		align-items: center;
-		gap: 0.25rem;
-		color: rgb(42 32 23 / 0.6);
-		font-size: 0.66rem;
-		font-weight: 700;
-		letter-spacing: 0.06em;
-		text-transform: uppercase;
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		margin: -1px;
+		padding: 0;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
 	}
 
-	.line.scar .kind {
+	.line .mark {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 0.95rem;
+		height: 0.95rem;
+		margin-right: 0.3rem;
+		vertical-align: -0.08em;
+		color: rgb(42 32 23 / 0.7);
+	}
+
+	.line.scar .mark,
+	.line.scar b {
 		color: #8a2a1c;
 	}
 
@@ -598,6 +626,10 @@
 		font-size: 1.15rem;
 		font-weight: 400;
 		line-height: 1.15;
+	}
+
+	.line.struck {
+		opacity: 0.55;
 	}
 
 	.line.struck b {
@@ -611,10 +643,11 @@
 	}
 
 	/* The active player's turn so far, floating beside the card toward the board. */
+	/* Only the active seat lists its steps, so they always clear its Current turn rail. */
 	.steps {
 		position: absolute;
 		top: 0;
-		left: calc(100% + 0.5rem);
+		left: calc(100% + var(--rail) + 2 * var(--rail-gap));
 		display: flex;
 		flex-direction: column;
 		gap: 0.25rem;
@@ -628,7 +661,7 @@
 
 	.tr .steps,
 	.br .steps {
-		right: calc(100% + 0.5rem);
+		right: calc(100% + var(--rail) + 2 * var(--rail-gap));
 		left: auto;
 		align-items: flex-end;
 	}

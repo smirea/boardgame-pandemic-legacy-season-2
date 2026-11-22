@@ -6,7 +6,7 @@ import { layoutCities } from '../src/lib/board/projection.ts';
 import { edgeKey } from '../../../packages/game/src/ids.ts';
 import { cities, documentedEdges, regions, startingEdges } from '../../../packages/game/src/content/world.ts';
 // Water is read from the same coastline the board draws, so a line the rules call dry looks dry.
-import { isWater, seaCourse, seaCourses } from './waterways.ts';
+import { isWater, seaCourses } from './waterways.ts';
 import { coursesCross, runAlongside, runsOver } from '../../../packages/game/src/lanes.ts';
 import type { Ground } from './waterways.ts';
 
@@ -85,7 +85,7 @@ function arches(aId: string, bId: string, share: number): Point[][] {
 	const b = positions[bId as keyof typeof positions];
 	const length = Math.hypot(b.x - a.x, b.z - a.z);
 	const bow = (hash(edgeKey(aId as never, bId as never)) < 0.5 ? -1 : 1) * share * length;
-	return [bow, bow / 2, -bow / 2, 0].map(amount => arch(a, b, amount));
+	return [bow, -bow, bow / 2, -bow / 2, 0].map(amount => arch(a, b, amount));
 }
 
 /** Ramer-Douglas-Peucker: drops points the line would pass within `tolerance` of anyway. */
@@ -291,16 +291,22 @@ for (let i = 0; i < cities.length; i++) {
 			courses.set(seaKey, starting);
 			continue;
 		}
-		const course = seaCourse(from, to, arches(a.id, b.id, SEA_BOW));
-		if (!course) {
-			if (listed) throw new Error(`no water joins ${a.id} and ${b.id}`);
-			continue;
+		let course: { path: Point[]; length: number } | null = null;
+		let fallback: { path: Point[]; length: number } | null = null;
+		for (const path of seaCourses(from, to, arches(a.id, b.id, SEA_BOW))) {
+			const candidate = { path, length: length(path) };
+			if (!fallback) fallback = candidate;
+			if (!listed && (candidate.length > MAX_SEA_LENGTH || candidate.length > chord * MAX_DETOUR)) continue;
+			if (!passesNearAnotherCity(a.id, b.id, path)) {
+				course = candidate;
+				break;
+			}
 		}
-		const fits =
-			course.length <= MAX_SEA_LENGTH &&
-			course.length <= chord * MAX_DETOUR &&
-			!passesNearAnotherCity(a.id, b.id, course.path);
-		if (!listed && !fits) continue;
+		if (!course) {
+			if (!listed) continue;
+			if (!fallback) throw new Error(`no water joins ${a.id} and ${b.id}`);
+			course = fallback;
+		}
 		candidates.set(seaKey, { a: a.id, b: b.id, kind: 'sea' });
 		courses.set(seaKey, course.path);
 	}

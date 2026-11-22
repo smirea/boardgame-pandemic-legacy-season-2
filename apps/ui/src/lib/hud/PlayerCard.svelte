@@ -2,11 +2,21 @@
 	import { cityDef } from '@repo/game';
 	import type { PlayerCard } from '@repo/game';
 	import { CITY_COLOR } from '#lib/board/CityMarker.svelte';
+	import { EVENT_PRINT } from '#lib/cards/playerPrint.ts';
+
+	/** The top of each face's gradient, which the face, its pile on a seat and its glyphs all wear. */
+	export const FACE_COLOR = {
+		rationed: '#e2ba46',
+		unrationed: '#df9032',
+		permanent: '#274782',
+		produce: '#1e557e',
+		epidemic: '#215729',
+	} as const;
 
 	export const KIND_COLOR = {
-		event: '#b08628',
-		produce: '#8d8476',
-		epidemic: '#a8261c',
+		event: FACE_COLOR.rationed,
+		produce: FACE_COLOR.produce,
+		epidemic: FACE_COLOR.epidemic,
 	} as const;
 
 	export const HAND_CARD_SIZE = 1.04;
@@ -16,8 +26,16 @@
 	export type CityCardCopies = { live: number; discarded: number; trashed: number };
 
 	/** The colour a card is known by at a glance: its city's region, or its kind. */
-	export const cardColor = (card: PlayerCard) =>
-		card.kind === 'city' ? CITY_COLOR[cityDef(card.city).color ?? 'haven'] : KIND_COLOR[card.kind];
+	export function cardColor(card: PlayerCard): string {
+		switch (card.kind) {
+			case 'city':
+				return CITY_COLOR[cityDef(card.city).color ?? 'haven'];
+			case 'event':
+				return FACE_COLOR[EVENT_PRINT[card.event].mode];
+			default:
+				return FACE_COLOR[card.kind];
+		}
+	}
 </script>
 
 <script lang="ts">
@@ -29,7 +47,6 @@
 	import {
 		COMPANION_PRINT,
 		EPIDEMIC_STEPS,
-		EVENT_PRINT,
 		IMPROVEMENT_PRINT,
 		companionArtUrl,
 		eventArtUrl,
@@ -54,6 +71,8 @@
 		small?: boolean;
 		/** Overrides live deck copy counts for a city card (used by debug showcases). */
 		copies?: CityCardCopies;
+		/** The search box just scratched, which wipes open to show what it found. */
+		revealing?: number;
 	};
 
 	let {
@@ -65,13 +84,14 @@
 		focusable = false,
 		small = false,
 		copies,
+		revealing,
 	}: Props = $props();
 
 	const EPIDEMIC_PLAIN = EPIDEMIC_STEPS.map(step => `${step.heading}: ${step.text}`).join(' ');
 
 	type SearchDisplay =
-		| { kind: 'sealed'; scope: 'land' | 'sea'; label: string }
-		| { kind: 'revealed'; scope: 'land' | 'sea'; heading: string; info: SearchRevealPrint };
+		| { kind: 'sealed'; index: number; scope: 'land' | 'sea'; label: string }
+		| { kind: 'revealed'; index: number; scope: 'land' | 'sea'; heading: string; info: SearchRevealPrint };
 
 	const cityDetails = $derived.by(() => {
 		if (card.kind !== 'city') return null;
@@ -90,11 +110,12 @@
 					return { id: card.companion, name, ...print, plain: `${name}: ${print.text}` };
 				})()
 			: null;
-		const searchEntries: SearchDisplay[] = card.search.flatMap<SearchDisplay>(box => {
+		const searchEntries: SearchDisplay[] = card.search.flatMap<SearchDisplay>((box, index) => {
 			if (!box.scratched) {
 				return [
 					{
 						kind: 'sealed' as const,
+						index,
 						scope: box.scope,
 						label:
 							card.search.length > 1
@@ -112,6 +133,7 @@
 			return [
 				{
 					kind: 'revealed' as const,
+					index,
 					scope: box.scope,
 					heading: card.search.length > 1 ? (box.scope === 'sea' ? 'Sea' : 'Land') : 'Searched',
 					info,
@@ -230,6 +252,7 @@
 			layout.compact && layout.two ? 0.46 : layout.compact || layout.top ? 0.5 : layout.two ? 0.52 : 0.54}
 		<span
 			class="search-revealed"
+			class:revealing={revealing === entry.index}
 			role="note"
 			data-search-revealed={entry.scope}
 			aria-label={`${entry.heading}: ${entry.info.plain}`}
@@ -278,7 +301,7 @@
 					<img class="companion-art" src={companionArtUrl(cityDetails.companion.id)} alt="" aria-hidden="true" />
 					{#if cityDetails.searchEntries.length > 0}
 						<span class="search-stack top" class:two={cityDetails.searchEntries.length >= 2}>
-							{#each cityDetails.searchEntries as search, index (index)}
+							{#each cityDetails.searchEntries as search (search.index)}
 								{@render searchChip(search, {
 									compact: false,
 									two: cityDetails.searchEntries.length >= 2,
@@ -327,7 +350,7 @@
 							class:compact={cityDetails.diagonalUpgrade}
 							class:two={cityDetails.searchEntries.length >= 2}
 						>
-							{#each cityDetails.searchEntries as search, index (index)}
+							{#each cityDetails.searchEntries as search (search.index)}
 								{@render searchChip(search, {
 									compact: cityDetails.diagonalUpgrade,
 									two: cityDetails.searchEntries.length >= 2,
@@ -738,6 +761,20 @@
 		text-align: center;
 	}
 
+	/* A box just scratched wipes open left to right, the way a coin takes the silver off. */
+	.search-revealed.revealing {
+		animation: scratch-open 900ms 250ms cubic-bezier(0.3, 0.7, 0.3, 1) both;
+	}
+
+	@keyframes scratch-open {
+		from {
+			clip-path: inset(0 100% 0 0);
+		}
+		to {
+			clip-path: inset(0 0 0 0);
+		}
+	}
+
 	.search-stack.compact .search-chip,
 	.search-stack.top .search-chip {
 		padding: 0.18em 0.34em;
@@ -1015,7 +1052,7 @@
 		gap: 0;
 		background:
 			radial-gradient(ellipse at 18% 12%, rgb(255 247 210 / 0.28), transparent 58%),
-			linear-gradient(170deg, #e2ba46, #bc8e1d);
+			linear-gradient(170deg, var(--band), #bc8e1d);
 		border-color: #7c580b;
 		color: #181209;
 		box-shadow:
@@ -1026,7 +1063,7 @@
 	.card.event.unrationed:not(.small) {
 		background:
 			radial-gradient(ellipse at 18% 12%, rgb(255 232 195 / 0.24), transparent 58%),
-			linear-gradient(170deg, #df9032, #b55e18);
+			linear-gradient(170deg, var(--band), #b55e18);
 		border-color: #69300a;
 		color: #191007;
 	}
@@ -1034,7 +1071,7 @@
 	.card.event.permanent:not(.small) {
 		background:
 			radial-gradient(ellipse at 18% 12%, rgb(160 205 255 / 0.16), transparent 58%),
-			linear-gradient(170deg, #274782, #15294e);
+			linear-gradient(170deg, var(--band), #15294e);
 		border-color: #101e3b;
 		color: #f0f5ff;
 	}
@@ -1184,7 +1221,7 @@
 		gap: 0;
 		background:
 			radial-gradient(ellipse at 20% 10%, rgb(135 200 245 / 0.16), transparent 58%),
-			linear-gradient(170deg, #1e557e, #11314a);
+			linear-gradient(170deg, var(--band), #11314a);
 		border-color: #0b2234;
 		color: #f2f7fb;
 		box-shadow:
@@ -1288,7 +1325,7 @@
 		gap: 0;
 		background:
 			radial-gradient(circle at 50% 45%, rgb(130 210 95 / 0.16), transparent 65%),
-			linear-gradient(168deg, #215729, #123318);
+			linear-gradient(168deg, var(--band), #123318);
 		border-color: #0e1d10;
 		color: #f6ea8e;
 		box-shadow:

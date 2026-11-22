@@ -1,5 +1,5 @@
 import { pack } from '@repo/game';
-import type { PlayerCard, PlayerDeckKind } from '@repo/game';
+import type { PlayerCard } from '@repo/game';
 import {
 	COMPANION_ICON,
 	EPIDEMIC_ICON,
@@ -9,13 +9,14 @@ import {
 	SEARCH_ICON,
 } from '#lib/cards/icons.ts';
 import { regionOf, sortHand } from './handOrder.ts';
+import { cardColor } from './PlayerCard.svelte';
 
 export type HandGroup = {
 	/** Stable while the group exists, so a card joining or leaving animates within it. */
 	key: string;
 	cards: PlayerCard[];
-	/** Which band it wears: a city's colour, or the card's kind. */
-	tone: PlayerDeckKind;
+	/** The colour its cards' faces wear (`cardColor`), so a pile never disagrees with the cards in it. */
+	color: string;
 	icon?: string;
 	/** A short mark printed instead of an icon, such as an improvement's card value. */
 	mark?: string;
@@ -26,7 +27,7 @@ export type HandGroup = {
 /**
  * A hand as the seat card shows it: interchangeable cards stack, and a card that carries its own state or ability
  * stands alone. Plain city cards are interchangeable by colour, since colour is what they pay for building and recon.
- * A city card with an improvement or search boxes, and every companion, is its own card. Events stack only with the
+ * A city card with an improvement or open search boxes, and every companion, is its own card. Events stack only with the
  * same event in the same mode, and Produce Supplies only with the same boxes left. Groups follow the hand's one order
  * (`sortHand`), each where its first card falls.
  */
@@ -39,10 +40,13 @@ export function handGroups(hand: PlayerCard[], name: (card: PlayerCard) => strin
 	return [...groups].map(([key, cards]) => describe(key, cards, name));
 }
 
+/** A spent search box leaves nothing to do, so the card is as plain as any other of its colour. */
+const openSearches = (card: Extract<PlayerCard, { kind: 'city' }>) => card.search.filter(box => !box.scratched).length;
+
 function keyOf(card: PlayerCard): string {
 	switch (card.kind) {
 		case 'city':
-			return card.improvement || card.search.length || card.companion
+			return card.improvement || openSearches(card) || card.companion
 				? `card:${card.id}`
 				: `color:${regionOf(card.city)}`;
 		case 'event':
@@ -60,19 +64,20 @@ function describe(key: string, cards: PlayerCard[], name: (card: PlayerCard) => 
 	switch (card.kind) {
 		case 'city': {
 			const region = regionOf(card.city);
-			if (cards.length === 1 && (card.improvement || card.search.length || card.companion)) {
+			const open = openSearches(card);
+			if (cards.length === 1 && (card.improvement || open || card.companion)) {
 				const improvement = pack.cityImprovements.find(item => item.id === card.improvement);
 				const companion = pack.companions.find(item => item.id === card.companion);
 				const mark = card.improvement ? IMPROVEMENT_MARK[card.improvement] : undefined;
 				const extras = [
 					improvement && `${improvement.name}: ${improvement.text}`,
 					companion && `${companion.name}: ${companion.text}`,
-					card.search.length && `${card.search.length} search box${card.search.length === 1 ? '' : 'es'}`,
+					open && `${open} search box${open === 1 ? '' : 'es'}`,
 				].filter(Boolean);
 				return {
 					key,
 					cards,
-					tone: region,
+					color: cardColor(card),
 					icon: mark?.icon ?? (mark ? undefined : card.companion ? COMPANION_ICON[card.companion] : SEARCH_ICON),
 					mark: mark?.text,
 					title: `${name(card)} (${extras.join('; ')})`,
@@ -82,7 +87,7 @@ function describe(key: string, cards: PlayerCard[], name: (card: PlayerCard) => 
 			return {
 				key,
 				cards,
-				tone: region,
+				color: cardColor(card),
 				title: `${cards.length} ${what} card${cards.length === 1 ? '' : 's'}: ${listed}`,
 			};
 		}
@@ -92,7 +97,7 @@ function describe(key: string, cards: PlayerCard[], name: (card: PlayerCard) => 
 			return {
 				key,
 				cards,
-				tone: 'event',
+				color: cardColor(card),
 				icon: EVENT_ICON[card.event],
 				title: `${listed} (event${mode}): ${event.text}`,
 			};
@@ -101,12 +106,12 @@ function describe(key: string, cards: PlayerCard[], name: (card: PlayerCard) => 
 			return {
 				key,
 				cards,
-				tone: 'produce',
+				color: cardColor(card),
 				icon: PRODUCE_ICON,
 				title: `${listed} (${card.boxesLeft} ${card.boxesLeft === 1 ? 'use' : 'uses'} left)`,
 			};
 		case 'epidemic':
-			return { key, cards, tone: 'epidemic', icon: EPIDEMIC_ICON, title: listed };
+			return { key, cards, color: cardColor(card), icon: EPIDEMIC_ICON, title: listed };
 	}
 }
 

@@ -348,6 +348,7 @@ try {
 		await agree(sketch => sketch.points > 10 && Object.keys(sketch.strokes).length === 1),
 		`a line the host drew is on every map (${(JSON.parse((await sketches())[0]!) as Sketch).points} points)`,
 	);
+	const hostLines = Object.keys((JSON.parse((await sketches())[0]!) as Sketch).strokes);
 	await scribble(watched, 450);
 	check(await agree(sketch => Object.keys(sketch.strokes).length === 2), `and so is a line a peer drew`);
 	const drawn = (JSON.parse((await sketches())[0]!) as Sketch).points;
@@ -363,6 +364,11 @@ try {
 	check(
 		await agree(sketch => sketch.points !== drawn && Object.values(sketch.strokes).some(count => count > 1)),
 		`a peer's eraser cut the same piece out of everyone's lines`,
+	);
+	await watched.page.click('[data-testid=draw-clear]');
+	check(
+		await agree(sketch => JSON.stringify(Object.keys(sketch.strokes)) === JSON.stringify(hostLines)),
+		`a peer's Erase mine took its own lines off every map and left the host's`,
 	);
 
 	// A peer reloads and comes back to the same state, and to the drawings on the map.
@@ -387,6 +393,10 @@ try {
 	);
 	const again = await converged(host, peers, 10_000);
 	check(again !== null, `and hold its state`);
+	check(
+		await agree(sketch => JSON.stringify(Object.keys(sketch.strokes)) === JSON.stringify(hostLines), 5000, true),
+		`the host kept the map's drawings through its reload, and every map has them again`,
+	);
 
 	// The game goes on after both reloads.
 	const state = JSON.parse(await stateOf(host)) as Save;

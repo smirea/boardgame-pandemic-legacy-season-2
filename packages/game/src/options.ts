@@ -283,6 +283,12 @@ export type ActionChoice = {
 	reason: string | null;
 };
 
+function takeable(world: World, seat: SeatId, candidates: Action[]): boolean {
+	return candidates.some(
+		action => action.a === 'transfer' && !action.give && checkAction(world, seat, action) === null,
+	);
+}
+
 /** Each kind of action the seat's character has, in rule order, with its legal variants or why it has none. */
 export function actionMenu(world: World, seat: SeatId): ActionChoice[] {
 	const game = world.game;
@@ -298,6 +304,9 @@ export function actionMenu(world: World, seat: SeatId): ActionChoice[] {
 			const actions = verdicts.flatMap(verdict => (verdict.reason === null ? [verdict.action] : []));
 			if (actions.length) return { a: id, actions, reason: null };
 			if (!isFreeAction(id) && game.actionsLeft === 0) return { a: id, actions, reason: 'No actions left' };
+			// Players reach for Pick up to take a cube from someone beside them, which the rules call a Transfer.
+			if (id === 'pickUp' && tried.length === 0 && takeable(world, seat, candidates))
+				return { a: id, actions, reason: "No supply cubes here. Take a player's with Transfer" };
 			// A shortfall ("Needs 2 cubes") comes from a target that was otherwise fine, so it says more than the
 			// refusals of targets that were never in reach.
 			const shortfalls = verdicts.filter(({ reason }) => reason!.startsWith('Needs '));

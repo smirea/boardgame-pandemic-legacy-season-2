@@ -10,7 +10,11 @@ const uiHost = new URL(env.UI_URL).hostname;
 export default defineConfig(({ command }) => ({
 	plugins: [
 		tailwindcss(),
-		feedbackProcrastimate({ token: env.PROCRASTIMATE_TOKEN, project: 'a/bg-pandemic-2' }),
+		// Only the dev server forwards to ProcrastiMate. A built site has no proxy, so it must not offer the entry.
+		feedbackProcrastimate({
+			token: command === 'serve' ? env.PROCRASTIMATE_TOKEN : undefined,
+			project: 'a/bg-pandemic-2',
+		}),
 		sveltekit({
 			preprocess: [feedbackEngine()],
 			adapter: adapter({

@@ -1,4 +1,15 @@
-import { actionMenu, checkAction, grid, has, legalPlays, pack, playDetail, reject, sealDef } from '@repo/game';
+import {
+	actionMenu,
+	checkAction,
+	grid,
+	has,
+	isFreeAction,
+	legalPlays,
+	pack,
+	playDetail,
+	reject,
+	sealDef,
+} from '@repo/game';
 import type { Action, CardId, CityId, Command, EventId, Phase, Play, ReconBox, SeatId, World } from '@repo/game';
 import type { UiStep } from '#lib/studio/scene.ts';
 import { untrack } from 'svelte';
@@ -6,6 +17,7 @@ import {
 	ACTION_NAMES,
 	actionAt,
 	actionDetail,
+	actionText,
 	actionTarget,
 	cardName,
 	cityName,
@@ -695,12 +707,15 @@ export function createChoosing(source: ChoosingSource) {
 				{
 					a: choice.a,
 					label: ACTION_NAMES[choice.a],
-					detail: only ? actionDetail(world, only) : there.length ? `${offered.length} ways` : '',
+					detail: only ? actionDetail(world, only) : there.length ? `${offered.length} ways` : summary(choice.a),
 					variants,
 				},
 			];
 		});
 	});
+
+	// A free action's ways (give or take, which player) are a click each, so its line says what they are.
+	const summary = (a: Action['a']) => (isFreeAction(a) && game ? actionText(world, game.active, a) : '');
 
 	function clickCity(city: CityId) {
 		if (snap.phase === 'setup.supply') return send({ type: 'PLACE_SUPPLY', city, count: 1 });

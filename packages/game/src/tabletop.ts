@@ -287,7 +287,7 @@ const TABLE = {
 				['sea', false],
 			],
 		},
-		{ city: 'tehran', search: [['land', false]] },
+		{ city: 'tehran', search: [['land', true]] },
 		{ city: 'tripoli', copies: 4 },
 		{ city: 'washington', copies: 4 },
 	] as CityCardFact[],

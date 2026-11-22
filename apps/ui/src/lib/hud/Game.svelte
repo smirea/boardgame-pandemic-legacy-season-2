@@ -21,7 +21,7 @@
 	import type { SessionView } from '#lib/session/session.svelte.ts';
 	import { inkOn } from '#lib/color.ts';
 	import { presentFeedback } from '#lib/feedback.ts';
-	import { onButton, typing } from '#lib/keys.ts';
+	import { inFeedback, onButton, typing } from '#lib/keys.ts';
 	import { LS } from '#lib/storage.ts';
 	import { setContext, tick, untrack } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
@@ -54,10 +54,13 @@
 	import Hotkeys from './Hotkeys.svelte';
 	import Objectives from './Objectives.svelte';
 	import ScannerDialog from './ScannerDialog.svelte';
+	import ScarChoice from './ScarChoice.svelte';
 	import SeatPicker from './SeatPicker.svelte';
 	import TopBar from './TopBar.svelte';
+	import UndoVote from './UndoVote.svelte';
 	import Upkeep from './Upkeep.svelte';
 	import RichText from './RichText.svelte';
+	import SearchReveal from './SearchReveal.svelte';
 	import type { CityCardCopies } from './PlayerCard.svelte';
 	import { provideViewState } from './viewState.ts';
 	import type { GameUi } from '#lib/studio/scene.ts';
@@ -150,6 +153,11 @@
 	}
 	// Once the table knows which game is next, every game is set up by choosing who plays, over the whole table.
 	const choosingCharacters = $derived(snap.phase === 'lobby' && !spectator && tableStart(snap.world) !== null);
+	/** A scar being chosen fills every screen, so the whole table sees the card it lands on. */
+	const scarOwed = $derived.by(() => {
+		const pending = playing ? game?.pending[0] : undefined;
+		return pending?.t === 'scar' ? { seat: pending.seat, chooser: pending.seat ?? game!.active } : null;
+	});
 	// A haven the character screen points at, which the camera looks at behind it.
 	let focus = $state.raw<{ city: CityId; x: number; y: number } | null>(null);
 	let stage = $state<HTMLElement | null>();
@@ -273,6 +281,7 @@
 			filter: choosing.filter,
 			toasts: toasts.map(({ text, tone }) => ({ text, tone })),
 			banner: banner && { title: banner.title, text: banner.text },
+			search: searchShown,
 			parts: view.read(),
 		};
 	}
@@ -297,6 +306,9 @@
 		heldAnnouncements = next.toasts.length > 0 || next.banner !== null;
 		toasts = next.toasts.map(entry => ({ id: nextFx++, ...entry }));
 		banner = next.banner && { id: nextFx++, ...next.banner };
+		// A scene keeps the result up until it is clicked away, so loading and capturing it never races the timer.
+		clearTimeout(searchTimer);
+		searchShown = next.search ?? null;
 		view.write(next.parts);
 		board?.setCamera(next.camera);
 		for (const [index, entry] of next.steps.entries()) {
@@ -328,6 +340,23 @@
 	let briefingRead = $state('');
 	const briefingKey = $derived(JSON.stringify(campaign.briefing));
 	const briefingOpen = $derived(campaign.briefing.length > 0 && briefingRead !== briefingKey);
+	/** Anything that covers the board. While one does, Show board lifts it off the table and puts it back. */
+	const covered = $derived(
+		briefingOpen ||
+			choosingCharacters ||
+			snap.phase === 'lobby' ||
+			snap.phase === 'finished' ||
+			snap.phase === 'upkeep' ||
+			scarOwed !== null ||
+			boxOpen ||
+			deckOpen ||
+			scannerOpen ||
+			choosing.chooser?.action === 'monitor',
+	);
+	let peeking = $state(false);
+	$effect(() => {
+		if (!covered) peeking = false;
+	});
 	// The closing dialog keeps what it said while it fades, so its objectives are still there to fly to the board.
 	let shownBriefing = $state.raw(untrack(() => campaign.briefing));
 	$effect.pre(() => {
@@ -337,6 +366,31 @@
 	let fx = $state.raw<Fx[]>([]);
 	let toasts = $state.raw<{ id: number; text: string; tone: string }[]>([]);
 	let banner = $state.raw<{ id: number; title: string; text: string } | null>(null);
+	/** The search whose card is up, by its line in the log. */
+	let searchShown = $state.raw<number | null>(null);
+	let searchTimer: ReturnType<typeof setTimeout> | undefined;
+	const SEARCH_UP_MS = 6500;
+
+	function showSearch(seq: number | null) {
+		clearTimeout(searchTimer);
+		searchShown = seq;
+		if (seq !== null) searchTimer = setTimeout(() => (searchShown = null), SEARCH_UP_MS);
+	}
+
+	const searchReveal = $derived.by(() => {
+		const entry = searchShown === null ? null : game?.log.find(line => line.seq === searchShown);
+		if (entry?.t !== 'search') return null;
+		const card = campaign.playerCards[entry.card];
+		if (card?.kind !== 'city' || !game) return null;
+		return {
+			seq: entry.seq,
+			who: seatName(world, entry.seat),
+			color: SEAT_COLORS[game.seats.indexOf(entry.seat)] ?? '#f4e8cd',
+			city: cityName(entry.city),
+			card,
+			box: entry.box,
+		};
+	});
 	let lastSeq = untrack(() => game?.log.at(-1)?.seq ?? 0);
 	let lastGame = untrack(() => campaign.results.length);
 	let nextFx = 1;
@@ -363,6 +417,7 @@
 				toasts = [];
 				banner = null;
 				fx = [];
+				showSearch(null);
 			});
 			return;
 		}
@@ -399,6 +454,7 @@
 			else if (entry.t === 'exposure' && entry.result === 'scar')
 				toast(`${seatName(world, entry.seat)} takes a scar`, 'bad');
 			else if (entry.t === 'note') toast(entry.text, 'good');
+			else if (entry.t === 'search') untrack(() => showSearch(entry.seq));
 		}
 		untrack(() => {
 			fx = [...fx, ...added];
@@ -659,13 +715,23 @@
 
 	/** Space advances the turn, Z undoes, F draws, E toggles eraser, Tab pings the map, ? opens hotkeys, Escape closes. */
 	function onkey(event: KeyboardEvent) {
+		// Escape still closes the chooser from its own filter field.
+		if (inFeedback(event)) return;
 		if (event.key === 'Escape') {
+			if (peeking) {
+				peeking = false;
+				return;
+			}
 			if (hotkeysOpen) {
 				hotkeysOpen = false;
 				return;
 			}
 			if (scannerOpen) {
 				scannerOpen = false;
+				return;
+			}
+			if (world.table.undoVote && (!world.table.undoVote.by || world.table.undoVote.by === session.player)) {
+				send({ type: 'CANCEL_UNDO_VOTE', player: session.player });
 				return;
 			}
 			if (document.activeElement instanceof HTMLElement && document.activeElement.classList.contains('focus-only')) {
@@ -698,10 +764,10 @@
 		}
 		const focused = event.composedPath()[0];
 		const onFocusOnly = focused instanceof HTMLButtonElement && focused.classList.contains('focus-only');
-		if ((onButton(event) && !onFocusOnly) || !game) return;
+		if ((onButton(event) && !onFocusOnly) || !game || modalOpen()) return;
 		if (key === 'z' && snap.canUndo && canAct) {
 			if (onFocusOnly) focused.blur();
-			send({ type: 'UNDO' });
+			send({ type: 'UNDO', by: session.player });
 		}
 		if (key !== ' ') return;
 		if (onFocusOnly) focused.blur();
@@ -729,7 +795,7 @@
 	}
 
 	function onkeyup(event: KeyboardEvent) {
-		if (event.key.toLowerCase() === 'f') {
+		if (event.key.toLowerCase() === 'f' && !typing(event)) {
 			tools.releasePen();
 		}
 	}
@@ -792,6 +858,7 @@
 			<ActionPanel
 				{snap}
 				seat={game.active}
+				player={session.player}
 				name={seatName(world, game.active)}
 				menu={actionChoices}
 				{live}
@@ -835,6 +902,7 @@
 							selected={viewing === seat}
 							showHand={seat !== dockSeat}
 							arriving={admin.turn.arriving}
+							acting={snap.phase === 'playing.actions'}
 							action="Show this hand in the dock"
 							selectedTag="Hand shown"
 							onselect={() => (viewing = seat)}
@@ -857,6 +925,7 @@
 
 <div
 	class="game"
+	class:peeking
 	style:--left={`${panels.sides.low.left}px`}
 	style:--right={`${panels.sides.low.right}px`}
 	style:--high-left={`${panels.sides.high.left}px`}
@@ -881,10 +950,12 @@
 		{canMonitor}
 		{monitorReason}
 		hasDrawings={!spectator && tools.hasDrawings}
+		hasOwnDrawings={!spectator && tools.hasOwnDrawings}
 		erasing={tools.tool === 'eraser'}
 		oneraser={() => tools.toggleEraser()}
 		onclear={tools.clear}
 		onreset={() => resetView++}
+		peek={covered ? { on: peeking, toggle: () => (peeking = !peeking) } : null}
 		onmenu={() => (menu = !menu)}
 		onbox={() => (boxOpen = !boxOpen)}
 		ondeck={() => (deckOpen = !deckOpen)}
@@ -1022,6 +1093,21 @@
 			{/key}
 		{/if}
 
+		{#if searchReveal}
+			{#key searchReveal.seq}
+				<div class="search-reveal">
+					<SearchReveal
+						who={searchReveal.who}
+						color={searchReveal.color}
+						city={searchReveal.city}
+						card={searchReveal.card}
+						box={searchReveal.box}
+						onclose={() => showSearch(null)}
+					/>
+				</div>
+			{/key}
+		{/if}
+
 		{#if nextUp && !banner}
 			{#key nextUp.key}
 				<TurnInterlude
@@ -1114,6 +1200,25 @@
 			</div>
 		{/if}
 
+		{#if scarOwed && game}
+			<div
+				class="scrim scar-scrim"
+				role="dialog"
+				aria-modal="true"
+				aria-label="Choose a scar"
+				transition:fade={{ duration: 200 }}
+			>
+				<ScarChoice
+					{world}
+					seat={scarOwed.seat}
+					{decides}
+					chooser={scarOwed.chooser}
+					canChoose={owns(scarOwed.chooser)}
+					{send}
+				/>
+			</div>
+		{/if}
+
 		{@render children?.()}
 
 		{#if boxOpen}
@@ -1183,6 +1288,18 @@
 			</div>
 		{/if}
 
+		{#if world.table.undoVote && game && !spectator}
+			<div
+				class="scrim undo-scrim"
+				role="dialog"
+				aria-modal="true"
+				aria-label="Shameful undo vote"
+				transition:fade={{ duration: 180 }}
+			>
+				<UndoVote {world} vote={world.table.undoVote} player={session.player} {send} />
+			</div>
+		{/if}
+
 		{#if hotkeysOpen}
 			<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_noninteractive_element_interactions -->
 			<div
@@ -1206,15 +1323,13 @@
 				transition:scale={{ start: 0.92, duration: 180, opacity: 0 }}
 				{@attach feedback('Menu', () => undefined)}
 			>
-				{#if import.meta.env.DEV}
-					<button
-						onclick={() => {
-							menu = false;
-							// The capture waits for the menu's exit transition, so the screenshot shows the table without it.
-							setTimeout(() => void presentFeedback(), 220);
-						}}>Give feedback <kbd>⌥⌘ click</kbd></button
-					>
-				{/if}
+				<button
+					onclick={() => {
+						menu = false;
+						// The capture waits for the menu's exit transition, so the screenshot shows the table without it.
+						setTimeout(() => void presentFeedback(), 220);
+					}}>Give feedback <kbd>⌥⌘ click</kbd></button
+				>
 				{#if !spectator}
 					<button
 						onclick={() => {
@@ -1593,6 +1708,14 @@
 		text-align: right;
 	}
 
+	.search-reveal {
+		position: absolute;
+		top: 8.5rem;
+		left: 50%;
+		z-index: 44;
+		transform: translateX(-50%);
+	}
+
 	.toasts {
 		position: absolute;
 		top: 5.6rem;
@@ -1762,6 +1885,30 @@
 
 	.scrim.box-scrim {
 		z-index: 70;
+	}
+
+	.scrim.scar-scrim {
+		z-index: 65;
+	}
+
+	.scrim.undo-scrim {
+		z-index: 75;
+		background: rgb(14 9 8 / 0.78);
+		backdrop-filter: blur(8px);
+	}
+
+	/* Show board: every cover steps off the table and lets the board be panned and read, until Back. */
+	.scrim {
+		transition: opacity 200ms ease;
+	}
+
+	.peeking .scrim {
+		opacity: 0;
+		visibility: hidden;
+		pointer-events: none;
+		transition:
+			opacity 200ms ease,
+			visibility 0s 200ms;
 	}
 
 	.scrim.open {

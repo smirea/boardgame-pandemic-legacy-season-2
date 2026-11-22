@@ -1,12 +1,14 @@
 <script lang="ts">
+	import { typing } from '#lib/keys.ts';
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
-	import { dossierView, rulebook, stickerStock } from '@repo/game';
+	import { dossierView, stickerStock } from '@repo/game';
 	import type { Campaign, DossierSlot } from '@repo/game';
 	import InfectionCard from '#lib/cards/InfectionCard.svelte';
 	import { scanUrl, sealScans } from '#lib/scans.svelte.ts';
 	import Crate from './Crate.svelte';
 	import PlayerCard from './PlayerCard.svelte';
 	import DossierDoor from './DossierDoor.svelte';
+	import Rulebook from './Rulebook.svelte';
 	import { keep } from './viewState.ts';
 
 	type Props = { campaign: Campaign; onclose: () => void };
@@ -14,7 +16,6 @@
 	let { campaign, onclose }: Props = $props();
 
 	const view = $derived(dossierView(campaign));
-	const book = $derived(rulebook(campaign));
 	const stock = $derived(stickerStock(campaign));
 	const TABS = [
 		{ id: 'box', label: 'Packages and dossier' },
@@ -58,7 +59,7 @@
 	});
 </script>
 
-<svelte:window onkeydown={event => event.key === 'Escape' && onclose()} />
+<svelte:window onkeydown={event => event.key === 'Escape' && !typing(event) && onclose()} />
 
 <section
 	class="box"
@@ -155,18 +156,7 @@
 			{/if}
 		</div>
 	{:else if tab === 'rulebook'}
-		<div class="pages" {@attach feedback('Rulebook', () => book)}>
-			<section>
-				<h3>Rules in force</h3>
-				{#each book.rules as rule (rule.id)}<p>{rule.text}</p>{:else}<p class="hint">Only the printed rules.</p>{/each}
-			</section>
-			<section>
-				<h3>Actions unlocked</h3>
-				{#each book.actions as action (action.id)}<p>{action.text}</p>{:else}<p class="hint">None yet.</p>{/each}
-				<h3>Turning points</h3>
-				{#each book.turningPoints as point (point.id)}<p>{point.text}</p>{:else}<p class="hint">None waiting.</p>{/each}
-			</section>
-		</div>
+		<Rulebook {campaign} />
 	{:else}
 		<div class="pages" {@attach feedback('Stickers', () => stock)}>
 			{#snippet list(title: string, items: { id: string; name: string; text: string; left: number }[])}

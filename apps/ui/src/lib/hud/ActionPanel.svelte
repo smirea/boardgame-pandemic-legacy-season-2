@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { actionCost, isFreeAction, pack, reject } from '@repo/game';
-	import type { Action, ActionChoice, CardId, Command, PublicState, SeatId } from '@repo/game';
+	import type { Action, ActionChoice, CardId, Command, PlayerId, PublicState, SeatId } from '@repo/game';
 	import ActionIcon from './ActionIcon.svelte';
 	import {
 		ACTION_NAMES,
@@ -19,6 +19,7 @@
 	type Props = {
 		snap: PublicState;
 		seat: SeatId;
+		player: PlayerId;
 		name: string;
 		menu: ActionChoice[];
 		/** The seat is taking actions on this screen, so rows can be chosen and the ones that cannot say why. */
@@ -35,7 +36,7 @@
 		onlockdown: (card: CardId) => void;
 	};
 
-	let { snap, seat, name, menu, live, canAct, owns, aiming, onchoose, send, onlockdown }: Props = $props();
+	let { snap, seat, player, name, menu, live, canAct, owns, aiming, onchoose, send, onlockdown }: Props = $props();
 
 	let showUnavailable = $state(false);
 	keep(
@@ -183,7 +184,9 @@
 			>
 				{game.actionsLeft > 0 ? 'End actions' : 'Draw cards'}
 			</button>
-			<button disabled={!snap.canUndo} onclick={() => send({ type: 'UNDO' })} data-testid="undo">Undo</button>
+			<button disabled={!snap.canUndo} onclick={() => send({ type: 'UNDO', by: player })} data-testid="undo"
+				>Undo</button
+			>
 		{/if}
 		{#each lockable as card (card.id)}
 			<button

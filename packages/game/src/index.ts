@@ -17,9 +17,9 @@ export {
 export type { Decide, Play } from './plays';
 export { playDetail } from './plays';
 export type { Purchase } from './legacy';
-export type { DossierSlot, DossierView } from './dossier';
+export type { DossierSlot, DossierView, RulebookBlock, RulebookChapter, RulebookSection } from './dossier';
 export { dossierView, rulebook, stickerStock } from './dossier';
-export { actionBriefs, briefingSections, openings, ruleBriefs, unlockText } from './briefing';
+export { actionBriefs, briefingSections, openings, ruleBriefs, searchFind, unlockText } from './briefing';
 export type { Opening } from './briefing';
 export type { BriefedUnlock, BriefingSection } from './briefing';
 export {
@@ -36,7 +36,7 @@ export {
 	ending,
 } from './legacy';
 export { createGame } from './flow';
-export type { Command, GameActor, GameSnapshot, Phase, Save, Seating } from './machine';
+export type { Command, GameActor, GameSnapshot, Phase, Save, Seating, UndoEntry } from './machine';
 export { createGameActor, fillSave, gameMachine, parseSave, phaseOf, reject } from './machine';
 export type { TableCommand } from './table';
 export { claimant, newTable, newTableBriefing, tablePlayers, tableStart } from './table';
@@ -53,7 +53,7 @@ export {
 export type { ActionChoice } from './options';
 export { violations } from './invariants';
 export type { Insights, PlayerCardsAt, PlayerDeckKind, PublicState, ReconBox } from './view';
-export { insights, onGrid, publicState, reconBoxes } from './view';
+export { inoculation, insights, onGrid, publicState, reconBoxes } from './view';
 export {
 	breakthrough,
 	canImproveCityCard,

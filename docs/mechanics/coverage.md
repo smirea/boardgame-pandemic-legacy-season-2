@@ -115,6 +115,6 @@ These remain this project's reading:
 ## UI simplifications
 
 - Actions that pay with cards (Build Supply Center, Recon) pick the cheapest legal payment for the player.
-- Deliver and Pick Up offer "all" or "one".
+- Pick Up and Transfer move one cube per click, and Undo puts one back. Deliver asks how many. With no cubes here but a player here holding some, Pick Up says to take theirs with Transfer.
 - Every client holds the full state. The UI simply does not show deck order or unscratched boxes.
 - A prompt is offered only to whoever it belongs to. Shared prompts ("any player may discard") show each player their own cards, and the player whose turn it is may pass.

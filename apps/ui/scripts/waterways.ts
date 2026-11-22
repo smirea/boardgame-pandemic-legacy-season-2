@@ -12,6 +12,10 @@ const WET_SHARE = 0.5;
 // A lane keeps this far off any coast where it can, so its tube never sits on the shore.
 const CLEARANCE = 0.6;
 const HARBOUR = 2.5;
+// The Mediterranean's islands are open sea to lanes and lines: Sicily, Sardinia, Crete and Cyprus would otherwise
+// wall it into channels no printed lane keeps to, and Midsea could not sail to Istanbul.
+const MEDITERRANEAN = { minLat: 30, maxLat: 46, minLon: -6, maxLon: 37 };
+const ISLAND = 1.5;
 // Straits narrower than a cell that real shipping uses, as [lat, lon] courses. They are cut open by hand.
 const STRAITS: [number, number][][] = [
 	[
@@ -38,13 +42,38 @@ const centre = (column: number, row: number): Point => ({
 	z: FRAME.minZ + (row + 0.5) * CELL,
 });
 
+function area(ring: Point[]) {
+	let twice = 0;
+	ring.forEach((p, i) => {
+		const q = ring[(i + 1) % ring.length]!;
+		twice += p.x * q.z - q.x * p.z;
+	});
+	return Math.abs(twice / 2);
+}
+
+const [southWest, northEast] = [
+	project(MEDITERRANEAN.minLat, MEDITERRANEAN.minLon),
+	project(MEDITERRANEAN.maxLat, MEDITERRANEAN.maxLon),
+];
+const mediterraneanIsland = (ring: Point[]) =>
+	area(ring) < ISLAND &&
+	ring.every(
+		point =>
+			point.x >= Math.min(southWest.x, northEast.x) &&
+			point.x <= Math.max(southWest.x, northEast.x) &&
+			point.z >= Math.min(southWest.z, northEast.z) &&
+			point.z <= Math.max(southWest.z, northEast.z),
+	);
+
 /** Per cell: how much of it is water, 0 to 1. Scanlines over the projected coast, even-odd. */
 function rasterize() {
 	const water = new Float32Array(columns * rows);
 	const topology = landTopology as unknown as Topology;
 	const edges: [Point, Point][] = [];
-	for (const polygon of projectPolygons(feature(topology, topology.objects['land']!)))
+	for (const polygon of projectPolygons(feature(topology, topology.objects['land']!))) {
+		if (mediterraneanIsland(polygon[0]!)) continue;
 		for (const ring of polygon) ring.forEach((point, i) => edges.push([point, ring[(i + 1) % ring.length]!]));
+	}
 	const lines = rows * ROWS_PER_CELL;
 	const crossings: number[][] = Array.from({ length: lines }, () => []);
 	const lineZ = (line: number) => FRAME.minZ + ((line + 0.5) * CELL) / ROWS_PER_CELL;

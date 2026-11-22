@@ -120,7 +120,7 @@ export const regions: RegionDef[] = regionRows.map(([id, name, revealed = false]
  * it the Bay of Biscay, Iberia and the western Mediterranean, and fogs the water the starting lanes sail
  * from Midsea. It claims less, enough to leave that water to the Atlantic.
  */
-const groundWeights: Record<string, number> = { paris: -16 };
+const groundWeights: Record<string, number> = { paris: -16, 'haven-mediterranean': 30 };
 
 export const cities: CityDef[] = Object.entries(cityRows).flatMap(([region, rows]) =>
 	rows.map(([id, name, lat, lon, color, population, playerCards, flags = '']) => ({
@@ -156,9 +156,7 @@ export const startingEdges: EdgeDef[] = [
 	['jacksonville', 'haven-south-atlantic'],
 	['new-york', 'jacksonville'],
 	['haven-mediterranean', 'tripoli'],
-	// The printed board sails Midsea to Istanbul. This map cannot lay that lane clear of Tripoli's port, so it
-	// reaches Istanbul through Tripoli instead.
-	['tripoli', 'istanbul'],
+	['haven-mediterranean', 'istanbul'],
 	['istanbul', 'cairo'],
 	['tripoli', 'cairo'],
 	['haven-mediterranean', 'haven-south-atlantic'],

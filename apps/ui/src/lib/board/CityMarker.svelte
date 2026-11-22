@@ -15,7 +15,8 @@
 	import { T } from '@threlte/core';
 	import type { IntersectionEvent } from '@threlte/extras';
 	import { HTML, useCursor } from '@threlte/extras';
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
+	import { cubicInOut } from 'svelte/easing';
 	import { Spring, Tween } from 'svelte/motion';
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { inkOn } from '#lib/color.ts';
@@ -24,8 +25,8 @@
 	import type { Placement } from './labels';
 	import { cubeGeometries, cubeMaterials, pieceMaterials, pieceModels, shelterGeometry } from './models.svelte';
 	import Pop from './Pop.svelte';
-	import { fonts, printDisc, printName, printSticker } from './print.svelte';
-	import type { PrintedKind } from './print.svelte';
+	import { fonts, printDisc, printDiscGlow, printName, printSticker } from './print.svelte';
+	import type { DiscTone, PrintedKind } from './print.svelte';
 	import Printed from './Printed.svelte';
 	import type { BoardPoint } from './projection';
 	import { LAND_HEIGHT } from './projection';
@@ -87,12 +88,36 @@
 	const label = $derived(state.name);
 	const onGrid = $derived(state.onGrid);
 	const population = $derived(state.population);
+	const inoculated = $derived(state.inoculated);
 	const name = $derived(fonts.ready ? printName(label, city.port, NAME_SIZE, !onGrid, false) : null);
 	// The lit name is printed the first time the pointer rests on the city and kept beside the plain one, so a
 	// pointer crossing the map lights names without painting any of them again.
 	let wasLit = false;
 	const everLit = $derived.by(() => (wasLit ||= lit));
 	const litName = $derived(fonts.ready && everLit ? printName(label, city.port, NAME_SIZE, !onGrid, true) : null);
+	const glow = $derived(fonts.ready && inoculated ? printDiscGlow(population, 2.8) : null);
+	// The board draws only while something changes, so the blue shimmer runs a few times when the city becomes fully
+	// inoculated, and once more whenever the pointer comes onto it, then rests on the blue numeral.
+	const shimmer = new Tween(0, { easing: cubicInOut });
+	let pulsing = 0;
+	async function pulse(times: number) {
+		const run = ++pulsing;
+		for (let index = 0; index < times && run === pulsing; index++) {
+			await shimmer.set(1, { duration: 650 });
+			if (run === pulsing) await shimmer.set(0.15, { duration: 900 });
+		}
+		if (run === pulsing) await shimmer.set(0, { duration: 600 });
+	}
+	$effect(() => {
+		if (inoculated) void pulse(3);
+		else {
+			pulsing++;
+			shimmer.set(0, { duration: 0 });
+		}
+	});
+	$effect(() => {
+		if (lit && untrack(() => inoculated)) void pulse(1);
+	});
 	// A name that stands off from its city is tied back to the disc by a fine ruled line.
 	const leader = $derived.by(() => {
 		if (!placement.leader || !name) return null;
@@ -108,8 +133,8 @@
 		const mid = DISC_REACH + length / 2;
 		return { x: ux * mid, z: uz * mid, length, angle: Math.atan2(-uz, ux) };
 	});
-	const discTone = $derived<'plain' | 'infested' | 'forsaken'>(
-		state.forsaken ? 'forsaken' : state.infested ? 'infested' : 'plain',
+	const discTone = $derived<DiscTone>(
+		state.forsaken ? 'forsaken' : inoculated ? 'inoculated' : state.infested ? 'infested' : 'plain',
 	);
 	const face = $derived(fonts.ready ? printDisc(population, 2.8, inkOn(color), discTone) : null);
 	const printedKinds = $derived(
@@ -250,6 +275,15 @@
 				opacity={state.onGrid ? 0.9 : 0.45}
 			/>
 		</T.Mesh>
+		{#if glow}
+			<Printed
+				print={glow}
+				position={[0, DISC + 0.025, 0]}
+				opacity={shimmer.current}
+				order={5}
+				visible={shimmer.current > 0}
+			/>
+		{/if}
 		{#if face}
 			<Printed print={face} position={[0, DISC + 0.03, 0]} opacity={state.onGrid ? 1 : 0.6} order={6} />
 		{/if}
