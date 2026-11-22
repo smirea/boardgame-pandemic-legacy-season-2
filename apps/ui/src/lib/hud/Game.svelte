@@ -15,7 +15,7 @@
 		sealKey,
 		tableStart,
 	} from '@repo/game';
-	import type { CardId, CityId, Command, Decide, EdgeDef, SeatId } from '@repo/game';
+	import type { BriefingEntry, CardId, CityId, Command, Decide, EdgeDef, SeatId } from '@repo/game';
 	import Board from '#lib/board/Board.svelte';
 	import type { BoardMarks, Fx, FxKind } from '#lib/board/types.ts';
 	import type { SessionView } from '#lib/session/session.svelte.ts';
@@ -45,6 +45,7 @@
 	import TurnInterlude from './TurnInterlude.svelte';
 	import { InfectionShow } from './infectionShow.svelte.ts';
 	import { PopulationShow } from './populationShow.svelte.ts';
+	import { LegacyShow } from './legacyShow.svelte.ts';
 	import { cardName, cityName, seatName, SEAT_COLORS, setNames } from './labels.svelte.ts';
 	import Lobby from './Lobby.svelte';
 	import CharacterSelect from './CharacterSelect.svelte';
@@ -354,9 +355,31 @@
 	$effect(() => {
 		if (snap.phase !== 'upkeep') upkeepAsideChosen = false;
 	});
+	// Once the whole table is done with a reading, each player keeps what it said until they close it themselves. It
+	// is this browser's alone and the game goes on under it.
+	let recap = $state.raw<BriefingEntry[] | null>(null);
+	// A studio scene keeps the recap, since the save it holds has already put the reading away.
+	$effect(() =>
+		view.register('recap', {
+			read: () => recap,
+			write: (value: BriefingEntry[] | null) => (recap = value),
+		}),
+	);
+	let lastBriefing = untrack(() => ({ entries: campaign.briefing, stowing: world.table.briefing.stowing }));
+	$effect.pre(() => {
+		const now = { entries: campaign.briefing, stowing: world.table.briefing.stowing };
+		const lived = !spectator || announce;
+		untrack(() => {
+			if (now.entries.length) recap = null;
+			// Only a reading the table put away together, everyone having clicked Done.
+			else if (lastBriefing.entries.length && lastBriefing.stowing && lived && !spectator) recap = lastBriefing.entries;
+			lastBriefing = now;
+		});
+	});
 	/** Anything that covers the board. While one does, Show board lifts it off the table and puts it back. */
 	const covered = $derived(
 		briefingOpen ||
+			recap !== null ||
 			choosingCharacters ||
 			snap.phase === 'lobby' ||
 			snap.phase === 'finished' ||
@@ -505,7 +528,8 @@
 		const next = world;
 		const lived = !spectator || announce;
 		const phase = snap.phase;
-		const held = briefingOpen;
+		// The reading's recap covers the board too, so the population show waits until this player closes it.
+		const held = briefingOpen || recap !== null;
 		untrack(() => {
 			show.observe(next, lived, phase);
 			population.observe(next, lived, phase, held);
@@ -515,6 +539,17 @@
 		show.stop();
 		population.stop();
 	});
+
+	const legacy = new LegacyShow();
+	$effect.pre(() => {
+		const next = world;
+		const lived = !spectator || announce;
+		untrack(() => legacy.observe(next, lived));
+	});
+	$effect(() => () => legacy.stop());
+	const legacyFocus = $derived(
+		legacy.focus ? { city: legacy.focus, ...untrack(openMiddle), glide: 1000, zoom: 0.55 } : null,
+	);
 
 	// What follows a player's actions is wound up in one place, where the Actions panel stood, for everyone to see.
 	const admin = createTurnAdmin({
@@ -696,6 +731,9 @@
 		get populationLag() {
 			return population.lag;
 		},
+		get mapLag() {
+			return legacy.lag;
+		},
 		get skull() {
 			return show.skull;
 		},
@@ -751,6 +789,10 @@
 			}
 			if (hotkeysOpen) {
 				hotkeysOpen = false;
+				return;
+			}
+			if (recap) {
+				recap = null;
 				return;
 			}
 			if (scannerOpen) {
@@ -1016,7 +1058,7 @@
 			oneraseend={tools.eraseEnd}
 			{resetView}
 			covered={panels.covered}
-			focus={showFocus ?? focus}
+			focus={legacyFocus ?? showFocus ?? focus}
 		/>
 
 		{#if game && seatAt && snap.phase !== 'upkeep'}
@@ -1170,6 +1212,7 @@
 				class="scrim"
 				class:passive={spectator}
 				class:tabletop={!spectator}
+				class:aside={legacy.aside}
 				role="dialog"
 				aria-modal={!spectator}
 				aria-label="New this game"
@@ -1190,9 +1233,22 @@
 							{solo}
 							{send}
 							ondeckout={out => (legacyDeckOut = out)}
+							paused={legacy.aside}
 						/>
 					{/key}
 				{/if}
+			</div>
+		{:else if recap}
+			<div
+				class="scrim"
+				role="dialog"
+				aria-modal="true"
+				aria-label="What the reading changed"
+				transition:fade={{ duration: 200 }}
+			>
+				<div in:fly={{ y: 24, duration: 300 }}>
+					<Briefing briefing={recap} {campaign} passive={false} recap oncontinue={() => (recap = null)} />
+				</div>
 			</div>
 		{:else if choosingCharacters}
 			<div
@@ -1946,7 +2002,9 @@
 		transition: opacity 200ms ease;
 	}
 
-	.peeking .scrim {
+	/* A Legacy reading steps off the table while what it changed comes onto the map. */
+	.peeking .scrim,
+	.scrim.aside {
 		opacity: 0;
 		visibility: hidden;
 		pointer-events: none;
