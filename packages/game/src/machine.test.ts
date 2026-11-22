@@ -2348,7 +2348,7 @@ describe('drawing connections: what a line may not cross', () => {
 		expect(checkEdge(campaign, city('washington'), city('lagos'), 'sea')).toBeNull();
 	});
 
-	test('a sea lane may cross one region line, and Expeditionary Voyage lifts only that limit', () => {
+	test('a sea lane may cross one printed red line, and Expeditionary Voyage lifts only that limit', () => {
 		const campaign = fresh();
 		reveal(
 			campaign,
@@ -2357,15 +2357,21 @@ describe('drawing connections: what a line may not cross', () => {
 		// Land lines put the two ports on the grid without adding any sea lane to cross.
 		campaign.edges.push(
 			{ a: city('lagos'), b: city('dar-es-salaam'), kind: 'land' },
-			{ a: city('lagos'), b: city('antananarivo'), kind: 'land' },
+			{ a: city('lagos'), b: city('bangkok'), kind: 'land' },
 		);
-		expect(passage(city('dar-es-salaam'), city('haven-indian-ocean'), 'sea').regionLines).toBe(1);
+		// Door 65's line runs down the Somali coast, between Dar es Salaam and the Indian Ocean haven.
+		expect(passage(city('dar-es-salaam'), city('haven-indian-ocean'), 'sea').redLines).toBe(1);
 		expect(checkEdge(campaign, city('dar-es-salaam'), city('haven-indian-ocean'), 'sea')).toBeNull();
-		expect(passage(city('antananarivo'), city('jakarta'), 'sea').regionLines).toBeGreaterThan(1);
-		expect(checkEdge(campaign, city('antananarivo'), city('jakarta'), 'sea')).toBe(
-			'A sea lane may cross only one region line',
+		// Bangkok to the Coral Sea crosses door 63's diagonal and door 59's line north of the haven.
+		expect(passage(city('bangkok'), city('haven-coral-sea'), 'sea').redLines).toBe(2);
+		expect(checkEdge(campaign, city('bangkok'), city('haven-coral-sea'), 'sea')).toBe(
+			'A sea lane may cross only one red line',
 		);
-		expect(checkEdge(campaign, city('antananarivo'), city('jakarta'), 'sea', true)).toBeNull();
+		expect(checkEdge(campaign, city('bangkok'), city('haven-coral-sea'), 'sea', true)).toBeNull();
+	});
+
+	test('a lane round Cape Horn crosses the Drake Passage line printed on the board', () => {
+		expect(passage(city('lima'), city('lagos'), 'sea').redLines).toBe(1);
 	});
 
 	test('a sea lane may not cross unexplored map either', () => {

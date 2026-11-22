@@ -71,3 +71,11 @@ export function runsOver(course: Point[], location: Point) {
 	if (sameEnd(location, course[0]!) || sameEnd(location, course.at(-1)!)) return false;
 	return legs(course).some(leg => distanceToLeg(location, leg) < LOCATION_CLEARANCE);
 }
+
+/** How many times a course crosses the red region lines. A course that crosses one line twice crosses twice. */
+export function redLineCrossings(course: Point[], lines: readonly Point[][]) {
+	let count = 0;
+	for (const line of lines)
+		for (const [a, b] of legs(course)) for (const [c, d] of legs(line)) if (segmentsCross(a, b, c, d)) count++;
+	return count;
+}

@@ -8,7 +8,7 @@
 			"coastal": "Port location (anchor symbol). Only ports can use Sail, Charter Boat and Chart Sea Lane.",
 			"infested": "Printed infested marker on the region sticker. Starting a turn in an infested city exposes the character, like a Plague cube does.",
 			"routes": "Supply lines and sea lanes are drawn by the players during the campaign. Only the printed starting sea lanes and the lines printed on region stickers start established. Every other route listed here was built in a documented campaign and is a legal candidate, not a fixed edge. The engine should let players draw any route that passes the geometric rules in legacy-timeline.json (Establish Supply Line, Chart Sea Lane).",
-			"regionLines": "Red region lines on the printed board limit sea lanes: a sea lane may cross at most one red line. Known red lines: south of South America at the Drake Passage (also blocks the Magellan Strait), south of Africa at 20E, across the Pacific between East Asia and the Coral Sea, and east of Shanghai along about 20-25N."
+			"regionLines": "Red region lines on the printed board limit sea lanes: a sea lane may cross at most one red line. Printed red lines: south of South America at the Drake Passage (base board, also blocks the Magellan Strait), south of Africa at 20E (door 57), along 100W south of Central America (door 60), along the Somali coast west of the Indian Ocean haven (door 65), diagonally from Ho Chi Minh City across Borneo to Australia (door 63), along 20N east of Taiwan (door 56), and along 20S east of Queensland (door 59). The engine keeps them in redLines in packages/game/src/content/world.ts."
 		}
 	},
 	"regions": [

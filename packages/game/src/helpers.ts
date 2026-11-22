@@ -16,6 +16,7 @@ import type {
 import { sealKey } from './content/types';
 import type { CardId, CharacterId, CityId, RegionId, SeatId } from './ids';
 import { edgeKey } from './ids';
+import { redLineCrossings } from './lanes';
 import type {
 	Campaign,
 	Character,
@@ -353,8 +354,7 @@ const locations = (Object.entries(pack.positions) as [CityId, Point][]).map(
 /**
  * The location a point on the board belongs to: the nearest one, weighed by `groundWeight`. This one
  * partition is what the rules mean by "unexplored map" and by region boundaries, and it is what the
- * board draws, so a line that looks like it crosses unknown territory or a region line is one the
- * rules refuse.
+ * board draws, so a line that looks like it crosses unknown territory is one the rules refuse.
  */
 export function nearestLocation(point: Point): CityId {
 	let best = locations[0]![0];
@@ -372,23 +372,19 @@ export function nearestLocation(point: Point): CityId {
 export const regionAt = (point: Point): RegionId => cityDef(nearestLocation(point)).region;
 
 const STEP = 0.5;
-const passageCache = new Map<string, { through: CityId[]; regionLines: number }>();
+const passageCache = new Map<string, { through: CityId[]; redLines: number }>();
+let redLines: Point[][] | undefined;
 
-/** What a line between two locations passes along its course: every location whose ground it crosses, and how many region lines. */
-export function passage(a: CityId, b: CityId, kind: EdgeKind): { through: CityId[]; regionLines: number } {
+/** What a line between two locations passes along its course: every location whose ground it crosses, and how many red region lines. */
+export function passage(a: CityId, b: CityId, kind: EdgeKind): { through: CityId[]; redLines: number } {
 	const key = `${kind}:${edgeKey(a, b)}`;
 	const known = passageCache.get(key);
 	if (known) return known;
 	const points = courseOf(a, b, kind).points;
 	const through: CityId[] = [];
-	let regionLines = 0;
-	let last: RegionId | null = null;
 	const visit = (point: Point) => {
 		const owner = nearestLocation(point);
 		if (!through.includes(owner)) through.push(owner);
-		const region = cityDef(owner).region;
-		if (last !== null && region !== last) regionLines += 1;
-		last = region;
 	};
 	visit(points[0]!);
 	for (let i = 1; i < points.length; i++) {
@@ -398,7 +394,10 @@ export function passage(a: CityId, b: CityId, kind: EdgeKind): { through: CityId
 		for (let step = 1; step <= steps; step++)
 			visit({ x: from.x + ((to.x - from.x) * step) / steps, z: from.z + ((to.z - from.z) * step) / steps });
 	}
-	const found = { through, regionLines };
+	const found = {
+		through,
+		redLines: redLineCrossings(points, (redLines ??= pack.redLines.map(line => line.map(([x, z]) => ({ x, z }))))),
+	};
 	passageCache.set(key, found);
 	return found;
 }

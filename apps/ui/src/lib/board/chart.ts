@@ -11,7 +11,7 @@ import type { BoardBounds, BoardPoint } from './projection';
 
 /**
  * The board is a printed chart: paper, water, coasts from the same 50m data the rules use, the
- * graticule, region lines and wear. Unexplored ground is hidden under smoke drawn by `Fog.svelte`.
+ * graticule, red lines, region lines and wear. Unexplored ground is hidden under smoke drawn by `Fog.svelte`.
  */
 
 const PIXELS = 4096;
@@ -404,6 +404,7 @@ export function paintChart(bounds: BoardBounds): Chart {
 		ctx.drawImage(layer.canvas, 0, 0);
 		ctx.globalCompositeOperation = 'source-over';
 		toBoard(ctx);
+		redLines(ctx, sphere, px);
 		frame(ctx, sphere, px);
 		ctx.setTransform(1, 0, 0, 1, 0, 0);
 		wear(ctx, width, height);
@@ -416,8 +417,28 @@ export function paintChart(bounds: BoardBounds): Chart {
 }
 
 /**
- * Region boundaries, exactly where `regionAt` changes: a dash-and-dot rule in boundary red on a pale
- * halo, so it reads over water-lining and coast without competing with routes.
+ * The red region lines a sea lane may cross only one of (`pack.redLines`), ruled solid in red over a pale
+ * red band as the printed board does. They are on the known chart, so each shows once its ground is revealed.
+ */
+function redLines(ctx: Ctx, sphere: Path2D, px: (pixels: number) => number) {
+	const path = new Path2D();
+	for (const line of pack.redLines) line.forEach(([x, z], index) => (index ? path.lineTo(x, z) : path.moveTo(x, z)));
+	ctx.save();
+	ctx.clip(sphere);
+	ctx.lineCap = 'butt';
+	ctx.lineJoin = 'round';
+	ctx.strokeStyle = 'rgb(226 120 112 / 0.45)';
+	ctx.lineWidth = px(16);
+	ctx.stroke(path);
+	ctx.strokeStyle = 'rgb(196 32 36 / 0.92)';
+	ctx.lineWidth = px(6);
+	ctx.stroke(path);
+	ctx.restore();
+}
+
+/**
+ * Region boundaries, exactly where `regionAt` changes: a dash-and-dot rule in ink on a pale halo, so it
+ * reads over water-lining and coast without competing with routes. Ink, not red: only the red lines limit lanes.
  */
 function regionLines(ctx: Ctx, bounds: BoardBounds, px: (pixels: number) => number) {
 	const path = new Path2D();
@@ -433,7 +454,7 @@ function regionLines(ctx: Ctx, bounds: BoardBounds, px: (pixels: number) => numb
 	ctx.strokeStyle = 'rgb(246 238 218 / 0.5)';
 	ctx.lineWidth = px(10);
 	ctx.stroke(path);
-	ctx.strokeStyle = 'rgb(110 30 20 / 0.95)';
+	ctx.strokeStyle = `rgb(${INK} / 0.9)`;
 	ctx.lineWidth = px(4.4);
 	ctx.setLineDash([px(26), px(7), px(5), px(7)]);
 	ctx.stroke(path);

@@ -175,7 +175,7 @@ export function checkEdge(
 	from: CityId,
 	to: CityId,
 	kind: EdgeKind,
-	ignoreRegions = false,
+	ignoreRedLines = false,
 ): string | null {
 	const target = cityDef(to);
 	const origin = cityDef(from);
@@ -193,7 +193,7 @@ export function checkEdge(
 	if (!isCandidate(from, to, 'sea')) return 'No sea route between them: a sea lane may not cross land or another city';
 	if (crossesUnexplored(campaign, from, to, 'sea')) return 'It would cross unexplored map';
 	if (crossesEdge(campaign, from, to, 'sea')) return 'It would cross another sea lane';
-	return ignoreRegions || passage(from, to, 'sea').regionLines <= 1 ? ok : 'A sea lane may cross only one region line';
+	return ignoreRedLines || passage(from, to, 'sea').redLines <= 1 ? ok : 'A sea lane may cross only one red line';
 }
 
 export function addEdge(world: World, a: CityId, b: CityId, kind: EdgeKind, countsForObjective: boolean) {
@@ -233,7 +233,7 @@ function resolveSearch(ctx: Ctx, result: SearchResult, card: CardId) {
 				game.pending.push({ t: 'removeHollow', seat: ctx.seat, amount: result.amount });
 			return;
 		case 'freeEdge':
-			game.pending.push({ t: 'freeEdge', seat: ctx.seat, kind: result.kind, ignoreRegions: false });
+			game.pending.push({ t: 'freeEdge', seat: ctx.seat, kind: result.kind, ignoreRedLines: false });
 			return;
 		case 'discover':
 			if (result.orAction && result.seals.every(seal => isOpen(campaign, seal))) {

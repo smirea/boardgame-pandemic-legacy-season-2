@@ -1,5 +1,5 @@
 import type { CityId, RegionId } from '../ids';
-import { candidateEdges, positions, routeCourses } from './geometry.generated';
+import { candidateEdges, positions, redLines, routeCourses } from './geometry.generated';
 import { sealKey } from './types';
 import type {
 	Color,
@@ -644,6 +644,7 @@ export const pack: ContentPack = {
 	candidateEdges,
 	positions,
 	routeCourses,
+	redLines,
 	reconRoutes,
 	searches: searches as ContentPack['searches'],
 	jobs: [

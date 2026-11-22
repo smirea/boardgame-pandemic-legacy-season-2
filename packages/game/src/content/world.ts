@@ -224,3 +224,67 @@ export const documentedEdges: EdgeDef[] = [
 		] as const
 	).map(([a, b]) => edge(a, b, 'sea')),
 ];
+
+/**
+ * The red region lines printed on the board and its map stickers, as `[lat, lon]` corners. A sea lane may
+ * cross at most one. Each starts on land, as printed. Where the printed line stops at ocean the board leaves
+ * dark for good, it runs on to the edge of the chart instead, since every patch of ocean here can be charted.
+ * The southern ones run well past the frame, because a course rounding a cape may bow a little beyond it.
+ * Longitudes run past 180 where the chart does (it is centred on 11°E).
+ */
+export const redLines: { printed: string; corners: [lat: number, lon: number][] }[] = [
+	// Through the Magellan Strait and Tierra del Fuego, then across the Drake Passage.
+	{
+		printed: 'board',
+		corners: [
+			[-52, -68.4],
+			[-75, -68.4],
+		],
+	},
+	{
+		printed: 'door 57',
+		corners: [
+			[-34.3, 20],
+			[-75, 20],
+		],
+	},
+	{
+		printed: 'door 60',
+		corners: [
+			[17.6, -100],
+			[-75, -100],
+		],
+	},
+	// Down the Somali coast to the northern tip of Madagascar, west of the Indian Ocean haven.
+	{
+		printed: 'door 65',
+		corners: [
+			[10.5, 50.6],
+			[-12.6, 49.3],
+		],
+	},
+	// From beside Ho Chi Minh City across Borneo to the north-west coast of Australia.
+	{
+		printed: 'door 63',
+		corners: [
+			[9.2, 105.1],
+			[-16, 128.5],
+		],
+	},
+	// From the southern tip of Taiwan east across the Pacific, south of Shanghai and Japan, north of Manila.
+	{
+		printed: 'door 56',
+		corners: [
+			[21.95, 120.8],
+			[21.95, 190.9],
+		],
+	},
+	// From Queensland east, north of the Coral Sea haven.
+	{
+		printed: 'door 59',
+		corners: [
+			[-16, 145],
+			[-16, 190.9],
+		],
+	},
+];

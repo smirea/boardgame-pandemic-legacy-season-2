@@ -1,13 +1,14 @@
 #!/usr/bin/env bun
 // Builds packages/game/src/content/geometry.generated.ts: board positions for every location, the
 // pairs players may join with a supply line or sea lane, and the course each of those lines takes on
-// the board. The rules test that course and the board draws it. Rerun after editing content/world.ts.
-import { layoutCities } from '../src/lib/board/projection.ts';
+// the board, and the red region lines. The rules test that course and the board draws it. Rerun after editing
+// content/world.ts.
+import { layoutCities, project } from '../src/lib/board/projection.ts';
 import { edgeKey } from '../../../packages/game/src/ids.ts';
-import { cities, documentedEdges, regions, startingEdges } from '../../../packages/game/src/content/world.ts';
+import { cities, documentedEdges, redLines, regions, startingEdges } from '../../../packages/game/src/content/world.ts';
 // Water is read from the same coastline the board draws, so a line the rules call dry looks dry.
 import { isWater, seaCourses } from './waterways.ts';
-import { coursesCross, runAlongside, runsOver } from '../../../packages/game/src/lanes.ts';
+import { coursesCross, redLineCrossings, runAlongside, runsOver } from '../../../packages/game/src/lanes.ts';
 import type { Ground } from './waterways.ts';
 
 const MAX_LAND_LENGTH = 46;
@@ -28,6 +29,22 @@ const SEA_BOW = 0.1;
 const positions = layoutCities(cities);
 
 type Point = { x: number; z: number };
+
+/** Each red line through the projection, a corner every half degree, so a parallel stays a parallel on the board. */
+const redLinesOnBoard: Point[][] = redLines.map(({ corners }) =>
+	corners
+		.flatMap(([lat, lon], index) => {
+			if (index === 0) return [project(lat, lon)];
+			const [fromLat, fromLon] = corners[index - 1]!;
+			const steps = Math.max(1, Math.ceil(Math.max(Math.abs(lat - fromLat), Math.abs(lon - fromLon)) / 0.5));
+			return Array.from({ length: steps }, (_, step) => {
+				const t = (step + 1) / steps;
+				return project(fromLat + (lat - fromLat) * t, fromLon + (lon - fromLon) * t);
+			});
+		})
+		.map(point => ({ x: Math.round(point.x * 100) / 100, z: Math.round(point.z * 100) / 100 })),
+);
+const MAX_RED_LINES = 1;
 
 /** `nearestLocation` from the rules, over the positions laid out here rather than the ones last generated. */
 function nearest(point: Point) {
@@ -291,17 +308,23 @@ for (let i = 0; i < cities.length; i++) {
 			courses.set(seaKey, starting);
 			continue;
 		}
+		// A lane takes the best course within the red line limit, and only when none is within it the best
+		// course over more, which only Expeditionary Voyage may chart.
 		let course: { path: Point[]; length: number } | null = null;
+		let overLimit: { path: Point[]; length: number } | null = null;
 		let fallback: { path: Point[]; length: number } | null = null;
 		for (const path of seaCourses(from, to, arches(a.id, b.id, SEA_BOW))) {
 			const candidate = { path, length: length(path) };
 			if (!fallback) fallback = candidate;
 			if (!listed && (candidate.length > MAX_SEA_LENGTH || candidate.length > chord * MAX_DETOUR)) continue;
-			if (!passesNearAnotherCity(a.id, b.id, path)) {
+			if (passesNearAnotherCity(a.id, b.id, path)) continue;
+			if (redLineCrossings(written(seaKey, path), redLinesOnBoard) <= MAX_RED_LINES) {
 				course = candidate;
 				break;
 			}
+			overLimit ??= candidate;
 		}
+		course ??= overLimit;
 		if (!course) {
 			if (!listed) continue;
 			if (!fallback) throw new Error(`no water joins ${a.id} and ${b.id}`);
@@ -349,6 +372,11 @@ export const routeCourses: Record<string, [number, number][]> = ${JSON.stringify
 			.sort(([x], [y]) => x.localeCompare(y))
 			.map(([key, path]) => [key, written(key, path).map(point => [point.x, point.z])]),
 	),
+)};
+
+/** The red region lines printed on the board and its stickers, in board units. */
+export const redLines: [number, number][][] = ${JSON.stringify(
+	redLinesOnBoard.map(line => line.map(point => [point.x, point.z])),
 )};
 `;
 await Bun.write(new URL('../../../packages/game/src/content/geometry.generated.ts', import.meta.url), output);

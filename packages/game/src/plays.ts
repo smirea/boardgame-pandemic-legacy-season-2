@@ -614,7 +614,7 @@ export function checkDecide(world: World, decide: Decide): string | null {
 				player(game, seat).location,
 				decide.to,
 				kind,
-				(pending as { ignoreRegions: boolean }).ignoreRegions,
+				(pending as { ignoreRedLines: boolean }).ignoreRedLines,
 			);
 		}
 		case 'removeHollow': {

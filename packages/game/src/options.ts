@@ -471,7 +471,8 @@ export function legalDecides(world: World): Decide[] {
 			case 'freeEdge':
 				for (const city of Object.keys(game.locations) as CityId[]) {
 					if (
-						checkEdge(campaign, player(game, pending.seat).location, city, pending.kind, pending.ignoreRegions) === null
+						checkEdge(campaign, player(game, pending.seat).location, city, pending.kind, pending.ignoreRedLines) ===
+						null
 					)
 						candidates.push({ d: 'freeEdge', to: city });
 				}

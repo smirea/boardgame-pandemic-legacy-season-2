@@ -181,7 +181,7 @@ export type Decision =
 	| { t: 'scar'; seat: SeatId | null }
 	| { t: 'replace'; seat: SeatId }
 	| { t: 'retrieve'; seat: SeatId; filter: 'any' | 'city' }
-	| { t: 'freeEdge'; seat: SeatId; kind: 'land' | 'sea'; ignoreRegions: boolean }
+	| { t: 'freeEdge'; seat: SeatId; kind: 'land' | 'sea'; ignoreRedLines: boolean }
 	| { t: 'removeHollow'; seat: SeatId; amount: number }
 	| { t: 'quarantineCard'; seat: SeatId }
 	| { t: 'giveCard'; seat: SeatId }

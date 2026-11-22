@@ -394,6 +394,8 @@ export type ContentPack = {
 	positions: Record<CityId, { x: number; z: number }>;
 	/** The course each line takes on the board, keyed `${kind}:${edgeKey}`, from the lesser id's end. */
 	routeCourses: Record<string, [number, number][]>;
+	/** The red region lines printed on the board, in board units. A sea lane may cross at most one. */
+	redLines: [number, number][][];
 	reconRoutes: ReconRoute[];
 	searches: Record<CityId, SearchBoxDef[]>;
 	jobs: JobDef[];
