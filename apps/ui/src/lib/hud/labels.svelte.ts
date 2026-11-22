@@ -456,7 +456,7 @@ export function decideLabel(world: World, decide: Decide): string {
 		case 'freeEdge':
 			return `Draw it to ${cityName(decide.to)}`;
 		case 'removeHollow':
-			return `Remove one from ${decide.cities.map(cityName).join(', ')}`;
+			return `Remove one from ${cityName(decide.city)}`;
 		case 'quarantineCard':
 			return `Set aside ${cardName(world, decide.card)}`;
 		case 'giveCard':
@@ -468,6 +468,7 @@ export function decideLabel(world: World, decide: Decide): string {
 			if (pending === 'epidemicDrawn') return 'Start Epidemic';
 			if (pending === 'epidemicInfect') return 'Draw bottom card';
 			if (pending === 'intensify') return 'Intensify';
+			if (pending === 'removeHollow') return 'Remove no more';
 			return 'Skip';
 		}
 	}
@@ -494,6 +495,8 @@ const DECISION_TITLES: Record<Decision['t'], string> = {
 export function decisionTitle(world: World, pending: Decision): string {
 	if (pending.t === 'shield')
 		return `${cityName(pending.city)} just lost a cube. Discard a ${pending.color} City card to put it back?`;
+	if (pending.t === 'removeHollow')
+		return `${seatName(world, pending.seat)}: Remove up to ${pending.amount} Hollow ${pending.amount === 1 ? 'Man' : 'Men'}, one at a time`;
 	if (pending.t === 'scar' && !pending.seat)
 		return 'A scar is owed. Choose who takes it, which scar, and where it goes';
 	const who = 'seat' in pending && pending.seat ? `${seatName(world, pending.seat)}: ` : '';
