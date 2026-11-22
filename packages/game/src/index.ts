@@ -55,6 +55,7 @@ export { violations } from './invariants';
 export type { Insights, PlayerCardsAt, PlayerDeckKind, PublicState, ReconBox } from './view';
 export { insights, onGrid, publicState, reconBoxes } from './view';
 export {
+	breakthrough,
 	cardValue,
 	characterAt,
 	cityDef,
@@ -65,6 +66,7 @@ export {
 	handLimit,
 	has,
 	isForsaken,
+	LABS,
 	nearestLocation,
 	neighbours,
 	overLimit,

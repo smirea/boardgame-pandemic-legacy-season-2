@@ -67,6 +67,7 @@
 		if (card.kind === 'prologue') return campaign.month === 0 ? 'In play' : 'Destroyed';
 		if (card.kind === 'objective') return campaign.objectives.includes('prologueCenters') ? 'In play' : 'Destroyed';
 		if (card.kind === 'archive' || card.kind === 'scanner') return 'In the reserve';
+		if (card.kind === 'plan') return campaign.objectives.includes('plan') ? 'In play' : 'Destroyed';
 		if (card.kind === 'stop' || card.kind === 'pause' || card.kind === 'priorities') return 'Read and set aside';
 		return 'Read';
 	}

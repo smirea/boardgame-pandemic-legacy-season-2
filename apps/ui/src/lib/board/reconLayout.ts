@@ -6,7 +6,7 @@ export type ReconRect = { x: number; z: number; width: number; depth: number };
 const GAP = 4;
 const MARGIN = 2.5;
 const TURNS = [0, 20, -20, 40, -40, 60, -60, 90, -90, 120, -120, 150, -150, 180];
-const REACHES = [GAP, GAP + 3, GAP + 7];
+const REACHES = [GAP, GAP + 3, GAP + 7, GAP + 12];
 
 const overlaps = (a: ReconRect, b: ReconRect) =>
 	Math.abs(a.x - b.x) * 2 < a.width + b.width && Math.abs(a.z - b.z) * 2 < a.depth + b.depth;
@@ -22,8 +22,13 @@ export function placeReconBoxes(
 	size: { width: number; depth: number },
 ): Map<string, ReconRect> {
 	const placed = new Map<string, ReconRect>();
+	const pad = (rect: ReconRect) => ({ ...rect, width: rect.width + MARGIN * 2, depth: rect.depth + MARGIN * 2 });
+	const clearOfPlaced = (rect: ReconRect) => {
+		const padded = pad(rect);
+		return [...placed.values()].every(other => !overlaps(padded, other));
+	};
 	const clear = (rect: ReconRect) => {
-		const padded = { ...rect, width: rect.width + MARGIN * 2, depth: rect.depth + MARGIN * 2 };
+		const padded = pad(rect);
 		return (
 			taken.every(point => !overlaps(padded, { ...point, width: 0, depth: 0 })) &&
 			[...placed.values()].every(other => !overlaps(padded, other))
@@ -45,6 +50,14 @@ export function placeReconBoxes(
 		for (const turn of TURNS) {
 			choice = REACHES.map(reach => at(turn, reach)).find(clear) ?? null;
 			if (choice) break;
+		}
+		if (!choice) {
+			// When a busy city leaves no spot clear of all neighbours (e.g. multiple Plan routes at Shanghai),
+			// still keep boxes clear of one another.
+			for (const turn of TURNS) {
+				choice = REACHES.map(reach => at(turn, reach)).find(clearOfPlaced) ?? null;
+				if (choice) break;
+			}
 		}
 		placed.set(box.route, choice ?? at(0, GAP));
 	}

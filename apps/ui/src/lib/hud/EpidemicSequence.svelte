@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
-	import { pack } from '@repo/game';
+	import { breakthrough, pack } from '@repo/game';
 	import type { World } from '@repo/game';
 	import { fade, scale } from 'svelte/transition';
 	import { legacyScans } from '#lib/scans.generated.ts';
@@ -33,6 +33,7 @@
 	const fromStorage = $derived(
 		world.campaign.rules.includes('epidemicFromStorage') && world.campaign.stored.infection.length > 0,
 	);
+	const jade = $derived(breakthrough(world.campaign, 'jade'));
 	const lastEpidemic = $derived.by(() => {
 		if (!game) return null;
 		for (let i = game.log.length - 1; i >= 0; i--) {
@@ -115,21 +116,30 @@
 						<div class="body">
 							<div class="row">
 								<b>Infect</b>
-								{#if infectState === 'done' && lastEpidemic?.city}
-									<span class="pill struck">
-										{cityName(lastEpidemic.city)}{lastEpidemic.removed > 0 ? ` −${lastEpidemic.removed}` : ''}
-									</span>
-								{:else if fromStorage}
-									<span class="pill">From storage</span>
-								{:else}
-									<span class="pill">Bottom card</span>
-								{/if}
+								<span class="pills">
+									{#if jade}
+										<span class="pill jade">Jade Lab</span>
+									{/if}
+									{#if infectState === 'done' && lastEpidemic?.city}
+										<span class="pill struck">
+											{cityName(lastEpidemic.city)}{lastEpidemic.removed > 0 ? ` −${lastEpidemic.removed}` : ''}
+										</span>
+									{:else if fromStorage}
+										<span class="pill">From storage</span>
+									{:else}
+										<span class="pill">Bottom card</span>
+									{/if}
+								</span>
 							</div>
 							<p>
 								<RichText
 									text={fromStorage
-										? 'Pull a stored Infection card and remove all supply cubes from that city.'
-										: 'Draw the bottom Infection card and remove all supply cubes from that city.'}
+										? jade
+											? 'Pull a stored Infection card and remove 1 supply cube from that city (Jade Lab).'
+											: 'Pull a stored Infection card and remove all supply cubes from that city.'
+										: jade
+											? 'Draw the bottom Infection card and remove 1 supply cube from that city (Jade Lab).'
+											: 'Draw the bottom Infection card and remove all supply cubes from that city.'}
 								/>
 							</p>
 						</div>
@@ -359,6 +369,12 @@
 		opacity: 0.8;
 	}
 
+	.pills {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.3rem;
+	}
+
 	.pill {
 		padding: 0.08rem 0.42rem;
 		border-radius: 999px;
@@ -372,6 +388,11 @@
 	.stage.active .pill {
 		background: rgb(227 178 60 / 0.25);
 		color: #fce29a;
+	}
+
+	.pill.jade {
+		background: rgb(72 168 124 / 0.28);
+		color: #a7f3d0;
 	}
 
 	.pill.struck {

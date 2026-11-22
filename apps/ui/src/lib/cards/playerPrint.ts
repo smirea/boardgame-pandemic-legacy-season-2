@@ -14,210 +14,193 @@ export const EVENT_PRINT: Record<EventId, EventPrint> = {
 		mode: 'rationed',
 		banner: 'Rationed Event',
 		rules: [
-			'Move 1 or 2 copies of a specific city in the Infection discard pile to the Game End area.',
-			'You may play this card between step 2 and step 3 of an epidemic.',
+			'Move 1–2 copies of one city from Infection discard to Game End.',
+			'Playable between Epidemic steps 2 & 3.',
 		],
-		timing: 'Play at any time. Not an action.',
+		timing: 'Free · any time',
 	},
 	airlift: {
 		mode: 'rationed',
 		banner: 'Rationed Event',
-		rules: ['Move any 1 pawn to any location.', "Get permission before moving another player's pawn."],
-		timing: 'Play at any time. Not an action.',
+		rules: ['Move any 1 pawn to any location (with that player’s permission).'],
+		timing: 'Free · any time',
 	},
 	handout: {
 		mode: 'rationed',
 		banner: 'Rationed Event',
-		rules: ['Take up to 2 Supply cubes from the stockpile and put them onto any location(s).'],
-		timing: 'Play at any time. Not an action.',
+		rules: ['Place up to 2 Supply cubes from the stockpile on any location(s).'],
+		timing: 'Free · any time',
 	},
 	quietNight: {
 		mode: 'rationed',
 		banner: 'Rationed Event',
-		rules: ['Skip the next "Infect Cities" step (do not flip over any Infection cards).'],
-		timing: 'Play at any time. Not an action.',
+		rules: ['Skip the next Infect Cities step.'],
+		timing: 'Free · any time',
 	},
 	cardSwap: {
 		mode: 'rationed',
 		banner: 'Rationed Event',
-		rules: ['Two players (anywhere on the board) can swap 1 Player card from their hands.'],
-		timing: 'Play at any time. Not an action.',
+		rules: ['Any two players swap 1 Player card from their hands.'],
+		timing: 'Free · any time',
 	},
 	spreadOut: {
 		mode: 'rationed',
 		banner: 'Rationed Event',
-		rules: ['Move 3 Supply cubes from one haven into one or more locations on the grid.'],
-		timing: 'Play at any time. Not an action.',
+		rules: ['Move 3 Supply cubes from one haven onto any grid location(s).'],
+		timing: 'Free · any time',
 	},
 	cleanse: {
 		mode: 'rationed',
 		banner: 'Rationed Event',
 		rules: ['Remove up to 2 Plague cubes from the grid.'],
-		timing: 'Play at any time. Not an action.',
+		timing: 'Free · any time',
 	},
 	forecast: {
 		mode: 'rationed',
 		banner: 'Rationed Event',
-		rules: [
-			'Draw, look at, and rearrange the top 8 cards of the Infection deck.',
-			'Put them back on top of the Infection deck.',
-		],
-		timing: 'Play at any time. Not an action.',
+		rules: ['Look at and reorder the top 8 Infection cards, then place them back on top.'],
+		timing: 'Free · any time',
 	},
 	cache: {
 		mode: 'rationed',
 		banner: 'Rationed Event',
-		rules: ['Take up to 6 Supply cubes from the reserve and add them to a location containing a player pawn.'],
-		timing: 'Play at any time. Not an action.',
+		rules: ['Add up to 6 Supply cubes from the reserve to any location with a pawn.'],
+		timing: 'Free · any time',
 	},
 	encore: {
 		mode: 'rationed',
 		banner: 'Rationed Event',
-		rules: ['Take 1 Rationed Event card from the discard pile and play it immediately.'],
-		timing: 'Play at any time. Not an action.',
+		rules: ['Take 1 Rationed Event from the discard pile and play it now.'],
+		timing: 'Free · any time',
 	},
 	secondWind: {
 		mode: 'rationed',
 		banner: 'Rationed Event',
 		rules: ['The current player gains 3 actions.'],
-		timing: 'Play during any player\'s "Actions" step. Not an action.',
+		timing: 'Free · Actions step',
 	},
 	massInoculation: {
 		mode: 'rationed',
 		banner: 'Rationed Event',
 		rules: [
-			'Put up to 3 Infection cards from the Infection discard pile into Package 6.',
-			'You may play this card between step 2 and step 3 of an epidemic.',
+			'Store up to 3 Infection cards from Infection discard in Package 6.',
+			'Playable between Epidemic steps 2 & 3.',
 		],
-		timing: 'Play at any time. Not an action.',
+		timing: 'Free · any time',
 	},
 	openWaters: {
 		mode: 'rationed',
 		banner: 'Rationed Event',
-		rules: [
-			'The current player may do the Chart Sea Lane action for free. (Do not spend an action or any Supply cubes.)',
-			'The sea lane may cross any number of red region lines.',
-		],
-		timing: 'Play at any time. Not an action.',
+		rules: ['Current player Charts a Sea Lane for free (no action or Supply cubes); may cross red region lines.'],
+		timing: 'Free · any time',
 	},
 	scavenge: {
 		mode: 'rationed',
 		banner: 'Rationed Event',
-		rules: [
-			'The current player draws the next 4 Player cards, adding any City cards to their hand. Discard any other cards to the Player discard pile without effect.',
-		],
-		timing: 'Play at any time. Not an action.',
+		rules: ['Current player draws 4 Player cards: keep City cards, discard all others without effect.'],
+		timing: 'Free · any time',
 	},
 	mobileShelters: {
 		mode: 'rationed',
 		banner: 'Rationed Event',
 		rules: ['Build 2 shelters anywhere on the grid for free.'],
-		timing: 'Play at any time. Not an action.',
+		timing: 'Free · any time',
 	},
 	purge: {
 		mode: 'unrationed',
 		banner: 'Unrationed Event',
 		rules: ['Remove all Plague cubes from 1 location on the grid.'],
-		destroy: 'Destroy this card after use.',
-		timing: 'Play at any time. Not an action.',
+		destroy: 'Destroy after use',
+		timing: 'Free · any time',
 	},
 	mentor: {
 		mode: 'unrationed',
 		banner: 'Unrationed Event',
-		rules: [
-			'Place a character ability worth 2 or less on a Character card currently in play. You may place this ability over a scar.',
-		],
-		destroy: 'Destroy this card after use.',
-		timing: 'Play at any time. Not an action.',
+		rules: ['Add an ability costing ≤2 to any in-play Character (may cover a scar).'],
+		destroy: 'Destroy after use',
+		timing: 'Free · any time',
 	},
 	safeHouses: {
 		mode: 'unrationed',
 		banner: 'Unrationed Event',
-		rules: ['Place up to 3 shelters onto any cities on the grid.'],
-		destroy: 'Destroy this card after use.',
-		timing: 'Play at any time. Not an action.',
+		rules: ['Place up to 3 shelters on any cities on the grid.'],
+		destroy: 'Destroy after use',
+		timing: 'Free · any time',
 	},
 	exile: {
 		mode: 'unrationed',
 		banner: 'Unrationed Event',
-		rules: [
-			'Destroy up to 3 copies of one specific city in the Infection discard pile.',
-			'You may play this card between step 2 and step 3 of an epidemic.',
-		],
-		destroy: 'Destroy this card after use.',
-		timing: 'Play at any time. Not an action.',
+		rules: ['Destroy up to 3 copies of one city in Infection discard.', 'Playable between Epidemic steps 2 & 3.'],
+		destroy: 'Destroy after use',
+		timing: 'Free · any time',
 	},
 	stockUp: {
 		mode: 'unrationed',
 		banner: 'Unrationed Event',
-		rules: ['Move up to 8 Supply cubes from the reserve to the stockpile for use in this game.'],
-		destroy: 'Destroy this card after use.',
-		timing: 'Play at any time. Not an action.',
+		rules: ['Move up to 8 Supply cubes from the reserve to the stockpile for this game.'],
+		destroy: 'Destroy after use',
+		timing: 'Free · any time',
 	},
 	antidote: {
 		mode: 'unrationed',
 		banner: 'Unrationed Event',
 		rules: ['Discard 1 Epidemic card without effect.'],
-		destroy: 'Destroy this card after use.',
-		timing: 'Play at any time. Not an action.',
+		destroy: 'Destroy after use',
+		timing: 'Free · any time',
 	},
 	riotControl: {
 		mode: 'unrationed',
 		banner: 'Unrationed Event',
-		rules: ['Move up to 4 "Utopia" Infection cards from the Infection discard pile to the Game End area.'],
-		destroy: 'Destroy this card after use.',
-		timing: 'Play at any time. Not an action.',
+		rules: ['Move up to 4 "Utopia" Infection cards from Infection discard to Game End.'],
+		destroy: 'Destroy after use',
+		timing: 'Free · any time',
 	},
 	surplus: {
 		mode: 'permanent',
 		banner: 'Player Card',
-		rules: [
-			'When doing the Make Supplies action, discard this card to put 3 more Supply cubes onto your Character card.',
-		],
+		rules: ['During Make Supplies, discard this card to take 3 extra Supply cubes onto your Character card.'],
 	},
 };
 
 export const EPIDEMIC_STEPS = [
 	{
 		heading: '1-INCREASE',
-		text: 'Move the Infection Rate marker forward 1 space.',
+		text: 'Advance the Infection Rate marker 1 space.',
 	},
 	{
 		heading: '2-INFECT',
-		text: 'Draw the bottom card from the Infection deck and remove all the Supply cubes (if any) from that city. Discard that card.',
+		text: 'Draw the bottom Infection card, remove all Supply cubes from that city, and discard it.',
 	},
 	{
 		heading: '3-INTENSIFY',
-		text: 'Shuffle the cards in the Infection discard pile and put them on top of the Infection deck.',
+		text: 'Shuffle the Infection discard pile and put it on top of the Infection deck.',
 	},
 ] as const;
 
 export const producePrint = (boxesLeft: number) => ({
-	lead: 'For an action, do one of the following:',
-	local:
-		'Local Production: at a haven or supply center, fill your current location to its population with Supply cubes.',
-	system:
-		'System-Wide Production: at a haven or supply center, fill all havens and supply centers to their population with Supply cubes.',
-	check: boxesLeft === 1 ? 'Then, check the box below.' : 'Then, check a box below.',
-	footer:
-		boxesLeft === 1 ? 'When this box is checked, destroy this card.' : 'When all boxes are checked, destroy this card.',
+	cost: 'Action · at haven or center',
+	localTitle: 'Local',
+	local: 'Fill this location to population with Supply cubes.',
+	systemTitle: 'System-Wide',
+	system: 'Fill all havens & centers to population, then check a box.',
+	footer: boxesLeft <= 1 ? 'Last box — destroys this card' : `${boxesLeft} boxes left · destroy when checked`,
 });
 
 export type ImprovementPrint = { text: string; swatch?: 'wild' | 'red' };
 
 export const IMPROVEMENT_PRINT: Record<CityImprovementId, ImprovementPrint> = {
 	double: {
-		text: 'This card counts as 2 cards of its color for the Build Supply Center action.',
+		text: 'Counts as 2 cards of its color for Build Supply Center.',
 	},
 	triple: {
-		text: 'This card counts as 3 cards of its color for the Build Supply Center action.',
+		text: 'Counts as 3 cards of its color for Build Supply Center.',
 	},
 	wild: {
-		text: 'You may use this card as a City card of any color when doing the Recon or Build Supply Center action.',
+		text: 'Any color City card for Recon or Build Supply Center.',
 		swatch: 'wild',
 	},
 	redWild: {
-		text: 'This card is both a red City card and a card of its original color.',
+		text: 'Counts as both red and its original color.',
 		swatch: 'red',
 	},
 };
@@ -226,47 +209,47 @@ export type CompanionPrint = { text: string; cards?: readonly ('A' | 'B')[] };
 
 export const COMPANION_PRINT: Record<CompanionId, CompanionPrint> = {
 	builder: {
-		text: 'When you do the Build Supply Center action, you need 1 fewer card if you have this card in your hand. (This card can be one of the cards used.)',
+		text: 'In hand: 1 fewer card to Build Supply Center (may include this card).',
 	},
 	lineman: {
-		text: 'You may do the Establish Supply Lines action with 1 fewer Supply cube if you have this card in your hand.',
+		text: 'In hand: 1 fewer Supply cube to Establish Supply Lines.',
 	},
 	rigger: {
-		text: 'When doing the Build Satellite Tower action, spend 1 fewer Supply cube if you have this card in your hand.',
+		text: 'In hand: 1 fewer Supply cube to Build Satellite Tower.',
 	},
 	tracker: {
-		text: 'You may do the Search action for free if you have this card in your hand.',
+		text: 'In hand: Search is a free action.',
 	},
 	fieldSurgeon: {
-		text: 'You do not get exposed when you begin your turn in an infested city if you have this card in your hand.',
+		text: 'In hand: no exposure when starting a turn in an infested city.',
 	},
 	trader: {
-		text: 'As an action, you can discard a City card (including this card) to draw a City card of the same color from the Player discard pile, if you have this card in your hand.',
+		text: 'Action (in hand): discard a City card (or this) for a same-color City card from Player discard.',
 	},
 	porter: {
-		text: 'As a free action, you may take Supply cubes from an adjacent location and place them into your location if you have this card in your hand.',
+		text: 'Free action (in hand): move Supply cubes from an adjacent location into yours.',
 	},
 	medic: {
-		text: 'Play this card at any time to remove a Plague cube from your location.',
+		text: 'Play any time: remove 1 Plague cube from your location.',
 	},
 	purifier: {
-		text: 'Play this card at any time to remove all Plague cubes from 1 location on the grid.',
+		text: 'Play any time: remove all Plague cubes from 1 location on the grid.',
 	},
 	shelterWright: {
-		text: 'Play this card at any time to place a shelter onto one city on the grid.',
+		text: 'Play any time: place a shelter on 1 city on the grid.',
 	},
 	marksman: {
-		text: 'Play this card at any time to remove 1 Hollow Men figure from anywhere on the grid.',
+		text: 'Play any time: remove 1 Hollow Men figure from anywhere on the grid.',
 	},
 	quartermaster: {
-		text: 'When you do the Build Shelter action, you may discard any color City card (including this one) if you have this card in your hand.',
+		text: 'In hand: discard any color City card (or this) for Build Shelter.',
 	},
 	doubleAgent: {
-		text: 'This card counts as 2 unique red cards for the Recon action.',
+		text: 'Counts as 2 unique red cards for Recon.',
 		cards: ['A', 'B'],
 	},
 	informant: {
-		text: 'Play this card at any time to move up to 4 "Utopia" Infection cards from the Infection discard pile to the Game End area.',
+		text: 'Play any time: move up to 4 "Utopia" Infection cards from discard to Game End.',
 	},
 };
 

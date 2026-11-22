@@ -5,8 +5,10 @@
 	import LegacyCard from '#lib/cards/LegacyCard.svelte';
 	import type { Insights, PublicState } from '@repo/game';
 	import Calendar from './Calendar.svelte';
+	import CampaignStatus from './CampaignStatus.svelte';
 	import Decks from './Decks.svelte';
 	import FrequencyScanner from './FrequencyScanner.svelte';
+	import HollowSupply from './HollowSupply.svelte';
 	import { MONTHS } from './labels.svelte.ts';
 	import StorageDeck from './StorageDeck.svelte';
 
@@ -60,6 +62,11 @@
 	const legacyLeft = $derived(pack.legacyDeck.length - campaign.legacyIndex);
 	const hasStorage = $derived(campaign.rules.includes('storage'));
 	const hasScanner = $derived(campaign.actions.includes('monitor'));
+	const hasHollow = $derived(
+		game !== null &&
+			(campaign.rules.includes('hollowSetup') ||
+				Object.values(campaign.infectionCards).some(card => card.kind === 'gather' || card.kind === 'assemble')),
+	);
 	let legacyPeek = $state(false);
 </script>
 
@@ -72,11 +79,15 @@
 			{#if !MONTHS[campaign.month]}<strong>Campaign over</strong>{/if}
 			<Calendar {campaign} {room} />
 		</div>
+		<CampaignStatus world={snap.world} onopen={onbox} />
 		{#if hasStorage}
 			<StorageDeck {campaign} onopen={onbox} />
 		{/if}
 		{#if hasScanner}
 			<FrequencyScanner {campaign} {canMonitor} {monitorReason} onopen={onscanner} />
+		{/if}
+		{#if hasHollow}
+			<HollowSupply world={snap.world} />
 		{/if}
 		<div class="stats">
 			<div class="deck-strip">

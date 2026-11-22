@@ -64,9 +64,28 @@ export const ACTION_NAMES: Record<Action['a'], string> = {
 	carry: 'Carry cubes over',
 };
 
-/** What a kind of action does for this character, where an ability changes it. */
-export const actionText = (world: World, seat: SeatId, a: Action['a']): string =>
-	a === 'deliver' && has(world, seat, 'courier') ? 'Put carried cubes here or next door' : ACTION_TEXT[a];
+/** What a kind of action does for this character, where an ability or piece count changes it. */
+export function actionText(world: World, seat: SeatId, a: Action['a']): string {
+	if (a === 'deliver' && has(world, seat, 'courier')) return 'Put carried cubes here or next door';
+	if (a === 'selfInject') {
+		const left = Math.max(0, pack.numbers.selfInfectDoses - world.campaign.dosesUsed);
+		return `Carry the sample, taking a scar (${left} of ${pack.numbers.selfInfectDoses} doses left)`;
+	}
+	const pieces = world.game?.pieces;
+	if (pieces) {
+		if (a === 'buildCenter') {
+			if (pieces.center === 0) return 'Discard cards of its colour to move a center here (0 left)';
+			if (pieces.center <= 2) return `${ACTION_TEXT.buildCenter} (${pieces.center} left)`;
+		} else if (a === 'buildTower') {
+			if (pieces.tower === 0) return 'Spend cubes to move a tower here (0 left)';
+			if (pieces.tower <= 2) return `${ACTION_TEXT.buildTower} (${pieces.tower} left)`;
+		} else if (a === 'buildShelter') {
+			if (pieces.shelter === 0) return 'Move an existing shelter to this city (0 left)';
+			if (pieces.shelter <= 2) return `${ACTION_TEXT.buildShelter} (${pieces.shelter} left)`;
+		}
+	}
+	return ACTION_TEXT[a];
+}
 
 /** What each kind of action does, in a line short enough to sit beside its name. */
 export const ACTION_TEXT: Record<Action['a'], string> = {
@@ -288,12 +307,18 @@ export function actionDetail(world: World, action: Action): Rich {
 			];
 		case 'recon': {
 			const route = pack.reconRoutes.find(candidate => candidate.id === action.route)!;
-			return [`${route.opens ? sealDef(route.opens).name : 'The Plan'}: `, ...cardList(world, action.cards)];
+			const planColor = `${route.color[0]!.toUpperCase()}${route.color.slice(1)}`;
+			return [
+				`${route.opens ? sealDef(route.opens).name : `The Plan (${planColor})`}: `,
+				...cardList(world, action.cards),
+			];
 		}
 		case 'search': {
 			const card = world.campaign.playerCards[action.card];
 			return card?.kind === 'city' ? [cardRef(world, action.card), `, ${card.search[action.box]!.scope} box`] : [];
 		}
+		case 'buildTower':
+			return action.moveFrom ? [`Moved from ${cityName(action.moveFrom)}`] : [];
 		case 'transmit':
 			return [cardRef(world, action.card), ` to ${seatName(world, action.to)}`];
 		case 'monitor':
@@ -301,7 +326,14 @@ export function actionDetail(world: World, action: Action): Rich {
 		case 'broadcast':
 			return [{ glyph: 'hollow', text: 'Hollow Men' }, ` from ${cityName(action.from)} to ${cityName(action.to)}`];
 		case 'buildShelter':
-			return action.card ? ['Discard ', cardRef(world, action.card)] : [];
+			return [
+				...(action.card ? ['Discard ', cardRef(world, action.card)] : []),
+				...(action.moveFrom ? [`${action.card ? ', moved' : 'Moved'} from ${cityName(action.moveFrom)}`] : []),
+			];
+		case 'selfInject': {
+			const left = Math.max(0, pack.numbers.selfInfectDoses - world.campaign.dosesUsed);
+			return [`${left} of ${pack.numbers.selfInfectDoses} doses left · takes Carrier scar`];
+		}
 		case 'administratorMove':
 			return [`${seatName(world, action.pawn)} to ${seatName(world, action.to)}`];
 		case 'sabotage':

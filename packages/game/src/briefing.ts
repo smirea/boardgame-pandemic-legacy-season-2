@@ -42,9 +42,12 @@ const HEADING = {
 	objectives: 'Objectives this game',
 	action: 'New actions',
 	rule: 'New rules',
+	turningPoint: 'Turning point',
 	event: 'New Event cards',
+	epidemicCard: 'Epidemic cards',
 	ability: 'New abilities for sale',
 	scar: 'New scars',
+	owedScar: 'Scars owed',
 	cityImprovement: 'New City card improvements for sale',
 	infectionImprovement: 'New Infection card improvements for sale',
 	permanentStructure: 'New at game end',
@@ -52,7 +55,11 @@ const HEADING = {
 	lab: 'Labs found',
 	region: 'Infested from the start',
 	route: 'Recon routes now known',
+	edge: 'New routes',
 	haven: 'New havens',
+	infest: 'Infested cities',
+	forsake: 'Forsaken cities',
+	destroy: 'City destroyed',
 	frequencyHint: 'Monitor frequencies',
 	gather: 'Hollow Men',
 	assemble: 'Hollow Men',
@@ -250,5 +257,34 @@ function unlockLine(campaign: Campaign, unlock: BriefedUnlock): string | null {
 			return `${unlock.amount} extra actions for the player whose turn it is.`;
 		case 'permanentStructure':
 			return `A ${unlock.structure} can be made permanent, so it starts every later game already built.`;
+		case 'epidemicCard':
+			return 'Another Epidemic card joins the box for future games.';
+		case 'turningPoint': {
+			const TEXT = {
+				firstForsaken: 'At Game End, if any revealed city is at population 0, open doors A and 12.',
+				losingStreak: 'After 4 games lost in a row, up to 10 extra reserve cubes join the stockpile for 3 games.',
+				defection: 'At Game End, if a Hollow Man stands on 3 different havens, open door 17.',
+			} as const;
+			return unlock.over ? 'Turning point resolved and removed from play.' : TEXT[unlock.id];
+		}
+		case 'owedScar':
+			return 'One character must take a scar when the next game begins.';
+		case 'destroy': {
+			const name = pack.cities.find(entry => entry.id === unlock.city)!.name;
+			return `${name} is permanently destroyed: removed from the map along with its routes and cards.`;
+		}
+		case 'edge': {
+			const a = pack.cities.find(entry => entry.id === unlock.edge.a)!.name;
+			const b = pack.cities.find(entry => entry.id === unlock.edge.b)!.name;
+			return `A ${unlock.edge.kind === 'sea' ? 'sea lane' : 'supply line'} now joins ${a} and ${b}.`;
+		}
+		case 'infest': {
+			const name = pack.cities.find(entry => entry.id === unlock.city)!.name;
+			return `${name} is now infested. Characters starting a turn there are exposed.`;
+		}
+		case 'forsake': {
+			const name = pack.cities.find(entry => entry.id === unlock.city)!.name;
+			return `${name} is forsaken and infested.`;
+		}
 	}
 }

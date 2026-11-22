@@ -161,6 +161,13 @@
 			<span class="body">
 				<span class="head">
 					<strong>{name}</strong>
+					{#if character?.carrier}
+						<span
+							class="carrier-badge"
+							data-testid="carrier-badge"
+							title="Carrying the sample — deliver to a supply center in Johannesburg">Sample</span
+						>
+					{/if}
 					{#if player}
 						<span
 							class="cubes"
@@ -191,7 +198,7 @@
 			>
 		{/if}
 
-		{#if reading && traits.length}
+		{#if reading && (traits.length || character?.carrier)}
 			<!-- The whole character card, readable: beside the seat on the side facing the board. -->
 			<div
 				class="sheet-out"
@@ -199,10 +206,18 @@
 				{@attach feedback(undefined, () => ({
 					name,
 					seat,
+					carrier: Boolean(character?.carrier),
 					traits: traits.map(trait => `${trait.kind}: ${trait.name}`),
 				}))}
 				transition:fly={{ x: right ? 18 : -18, duration: 200, easing: cubicOut }}
 			>
+				{#if character?.carrier}
+					<div class="line carrier">
+						<span class="kind">Sample carrier</span>
+						<b>Carrying the Pearl Lab sample</b>
+						<p>Deliver to a supply center in Johannesburg to complete the final objective.</p>
+					</div>
+				{/if}
 				{#each traits as trait, index (`${trait.kind}:${trait.name}:${index}`)}
 					<div class="line {trait.kind}" class:struck={trait.struck}>
 						<span class="kind">
@@ -459,6 +474,24 @@
 		white-space: nowrap;
 	}
 
+	.carrier-badge {
+		flex: none;
+		padding: 0.08rem 0.36rem;
+		border: 1px solid #3fe3b0;
+		border-radius: 999px;
+		background: rgb(14 48 40 / 0.92);
+		color: #9bf5d7;
+		font-size: 0.62rem;
+		font-weight: 800;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		line-height: 1.15;
+	}
+
+	.line.carrier .kind {
+		color: #166b52;
+	}
+
 	/* Keep even a full reserve of carried cubes beside the name. */
 	.cubes {
 		display: flex;
@@ -670,9 +703,9 @@
 		width: 100%;
 	}
 
-	/* Three real cards to a row, as wide as the seat, so it stays clear of the character sheet beside the card. */
+	/* Three real cards to a row, scaled 30% larger so every card reads cleanly on hover. */
 	.spread {
-		--card-size: 0.6rem;
+		--card-size: 0.78rem;
 		position: absolute;
 		bottom: -0.35rem;
 		left: -0.35rem;

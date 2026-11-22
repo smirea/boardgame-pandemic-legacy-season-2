@@ -12,6 +12,13 @@ export type CityHighlight = 'target' | 'selected' | null;
  */
 export type Covered = { x: number; y: number; width: number; height: number; firm?: boolean };
 
+export type LabInfo = {
+	name: string;
+	effect: string | null;
+	active: boolean;
+	doses?: { left: number; total: number };
+};
+
 export type CityView = {
 	name: string;
 	revealed: boolean;
@@ -35,6 +42,7 @@ export type CityView = {
 	infested: boolean;
 	forsaken: boolean;
 	lab: boolean;
+	labInfo: LabInfo | null;
 	highlight: CityHighlight;
 	/** The city's Infection cards and its chance of being hit in the next Infect step, while a game is played. */
 	infection: { odds: number; inDeck: number; discarded: number } | null;
@@ -57,6 +65,8 @@ export type PawnView = {
 	pickable: boolean;
 	/** Supply cubes the character carries. */
 	carried: number;
+	/** True when this character carries the Pearl Lab sample. */
+	carrier: boolean;
 	travel: Travel;
 	/** The way the last move went over the board, city to city, when it kept to a road or the sea. */
 	course: BoardPoint[] | null;
@@ -123,6 +133,8 @@ export type BoardView = {
 	pawns: PawnView[];
 	/** Supply cubes left in the stockpile, while a game is played. */
 	stockpile: number | null;
+	/** Supply cubes held in reserve off the board, while a game is played. */
+	reserve: number | null;
 	recon: ReconBoxView[];
 	cursors: CursorView[];
 	drawings?: DrawingView[];

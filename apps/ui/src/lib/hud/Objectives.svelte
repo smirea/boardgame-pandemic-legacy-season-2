@@ -203,6 +203,7 @@
 <section
 	class="objectives"
 	data-testid="objectives"
+	data-dest="objectives"
 	{@attach feedback(undefined, () => ({
 		objectives: objectives.map(objective => objective.id),
 		progress: game?.progress,
@@ -222,6 +223,7 @@
 			>
 				<ObjectiveTag
 					{objective}
+					{campaign}
 					progress={game?.progress[objective.id] ?? 0}
 					done={game?.completed.includes(objective.id) ?? false}
 					waived={game?.waived.includes(objective.id) ?? false}

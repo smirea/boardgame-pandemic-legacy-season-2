@@ -41,6 +41,14 @@
 			search: [],
 			companion: companion.id,
 		})),
+		{
+			id: 'ic-combo' as never,
+			kind: 'city' as const,
+			city: 'london' as never,
+			improvement: 'wild' as const,
+			search: [{ scope: 'land' as const, result: null as never, scratched: false }],
+			companion: 'trader' as const,
+		},
 		...pack.events.map((event, index) => ({
 			id: `e${index}` as never,
 			kind: 'event' as const,
@@ -192,7 +200,7 @@
 	}
 
 	.player-scan {
-		height: calc(var(--card-size, 1rem) * 9.7);
+		height: calc(var(--card-size, 1rem) * 10.6);
 		width: auto;
 		border-radius: 0.4em;
 	}

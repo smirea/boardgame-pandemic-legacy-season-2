@@ -96,14 +96,27 @@ export function cityHint(city: CityView): HintText {
 			value: structureValue(entry, city.inGame),
 			tone: entry.placed || !city.inGame ? 'good' : null,
 		});
-	if (city.lab) rows.push({ label: 'Lab', value: 'Found (permanent)', tone: 'good' });
+	if (city.labInfo) {
+		rows.push({
+			label: city.labInfo.name,
+			value: city.labInfo.active ? 'Breakthrough active' : 'Found (permanent)',
+			tone: 'good',
+		});
+		if (city.labInfo.doses)
+			rows.push({
+				label: 'Sample doses',
+				value: `${city.labInfo.doses.left} of ${city.labInfo.doses.total} left`,
+				tone: city.labInfo.doses.left === 0 ? 'bad' : 'good',
+			});
+	} else if (city.lab) rows.push({ label: 'Lab', value: 'Found (permanent)', tone: 'good' });
 	if (city.infested) rows.push({ label: 'Infested', value: 'Permanent sticker', tone: 'bad' });
 	if (city.forsaken) rows.push({ label: 'Forsaken', value: 'Yes', tone: 'bad' });
 	if (city.plague) rows.push({ label: 'Plague cubes', value: String(city.plague), tone: 'bad' });
 	if (city.hollow) rows.push({ label: 'Hollow Men', value: String(city.hollow), tone: 'bad' });
-	const notes = city.haven
-		? ['No Infection card names a haven. An outbreak in a neighbouring city still strikes it.']
-		: [];
+	const notes = [
+		...(city.haven ? ['No Infection card names a haven. An outbreak in a neighbouring city still strikes it.'] : []),
+		...(city.labInfo?.effect ? [`${city.labInfo.name}: ${city.labInfo.effect}`] : []),
+	];
 	return { title: city.name, marks, counts, rows, notes };
 }
 
@@ -132,7 +145,21 @@ export function partHint(part: Part, city: CityView): HintText {
 			rows: [{ label: 'Count', value: String(city.hollow), tone: 'bad' }, here],
 			notes: [],
 		};
-	if (part === 'lab') return { title: 'Lab', rows: [here], notes: ['Every lab found counts toward the final score.'] };
+	if (part === 'lab') {
+		const rows: HintRow[] = [here];
+		if (city.labInfo?.active) rows.push({ label: 'Status', value: 'Breakthrough active', tone: 'good' });
+		if (city.labInfo?.doses)
+			rows.push({
+				label: 'Sample doses',
+				value: `${city.labInfo.doses.left} of ${city.labInfo.doses.total} left`,
+				tone: city.labInfo.doses.left === 0 ? 'bad' : 'good',
+			});
+		const notes = [
+			...(city.labInfo?.effect ? [city.labInfo.effect] : []),
+			'Every lab found counts toward the final score.',
+		];
+		return { title: city.labInfo?.name ?? 'Lab', rows, notes };
+	}
 	const note = part.permanent
 		? part.placed
 			? 'Marked with a permanent sticker on the board and placed automatically on game start.'
@@ -148,11 +175,14 @@ export function partHint(part: Part, city: CityView): HintText {
 }
 
 /** The pile of supply cubes not yet on the board. */
-export function stockpileHint(count: number): HintText {
+export function stockpileHint(count: number, reserve?: number | null): HintText {
+	const rows: HintRow[] = [{ label: 'Supply cubes left', value: String(count), tone: count === 0 ? 'bad' : null }];
+	if (reserve != null)
+		rows.push({ label: 'Reserve cubes', value: String(reserve), tone: reserve === 0 ? 'bad' : null });
 	return {
 		title: 'Stockpile',
 		marks: ['supplies'],
-		rows: [{ label: 'Supply cubes left', value: String(count), tone: count === 0 ? 'bad' : null }],
+		rows,
 		notes: ['Cubes placed on cities or taken by players come from here, and cubes removed come back.'],
 	};
 }

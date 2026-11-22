@@ -109,11 +109,25 @@
 	const rem = () => parseFloat(getComputedStyle(document.documentElement).fontSize);
 	const overlap = $derived.by(() => {
 		const count = handCards.length;
-		const loose = Math.max(0.3, Math.min(2.9, (count - 3) * 0.55));
+		const loose = Math.max(0.35, Math.min(3.4, (count - 3) * 0.65));
 		if (count < 2 || !cardWidth || !handWidth) return loose;
 		const room = handWidth - 1.2 * rem();
 		return Math.max(loose, (count * cardWidth - room) / (count - 1) / rem());
 	});
+	let skipFree = $state(false);
+	$effect(() => {
+		void snap.phase;
+		void freeAbilities.length;
+		skipFree = false;
+	});
+	function confirmSupply() {
+		if (freeAbilities.length > 0 && !skipFree) {
+			skipFree = true;
+			return;
+		}
+		send({ type: 'CONFIRM_SUPPLY' });
+	}
+	const hollowSetup = $derived(world.campaign.rules.includes('hollowSetup'));
 	const fanAngle = (index: number) => (index - (handCards.length - 1) / 2) * Math.min(4.5, 22 / handCards.length);
 	const mustDiscard = $derived(owns(seat) && decides.some(decide => decide.d === 'discard' && decide.seat === seat));
 	const playable = $derived(new Set(plays.filter(option => option.seat === seat).map(option => option.card)));
@@ -203,10 +217,17 @@
 				<button onclick={() => send({ type: 'AUTO_SUPPLY' })} data-testid="auto-supply">Spread the rest evenly</button>
 				<button
 					class="primary"
+					class:warn-skip={skipFree}
 					disabled={game.stockpile > 0}
-					onclick={() => send({ type: 'CONFIRM_SUPPLY' })}
-					data-testid="confirm-supply">Infect 9 cities</button
+					onclick={confirmSupply}
+					data-testid="confirm-supply"
 				>
+					{#if skipFree}
+						Skip {world.campaign.freeAbilityUnits} free unit{world.campaign.freeAbilityUnits === 1 ? '' : 's'} &amp; infect
+					{:else}
+						Infect 9 cities
+					{/if}
+				</button>
 			</div>
 		{:else if opening !== null}
 			<div class="setup" data-testid="setup-infect-bar">
@@ -214,6 +235,15 @@
 					{#if opening > 0}
 						<strong>{opening}</strong> Infection card{opening === 1 ? '' : 's'} left to flip. Anyone can click the Infection
 						deck, or press Space.
+						{#if hollowSetup}
+							<span class="hollow-note" class:now={opening <= 3} data-testid="hollow-setup-note">
+								{#if opening <= 3}
+									Next {opening} flip{opening === 1 ? '' : 's'} place Hollow Men
+								{:else}
+									Last 3 flips place Hollow Men
+								{/if}
+							</span>
+						{/if}
 					{:else}
 						The last city is infected
 					{/if}
@@ -447,7 +477,7 @@
 	/* Each way to use a card stands as a tag over it once it rises out of the fan. */
 	.tags {
 		position: absolute;
-		bottom: calc(100% + 3.4rem);
+		bottom: calc(100% + 4.35rem);
 		left: 50%;
 		z-index: 6;
 		display: none;
@@ -561,8 +591,41 @@
 	}
 
 	.free summary {
+		padding: 0.24rem 0.7rem;
+		border: 1px solid var(--warn);
+		border-radius: 999px;
+		background: rgb(227 178 60 / 0.16);
+		color: #fce29a;
+		font-weight: 600;
 		cursor: pointer;
-		color: var(--paper);
+	}
+
+	.free summary:hover {
+		background: rgb(227 178 60 / 0.26);
+	}
+
+	.setup button.warn-skip {
+		border-color: var(--warn);
+		background: var(--warn);
+		color: #1c140a;
+	}
+
+	.hollow-note {
+		display: inline-block;
+		margin-left: 0.5rem;
+		padding: 0.1rem 0.48rem;
+		border: 1px solid rgb(186 154 232 / 0.45);
+		border-radius: 999px;
+		background: rgb(58 44 82 / 0.45);
+		color: #d9c9f0;
+		font-size: 0.78rem;
+		font-weight: 600;
+	}
+
+	.hollow-note.now {
+		border-color: #d97c6e;
+		background: rgb(168 38 28 / 0.38);
+		color: #ffd0c8;
 	}
 
 	.free-list {
@@ -600,7 +663,7 @@
 		background: var(--document);
 		box-shadow: var(--document-shadow);
 		translate: -50% 0;
-		--card-size: 1rem;
+		--card-size: 1.12rem;
 	}
 
 	/* A card not chosen stands back a little; a chosen one lifts and wears a check. */
@@ -666,7 +729,7 @@
 	}
 
 	.hand {
-		--card-size: 0.8rem;
+		--card-size: 1.04rem;
 		display: flex;
 		align-self: stretch;
 		justify-content: center;
@@ -693,7 +756,7 @@
 
 	/* A card pointed at rises out of the fan, mostly straightened and large enough to read. */
 	.slot:hover .lift {
-		transform: translateY(-0.6rem) rotate(calc(var(--angle) * 0.2)) scale(1.3);
+		transform: translateY(-0.65rem) rotate(calc(var(--angle) * 0.15)) scale(1.22);
 	}
 
 	.empty,

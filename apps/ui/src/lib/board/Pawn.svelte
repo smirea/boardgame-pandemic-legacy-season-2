@@ -140,18 +140,30 @@
 					<button
 						class="anchor pick"
 						data-pawn={pawn.id}
+						data-carrier={pawn.carrier ? 'true' : undefined}
 						aria-label={`Pick ${pawn.name}`}
 						title={pawn.name}
 						onclick={onpick}
 						{@attach keepFromCamera}
-						{@attach feedback(pawn.name, () => ({ id: pawn.id, city: pawn.city, pickable: true }))}
+						{@attach feedback(pawn.name, () => ({
+							id: pawn.id,
+							city: pawn.city,
+							pickable: true,
+							carrier: pawn.carrier,
+						}))}
 					></button>
 				{:else}
 					<span
 						class="anchor"
 						data-pawn={pawn.id}
+						data-carrier={pawn.carrier ? 'true' : undefined}
 						aria-hidden="true"
-						{@attach feedback(pawn.name, () => ({ id: pawn.id, city: pawn.city, lit: pawn.lit }))}
+						{@attach feedback(pawn.name, () => ({
+							id: pawn.id,
+							city: pawn.city,
+							lit: pawn.lit,
+							carrier: pawn.carrier,
+						}))}
 					></span>
 				{/if}
 			</HTML>
@@ -164,6 +176,16 @@
 					emissiveIntensity={Math.max(pawn.active ? 0.35 : 0, glow.current * 0.7)}
 				/>
 			</T.Mesh>
+			{#if pawn.carrier}
+				<T.Mesh position.y={0.95} rotation.x={Math.PI / 2}>
+					<T.TorusGeometry args={[0.33, 0.065, 12, 28]} />
+					<T.MeshStandardMaterial color="#4be3b5" emissive="#2fd9a4" emissiveIntensity={0.85} roughness={0.3} />
+				</T.Mesh>
+				<T.Mesh position.y={0.05} rotation.x={-Math.PI / 2}>
+					<T.RingGeometry args={[0.8, 0.96, 36]} />
+					<T.MeshBasicMaterial color="#4be3b5" transparent opacity={0.88} depthWrite={false} />
+				</T.Mesh>
+			{/if}
 			{#if glow.current > 0.01}
 				<T.Mesh
 					position.y={0.04 - (glow.current * 0.9) / (PAWN_SCALE * (1 + glow.current * 0.25))}

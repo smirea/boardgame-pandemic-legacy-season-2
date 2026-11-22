@@ -7,6 +7,7 @@
 		PlayerCard as PlayerCardData,
 	} from '@repo/game';
 	import InfectionCard from '#lib/cards/InfectionCard.svelte';
+	import OccupationIcon from '#lib/occupations/OccupationIcon.svelte';
 	import ActionIcon from './ActionIcon.svelte';
 	import { ACTION_ICON } from './labels.svelte.ts';
 	import PlayerCard from './PlayerCard.svelte';
@@ -16,8 +17,11 @@
 	/** The sticker an unlock that is no card, cube or action comes as. */
 	const STICKER: Partial<Record<BriefedUnlock['t'], string>> = {
 		rule: 'Rule',
+		turningPoint: 'Turning Pt',
+		epidemicCard: 'Epidemic',
 		ability: 'Ability',
 		scar: 'Scar',
+		owedScar: 'Scar',
 		cityImprovement: 'Upgrade',
 		infectionImprovement: 'Upgrade',
 		permanentStructure: 'Permanent',
@@ -25,7 +29,11 @@
 		lab: 'Lab',
 		region: 'Region',
 		route: 'Route',
+		edge: 'Route',
 		haven: 'Haven',
+		infest: 'Infested',
+		forsake: 'Forsaken',
+		destroy: 'Destroyed',
 		frequencyHint: 'Signal',
 		freeAbilityUnits: 'Units',
 		actions: 'Actions',
@@ -94,6 +102,10 @@
 	</span>
 {:else if piece?.t === 'action'}
 	<ActionIcon action={piece.action} {size} />
+{:else if unlock.t === 'job'}
+	<span class="job-medallion" style:--size={size} aria-label={unlock.job}>
+		<OccupationIcon job={unlock.job} />
+	</span>
 {:else if unlock.t === 'rule' && unlock.rule === 'storage'}
 	<span class="sticker storage-pkg" style:--size={size}>Package 6</span>
 {:else if STICKER[unlock.t]}
@@ -150,6 +162,21 @@
 		border-color: #5b3e1a;
 		background: linear-gradient(180deg, #c99f67, #a47b47);
 		color: #241607;
+	}
+
+	.job-medallion {
+		display: inline-grid;
+		flex: none;
+		place-items: center;
+		width: var(--size);
+		height: var(--size);
+		padding: 0.25rem;
+		box-sizing: border-box;
+		border: 1.5px solid var(--paper-ink);
+		border-radius: 50%;
+		background: var(--slip);
+		color: var(--paper-ink);
+		box-shadow: 0 1px 2px rgb(40 26 12 / 0.35);
 	}
 
 	.cubes i {

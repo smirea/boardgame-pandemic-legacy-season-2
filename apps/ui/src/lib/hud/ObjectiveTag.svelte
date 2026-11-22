@@ -21,18 +21,32 @@
 </script>
 
 <script lang="ts">
+	import { pack } from '@repo/game';
+	import type { Campaign } from '@repo/game';
 	import { backOut } from 'svelte/easing';
-	import { scale } from 'svelte/transition';
+	import { fade, scale } from 'svelte/transition';
+	import LegacyCard from '#lib/cards/LegacyCard.svelte';
 
 	type Props = {
 		objective: ObjectiveDef;
+		campaign?: Campaign;
 		progress?: number;
 		done?: boolean;
 		waived?: boolean;
 		onclick?: () => void;
 	};
 
-	let { objective, progress = 0, done = false, waived = false, onclick }: Props = $props();
+	let { objective, campaign, progress = 0, done = false, waived = false, onclick }: Props = $props();
+
+	const planCard = $derived(
+		objective.id === 'plan' && campaign ? (pack.legacyDeck.find(card => card.id === '11-05') ?? null) : null,
+	);
+	let showPlan = $state(false);
+	const sampleNote = $derived(
+		objective.id === 'deliverSample' && campaign?.rules.includes('carrier')
+			? ` ${Math.max(0, pack.numbers.selfInfectDoses - campaign.dosesUsed)} of ${pack.numbers.selfInfectDoses} doses left.`
+			: '',
+	);
 </script>
 
 {#snippet glyph(kind: Glyph)}
@@ -64,38 +78,77 @@
 	</svg>
 {/snippet}
 
-<button
-	class="objective"
-	class:done
-	class:waived
-	class:mandatory={objective.mandatory}
-	disabled={!onclick || done || waived}
-	title={`${objective.name}. ${objective.rule}${objective.mandatory ? ' Mandatory.' : ''}${progress && objective.target > 1 ? ` ${progress} of ${objective.target} done.` : ''}${onclick ? ' Click to mark it impossible this game.' : ''}`}
-	{onclick}
->
-	<span class="face">
-		{@render glyph(GLYPH[objective.id])}
-		<span class="name">{objective.name}</span>
-		{#if done}
-			<svg class="check" viewBox="0 0 16 16" aria-label="done" in:scale={{ duration: 420, easing: backOut }}>
-				<path d="M2.5 8.5 6.2 12 13.5 4" />
-			</svg>
-		{:else if objective.target > 1}
-			<span class="steps" aria-label={`${progress} of ${objective.target}`}>
-				{#each { length: objective.target } as _, step (step)}
-					<i class:on={step < progress}>{@render glyph(GLYPH[objective.id])}</i>
-				{/each}
-			</span>
-		{:else}
-			<span class="box" aria-label="not yet"></span>
+{#snippet tagButton()}
+	<button
+		class="objective"
+		class:done
+		class:waived
+		class:mandatory={objective.mandatory}
+		disabled={!onclick || done || waived}
+		title={`${objective.name}. ${objective.rule}${sampleNote}${objective.mandatory ? ' Mandatory.' : ''}${progress && objective.target > 1 ? ` ${progress} of ${objective.target} done.` : ''}${onclick ? ' Click to mark it impossible this game.' : ''}`}
+		{onclick}
+	>
+		<span class="face">
+			{@render glyph(GLYPH[objective.id])}
+			<span class="name">{objective.name}</span>
+			{#if done}
+				<svg class="check" viewBox="0 0 16 16" aria-label="done" in:scale={{ duration: 420, easing: backOut }}>
+					<path d="M2.5 8.5 6.2 12 13.5 4" />
+				</svg>
+			{:else if objective.target > 1}
+				<span class="steps" aria-label={`${progress} of ${objective.target}`}>
+					{#each { length: objective.target } as _, step (step)}
+						<i class:on={step < progress}>{@render glyph(GLYPH[objective.id])}</i>
+					{/each}
+				</span>
+			{:else}
+				<span class="box" aria-label="not yet"></span>
+			{/if}
+		</span>
+		{#if objective.mandatory}
+			<span class="must">mandatory</span>
+		{/if}
+	</button>
+{/snippet}
+
+{#if planCard && campaign}
+	<span
+		class="tag-wrap"
+		role="group"
+		aria-label={objective.name}
+		onpointerenter={() => (showPlan = true)}
+		onpointerleave={() => (showPlan = false)}
+		onfocusin={() => (showPlan = true)}
+		onfocusout={() => (showPlan = false)}
+	>
+		{@render tagButton()}
+		{#if showPlan}
+			<div class="plan-pop" role="tooltip" data-testid="plan-card-preview" transition:fade={{ duration: 140 }}>
+				<LegacyCard card={planCard} side="b" size="full" {campaign} />
+			</div>
 		{/if}
 	</span>
-	{#if objective.mandatory}
-		<span class="must">mandatory</span>
-	{/if}
-</button>
+{:else}
+	{@render tagButton()}
+{/if}
 
 <style>
+	.tag-wrap {
+		position: relative;
+		display: inline-flex;
+		height: 100%;
+	}
+
+	.plan-pop {
+		position: absolute;
+		top: calc(100% + 0.5rem);
+		left: 50%;
+		z-index: 65;
+		translate: -50% 0;
+		white-space: normal;
+		pointer-events: none;
+	}
+
 	/* Each objective is a paper tag: its symbol, its name, then its track. A finished one turns green and gets a check. */
 	.objective {
 		display: inline-flex;

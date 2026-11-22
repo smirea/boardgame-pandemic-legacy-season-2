@@ -1,11 +1,26 @@
-import { isForsaken, pack } from '@repo/game';
+import { breakthrough, isForsaken, LABS, pack } from '@repo/game';
 import type { CityId, EdgeDef, Insights, ReconBox, SeatId, World } from '@repo/game';
 import { travelOf } from '#lib/board/travel.ts';
-import type { BoardMarks, BoardView, CityView, Fx } from '#lib/board/types.ts';
+import type { BoardMarks, BoardView, CityView, Fx, LabInfo } from '#lib/board/types.ts';
 import { reconciler } from '#lib/reconcile.ts';
 import type { SessionView } from '#lib/session/session.svelte.ts';
 import type { Lag } from './infectionShow.svelte.ts';
 import { cityName, SEAT_COLORS, seatName } from './labels.svelte.ts';
+
+const LAB_META: Record<string, { id?: keyof typeof LABS; name: string; effect: string | null }> = {
+	[LABS.opal]: { id: 'opal', name: 'Opal Lab', effect: 'Make Supplies at a haven or supply center takes +1 cube.' },
+	[LABS.jade]: {
+		id: 'jade',
+		name: 'Jade Lab',
+		effect: 'Epidemics remove only 1 supply cube from the city they strike.',
+	},
+	[LABS.topaz]: {
+		id: 'topaz',
+		name: 'Topaz Lab',
+		effect: 'Discard a matching City card to prevent losing a cube to infection.',
+	},
+	'lake-baikal': { name: 'Pearl Lab', effect: null },
+};
 
 /** What the board is drawn from. Each is read where it is used, so a part of the board follows only what it shows. */
 export type BoardSource = {
@@ -66,6 +81,23 @@ export function createBoardView(source: BoardSource): BoardView {
 					const record = campaign.locations[city.id]!;
 					const location = game?.locations[city.id];
 					const held = lag.cities[city.id];
+					const labMeta = record.lab ? LAB_META[city.id] : undefined;
+					const labActive = labMeta?.id ? breakthrough(campaign, labMeta.id) : false;
+					const labInfo: LabInfo | null = record.lab
+						? {
+								name: labMeta?.name ?? 'Lab',
+								effect: labActive ? (labMeta?.effect ?? null) : null,
+								active: labActive,
+								...(city.id === 'lake-baikal' && campaign.rules.includes('carrier')
+									? {
+											doses: {
+												left: Math.max(0, pack.numbers.selfInfectDoses - campaign.dosesUsed),
+												total: pack.numbers.selfInfectDoses,
+											},
+										}
+									: {}),
+							}
+						: null;
 					return [
 						city.id,
 						{
@@ -89,6 +121,7 @@ export function createBoardView(source: BoardSource): BoardView {
 							infested: record.infested,
 							forsaken: isForsaken(campaign, city.id),
 							lab: record.lab,
+							labInfo,
 							highlight: selected === city.id ? 'selected' : targets.has(city.id) ? 'target' : null,
 							infection:
 								info && city.kind !== 'haven'
@@ -157,6 +190,7 @@ export function createBoardView(source: BoardSource): BoardView {
 				lit: source.litPawn(seat),
 				pickable: source.pickablePawn(seat),
 				carried: game!.players[seat]!.supplies,
+				carrier: Boolean(campaign.characters[game!.players[seat]!.character]?.carrier),
 				...(lastMoves[seat] ?? { travel: 'land' as const, course: null }),
 			})),
 		),
@@ -196,6 +230,7 @@ export function createBoardView(source: BoardSource): BoardView {
 	);
 
 	const stockpile = $derived(game ? game.stockpile - source.lag.stockpile : null);
+	const reserve = $derived(game ? game.reserve : null);
 
 	return {
 		get cities() {
@@ -215,6 +250,9 @@ export function createBoardView(source: BoardSource): BoardView {
 		},
 		get stockpile() {
 			return stockpile;
+		},
+		get reserve() {
+			return reserve;
 		},
 		get cursors() {
 			return cursors;

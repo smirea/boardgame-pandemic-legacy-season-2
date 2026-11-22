@@ -212,7 +212,7 @@ export function reconBoxes(world: World, phase: Phase): ReconBox[] {
 					? pack.regions.find(region => region.id === regions[0])!.name
 					: route.opens
 						? sealDef(route.opens).name
-						: 'The Plan',
+						: `The Plan · ${route.color[0]!.toUpperCase()}${route.color.slice(1)}`,
 				reveals: pack.cities
 					.filter(city => (regions.includes(city.region) && !city.lost) || havens.has(city.id))
 					.filter(city => !campaign.locations[city.id]?.revealed)

@@ -221,6 +221,8 @@ const scenarios: Scenario[] = [
 				'infection-deck-count',
 				'storage-deck',
 				'frequency-scanner',
+				'hollow-supply',
+				'campaign-status',
 				'objectives',
 			]) {
 				const point = await center(`[data-testid=${id}]`).catch(() => null);

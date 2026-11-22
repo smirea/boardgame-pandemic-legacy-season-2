@@ -236,7 +236,7 @@
 	};
 	const hint = $derived.by(() => {
 		if (!hovered) return null;
-		if (!hovered.city) return view.stockpile === null ? null : stockpileHint(view.stockpile);
+		if (!hovered.city) return view.stockpile === null ? null : stockpileHint(view.stockpile, view.reserve);
 		return view.cities[hovered.city] ? partHint(hovered.part, view.cities[hovered.city]!) : null;
 	});
 	// The slip takes the colour of the city it describes, as the city's player card does, and the stockpile's is

@@ -50,28 +50,57 @@
 				if (unlock.now?.[0] === 'hand') return { cls: 'playerDeck', dest: ['hand', 'playerDeck', 'box'] };
 				if (unlock.mode === 'rationed') return { cls: 'box', dest: ['box'] };
 				return { cls: 'playerDeck', dest: ['playerDeck', 'box'] };
+			case 'epidemicCard':
+				return { cls: 'playerDeck', dest: ['playerDeck', 'box'] };
 			case 'lab':
 			case 'region':
 			case 'route':
+			case 'edge':
 			case 'haven':
 			case 'stockpileBonus':
+			case 'destroy':
+			case 'infest':
+			case 'forsake':
 				return { cls: 'map', dest: ['map'] };
 			case 'action':
 			case 'actions':
 				return { cls: 'mechanic', dest: ['actions', 'box'] };
 			case 'frequencyHint':
 				return { cls: 'mechanic', dest: ['scanner', 'box'] };
+			case 'freeAbilityUnits':
+				return { cls: 'mechanic', dest: ['hand', 'box'] };
+			case 'turningPoint':
+				return { cls: 'mechanic', dest: ['campaignStatus', 'box'] };
+			case 'owedScar':
+				return { cls: 'mechanic', dest: ['box'] };
 			case 'rule':
 				if (unlock.rule === 'storage' || unlock.rule === 'epidemicFromStorage')
 					return { cls: 'mechanic', dest: ['storage', 'box'] };
-				return { cls: 'mechanic', dest: ['box'] };
+				if (unlock.rule === 'hollowSetup') return { cls: 'mechanic', dest: ['hollow', 'infectionDeck', 'box'] };
+				return { cls: 'mechanic', dest: ['campaignStatus', 'box'] };
 			default:
 				return { cls: 'box', dest: ['box'] };
 		}
 	}
 
 	function cardStow(card: LegacyCardDef): { cls: StowClass; put: string } {
-		return card.kind === 'scanner' ? { cls: 'mechanic', put: 'scanner box' } : { cls: 'trash', put: 'trash' };
+		switch (card.kind) {
+			case 'scanner':
+				return { cls: 'mechanic', put: 'scanner box' };
+			case 'plan':
+			case 'objective':
+				return { cls: 'mechanic', put: 'objectives box' };
+			case 'turningPoint':
+				return { cls: 'mechanic', put: 'campaignStatus box' };
+			case 'epidemic':
+				return { cls: 'playerDeck', put: 'playerDeck box' };
+			case 'event':
+				return { cls: 'box', put: 'playerDeck box' };
+			case 'archive':
+				return { cls: 'box', put: 'legacyDeck box' };
+			default:
+				return { cls: 'trash', put: 'trash' };
+		}
 	}
 
 	const steps = $derived(openings(briefing));
