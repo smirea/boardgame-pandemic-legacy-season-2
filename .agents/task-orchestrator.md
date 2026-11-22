@@ -41,4 +41,4 @@ Repo config for the global `task-orchestrator` skill (`~/code/ai-files/skills/ta
 
 ## After the merge
 
-- Nothing deploys on merge. The signal Worker in `apps/signal` deploys by hand with `wrangler deploy`: a change to it ends with `needs_input` asking Stefan to deploy, unless he said otherwise.
+- A merge deploys: CI's `deploy` job ships `apps/signal` (the signal Worker and the built game at https://pandemic-legacy-s2.stf.lol) on every push to master once the checks pass. Watch that run after your merge and fix it if it fails. A change that needs a new Worker secret also needs `bun run secrets:push`.

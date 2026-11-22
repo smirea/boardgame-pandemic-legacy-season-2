@@ -3,6 +3,7 @@
 	import {
 		actionMenu,
 		cardTargets,
+		cityDef,
 		insights,
 		legalDecides,
 		legalPlays,
@@ -57,6 +58,7 @@
 	import TopBar from './TopBar.svelte';
 	import Upkeep from './Upkeep.svelte';
 	import RichText from './RichText.svelte';
+	import type { CityCardCopies } from './PlayerCard.svelte';
 	import { provideViewState } from './viewState.ts';
 	import type { GameUi } from '#lib/studio/scene.ts';
 
@@ -500,6 +502,36 @@
 	let hoveredCards = $state<CardId[]>([]);
 	setContext('card-hover', (cards: CardId | CardId[] | null) => {
 		hoveredCards = cards === null ? [] : [cards].flat();
+	});
+
+	// City cards read live copy state (in hand/deck, discarded, or out of play) without prop drilling.
+	const campaignCityCopies = $derived.by(() => {
+		const stored = new Set(campaign.stored.player);
+		const counts: Partial<Record<CityId, number>> = {};
+		for (const card of Object.values(campaign.playerCards)) {
+			if (card.kind === 'city' && !stored.has(card.id)) counts[card.city] = (counts[card.city] ?? 0) + 1;
+		}
+		return counts;
+	});
+	const deckBuilt = $derived(
+		game !== null &&
+			info !== null &&
+			(info.playerDeck.cards > 0 ||
+				game.playerDiscard.length > 0 ||
+				game.seats.some(seat => game.players[seat]!.hand.length > 0)),
+	);
+	setContext('card-copies', (city: CityId): CityCardCopies => {
+		const total = cityDef(city).playerCards;
+		if (deckBuilt && info) {
+			const at = info.playerDeck.cities[city];
+			if (at || gridSet.has(city)) {
+				const inPlay = (at?.inDeck ?? 0) + (at?.inHands ?? 0);
+				const discarded = at?.discarded ?? 0;
+				return { live: inPlay, discarded, trashed: Math.max(0, total - inPlay - discarded) };
+			}
+		}
+		const inPlay = campaignCityCopies[city] ?? 0;
+		return { live: inPlay, discarded: 0, trashed: Math.max(0, total - inPlay) };
 	});
 	const hoveredTargets = $derived.by(() => {
 		const targets = hoveredCards.map(card => cardTargets(world, snap.phase, card));

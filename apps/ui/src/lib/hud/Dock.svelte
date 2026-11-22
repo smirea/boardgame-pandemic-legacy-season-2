@@ -499,6 +499,10 @@
 		display: flex;
 	}
 
+	.slot:has(:global([data-floating-upgrade])) .tags {
+		bottom: calc(100% + 9.1rem);
+	}
+
 	.tags button {
 		display: flex;
 		align-items: center;

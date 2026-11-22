@@ -142,13 +142,13 @@
 
 	function playerControlsLabel(card: PlayerCardData): string {
 		if (card.kind === 'city' && card.search.length > 0) return 'Search';
-		if (card.kind === 'produce') return 'System-wide boxes';
+		if (card.kind === 'produce') return 'System-wide uses';
 		return 'Card state';
 	}
 
 	function playerControls(card: PlayerCardData): CardControl[] {
 		if (card.kind === 'city' && card.search.length > 0) {
-			return card.search.map((box, index) => {
+			return card.search.map(box => {
 				const single = card.search.length === 1;
 				const label = single
 					? box.scratched
@@ -175,7 +175,7 @@
 		if (card.kind === 'produce') {
 			return [1, 2, 3].map(count => ({
 				id: `boxes-${count}`,
-				label: `${count} box${count === 1 ? '' : 'es'}`,
+				label: `${count} use${count === 1 ? '' : 's'}`,
 				active: card.boxesLeft === count,
 				onclick: () => {
 					card.boxesLeft = count;
@@ -289,7 +289,7 @@
 	</p>
 
 	<h2>Player cards</h2>
-	<section data-testid="player-cards">
+	<section class="player-grid" data-testid="player-cards">
 		{#each shownPlayerCards as card (card.id)}
 			<DebugCardStage
 				id={card.id}
@@ -460,5 +460,13 @@
 		display: flex;
 		flex-wrap: wrap;
 		gap: 0.8rem;
+	}
+
+	.player-grid {
+		align-items: flex-end;
+	}
+
+	.player-grid :global(.card[data-floating-upgrade]) {
+		margin-top: 3.8em;
 	}
 </style>

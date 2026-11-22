@@ -813,9 +813,8 @@
 		flex-direction: column;
 		gap: 0.28em;
 		margin: auto 0 0;
-		padding: 0.55em 0.6em;
-		background: rgb(255 252 246 / 0.55);
-		box-shadow: inset 0 0 0 1px rgb(42 32 23 / 0.2);
+		padding-top: 0.45em;
+		border-top: 1px solid rgb(42 32 23 / 0.22);
 	}
 
 	.coords div {
@@ -836,9 +835,7 @@
 	}
 
 	.panel {
-		padding: 0.55em 0.65em;
-		border-radius: 0.35em;
-		background: rgb(0 0 0 / 0.22);
+		padding: 0;
 	}
 
 	.panel:has(.wells) {
