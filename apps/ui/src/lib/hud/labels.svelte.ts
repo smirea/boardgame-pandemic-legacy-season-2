@@ -269,11 +269,11 @@ export function actionDetail(world: World, action: Action): Rich {
 			];
 		}
 		case 'produce': {
-			// Two of these in hand are two choices only by the boxes left on each, and System-Wide scratches one.
+			// Two of these in hand are two choices only by the uses left on each, and System-Wide spends one.
 			const card = world.campaign.playerCards[action.card];
-			const boxes = card?.kind === 'produce' ? card.boxesLeft : 0;
+			const uses = card?.kind === 'produce' ? card.boxesLeft : 0;
 			return [
-				`${action.mode === 'local' ? 'Here only' : 'Every haven and supply center'} · ${boxes} box${boxes === 1 ? '' : 'es'} left`,
+				`${action.mode === 'local' ? 'Here only' : 'Every haven and supply center'} · ${uses} use${uses === 1 ? '' : 's'} left`,
 			];
 		}
 		case 'deliver':

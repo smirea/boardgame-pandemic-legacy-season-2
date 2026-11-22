@@ -25,13 +25,26 @@
 {:else if glyph === 'scar'}
 	<b class="glyph scar" aria-hidden="true">⚡</b>
 {:else if glyph === 'package'}
-	<b class="glyph package" aria-hidden="true">▣</b>
+	<b class="glyph package" aria-hidden="true">
+		<svg class="shape-svg" viewBox="0 0 16 16">
+			<rect x="2" y="2" width="12" height="12" rx="1.6" fill="currentColor" />
+			<path d="M2.5 5.5h11M5.5 8.5h5" stroke="rgb(32 20 8 / 0.72)" stroke-width="1.3" stroke-linecap="round" />
+		</svg>
+	</b>
 {:else if glyph === 'door'}
 	<b class="glyph door" aria-hidden="true">▤</b>
 {:else if glyph === 'lab'}
-	<b class="glyph lab" aria-hidden="true">⬠</b>
+	<b class="glyph lab" aria-hidden="true">
+		<svg class="shape-svg" viewBox="0 0 16 16">
+			<path d="M8 1.4 14.3 6l-2.4 7.5H4.1L1.7 6Z" fill="currentColor" />
+		</svg>
+	</b>
 {:else if glyph === 'haven'}
-	<b class="glyph haven" aria-hidden="true">⬡</b>
+	<b class="glyph haven" aria-hidden="true">
+		<svg class="shape-svg" viewBox="0 0 16 16">
+			<path d="M8 1.2 13.9 4.6v6.8L8 14.8 2.1 11.4V4.6Z" fill="currentColor" />
+		</svg>
+	</b>
 {:else}
 	<b class="glyph {glyph}" style:--band={color} aria-hidden="true"></b>
 {/if}
@@ -135,6 +148,7 @@
 		height: 1.05em;
 		border-radius: 2px;
 		background: #b08628;
+		box-shadow: inset 0 0 0 1px rgb(28 20 8 / 0.45);
 		color: #fff6e0;
 		font-size: 0.78em;
 	}
@@ -149,9 +163,19 @@
 		font-size: 0.92em;
 	}
 
+	.package,
+	.lab,
+	.haven {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 0.84em;
+		height: 0.84em;
+		vertical-align: -0.1em;
+	}
+
 	.package {
-		color: #a97a46;
-		font-size: 0.95em;
+		color: #b48248;
 	}
 
 	.door {
@@ -161,11 +185,33 @@
 
 	.lab {
 		color: #d9a72e;
-		font-size: 0.92em;
 	}
 
 	.haven {
-		color: #3f9169;
-		font-size: 0.95em;
+		color: #3da87e;
+	}
+
+	.shape-svg {
+		display: block;
+		width: 100%;
+		height: 100%;
+	}
+
+	.haven .shape-svg path {
+		stroke: rgb(14 40 30 / 0.58);
+		stroke-width: 1.1;
+		paint-order: stroke;
+	}
+
+	.lab .shape-svg path {
+		stroke: rgb(62 42 8 / 0.55);
+		stroke-width: 1.1;
+		paint-order: stroke;
+	}
+
+	.package .shape-svg rect {
+		stroke: rgb(32 20 8 / 0.65);
+		stroke-width: 1.1;
+		paint-order: stroke;
 	}
 </style>

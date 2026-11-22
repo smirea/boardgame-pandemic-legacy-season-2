@@ -7,6 +7,7 @@
 		OBJECTIVE_PRINT,
 		RECKONING_ROWS,
 		SCANNER_SLOTS,
+		eventArtUrl,
 		eventPlainText,
 	} from '#lib/cards/playerPrint.ts';
 	import { fitText } from '#lib/cards/fit.ts';
@@ -79,7 +80,6 @@
 			class:has-track={Boolean(objectivePrint.trackMax)}
 			class:has-details={Boolean(objectivePrint.details)}
 		>
-			<div class="obj-frame" aria-hidden="true"></div>
 			<div class="obj-head">
 				<div class="obj-words">
 					<span class="obj-kicker">{objectivePrint.mandatory ? 'MANDATORY OBJECTIVE' : 'OBJECTIVE'}</span>
@@ -137,21 +137,21 @@
 			{/if}
 			<span class="code">{code}</span>
 		</div>
-	{:else if card.kind === 'event' && eventPrint}
+	{:else if card.kind === 'event' && eventPrint && eventId}
 		<div class="inner event-face">
-			<header class="ev-banner">{eventPrint.banner}</header>
-			<div class="ev-screen">
-				<h3 {@attach fitText(card.title, { max: 1.4, min: 0.85, across: true })}>{card.title}</h3>
-				<div class="ev-rule-bar" aria-hidden="true"></div>
-			</div>
-			<div class="ev-panel">
-				<div class="ev-rules" {@attach fitText(eventFitKey, { max: 1.04, min: 0.52 })}>
+			<header class="ev-top">
+				<span class="ev-kicker">{eventPrint.banner}</span>
+				<h3 {@attach fitText(card.title, { max: 1.4, min: 0.8, across: true })}>{card.title}</h3>
+			</header>
+			<div class="ev-body" class:has-leaf={Boolean(eventPrint.timing)}>
+				<img class="ev-art" src={eventArtUrl(eventId)} alt="" aria-hidden="true" />
+				<div class="ev-rules" {@attach fitText(eventFitKey, { max: 1.12, min: 0.56 })}>
 					{#each eventPrint.rules as line, idx (idx)}
 						<p><RichText text={line} /></p>
 					{/each}
 				</div>
 				{#if eventPrint.timing}
-					<p class="ev-timing">{eventPrint.timing}</p>
+					<span class="ev-leaf">{eventPrint.timing}</span>
 				{/if}
 			</div>
 			<span class="code">{code}</span>
@@ -275,7 +275,14 @@
 				<h3>EPIDEMIC</h3>
 				<div class="ep-scale" aria-hidden="true"></div>
 			</div>
-			<div class="ep-body" {@attach fitText(epidemicFitKey, { max: 0.96, min: 0.58 })}>
+			<div class="ep-body" {@attach fitText(epidemicFitKey, { max: 1.02, min: 0.58 })}>
+				<svg class="ep-art" viewBox="0 0 24 24" aria-hidden="true">
+					<circle cx="12" cy="12" r="2.2" fill="currentColor" />
+					<path
+						d="M12 4.2a4.3 4.3 0 0 0-3.7 6.5l1.5-.9a2.6 2.6 0 1 1 4.4 0l1.5.9A4.3 4.3 0 0 0 12 4.2Zm-6.8 11.7a4.3 4.3 0 0 0 7.4-.1l-1.5-.9a2.6 2.6 0 1 1-2.2-3.8V9.4a4.3 4.3 0 0 0-3.7 6.5Zm13.6 0a4.3 4.3 0 0 0-3.7-6.5v1.7a2.6 2.6 0 1 1-2.2 3.8l-1.5.9a4.3 4.3 0 0 0 7.4.1Z"
+						fill="currentColor"
+					/>
+				</svg>
 				<ol class="ep-steps">
 					{#each EPIDEMIC_STEPS as step (step.heading)}
 						<li>
@@ -362,20 +369,12 @@
 	.obj-face {
 		justify-content: space-between;
 		gap: 0.35em;
-		padding: 0.95em 1.15em 1.1em;
+		padding: 0.9em 1.05em 1.05em;
 		background:
 			radial-gradient(circle at 86% 18%, rgb(255 255 255 / 0.06), transparent 52%),
 			linear-gradient(155deg, #2d2b29, #181716);
 		color: #f3ede0;
 		border: 2px solid rgb(235 227 210 / 0.42);
-	}
-
-	.obj-frame {
-		position: absolute;
-		inset: 0.42em;
-		border: 1.5px solid rgb(235 227 210 / 0.32);
-		border-radius: 4px;
-		pointer-events: none;
 	}
 
 	.obj-head {
@@ -555,95 +554,106 @@
 	}
 
 	/* === Side B: Rationed Event (Portrait) === */
-	.event-face {
-		gap: 0.48em;
-		padding: 0.7em 0.8em 0.85em;
+	.special .inner.event-face {
+		gap: 0;
+		padding: 0;
 		background:
-			radial-gradient(ellipse at 20% 0%, rgb(255 245 200 / 0.25), transparent 55%),
-			linear-gradient(170deg, #d7aa2a, #ab7d15);
-		color: #211910;
+			radial-gradient(ellipse at 18% 12%, rgb(255 247 210 / 0.28), transparent 58%),
+			linear-gradient(170deg, #e2ba46, #bc8e1d);
+		color: #181209;
 		border: 2px solid #8a630d;
 	}
 
-	.ev-banner {
-		color: #fffdf6;
-		font-size: 0.98em;
+	.ev-top {
+		display: flex;
+		flex-direction: column;
+		gap: 0.14em;
+		padding: 0.62em 0.85em 0.6em;
+		background: linear-gradient(165deg, #1b221c, #101511);
+		color: #a6e39d;
+		flex: none;
+	}
+
+	.ev-kicker {
+		font-size: 0.72em;
 		font-weight: 800;
 		font-style: italic;
 		letter-spacing: 0.06em;
 		text-transform: uppercase;
-		text-shadow: 0 1px 2px rgb(30 20 0 / 0.45);
+		color: #f4d678;
 	}
 
-	.ev-screen {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		gap: 0.35em;
-		min-height: 3.6em;
-		padding: 0.55em 0.65em;
-		border: 1.5px solid #6e5210;
-		border-radius: 4px;
-		background: linear-gradient(165deg, #1b221c, #111612);
-		color: #8fd98e;
-		text-align: center;
-	}
-
-	.ev-screen h3 {
+	.ev-top h3 {
 		margin: 0;
 		width: 100%;
 		font-family: var(--font-display);
 		font-weight: 400;
-		letter-spacing: 0.04em;
+		letter-spacing: 0.03em;
 		text-transform: uppercase;
-		line-height: 1.08;
+		line-height: 1.02;
 		color: #a6e39d;
 	}
 
-	.ev-rule-bar {
-		width: 45%;
-		height: 2px;
-		background: rgb(166 227 157 / 0.35);
-		border-radius: 1px;
-	}
-
-	.ev-panel {
+	.ev-body {
+		position: relative;
 		flex: 1;
 		min-height: 0;
 		display: flex;
 		flex-direction: column;
-		justify-content: space-between;
-		gap: 0.45em;
-		padding: 0.65em 0.7em 0.6em;
-		border: 1px solid rgb(60 44 10 / 0.25);
-		border-radius: 4px;
-		background: linear-gradient(175deg, #fbf6e8, #f2e8cf);
-		color: #1e1812;
+		overflow: hidden;
+	}
+
+	.ev-art {
+		position: absolute;
+		right: -11%;
+		bottom: -11%;
+		z-index: 0;
+		width: 82%;
+		height: 82%;
+		object-fit: contain;
+		object-position: right bottom;
+		opacity: 0.21;
+		mix-blend-mode: multiply;
+		pointer-events: none;
+		user-select: none;
 	}
 
 	.ev-rules {
+		position: relative;
+		z-index: 1;
 		flex: 1;
 		min-height: 0;
 		display: flex;
 		flex-direction: column;
-		gap: 0.5em;
+		gap: 0.55em;
+		padding: 0.85em 0.9em 0.9em;
 		overflow: hidden;
+		font-weight: 500;
 		line-height: 1.32;
+	}
+
+	.ev-body.has-leaf .ev-rules {
+		padding-bottom: 2.3em;
 	}
 
 	.ev-rules p {
 		margin: 0;
 	}
 
-	.ev-timing {
-		margin: 0;
-		padding-right: 3.2em;
-		color: #b83024;
-		font-size: 0.78em;
-		font-style: italic;
-		font-weight: 600;
-		line-height: 1.22;
+	.ev-leaf {
+		position: absolute;
+		left: 0;
+		bottom: 0;
+		z-index: 2;
+		padding: 0.34em 0.9em 0.3em 0.75em;
+		border-radius: 0 0.95em 0 0;
+		background: #171d18;
+		color: #f3e6c2;
+		font-size: 0.74em;
+		font-weight: 700;
+		letter-spacing: 0.02em;
+		line-height: 1.1;
+		white-space: nowrap;
 	}
 
 	/* === Side B: Frequency Scanner (Landscape) === */
@@ -906,21 +916,21 @@
 	}
 
 	/* === Side B: Final Reckoning (Landscape) === */
-	.reckoning-face {
+	.special .inner.reckoning-face {
 		gap: 0.28em;
-		padding: 0.55em 0.82em 0.62em;
+		padding: 0 0.82em 0.62em;
 		background: linear-gradient(165deg, #f5eedf, #e8dcc2);
 		color: #241c15;
 		border: 2px solid #8a785d;
 	}
 
 	.reck-banner {
-		padding: 0.18em 0.55em;
-		border-radius: 3px;
+		margin: 0 -0.82em 0.1em;
+		padding: 0.34em 0.82em 0.28em;
 		background: #1b1815;
 		color: #e44a38;
 		font-family: var(--font-display);
-		font-size: 1.22em;
+		font-size: 1.24em;
 		font-style: italic;
 		letter-spacing: 0.05em;
 		text-align: center;
@@ -978,32 +988,31 @@
 	}
 
 	/* === Side B: Epidemic (Portrait) === */
-	.epidemic-face {
-		gap: 0.65em;
-		padding: 0.75em 0.85em 1.15em;
+	.special .inner.epidemic-face {
+		gap: 0;
+		padding: 0;
 		background:
 			radial-gradient(circle at 50% 45%, rgb(130 210 95 / 0.14), transparent 65%),
 			linear-gradient(168deg, #215729, #123318);
 		color: #f4eecc;
-		border: 2.5px solid #162317;
-		box-shadow: inset 0 0 0 2px rgb(244 238 204 / 0.18);
+		border: 2px solid #162317;
 	}
 
 	.ep-head {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		padding: 0.35em 0.5em 0.25em;
-		border: 1.5px solid #f4eecc;
-		border-radius: 3px;
+		padding: 0.52em 0.6em 0.36em;
+		border-bottom: 1.5px solid rgb(244 238 204 / 0.45);
 		background: linear-gradient(180deg, #d86d24, #ecc63b);
 		color: #8f1d14;
+		flex: none;
 	}
 
 	.ep-head h3 {
 		margin: 0;
 		font-family: var(--font-display);
-		font-size: 1.78em;
+		font-size: 1.82em;
 		font-weight: 700;
 		letter-spacing: 0.06em;
 		line-height: 1;
@@ -1012,21 +1021,37 @@
 	.ep-scale {
 		width: 92%;
 		height: 0.32em;
-		margin-top: 0.12em;
+		margin-top: 0.14em;
 		border-bottom: 1.5px solid #6b2212;
 		background: repeating-linear-gradient(90deg, #6b2212 0 1px, transparent 1px 0.45em);
 		opacity: 0.65;
 	}
 
 	.ep-body {
+		position: relative;
 		flex: 1;
 		min-height: 0;
+		padding: 0.8em 0.9em 1.35em;
 		overflow: hidden;
 		display: flex;
 		flex-direction: column;
 	}
 
+	.ep-art {
+		position: absolute;
+		right: -14%;
+		bottom: -14%;
+		z-index: 0;
+		width: 72%;
+		height: 72%;
+		color: #0a1f0d;
+		opacity: 0.32;
+		pointer-events: none;
+	}
+
 	.ep-steps {
+		position: relative;
+		z-index: 1;
 		display: flex;
 		flex-direction: column;
 		gap: 0.72em;
