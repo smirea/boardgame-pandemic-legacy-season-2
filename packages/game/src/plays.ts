@@ -544,7 +544,8 @@ export type Decide =
 	| { d: 'replace'; character: CharacterId | null }
 	| { d: 'retrieve'; card: CardId }
 	| { d: 'freeEdge'; to: CityId }
-	| { d: 'removeHollow'; cities: CityId[] }
+	/** One Hollow Man at a time: the choice stays open while some of its amount is left, until it is skipped. */
+	| { d: 'removeHollow'; city: CityId }
 	| { d: 'quarantineCard'; card: CardId }
 	| { d: 'giveCard'; card: CardId; to: SeatId }
 	| { d: 'shield'; seat: SeatId; card: CardId }
@@ -626,13 +627,8 @@ export function checkDecide(world: World, decide: Decide): string | null {
 				(pending as { ignoreRedLines: boolean }).ignoreRedLines,
 			);
 		}
-		case 'removeHollow': {
-			const amount = (pending as { amount: number }).amount;
-			const counts = new Map<CityId, number>();
-			for (const city of decide.cities) counts.set(city, (counts.get(city) ?? 0) + 1);
-			const valid = [...counts].every(([city, count]) => (game.locations[city]?.hollow ?? 0) >= count);
-			return decide.cities.length >= 1 && decide.cities.length <= amount && valid ? ok : 'Pick Hollow Men on the board';
-		}
+		case 'removeHollow':
+			return (game.locations[decide.city]?.hollow ?? 0) > 0 ? ok : 'Pick a Hollow Man on the board';
 		case 'quarantineCard':
 			return game.infectionDiscard.includes(decide.card) ? ok : 'Pick a card from the Infection discard pile';
 		case 'giveCard': {
@@ -667,6 +663,14 @@ export function applyDecide(world: World, decide: Decide) {
 			pending.count -= decide.cards.length;
 			if (pending.count <= 0 || player(game, decide.seat).hand.length === 0) game.pending.shift();
 		}
+		return;
+	}
+	if (decide.d === 'removeHollow' && pending?.t === 'removeHollow') {
+		game.locations[decide.city]!.hollow -= 1;
+		game.pieces.hollow += 1;
+		log(game, { t: 'note', text: `A Hollow Man was removed from ${cityDef(decide.city).name}` });
+		pending.amount -= 1;
+		if (pending.amount <= 0) game.pending.shift();
 		return;
 	}
 	game.pending.shift();
@@ -724,13 +728,6 @@ export function applyDecide(world: World, decide: Decide) {
 		case 'freeEdge':
 			addEdge(world, player(game, seat).location, decide.to, (pending as { kind: 'land' | 'sea' }).kind, true);
 			return;
-		case 'removeHollow':
-			for (const city of decide.cities) {
-				game.locations[city]!.hollow -= 1;
-				game.pieces.hollow += 1;
-				log(game, { t: 'note', text: `A Hollow Man was removed from ${cityDef(city).name}` });
-			}
-			return;
 		case 'giveCard': {
 			player(game, seat).hand = player(game, seat).hand.filter(card => card !== decide.card);
 			player(game, decide.to).hand.push(decide.card);
@@ -782,6 +779,8 @@ export function autoResolve(world: World) {
 			game.pending.shift();
 		else if (pending.t === 'discard' && player(game, pending.seat).hand.length === 0) game.pending.shift();
 		else if (pending.t === 'giveCard' && player(game, pending.seat).hand.length === 0) game.pending.shift();
+		else if (pending.t === 'removeHollow' && !Object.values(game.locations).some(location => location.hollow > 0))
+			game.pending.shift();
 		else return;
 	}
 }

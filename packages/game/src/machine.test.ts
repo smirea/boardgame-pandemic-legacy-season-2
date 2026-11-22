@@ -22,7 +22,7 @@ import { edgeKey } from './ids';
 import type { CardId, CityId, PlayerId } from './ids';
 import { createGameActor, parseSave, phaseOf, reject } from './machine';
 import type { Command, GameActor, Phase, Save } from './machine';
-import { legalActions, legalPlays } from './options';
+import { legalActions, legalDecides, legalPlays } from './options';
 import { applyUnlock, closeGame, newCampaign, openSeal, readLegacy, score } from './legacy';
 import type { Purchase } from './legacy';
 import { newTable } from './table';
@@ -423,13 +423,6 @@ describe('exploring', () => {
 		send(aside, { type: 'DECIDE', decide: { d: 'quarantineCard', card: target } });
 		expect(gameOf(aside).gameEndArea).toEqual([target]);
 
-		const hunt = searching(
-			{ t: 'removeHollow', amount: 2 },
-			world => void (world.game!.locations[city('cairo')]!.hollow = 2),
-		);
-		send(hunt, { type: 'DECIDE', decide: { d: 'removeHollow', cities: [city('cairo'), city('cairo')] } });
-		expect(gameOf(hunt).locations[city('cairo')]!.hollow).toBe(0);
-
 		const route = searching({ t: 'freeEdge', kind: 'land' });
 		expect(gameOf(route).pending[0]).toMatchObject({ t: 'freeEdge' });
 		const to = pack.candidateEdges
@@ -443,6 +436,28 @@ describe('exploring', () => {
 			.find(other => other && !hasEdge(worldOf(route).campaign, city('denver'), other))!;
 		send(route, { type: 'DECIDE', decide: { d: 'freeEdge', to } });
 		expect(hasEdge(worldOf(route).campaign, city('denver'), to)).toBe(true);
+	});
+
+	test('removing up to N Hollow Men takes N of the choices offered, from any cities, or stops early', () => {
+		const offered = (actor: GameActor, from: string) =>
+			legalDecides(worldOf(actor)).find(decide => decide.d === 'removeHollow' && decide.city === city(from))!;
+		const hunt = searching({ t: 'removeHollow', amount: 2 }, world => {
+			world.game!.locations[city('cairo')]!.hollow = 2;
+			world.game!.locations[city('lagos')]!.hollow = 1;
+		});
+		send(hunt, { type: 'DECIDE', decide: offered(hunt, 'cairo') });
+		send(hunt, { type: 'DECIDE', decide: offered(hunt, 'lagos') });
+		expect(gameOf(hunt).locations[city('cairo')]!.hollow).toBe(1);
+		expect(gameOf(hunt).locations[city('lagos')]!.hollow).toBe(0);
+		expect(gameOf(hunt).pending).toEqual([]);
+
+		const short = searching({ t: 'removeHollow', amount: 2 }, world => {
+			world.game!.locations[city('cairo')]!.hollow = 2;
+		});
+		send(short, { type: 'DECIDE', decide: offered(short, 'cairo') });
+		send(short, { type: 'DECIDE', decide: { d: 'skip' } });
+		expect(gameOf(short).locations[city('cairo')]!.hollow).toBe(1);
+		expect(gameOf(short).pending).toEqual([]);
 	});
 
 	test('the Lookout searches with a card from the discard pile', () => {

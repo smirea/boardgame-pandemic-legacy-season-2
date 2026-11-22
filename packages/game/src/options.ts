@@ -479,7 +479,7 @@ export function legalDecides(world: World): Decide[] {
 				break;
 			case 'removeHollow':
 				for (const city of Object.keys(game.locations) as CityId[])
-					if (game.locations[city]!.hollow > 0) candidates.push({ d: 'removeHollow', cities: [city] });
+					if (game.locations[city]!.hollow > 0) candidates.push({ d: 'removeHollow', city });
 				break;
 			case 'quarantineCard':
 				for (const card of game.infectionDiscard) candidates.push({ d: 'quarantineCard', card });
