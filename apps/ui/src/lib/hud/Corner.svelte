@@ -3,14 +3,13 @@
 	import type { CardId } from '@repo/game';
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { pack, SEAT_IDS } from '@repo/game';
-	import type { PlayerDeckKind, SeatId, World } from '@repo/game';
+	import type { SeatId, World } from '@repo/game';
 	import { inkOn } from '#lib/color.ts';
 	import Bubble from '#lib/replay/Bubble.svelte';
 	import type { SaidNote } from '#lib/replay/replay.svelte.ts';
 	import { flip } from 'svelte/animate';
 	import { cubicIn, cubicOut } from 'svelte/easing';
 	import { fade, fly, scale } from 'svelte/transition';
-	import { CITY_COLOR } from '#lib/board/CityMarker.svelte';
 	import CardIcon from '#lib/cards/CardIcon.svelte';
 	import OccupationIcon from '#lib/occupations/OccupationIcon.svelte';
 	import { SCAR_ICON } from '#lib/cards/icons.ts';
@@ -18,7 +17,7 @@
 	import { handGroups } from './handGroups.ts';
 	import { sortHand } from './handOrder.ts';
 	import { cardName } from './labels.svelte.ts';
-	import PlayerCard, { KIND_COLOR } from './PlayerCard.svelte';
+	import PlayerCard from './PlayerCard.svelte';
 	import Portrait from './Portrait.svelte';
 	import type { Place } from './seats.ts';
 	import { characterTraits, TRAIT_KIND } from './traits.ts';
@@ -89,8 +88,6 @@
 		),
 	);
 	const groups = $derived(handGroups(hand, named));
-	const toneColor = (tone: PlayerDeckKind) =>
-		tone in CITY_COLOR ? CITY_COLOR[tone as keyof typeof CITY_COLOR] : KIND_COLOR[tone as keyof typeof KIND_COLOR];
 	const steps = $derived(active && acting ? turnSteps(world, seat) : []);
 	let reading = $state(false);
 
@@ -259,7 +256,6 @@
 				</div>
 			{/if}
 			{#each groups as group (group.key)}
-				{@const color = toneColor(group.tone)}
 				{@const ids = group.cards.map(card => card.id)}
 				<button
 					class="mini"
@@ -267,8 +263,8 @@
 					onmouseleave={() => hoverCard?.(null)}
 					onfocus={() => hoverCard?.(ids)}
 					onblur={() => hoverCard?.(null)}
-					style:--band={color}
-					style:--ink={inkOn(color)}
+					style:--band={group.color}
+					style:--ink={inkOn(group.color)}
 					aria-label={group.title}
 					onclick={onselect}
 					data-group={group.key}

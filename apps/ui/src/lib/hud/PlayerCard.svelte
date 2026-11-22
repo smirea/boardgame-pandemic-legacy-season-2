@@ -2,11 +2,21 @@
 	import { cityDef } from '@repo/game';
 	import type { PlayerCard } from '@repo/game';
 	import { CITY_COLOR } from '#lib/board/CityMarker.svelte';
+	import { EVENT_PRINT } from '#lib/cards/playerPrint.ts';
+
+	/** The top of each face's gradient, which the face, its pile on a seat and its glyphs all wear. */
+	export const FACE_COLOR = {
+		rationed: '#e2ba46',
+		unrationed: '#df9032',
+		permanent: '#274782',
+		produce: '#1e557e',
+		epidemic: '#215729',
+	} as const;
 
 	export const KIND_COLOR = {
-		event: '#b08628',
-		produce: '#8d8476',
-		epidemic: '#a8261c',
+		event: FACE_COLOR.rationed,
+		produce: FACE_COLOR.produce,
+		epidemic: FACE_COLOR.epidemic,
 	} as const;
 
 	export const HAND_CARD_SIZE = 1.04;
@@ -16,8 +26,16 @@
 	export type CityCardCopies = { live: number; discarded: number; trashed: number };
 
 	/** The colour a card is known by at a glance: its city's region, or its kind. */
-	export const cardColor = (card: PlayerCard) =>
-		card.kind === 'city' ? CITY_COLOR[cityDef(card.city).color ?? 'haven'] : KIND_COLOR[card.kind];
+	export function cardColor(card: PlayerCard): string {
+		switch (card.kind) {
+			case 'city':
+				return CITY_COLOR[cityDef(card.city).color ?? 'haven'];
+			case 'event':
+				return FACE_COLOR[EVENT_PRINT[card.event].mode];
+			default:
+				return FACE_COLOR[card.kind];
+		}
+	}
 </script>
 
 <script lang="ts">
@@ -29,7 +47,6 @@
 	import {
 		COMPANION_PRINT,
 		EPIDEMIC_STEPS,
-		EVENT_PRINT,
 		IMPROVEMENT_PRINT,
 		companionArtUrl,
 		eventArtUrl,
@@ -817,7 +834,7 @@
 		gap: 0;
 		background:
 			radial-gradient(ellipse at 18% 12%, rgb(255 247 210 / 0.28), transparent 58%),
-			linear-gradient(170deg, #e2ba46, #bc8e1d);
+			linear-gradient(170deg, var(--band), #bc8e1d);
 		border-color: #7c580b;
 		color: #181209;
 		box-shadow:
@@ -828,7 +845,7 @@
 	.card.event.unrationed:not(.small) {
 		background:
 			radial-gradient(ellipse at 18% 12%, rgb(255 232 195 / 0.24), transparent 58%),
-			linear-gradient(170deg, #df9032, #b55e18);
+			linear-gradient(170deg, var(--band), #b55e18);
 		border-color: #69300a;
 		color: #191007;
 	}
@@ -836,7 +853,7 @@
 	.card.event.permanent:not(.small) {
 		background:
 			radial-gradient(ellipse at 18% 12%, rgb(160 205 255 / 0.16), transparent 58%),
-			linear-gradient(170deg, #274782, #15294e);
+			linear-gradient(170deg, var(--band), #15294e);
 		border-color: #101e3b;
 		color: #f0f5ff;
 	}
@@ -986,7 +1003,7 @@
 		gap: 0;
 		background:
 			radial-gradient(ellipse at 20% 10%, rgb(135 200 245 / 0.16), transparent 58%),
-			linear-gradient(170deg, #1e557e, #11314a);
+			linear-gradient(170deg, var(--band), #11314a);
 		border-color: #0b2234;
 		color: #f2f7fb;
 		box-shadow:
@@ -1090,7 +1107,7 @@
 		gap: 0;
 		background:
 			radial-gradient(circle at 50% 45%, rgb(130 210 95 / 0.16), transparent 65%),
-			linear-gradient(168deg, #215729, #123318);
+			linear-gradient(168deg, var(--band), #123318);
 		border-color: #0e1d10;
 		color: #f6ea8e;
 		box-shadow:
