@@ -118,7 +118,7 @@
 	<div class="slot" data-turn-slot data-testid="infection-draw">
 		{#each stack as entry, index (entry.key)}
 			<div class="layer" class:older={index > 0} animate:flip={{ duration: 320 }} in:fromDeck out:leave>
-				<InfectionCard card={entry.card} note={entry.note} />
+				<InfectionCard card={entry.card} note={entry.note} alarm={entry.alarm} />
 			</div>
 		{/each}
 	</div>

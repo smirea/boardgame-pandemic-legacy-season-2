@@ -64,6 +64,10 @@ export const ACTION_NAMES: Record<Action['a'], string> = {
 	carry: 'Carry cubes over',
 };
 
+/** What a kind of action does for this character, where an ability changes it. */
+export const actionText = (world: World, seat: SeatId, a: Action['a']): string =>
+	a === 'deliver' && has(world, seat, 'courier') ? 'Put carried cubes here or next door' : ACTION_TEXT[a];
+
 /** What each kind of action does, in a line short enough to sit beside its name. */
 export const ACTION_TEXT: Record<Action['a'], string> = {
 	drive: 'Move along a line or lane to a neighbour',
@@ -72,7 +76,7 @@ export const ACTION_TEXT: Record<Action['a'], string> = {
 	captainSail: 'Discard any City card to sail to a port',
 	makeSupplies: 'Take a cube from the stockpile',
 	produce: 'Discard Produce Supplies to fill cities',
-	deliver: 'Put carried cubes here or next door',
+	deliver: 'Put carried cubes in this city',
 	share: "Give or take this city's card",
 	buildCenter: 'Discard cards of its colour to build one',
 	recon: 'Discard City cards to open a region',
@@ -245,8 +249,14 @@ export function actionDetail(world: World, action: Action): Rich {
 				` from the ${pile}, ${game[pile]} left`,
 			];
 		}
-		case 'produce':
-			return [action.mode === 'local' ? 'Here only' : 'Every haven and supply center'];
+		case 'produce': {
+			// Two of these in hand are two choices only by the boxes left on each, and System-Wide scratches one.
+			const card = world.campaign.playerCards[action.card];
+			const boxes = card?.kind === 'produce' ? card.boxesLeft : 0;
+			return [
+				`${action.mode === 'local' ? 'Here only' : 'Every haven and supply center'} · ${boxes} box${boxes === 1 ? '' : 'es'} left`,
+			];
+		}
 		case 'deliver':
 			return [...cubeCount(action.count), action.to ? ` to ${cityName(action.to)}` : ' here'];
 		case 'pickUp': {

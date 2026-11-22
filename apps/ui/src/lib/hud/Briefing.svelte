@@ -13,7 +13,15 @@
 
 	let { briefing, campaign, passive, oncontinue }: Props = $props();
 
-	const sections = $derived(briefingSections(briefing));
+	// Each card that changes the objectives brings a group of its own, and all of them would show the same list:
+	// the objectives as they now stand. It is drawn once, where the first card names them.
+	const sections = $derived.by(() => {
+		const all = briefingSections(briefing);
+		const names = (section: (typeof all)[number]) =>
+			section.t === 'group' && section.items[0]?.unlock.t === 'objectives';
+		const first = all.findIndex(names);
+		return all.filter((section, index) => index === first || !names(section));
+	});
 	const objectives = $derived(pack.objectives.filter(objective => campaign.objectives.includes(objective.id)));
 </script>
 

@@ -218,9 +218,14 @@
 		{#if steps.length}
 			<!-- The turn so far, beside the card on the side facing the board. -->
 			<ol class="steps" data-testid="turn-steps">
-				{#each steps as step, index (step.seq)}
-					<li class={step.kind} in:fly={{ x: right ? 24 : -24, duration: 320 }} animate:flip={{ duration: 260 }}>
-						<i>{index + 1}</i>
+				{#each steps as step (step.seq)}
+					<li
+						class={step.kind}
+						class:unpaid={step.spent === null}
+						in:fly={{ x: right ? 24 : -24, duration: 320 }}
+						animate:flip={{ duration: 260 }}
+					>
+						<i title={step.spent === null ? 'Cost no action' : `Action ${step.spent}`}>{step.spent ?? '·'}</i>
 						<b>{step.name}</b>
 						{#if step.detail}<span>{step.detail}</span>{/if}
 					</li>
@@ -635,6 +640,10 @@
 
 	.steps li.event {
 		border-left-color: #b08628;
+	}
+
+	.steps li.unpaid b {
+		font-weight: 500;
 	}
 
 	.steps i {

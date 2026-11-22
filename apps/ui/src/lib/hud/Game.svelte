@@ -282,6 +282,7 @@
 	let toasts = $state.raw<{ id: number; text: string; tone: string }[]>([]);
 	let banner = $state.raw<{ id: number; title: string; text: string } | null>(null);
 	let lastSeq = untrack(() => game?.log.at(-1)?.seq ?? 0);
+	let lastGame = untrack(() => campaign.results.length);
 	let nextFx = 1;
 
 	function toast(text: string, tone = '') {
@@ -296,7 +297,10 @@
 		// A spectator jumping through a recording skips over events rather than living through each one at once,
 		// and what was announced where they jumped from no longer applies.
 		const jumped = spectator && (newest < lastSeq || !untrack(() => announce));
-		if (newest < lastSeq) lastSeq = spectator ? newest : 0;
+		// A shorter log is a new game, whose every line is news, or an undo, which leaves nothing new to announce.
+		const index = campaign.results.length;
+		if (newest < lastSeq) lastSeq = spectator || index === lastGame ? newest : 0;
+		lastGame = index;
 		if (jumped) {
 			lastSeq = newest;
 			untrack(() => {
@@ -613,8 +617,17 @@
 			return;
 		}
 		// A card still face up beside the deck is read before the next one is turned.
-		if (snap.phase === 'playing.actions') send({ type: 'END_ACTIONS', seat: game.active });
-		else if (admin.action && !admin.action.busy) admin.action.onclick();
+		if (snap.phase !== 'playing.actions') {
+			if (admin.action && !admin.action.busy) admin.action.onclick();
+			return;
+		}
+		// Space moves the turn on at every other step, so a press meant for a deck can land here. It ends a turn
+		// that is spent, and never throws away actions: those go by the End actions button.
+		if (game.actionsLeft === 0) send({ type: 'END_ACTIONS', seat: game.active });
+		else
+			toast(
+				`${game.actionsLeft} action${game.actionsLeft === 1 ? '' : 's'} left. Click End actions to end your turn early.`,
+			);
 	}
 
 	function onkeyup(event: KeyboardEvent) {

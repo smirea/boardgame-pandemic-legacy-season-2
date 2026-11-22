@@ -27,6 +27,18 @@
 		invalidate();
 	});
 
+	// A pointer left lying on the map keeps its cone and drops its name after a few seconds: a name resting beside a
+	// city reads as the label of a pawn standing there.
+	let resting = $state(false);
+	$effect(() => {
+		void cursor.x;
+		void cursor.z;
+		void cursor.tool;
+		resting = false;
+		const timer = setTimeout(() => (resting = true), 3000);
+		return () => clearTimeout(timer);
+	});
+
 	const tipY = CITY_TOP + 0.45;
 	const labelInk = $derived(inkOn(cursor.color));
 </script>
@@ -78,7 +90,7 @@
 		style="pointer-events: none"
 		zIndexRange={[20, 11]}
 	>
-		<span class="tag" style:background={cursor.color} style:color={labelInk}>
+		<span class="tag" class:resting style:background={cursor.color} style:color={labelInk}>
 			{#if cursor.tool === 'pen'}
 				<svg viewBox="0 0 16 16" aria-hidden="true">
 					<path d="M11.8 1.8a1.9 1.9 0 0 1 2.7 2.7L5.4 13.6 1.5 14.5l.9-3.9Z" />
@@ -104,6 +116,11 @@
 		font: 600 0.68rem/1.45 var(--font-ui);
 		white-space: nowrap;
 		transform: translateY(-0.7rem);
+		transition: opacity 400ms;
+	}
+
+	.tag.resting {
+		opacity: 0;
 	}
 
 	.tag svg {

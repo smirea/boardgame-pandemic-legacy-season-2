@@ -1,0 +1,155 @@
+{
+	"g00": {
+		"summary": "January, first attempt, played by three different models (Claude Sonnet 5.5, Gemini 4 Neon, Grok 4.7) who had only pictures of the screen and a pointer aimed by pixel. 216 commands, 469 pointer and key presses, two hours. Lost on turn 13 at the eighth incident, with two of three supply centers built and North America never reconned. The players filed 131 findings.",
+		"story": "Three testers who had never seen the screen sat down at an empty campaign. They agreed on January, made a Farmer, an Instructor and a Laborer, and each lost their Ready more than once as the others made characters. The lead read the Legacy cards with their faces half hidden behind the deck, spread 36 cubes evenly, and the nine opening infections played. Neon pressed Space for the infection deck just as the first turn became theirs, and the turn was gone with four actions unspent. An Epidemic on the first draw emptied London. The table built Jacksonville and Washington while incidents piled up in cities whose tokens still read 3: nobody could see from the map which cities had no cubes. Tripoli outbroke into Midsea, a third Epidemic struck, and Cairo, empty for a turn without anyone noticing, took the eighth incident. At game end the table read four new Rationed Events and spent 3 units on Architect for the Laborer.",
+		"highlights": [
+			"The whole loop by pixel: lobby, character creation, the Legacy briefing, setup, 13 turns, defeat, the game-end cards and spending.",
+			"All three ways to choose an action were found and used: the panel, the ring over a city, and the tags over a hand card.",
+			"Praised by all three: the Actions panel with its reasons, the deck and city hovers with their odds, the Your turn interlude, the chart itself, the Epidemic sequence and the Defeat panel.",
+			"Scores out of 10 (Sonnet, Neon, Grok): learning 5, 7, 5; speed of a turn 6, 7, 4; knowing what is going on 5, 6, 3; looks 8, 6, 7."
+		],
+		"parity": "January's objectives, required count and supplies matched the research timeline. An outbreak happened in play for the first time in any run (Tripoli into Midsea, a haven).",
+		"findings": [
+			{
+				"finding": "Space ended a turn with all four actions unspent, with no confirmation and no undo. Space also flips and draws, so a press meant for a deck landed on the first turn.",
+				"kind": "ui bug",
+				"fix": "Space ends a turn only when no actions are left. With actions left it says so and points at End actions. Checked in a browser. Still open: End actions cannot be undone before the first draw."
+			},
+			{
+				"finding": "Undo replayed every toast of the game so far (old Epidemics, old Produce results), more on each undo.",
+				"kind": "ui bug",
+				"fix": "A log that got shorter in the same game is an undo and announces nothing. Checked in a browser after two Epidemics."
+			},
+			{
+				"finding": "The Laborer's Build said Needs 5 cards until it could be paid, then spent 4 cards and 2 cubes.",
+				"kind": "rules text",
+				"fix": "Of two prices a character could pay, the menu shows the nearer one. A Laborer holding 2 cubes reads Needs 4. Checked against the save of that moment."
+			},
+			{
+				"finding": "An Instructor who had used the gift, standing beside another pawn, was told Both pawns must be in the same location.",
+				"kind": "rules text",
+				"fix": "A refusal about pawns elsewhere no longer outvotes what the pawns standing here were refused for. Reads Only this city's card can be shared here. Checked against the save of that moment."
+			},
+			{
+				"finding": "Deliver read here or next door for every character. Only a Courier delivers next door.",
+				"kind": "ui bug",
+				"fix": "The line follows the character. Checked in a browser."
+			},
+			{
+				"finding": "Two Produce Supplies in hand gave four rows in two identical pairs, and two Tripoli cards gave two identical Discard Tripoli rows and a count of 5 beside 4 lit cities.",
+				"kind": "ui bug",
+				"fix": "Ways that differ only in which of two identical cards they spend are one way. A Produce row says how many boxes its card has left. Checked in a browser."
+			},
+			{
+				"finding": "The summary of a briefing showed the objectives three and four times, ran off the screen, and ignored Escape.",
+				"kind": "ui bug",
+				"fix": "The objectives are drawn once, the January summary fits a laptop screen, and Escape closes it. Checked in a browser."
+			},
+			{
+				"finding": "The live list beside the active seat numbered free actions with paid ones, so a four-action turn read as eight.",
+				"kind": "ui",
+				"fix": "The engine logs what each action cost. Only paid steps are numbered. Checked in a browser."
+			},
+			{
+				"finding": "An incident and a harmless cube lost had the same pale tag on the flipped Infection card. The outbreak tag was read as a bug.",
+				"kind": "ui",
+				"fix": "Incident and outbreak tags are red. Checked in a browser. Still open: the outbreak tag does not name the cities it reached."
+			},
+			{
+				"finding": "Another player's resting pointer, drawn with their name, was read as a label for their pawn in the wrong city by two of three testers.",
+				"kind": "ui",
+				"fix": "The name fades three seconds after the pointer stops and returns when it moves. The cone stays. Checked on two browsers."
+			},
+			{
+				"finding": "A haven's hover listed its chance of infection and its cards in the decks, all zero.",
+				"kind": "ui",
+				"fix": "A haven's hover says no Infection card names it and that an outbreak next door still strikes it, which is what happened to Midsea."
+			},
+			{
+				"finding": "The Infection deck hover headed its top layer On top, drawn next, and a tester took the list for an order.",
+				"kind": "ui",
+				"fix": "It reads On top, in no known order."
+			},
+			{
+				"finding": "Ready was cleared for everyone whenever anyone took or made a character, with no word of why.",
+				"kind": "ui",
+				"fix": "The rule stays (a test holds it). The waiting line now names you and says that taking or making a character asks everyone to ready again. Open question for the owner: clear only the player who changed."
+			},
+			{
+				"finding": "Every tester read the 3 on a city as its supplies. It is the population, which never changes in play. Supplies are small squares beside the token, a plague cube is a green speck, and a city with no cubes looks like any other. The table lost to an incident in a city it did not know was empty.",
+				"kind": "open",
+				"fix": "Not changed. All three put this first or second. The token needs to show supplies as a number or a readable stack, and an empty city needs to look empty."
+			},
+			{
+				"finding": "The top bar's Infection deck count and hover show all nine opening infections before a player has flipped them on their own screen. The show holds the board back, not the decks.",
+				"kind": "open",
+				"fix": "Not changed. Confirmed in the code: Decks reads the live state."
+			},
+			{
+				"finding": "What an Epidemic struck is on screen for five seconds and then nowhere. There is no log a player can open. Two testers missed the city twice.",
+				"kind": "open",
+				"fix": "Not changed. A log of this turn and the last would answer it, and the lines already exist for replays."
+			},
+			{
+				"finding": "The recon boxes for North America and Europe, the month's mandatory objective among them, sit under a seat and under the objective tags on a 1440 by 900 screen.",
+				"kind": "open",
+				"fix": "Not changed. The boxes are placed clear of cities and names, not of the panels over the board."
+			},
+			{
+				"finding": "Legacy card faces are cut off behind the deck and the screen's edge while a briefing is unpacked, the objective tags above Done collapse to a strip, and three prompts stack on one bar during setup.",
+				"kind": "open",
+				"fix": "Not changed. Confirmed on the pictures."
+			},
+			{
+				"finding": "The live list is cut by the Current turn rail and by the hand, a seat's hover opens behind the rail, the hand covers the stockpile, and the top bar's hovers open behind the character cards.",
+				"kind": "open",
+				"fix": "Not changed."
+			},
+			{
+				"finding": "Game-end spending buys on one click with no way back, shows what an option does only once it is picked, and keeps the list of what was bought only in the browser that clicked.",
+				"kind": "open",
+				"fix": "Not changed. Confirmed in the code: purchases are not in the state."
+			},
+			{
+				"finding": "The cube and card pictures inside sentences read as missing characters to all three.",
+				"kind": "open",
+				"fix": "Not changed. They are flat squares about ten pixels wide."
+			},
+			{
+				"finding": "The incident track warns only on hover, and the infection rate's caption is hidden on a laptop.",
+				"kind": "open",
+				"fix": "Not changed."
+			},
+			{
+				"finding": "A hand of eight squeezes its cards until the pointer lifts one over its neighbour, and a tester discarded the wrong card. The discard prompt speaks of the player by name and gives no count.",
+				"kind": "open",
+				"fix": "Not changed."
+			},
+			{
+				"finding": "A browser with no seat cannot reach the seat picker while a briefing is being unpacked: the briefing covers it.",
+				"kind": "open",
+				"fix": "Not changed. Found by the operator while checking the fixes."
+			},
+			{
+				"finding": "Reported and not a defect: an outbreak tag (it was a real outbreak), a haven taking an incident (the outbreak reached it), a prompt to flip shown to every player (each flips their own copy of the opening nine), Deliver placing one cube at once (one way happens at once), a Farmer's free Deliver lost after a Transfer (the printed rule says immediately), Produce offering one mode in a full haven.",
+				"kind": "by design",
+				"fix": "None."
+			},
+			{
+				"finding": "Players sharing one headless browser froze each other's animations, which a picture then showed.",
+				"kind": "lab",
+				"fix": "Every player has a browser of its own."
+			},
+			{
+				"finding": "A restart of the lab sat the players down as strangers, in other seats and without their characters.",
+				"kind": "lab",
+				"fix": "Each browser is given the identity the starting save knows its player by."
+			},
+			{
+				"finding": "myreports was empty once the game had moved on, wait called a player for a choice only another could answer, and a key could not be held.",
+				"kind": "lab",
+				"fix": "myreports lists what was filed since the brief, an open choice calls only who can answer it, and keydown and keyup hold a key."
+			}
+		]
+	}
+}

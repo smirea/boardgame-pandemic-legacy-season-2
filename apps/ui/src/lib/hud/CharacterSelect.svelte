@@ -67,7 +67,9 @@
 
 	const start = $derived(tableStart(world)!);
 	const title = $derived(start === 'prologue' ? 'Prologue' : MONTHS[Math.max(1, campaign.month)]!);
-	const waitingOn = $derived(players.filter(who => !table.ready[who]).map(nameOf));
+	const waitingOn = $derived(
+		players.filter(who => !table.ready[who]).map(who => (who === player ? 'you' : nameOf(who))),
+	);
 
 	function take(character: Character) {
 		const holder = claimant(world, character.id);
@@ -495,6 +497,9 @@
 					A game needs two seats.
 				{:else if waitingOn.length}
 					Waiting for {waitingOn.join(', ')}.
+					{#if waitingOn.includes('you')}
+						Taking or making a character asks everyone to ready again.
+					{/if}
 				{:else}
 					Starting.
 				{/if}

@@ -19,7 +19,7 @@ Start with `help`. In short:
 
 - `shot` takes a picture of your screen and prints the path of a PNG. **Open that file with your image viewing tool to see your screen.** The screen is 1440 by 900 pixels, and a position is `x y`: across from the left edge, down from the top. `shot 3` waits three seconds first. `shot grid` draws a grid every 100 pixels, to check your aim when a click lands beside what you meant.
 - `zoom <x> <y> <width> <height>` gives that part of the screen at three times the size, for small print.
-- `click <x> <y>`, `rclick`, `dblclick`, `move <x> <y>` (rest the pointer, as you would over something to read its tooltip), `drag <x1> <y1> <x2> <y2>`, `scroll <x> <y> <amount>`, `key <key>`, `type <text>`. Each answers with what the pointer landed on and a new picture taken half a second later. If something is still moving in that picture, `shot 2`.
+- `click <x> <y>`, `rclick`, `dblclick`, `move <x> <y>` (rest the pointer, as you would over something to read its tooltip), `drag <x1> <y1> <x2> <y2>`, `scroll <x> <y> <amount>`, `key <key>`, `keydown <key>` and `keyup <key>` (for anything the game does while a key is held), `type <text>`. Each answers with what the pointer landed on and a new picture taken half a second later. If something is still moving in that picture, `shot 2`.
 - `wait` blocks until the table is waiting on you or someone speaks. It tells you only _that_ you are needed. The screen tells you for what. Run it again whenever it comes back empty. Never stop because you are waiting.
 - `say <text>` is your voice at the table. `listen` blocks until someone else speaks.
 - `report <bug|ux|visual|rules|idea> <text>` records a finding with a picture of your screen at that moment. `myreports` lists what you have recorded.

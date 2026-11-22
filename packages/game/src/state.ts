@@ -196,7 +196,7 @@ export type Decision =
 
 export type LogEntry = { seq: number } & (
 	| { t: 'turn'; seat: SeatId }
-	| { t: 'action'; seat: SeatId; action: ActionId; detail: string }
+	| { t: 'action'; seat: SeatId; action: ActionId; detail: string; cost: number }
 	| { t: 'move'; seat: SeatId; from: CityId; to: CityId; by: string }
 	| { t: 'draw'; seat: SeatId; card: CardId }
 	| { t: 'epidemic'; city: CityId | null; card: CardId | null; rate: number; removed: number }

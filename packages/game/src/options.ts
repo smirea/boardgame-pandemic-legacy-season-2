@@ -1,5 +1,5 @@
 import type { Action } from './actions';
-import { actionGate, actionIds, checkAction, checkEdge, hasAction, isFreeAction } from './actions';
+import { actionGate, actionIds, checkAction, checkEdge, hasAction, isFreeAction, OUT_OF_REACH } from './actions';
 import { pack } from './content/pack';
 import type { ActionId, Color, CompanionId, EventId } from './content/types';
 import { freeCharacters, scarTargets } from './flow';
@@ -296,10 +296,14 @@ export function actionMenu(world: World, seat: SeatId): ActionChoice[] {
 			// A shortfall ("Needs 2 cubes") comes from a target that was otherwise fine, so it says more than the
 			// refusals of targets that were never in reach.
 			const shortfalls = verdicts.filter(({ reason }) => reason!.startsWith('Needs '));
+			// A pawn standing here was refused for what it holds, which says more than every pawn elsewhere being out of reach.
+			const inReach = verdicts.filter(({ reason }) => reason !== OUT_OF_REACH);
 			const counts = new Map<string, number>();
-			for (const { reason } of shortfalls.length ? shortfalls : verdicts)
+			for (const { reason } of shortfalls.length ? shortfalls : inReach.length ? inReach : verdicts)
 				counts.set(reason!, (counts.get(reason!) ?? 0) + 1);
-			const common = [...counts].sort((a, b) => b[1] - a[1])[0]?.[0];
+			// Of two prices the character could pay (a Laborer's 4 cards and 2 cubes, or 5 cards), the nearer one is the one to show.
+			const needs = (reason: string) => Number(/^Needs (\d+)/.exec(reason)?.[1] ?? Infinity);
+			const common = [...counts].sort((a, b) => b[1] - a[1] || needs(a[0]) - needs(b[0]))[0]?.[0];
 			return { a: id, actions, reason: common ?? NEEDS[id] ?? 'Nothing to do with it here' };
 		});
 }

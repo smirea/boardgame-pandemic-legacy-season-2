@@ -77,6 +77,7 @@ export function createBoardView(source: BoardSource): BoardView {
 							hollow: (location?.hollow ?? 0) - (held?.hollow ?? 0),
 							population: record.population,
 							port: city.port,
+							haven: city.kind === 'haven',
 							structures: (['center', 'tower', 'shelter'] as const)
 								.filter(kind => location?.[kind] ?? record.permanent.includes(kind))
 								.map(kind => ({ kind, permanent: record.permanent.includes(kind) })),
@@ -84,14 +85,15 @@ export function createBoardView(source: BoardSource): BoardView {
 							forsaken: isForsaken(campaign, city.id),
 							lab: record.lab,
 							highlight: selected === city.id ? 'selected' : targets.has(city.id) ? 'target' : null,
-							infection: info
-								? {
-										odds: info.infection.odds[city.id] ?? 0,
-										inDeck: info.infection.strata.reduce((sum, stratum) => sum + (stratum.cities[city.id] ?? 0), 0),
-										discarded: info.infection.discard[city.id] ?? 0,
-									}
-								: null,
-							cards: info ? (info.playerDeck.cities[city.id] ?? NO_CARDS) : null,
+							infection:
+								info && city.kind !== 'haven'
+									? {
+											odds: info.infection.odds[city.id] ?? 0,
+											inDeck: info.infection.strata.reduce((sum, stratum) => sum + (stratum.cities[city.id] ?? 0), 0),
+											discarded: info.infection.discard[city.id] ?? 0,
+										}
+									: null,
+							cards: info && city.kind !== 'haven' ? (info.playerDeck.cities[city.id] ?? NO_CARDS) : null,
 						},
 					];
 				}),

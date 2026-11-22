@@ -137,7 +137,7 @@ export function createChoosing(source: ChoosingSource) {
 		ring = null;
 		chooser = null;
 		targeting = null;
-		const variants = ways(all);
+		const variants = ways(world, all);
 		if (variants.length === 1) return act(variants[0]!);
 		if (name === 'administratorMove') {
 			const moves = new Map<SeatId, Map<CityId, Option>>();
@@ -192,7 +192,7 @@ export function createChoosing(source: ChoosingSource) {
 			const there = choice.actions.filter(action => actionTarget(world, action) === ring);
 			const variants = there.length ? there : ring === here ? choice.actions : [];
 			if (!variants.length) return [];
-			const offered = ways(variants);
+			const offered = ways(world, variants);
 			const only = offered.length === 1 ? offered[0]! : null;
 			return [
 				{

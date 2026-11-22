@@ -3,7 +3,14 @@ import type { Action, LogEntry, SeatId, World } from '@repo/game';
 import { ACTION_NAMES, cityName } from './labels.svelte.ts';
 
 /** One thing the active player did this turn, in the order they did it. */
-export type TurnStep = { seq: number; name: string; detail: string; kind: 'action' | 'event' };
+export type TurnStep = {
+	seq: number;
+	name: string;
+	detail: string;
+	kind: 'action' | 'event';
+	/** Which of the turn's actions this spent, counting from 1. Null for what cost none: a free action, an event. */
+	spent: number | null;
+};
 
 const STRUCTURE = { center: 'supply center', tower: 'tower', shelter: 'shelter' } as const;
 
@@ -25,6 +32,7 @@ export function turnSteps(world: World, seat: SeatId): TurnStep[] {
 	if (start < 0 || log[start]!.t !== 'turn' || log[start]!.seat !== seat) return [];
 	const steps: TurnStep[] = [];
 	let effects: LogEntry[] = [];
+	let spent = 0;
 	for (const entry of log.slice(start + 1)) {
 		if (entry.t === 'action' && entry.seat === seat) {
 			steps.push({
@@ -32,11 +40,18 @@ export function turnSteps(world: World, seat: SeatId): TurnStep[] {
 				name: ACTION_NAMES[entry.action as Action['a']] ?? entry.action,
 				detail: describe(effects),
 				kind: 'action',
+				spent: entry.cost > 0 ? (spent += entry.cost) : null,
 			});
 			effects = [];
 		} else if (entry.t === 'event' && entry.seat === seat) {
 			const event = pack.events.find(item => item.id === entry.event);
-			steps.push({ seq: entry.seq, name: event?.name ?? entry.event, detail: entry.detail, kind: 'event' });
+			steps.push({
+				seq: entry.seq,
+				name: event?.name ?? entry.event,
+				detail: entry.detail,
+				kind: 'event',
+				spent: null,
+			});
 			effects = [];
 		} else effects.push(entry);
 	}

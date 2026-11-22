@@ -292,7 +292,10 @@
 
 <svelte:window
 	onkeydown={event => {
-		if (full) return;
+		if (full) {
+			if (event.key === 'Escape') full = false;
+			return;
+		}
 		if (event.key === ' ' && !progress.stowing) {
 			event.preventDefault();
 			if (allDrawn) toggleReady();

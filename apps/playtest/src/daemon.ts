@@ -10,6 +10,7 @@ import { join } from 'node:path';
 import {
 	actionBriefs,
 	gameIndexOf,
+	legalPlays,
 	newCampaign,
 	newTable,
 	openings,
@@ -34,6 +35,7 @@ import {
 	clickAt,
 	closeTool,
 	dragTo,
+	holdKey,
 	moveTo,
 	point,
 	pressCombo,
@@ -100,7 +102,7 @@ const files = {
 
 type LabState = {
 	/** The game the current briefs were written for, by its index in the campaign's results. */
-	session: { startIndex: number } | null;
+	session: { startIndex: number; at?: string } | null;
 	picks: (CharacterId | null)[];
 	chat: { at: string; from: string; text: string }[];
 	chatSeen: Record<string, number>;
@@ -214,8 +216,13 @@ await Bun.$`bun x playwright install chromium-headless-shell`.cwd(uiDir).quiet()
 const browsers: Awaited<ReturnType<typeof launch>>[] = [];
 const tabUrl = (id: string) => `http://127.0.0.1:${pages.port}/?DEBUG_ID=${config.run}-${id}`;
 const tabs: Tab[] = [];
+/** The id the starting save knows this player by. A browser is new every time the lab starts, and the player is not. */
+const identityOf = (player: { id: string; name: string }) => {
+	const seat = initialSave.world.table.seats.find(entry => entry.name === player.name);
+	return seat ? { key: `legacy-DEBUG_ID=${config.run}-${player.id}:playerId`, player: seat.player } : undefined;
+};
 for (const [index, player] of config.players.entries()) {
-	browsers.push(await launch(config.headed));
+	browsers.push(await launch(config.headed, player.harness === 'desktop' ? player.id : undefined));
 	tabs.push(
 		await openTab(browsers.at(-1)!.context, {
 			id: player.id,
@@ -223,6 +230,7 @@ for (const [index, player] of config.players.entries()) {
 			name: player.name,
 			passphrase: config.passphrase,
 			host: index === 0,
+			identity: identityOf(player),
 			onError: text => journal({ kind: 'tab-error', agent: player.id, text }),
 		}),
 	);
@@ -380,16 +388,18 @@ const sessionDone = (state: PublicState) =>
 	gameIndex(state) > lab.session.startIndex &&
 	(state.phase === 'lobby' || state.phase === 'finished');
 
+/** Players who know the game only by looking at it, whoever takes the pictures. */
+const sees = (index: number) => ['screen', 'desktop'].includes(config.players[index]!.harness);
+
 function whoOf(id: string): Who | null {
 	const index = config.players.findIndex(player => player.id === id);
 	if (index < 0) return null;
 	const leadIndex = (lab.session?.startIndex ?? (current ? gameIndex(current) : 0)) % config.players.length;
 	const name = config.players[index]!.name;
 	// A player on the screen sits where the lobby put them, which is seat order only while nobody has moved.
-	const seat =
-		config.players[index]!.harness === 'screen'
-			? (current?.world.table.seats.find(entry => entry.name === name)?.seat ?? seatOf(index))
-			: seatOf(index);
+	const seat = sees(index)
+		? (current?.world.table.seats.find(entry => entry.name === name)?.seat ?? seatOf(index))
+		: seatOf(index);
 	return { index, id, name, seat, lead: index === leadIndex };
 }
 
@@ -404,10 +414,12 @@ const forScreen = (line: string) =>
 /** What the game is waiting on this player for. Empty means it is someone else's move. */
 function needs(state: PublicState, who: Who): string[] {
 	const harness = config.players[who.index]!.harness;
-	if (harness === 'screen') return needsOnScreen(state, who);
+	if (sees(who.index)) return needsOnScreen(state, who);
 	const lines = needsByKey(state, who);
 	return harness === 'ui' ? lines.map(forScreen) : lines;
 }
+
+const TABLE_CHOICE = 'A CHOICE IS OPEN TO THE TABLE.';
 
 const SESSION_COMPLETE =
 	'SESSION COMPLETE. This game and its game-end step are finished. Write your report now, then stop.';
@@ -438,8 +450,11 @@ function needsOnScreen(state: PublicState, who: Who): string[] {
 		case 'over':
 		case 'upkeep':
 			return who.lead ? [lead] : [];
-		default:
-			return needsByKey(state, who).length ? [yours] : [];
+		default: {
+			// A choice open to the table is the active player's to pass, and anyone's who holds a card that answers it.
+			const answers = world.game?.active === who.seat || legalPlays(world, phase).some(play => play.seat === who.seat);
+			return needsByKey(state, who).some(line => answers || !line.startsWith(TABLE_CHOICE)) ? [yours] : [];
+		}
 	}
 }
 
@@ -485,9 +500,7 @@ function needsByKey(state: PublicState, who: Who): string[] {
 				const owner = 'seat' in pending ? pending.seat : null;
 				if (owner === who.seat) out.push('A CHOICE IS WAITING ON YOU. See `options decide`.');
 				if (owner === null)
-					out.push(
-						'A CHOICE IS OPEN TO THE TABLE. See `options decide`. The active player passes with `do decide:skip`.',
-					);
+					out.push(`${TABLE_CHOICE} See \`options decide\`. The active player passes with \`do decide:skip\`.`);
 			}
 			if (
 				optionsFor(state, who, lab.picks).some(option => option.key.startsWith('decide:discard')) &&
@@ -559,7 +572,7 @@ function digest(state: PublicState, who: Who): string[] {
 	lab.chatSeen[who.id] = lab.chat.length;
 	if (unread.length) lines.push('TABLE TALK:', ...unread.map(message => `  ${message.from}: ${message.text}`));
 	const game = state.world.game;
-	if (config.players[who.index]!.harness === 'screen') {
+	if (sees(who.index)) {
 		const list = needs(state, who);
 		lines.push(...(list.length ? list : ['Nothing is waiting on you right now.']));
 		return lines;
@@ -662,7 +675,7 @@ function report(who: Who | null, agent: string, severity: string, text: string):
 		save: saved,
 	};
 	appendFileSync(files.issues, `${JSON.stringify(issue)}\n`);
-	if (who && config.players[who.index]!.harness === 'screen')
+	if (who && sees(who.index))
 		void tabs[who.index]!.page.screenshot({ path: saved.replace(/\.json$/, '.png') }).catch(() => {});
 	note('issue', issue.agent, `[${severity}] ${text}`);
 	journal({ kind: 'issue', ...issue });
@@ -706,6 +719,7 @@ const SCREEN_HELP = `You have the screen and nothing else. Run as: ./apps/playte
   drag <x1> <y1> <x2> <y2>   press at the first position, move to the second, let go
   scroll <x> <y> <amount>  turn the wheel there: a positive amount scrolls down, about 100 a notch
   key <key>               press a key: Escape, Enter, Space, Tab, ArrowLeft, a, 1, or a combination such as Shift+Tab
+  keydown <key>           hold a key down, for what the game does while a key is held. It stays down until keyup <key>
   type <text>             type into whatever has the keyboard
   wait [seconds]          block until the table is waiting on you or someone speaks (default 45)
   say <text>              talk to the table, as you would out loud
@@ -713,6 +727,95 @@ const SCREEN_HELP = `You have the screen and nothing else. Run as: ./apps/playte
   report <bug|ux|visual|rules|idea> <text>   record a finding, with a picture of your screen at that moment
   myreports               the findings you have recorded this game
 Every pointer and keyboard command answers with a new picture of the screen, taken half a second later.`;
+
+const DESKTOP_HELP = `Your game is in a real browser window on this desktop, and you drive it with your own computer-use tool.
+The lab gives you only these. Run as: ./apps/playtest/play <you> <command>
+  window                  which window is yours: the app, its process id, its window id and where it is on the desktop
+  focus                   take the desktop: blocks until no other player has it, then brings your window to the front.
+                          It is yours for two minutes. Run it again to keep it
+  release                 give the desktop up, the moment you stop using the pointer and keyboard
+  wait [seconds]          block until the table is waiting on you or someone speaks (default 45)
+  say <text>              talk to the table, as you would out loud
+  listen [seconds]        block until another player speaks
+  report <bug|ux|visual|rules|idea> <text>   record a finding, with a picture of your page at that moment
+  myreports               the findings you have recorded this game`;
+
+/** One desktop, one pointer, one keyboard: who has them, and until when unless they ask again. */
+let desk: { id: string; until: number } | null = null;
+const DESK_HOLD = 120_000;
+
+const cua = async (tool: string, input: object) => {
+	const run = Bun.spawn(['cua-driver', tool, JSON.stringify(input)], { stdout: 'pipe', stderr: 'pipe' });
+	const text = await new Response(run.stdout).text();
+	await run.exited;
+	try {
+		return JSON.parse(text) as Record<string, unknown>;
+	} catch {
+		return { error: text.trim() || 'cua-driver gave no answer' };
+	}
+};
+
+/** The window of a player's own browser, found by the mark its process was launched with. */
+async function windowOf(id: string) {
+	const list = await Bun.$`ps -axo pid=,command=`.quiet().text();
+	const line = list.split('\n').find(row => row.includes(`--playtest-player=${id}`) && !row.includes('--type='));
+	const pid = Number(line?.trim().split(/\s+/)[0]);
+	if (!pid) return null;
+	type Listed = { window_id: number; title: string; bounds: { x: number; y: number; width: number; height: number } };
+	const found = (await cua('list_windows', { pid })) as { windows?: Listed[] };
+	const window = (found.windows ?? []).toSorted(
+		(a, b) => b.bounds.width * b.bounds.height - a.bounds.width * a.bounds.height,
+	)[0];
+	return window ? { pid, ...window } : null;
+}
+
+/** The commands of a player who drives their own window: the lab only says which window, and whose turn the desktop is. */
+async function handleDesktop(who: Who, verb: string): Promise<string> {
+	switch (verb) {
+		case 'help':
+			return DESKTOP_HELP;
+		case 'window': {
+			const window = await windowOf(who.id);
+			if (!window) return 'Your window is not open. Tell the operator.';
+			const { x, y, width, height } = window.bounds;
+			return `Your window: app "Google Chrome for Testing", pid ${window.pid}, window_id ${window.window_id}, titled "${window.title}". On the desktop its top left is at (${x}, ${y}) and it is ${width} by ${height} points. The game page is the part under the toolbar.`;
+		}
+		case 'focus': {
+			for (const deadline = Date.now() + 45_000; ;) {
+				if (!desk || desk.id === who.id || desk.until < Date.now()) break;
+				if (Date.now() > deadline) {
+					const holder = config.players.find(player => player.id === desk!.id)?.name;
+					return `${holder} has the desktop. Run \`focus\` again.`;
+				}
+				await Bun.sleep(300);
+			}
+			const window = await windowOf(who.id);
+			if (!window) return 'Your window is not open. Tell the operator.';
+			desk = { id: who.id, until: Date.now() + DESK_HOLD };
+			const raised = await cua('bring_to_front', { pid: window.pid, window_id: window.window_id });
+			journal({ kind: 'desk', agent: who.id, raised: raised['status'] ?? raised['error'] ?? null });
+			return `The desktop is yours for two minutes, and your window (pid ${window.pid}, window_id ${window.window_id}) is in front. Run \`focus\` again to keep it, and \`release\` when you are done.`;
+		}
+		case 'release':
+			if (desk?.id === who.id) desk = null;
+			return 'Released.';
+		case 'myreports':
+			return myReports(who);
+		default:
+			return `"${verb}" is not one of your commands.\n${DESKTOP_HELP}`;
+	}
+}
+
+function myReports(who: Who): string {
+	// Since the brief, not by month: the report is written after the game has moved the campaign on.
+	const since = lab.session?.at ?? '';
+	const mine = issues().filter(issue => issue.agent === who.name && issue.at >= since);
+	return mine.length
+		? mine
+				.map((issue, index) => `${index + 1}. [${issue.severity}] turn ${issue.turn ?? '-'}: ${issue.text}`)
+				.join('\n')
+		: 'You have recorded nothing this game.';
+}
 
 let screenShots = 0;
 
@@ -780,22 +883,15 @@ async function handleScreen(who: Who, tab: Tab, verb: string, rest: string[]): P
 		case 'key':
 			if (!rest[0]) return 'usage: key <key>';
 			return after(await pressCombo(tab, rest[0]));
+		case 'keydown':
+		case 'keyup':
+			if (!rest[0]) return `usage: ${verb} <key>`;
+			return after(await holdKey(tab, rest[0], verb === 'keydown'));
 		case 'type':
 			if (!rest.length) return 'usage: type <text>';
 			return after(await typeText(tab, rest.join(' ')));
-		case 'myreports': {
-			const mine = issues().filter(
-				issue =>
-					issue.agent === who.name &&
-					issue.month === current!.world.campaign.month &&
-					issue.attempt === current!.world.campaign.attempt,
-			);
-			return mine.length
-				? mine
-						.map((issue, index) => `${index + 1}. [${issue.severity}] turn ${issue.turn ?? '-'}: ${issue.text}`)
-						.join('\n')
-				: 'You have recorded nothing this game.';
-		}
+		case 'myreports':
+			return myReports(who);
 		default:
 			return `You have the screen and nothing else this run: "${verb}" is not one of your commands.\n${SCREEN_HELP}`;
 	}
@@ -810,7 +906,7 @@ async function handle(agent: string, words: string[]): Promise<string> {
 	if (agent === 'lab') {
 		switch (verb) {
 			case 'brief': {
-				lab.session = { startIndex: gameIndex(state) };
+				lab.session = { startIndex: gameIndex(state), at: new Date().toISOString() };
 				for (const [index, pick] of lab.picks.entries())
 					if (pick && (state.world.campaign.characters[pick]?.dead ?? true)) lab.picks[index] = null;
 				persist();
@@ -888,8 +984,8 @@ async function handle(agent: string, words: string[]): Promise<string> {
 	if (!who) return `Unknown player "${agent}". Players: ${config.players.map(player => player.id).join(', ')}.`;
 	const harness = config.players[who.index]!.harness;
 	const tab = tabs[who.index]!;
-	if (harness === 'screen' && !['wait', 'listen', 'say', 'report'].includes(verb))
-		return handleScreen(who, tab, verb, rest);
+	if (sees(who.index) && !['wait', 'listen', 'say', 'report'].includes(verb))
+		return harness === 'desktop' ? handleDesktop(who, verb) : handleScreen(who, tab, verb, rest);
 
 	switch (verb) {
 		case 'help':
@@ -907,13 +1003,13 @@ async function handle(agent: string, words: string[]): Promise<string> {
 				await locked(() => refresh());
 				const unread = lab.chat.slice(lab.chatSeen[who.id] ?? 0).some(message => message.from !== who.name);
 				if (needs(current!, who).length || unread) {
-					const lines = [...(harness === 'screen' ? [] : [renderHeader(current!)]), ...digest(current!, who)];
+					const lines = [...(sees(who.index) ? [] : [renderHeader(current!)]), ...digest(current!, who)];
 					persist();
 					return lines.join('\n');
 				}
 				if (Date.now() > deadline) {
 					const now = current!;
-					if (harness === 'screen') return 'Nothing is waiting on you yet. Run `wait` again.';
+					if (sees(who.index)) return 'Nothing is waiting on you yet. Run `wait` again.';
 					const active = now.world.game && now.phase.startsWith('playing') ? now.world.game.active : null;
 					const on = active
 						? now.world.campaign.characters[now.world.game!.players[active]!.character]?.name

@@ -4,7 +4,7 @@
 	import type { Action, ActionChoice, CardId, Command, PublicState, SeatId } from '@repo/game';
 	import { tick } from 'svelte';
 	import ActionIcon from './ActionIcon.svelte';
-	import { ACTION_NAMES, ACTION_TEXT, actionDetail, actionTarget, cityName, sharedCost } from './labels.svelte.ts';
+	import { ACTION_NAMES, actionDetail, actionTarget, actionText, cityName, sharedCost } from './labels.svelte.ts';
 	import { plain } from './rich.ts';
 	import RichText from './RichText.svelte';
 	import { ways } from './ways.ts';
@@ -52,7 +52,7 @@
 	// Every row is always in view, so the list keeps the engine's order and a row never moves under the pointer.
 	const rows = $derived(
 		menu.map(choice => {
-			const offered = ways(choice.actions);
+			const offered = ways(world, choice.actions);
 			const only = offered.length === 1 ? offered[0]! : null;
 			const target = only ? actionTarget(world, only) : null;
 			const detail = only ? actionDetail(world, only) : sharedCost(world, offered);
@@ -64,7 +64,8 @@
 				choice,
 				open: live && choice.actions.length > 0,
 				title: ACTION_NAMES[choice.a] + (live && target ? ` to ${cityName(target)}` : ''),
-				text: live && choice.reason ? choice.reason : live && detail?.length ? detail : ACTION_TEXT[choice.a],
+				text:
+					live && choice.reason ? choice.reason : live && detail?.length ? detail : actionText(world, seat, choice.a),
 				count: live && offered.length > 1 ? offered.length : null,
 				free,
 			};

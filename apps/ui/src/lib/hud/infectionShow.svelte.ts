@@ -13,12 +13,14 @@ type Beat = {
 	city: CityId;
 	card: InfectionCard;
 	note: string;
+	/** The card cost the table an incident, so its note is drawn as a warning. */
+	alarm: boolean;
 	strike: Hidden[];
 	pulse: FxKind | null;
 	incidents: { city: CityId; hidden: Hidden[] }[];
 };
 
-export type DrawnInfection = { key: number; card: InfectionCard; note: string; city: CityId };
+export type DrawnInfection = { key: number; card: InfectionCard; note: string; alarm: boolean; city: CityId };
 export type Lag = { cities: Partial<Record<CityId, Pieces>>; stockpile: number };
 
 const NOTE = {
@@ -208,6 +210,7 @@ export class InfectionShow {
 					city: entry.city,
 					card,
 					note: NOTE[entry.effect],
+					alarm: entry.effect === 'plague' || entry.effect === 'outbreak',
 					strike,
 					pulse: pulse === 'plague' ? null : pulse,
 					incidents: [],
@@ -222,6 +225,7 @@ export class InfectionShow {
 					city: entry.city,
 					card,
 					note: 'epidemic',
+					alarm: false,
 					strike: [...take(entry.city, 'supplies', -entry.removed), ...take(null, 'stockpile', entry.removed)],
 					pulse: 'epidemic',
 					incidents: [],
@@ -269,7 +273,10 @@ export class InfectionShow {
 			if (!beat) break;
 			this.queued = this.queue.length;
 			const slow = beat.incidents.length > 0;
-			this.stack = [{ key: beat.seq, card: beat.card, note: beat.note, city: beat.city }, ...this.stack];
+			this.stack = [
+				{ key: beat.seq, card: beat.card, note: beat.note, alarm: beat.alarm, city: beat.city },
+				...this.stack,
+			];
 			this.focus = beat.city;
 			if (!(await wait(slow ? 1050 : 630))) return;
 			this.reveal(beat.strike);

@@ -22,6 +22,8 @@ export type CityView = {
 	population: number;
 	/** Marked with an anchor: only ports start or end sea movement. */
 	port: boolean;
+	/** A haven has no Infection card and no City card: only an outbreak next door reaches it. */
+	haven: boolean;
 	/** What stands here, with whether it is printed on the board for good or only lasts this game. */
 	structures: { kind: StructureKind; permanent: boolean }[];
 	infested: boolean;

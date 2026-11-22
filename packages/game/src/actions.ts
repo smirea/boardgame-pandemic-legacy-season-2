@@ -142,6 +142,9 @@ function fillTargets(ctx: Ctx, mode: 'local' | 'system', first: CityId[] = []): 
 	return [...new Set([...chosen, ctx.here, ...sites])];
 }
 
+/** The refusal for a pawn that is somewhere else, which says nothing about what the pawns standing here could do. */
+export const OUT_OF_REACH = 'Both pawns must be in the same location';
+
 const shortfall = (ctx: Ctx, city: CityId) =>
 	Math.max(0, ctx.campaign.locations[city]!.population - ctx.game.locations[city]!.supplies);
 
@@ -384,8 +387,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 	share: {
 		check(ctx, action) {
 			const other = ctx.game.players[action.with];
-			if (!other || action.with === ctx.seat || other.location !== ctx.here)
-				return 'Both pawns must be in the same location';
+			if (!other || action.with === ctx.seat || other.location !== ctx.here) return OUT_OF_REACH;
 			const giver = action.give ? ctx.seat : action.with;
 			if (!player(ctx.game, giver).hand.includes(action.card)) return 'The giver does not hold that card';
 			const card = ctx.campaign.playerCards[action.card];
@@ -773,8 +775,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 		check(ctx, action) {
 			const other = ctx.game.players[action.with];
 			if (!unused(ctx, 'facilitator')) return 'Once per turn';
-			if (!other || action.with === ctx.seat || other.location !== ctx.here)
-				return 'Both pawns must be in the same location';
+			if (!other || action.with === ctx.seat || other.location !== ctx.here) return OUT_OF_REACH;
 			return other.hand.includes(action.card) ? ok : 'They do not hold that card';
 		},
 		apply(ctx, action) {
@@ -871,7 +872,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 		check(ctx, action) {
 			const other = ctx.game.players[action.with];
 			if (!other || action.with === ctx.seat) return 'Pick another player';
-			if (other.location !== ctx.here && !trait(ctx, 'radioOperator')) return 'Both pawns must be in the same location';
+			if (other.location !== ctx.here && !trait(ctx, 'radioOperator')) return OUT_OF_REACH;
 			const giver = action.give ? ctx.me : other;
 			return Number.isInteger(action.count) && action.count >= 1 && action.count <= giver.supplies
 				? ok
@@ -1039,7 +1040,7 @@ export function applyAction(world: World, seat: SeatId, action: Action) {
 	specFor(action).apply(ctx, action);
 	if (action.a === 'deliver') ctx.me.used = ctx.me.used.filter(key => key !== 'farmerReady');
 	settleCarried(world);
-	log(ctx.game, { t: 'action', seat, action: action.a, detail: '' });
+	log(ctx.game, { t: 'action', seat, action: action.a, detail: '', cost });
 }
 
 /** Cubes the seat's character would pay to draw a supply line or sea lane right now. */

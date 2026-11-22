@@ -147,3 +147,12 @@ export async function pressCombo(tab: Tab, key: string): Promise<string> {
 	}
 	return `Pressed ${key}.`;
 }
+
+export async function holdKey(tab: Tab, key: string, down: boolean): Promise<string> {
+	try {
+		await (down ? tab.page.keyboard.down(key) : tab.page.keyboard.up(key));
+	} catch {
+		return `No key "${key}".`;
+	}
+	return down ? `Holding ${key} down. Let go with keyup ${key}.` : `Let go of ${key}.`;
+}

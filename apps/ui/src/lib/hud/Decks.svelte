@@ -187,7 +187,7 @@
 					<h4>
 						{infection.strata.length > 1
 							? index === 0
-								? 'On top, drawn next'
+								? 'On top, in no known order'
 								: `Layer ${index + 1}`
 							: infection.opening
 								? 'In the deck'

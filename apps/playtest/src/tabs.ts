@@ -21,12 +21,25 @@ declare const document: Document;
 
 export type Tab = { id: string; page: Page; errors: string[] };
 
-export async function launch(headed: boolean): Promise<{ browser: Browser; context: BrowserContext }> {
+/** The window a person would have: the page is 1440 by 900 under the title bar, tabs, toolbar and automation notice. */
+const WINDOW = { width: 1440, height: 987, x: 170, y: 40 };
+
+/**
+ * A browser for one player. `desk` names a player who drives the window themselves, through the desktop: it gets a
+ * real window drawn by the graphics card, at the size of the page the others see, and a mark its process can be found by.
+ */
+export async function launch(headed: boolean, desk?: string): Promise<{ browser: Browser; context: BrowserContext }> {
 	const browser = await chromium.launch({
-		headless: !headed,
-		args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'],
+		headless: !headed && !desk,
+		args: desk
+			? [
+					`--playtest-player=${desk}`,
+					`--window-size=${WINDOW.width},${WINDOW.height}`,
+					`--window-position=${WINDOW.x},${WINDOW.y}`,
+				]
+			: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'],
 	});
-	const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+	const context = await browser.newContext({ viewport: desk ? null : { width: 1440, height: 900 } });
 	return { browser, context };
 }
 
@@ -39,9 +52,15 @@ export async function openTab(
 		name: string;
 		passphrase: string;
 		host: boolean;
+		/** Who this browser was the last time the lab ran, so a restart of the lab is not a stranger sitting down. */
+		identity?: { key: string; player: string };
 		onError: (text: string) => void;
 	},
 ): Promise<Tab> {
+	if (options.identity)
+		await context.addInitScript(({ key, player }) => {
+			if (!localStorage.getItem(key)) localStorage.setItem(key, JSON.stringify(player));
+		}, options.identity);
 	const page = await context.newPage();
 	const tab: Tab = { id: options.id, page, errors: [] };
 	const note = (text: string) => {

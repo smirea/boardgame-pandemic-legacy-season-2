@@ -71,7 +71,10 @@ export function cityHint(city: CityView): HintText {
 	if (city.lab) rows.push({ label: 'Lab', value: 'Found', tone: 'good' });
 	if (city.infested) rows.push({ label: 'Infested', value: 'Yes', tone: 'bad' });
 	if (city.forsaken) rows.push({ label: 'Forsaken', value: 'Yes', tone: 'bad' });
-	return { title: city.name, marks, counts, rows, notes: [] };
+	const notes = city.haven
+		? ['No Infection card names a haven. An outbreak in a neighbouring city still strikes it.']
+		: [];
+	return { title: city.name, marks, counts, rows, notes };
 }
 
 /** One piece or printed mark beside a city. */

@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
 
-export type Harness = 'api' | 'ui' | 'screen';
+export type Harness = 'api' | 'ui' | 'screen' | 'desktop';
 
 export type PlayerConfig = {
 	/** Short id used on the command line, such as `vex`. */
@@ -14,6 +14,8 @@ export type PlayerConfig = {
 	/**
 	 * `api` sends commands through the tab's debug API. `ui` may only click what a person could click, found
 	 * by its text. `screen` has pictures of the screen and a pointer and keyboard aimed by pixel, and nothing else.
+	 * `desktop` has a real browser window on this machine's desktop, which the player drives with a computer-use
+	 * tool of their own, and the lab gives them only whose turn the desktop is.
 	 */
 	harness: Harness;
 	/** The T3 provider and model that plays this seat, recorded so a run can be repeated. */
@@ -67,8 +69,8 @@ export function loadConfig(path: string): LabConfig & { file: string; runDir: st
 	for (const player of players) {
 		for (const key of ['id', 'name', 'persona', 'harness', 'provider', 'model', 'effort'] as const)
 			if (!player[key]) throw new Error(`${file}: player "${player.id ?? '?'}" needs "${key}"`);
-		if (!['api', 'ui', 'screen'].includes(player.harness))
-			throw new Error(`${file}: harness is "api", "ui" or "screen"`);
+		if (!['api', 'ui', 'screen', 'desktop'].includes(player.harness))
+			throw new Error(`${file}: harness is "api", "ui", "screen" or "desktop"`);
 		player.persona = fromLab(player.persona);
 		if (player.memory) player.memory = fromLab(player.memory);
 		if (!existsSync(player.persona)) throw new Error(`${file}: no persona file at ${player.persona}`);
