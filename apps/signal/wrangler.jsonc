@@ -15,13 +15,13 @@
 		"production": {
 			"name": "pandemic-legacy-s2",
 			"routes": [{ "pattern": "pandemic-legacy-s2.stf.lol", "custom_domain": true }],
-			"secrets": { "required": ["SIGNAL_SECRET"] },
+			"secrets": { "required": ["SIGNAL_SECRET", "PROCRASTIMATE_TOKEN"] },
 			"workers_dev": false,
 			"preview_urls": false,
 			"assets": {
 				"directory": "site",
 				"not_found_handling": "single-page-application",
-				"run_worker_first": ["/signal"],
+				"run_worker_first": ["/signal", "/__feedback/*"],
 			},
 			"durable_objects": {
 				"bindings": [{ "name": "SIGNAL_ROOM", "class_name": "SignalRoom" }],

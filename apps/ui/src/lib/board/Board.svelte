@@ -20,15 +20,12 @@
 	import type { BoardView, Covered, CursorTool } from './types';
 	import type { CameraPose } from '#lib/studio/scene.ts';
 
-	// The feedback editor and the studio's capture redraw the page, and a WebGL canvas reads blank once its frame is
-	// presented. The board draws only when something changes, so keeping the buffer costs little.
 	const createRenderer = (canvas: HTMLCanvasElement) =>
 		new WebGLRenderer({
 			canvas,
 			powerPreference: 'high-performance',
 			antialias: true,
 			alpha: true,
-			preserveDrawingBuffer: true,
 		});
 
 	type Props = {
