@@ -33,9 +33,11 @@
 		solo: boolean;
 		send: (command: Command) => void;
 		ondeckout?: (out: boolean) => void;
+		/** The table is watching the map, so the reading waits. */
+		paused?: boolean;
 	};
 
-	let { briefing, campaign, table, player, solo, send, ondeckout }: Props = $props();
+	let { briefing, campaign, table, player, solo, send, ondeckout, paused = false }: Props = $props();
 
 	type StowClass = 'trash' | 'infectionDeck' | 'playerDeck' | 'map' | 'box' | 'mechanic';
 	const STOW_ORDER: StowClass[] = ['trash', 'infectionDeck', 'playerDeck', 'map', 'box', 'mechanic'];
@@ -333,7 +335,7 @@
 			if (event.key === 'Escape') full = false;
 			return;
 		}
-		if (event.key === ' ' && !progress.stowing) {
+		if (event.key === ' ' && !progress.stowing && !paused) {
 			event.preventDefault();
 			if (allDrawn) toggleReady();
 			else step();
@@ -542,40 +544,35 @@
 								{/if}
 							</div>
 
-							{#if flipped}
-								<div class="caption-plate" in:fade={{ duration: 240 }}>
-									<h2>{current.title}</h2>
-									{#if current.text && !cardDef}<p><RichText text={current.text} /></p>{/if}
-								</div>
+							<!-- What came out stands beside the card, never under it, so a full reading fits the table without scrolling. -->
+							<div class="spotlight-side">
+								{#if flipped}
+									<div class="caption-plate" in:fade={{ duration: 240 }}>
+										<h2>{current.title}</h2>
+										{#if current.text && !cardDef}<p><RichText text={current.text} /></p>{/if}
+									</div>
 
-								{#if pieces.length}
-									<ul class="spotlight-pieces">
-										{#each pieces as entry, pIdx (pIdx)}
-											{@const stow = stowInfo(entry.unlock)}
-											<li
-												class="big-piece"
-												class:mechanic={stow?.cls === 'mechanic'}
-												in:fly={{ y: 28, duration: 380, delay: pIdx * 90 }}
-											>
-												<span class="piece-token" data-stow-class={stow?.cls} data-put={stow?.dest.join(' ')}>
-													<BriefPiece unlock={entry.unlock} {campaign} size="2.8rem" />
-												</span>
-												<p><RichText text={entry.text} /></p>
-											</li>
-										{/each}
-									</ul>
+									{#if pieces.length}
+										<ul class="spotlight-pieces">
+											{#each pieces as entry, pIdx (pIdx)}
+												{@const stow = stowInfo(entry.unlock)}
+												<li
+													class="big-piece"
+													class:mechanic={stow?.cls === 'mechanic'}
+													in:fly={{ y: 28, duration: 380, delay: pIdx * 90 }}
+												>
+													<span class="piece-token" data-stow-class={stow?.cls} data-put={stow?.dest.join(' ')}>
+														<BriefPiece unlock={entry.unlock} {campaign} size="2.8rem" />
+													</span>
+													<p><RichText text={entry.text} /></p>
+												</li>
+											{/each}
+										</ul>
+									{/if}
 								{/if}
-							{/if}
+							</div>
 						</div>
 					{/key}
-				{/if}
-
-				{#if showObjectives && objectives.length}
-					<div class="table-objectives" in:fly={{ y: 20, duration: 360 }}>
-						{#each objectives as objective (objective.id)}
-							<span class="obj-tag" data-brief-objective={objective.id}><ObjectiveTag {objective} /></span>
-						{/each}
-					</div>
 				{/if}
 			</div>
 
@@ -626,6 +623,14 @@
 				{/each}
 			</div>
 		</div>
+
+		{#if showObjectives && objectives.length}
+			<div class="table-objectives" in:fly={{ y: 20, duration: 360 }}>
+				{#each objectives as objective (objective.id)}
+					<span class="obj-tag" data-brief-objective={objective.id}><ObjectiveTag {objective} /></span>
+				{/each}
+			</div>
+		{/if}
 
 		<!-- Bottom action bar: Trash receptacle + Done button with multiplayer agreement -->
 		<footer class="bottom-bar">
@@ -683,7 +688,7 @@
 	.tabletop-unboxing {
 		position: relative;
 		display: grid;
-		grid-template-rows: auto minmax(0, 1fr) auto;
+		grid-template-rows: auto minmax(0, 1fr) auto auto;
 		width: 100%;
 		height: 100%;
 		padding: 0.6rem 1.2rem 1rem;
@@ -794,10 +799,10 @@
 	.wing {
 		display: flex;
 		flex-direction: column;
-		gap: 0.8rem;
+		gap: 0.6rem;
 		max-height: 100%;
 		overflow: auto;
-		padding: 0.4rem;
+		padding: 0.3rem;
 	}
 
 	.wing.left {
@@ -866,14 +871,6 @@
 		background: rgb(227 178 60 / 0.14);
 	}
 
-	.chip-label {
-		display: -webkit-box;
-		-webkit-line-clamp: 3;
-		line-clamp: 3;
-		-webkit-box-orient: vertical;
-		overflow: hidden;
-	}
-
 	.center {
 		display: flex;
 		flex-direction: column;
@@ -881,17 +878,21 @@
 		justify-content: center;
 		gap: 0.85rem;
 		min-height: 0;
-		max-height: 100%;
-		overflow: auto;
 		padding: 0.4rem;
 	}
 
 	.spotlight {
 		display: flex;
-		flex-direction: column;
 		align-items: center;
-		gap: 0.75rem;
-		max-width: min(44rem, 56vw);
+		gap: 1.4rem;
+	}
+
+	.spotlight-side {
+		display: flex;
+		flex-direction: column;
+		align-items: stretch;
+		gap: 0.7rem;
+		width: min(24rem, 26vw);
 	}
 
 	.spotlight-top {
@@ -1000,9 +1001,11 @@
 		font-size: 1.6rem;
 	}
 
+	/* Three doors to a column, so a card that opens five stays no taller than the card. */
 	.opened-seals {
-		display: flex;
-		flex-direction: column;
+		display: grid;
+		grid-template-rows: repeat(3, auto);
+		grid-auto-flow: column;
 		gap: 0.6rem;
 	}
 
@@ -1040,8 +1043,7 @@
 
 	.spotlight-pieces {
 		display: flex;
-		flex-wrap: wrap;
-		justify-content: center;
+		flex-direction: column;
 		gap: 0.7rem;
 		margin: 0;
 		padding: 0;
@@ -1052,7 +1054,6 @@
 		display: flex;
 		align-items: center;
 		gap: 0.7rem;
-		max-width: 24rem;
 		padding: 0.55rem 0.75rem;
 		border: 1px solid rgb(231 220 198 / 0.24);
 		border-radius: 6px;
@@ -1083,6 +1084,8 @@
 		flex-wrap: wrap;
 		justify-content: center;
 		gap: 0.6rem;
+		padding-top: 0.5rem;
+		z-index: 4;
 	}
 
 	.obj-tag {

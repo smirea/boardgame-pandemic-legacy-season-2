@@ -5,6 +5,7 @@ import type { BoardMarks, BoardView, CityView, Fx, LabInfo } from '#lib/board/ty
 import { reconciler } from '#lib/reconcile.ts';
 import type { SessionView } from '#lib/session/session.svelte.ts';
 import type { Lag } from './infectionShow.svelte.ts';
+import type { MapLag } from './legacyShow.svelte.ts';
 import { cityName, SEAT_COLORS, seatName } from './labels.svelte.ts';
 
 const LAB_META: Record<string, { id?: keyof typeof LABS; name: string; effect: string | null }> = {
@@ -32,6 +33,8 @@ export type BoardSource = {
 	readonly lag: Lag;
 	/** Game End's population changes the population show has not reached yet. */
 	readonly populationLag: Partial<Record<CityId, number>>;
+	/** The map as it was before a Legacy reading, for each change whose scene the Unboxing has not played yet. */
+	readonly mapLag: MapLag;
 	readonly skull: BoardView['skull'];
 	/** The city whose ring of actions is open. */
 	readonly selected: CityId | null;
@@ -76,13 +79,13 @@ export function createBoardView(source: BoardSource): BoardView {
 	const sameCities = reconciler<Record<CityId, CityView>>();
 	const cities = $derived.by(() => {
 		const info = source.playing ? source.info : null;
-		const { lag, populationLag, onGrid, selected, targets } = source;
+		const { lag, mapLag, populationLag, onGrid, selected, targets } = source;
 		const stocks = inoculation(source.world);
 		const storageLeaks = campaign.rules.includes('epidemicFromStorage');
 		return sameCities(
 			Object.fromEntries(
 				pack.cities.map((city): [CityId, CityView] => {
-					const record = campaign.locations[city.id]!;
+					const record = mapLag.locations[city.id] ?? campaign.locations[city.id]!;
 					const location = game?.locations[city.id];
 					const held = lag.cities[city.id];
 					const labMeta = record.lab ? LAB_META[city.id] : undefined;
@@ -123,7 +126,11 @@ export function createBoardView(source: BoardSource): BoardView {
 								.filter(entry => entry.permanent || entry.placed),
 							inGame: game !== null,
 							infested: record.infested,
-							forsaken: isForsaken(campaign, city.id) && !populationLag[city.id],
+							forsaken:
+								(record === campaign.locations[city.id]
+									? isForsaken(campaign, city.id)
+									: campaign.rules.includes('forsaken') && city.kind === 'city' && record.population === 0) &&
+								!populationLag[city.id],
 							lab: record.lab,
 							labInfo,
 							highlight: selected === city.id ? 'selected' : targets.has(city.id) ? 'target' : null,
@@ -149,24 +156,26 @@ export function createBoardView(source: BoardSource): BoardView {
 	const sameRecon = reconciler<BoardView['recon']>();
 	const recon = $derived(
 		sameRecon(
-			source.recons.map(box => ({
-				route: box.route.id,
-				city: box.route.city,
-				cityName: cityName(box.route.city),
-				name: box.name,
-				color: box.route.color,
-				count: box.route.count,
-				unique: box.route.unique,
-				needsCenter: box.route.needsCenter,
-				reveals: box.reveals,
-				...(source.spectator
-					? { state: 'idle' as const, reason: null }
-					: !source.canAct
-						? { state: 'blocked' as const, reason: 'Not your turn' }
-						: box.actions.length
-							? { state: 'ready' as const, reason: null }
-							: { state: 'blocked' as const, reason: box.reason }),
-			})),
+			source.recons
+				.filter(box => !source.mapLag.routes.has(box.route.id))
+				.map(box => ({
+					route: box.route.id,
+					city: box.route.city,
+					cityName: cityName(box.route.city),
+					name: box.name,
+					color: box.route.color,
+					count: box.route.count,
+					unique: box.route.unique,
+					needsCenter: box.route.needsCenter,
+					reveals: box.reveals,
+					...(source.spectator
+						? { state: 'idle' as const, reason: null }
+						: !source.canAct
+							? { state: 'blocked' as const, reason: 'Not your turn' }
+							: box.actions.length
+								? { state: 'ready' as const, reason: null }
+								: { state: 'blocked' as const, reason: box.reason }),
+				})),
 		),
 	);
 
@@ -236,6 +245,8 @@ export function createBoardView(source: BoardSource): BoardView {
 		})),
 	);
 
+	const edges = $derived(source.mapLag.edges ?? campaign.edges);
+
 	const stockpile = $derived(game ? game.stockpile - source.lag.stockpile : null);
 	const reserve = $derived(game ? game.reserve : null);
 
@@ -244,7 +255,7 @@ export function createBoardView(source: BoardSource): BoardView {
 			return cities;
 		},
 		get edges() {
-			return campaign.edges;
+			return edges;
 		},
 		get ghostEdges() {
 			return source.ghostEdges;

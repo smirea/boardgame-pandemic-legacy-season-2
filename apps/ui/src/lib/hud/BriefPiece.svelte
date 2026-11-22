@@ -153,8 +153,8 @@
 		background: var(--slip);
 		color: var(--paper-ink);
 		box-shadow: 0 1px 2px rgb(40 26 12 / 0.35);
-		font-size: 0.72rem;
-		font-weight: 700;
+		font-size: 0.8rem;
+		font-weight: 800;
 		letter-spacing: 0.04em;
 		text-transform: uppercase;
 	}

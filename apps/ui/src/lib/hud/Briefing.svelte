@@ -9,9 +9,16 @@
 	// Unlocks that show as a card or cubes get a grid, so the pieces line up.
 	const PIECES = new Set(['cityImprovement', 'infectionImprovement', 'event', 'gather', 'assemble', 'stockpileBonus']);
 
-	type Props = { briefing: BriefingEntry[]; campaign: Campaign; passive: boolean; oncontinue: () => void };
+	type Props = {
+		briefing: BriefingEntry[];
+		campaign: Campaign;
+		passive: boolean;
+		/** Read again after the table put the reading away, so its objectives are already on the board. */
+		recap?: boolean;
+		oncontinue: () => void;
+	};
 
-	let { briefing, campaign, passive, oncontinue }: Props = $props();
+	let { briefing, campaign, passive, recap = false, oncontinue }: Props = $props();
 
 	// Each card that changes the objectives brings a group of its own, and all of them would show the same list:
 	// the objectives as they now stand. It is drawn once, where the first card names them.
@@ -40,7 +47,9 @@
 					{#if section.items[0]?.unlock.t === 'objectives'}
 						<div class="objectives">
 							{#each objectives as objective (objective.id)}
-								<span class="tag" data-brief-objective={objective.id}><ObjectiveTag {objective} /></span>
+								<span class="tag" data-brief-objective={recap ? undefined : objective.id}
+									><ObjectiveTag {objective} /></span
+								>
 							{/each}
 						</div>
 						<p class="note">
@@ -60,7 +69,9 @@
 			{/if}
 		{/each}
 	</div>
-	<button class="primary" onclick={oncontinue} data-testid="ack-briefing">Continue</button>
+	<button class="primary" onclick={oncontinue} data-testid={recap ? 'close-recap' : 'ack-briefing'}>
+		{recap ? 'Close' : 'Continue'}
+	</button>
 </div>
 
 <style>
