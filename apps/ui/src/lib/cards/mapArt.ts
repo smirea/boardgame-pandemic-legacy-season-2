@@ -16,7 +16,6 @@ export type MapArt = {
 	pin: { x: number; y: number };
 	/** Other locations inside the frame, so a card reads as a place on the board and not a lone dot. */
 	neighbours: { x: number; y: number; color: Color | null }[];
-	coordinates: string;
 };
 
 const topology = landTopology as unknown as Topology;
@@ -50,9 +49,6 @@ const near = (mass: Landmass, lon: number, lat: number) => {
 	const fromWest = ((lon - mass.west + 540) % 360) - 180;
 	return fromWest > -REACH.lon && fromWest < span + REACH.lon;
 };
-
-const degrees = (value: number, positive: string, negative: string) =>
-	`${Math.abs(value).toFixed(1)}°${value >= 0 ? positive : negative}`;
 
 /**
  * The picture on every city card: the map around the city with a pin on it. It is drawn from the
@@ -89,7 +85,6 @@ export function mapArt(id: CityId): MapArt {
 		graticule: path(graticule) ?? '',
 		pin: { x, y },
 		neighbours,
-		coordinates: `${degrees(city.lat, 'N', 'S')} ${degrees(city.lon, 'E', 'W')}`,
 	};
 	cache.set(id, art);
 	return art;
