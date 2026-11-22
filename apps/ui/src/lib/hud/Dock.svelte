@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { handLimit, pack, reject } from '@repo/game';
-	import type { Action, CardId, Command, Decide, Play, PublicState, Purchase, SeatId } from '@repo/game';
+	import type { Action, CardId, CharacterId, Command, Decide, Play, PublicState, Purchase, SeatId } from '@repo/game';
 	import { flip } from 'svelte/animate';
 	import { cubicIn } from 'svelte/easing';
 	import { fade, fly } from 'svelte/transition';
@@ -10,6 +10,7 @@
 	import { deal } from './deal.ts';
 	import { sortHand } from './handOrder.ts';
 	import PlayerCard, { HAND_CARD_SIZE } from './PlayerCard.svelte';
+	import Portrait from './Portrait.svelte';
 	import { keep } from './viewState.ts';
 
 	type Props = {
@@ -60,12 +61,19 @@
 
 	const world = $derived(snap.world);
 	const game = $derived(world.game!);
-	/** Abilities the group may take during setup with units a Legacy card gave it for nothing. */
+	/**
+	 * Abilities the group may take during setup with units a Legacy card gave it for nothing, as a table of abilities by
+	 * the characters who may take them, the seated ones first in seat order.
+	 */
 	const freeAbilities = $derived.by(() => {
 		const { campaign } = world;
-		const offers: Extract<Purchase, { t: 'ability' }>[] = [];
-		if (snap.phase !== 'setup.supply' || campaign.freeAbilityUnits <= 0) return offers;
-		for (const ability of new Set(campaign.abilitiesForSale))
+		const none = { rows: [], characters: [] };
+		if (snap.phase !== 'setup.supply' || campaign.freeAbilityUnits <= 0) return none;
+		const seated = game.seats.map(other => game.players[other]!.character);
+		const rank = (id: CharacterId) => (seated.includes(id) ? seated.indexOf(id) : Infinity);
+		const rows = [...new Set(campaign.abilitiesForSale)].flatMap(ability => {
+			const def = pack.abilities.find(candidate => candidate.id === ability)!;
+			const buy = new Map<CharacterId, Extract<Purchase, { t: 'ability' }>>();
 			for (const character of Object.values(campaign.characters)) {
 				const purchase = {
 					t: 'ability' as const,
@@ -74,10 +82,27 @@
 					slot: character.slots.indexOf(null),
 				};
 				if (purchase.slot >= 0 && reject(world, snap.phase, { type: 'PURCHASE', purchase }) === null)
-					offers.push(purchase);
+					buy.set(character.id, purchase);
 			}
-		return offers;
+			return buy.size ? [{ def, buy }] : [];
+		});
+		const characters = Object.values(campaign.characters)
+			.filter(character => rows.some(row => row.buy.has(character.id)))
+			.toSorted((a, b) => rank(a.id) - rank(b.id))
+			.map(character => {
+				const at = seated.indexOf(character.id);
+				const job = character.job ? pack.jobs.find(candidate => candidate.id === character.job)!.name : null;
+				return {
+					character,
+					color: at >= 0 ? SEAT_COLORS[at]! : '#4a4238',
+					seated: at >= 0,
+					job: job === character.name ? null : job,
+				};
+			});
+		return { rows, characters };
 	});
+
+	const benched = $derived(freeAbilities.characters.filter(entry => !entry.seated).length);
 
 	const pending = $derived(game.pending[0]);
 	// An Epidemic is started from its card beside the deck and its steps follow on the Epidemic's own panel, so the
@@ -122,11 +147,11 @@
 	let skipFree = $state(false);
 	$effect(() => {
 		void snap.phase;
-		void freeAbilities.length;
+		void freeAbilities.rows.length;
 		skipFree = false;
 	});
 	function confirmSupply() {
-		if (freeAbilities.length > 0 && !skipFree) {
+		if (freeAbilities.rows.length > 0 && !skipFree) {
 			skipFree = true;
 			return;
 		}
@@ -201,18 +226,87 @@
 				<div data-testid="supply-left">
 					<strong>{game.stockpile}</strong> cube{game.stockpile === 1 ? '' : 's'} left to place
 				</div>
-				{#if freeAbilities.length}
+				{#if freeAbilities.rows.length}
 					<details class="free" data-testid="free-abilities">
 						<summary>
 							{world.campaign.freeAbilityUnits} free unit{world.campaign.freeAbilityUnits === 1 ? '' : 's'} for abilities
 						</summary>
-						<div class="free-list">
-							{#each freeAbilities as purchase (`${purchase.ability}:${purchase.character}`)}
-								{@const def = pack.abilities.find(ability => ability.id === purchase.ability)!}
-								<button onclick={() => send({ type: 'PURCHASE', purchase })}>
-									{def.name} ({def.cost}) for {world.campaign.characters[purchase.character]!.name}
-								</button>
-							{/each}
+						<div
+							class="free-list"
+							data-testid="free-ability-list"
+							{@attach feedback('Free abilities', () => ({
+								units: world.campaign.freeAbilityUnits,
+								abilities: freeAbilities.rows.map(row => row.def.id),
+								characters: freeAbilities.characters.map(entry => entry.character.name),
+							}))}
+						>
+							<header>
+								<strong>Free abilities</strong>
+								<span>
+									{world.campaign.freeAbilityUnits} unit{world.campaign.freeAbilityUnits === 1 ? '' : 's'} to spend before
+									the game starts
+								</span>
+							</header>
+							<table style:--columns={freeAbilities.characters.length}>
+								<thead>
+									{#if benched > 0}
+										<tr class="groups">
+											<th></th>
+											{#if benched < freeAbilities.characters.length}
+												<th colspan={freeAbilities.characters.length - benched}>At the table</th>
+											{/if}
+											<th colspan={benched} class="bench">Not playing</th>
+										</tr>
+									{/if}
+									<tr>
+										<th></th>
+										{#each freeAbilities.characters as { character, color, seated, job }, index (character.id)}
+											<th
+												class="who"
+												class:benched={!seated}
+												class:first-benched={!seated && index === freeAbilities.characters.length - benched}
+												style:--seat={color}
+												scope="col"
+											>
+												<span class="face"><Portrait portrait={character.portrait} {color} job={character.job} /></span>
+												<span class="name">{character.name}</span>
+												{#if job}<small>{job}</small>{/if}
+											</th>
+										{/each}
+									</tr>
+								</thead>
+								<tbody>
+									{#each freeAbilities.rows as { def, buy } (def.id)}
+										<tr data-ability={def.id}>
+											<th scope="row">
+												<span class="ability-head">
+													<strong>{def.name}</strong>
+													<span
+														class="cost"
+														role="img"
+														aria-label={`Costs ${def.cost} unit${def.cost === 1 ? '' : 's'}`}
+													>
+														{#each { length: def.cost } as _, index (index)}<i></i>{/each}
+													</span>
+												</span>
+												<span class="text">{def.text}</span>
+											</th>
+											{#each freeAbilities.characters as { character, color } (character.id)}
+												{@const purchase = buy.get(character.id)}
+												<td style:--seat={color}>
+													{#if purchase}
+														<button
+															class="give"
+															onclick={() => send({ type: 'PURCHASE', purchase })}
+															aria-label={`Give ${def.name} to ${character.name}`}>+</button
+														>
+													{/if}
+												</td>
+											{/each}
+										</tr>
+									{/each}
+								</tbody>
+							</table>
 						</div>
 					</details>
 				{/if}
@@ -643,16 +737,177 @@
 		position: absolute;
 		bottom: calc(100% + 0.6rem);
 		left: 50%;
-		display: grid;
-		grid-template-columns: repeat(3, minmax(13rem, 1fr));
-		gap: 0.3rem;
-		max-height: min(26rem, calc(100vh - 14rem));
-		padding: 0.6rem;
+		width: max-content;
+		max-width: calc(100vw - 4rem);
+		max-height: min(34rem, calc(100vh - 14rem));
+		padding: 0.75rem 0.8rem 0.6rem;
 		overflow: auto;
 		translate: -50% 0;
 		border: 1px solid var(--line);
 		border-radius: 0.5rem;
 		background: var(--panel);
+		backdrop-filter: blur(10px);
+		box-shadow: 0 0.8rem 2rem rgb(0 0 0 / 0.45);
+	}
+
+	.free-list header {
+		display: flex;
+		align-items: baseline;
+		gap: 0.6rem;
+		padding: 0 0.2rem 0.5rem;
+	}
+
+	.free-list header strong {
+		color: #fce29a;
+		font-size: 1.05rem;
+	}
+
+	.free-list header span,
+	.free-list small,
+	.free-list .text {
+		color: var(--muted);
+	}
+
+	.free-list header span {
+		font-size: 0.82rem;
+	}
+
+	.free-list table {
+		border-collapse: separate;
+		border-spacing: 0;
+	}
+
+	.free-list thead th {
+		position: sticky;
+		top: -0.75rem;
+		z-index: 1;
+		background: var(--panel);
+	}
+
+	.free-list th.who {
+		width: 5.2rem;
+		padding: 0 0.25rem 0.45rem;
+		border-bottom: 2px solid var(--seat);
+		font-weight: 400;
+		text-align: center;
+		vertical-align: bottom;
+	}
+
+	.free-list th.who.benched {
+		opacity: 0.7;
+	}
+
+	.free-list th.who.first-benched,
+	.free-list .groups .bench {
+		border-left: 1px solid var(--line);
+	}
+
+	.free-list .groups th {
+		top: -0.75rem;
+		padding: 0 0.25rem 0.4rem;
+		color: var(--muted);
+		font-size: 0.68rem;
+		font-weight: 600;
+		letter-spacing: 0.08em;
+		text-align: center;
+		text-transform: uppercase;
+	}
+
+	.free-list .groups + tr th {
+		top: 0.6rem;
+	}
+
+	.free-list .face {
+		position: relative;
+		display: block;
+		width: 2.6rem;
+		height: 2.6rem;
+		margin: 0 auto 0.3rem;
+		overflow: hidden;
+		border-radius: 0.25rem;
+	}
+
+	.free-list .name,
+	.free-list small {
+		display: block;
+		max-width: 5.2rem;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.free-list .name {
+		font-size: 0.85rem;
+	}
+
+	.free-list small {
+		font-size: 0.7rem;
+	}
+
+	.free-list tbody th {
+		width: 15rem;
+		padding: 0.5rem 1rem 0.5rem 0.2rem;
+		font-weight: 400;
+		text-align: left;
+	}
+
+	.free-list tbody tr + tr > * {
+		border-top: 1px solid rgb(255 255 255 / 0.07);
+	}
+
+	.ability-head {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.ability-head strong {
+		font-size: 0.98rem;
+	}
+
+	.cost {
+		display: flex;
+		gap: 0.18rem;
+	}
+
+	.cost i {
+		width: 0.55rem;
+		height: 0.55rem;
+		border-radius: 2px;
+		background: var(--warn);
+		box-shadow: inset 0 -1px 0 rgb(0 0 0 / 0.3);
+	}
+
+	.free-list .text {
+		display: block;
+		margin-top: 0.15rem;
+		font-size: 0.78rem;
+		line-height: 1.3;
+	}
+
+	.free-list td {
+		padding: 0.3rem;
+		text-align: center;
+		vertical-align: middle;
+	}
+
+	.setup .free-list .give {
+		width: 2.1rem;
+		height: 2.1rem;
+		padding: 0;
+		border: 1px solid color-mix(in srgb, var(--seat) 55%, transparent);
+		border-radius: 50%;
+		background: color-mix(in srgb, var(--seat) 12%, transparent);
+		color: var(--ink);
+		font-size: 1.15rem;
+		line-height: 1;
+	}
+
+	.setup .free-list .give:hover,
+	.setup .free-list .give:focus-visible {
+		border-color: var(--seat);
+		background: var(--seat);
+		color: #1c140a;
 	}
 
 	.setup .lost strong {
