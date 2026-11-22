@@ -1,7 +1,7 @@
 import { expect, test } from 'bun:test';
 import { pack } from './content/pack';
 import type { EdgeDef } from './content/types';
-import { passage, routeCourse } from './helpers';
+import { groundRevealed, passage, routeCourse } from './helpers';
 import { coursesCross, runsOver } from './lanes';
 import { newCampaign } from './legacy';
 
@@ -35,7 +35,7 @@ test('no starting line runs over ground the fog hides at the start', () => {
 	const campaign = newCampaign(0);
 	const hidden = startingEdges.flatMap(edge =>
 		passage(edge.a, edge.b, edge.kind)
-			.through.filter(id => !campaign.locations[id]?.revealed)
+			.through.filter(id => !groundRevealed(campaign, id))
 			.map(id => `${name(edge)} over ${id}`),
 	);
 	expect(hidden).toEqual([]);

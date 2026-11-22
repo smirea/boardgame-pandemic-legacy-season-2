@@ -1,6 +1,6 @@
 /// <reference types="bun" />
 import { describe, expect, test } from 'bun:test';
-import { nearestLocation, regionAt } from '@repo/game';
+import { nearestGround, regionAt } from '@repo/game';
 import { partition } from './partition';
 import { FRAME } from './projection';
 import type { BoardPoint } from './projection';
@@ -30,13 +30,13 @@ function crosses(a: BoardPoint, b: BoardPoint, c: BoardPoint, d: BoardPoint) {
 }
 
 describe('the board draws the rules partition', () => {
-	test('every point lies in the cell of the location nearestLocation names', () => {
+	test('every point lies in the cell of the location nearestGround names', () => {
 		const byId = new Map(cells.map(cell => [cell.id, cell.outline]));
 		let checked = 0;
 		for (let x = FRAME.minX; x <= FRAME.maxX; x += STEP) {
 			for (let z = FRAME.minZ; z <= FRAME.maxZ; z += STEP) {
 				const point = { x, z };
-				expect(inside(byId.get(nearestLocation(point))!, point, 1e-6)).toBe(true);
+				expect(inside(byId.get(nearestGround(point))!, point, 1e-6)).toBe(true);
 				checked++;
 			}
 		}

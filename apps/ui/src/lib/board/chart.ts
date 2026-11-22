@@ -1,5 +1,5 @@
 import { pack } from '@repo/game';
-import type { CityId } from '@repo/game';
+import type { CityId, GroundId } from '@repo/game';
 import { geoGraticule } from 'd3-geo';
 import type { GeoPermissibleObjects } from 'd3-geo';
 import { feature } from 'topojson-client';
@@ -560,11 +560,11 @@ export class FogMask {
 	/** Where region lines show: white along each border, as strong as the more hidden of the two locations it divides. */
 	readonly lines: OffscreenCanvas;
 	#linesCtx: OffscreenCanvasRenderingContext2D;
-	#borders: { a: CityId; b: CityId; path: Path2D }[];
+	#borders: { a: GroundId; b: GroundId; path: Path2D }[];
 	#fieldCtx: OffscreenCanvasRenderingContext2D;
 	#ctx: Ctx;
 	#scale: number;
-	#cells: { id: CityId; path: Path2D; at: BoardPoint; reach: number }[];
+	#cells: { id: GroundId; path: Path2D; at: BoardPoint; reach: number }[];
 
 	constructor(
 		readonly bounds: BoardBounds,
@@ -587,7 +587,7 @@ export class FogMask {
 			return { a: border.a, b: border.b, path };
 		});
 		this.#cells = partition(bounds).cells.map(cell => {
-			const at = pack.positions[cell.id]!;
+			const at = pack.positions[cell.id as CityId] ?? pack.darkSeas.find(sea => sea.id === cell.id)!.at;
 			const path = new Path2D();
 			cell.outline.forEach((corner, index) =>
 				index ? path.lineTo(corner.x, corner.z) : path.moveTo(corner.x, corner.z),
@@ -598,7 +598,7 @@ export class FogMask {
 		});
 	}
 
-	draw(cover: (id: CityId) => number) {
+	draw(cover: (id: GroundId) => number) {
 		const ctx = this.#ctx;
 		const scale = this.#scale;
 		// Opaque black under the white cells: the value lives in the colour channels, which a blur keeps

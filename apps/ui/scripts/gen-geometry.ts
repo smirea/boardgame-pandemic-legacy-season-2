@@ -5,7 +5,14 @@
 // content/world.ts.
 import { layoutCities, project } from '../src/lib/board/projection.ts';
 import { edgeKey } from '../../../packages/game/src/ids.ts';
-import { cities, documentedEdges, redLines, regions, startingEdges } from '../../../packages/game/src/content/world.ts';
+import {
+	cities,
+	darkSeas,
+	documentedEdges,
+	redLines,
+	regions,
+	startingEdges,
+} from '../../../packages/game/src/content/world.ts';
 // Water is read from the same coastline the board draws, so a line the rules call dry looks dry.
 import { isWater, seaCourses } from './waterways.ts';
 import { coursesCross, redLineCrossings, runAlongside, runsOver } from '../../../packages/game/src/lanes.ts';
@@ -46,20 +53,44 @@ const redLinesOnBoard: Point[][] = redLines.map(({ corners }) =>
 );
 const MAX_RED_LINES = 1;
 
-/** `nearestLocation` from the rules, over the positions laid out here rather than the ones last generated. */
+const seaPositions = Object.fromEntries(
+	darkSeas.map(sea => {
+		const at = project(sea.lat, sea.lon);
+		return [sea.id, { x: Math.round(at.x * 100) / 100, z: Math.round(at.z * 100) / 100 }];
+	}),
+);
+
+/**
+ * `nearestGround` from the rules, over the positions laid out here rather than the ones last generated: the
+ * location or dark sea that owns a point.
+ */
 function nearest(point: Point) {
-	let best = cities[0]!;
+	let best: { city: (typeof cities)[number] } | { sea: (typeof darkSeas)[number] } = { city: cities[0]! };
 	let closest = Number.POSITIVE_INFINITY;
 	for (const city of cities) {
 		const at = positions[city.id];
 		const distance = (at.x - point.x) ** 2 + (at.z - point.z) ** 2 - (city.groundWeight ?? 0);
 		if (distance < closest) {
 			closest = distance;
-			best = city;
+			best = { city };
+		}
+	}
+	for (const sea of darkSeas) {
+		const at = seaPositions[sea.id]!;
+		const distance = (at.x - point.x) ** 2 + (at.z - point.z) ** 2;
+		if (distance < closest) {
+			closest = distance;
+			best = { sea };
 		}
 	}
 	return best;
 }
+
+/** Where a lane may go at all: off the ocean that stays dark for the whole campaign. */
+const neverDark: Ground = point => {
+	const owner = nearest(point);
+	return 'city' in owner || owner.sea.revealedWith !== null;
+};
 
 // A starting lane is on the board before anyone explores, so its course keeps to ground revealed at the
 // start: drawn over the fog, it would be a lane the rules refuse to anyone who tried to build it. The fog
@@ -68,7 +99,7 @@ const FOG_MARGIN = 1;
 const revealedRegions = new Set(regions.filter(region => region.startsRevealed).map(region => region.id));
 const revealed = (point: Point) => {
 	const owner = nearest(point);
-	return revealedRegions.has(owner.region) && !owner.lost;
+	return 'city' in owner && revealedRegions.has(owner.city.region) && !owner.city.lost;
 };
 const around = Array.from({ length: 8 }, (_, k) => ({
 	x: Math.cos((k * Math.PI) / 4) * FOG_MARGIN,
@@ -313,7 +344,7 @@ for (let i = 0; i < cities.length; i++) {
 		let course: { path: Point[]; length: number } | null = null;
 		let overLimit: { path: Point[]; length: number } | null = null;
 		let fallback: { path: Point[]; length: number } | null = null;
-		for (const path of seaCourses(from, to, arches(a.id, b.id, SEA_BOW))) {
+		for (const path of seaCourses(from, to, arches(a.id, b.id, SEA_BOW), neverDark)) {
 			const candidate = { path, length: length(path) };
 			if (!fallback) fallback = candidate;
 			if (!listed && (candidate.length > MAX_SEA_LENGTH || candidate.length > chord * MAX_DETOUR)) continue;
@@ -327,6 +358,10 @@ for (let i = 0; i < cities.length; i++) {
 		course ??= overLimit;
 		if (!course) {
 			if (!listed) continue;
+			fallback ??= (() => {
+				const first = seaCourses(from, to, arches(a.id, b.id, SEA_BOW)).next();
+				return first.done ? null : { path: first.value, length: length(first.value) };
+			})();
 			if (!fallback) throw new Error(`no water joins ${a.id} and ${b.id}`);
 			course = fallback;
 		}
@@ -373,6 +408,9 @@ export const routeCourses: Record<string, [number, number][]> = ${JSON.stringify
 			.map(([key, path]) => [key, written(key, path).map(point => [point.x, point.z])]),
 	),
 )};
+
+/** Where each dark sea owns ground from, in board units. */
+export const seaPositions: Record<string, { x: number; z: number }> = ${JSON.stringify(seaPositions)};
 
 /** The red region lines printed on the board and its stickers, in board units. */
 export const redLines: [number, number][][] = ${JSON.stringify(

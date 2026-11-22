@@ -2491,6 +2491,18 @@ describe('drawing connections: what a line may not cross', () => {
 		expect(checkEdge(campaign, city('lagos'), city('antananarivo'), 'sea')).toBe('It would cross unexplored map');
 	});
 
+	test('the Bay of Bengal stays dark until South East Asia is revealed, as the printed board leaves it', () => {
+		const campaign = fresh();
+		reveal(
+			campaign,
+			pack.cities.filter(entry => entry.region !== 'east-asia').map(entry => entry.id),
+		);
+		campaign.edges.push({ a: city('lagos'), b: city('antananarivo'), kind: 'land' });
+		expect(checkEdge(campaign, city('antananarivo'), city('kolkata'), 'sea')).toBe('It would cross unexplored map');
+		reveal(campaign, ['jakarta']);
+		expect(checkEdge(campaign, city('antananarivo'), city('kolkata'), 'sea')).toBeNull();
+	});
+
 	test('every city can still be joined to something', () => {
 		for (const entry of pack.cities)
 			expect(pack.candidateEdges.some(edge => edge.a === entry.id || edge.b === entry.id)).toBe(true);

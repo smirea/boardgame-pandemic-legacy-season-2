@@ -14,7 +14,7 @@ import type {
 	Unlock,
 } from './content/types';
 import { sealKey } from './content/types';
-import type { CardId, CharacterId, CityId, RegionId, SeatId } from './ids';
+import type { CardId, CharacterId, CityId, GroundId, RegionId, SeaId, SeatId } from './ids';
 import { edgeKey } from './ids';
 import { redLineCrossings } from './lanes';
 import type {
@@ -347,19 +347,25 @@ export function crossesEdge(campaign: Campaign, a: CityId, b: CityId, kind: Edge
 	);
 }
 
-const locations = (Object.entries(pack.positions) as [CityId, Point][]).map(
-	([id, at]) => [id, at, pack.cities.find(city => city.id === id)!.groundWeight ?? 0] as const,
-);
+const grounds: (readonly [GroundId, Point, number])[] = [
+	...(Object.entries(pack.positions) as [CityId, Point][]).map(
+		([id, at]) => [id, at, pack.cities.find(city => city.id === id)!.groundWeight ?? 0] as const,
+	),
+	...pack.darkSeas.map(sea => [sea.id, sea.at, 0] as const),
+];
+const seaIndex = new Map(pack.darkSeas.map(sea => [sea.id as GroundId, sea]));
+
+export const isSea = (id: GroundId): id is SeaId => seaIndex.has(id);
 
 /**
- * The location a point on the board belongs to: the nearest one, weighed by `groundWeight`. This one
- * partition is what the rules mean by "unexplored map" and by region boundaries, and it is what the
- * board draws, so a line that looks like it crosses unknown territory is one the rules refuse.
+ * What a point on the board belongs to: the nearest location or dark sea, weighed by `groundWeight`. This one
+ * partition is what the rules mean by "unexplored map" and by region boundaries, and it is what the board draws, so
+ * a line that looks like it crosses unknown territory is one the rules refuse.
  */
-export function nearestLocation(point: Point): CityId {
-	let best = locations[0]![0];
+export function nearestGround(point: Point): GroundId {
+	let best = grounds[0]![0];
 	let closest = Number.POSITIVE_INFINITY;
-	for (const [id, at, weight] of locations) {
+	for (const [id, at, weight] of grounds) {
 		const distance = (at.x - point.x) ** 2 + (at.z - point.z) ** 2 - weight;
 		if (distance < closest) {
 			closest = distance;
@@ -369,21 +375,34 @@ export function nearestLocation(point: Point): CityId {
 	return best;
 }
 
-export const regionAt = (point: Point): RegionId => cityDef(nearestLocation(point)).region;
+/** The location whose reveal uncovers this ground: itself, or the one a dark sea opens with, if any. */
+export const groundCity = (id: GroundId): CityId | null => (isSea(id) ? seaIndex.get(id)!.revealedWith : id);
+
+/** Whether players can see this ground. A dark sea that nothing uncovers never is. */
+export function groundRevealed(campaign: Campaign, id: GroundId): boolean {
+	const city = groundCity(id);
+	return city !== null && campaign.locations[city]?.revealed === true;
+}
+
+/** The region a point lies in, or null in a dark sea that stays dark. */
+export const regionAt = (point: Point): RegionId | null => {
+	const city = groundCity(nearestGround(point));
+	return city && cityDef(city).region;
+};
 
 const STEP = 0.5;
-const passageCache = new Map<string, { through: CityId[]; redLines: number }>();
+const passageCache = new Map<string, { through: GroundId[]; redLines: number }>();
 let redLines: Point[][] | undefined;
 
-/** What a line between two locations passes along its course: every location whose ground it crosses, and how many red region lines. */
-export function passage(a: CityId, b: CityId, kind: EdgeKind): { through: CityId[]; redLines: number } {
+/** What a line between two locations passes along its course: every location or dark sea whose ground it crosses, and how many red region lines. */
+export function passage(a: CityId, b: CityId, kind: EdgeKind): { through: GroundId[]; redLines: number } {
 	const key = `${kind}:${edgeKey(a, b)}`;
 	const known = passageCache.get(key);
 	if (known) return known;
 	const points = courseOf(a, b, kind).points;
-	const through: CityId[] = [];
+	const through: GroundId[] = [];
 	const visit = (point: Point) => {
-		const owner = nearestLocation(point);
+		const owner = nearestGround(point);
 		if (!through.includes(owner)) through.push(owner);
 	};
 	visit(points[0]!);
@@ -404,7 +423,7 @@ export function passage(a: CityId, b: CityId, kind: EdgeKind): { through: CityId
 
 /** Whether a line between the two locations would run over ground no one has revealed yet. */
 export const crossesUnexplored = (campaign: Campaign, a: CityId, b: CityId, kind: EdgeKind) =>
-	passage(a, b, kind).through.some(id => !campaign.locations[id]?.revealed);
+	passage(a, b, kind).through.some(id => !groundRevealed(campaign, id));
 
 export const isCandidate = (a: CityId, b: CityId, kind: EdgeKind) =>
 	pack.candidateEdges.some(edge => edge.kind === kind && edgeKey(edge.a, edge.b) === edgeKey(a, b));

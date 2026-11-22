@@ -102,8 +102,8 @@
 </script>
 
 <script lang="ts">
-	import { pack } from '@repo/game';
-	import type { CityId } from '@repo/game';
+	import { groundCity, pack } from '@repo/game';
+	import type { CityId, GroundId } from '@repo/game';
 	import { T, useTask, useThrelte } from '@threlte/core';
 	import { untrack } from 'svelte';
 	import { cubicInOut } from 'svelte/easing';
@@ -185,11 +185,17 @@
 	const bank = layer(0);
 	const wisps = layer(1);
 
-	// Every location owns ground, lost havens included: the rules count theirs as unexplored too.
-	const sources = new Map<CityId, { cover: number; progress: number; target: number; wait: number }>(
-		pack.cities.map(city => {
-			const covered = hidden(city.id) ? 1 : 0;
-			return [city.id, { cover: covered, progress: covered, target: covered, wait: 0 }];
+	// Every location owns ground, lost havens included: the rules count theirs as unexplored too. So does each dark
+	// sea, hidden until the location it opens with is revealed, or for good.
+	const grounds: GroundId[] = [...pack.cities.map(city => city.id), ...pack.darkSeas.map(sea => sea.id)];
+	const hiddenGround = (id: GroundId) => {
+		const city = groundCity(id);
+		return city === null || hidden(city);
+	};
+	const sources = new Map<GroundId, { cover: number; progress: number; target: number; wait: number }>(
+		grounds.map(id => {
+			const covered = hiddenGround(id) ? 1 : 0;
+			return [id, { cover: covered, progress: covered, target: covered, wait: 0 }];
 		}),
 	);
 	const paint = () => {
@@ -245,9 +251,9 @@
 
 	$effect(() => {
 		let changed = false;
-		pack.cities.forEach((city, index) => {
-			const source = sources.get(city.id)!;
-			const target = hidden(city.id) ? 1 : 0;
+		grounds.forEach((id, index) => {
+			const source = sources.get(id)!;
+			const target = hiddenGround(id) ? 1 : 0;
 			if (source.target === target) return;
 			source.target = target;
 			source.wait = (index % 9) * 0.12;
