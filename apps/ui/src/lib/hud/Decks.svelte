@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
-	import { cityDef } from '@repo/game';
+	import { cityDef, pack } from '@repo/game';
 	import type { CityId, Insights, PlayerDeckKind, World } from '@repo/game';
 	import { fade, fly } from 'svelte/transition';
 	import { CITY_COLOR } from '#lib/board/CityMarker.svelte';
@@ -35,6 +35,8 @@
 	];
 	const player = $derived(info.playerDeck);
 	const infection = $derived(info.infection);
+	const rates = pack.numbers.infectionRates;
+	const rateIndex = $derived(world?.game?.rateIndex ?? 0);
 	const kinds = $derived(
 		KINDS.flatMap(entry => (player.byKind[entry.kind] ? [{ ...entry, count: player.byKind[entry.kind]! }] : [])),
 	);
@@ -130,6 +132,7 @@
 		player: player.cards,
 		epidemicsLeft: player.epidemicsLeft,
 		infection: infectionCards,
+		rateIndex,
 		discard: infection.discard,
 	}))}
 >
@@ -139,7 +142,12 @@
 		'#5d5446',
 		dealt ? String(player.cards) : '–',
 	)}
-	{@render deck('infection', `Infection deck: ${infectionCards} cards`, INFECTION, String(infectionCards))}
+	{@render deck(
+		'infection',
+		`Infection deck: ${infectionCards} cards, rate ${rates[rateIndex]}`,
+		INFECTION,
+		String(infectionCards),
+	)}
 
 	{#if open === 'player'}
 		<div class="tip" role="tooltip" data-testid="player-deck-tip" transition:fade={{ duration: 140 }}>
@@ -176,12 +184,20 @@
 	{:else if open === 'infection'}
 		<div class="tip wide" role="tooltip" data-testid="infection-deck-tip" transition:fade={{ duration: 140 }}>
 			<strong>Infection deck, {infectionCards} cards</strong>
-			{#if infection.opening}
-				<dl>
+			<dl>
+				<dt>Infection rate</dt>
+				<dd>
+					<span class="rate-track" data-testid="infection-rate-track" aria-label={`Infection rate ${rates[rateIndex]}`}>
+						{#each rates as rate, index (index)}
+							<span class="pip" class:on={index === rateIndex} class:past={index < rateIndex}>{rate}</span>
+						{/each}
+					</span>
+				</dd>
+				{#if infection.opening}
 					<dt>The opening infection flips</dt>
 					<dd>{infection.rate}</dd>
-				</dl>
-			{/if}
+				{/if}
+			</dl>
 			{#each infection.strata as stratum, index (index)}
 				<section>
 					<h4>
@@ -341,6 +357,36 @@
 
 	.hot {
 		color: var(--ink-danger);
+	}
+
+	.rate-track {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.18rem;
+	}
+
+	.pip {
+		display: grid;
+		place-items: center;
+		width: 1.05rem;
+		height: 1.05rem;
+		border: 1px solid var(--slip-line);
+		border-radius: 50%;
+		color: var(--slip-muted);
+		font-size: 0.66rem;
+		font-weight: 600;
+		line-height: 1;
+	}
+
+	.pip.past {
+		opacity: 0.4;
+	}
+
+	.pip.on {
+		border-color: var(--slip-ink);
+		background: var(--slip-ink);
+		color: var(--slip);
+		font-weight: 700;
 	}
 
 	ul {

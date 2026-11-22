@@ -16,9 +16,17 @@ import { plain } from './rich.ts';
 import type { Rich } from './rich.ts';
 import { ways } from './ways.ts';
 
-export type Option = { label: string; detail: Rich | string; run: () => void; city?: CityId; item?: string };
+export type Option = {
+	label: string;
+	detail: Rich | string;
+	run: () => void;
+	city?: CityId;
+	item?: string;
+	frequency?: number;
+};
 export type Chooser = {
 	title: string;
+	action?: Action['a'];
 	options: Option[];
 	multi?: { max: number; verb: string; confirm: (picked: Option[]) => void };
 };
@@ -114,11 +122,12 @@ export function createChoosing(source: ChoosingSource) {
 		label: ACTION_NAMES[action.a],
 		detail: actionDetail(world, action),
 		run: () => act(action),
+		...(action.a === 'monitor' ? { frequency: action.frequency } : {}),
 	});
 
-	function choose(title: string, options: Option[]) {
-		if (options.length === 1) options[0]!.run();
-		else if (options.length > 1) chooser = { title, options };
+	function choose(title: string, options: Option[], action?: Action['a']) {
+		if (options.length === 1 && action !== 'monitor') options[0]!.run();
+		else if (options.length >= 1) chooser = { title, action, options };
 	}
 
 	/** Takes a recon route from its box on the board, asking how to pay when there is more than one way. */
@@ -138,7 +147,7 @@ export function createChoosing(source: ChoosingSource) {
 		chooser = null;
 		targeting = null;
 		const variants = ways(world, all);
-		if (variants.length === 1) return act(variants[0]!);
+		if (variants.length === 1 && name !== 'monitor') return act(variants[0]!);
 		if (name === 'administratorMove') {
 			const moves = new Map<SeatId, Map<CityId, Option>>();
 			for (const action of variants) {
@@ -160,7 +169,7 @@ export function createChoosing(source: ChoosingSource) {
 			targeting = { label: ACTION_NAMES[name], a: name, cities };
 			return;
 		}
-		choose(ACTION_NAMES[name], variants.map(actionOption));
+		choose(ACTION_NAMES[name], variants.map(actionOption), name);
 	}
 
 	/** Lights the pawns that can be moved, then, once one is picked, where it can go. */

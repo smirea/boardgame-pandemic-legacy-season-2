@@ -52,6 +52,7 @@
 	import LegacyDeck from './LegacyDeck.svelte';
 	import Hotkeys from './Hotkeys.svelte';
 	import Objectives from './Objectives.svelte';
+	import ScannerDialog from './ScannerDialog.svelte';
 	import SeatPicker from './SeatPicker.svelte';
 	import TopBar from './TopBar.svelte';
 	import Upkeep from './Upkeep.svelte';
@@ -135,7 +136,21 @@
 	let boxOpen = $state(false);
 	let deckOpen = $state(false);
 	let hotkeysOpen = $state(false);
+	let scannerOpen = $state(false);
 	let legacyDeckOut = $state(false);
+	const monitorChoice = $derived(actionChoices.find(choice => choice.a === 'monitor') ?? null);
+	const canMonitor = $derived(live && Boolean(monitorChoice?.actions.length));
+	const monitorReason = $derived(
+		live ? (monitorChoice?.reason ?? null) : game ? 'Available on your turn during actions' : null,
+	);
+	function openScanner() {
+		if (canMonitor) {
+			scannerOpen = false;
+			choosing.step({ t: 'start', a: 'monitor', via: 'panel' });
+		} else {
+			scannerOpen = !scannerOpen;
+		}
+	}
 	// Once the table knows which game is next, every game is set up by choosing who plays, over the whole table.
 	const choosingCharacters = $derived(snap.phase === 'lobby' && !spectator && tableStart(snap.world) !== null);
 	// A haven the character screen points at, which the camera looks at behind it.
@@ -214,6 +229,7 @@
 			box: boxOpen,
 			deck: deckOpen,
 			hotkeys: hotkeysOpen,
+			scanner: scannerOpen,
 			steps: choosing.steps,
 			filter: choosing.filter,
 			toasts: toasts.map(({ text, tone }) => ({ text, tone })),
@@ -237,6 +253,7 @@
 		boxOpen = next.box;
 		deckOpen = next.deck;
 		hotkeysOpen = next.hotkeys ?? false;
+		scannerOpen = next.scanner ?? false;
 		viewing = next.viewing;
 		heldAnnouncements = next.toasts.length > 0 || next.banner !== null;
 		toasts = next.toasts.map(entry => ({ id: nextFx++, ...entry }));
@@ -576,6 +593,10 @@
 				hotkeysOpen = false;
 				return;
 			}
+			if (scannerOpen) {
+				scannerOpen = false;
+				return;
+			}
 			cancel();
 			menu = false;
 		}
@@ -778,6 +799,8 @@
 		players={session.peers.filter(peer => peer.connected).length}
 		solo={session.mode === 'solo' || spectator}
 		legacyOut={legacyDeckOut}
+		{canMonitor}
+		{monitorReason}
 		hasDrawings={!spectator && tools.hasDrawings}
 		erasing={tools.tool === 'eraser'}
 		oneraser={() => tools.toggleEraser()}
@@ -786,6 +809,7 @@
 		onmenu={() => (menu = !menu)}
 		onbox={() => (boxOpen = !boxOpen)}
 		ondeck={() => (deckOpen = !deckOpen)}
+		onscanner={openScanner}
 	/>
 
 	<main class="stage" bind:this={stage} data-dest="map">
@@ -859,7 +883,7 @@
 			/>
 		{/if}
 
-		{#if choosing.chooser}
+		{#if choosing.chooser && choosing.chooser.action !== 'monitor'}
 			<div
 				class="chooser"
 				transition:fly={{ y: 16, duration: 180 }}
@@ -1037,6 +1061,45 @@
 			>
 				<div in:fly={{ y: 24, duration: 300 }}>
 					<LegacyDeck {campaign} onclose={() => (deckOpen = false)} />
+				</div>
+			</div>
+		{/if}
+
+		{#if choosing.chooser?.action === 'monitor' || scannerOpen}
+			{@const monitorOptions = choosing.chooser?.action === 'monitor' ? choosing.chooser.options : null}
+			{@const legalFrequencies = monitorOptions
+				? new Set(monitorOptions.flatMap(option => (option.frequency !== undefined ? [option.frequency] : [])))
+				: undefined}
+			<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_noninteractive_element_interactions -->
+			<div
+				class="scrim box-scrim"
+				role="dialog"
+				aria-modal="true"
+				aria-label="Frequency Scanner"
+				tabindex="-1"
+				transition:fade={{ duration: 180 }}
+				onclick={event => {
+					if (event.target !== event.currentTarget) return;
+					if (monitorOptions) choosing.step({ t: 'closeChooser' });
+					else scannerOpen = false;
+				}}
+			>
+				<div in:fly={{ y: 24, duration: 280 }}>
+					<ScannerDialog
+						{campaign}
+						legal={legalFrequencies}
+						reason={monitorOptions ? null : monitorReason}
+						onpick={monitorOptions
+							? frequency => {
+									const index = monitorOptions.findIndex(option => option.frequency === frequency);
+									if (index >= 0) choosing.step({ t: 'option', index });
+								}
+							: undefined}
+						onclose={() => {
+							if (monitorOptions) choosing.step({ t: 'closeChooser' });
+							else scannerOpen = false;
+						}}
+					/>
 				</div>
 			</div>
 		{/if}

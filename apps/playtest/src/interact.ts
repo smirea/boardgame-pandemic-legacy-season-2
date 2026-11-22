@@ -216,7 +216,13 @@ const scenarios: Scenario[] = [
 	{
 		id: 'hover-decks',
 		async run() {
-			for (const id of ['player-deck-count', 'infection-deck-count', 'storage-deck', 'objectives']) {
+			for (const id of [
+				'player-deck-count',
+				'infection-deck-count',
+				'storage-deck',
+				'frequency-scanner',
+				'objectives',
+			]) {
 				const point = await center(`[data-testid=${id}]`).catch(() => null);
 				if (!point) continue;
 				await page.mouse.move(point.x, point.y, { steps: 8 });
@@ -292,7 +298,7 @@ const scenarios: Scenario[] = [
 	{
 		id: 'dialogs',
 		async run() {
-			for (const id of ['open-box', 'open-legacy-deck']) {
+			for (const id of ['open-box', 'open-legacy-deck', 'frequency-scanner']) {
 				const point = await center(`[data-testid=${id}]`).catch(() => null);
 				if (!point) continue;
 				await page.mouse.click(point.x, point.y);

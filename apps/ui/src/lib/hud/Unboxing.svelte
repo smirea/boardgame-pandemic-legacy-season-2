@@ -59,6 +59,8 @@
 			case 'action':
 			case 'actions':
 				return { cls: 'mechanic', dest: ['actions', 'box'] };
+			case 'frequencyHint':
+				return { cls: 'mechanic', dest: ['scanner', 'box'] };
 			case 'rule':
 				if (unlock.rule === 'storage' || unlock.rule === 'epidemicFromStorage')
 					return { cls: 'mechanic', dest: ['storage', 'box'] };
@@ -66,6 +68,10 @@
 			default:
 				return { cls: 'box', dest: ['box'] };
 		}
+	}
+
+	function cardStow(card: LegacyCardDef): { cls: StowClass; put: string } {
+		return card.kind === 'scanner' ? { cls: 'mechanic', put: 'scanner box' } : { cls: 'trash', put: 'trash' };
 	}
 
 	const steps = $derived(openings(briefing));
@@ -388,7 +394,8 @@
 					<div class="scattered" style:--tilt={`${(index % 3) * 2 - 2}deg`} in:fly={{ x: 60, y: -20, duration: 420 }}>
 						<div class="scattered-head">
 							{#if cardDef}
-								<span class="mini-card" data-stow-class="trash" data-put="trash">
+								{@const stow = cardStow(cardDef)}
+								<span class="mini-card" data-stow-class={stow.cls} data-put={stow.put}>
 									<LegacyCard card={cardDef} side="b" size="thumb" {campaign} />
 								</span>
 							{/if}
@@ -432,14 +439,15 @@
 						<div class="spotlight" in:fromLegacyDeck>
 							<div class="spotlight-top">
 								{#if cardDef}
+									{@const stow = cardStow(cardDef)}
 									<button
 										class="flip-card"
 										class:flipped
 										class:clickable={needsFlip}
 										onclick={() => needsFlip && step()}
 										data-testid="legacy-active-card"
-										data-stow-class={flipped ? 'trash' : undefined}
-										data-put="trash"
+										data-stow-class={flipped ? stow.cls : undefined}
+										data-put={stow.put}
 										aria-label={needsFlip ? `Flip ${current.title}` : current.title}
 									>
 										<span class="flipper" class:flipped>
@@ -553,7 +561,8 @@
 					>
 						<div class="scattered-head">
 							{#if cardDef}
-								<span class="mini-card" data-stow-class="trash" data-put="trash">
+								{@const stow = cardStow(cardDef)}
+								<span class="mini-card" data-stow-class={stow.cls} data-put={stow.put}>
 									<LegacyCard card={cardDef} side="b" size="thumb" {campaign} />
 								</span>
 							{/if}

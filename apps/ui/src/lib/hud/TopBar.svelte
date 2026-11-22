@@ -6,6 +6,7 @@
 	import type { Insights, PublicState } from '@repo/game';
 	import Calendar from './Calendar.svelte';
 	import Decks from './Decks.svelte';
+	import FrequencyScanner from './FrequencyScanner.svelte';
 	import { MONTHS } from './labels.svelte.ts';
 	import StorageDeck from './StorageDeck.svelte';
 
@@ -17,6 +18,8 @@
 		solo: boolean;
 		/** True while the Legacy deck is lifted out onto the table during an interactive briefing. */
 		legacyOut?: boolean;
+		canMonitor?: boolean;
+		monitorReason?: string | null;
 		hasDrawings?: boolean;
 		erasing?: boolean;
 		oneraser?: () => void;
@@ -25,6 +28,7 @@
 		onmenu: () => void;
 		onbox: () => void;
 		ondeck: () => void;
+		onscanner?: () => void;
 	};
 
 	let {
@@ -34,6 +38,8 @@
 		players,
 		solo,
 		legacyOut = false,
+		canMonitor = false,
+		monitorReason = null,
 		hasDrawings = false,
 		erasing = false,
 		oneraser,
@@ -42,17 +48,18 @@
 		onmenu,
 		onbox,
 		ondeck,
+		onscanner,
 	}: Props = $props();
 
 	const campaign = $derived(snap.world.campaign);
 	const game = $derived(snap.world.game);
-	const rates = pack.numbers.infectionRates;
 	const dealt = $derived(!snap.phase.startsWith('setup'));
 	/** The width left for the calendar once the rest of the bar has what it needs. */
 	let room = $state(0);
 	const nextLegacy = $derived(pack.legacyDeck[campaign.legacyIndex]);
 	const legacyLeft = $derived(pack.legacyDeck.length - campaign.legacyIndex);
 	const hasStorage = $derived(campaign.rules.includes('storage'));
+	const hasScanner = $derived(campaign.actions.includes('monitor'));
 	let legacyPeek = $state(false);
 </script>
 
@@ -68,16 +75,10 @@
 		{#if hasStorage}
 			<StorageDeck {campaign} onopen={onbox} />
 		{/if}
+		{#if hasScanner}
+			<FrequencyScanner {campaign} {canMonitor} {monitorReason} onopen={onscanner} />
+		{/if}
 		<div class="stats">
-			{#if game && info}
-				<div class="track" title="Infection rate: cards flipped at the end of every turn">
-					<span class="caption">Infection rate</span>
-					{#each rates as rate, index (index)}
-						<span class="pip" class:on={index === game.rateIndex} class:past={index < game.rateIndex}>{rate}</span>
-					{/each}
-				</div>
-			{/if}
-
 			<div class="deck-strip">
 				{#if game && info}
 					<Decks {info} world={snap.world} {dealt} />
@@ -246,45 +247,9 @@
 		white-space: nowrap;
 	}
 
-	@container topbar (width < 1600px) {
-		.track .caption {
-			display: none;
-		}
-	}
-
-	/* Too narrow for a single line: the rate track sits over the decks. */
-	@container topbar (width < 1400px) {
-		.bar .stats {
-			flex-direction: column;
-			align-items: flex-end;
-			gap: 0.1rem;
-		}
-
-		.stats :global(.deck strong) {
-			font-size: 0.9rem;
-		}
-
-		.stats :global(.deck) {
-			padding: 0;
-		}
-
-		.stats :global(.deck .card-icon) {
-			scale: 0.8;
-		}
-
-		.stats :global(.decks) {
-			height: 1.2rem;
-		}
-	}
-
 	@container topbar (width < 1000px) {
 		.bar {
 			gap: 0.8rem;
-		}
-
-		.pip {
-			width: 0.95rem;
-			height: 0.95rem;
 		}
 	}
 
@@ -304,54 +269,12 @@
 		line-height: 1;
 	}
 
-	.caption {
-		color: var(--muted);
-		font-size: 0.82rem;
-	}
-
 	.stats {
 		display: flex;
 		align-items: center;
 		gap: 1.4rem;
 		flex: none;
 		line-height: 1;
-	}
-
-	.track {
-		display: flex;
-		align-items: center;
-		gap: 0.2rem;
-	}
-
-	.caption {
-		margin-right: 0.3rem;
-	}
-
-	.pip {
-		display: grid;
-		place-items: center;
-		width: 1.1rem;
-		height: 1.1rem;
-		border: 1px solid var(--line-strong);
-		border-radius: 50%;
-		color: var(--muted);
-		font-size: 0.68rem;
-		font-weight: 600;
-		transition:
-			background 300ms ease,
-			color 300ms ease,
-			transform 300ms cubic-bezier(0.3, 1.6, 0.5, 1);
-	}
-
-	.pip.past {
-		opacity: 0.35;
-	}
-
-	.pip.on {
-		border-color: var(--warn);
-		background: var(--warn);
-		color: var(--paper-ink);
-		transform: scale(1.15);
 	}
 
 	.right {

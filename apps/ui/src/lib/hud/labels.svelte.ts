@@ -86,7 +86,7 @@ export const ACTION_TEXT: Record<Action['a'], string> = {
 	shuttle: 'Fly between havens and supply centers',
 	buildTower: 'Spend cubes to raise a tower here',
 	transmit: 'Send a City card from a tower',
-	monitor: 'Look at the top Player cards',
+	monitor: 'At a tower, discard 4 Player cards and scratch a frequency',
 	broadcast: 'Move Hollow Men from a tower',
 	buildShelter: 'Build a shelter in this city',
 	administratorMove: "Move a pawn to another's location",
