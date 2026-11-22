@@ -177,169 +177,29 @@ export function printBerth(width: number, height: number): Print {
 
 export type DiscTone = 'plain' | 'infested' | 'forsaken';
 
-const GRUNGE_PALETTE = {
-	infested: {
-		top: '#d2ff4d',
-		mid: '#9ce022',
-		bottom: '#70b812',
-		outline: '#1b2e05',
-		deep: 'rgb(44 88 6 / 0.44)',
-		bright: 'rgb(235 255 140 / 0.52)',
-		splatter: '#9ce022',
-		splatterDark: '#3f7308',
-	},
-	forsaken: {
-		top: '#ff5c4d',
-		mid: '#ec2a20',
-		bottom: '#b81610',
-		outline: '#3b0806',
-		deep: 'rgb(118 10 8 / 0.42)',
-		bright: 'rgb(255 162 142 / 0.48)',
-		splatter: '#e82c22',
-		splatterDark: '#7d0e0a',
-	},
-} as const;
+const TONE_COLOR: Record<Exclude<DiscTone, 'plain'>, { fill: string; outline: string }> = {
+	infested: { fill: '#9ce022', outline: '#1b2e05' },
+	forsaken: { fill: '#ec2a20', outline: '#3b0806' },
+};
 
-function mulberry32(seed: number) {
-	let state = seed >>> 0;
-	return () => {
-		state = (state + 0x6d2b79f5) >>> 0;
-		let t = Math.imul(state ^ (state >>> 15), 1 | state);
-		t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-		return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-	};
-}
-
-/** Draws a tiny jagged polygon shard around `(x, y)` for organic chipped-paint grunge instead of smooth circles. */
-function jaggedChip(context: CanvasRenderingContext2D, x: number, y: number, radius: number, rand: () => number) {
-	const sides = 5 + Math.floor(rand() * 3);
-	const start = rand() * Math.PI * 2;
-	context.beginPath();
-	for (let i = 0; i < sides; i++) {
-		const angle = start + (i / sides) * Math.PI * 2 + (rand() - 0.5) * 0.35;
-		const r = radius * (0.45 + rand() * 0.75);
-		const px = x + Math.cos(angle) * r;
-		const py = y + Math.sin(angle) * r;
-		if (i === 0) context.moveTo(px, py);
-		else context.lineTo(px, py);
-	}
-	context.closePath();
-	context.fill();
-}
-
-/** The face of a city's disc: its population as a large numeral, distressed in green or red when infested or forsaken. */
+/** The face of a city's disc: its population as a numeral, in green or red when infested or forsaken. */
 export function printDisc(population: number, size: number, color: string, tone: DiscTone = 'plain'): Print {
 	return sheet(size, size, context => {
 		const text = String(population);
-		if (tone === 'plain') {
-			context.textAlign = 'center';
-			context.textBaseline = 'middle';
+		context.textAlign = 'center';
+		context.textBaseline = 'middle';
+		context.font = `700 ${size * 0.82}px ${NUMBER_FONT}`;
+		if (tone !== 'plain') {
+			const styled = TONE_COLOR[tone];
+			context.lineJoin = 'round';
+			context.strokeStyle = styled.outline;
+			context.lineWidth = size * 0.06;
+			context.strokeText(text, size / 2, size * 0.54);
+			context.fillStyle = styled.fill;
+		} else {
 			context.fillStyle = color;
-			context.font = `700 ${size * 0.82}px ${NUMBER_FONT}`;
-			context.fillText(text, size / 2, size * 0.54);
-			return;
 		}
-
-		const palette = GRUNGE_PALETTE[tone];
-		const rand = mulberry32(((population + 3) * 2654435761) ^ (tone === 'forsaken' ? 0x9e3779b9 : 0x517cc1b7));
-		const cx = size / 2;
-		const cy = size * 0.535;
-		const tilt = (rand() - 0.5) * 0.08 + (tone === 'forsaken' ? -0.035 : 0.025);
-		const font = `700 ${size * 0.86}px ${NUMBER_FONT}`;
-
-		// Paint the distressed numeral on an offscreen layer so erosion cutouts never nibble the surrounding flecks.
-		const glyphCanvas = document.createElement('canvas');
-		glyphCanvas.width = Math.ceil(size * PX_PER_UNIT);
-		glyphCanvas.height = Math.ceil(size * PX_PER_UNIT);
-		const g = glyphCanvas.getContext('2d')!;
-		g.scale(PX_PER_UNIT, PX_PER_UNIT);
-
-		g.save();
-		g.translate(cx, cy);
-		g.rotate(tilt);
-		g.textAlign = 'center';
-		g.textBaseline = 'middle';
-		g.lineJoin = 'round';
-		g.lineCap = 'round';
-		g.font = font;
-
-		// Thin dark rough-stamped rim keeps green readable on yellow/red discs and red crisp on stone gray
-		// without darkening the numeral's color at full-map zoom.
-		g.strokeStyle = palette.outline;
-		g.lineWidth = size * 0.068;
-		g.strokeText(text, size * 0.012, size * 0.014);
-		g.lineWidth = size * 0.052;
-		g.strokeText(text, -size * 0.008, -size * 0.006);
-
-		const fill = g.createLinearGradient(0, -size * 0.4, 0, size * 0.4);
-		fill.addColorStop(0, palette.top);
-		fill.addColorStop(0.55, palette.mid);
-		fill.addColorStop(1, palette.bottom);
-		g.fillStyle = fill;
-		g.fillText(text, 0, 0);
-
-		// Organic paint mottling inside the numeral using saturated dark/light tones of the same hue.
-		g.globalCompositeOperation = 'source-atop';
-		for (let i = 0; i < 42; i++) {
-			g.fillStyle = i % 3 === 0 ? palette.bright : palette.deep;
-			const x = (rand() - 0.5) * size * 0.66;
-			const y = (rand() - 0.5) * size * 0.74;
-			jaggedChip(g, x, y, size * (0.022 + rand() * 0.055), rand);
-		}
-		// Subtle weathered brush-grain scuffs in the deeper hue.
-		g.strokeStyle = palette.deep;
-		for (let i = 0; i < 9; i++) {
-			const x0 = (rand() - 0.5) * size * 0.45;
-			const y0 = (rand() - 0.5) * size * 0.65;
-			const angle = (rand() - 0.5) * 1.1;
-			const len = size * (0.1 + rand() * 0.22);
-			g.lineWidth = size * (0.007 + rand() * 0.012);
-			g.beginPath();
-			g.moveTo(x0 - Math.cos(angle) * len * 0.5, y0 - Math.sin(angle) * len * 0.5);
-			g.lineTo(x0 + Math.cos(angle) * len * 0.5, y0 + Math.sin(angle) * len * 0.5);
-			g.stroke();
-		}
-
-		// Porous stamped-paint erosion, micro-pitting, and ragged chipped notches (kept fine so digits read clearly at map scale).
-		g.globalCompositeOperation = 'destination-out';
-		g.fillStyle = '#000';
-		for (let i = 0; i < 64; i++) {
-			const x = (rand() - 0.5) * size * 0.64;
-			const y = (rand() - 0.5) * size * 0.74;
-			jaggedChip(g, x, y, size * (0.006 + rand() * 0.015), rand);
-		}
-		// Fine short organic hairline cracks.
-		g.strokeStyle = '#000';
-		for (let i = 0; i < 4; i++) {
-			let px = (rand() - 0.5) * size * 0.42;
-			let py = (rand() - 0.5) * size * 0.58;
-			const baseAngle = rand() * Math.PI * 2;
-			g.lineWidth = size * (0.006 + rand() * 0.008);
-			g.beginPath();
-			g.moveTo(px, py);
-			for (let seg = 0; seg < 3; seg++) {
-				const step = size * (0.045 + rand() * 0.055);
-				const a = baseAngle + (rand() - 0.5) * 0.9;
-				px += Math.cos(a) * step;
-				py += Math.sin(a) * step;
-				g.lineTo(px, py);
-			}
-			g.stroke();
-		}
-		g.restore();
-
-		// Organic fine grunge flecks near the numeral, kept well inside the disc's inner ring.
-		for (let i = 0; i < 22; i++) {
-			const angle = rand() * Math.PI * 2;
-			const dist = size * (0.23 + rand() * 0.17);
-			const x = cx + Math.cos(angle) * dist;
-			const y = cy + Math.sin(angle) * dist;
-			context.fillStyle = i % 4 === 0 ? palette.splatterDark : palette.splatter;
-			context.globalAlpha = 0.5 + rand() * 0.4;
-			jaggedChip(context, x, y, size * (0.009 + rand() * 0.018), rand);
-		}
-		context.globalAlpha = 1;
-		context.drawImage(glyphCanvas, 0, 0, size, size);
+		context.fillText(text, size / 2, size * 0.54);
 	});
 }
 
