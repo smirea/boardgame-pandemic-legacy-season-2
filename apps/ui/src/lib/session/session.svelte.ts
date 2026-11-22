@@ -8,7 +8,9 @@ import type { DebugApi } from './debug';
 import { parseMsg, parsePresence } from './protocol';
 import type { CursorTool, Msg, Point, Presence, Stroke } from './protocol';
 import { Sketch } from './sketch.svelte';
-import { storedId, storedName, storedRecord, storedSave } from './stored';
+import { storedDrawings, storedId, storedName, storedRecord, storedSave } from './stored';
+
+const DRAWINGS_SAVE_MS = 1000;
 import { StateFeed, StateMirror } from './sync';
 
 export type Mode = 'solo' | 'host' | 'join';
@@ -72,6 +74,7 @@ export class GameSession {
 	readonly #pointers = new Map<string, NonNullable<Presence>>();
 	#pointersFrame = 0;
 	#storageFailed = false;
+	#drawingsTimer: ReturnType<typeof setTimeout> | null = null;
 
 	/** False for a session that stands apart from this browser's campaign, which neither reads nor writes storage. */
 	readonly #persist: boolean;
@@ -91,9 +94,18 @@ export class GameSession {
 				: createWebRtcTransport({ signalUrl: new URL(__SIGNAL_URL__, location.href).href, secret: options.secret });
 		const config = { selfId: this.selfId, name: storedName(), transport, parseMsg, parsePresence };
 		this.#net = options.mode === 'join' ? joinHost<Msg, Presence>(config) : createHost<Msg, Presence>(config);
-		this.#sketch = new Sketch(this.selfId, msg => {
-			if (this.status === 'connected') this.#net.send(msg);
-		});
+		const keepsDrawings = options.mode !== 'join' && this.#persist;
+		this.#sketch = new Sketch(
+			this.selfId,
+			msg => {
+				if (this.status === 'connected') this.#net.send(msg);
+			},
+			keepsDrawings ? () => this.#saveDrawingsSoon() : undefined,
+		);
+		if (keepsDrawings) {
+			this.#sketch.restore(storedDrawings());
+			addEventListener('pagehide', this.#saveDrawings);
+		}
 
 		this.#net.on('status', status => {
 			this.status = status;
@@ -303,6 +315,25 @@ export class GameSession {
 		}
 	}
 
+	/**
+	 * The host keeps what is drawn on the map across a reload. A pen sends points thirty times a second, so the
+	 * strokes are written at most once a second, while the browser is idle, and once more as the page goes away.
+	 */
+	#saveDrawingsSoon() {
+		if (this.#drawingsTimer !== null) return;
+		this.#drawingsTimer = setTimeout(() => {
+			if (typeof requestIdleCallback === 'function') requestIdleCallback(this.#saveDrawings, { timeout: 2000 });
+			else this.#saveDrawings();
+		}, DRAWINGS_SAVE_MS);
+	}
+
+	#saveDrawings = () => {
+		if (this.#drawingsTimer === null) return;
+		clearTimeout(this.#drawingsTimer);
+		this.#drawingsTimer = null;
+		this.#store({ drawings: this.#sketch.drawings });
+	};
+
 	/** Adds the change to the recording of the game it belongs to, starting a new recording when a new game begins. */
 	#remember(before: PublicState, after: PublicState) {
 		if (!this.#record || gameIndexOf(this.#record.initial) !== gameIndexOf(before))
@@ -389,11 +420,13 @@ export class GameSession {
 		const save: unknown = typeof raw === 'string' ? JSON.parse(raw) : raw;
 		LS.delete('record');
 		LS.delete('undo');
+		LS.delete('drawings');
 		LS.set({ save: parseSave(save) });
 		location.reload();
 	}
 
 	newCampaign() {
+		LS.delete('drawings');
 		LS.delete('save');
 		LS.delete('undo');
 		LS.delete('record');
@@ -405,6 +438,8 @@ export class GameSession {
 	}
 
 	close() {
+		this.#saveDrawings();
+		removeEventListener('pagehide', this.#saveDrawings);
 		cancelAnimationFrame(this.#pointersFrame);
 		this.#sketch.dispose();
 		this.#actor?.stop();

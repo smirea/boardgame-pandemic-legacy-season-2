@@ -18,6 +18,8 @@ export const LS = new LocalStorage<{
 	debugSnapshot: unknown;
 	/** Named saves to return to (`DEBUG.checkpoint`), newest last. */
 	checkpoints: { name: string; save: unknown }[];
+	/** What the host's table has drawn on the map, by player. Kept apart from `save`: it is not game state. */
+	drawings: Record<string, unknown[]>;
 	/** The host's recording of the game in progress, played back at `/replay`. */
 	record: unknown;
 	replay: { speed: number; panel: boolean; bubbles: boolean };
@@ -35,6 +37,7 @@ export const LS = new LocalStorage<{
 		undo: [],
 		debugSnapshot: null,
 		checkpoints: [],
+		drawings: {},
 		record: null,
 		replay: { speed: 1, panel: true, bubbles: true },
 		studio: null,

@@ -2,6 +2,8 @@ import { gameIndexOf, parseRecord, parseSave } from '@repo/game';
 import type { GameRecord, Save } from '@repo/game';
 import { createPeerId, peerId } from '@repo/net';
 import { LS } from '../storage';
+import { parseMsg } from './protocol';
+import type { Stroke } from './protocol';
 
 /** The id this browser keeps across reloads, which is who it is at the table. */
 export function storedId() {
@@ -39,3 +41,17 @@ export function storedRecord(save: Save | null): GameRecord | null {
 }
 
 export const storedName = () => LS.get('name', '').trim() || 'Player';
+
+/** What the host's table had drawn on the map before a reload, checked as strictly as strokes off the wire. */
+export function storedDrawings(): Record<string, Stroke[]> {
+	const kept: Record<string, Stroke[]> = {};
+	for (const [player, strokes] of Object.entries(LS.get('drawings') ?? {})) {
+		try {
+			const msg = parseMsg({ t: 'strokes', player, strokes });
+			if (msg.t === 'strokes' && msg.strokes.length) kept[player] = msg.strokes;
+		} catch (error) {
+			console.warn(`Dropping ${player}'s kept drawings:`, error);
+		}
+	}
+	return kept;
+}

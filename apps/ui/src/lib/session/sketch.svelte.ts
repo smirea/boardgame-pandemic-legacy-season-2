@@ -19,6 +19,7 @@ export class Sketch {
 
 	readonly #self: string;
 	readonly #send: (msg: SketchMsg) => void;
+	readonly #onchange: () => void;
 	/** Points drawn here and not yet sent, by stroke. */
 	readonly #pen = new Map<string, Point[]>();
 	/** Players whose strokes an eraser here changed and whose new strokes are not yet sent. */
@@ -28,14 +29,22 @@ export class Sketch {
 	#pingSeq = 0;
 	readonly #pingTimers = new Set<ReturnType<typeof setTimeout>>();
 
-	constructor(self: string, send: (msg: SketchMsg) => void) {
+	/** `onchange` hears of every change to the strokes on the map, from here or from another browser. */
+	constructor(self: string, send: (msg: SketchMsg) => void, onchange: () => void = () => {}) {
 		this.#self = self;
 		this.#send = send;
+		this.#onchange = onchange;
 	}
 
 	#set(player: string, strokes: Stroke[]) {
 		const { [player]: _gone, ...rest } = this.drawings;
 		this.drawings = strokes.length ? { ...rest, [player]: strokes } : rest;
+		this.#onchange();
+	}
+
+	/** Puts back strokes kept from before a reload, before anyone has joined to be sent them. */
+	restore(drawings: Record<string, Stroke[]>) {
+		this.drawings = drawings;
 	}
 
 	#extend(player: string, id: string, points: Point[]) {
@@ -105,6 +114,7 @@ export class Sketch {
 			this.#pen.clear();
 			this.#erased.clear();
 			this.drawings = {};
+			this.#onchange();
 		} else {
 			const ping = { id: msg.id, player: msg.player, x: msg.x, z: msg.z, createdAt: performance.now() };
 			this.pings = [...this.pings, { ...ping, duration: PING_DURATION_MS }];

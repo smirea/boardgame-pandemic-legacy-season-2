@@ -393,6 +393,10 @@ try {
 	);
 	const again = await converged(host, peers, 10_000);
 	check(again !== null, `and hold its state`);
+	check(
+		await agree(sketch => JSON.stringify(Object.keys(sketch.strokes)) === JSON.stringify(hostLines), 5000, true),
+		`the host kept the map's drawings through its reload, and every map has them again`,
+	);
 
 	// The game goes on after both reloads.
 	const state = JSON.parse(await stateOf(host)) as Save;
