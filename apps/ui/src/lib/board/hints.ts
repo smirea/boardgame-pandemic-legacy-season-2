@@ -32,7 +32,13 @@ export type HintCount = { glyph: 'supplies' | 'plague' | 'hollow'; count: number
  */
 export type HintText = { title: string; marks?: Glyph[]; counts?: HintCount[]; rows: HintRow[]; notes: string[] };
 
-export type Part = 'city' | 'supplies' | 'plague' | 'hollow' | 'lab' | { structure: StructureKind; permanent: boolean };
+export type Part =
+	| 'city'
+	| 'supplies'
+	| 'plague'
+	| 'hollow'
+	| 'lab'
+	| { structure: StructureKind; permanent: boolean; placed: boolean };
 
 /** Names a part, so that leaving one piece cannot clear the hint the next piece has just set. */
 export const partKey = (part: Part) => (typeof part === 'string' ? part : part.structure);
@@ -45,10 +51,23 @@ export const STRUCTURE_NAME: Record<StructureKind, string> = {
 
 const percent = (odds: number) => `${Math.round(odds * 100)}%`;
 
+function structureValue(entry: { permanent: boolean; placed: boolean }, inGame: boolean): string {
+	if (entry.permanent && entry.placed) return 'Permanent';
+	if (entry.permanent) return inGame ? 'Permanent sticker (piece moved)' : 'Permanent (placed on game start)';
+	return 'This game';
+}
+
 /** Everything at one city, for a hover over its disc. */
 export function cityHint(city: CityView): HintText {
-	const marks: Glyph[] = [...(city.port ? ['port' as const] : []), ...city.structures.map(entry => entry.kind)];
-	const counts: HintCount[] = [{ glyph: 'supplies', count: city.supplies, tone: city.supplies === 0 ? 'bad' : null }];
+	const marks: Glyph[] = [
+		...(city.haven ? ['haven' as const] : []),
+		...(city.port ? ['port' as const] : []),
+		...city.structures.map(entry => entry.kind),
+		...(city.lab ? ['lab' as const] : []),
+	];
+	const counts: HintCount[] = [];
+	if (city.inGame || city.supplies > 0)
+		counts.push({ glyph: 'supplies', count: city.supplies, tone: city.supplies === 0 ? 'bad' : null });
 	if (city.plague) counts.push({ glyph: 'plague', count: city.plague, tone: 'bad' });
 	if (city.hollow) counts.push({ glyph: 'hollow', count: city.hollow, tone: 'bad' });
 	const rows: HintRow[] = [];
@@ -68,9 +87,20 @@ export function cityHint(city: CityView): HintText {
 			label: 'Player cards',
 			value: `${city.cards.inDeck} in deck, ${city.cards.inHands} in hand, ${city.cards.discarded} discarded`,
 		});
-	if (city.lab) rows.push({ label: 'Lab', value: 'Found', tone: 'good' });
-	if (city.infested) rows.push({ label: 'Infested', value: 'Yes', tone: 'bad' });
+	if (!city.onGrid) rows.push({ label: 'Grid', value: 'Off the grid', tone: 'bad' });
+	if (city.haven) rows.push({ label: 'Port', value: 'Haven (sea access)', tone: 'good' });
+	else if (city.port) rows.push({ label: 'Port', value: 'Sea access' });
+	for (const entry of city.structures)
+		rows.push({
+			label: STRUCTURE_NAME[entry.kind],
+			value: structureValue(entry, city.inGame),
+			tone: entry.placed || !city.inGame ? 'good' : null,
+		});
+	if (city.lab) rows.push({ label: 'Lab', value: 'Found (permanent)', tone: 'good' });
+	if (city.infested) rows.push({ label: 'Infested', value: 'Permanent sticker', tone: 'bad' });
 	if (city.forsaken) rows.push({ label: 'Forsaken', value: 'Yes', tone: 'bad' });
+	if (city.plague) rows.push({ label: 'Plague cubes', value: String(city.plague), tone: 'bad' });
+	if (city.hollow) rows.push({ label: 'Hollow Men', value: String(city.hollow), tone: 'bad' });
 	const notes = city.haven
 		? ['No Infection card names a haven. An outbreak in a neighbouring city still strikes it.']
 		: [];
@@ -103,10 +133,17 @@ export function partHint(part: Part, city: CityView): HintText {
 			notes: [],
 		};
 	if (part === 'lab') return { title: 'Lab', rows: [here], notes: ['Every lab found counts toward the final score.'] };
+	const note = part.permanent
+		? part.placed
+			? 'Marked with a permanent sticker on the board and placed automatically on game start.'
+			: city.inGame
+				? 'Marked with a permanent sticker, though its piece was moved elsewhere this game.'
+				: 'Permanent map sticker: its piece is placed here on game start.'
+		: 'Built this game; removed when this game ends.';
 	return {
 		title: STRUCTURE_NAME[part.structure],
-		rows: [here, { label: 'Lasts', value: part.permanent ? 'Permanent' : 'This game only' }],
-		notes: [part.permanent ? 'Printed on the board, it stands in every game.' : 'Removed when this game ends.'],
+		rows: [here, { label: 'Status', value: structureValue(part, city.inGame) }],
+		notes: [note],
 	};
 }
 

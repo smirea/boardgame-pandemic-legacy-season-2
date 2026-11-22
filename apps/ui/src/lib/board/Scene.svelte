@@ -35,6 +35,7 @@
 	import { buildLandGeometry, mapToSheet } from './land';
 	import { LAND_HEIGHT } from './projection';
 	import FlyingCube from './FlyingCube.svelte';
+	import { pieceModels } from './models.svelte';
 	import Pawn from './Pawn.svelte';
 	import { fonts, nameWidth } from './print.svelte';
 	import type { BoardBounds, BoardPoint } from './projection';
@@ -120,6 +121,12 @@
 	$effect(() => {
 		void $size;
 		void $dpr;
+		invalidate();
+	});
+	$effect(() => {
+		void pieceModels.hollow;
+		void pieceModels.tower;
+		void pieceModels.station;
 		invalidate();
 	});
 	const layout = pack.positions;

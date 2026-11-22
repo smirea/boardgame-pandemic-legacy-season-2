@@ -22,6 +22,7 @@
 	import type { Part } from './hints';
 	import { DISC_REACH, NAME_SIZE } from './labels';
 	import type { Placement } from './labels';
+	import { pieceMaterials, pieceModels } from './models.svelte';
 	import Pop from './Pop.svelte';
 	import { fonts, printDisc, printName, printSticker } from './print.svelte';
 	import type { PrintedKind } from './print.svelte';
@@ -121,14 +122,19 @@
 	const stickers = $derived(
 		fonts.ready && printedKinds
 			? (printedKinds.split(',') as PrintedKind[]).map(kind => ({
-					part: (kind === 'lab' ? 'lab' : kind === 'infested' ? 'city' : { structure: kind, permanent: true }) as Part,
 					kind,
-					print: printSticker(kind, kind === 'infested' ? 2.0 : 2.1),
+					print: printSticker(kind, kind === 'infested' ? 2.0 : kind === 'lab' ? 2.1 : 2.35),
 				}))
 			: [],
 	);
-	const built = (kind: 'center' | 'tower' | 'shelter') =>
-		state.structures.some(structure => structure.kind === kind && !structure.permanent);
+	const placedStructure = (kind: 'center' | 'tower' | 'shelter') =>
+		state.structures.find(structure => structure.kind === kind && structure.placed) ?? null;
+	const stickerPart = (kind: PrintedKind): Part =>
+		kind === 'lab'
+			? 'lab'
+			: kind === 'infested'
+				? 'city'
+				: { structure: kind, permanent: true, placed: Boolean(placedStructure(kind)) };
 
 	// Supply cubes stand in a block under the supply center's place, rising in layers as they pile up.
 	const SUPPLY = { size: 0.7, slot: 0.86, columns: 2, rows: 3 };
@@ -154,8 +160,8 @@
 	);
 	const figures = $derived(
 		Array.from({ length: state.hollow }, (_, index) => ({
-			x: (index - (state.hollow - 1) / 2) * 1.2,
-			z: CITY_RADIUS + 1.2,
+			x: (index - (state.hollow - 1) / 2) * 1.35,
+			z: CITY_RADIUS + 1.35,
 		})),
 	);
 
@@ -314,16 +320,22 @@
 	{/if}
 
 	{#each figures as figure, index (index)}
-		<Pop position={[figure.x, 0.85, figure.z]}>
-			<T.Mesh castShadow>
-				<T.ConeGeometry args={[0.52, 1.7, 5]} />
-				<T.MeshStandardMaterial color="#4e3b63" emissive="#24143a" emissiveIntensity={0.5} roughness={0.7} />
-			</T.Mesh>
+		<Pop position={[figure.x, INK + 0.02, figure.z]}>
+			{#if pieceModels.hollow}
+				<T.Mesh
+					geometry={pieceModels.hollow}
+					material={pieceMaterials.hollow}
+					scale={2.1}
+					castShadow
+					receiveShadow
+					dispose={false}
+				/>
+			{/if}
 		</Pop>
 	{/each}
 	{#if figures.length}
-		<T.Mesh position={[0, 0.9, CITY_RADIUS + 1.2]} {...explain('hollow')}>
-			<T.BoxGeometry args={[figures.length * 1.2 + 0.3, 1.9, 1.3]} />
+		<T.Mesh position={[0, 1.05, CITY_RADIUS + 1.35]} {...explain('hollow')}>
+			<T.BoxGeometry args={[figures.length * 1.35 + 0.35, 2.2, 1.65]} />
 			<T.MeshBasicMaterial colorWrite={false} depthWrite={false} />
 		</T.Mesh>
 	{/if}
@@ -331,50 +343,71 @@
 	{#each stickers as sticker (sticker.kind)}
 		{@const [x, z] = SPOT[sticker.kind]}
 		<Printed print={sticker.print} position={[x, INK + 0.01, z]} order={5} />
-		<T.Mesh position={[x, 0.15, z]} {...explain(sticker.part)}>
-			<T.CylinderGeometry args={[1.05, 1.05, 0.3, 16]} />
-			<T.MeshBasicMaterial colorWrite={false} depthWrite={false} />
-		</T.Mesh>
+		{#if sticker.kind === 'lab' || sticker.kind === 'infested' || !placedStructure(sticker.kind)}
+			<T.Mesh position={[x, 0.15, z]} {...explain(stickerPart(sticker.kind))}>
+				<T.CylinderGeometry args={[1.15, 1.15, 0.3, 16]} />
+				<T.MeshBasicMaterial colorWrite={false} depthWrite={false} />
+			</T.Mesh>
+		{/if}
 	{/each}
 
-	{#if built('center')}
-		<Pop position={[SPOT.center[0], 0, SPOT.center[1]]}>
-			<T.Mesh position.y={0.5} castShadow {...explain({ structure: 'center', permanent: false })}>
-				<T.BoxGeometry args={[1.2, 1, 1.2]} />
-				<T.MeshStandardMaterial color="#ebe2cc" roughness={0.8} />
-			</T.Mesh>
-			<T.Mesh
-				position.y={1.3}
-				rotation.y={Math.PI / 4}
-				castShadow
-				{...explain({ structure: 'center', permanent: false })}
-			>
-				<T.ConeGeometry args={[1.02, 0.65, 4]} />
-				<T.MeshStandardMaterial color="#8f4129" roughness={0.8} />
-			</T.Mesh>
-		</Pop>
-	{/if}
-	{#if built('tower')}
-		<Pop position={[SPOT.tower[0], 0, SPOT.tower[1]]}>
-			<T.Mesh position.y={1.3} castShadow>
-				<T.CylinderGeometry args={[0.08, 0.2, 2.6, 8]} />
-				<T.MeshStandardMaterial color="#5e5a53" metalness={0.4} roughness={0.55} />
-			</T.Mesh>
-			<T.Mesh position.y={2.7}>
-				<T.SphereGeometry args={[0.24, 12, 10]} />
-				<T.MeshStandardMaterial color="#ffd27a" emissive="#e09a2e" emissiveIntensity={1.1} />
-			</T.Mesh>
-			<T.Mesh position.y={1.4} {...explain({ structure: 'tower', permanent: false })}>
-				<T.CylinderGeometry args={[0.6, 0.6, 3, 8]} />
+	{#if placedStructure('center')}
+		{@const center = placedStructure('center')!}
+		<Pop position={[SPOT.center[0], INK + 0.02, SPOT.center[1]]}>
+			{#if pieceModels.station}
+				<T.Mesh
+					geometry={pieceModels.station}
+					material={pieceMaterials.center}
+					scale={1.55}
+					rotation.y={0.42}
+					castShadow
+					receiveShadow
+					dispose={false}
+				/>
+			{/if}
+			<T.Mesh position.y={0.8} {...explain({ structure: 'center', permanent: center.permanent, placed: true })}>
+				<T.CylinderGeometry args={[1.15, 1.15, 1.7, 12]} />
 				<T.MeshBasicMaterial colorWrite={false} depthWrite={false} />
 			</T.Mesh>
 		</Pop>
 	{/if}
-	{#if built('shelter')}
-		<Pop position={[SPOT.shelter[0], 0, SPOT.shelter[1]]}>
-			<T.Mesh castShadow {...explain({ structure: 'shelter', permanent: false })}>
-				<T.SphereGeometry args={[0.75, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2]} />
-				<T.MeshStandardMaterial color="#7a8556" roughness={0.85} />
+	{#if placedStructure('tower')}
+		{@const tower = placedStructure('tower')!}
+		<Pop position={[SPOT.tower[0], INK + 0.02, SPOT.tower[1]]}>
+			{#if pieceModels.tower}
+				<T.Mesh
+					geometry={pieceModels.tower}
+					material={pieceMaterials.tower}
+					scale={2.45}
+					rotation.y={-0.35}
+					castShadow
+					receiveShadow
+					dispose={false}
+				/>
+			{/if}
+			<T.Mesh position.y={1.25} {...explain({ structure: 'tower', permanent: tower.permanent, placed: true })}>
+				<T.CylinderGeometry args={[1.15, 1.15, 2.6, 12]} />
+				<T.MeshBasicMaterial colorWrite={false} depthWrite={false} />
+			</T.Mesh>
+		</Pop>
+	{/if}
+	{#if placedStructure('shelter')}
+		{@const shelter = placedStructure('shelter')!}
+		<Pop position={[SPOT.shelter[0], INK + 0.02, SPOT.shelter[1]]}>
+			{#if pieceModels.station}
+				<T.Mesh
+					geometry={pieceModels.station}
+					material={pieceMaterials.shelter}
+					scale={1.5}
+					rotation.y={0.42}
+					castShadow
+					receiveShadow
+					dispose={false}
+				/>
+			{/if}
+			<T.Mesh position.y={0.8} {...explain({ structure: 'shelter', permanent: shelter.permanent, placed: true })}>
+				<T.CylinderGeometry args={[1.15, 1.15, 1.7, 12]} />
+				<T.MeshBasicMaterial colorWrite={false} depthWrite={false} />
 			</T.Mesh>
 		</Pop>
 	{/if}

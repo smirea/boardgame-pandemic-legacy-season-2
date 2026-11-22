@@ -79,8 +79,13 @@ export function createBoardView(source: BoardSource): BoardView {
 							port: city.port,
 							haven: city.kind === 'haven',
 							structures: (['center', 'tower', 'shelter'] as const)
-								.filter(kind => location?.[kind] ?? record.permanent.includes(kind))
-								.map(kind => ({ kind, permanent: record.permanent.includes(kind) })),
+								.map(kind => ({
+									kind,
+									permanent: record.permanent.includes(kind),
+									placed: Boolean(location?.[kind]),
+								}))
+								.filter(entry => entry.permanent || entry.placed),
+							inGame: game !== null,
 							infested: record.infested,
 							forsaken: isForsaken(campaign, city.id),
 							lab: record.lab,

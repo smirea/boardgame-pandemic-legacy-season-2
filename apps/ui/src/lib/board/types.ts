@@ -24,8 +24,14 @@ export type CityView = {
 	port: boolean;
 	/** A haven has no Infection card and no City card: only an outbreak next door reaches it. */
 	haven: boolean;
-	/** What stands here, with whether it is printed on the board for good or only lasts this game. */
-	structures: { kind: StructureKind; permanent: boolean }[];
+	/**
+	 * What stands here and what is permanently marked by a map sticker.
+	 * `permanent` marks the board with a sticker (always visible); `placed` puts the 3D model here
+	 * (at game start for permanent locations, or via the ephemeral build action in game).
+	 */
+	structures: { kind: StructureKind; permanent: boolean; placed: boolean }[];
+	/** True while a game is in progress (as opposed to the lobby between games). */
+	inGame: boolean;
 	infested: boolean;
 	forsaken: boolean;
 	lab: boolean;

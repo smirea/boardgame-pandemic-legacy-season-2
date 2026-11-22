@@ -524,7 +524,7 @@
 		flex-direction: column;
 		gap: 0.3rem;
 		width: max-content;
-		max-width: 17rem;
+		max-width: 19.5rem;
 		padding: 0.45rem 0.65rem 0.5rem;
 		border: 1px solid color-mix(in srgb, var(--tint) 70%, #2a2017);
 		border-radius: 2px;
