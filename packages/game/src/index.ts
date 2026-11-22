@@ -17,7 +17,7 @@ export {
 export type { Decide, Play } from './plays';
 export { playDetail } from './plays';
 export type { Purchase } from './legacy';
-export type { DossierSlot, DossierView } from './dossier';
+export type { DossierSlot, DossierView, RulebookBlock, RulebookChapter, RulebookSection } from './dossier';
 export { dossierView, rulebook, stickerStock } from './dossier';
 export { actionBriefs, briefingSections, openings, ruleBriefs, searchFind, unlockText } from './briefing';
 export type { Opening } from './briefing';

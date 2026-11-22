@@ -2,8 +2,9 @@ import { pack } from './content/pack';
 import { sealKey } from './content/types';
 import type { DoorId, RuleId, Seal, SealDef, TurningPointId } from './content/types';
 import { INFESTED_STICKERS } from './helpers';
-import { actionBriefs, ruleBriefs, unlockText } from './briefing';
-import { newCampaign } from './legacy';
+import { unlockText } from './briefing';
+import { RULEBOOK, RULE_STICKERS } from './content/rulebook';
+import type { RuleBlock, RuleGate, RuleText, StickerSlot } from './content/rulebook';
 import type { Campaign } from './state';
 
 /**
@@ -72,26 +73,62 @@ function ruleCount(campaign: Campaign, rule: RuleId): string {
 	return '';
 }
 
-/** What the group's rulebook holds by now: the rules in force, the actions unlocked and the turning points waiting. */
-export function rulebook(campaign: Campaign) {
-	const start = new Set(newCampaign(0).actions);
-	return {
-		rules: campaign.rules.map(rule => ({ id: rule, text: `${ruleBriefs[rule] ?? rule}${ruleCount(campaign, rule)}` })),
-		actions: campaign.actions
-			.filter(action => !start.has(action))
-			.map(action => ({ id: action, text: actionBriefs[action] ?? action })),
-		turningPoints: [
-			...campaign.turningPoints.map(id => ({ id, text: TURNING_POINTS[id] })),
-			...(campaign.losingStreakBonusGames > 0
-				? [
-						{
-							id: 'relief',
-							text: `Give Us the Tools: up to 10 reserve cubes join the stockpile at setup, ${campaign.losingStreakBonusGames} more ${campaign.losingStreakBonusGames === 1 ? 'game' : 'games'}.`,
-						},
-					]
-				: []),
-		],
-	};
+export type RulebookBlock = (RuleText & { sticker?: StickerSlot }) | { t: 'slot'; sticker: StickerSlot };
+export type RulebookSection = { id: string; title: string; blocks: RulebookBlock[] };
+export type RulebookChapter = { id: string; title: string; sections: RulebookSection[] };
+
+function gateOpen(campaign: Campaign, gate: RuleGate): boolean {
+	return gate.t === 'prologue' ? campaign.month === 0 : campaign.opened.includes(sealKey(gate.seal));
+}
+
+const stickerPlaced = (campaign: Campaign, slot: StickerSlot) => campaign.opened.includes(sealKey(RULE_STICKERS[slot]));
+
+function shownBlocks(campaign: Campaign, blocks: RuleBlock[]): RulebookBlock[] {
+	const shown: RulebookBlock[] = [];
+	for (const { sticker, replacedBy, when, count, ...text } of blocks) {
+		if (when && !gateOpen(campaign, when)) continue;
+		if (replacedBy && stickerPlaced(campaign, replacedBy)) continue;
+		if (sticker && !stickerPlaced(campaign, sticker)) {
+			const last = shown.at(-1);
+			if (!(last?.t === 'slot' && last.sticker === sticker)) shown.push({ t: 'slot', sticker });
+			continue;
+		}
+		const counted = count && text.t === 'p' ? { ...text, text: text.text + ruleCount(campaign, count) } : text;
+		shown.push(sticker ? { ...counted, sticker } : counted);
+	}
+	return shown;
+}
+
+/** What waits in the Game End area: the turning points still to trigger and the relief still owed. */
+function waiting(campaign: Campaign): RulebookSection | null {
+	const blocks: RulebookBlock[] = [
+		...campaign.turningPoints.map(id => ({ t: 'p' as const, text: TURNING_POINTS[id] })),
+		...(campaign.losingStreakBonusGames > 0
+			? [
+					{
+						t: 'p' as const,
+						text: `Give Us the Tools: up to 10 reserve cubes join the stockpile at setup, ${campaign.losingStreakBonusGames} more ${campaign.losingStreakBonusGames === 1 ? 'game' : 'games'}.`,
+					},
+				]
+			: []),
+	];
+	return blocks.length ? { id: 'turning-points', title: 'Turning points waiting', blocks } : null;
+}
+
+/**
+ * The group's rulebook as it reads by now: the printed rules with every rule sticker the campaign has placed, the
+ * printed text those stickers cover taken out, the slots still empty, and the rules each opened package or door
+ * brought. Nothing still sealed is in it.
+ */
+export function rulebook(campaign: Campaign): RulebookChapter[] {
+	return RULEBOOK.map(chapter => {
+		const sections = chapter.sections
+			.filter(section => !section.when || gateOpen(campaign, section.when))
+			.map(section => ({ id: section.id, title: section.title, blocks: shownBlocks(campaign, section.blocks) }))
+			.filter(section => section.blocks.length > 0);
+		const extra = chapter.id === 'game-end' ? waiting(campaign) : null;
+		return { id: chapter.id, title: chapter.title, sections: extra ? [...sections, extra] : sections };
+	});
 }
 
 const count = <T extends string>(ids: T[]) => {
