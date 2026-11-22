@@ -8,8 +8,10 @@ export type TurnStep = {
 	name: string;
 	detail: string;
 	kind: 'action' | 'event';
-	/** Which of the turn's actions this spent, counting from 1. Null for what cost none: a free action, an event. */
-	spent: number | null;
+	/** Whether it spent any of the turn's actions. */
+	paid: boolean;
+	/** How many times in a row it was taken, which the list shows as one row. */
+	count: number;
 };
 
 const STRUCTURE = { center: 'supply center', tower: 'tower', shelter: 'shelter' } as const;
@@ -25,33 +27,38 @@ function describe(effects: LogEntry[]): string {
 	return '';
 }
 
-/** The actions and events `seat` has taken since its turn began. */
+/** The actions and events `seat` has taken since its turn began, the same one taken again in a row folded into one. */
 export function turnSteps(world: World, seat: SeatId): TurnStep[] {
 	const log = world.game?.log ?? [];
 	const start = log.findLastIndex(entry => entry.t === 'turn');
 	if (start < 0 || log[start]!.t !== 'turn' || log[start]!.seat !== seat) return [];
 	const steps: TurnStep[] = [];
 	let effects: LogEntry[] = [];
-	let spent = 0;
+	const add = (step: Omit<TurnStep, 'count'>) => {
+		const last = steps.at(-1);
+		if (
+			last &&
+			last.name === step.name &&
+			last.detail === step.detail &&
+			last.kind === step.kind &&
+			last.paid === step.paid
+		)
+			last.count++;
+		else steps.push({ ...step, count: 1 });
+	};
 	for (const entry of log.slice(start + 1)) {
 		if (entry.t === 'action' && entry.seat === seat) {
-			steps.push({
+			add({
 				seq: entry.seq,
 				name: ACTION_NAMES[entry.action as Action['a']] ?? entry.action,
 				detail: describe(effects),
 				kind: 'action',
-				spent: entry.cost > 0 ? (spent += entry.cost) : null,
+				paid: entry.cost > 0,
 			});
 			effects = [];
 		} else if (entry.t === 'event' && entry.seat === seat) {
 			const event = pack.events.find(item => item.id === entry.event);
-			steps.push({
-				seq: entry.seq,
-				name: event?.name ?? entry.event,
-				detail: entry.detail,
-				kind: 'event',
-				spent: null,
-			});
+			add({ seq: entry.seq, name: event?.name ?? entry.event, detail: entry.detail, kind: 'event', paid: false });
 			effects = [];
 		} else effects.push(entry);
 	}

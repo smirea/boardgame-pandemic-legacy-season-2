@@ -223,13 +223,13 @@
 				{#each steps as step (step.seq)}
 					<li
 						class={step.kind}
-						class:unpaid={step.spent === null}
+						class:unpaid={!step.paid}
 						in:fly={{ x: right ? 24 : -24, duration: 320 }}
 						animate:flip={{ duration: 260 }}
 					>
-						<i>{step.spent ?? '·'}</i>
 						<b>{step.name}</b>
 						{#if step.detail}<span>{step.detail}</span>{/if}
+						{#if step.count > 1}<i aria-label="{step.count} times">×{step.count}</i>{/if}
 					</li>
 				{/each}
 			</ol>
@@ -663,7 +663,6 @@
 	.br .steps {
 		right: calc(100% + var(--rail) + 2 * var(--rail-gap));
 		left: auto;
-		align-items: flex-end;
 	}
 
 	.bl .steps,
@@ -676,7 +675,7 @@
 		display: flex;
 		align-items: baseline;
 		gap: 0.4rem;
-		padding: 0.22rem 0.55rem 0.24rem 0.3rem;
+		padding: 0.22rem 0.55rem 0.24rem;
 		border-left: 3px solid var(--seat);
 		border-radius: 2px;
 		background: rgb(240 231 210 / 0.95);
@@ -695,11 +694,12 @@
 	}
 
 	.steps i {
-		min-width: 1rem;
+		margin-left: auto;
+		padding-left: 0.4rem;
 		color: rgb(42 32 23 / 0.55);
 		font-style: normal;
 		font-weight: 700;
-		text-align: center;
+		font-variant-numeric: tabular-nums;
 	}
 
 	.steps b {
