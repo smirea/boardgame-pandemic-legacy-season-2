@@ -122,10 +122,15 @@ export function keepSoon(record: GameRecord, state: PublicState) {
  */
 export async function keepStoredGame() {
 	const raw = LS.get('record');
-	if (!raw) return;
+	if (raw) await keepRecord(raw);
+}
+
+/** Keeps a whole recording, such as the host's that a peer fetched, and returns its id in the library. */
+export async function keepRecord(raw: unknown): Promise<string> {
 	const record = parseRecord(raw);
 	const frames = framesOf(record);
 	await keepGame(record, frames.findLast(frame => frame.world.game) ?? frames.at(-1)!);
+	return keyOf(record);
 }
 
 /** Every game this browser has hosted, oldest first. */
