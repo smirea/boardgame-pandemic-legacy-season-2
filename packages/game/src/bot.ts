@@ -1,11 +1,13 @@
 import { pack } from './content/pack';
 import { freeCharacters } from './flow';
-import type { CharacterId, SeatId } from './ids';
+import type { CharacterId, PlayerId, SeatId } from './ids';
+import { checkRefund } from './legacy';
 import type { Command, Phase } from './machine';
 import { legalActions, legalDecides, legalPlays, legalPurchases } from './options';
 import type { RngState } from './rng';
 import { nextFloat, pick } from './rng';
 import type { World } from './state';
+import { tablePlayers } from './table';
 
 const PROGRESS = new Set([
 	'recon',
@@ -88,9 +90,12 @@ export function botCommand(world: World, phase: Phase, rng: RngState, seats = 2)
 			return { type: 'CONTINUE' };
 		case 'upkeep': {
 			const options = legalPurchases(world);
-			return options.length && nextFloat(rng) < 0.9
-				? { type: 'PURCHASE', purchase: pick(rng, options) }
-				: { type: 'FINISH_UPKEEP' };
+			const upkeep = game!.upkeep!;
+			const refunds = upkeep.bought.flatMap((_, index) => (checkRefund(world, index) === null ? [index] : []));
+			if (refunds.length && nextFloat(rng) < 0.05) return { type: 'REFUND', index: pick(rng, refunds) };
+			if (options.length && nextFloat(rng) < 0.9) return { type: 'PURCHASE', purchase: pick(rng, options) };
+			const waiting = tablePlayers(world.table).find(player => !upkeep.done.includes(player));
+			return { type: 'FINISH_UPKEEP', player: waiting ?? ('bot' as PlayerId), done: true };
 		}
 		case 'finished':
 			throw new Error('the campaign is over');

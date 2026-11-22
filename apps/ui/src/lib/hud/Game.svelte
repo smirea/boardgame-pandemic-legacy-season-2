@@ -44,6 +44,7 @@
 	import TurnDesk from './TurnDesk.svelte';
 	import TurnInterlude from './TurnInterlude.svelte';
 	import { InfectionShow } from './infectionShow.svelte.ts';
+	import { PopulationShow } from './populationShow.svelte.ts';
 	import { cardName, cityName, seatName, SEAT_COLORS, setNames } from './labels.svelte.ts';
 	import Lobby from './Lobby.svelte';
 	import CharacterSelect from './CharacterSelect.svelte';
@@ -182,14 +183,14 @@
 			return leftColumn;
 		},
 		get rightColumn() {
-			return rightColumn;
+			return upkeepDock ?? rightColumn;
 		},
 		get goals() {
 			return goals;
 		},
 		// The Actions panel comes and goes with the turn's steps, and is one of the panels measured.
 		get layout() {
-			return [seatAt, listed, admin.deck];
+			return [seatAt, listed, admin.deck, upkeepDock];
 		},
 	});
 	let resetView = $state(0);
@@ -302,13 +303,26 @@
 	let briefingRead = $state('');
 	const briefingKey = $derived(JSON.stringify(campaign.briefing));
 	const briefingOpen = $derived(campaign.briefing.length > 0 && briefingRead !== briefingKey);
+	const population = new PopulationShow((city, kind) => {
+		const id = nextFx++;
+		fx = [...fx, { id, city, kind, delay: 0 }];
+		setTimeout(() => (fx = fx.filter(entry => entry.id !== id)), 4000);
+	});
+	// The spending sheet steps aside to a side column while the population show plays, or while a player looks at the board.
+	let upkeepAsideChosen = $state(false);
+	const upkeepAside = $derived(snap.phase === 'upkeep' && (population.playing || upkeepAsideChosen));
+	let upkeepScrim = $state<HTMLElement | null>(null);
+	const upkeepDock = $derived(upkeepAside ? upkeepScrim : null);
+	$effect(() => {
+		if (snap.phase !== 'upkeep') upkeepAsideChosen = false;
+	});
 	/** Anything that covers the board. While one does, Show board lifts it off the table and puts it back. */
 	const covered = $derived(
 		briefingOpen ||
 			choosingCharacters ||
 			snap.phase === 'lobby' ||
 			snap.phase === 'finished' ||
-			snap.phase === 'upkeep' ||
+			(snap.phase === 'upkeep' && !upkeepAside) ||
 			scarOwed !== null ||
 			boxOpen ||
 			deckOpen ||
@@ -444,15 +458,25 @@
 		return { x: (left + right) / 2 / width, y: 0.45 };
 	}
 	// Worked out once per city: a new object restarts the camera's glide, and the panels move while the show plays.
-	const showFocus = $derived(show.focus ? { city: show.focus, ...untrack(openMiddle), glide: 900, zoom: 0.45 } : null);
+	const showFocus = $derived.by(() => {
+		const city = show.focus ?? population.focus;
+		return city ? { city, ...untrack(openMiddle), glide: 900, zoom: 0.45 } : null;
+	});
 	// Before anything draws the new state, so the board and the incident track never show what the show holds back.
 	$effect.pre(() => {
 		const next = world;
 		const lived = !spectator || announce;
 		const phase = snap.phase;
-		untrack(() => show.observe(next, lived, phase));
+		const held = briefingOpen;
+		untrack(() => {
+			show.observe(next, lived, phase);
+			population.observe(next, lived, phase, held);
+		});
 	});
-	$effect(() => () => show.stop());
+	$effect(() => () => {
+		show.stop();
+		population.stop();
+	});
 
 	// What follows a player's actions is wound up in one place, where the Actions panel stood, for everyone to see.
 	const admin = createTurnAdmin({
@@ -631,6 +655,9 @@
 		get lag() {
 			return show.lag;
 		},
+		get populationLag() {
+			return population.lag;
+		},
 		get skull() {
 			return show.skull;
 		},
@@ -665,7 +692,7 @@
 			return fx;
 		},
 		get marks() {
-			return marks;
+			return marks ?? population.marks;
 		},
 	});
 
@@ -1148,8 +1175,25 @@
 				<Lobby {snap} {send} player={session.player} rename={name => session.rename(name)} />
 			</div>
 		{:else if snap.phase === 'upkeep'}
-			<div class="scrim" role="dialog" aria-modal="true" aria-label="Between games" transition:fade={{ duration: 200 }}>
-				<Upkeep {snap} {send} />
+			<div
+				class="scrim upkeep-scrim"
+				class:aside={upkeepAside}
+				role="dialog"
+				aria-modal={!upkeepAside}
+				aria-label="Between games"
+				bind:this={upkeepScrim}
+				transition:fade={{ duration: 200 }}
+			>
+				<Upkeep
+					{snap}
+					{send}
+					player={session.player}
+					{spectator}
+					aside={upkeepAside}
+					showing={population.playing ? population.shown : null}
+					onaside={aside => (upkeepAsideChosen = aside)}
+					onskip={() => population.stop()}
+				/>
 			</div>
 		{/if}
 
@@ -1855,6 +1899,22 @@
 	.scrim.open {
 		padding: 0;
 		background: none;
+	}
+
+	/* Stepped aside, the spending sheet stands in the right column and leaves the board free to pan and read. */
+	.scrim.upkeep-scrim.aside {
+		inset: 0.7rem 0.7rem 0.7rem auto;
+		z-index: 30;
+		display: flex;
+		align-items: flex-start;
+		padding: 0;
+		overflow: visible;
+		background: none;
+		pointer-events: none;
+	}
+
+	.scrim.upkeep-scrim.aside > :global(*) {
+		pointer-events: auto;
 	}
 
 	.scrim.passive {

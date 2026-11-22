@@ -33,7 +33,7 @@ import {
 } from './helpers';
 import type { CardId, CharacterId, CityId, SeatId } from './ids';
 import { shuffle } from './rng';
-import type { Campaign, Character, ExposureBox, World } from './state';
+import type { Bought, Campaign, Character, ExposureBox, Upkeep, World } from './state';
 
 const numbers = pack.numbers;
 
@@ -409,9 +409,9 @@ export function productionUnits(campaign: Campaign, won: boolean): number {
 export function resolveGameEnd(world: World) {
 	const { campaign, game } = world as { campaign: Campaign; game: NonNullable<World['game']> };
 	const won = game.outcome?.won ?? false;
-	const changes: { city: CityId; delta: number }[] = [];
+	const changes: Upkeep['populationChanges'] = [];
 	if (campaign.month === 0) {
-		game.upkeep = { units: 0, populationChanges: [] };
+		game.upkeep = { units: 0, populationChanges: [], bought: [], done: [] };
 		return;
 	}
 	for (const city of pack.cities) {
@@ -420,7 +420,11 @@ export function resolveGameEnd(world: World) {
 		const loss = (location.plague > 0 || location.hollow > 0) && !location.shelter ? 1 : 0;
 		const gain = location.center && city.kind === 'city' ? 1 : 0;
 		const next = Math.max(0, Math.min(8, record.population - loss + gain));
-		if (next !== record.population) changes.push({ city: city.id, delta: next - record.population });
+		if (next !== record.population) {
+			const delta = next - record.population;
+			const reason = delta > 0 ? 'center' : location.plague > 0 ? 'plague' : 'hollow';
+			changes.push({ city: city.id, delta, reason });
+		}
 		record.population = next;
 	}
 	readLegacy(world, 'gameEnd', won);
@@ -464,7 +468,7 @@ export function resolveGameEnd(world: World) {
 				Object.values(game.players).find(entry => entry.character === character.id)?.location ?? character.home;
 		}
 	}
-	game.upkeep = { units: productionUnits(campaign, won), populationChanges: changes };
+	game.upkeep = { units: productionUnits(campaign, won), populationChanges: changes, bought: [], done: [] };
 }
 
 export type Purchase =
@@ -562,7 +566,11 @@ export function applyPurchase(world: World, purchase: Purchase) {
 		campaign.freeAbilityUnits -= free;
 		cost -= free;
 	}
-	if (game.upkeep) game.upkeep.units -= cost;
+	if (game.upkeep) {
+		game.upkeep.units -= cost;
+		game.upkeep.bought.push({ purchase, units: cost, free: purchaseCost(purchase) - cost });
+		game.upkeep.done = [];
+	}
 	switch (purchase.t) {
 		case 'ability':
 			takeOne(campaign.abilitiesForSale, purchase.ability);
@@ -590,6 +598,61 @@ export function applyPurchase(world: World, purchase: Purchase) {
 			takeOne(campaign.permanentForSale, purchase.structure);
 			campaign.locations[purchase.city]!.permanent.push(purchase.structure);
 			return;
+	}
+}
+
+/** Null when the purchase at `index` of the spending step can be given back. */
+export function checkRefund(world: World, index: number): string | null {
+	const bought = world.game?.upkeep?.bought ?? [];
+	const entry = bought[index];
+	if (!Number.isInteger(index) || !entry) return 'Nothing bought there';
+	const { purchase } = entry;
+	// A restored city's population is what later population purchases stood on.
+	if (
+		purchase.t === 'restore' &&
+		bought.slice(index + 1).some(later => later.purchase.t === 'population' && later.purchase.city === purchase.city)
+	)
+		return `Give back ${cityDef(purchase.city).name}'s population first`;
+	return null;
+}
+
+/** Gives back one purchase of the spending step, undoing exactly what `applyPurchase` did. */
+export function refundPurchase(world: World, index: number) {
+	const { campaign, game } = world as { campaign: Campaign; game: NonNullable<World['game']> };
+	const upkeep = game.upkeep!;
+	const [{ purchase, units, free }] = upkeep.bought.splice(index, 1) as [Bought];
+	upkeep.units += units;
+	campaign.freeAbilityUnits += free;
+	upkeep.done = [];
+	switch (purchase.t) {
+		case 'ability':
+			campaign.abilitiesForSale.push(purchase.ability);
+			campaign.characters[purchase.character]!.slots[purchase.slot] = null;
+			return;
+		case 'cityImprovement': {
+			const card = campaign.playerCards[purchase.card]!;
+			campaign.cityImprovementsForSale.push(purchase.improvement);
+			if (card.kind === 'city') card.improvement = null;
+			return;
+		}
+		case 'infectionImprovement': {
+			const card = campaign.infectionCards[purchase.card]!;
+			campaign.infectionImprovementsForSale.push(purchase.improvement);
+			if (card.kind === 'city') card.improvement = null;
+			return;
+		}
+		case 'population':
+			campaign.locations[purchase.city]!.population -= purchase.steps;
+			return;
+		case 'restore':
+			campaign.locations[purchase.city]!.population = 0;
+			return;
+		case 'permanent': {
+			campaign.permanentForSale.push(purchase.structure);
+			const permanent = campaign.locations[purchase.city]!.permanent;
+			permanent.splice(permanent.lastIndexOf(purchase.structure), 1);
+			return;
+		}
 	}
 }
 

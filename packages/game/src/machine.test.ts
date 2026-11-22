@@ -24,6 +24,7 @@ import { createGameActor, parseSave, phaseOf, reject } from './machine';
 import type { Command, GameActor, Phase, Save } from './machine';
 import { legalActions, legalPlays } from './options';
 import { applyUnlock, closeGame, newCampaign, openSeal, readLegacy, score } from './legacy';
+import type { Purchase } from './legacy';
 import { newTable } from './table';
 import { decemberSave, octoberSave } from './scenarios';
 import { tabletopSave } from './tabletop';
@@ -1118,12 +1119,80 @@ describe('game end and the campaign', () => {
 			world.game!.completed.push('lostHaven', 'reconRegion');
 			world.game!.progress.reconRegion = 1;
 		});
-		send(actor, { type: 'FINISH_UPKEEP' });
+		send(actor, { type: 'FINISH_UPKEEP', player: 'host' as PlayerId, done: true });
 		const { campaign } = worldOf(actor);
 		expect(campaign.objectives).not.toContain('lostHaven');
 		expect(campaign.objectives).toContain('reconRegion');
 		expect(campaign.carriedProgress.reconRegion).toBe(1);
 		expect(pack.objectives.find(objective => objective.id === 'reconRegion')!.mandatory).toBe(true);
+	});
+
+	test('giving purchases back restores the units and the campaign as they were, and a restore waits for the population on it', () => {
+		const actor = ended(true, world => {
+			world.game!.locations[city('tehran')]!.shelter = true;
+			world.campaign.locations[city('frankfurt')]!.population = 0;
+			world.campaign.freeAbilityUnits = 3;
+		});
+		const sorted = (world: World) => {
+			const campaign = structuredClone(world.campaign);
+			for (const key of [
+				'abilitiesForSale',
+				'cityImprovementsForSale',
+				'infectionImprovementsForSale',
+				'permanentForSale',
+			] as const)
+				(campaign[key] as string[]).sort();
+			return { campaign, units: world.game!.upkeep!.units };
+		};
+		const before = sorted(worldOf(actor));
+		const character = Object.values(worldOf(actor).campaign.characters)[0]!;
+		const purchases: Purchase[] = [
+			{
+				t: 'ability',
+				ability: worldOf(actor).campaign.abilitiesForSale[0]!,
+				character: character.id,
+				slot: character.slots.indexOf(null),
+			},
+			{ t: 'cityImprovement', improvement: 'double', card: cityCards(worldOf(actor), 'london')[0]! },
+			{ t: 'restore', city: city('frankfurt') },
+			{ t: 'population', city: city('frankfurt'), steps: 1 },
+			{ t: 'permanent', structure: 'shelter', city: city('tehran') },
+		];
+		for (const purchase of purchases) send(actor, { type: 'PURCHASE', purchase });
+		expect(gameOf(actor).upkeep!.bought.map(entry => entry.purchase)).toEqual(purchases);
+		expect(reject(worldOf(actor), 'upkeep', { type: 'REFUND', index: 2 })).toBe(
+			"Give back Frankfurt's population first",
+		);
+		send(actor, { type: 'REFUND', index: 3 });
+		send(actor, { type: 'REFUND', index: 2 });
+		while (gameOf(actor).upkeep!.bought.length) send(actor, { type: 'REFUND', index: 0 });
+		expect(sorted(worldOf(actor))).toEqual(before);
+	});
+
+	test('the game closes only once everyone at the table is done, and a purchase or refund calls the vote again', () => {
+		const ann = 'ann' as PlayerId;
+		const ben = 'ben' as PlayerId;
+		const actor = ended(true, world => {
+			world.table.seats = [
+				{ seat: A, player: ann, name: 'Ann' },
+				{ seat: B, player: ben, name: 'Ben' },
+			];
+		});
+		const done = (player: PlayerId) => send(actor, { type: 'FINISH_UPKEEP', player, done: true });
+		expect(reject(worldOf(actor), 'upkeep', { type: 'FINISH_UPKEEP', player: 'cat' as PlayerId, done: true })).toBe(
+			'Sit down first',
+		);
+		done(ann);
+		expect(gameOf(actor).upkeep!.done).toEqual([ann]);
+		send(actor, { type: 'PURCHASE', purchase: { t: 'population', city: city('lagos'), steps: 1 } });
+		expect(gameOf(actor).upkeep!.done).toEqual([]);
+		done(ann);
+		send(actor, { type: 'REFUND', index: 0 });
+		expect(gameOf(actor).upkeep!.done).toEqual([]);
+		done(ann);
+		expect(phase(actor)).toBe('upkeep');
+		done(ben);
+		expect(phase(actor)).toBe('lobby');
 	});
 
 	test('every purchase applies, and permanent structures stand at the next setup', () => {
@@ -1149,7 +1218,7 @@ describe('game end and the campaign', () => {
 		expect(gameOf(actor).upkeep!.units).toBe(units - 1 - 1 - 1 - 2 - 2);
 		expect(after.locations[city('frankfurt')]!.population).toBe(1);
 		expect(after.locations[city('lagos')]!.population).toBe(campaign.locations[city('lagos')]!.population + 1);
-		send(actor, { type: 'FINISH_UPKEEP' });
+		send(actor, { type: 'FINISH_UPKEEP', player: 'host' as PlayerId, done: true });
 		expect(phase(actor)).toBe('lobby');
 		expect(worldOf(actor).campaign).toMatchObject({ month: 10, attempt: 2 });
 		send(actor, {
@@ -1189,7 +1258,7 @@ describe('game end and the campaign', () => {
 			);
 		});
 		expect(worldOf(actor).campaign.losingStreakBonusGames).toBe(3);
-		send(actor, { type: 'FINISH_UPKEEP' });
+		send(actor, { type: 'FINISH_UPKEEP', player: 'host' as PlayerId, done: true });
 		const characters = Object.values(worldOf(actor).campaign.characters);
 		send(actor, {
 			type: 'START_GAME',
@@ -1206,10 +1275,10 @@ describe('game end and the campaign', () => {
 	test('a win moves to the next month and eases rationing, and December ends the campaign', () => {
 		const october = ended(true);
 		const rationing = worldOf(october).campaign.rationing;
-		send(october, { type: 'FINISH_UPKEEP' });
+		send(october, { type: 'FINISH_UPKEEP', player: 'host' as PlayerId, done: true });
 		expect(worldOf(october).campaign).toMatchObject({ month: 11, attempt: 1, rationing: Math.max(0, rationing - 2) });
 		const december = ended(true, world => void (world.campaign.month = 12));
-		send(december, { type: 'FINISH_UPKEEP' });
+		send(december, { type: 'FINISH_UPKEEP', player: 'host' as PlayerId, done: true });
 		expect(phase(december)).toBe('finished');
 	});
 
@@ -1953,7 +2022,7 @@ test('a lost early attempt carries completed objectives and Plan steps, not part
 	campaign.month = 10;
 	campaign.attempt = 1;
 	game.outcome = { won: false, reason: 'test' };
-	game.upkeep = { units: 0, populationChanges: [] };
+	game.upkeep = { units: 0, populationChanges: [], bought: [], done: [] };
 	game.completed = ['reconEastAsia'];
 	game.progress = { reconEastAsia: 1, defect: 2, plan: 2 };
 	closeGame(world);
@@ -2461,7 +2530,7 @@ test('a game needs 2 to 4 seats, and a haven worker only when no living characte
 test('population is bought in whole steps', () => {
 	const actor = late((_, game) => {
 		game.outcome = { won: false, reason: 'test' };
-		game.upkeep = { units: 5, populationChanges: [] };
+		game.upkeep = { units: 5, populationChanges: [], bought: [], done: [] };
 	}, 'upkeep');
 	const target = [...grid(worldOf(actor).campaign)].find(id => worldOf(actor).campaign.locations[id]!.population < 6)!;
 	expect(
@@ -2476,7 +2545,7 @@ test('a game result records who played', () => {
 	const world = JSON.parse(JSON.stringify(worldOf(late()))) as World;
 	const game = world.game!;
 	game.outcome = { won: true, reason: 'test' };
-	game.upkeep = { units: 0, populationChanges: [] };
+	game.upkeep = { units: 0, populationChanges: [], bought: [], done: [] };
 	const seated = game.seats.map(seat => game.players[seat]!.character);
 	closeGame(world);
 	expect(world.campaign.results.at(-1)!.characters).toEqual(seated);
@@ -2848,7 +2917,7 @@ describe('between games', () => {
 				purchase: { t: 'population', city: city('cairo'), steps: 2 },
 			}),
 		).toContain('units');
-		send(actor, { type: 'FINISH_UPKEEP' });
+		send(actor, { type: 'FINISH_UPKEEP', player: 'host' as PlayerId, done: true });
 		expect(worldOf(actor).campaign).toMatchObject({ month: 1, attempt: 2, rationing: 6 });
 		expect(worldOf(actor).campaign.locations[city('cairo')]!.population).toBe(5);
 		expect(worldOf(actor).game).toBeNull();
@@ -2856,7 +2925,7 @@ describe('between games', () => {
 
 	test('February forces North America open with no explorer reward when it was never reconned', () => {
 		const actor = lost();
-		send(actor, { type: 'FINISH_UPKEEP' });
+		send(actor, { type: 'FINISH_UPKEEP', player: 'host' as PlayerId, done: true });
 		const seating = Object.values(worldOf(actor).campaign.characters).map((character, index) => ({
 			seat: [A, B][index]!,
 			character: character.id,
@@ -2867,7 +2936,7 @@ describe('between games', () => {
 		second.game!.outcome = { won: false, reason: 'test' };
 		const next = createGameActor({ seed: 1, save: { v: 1, phase: 'over', world: second } }).start();
 		send(next, { type: 'CONTINUE' });
-		send(next, { type: 'FINISH_UPKEEP' });
+		send(next, { type: 'FINISH_UPKEEP', player: 'host' as PlayerId, done: true });
 		expect(worldOf(next).campaign.month).toBe(2);
 		send(next, { type: 'START_GAME', seating });
 		const { campaign } = worldOf(next);
@@ -2923,8 +2992,8 @@ test('a prologue game leaves no permanent mark on the campaign', () => {
 	Object.values(world.campaign.characters)[0]!.exposure = 3;
 	const ended = createGameActor({ seed: 1, save: { v: 1, phase: 'over', world } }).start();
 	send(ended, { type: 'CONTINUE' });
-	expect(gameOf(ended).upkeep).toEqual({ units: 0, populationChanges: [] });
-	send(ended, { type: 'FINISH_UPKEEP' });
+	expect(gameOf(ended).upkeep).toEqual({ units: 0, populationChanges: [], bought: [], done: [] });
+	send(ended, { type: 'FINISH_UPKEEP', player: 'host' as PlayerId, done: true });
 	const after = worldOf(ended).campaign;
 	expect(after.locations).toEqual(before.locations);
 	expect(after.characters).toEqual(before.characters);

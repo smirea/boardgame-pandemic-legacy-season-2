@@ -449,8 +449,9 @@ function needsOnScreen(state: PublicState, who: Who): string[] {
 		case 'setup.infect':
 		case 'setup.events':
 		case 'over':
-		case 'upkeep':
 			return who.lead ? [lead] : [];
+		case 'upkeep':
+			return me && state.world.game?.upkeep?.done.includes(me) ? [] : [yours];
 		default: {
 			// A choice open to the table is the active player's to pass, and anyone's who holds a card that answers it.
 			const answers = world.game?.active === who.seat || legalPlays(world, phase).some(play => play.seat === who.seat);
@@ -539,7 +540,13 @@ function needsByKey(state: PublicState, who: Who): string[] {
 			break;
 		case 'upkeep':
 			if (who.lead)
-				out.push('LEAD: spend the production units (`options buy`), then `do finish-upkeep`. Ask the table first.');
+				out.push(
+					'LEAD: spend the production units (`options buy`, `do refund:<n>` gives one back), then `do finish-upkeep`. Ask the table first.',
+				);
+			else
+				out.push(
+					'Once the lead has spent the production units, vote with `do finish-upkeep`. The game closes when everyone has.',
+				);
 			break;
 		case 'finished':
 			out.push('The campaign is over. Write your report and memory file, then stop.');

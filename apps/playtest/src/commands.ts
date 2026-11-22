@@ -18,6 +18,7 @@ import type {
 	JobId,
 	ObjectiveId,
 	Play,
+	PlayerId,
 	PublicState,
 	Purchase,
 	SeatId,
@@ -87,7 +88,14 @@ export function optionsFor(state: PublicState, who: Who, seating: (CharacterId |
 			add('infect', 'setup', 'flip one of the Infection cards that open the game', { type: 'INFECT' });
 		add('confirm-events', 'setup', 'deal hands and begin', { type: 'CONFIRM_EVENTS' });
 		add('continue', 'flow', 'go to the game-end step', { type: 'CONTINUE' });
-		add('finish-upkeep', 'flow', 'end the game-end step; unspent units are lost', { type: 'FINISH_UPKEEP' });
+		if (phase === 'upkeep')
+			for (const [index, entry] of (game?.upkeep?.bought ?? []).entries())
+				add(
+					`refund:${index}`,
+					'refund',
+					`give back ${entry.purchase.t} ${describe(state, entry.purchase, 't')} for ${entry.units} unit(s)`,
+					{ type: 'REFUND', index },
+				);
 		if (phase === 'upkeep' || phase === 'setup.supply') {
 			for (const purchase of legalPurchases(world))
 				add(
@@ -98,6 +106,19 @@ export function optionsFor(state: PublicState, who: Who, seating: (CharacterId |
 					purchaseCost(purchase),
 				);
 		}
+	}
+
+	if (phase === 'upkeep') {
+		const player = (world.table.seats.find(entry => entry.name === who.name)?.player ?? who.id) as PlayerId;
+		const done = game?.upkeep?.done.includes(player) ?? false;
+		add(
+			'finish-upkeep',
+			'flow',
+			done
+				? 'take back your Done vote'
+				: 'vote that the table is done spending; the game closes once everyone has, and unspent units are lost',
+			{ type: 'FINISH_UPKEEP', player, done: !done },
+		);
 	}
 
 	if (!game || !phase.startsWith('playing')) return options;

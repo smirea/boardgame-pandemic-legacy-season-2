@@ -25,10 +25,12 @@ import type { Purchase } from './legacy';
 import {
 	applyPurchase,
 	checkPurchase,
+	checkRefund,
 	closeGame,
 	createCharacter,
 	newCampaign,
 	readLegacy,
+	refundPurchase,
 	resolveGameEnd,
 } from './legacy';
 import type { Decide, Play } from './plays';
@@ -80,7 +82,10 @@ export type Command =
 	| { type: 'UNDO'; by?: PlayerId }
 	| { type: 'CONTINUE' }
 	| { type: 'PURCHASE'; purchase: Purchase }
-	| { type: 'FINISH_UPKEEP' }
+	/** Gives back the purchase at this place in the spending step's list. */
+	| { type: 'REFUND'; index: number }
+	/** A player's vote that the table is done spending. The game closes once everyone at the table has voted. */
+	| { type: 'FINISH_UPKEEP'; player: PlayerId; done: boolean }
 	| TableCommand;
 
 export type Phase =
@@ -271,7 +276,10 @@ export function reject(world: World, phase: Phase, command: Command): string | n
 			return inPhase('over');
 		case 'PURCHASE':
 			return inPhase('upkeep', 'setup.supply') ?? checkPurchase(world, command.purchase);
+		case 'REFUND':
+			return inPhase('upkeep') ?? checkRefund(world, command.index);
 		case 'FINISH_UPKEEP':
+			if (world.table.seats.length > 0 && !tablePlayers(world.table).includes(command.player)) return 'Sit down first';
 			return inPhase('upkeep');
 	}
 }
@@ -371,6 +379,15 @@ export const gameMachine = setup({
 			!isOver(context.world) && context.world.game!.drawsLeft === 0 && !blocked(context.world),
 		openingDone: ({ context }: Args) =>
 			!isOver(context.world) && context.world.game!.infectionsLeft === 0 && !blocked(context.world),
+		upkeepAgreed: ({ context, event }: Args) => {
+			if (reject(context.world, 'upkeep', event) !== null) return false;
+			const vote = event as Of<'FINISH_UPKEEP'>;
+			const done = context.world.game!.upkeep!.done;
+			const players = tablePlayers(context.world.table);
+			// With nobody seated (the bot, the tests) a single vote decides.
+			if (players.length === 0) return vote.done;
+			return players.every(player => (player === vote.player ? vote.done : done.includes(player)));
+		},
 		campaignEnding: ({ context }: Args) => {
 			const { campaign, game } = context.world;
 			return campaign.month === 12 && (campaign.attempt === 2 || game?.outcome?.won === true);
@@ -539,6 +556,16 @@ export const gameMachine = setup({
 		),
 		resolveGameEnd: assign(change(resolveGameEnd)),
 		purchase: assign(change((world, event) => applyPurchase(world, (event as Of<'PURCHASE'>).purchase))),
+		refund: assign(change((world, event) => refundPurchase(world, (event as Of<'REFUND'>).index))),
+		voteUpkeep: assign(
+			change((world, event) => {
+				const vote = event as Of<'FINISH_UPKEEP'>;
+				const upkeep = world.game!.upkeep!;
+				upkeep.done = vote.done
+					? [...new Set([...upkeep.done, vote.player])]
+					: upkeep.done.filter(player => player !== vote.player);
+			}),
+		),
 		closeGame: assign(change(closeGame)),
 	},
 }).createMachine({
@@ -659,9 +686,11 @@ export const gameMachine = setup({
 			on: {
 				...seatEvents('upkeep'),
 				PURCHASE: { guard: { type: 'legal', params: 'upkeep' }, actions: 'purchase' },
+				REFUND: { guard: { type: 'legal', params: 'upkeep' }, actions: 'refund' },
 				FINISH_UPKEEP: [
-					{ guard: 'campaignEnding', target: 'finished', actions: 'closeGame' },
-					{ target: 'lobby', actions: 'closeGame' },
+					{ guard: and(['upkeepAgreed', 'campaignEnding']), target: 'finished', actions: 'closeGame' },
+					{ guard: 'upkeepAgreed', target: 'lobby', actions: 'closeGame' },
+					{ guard: { type: 'legal', params: 'upkeep' }, actions: 'voteUpkeep' },
 				],
 			},
 		},
