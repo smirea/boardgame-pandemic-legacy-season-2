@@ -8,8 +8,7 @@
 
 	type Slot = 'won' | 'lost' | 'now' | 'open';
 
-	/** `room` is the width the bar can give the calendar. Months that do not fit fold away. */
-	let { campaign, room = Number.POSITIVE_INFINITY }: { campaign: Campaign; room?: number } = $props();
+	let { campaign }: { campaign: Campaign } = $props();
 
 	const ATTEMPTS = ['Early', 'Late'] as const;
 	const SAID: Record<Slot, string> = { won: 'won', lost: 'lost', now: 'in play', open: '' };
@@ -31,33 +30,8 @@
 		}),
 	);
 
-	// The widest month drawn so far, which every month is budgeted at, and the fold marker's width.
-	let slot = $state(0);
-	const FOLD = 18;
-	const measure = (element: HTMLElement) => {
-		slot = Math.max(slot, element.offsetWidth);
-	};
-	/** Future months fold first, farthest first, then past months, oldest first. The current month always stays. */
-	const shown = $derived.by(() => {
-		const all = months.map(entry => entry.month);
-		if (!slot || room === Number.POSITIVE_INFINITY) return new Set(all);
-		const fit = (count: number, folds: number) => count * slot + folds * FOLD <= room;
-		const order = [
-			...all.filter(month => month > campaign.month).toReversed(),
-			...all.filter(month => month < campaign.month),
-		];
-		const visible = new Set(all);
-		for (const month of order) {
-			const folds =
-				Number(all.some(m => m > campaign.month && !visible.has(m))) +
-				Number(all.some(m => m < campaign.month && !visible.has(m)));
-			if (fit(visible.size, folds)) break;
-			visible.delete(month);
-		}
-		return visible;
-	});
-	const foldedPast = $derived(months.filter(entry => entry.month < campaign.month && !shown.has(entry.month)));
-	const foldedFuture = $derived(months.filter(entry => entry.month > campaign.month && !shown.has(entry.month)));
+	/** The month in play, or the Prologue when the campaign has not reached January. */
+	const current = $derived(months.find(entry => entry.month === campaign.month) ?? null);
 </script>
 
 {#snippet mark(slot: Slot, side: 'early' | 'late')}
@@ -72,8 +46,54 @@
 	</i>
 {/snippet}
 
-<ol
+{#snippet month(entry: (typeof months)[number])}
+	<li
+		class="month"
+		class:current={entry.month === campaign.month}
+		class:past={entry.month < campaign.month}
+		data-month={entry.month}
+		aria-label={[
+			entry.name,
+			`${entry.required} objective${entry.required === 1 ? '' : 's'} required`,
+			`${entry.cubes} supply cubes`,
+			...entry.attempts,
+		].join('. ')}
+	>
+		<span class="line">
+			{@render mark(entry.slots[0]!, 'early')}
+			<span class="name">{entry.name.slice(0, 3)}</span>
+			{@render mark(entry.slots[1]!, 'late')}
+		</span>
+		<span class="goals" data-required={entry.required}>
+			{#each { length: entry.required } as _, index (index)}<i></i>{/each}
+		</span>
+
+		<!-- The month's printed numbers: what the board says before any Legacy card adds to them. -->
+		<div class="tip" role="tooltip" data-testid="calendar-tip">
+			<strong>{entry.name}</strong>
+			<p class="needs">
+				<span class="goals"
+					>{#each { length: entry.required } as _, index (index)}<i></i>{/each}</span
+				>
+				{entry.required} objective{entry.required === 1 ? '' : 's'} required
+			</p>
+			<p>
+				{entry.cubes ? `${entry.cubes} supply cubes at setup` : 'No supply cubes at setup'}
+			</p>
+			{#if entry.cubes}
+				<span class="cubes" data-cubes={entry.cubes}>
+					{#each { length: entry.cubes } as _, index (index)}<i></i>{/each}
+				</span>
+			{/if}
+			{#each entry.attempts as said (said)}<p class="said">{said}</p>{/each}
+		</div>
+	</li>
+{/snippet}
+
+<!-- The bar shows the month in play. The whole year drops down while the pointer or focus rests on it. -->
+<div
 	class="calendar"
+	role="group"
 	aria-label="Campaign calendar"
 	{@attach feedback('Calendar', () => ({
 		month: campaign.month,
@@ -81,66 +101,46 @@
 		results: campaign.results.map(result => `${result.month}.${result.attempt}:${result.won ? 'won' : 'lost'}`),
 	}))}
 >
-	{#if foldedPast.length}
-		<li
-			class="fold"
-			aria-label={foldedPast.map(entry => `${entry.name}: ${entry.attempts.join(', ') || 'not played'}`).join('. ')}
-		>
-			⋯
-		</li>
-	{/if}
-	{#each months.filter(entry => shown.has(entry.month)) as entry (entry.month)}
-		<li
-			{@attach measure}
-			class="month"
-			class:current={entry.month === campaign.month}
-			class:past={entry.month < campaign.month}
-			data-month={entry.month}
-			aria-label={[
-				entry.name,
-				`${entry.required} objective${entry.required === 1 ? '' : 's'} required`,
-				`${entry.cubes} supply cubes`,
-				...entry.attempts,
-			].join('. ')}
-		>
-			<span class="line">
-				{@render mark(entry.slots[0]!, 'early')}
-				<span class="name">{entry.name.slice(0, 3)}</span>
-				{@render mark(entry.slots[1]!, 'late')}
+	<button
+		type="button"
+		class="peek"
+		aria-label={`${current?.name ?? MONTHS[campaign.month] ?? 'Campaign over'}: show the calendar`}
+	>
+		{#if current}
+			<span class="month current" data-month={current.month}>
+				<span class="line">
+					{@render mark(current.slots[0]!, 'early')}
+					<span class="name">{current.name.slice(0, 3)}</span>
+					{@render mark(current.slots[1]!, 'late')}
+				</span>
+				<span class="goals" data-required={current.required}>
+					{#each { length: current.required } as _, index (index)}<i></i>{/each}
+				</span>
 			</span>
-			<span class="goals" data-required={entry.required}>
-				{#each { length: entry.required } as _, index (index)}<i></i>{/each}
-			</span>
-
-			<!-- The month's printed numbers: what the board says before any Legacy card adds to them. -->
-			<div class="tip" role="tooltip" data-testid="calendar-tip">
-				<strong>{entry.name}</strong>
-				<p class="needs">
-					<span class="goals"
-						>{#each { length: entry.required } as _, index (index)}<i></i>{/each}</span
-					>
-					{entry.required} objective{entry.required === 1 ? '' : 's'} required
-				</p>
-				<p>
-					{entry.cubes ? `${entry.cubes} supply cubes at setup` : 'No supply cubes at setup'}
-				</p>
-				{#if entry.cubes}
-					<span class="cubes" data-cubes={entry.cubes}>
-						{#each { length: entry.cubes } as _, index (index)}<i></i>{/each}
-					</span>
-				{/if}
-				{#each entry.attempts as said (said)}<p class="said">{said}</p>{/each}
-			</div>
-		</li>
-	{/each}
-	{#if foldedFuture.length}
-		<li class="fold" aria-label={`Still to come: ${foldedFuture.map(entry => entry.name).join(', ')}`}>⋯</li>
-	{/if}
-</ol>
+		{:else}
+			<span class="month current prologue"><span class="name">{MONTHS[campaign.month] ?? 'Done'}</span></span>
+		{/if}
+		<span class="more" aria-hidden="true">
+			<svg viewBox="0 0 10 10"><path d="M2.5 3.8 5 6.3l2.5-2.5" /></svg>
+		</span>
+	</button>
+	<div class="year">
+		<ol data-testid="calendar-year">
+			{#each months as entry (entry.month)}
+				{@render month(entry)}
+			{/each}
+		</ol>
+	</div>
+</div>
 
 <style>
 	/* Each month carries its own record: the early attempt's mark on the left of its name, the late one's on the right. */
 	.calendar {
+		position: relative;
+		outline: none;
+	}
+
+	ol {
 		display: flex;
 		gap: 0.05rem;
 		margin: 0;
@@ -148,12 +148,86 @@
 		list-style: none;
 	}
 
-	.fold {
+	.peek {
+		display: flex;
+		align-items: stretch;
+		padding: 0;
+		border: 0;
+		border-radius: 2px;
+		background: none;
+		color: inherit;
+		font: inherit;
+		cursor: default;
+		transition: background 200ms ease;
+	}
+
+	.calendar:hover .peek,
+	.peek:focus-visible {
+		background: rgb(231 220 198 / 0.07);
+	}
+
+	.peek:focus-visible {
+		outline: 1px solid var(--line-strong);
+	}
+
+	.more {
 		display: grid;
 		place-items: center;
-		width: 18px;
+		width: 0.9rem;
 		color: var(--muted);
-		cursor: default;
+	}
+
+	.more svg {
+		width: 0.7rem;
+		height: 0.7rem;
+		stroke: currentColor;
+		transition: rotate 200ms ease;
+	}
+
+	.calendar:hover .more svg,
+	.calendar:focus-within .more svg {
+		rotate: 180deg;
+	}
+
+	.prologue {
+		justify-content: center;
+		padding-inline: 0.4rem;
+	}
+
+	/* The padding bridges the gap under the bar, so the pointer can travel down into the year without it closing. */
+	.year {
+		position: absolute;
+		top: 100%;
+		left: -0.4rem;
+		z-index: 6;
+		padding-top: 0.35rem;
+		opacity: 0;
+		visibility: hidden;
+		translate: 0 -0.3rem;
+		transition:
+			opacity 160ms ease,
+			translate 160ms ease,
+			visibility 0s 160ms;
+	}
+
+	.year ol {
+		padding: 0.3rem 0.4rem;
+		border: 1px solid var(--line);
+		border-radius: 3px;
+		background: var(--panel);
+		backdrop-filter: blur(10px);
+		box-shadow: 0 0.6rem 1.6rem rgb(0 0 0 / 0.4);
+	}
+
+	.calendar:hover .year,
+	.calendar:focus-within .year {
+		opacity: 1;
+		visibility: visible;
+		translate: 0 0;
+		transition:
+			opacity 160ms ease 80ms,
+			translate 160ms ease 80ms,
+			visibility 0s 80ms;
 	}
 
 	.month {

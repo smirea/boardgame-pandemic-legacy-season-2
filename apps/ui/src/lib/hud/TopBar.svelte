@@ -59,8 +59,6 @@
 	const campaign = $derived(snap.world.campaign);
 	const game = $derived(snap.world.game);
 	const dealt = $derived(!snap.phase.startsWith('setup'));
-	/** The width left for the calendar once the rest of the bar has what it needs. */
-	let room = $state(0);
 	const nextLegacy = $derived(pack.legacyDeck[campaign.legacyIndex]);
 	const legacyLeft = $derived(pack.legacyDeck.length - campaign.legacyIndex);
 	const hasStorage = $derived(campaign.rules.includes('storage'));
@@ -78,9 +76,9 @@
 	{@attach feedback(undefined, () => ({ status, players, solo, month: campaign.month, phase: snap.phase }))}
 >
 	<header class="bar">
-		<div class="month" bind:clientWidth={room}>
+		<div class="month">
 			{#if !MONTHS[campaign.month]}<strong>Campaign over</strong>{/if}
-			<Calendar {campaign} {room} />
+			<Calendar {campaign} />
 		</div>
 		<CampaignStatus world={snap.world} onopen={onbox} />
 		{#if hasStorage}
@@ -257,7 +255,7 @@
 		}
 	}
 
-	/* Takes the room the rest of the bar leaves, whatever the calendar holds, so the calendar can fold to fit it. */
+	/* Takes the room the rest of the bar leaves, so the bar's other parts keep their places. */
 	.month {
 		display: flex;
 		flex: 1 1 0;
