@@ -12,6 +12,7 @@
 	import { fade, fly, scale } from 'svelte/transition';
 	import { CITY_COLOR } from '#lib/board/CityMarker.svelte';
 	import CardIcon from '#lib/cards/CardIcon.svelte';
+	import OccupationIcon from '#lib/occupations/OccupationIcon.svelte';
 	import { SCAR_ICON } from '#lib/cards/icons.ts';
 	import { deal } from './deal.ts';
 	import { handGroups } from './handGroups.ts';
@@ -199,18 +200,21 @@
 			>
 				{#if character?.carrier}
 					<div class="line carrier">
-						<span class="kind">Sample carrier</span>
 						<b>Carrying the Pearl Lab sample</b>
 						<p>Deliver to a supply center in Johannesburg to complete the final objective.</p>
 					</div>
 				{/if}
 				{#each traits as trait, index (`${trait.kind}:${trait.name}:${index}`)}
 					<div class="line {trait.kind}" class:struck={trait.struck}>
-						<span class="kind">
-							{#if trait.kind === 'scar'}<CardIcon path={SCAR_ICON} size="0.85rem" />{/if}
-							{TRAIT_KIND[trait.kind]}{trait.struck ? ', covered by a scar' : ''}
-						</span>
-						<b>{trait.name}</b>
+						<span class="sr-only">{TRAIT_KIND[trait.kind]}{trait.struck ? ', covered by a scar' : ''}: </span>
+						<b>
+							{#if trait.kind === 'job' && trait.job}
+								<span class="mark"><OccupationIcon job={trait.job} /></span>
+							{:else if trait.kind === 'scar'}
+								<span class="mark"><CardIcon path={SCAR_ICON} size="0.9rem" /></span>
+							{/if}
+							{trait.name}
+						</b>
 						<p>{trait.text}</p>
 					</div>
 				{/each}
@@ -486,7 +490,7 @@
 		line-height: 1.15;
 	}
 
-	.line.carrier .kind {
+	.line.carrier b {
 		color: #166b52;
 	}
 
@@ -593,18 +597,30 @@
 		bottom: 0;
 	}
 
-	.line .kind {
-		display: flex;
-		align-items: center;
-		gap: 0.25rem;
-		color: rgb(42 32 23 / 0.6);
-		font-size: 0.66rem;
-		font-weight: 700;
-		letter-spacing: 0.06em;
-		text-transform: uppercase;
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		margin: -1px;
+		padding: 0;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
 	}
 
-	.line.scar .kind {
+	.line .mark {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 0.95rem;
+		height: 0.95rem;
+		margin-right: 0.3rem;
+		vertical-align: -0.08em;
+		color: rgb(42 32 23 / 0.7);
+	}
+
+	.line.scar .mark,
+	.line.scar b {
 		color: #8a2a1c;
 	}
 
@@ -614,6 +630,10 @@
 		font-size: 1.15rem;
 		font-weight: 400;
 		line-height: 1.15;
+	}
+
+	.line.struck {
+		opacity: 0.55;
 	}
 
 	.line.struck b {
