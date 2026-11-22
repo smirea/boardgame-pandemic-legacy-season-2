@@ -16,7 +16,21 @@ import type {
 } from './content/types';
 import { briefUnlock } from './briefing';
 import { settleGrid } from './flow';
-import { cityDef, grid, gridCityCount, hasEdge, hasRule, infest, isForsaken, log, sealDef } from './helpers';
+export { paddedTrack } from './helpers';
+import {
+	canImproveCityCard,
+	canImproveInfectionCard,
+	cityDef,
+	grid,
+	gridCityCount,
+	hasEdge,
+	hasRule,
+	infest,
+	isForsaken,
+	log,
+	paddedTrack,
+	sealDef,
+} from './helpers';
 import type { CardId, CharacterId, CityId, SeatId } from './ids';
 import { shuffle } from './rng';
 import type { Campaign, Character, ExposureBox, World } from './state';
@@ -138,12 +152,6 @@ function addEpidemic(campaign: Campaign) {
 	const id = newCardId(campaign, 'epidemic');
 	campaign.playerCards[id] = { id, kind: 'epidemic' };
 }
-
-/** Every card shows the same number of boxes, so the boxes past the one that kills are blank and never reached. */
-export const paddedTrack = (layout: readonly ExposureBox[]): ExposureBox[] => [
-	...layout,
-	...Array<ExposureBox>(Math.max(0, numbers.exposureBoxes - layout.length)).fill('empty'),
-];
 
 export function createCharacter(
 	campaign: Campaign,
@@ -510,16 +518,18 @@ export function checkPurchase(world: World, purchase: Purchase): string | null {
 			const card = campaign.playerCards[purchase.card];
 			if (!campaign.cityImprovementsForSale.includes(purchase.improvement))
 				return 'That improvement is not available yet';
-			if (card?.kind !== 'city' || card.improvement) return 'Pick a City card with an empty slot';
-			if (card.city === UTOPIA) return 'Utopia cannot be improved';
+			if (card?.kind === 'city' && card.city === UTOPIA) return 'Utopia cannot be improved';
+			if (card?.kind === 'city' && card.search.length > 0) return 'Search cards have no improvement slot';
+			if (!card || card.kind !== 'city' || !canImproveCityCard(card)) return 'Pick a City card with an empty slot';
 			return onGrid.has(card.city) ? null : 'The city is not on the grid';
 		}
 		case 'infectionImprovement': {
 			const card = campaign.infectionCards[purchase.card];
 			if (!campaign.infectionImprovementsForSale.includes(purchase.improvement))
 				return 'That improvement is not available yet';
-			if (card?.kind !== 'city' || card.improvement) return 'Pick an Infection card with an empty slot';
-			if (card.city === UTOPIA) return 'Utopia cannot be improved';
+			if (card?.kind === 'city' && card.city === UTOPIA) return 'Utopia cannot be improved';
+			if (!card || card.kind !== 'city' || !canImproveInfectionCard(card))
+				return 'Pick an Infection card with an empty slot';
 			return onGrid.has(card.city) ? null : 'The city is not on the grid';
 		}
 		case 'population': {

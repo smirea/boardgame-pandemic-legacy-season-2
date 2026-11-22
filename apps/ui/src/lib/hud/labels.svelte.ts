@@ -406,7 +406,8 @@ export function playTarget(play: Play): CityId | null {
 	if ('city' in play) return play.city;
 	if (play.e === 'airlift') return play.to;
 	if (play.e === 'openWaters') return play.to;
-	if (play.e === 'safeHouses' || play.e === 'handout' || play.e === 'cleanse') return play.cities[0]!;
+	if (play.e === 'safeHouses' || play.e === 'mobileShelters' || play.e === 'handout' || play.e === 'cleanse')
+		return play.cities[0]!;
 	if (play.e === 'spreadOut') return play.to[0]!;
 	return null;
 }

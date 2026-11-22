@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { keep } from './viewState.ts';
-	import { onGrid, pack, reject } from '@repo/game';
+	import { canImproveCityCard, canImproveInfectionCard, onGrid, pack, reject } from '@repo/game';
 	import type { CardId, Command, PublicState, Purchase } from '@repo/game';
 	import { cityName, purchaseLabel } from './labels.svelte.ts';
 
@@ -34,7 +34,7 @@
 		for (const improvement of new Set(campaign.cityImprovementsForSale)) {
 			const def = pack.cityImprovements.find(candidate => candidate.id === improvement)!;
 			for (const card of Object.values(campaign.playerCards)) {
-				if (card.kind !== 'city' || seenCity.has(`${improvement}:${card.city}`)) continue;
+				if (card.kind !== 'city' || !canImproveCityCard(card) || seenCity.has(`${improvement}:${card.city}`)) continue;
 				seenCity.add(`${improvement}:${card.city}`);
 				all.push({
 					group: `City card: ${def.name} (${def.cost})`,
@@ -47,7 +47,8 @@
 		for (const improvement of new Set(campaign.infectionImprovementsForSale)) {
 			const def = pack.infectionImprovements.find(candidate => candidate.id === improvement)!;
 			for (const card of Object.values(campaign.infectionCards)) {
-				if (card.kind !== 'city' || seenInfection.has(`${improvement}:${card.city}`)) continue;
+				if (card.kind !== 'city' || !canImproveInfectionCard(card) || seenInfection.has(`${improvement}:${card.city}`))
+					continue;
 				seenInfection.add(`${improvement}:${card.city}`);
 				all.push({
 					group: `Infection card: ${def.name} (${def.cost})`,

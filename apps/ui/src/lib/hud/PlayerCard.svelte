@@ -20,6 +20,7 @@
 
 <script lang="ts">
 	import { getContext } from 'svelte';
+	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import type { CardId } from '@repo/game';
 	import { pack } from '@repo/game';
 	import { fitText } from '#lib/cards/fit.ts';
@@ -30,6 +31,8 @@
 		EVENT_PRINT,
 		IMPROVEMENT_PRINT,
 		producePrint,
+		searchHeading,
+		searchResultText,
 	} from '#lib/cards/playerPrint.ts';
 	import { inkOn } from '#lib/color.ts';
 	import { originals, playerCardScan, scanUrl } from '#lib/scans.svelte.ts';
@@ -42,6 +45,10 @@
 	let { card, onclick, tone = null, small = false }: Props = $props();
 
 	const EPIDEMIC_PLAIN = EPIDEMIC_STEPS.map(step => `${step.heading}: ${step.text}`).join(' ');
+
+	type SearchDisplay =
+		| { kind: 'foil'; scope: 'land' | 'sea'; heading: string }
+		| { kind: 'revealed'; scope: 'land' | 'sea'; heading: string; text: string };
 
 	const cityDetails = $derived.by(() => {
 		if (card.kind !== 'city') return null;
@@ -58,13 +65,24 @@
 					...COMPANION_PRINT[card.companion],
 				}
 			: null;
+		const searchBlocks: SearchDisplay[] = [];
+		for (const box of card.search) {
+			const heading = searchHeading(card.search, box);
+			if (!box.scratched) {
+				searchBlocks.push({ kind: 'foil', scope: box.scope, heading });
+			} else if (box.result && !(box.result.t === 'companion' && card.companion === box.result.companion)) {
+				searchBlocks.push({ kind: 'revealed', scope: box.scope, heading, text: searchResultText(box.result) });
+			}
+		}
+		const blockCount = (improvement ? 1 : 0) + (companion ? 1 : 0) + searchBlocks.length;
 		const plain = [
 			improvement && `${improvement.name}: ${improvement.text}`,
 			companion && `Companion: ${companion.name}. ${companion.text}`,
+			...searchBlocks.map(block => (block.kind === 'foil' ? block.heading : `${block.heading}: ${block.text}`)),
 		]
 			.filter(Boolean)
 			.join(' ');
-		return { city, improvement, companion, plain };
+		return { city, improvement, companion, searchBlocks, blockCount, plain };
 	});
 
 	const eventInfo = $derived.by(() => {
@@ -85,9 +103,11 @@
 		switch (card.kind) {
 			case 'city': {
 				const { city, companion } = cityDetails!;
+				const base = city.port ? 'Port' : 'City';
+				const unscratched = card.search.some(box => !box.scratched);
 				return {
 					title: city.name,
-					kicker: companion ? `${city.port ? 'Port' : 'City'} · ${companion.name}` : city.port ? 'Port' : 'City',
+					kicker: companion ? `${base} · ${companion.name}` : unscratched ? `${base} · Search` : base,
 					color: cardColor(card),
 				};
 			}
@@ -134,6 +154,7 @@
 	style:--on={inkOn(face.color)}
 	disabled={!onclick}
 	{onclick}
+	{@attach feedback('Player card', () => ({ id: card.id, kind: card.kind }))}
 >
 	{#if originals.held && originalScan}
 		<img class="original-swap" src={scanUrl(originalScan.card.src)} alt={face.title} />
@@ -150,15 +171,14 @@
 			<span class="kicker">{face.kicker}</span>
 			<span class="title" {@attach fitText(face.title, { max: 1.2, min: 0.72, across: true })}>{face.title}</span>
 		</span>
-		<span
-			class="art"
-			class:compact={Boolean(cityDetails.improvement || cityDetails.companion)}
-			class:both={Boolean(cityDetails.improvement && cityDetails.companion)}
-		>
+		<span class="art" class:compact={cityDetails.blockCount > 0} class:both={cityDetails.blockCount >= 2}>
 			<MapArt city={card.city} accent={face.color} />
 		</span>
-		{#if cityDetails.improvement || cityDetails.companion}
-			<span class="city-slip" {@attach fitText(cityDetails.plain, { max: 0.78, min: 0.44 })}>
+		{#if cityDetails.blockCount > 0}
+			<span
+				class="city-slip"
+				{@attach fitText(cityDetails.plain, { max: 0.78, min: cityDetails.blockCount >= 2 ? 0.36 : 0.44 })}
+			>
 				{#if cityDetails.improvement}
 					<span class="slip-block">
 						<span class="slip-head">
@@ -175,6 +195,7 @@
 				{#if cityDetails.companion}
 					<span class="slip-block">
 						<span class="slip-head">
+							<span class="pill companion">Companion</span>
 							<strong>{cityDetails.companion.name}:</strong>
 							{#if cityDetails.companion.cards}
 								{#each cityDetails.companion.cards as letter (letter)}
@@ -185,6 +206,21 @@
 						<RichText text={cityDetails.companion.text} />
 					</span>
 				{/if}
+				{#each cityDetails.searchBlocks as block, idx (idx)}
+					{#if block.kind === 'foil'}
+						<span class="slip-block search-foil" data-search-foil={block.scope}>
+							<span class="foil-icon" aria-hidden="true">{block.scope === 'sea' ? '≈' : '⌕'}</span>
+							<span>{block.heading}</span>
+						</span>
+					{:else}
+						<span class="slip-block" data-search-revealed={block.scope}>
+							<span class="slip-head">
+								<strong>{block.heading}:</strong>
+							</span>
+							<RichText text={block.text} />
+						</span>
+					{/if}
+				{/each}
 			</span>
 		{/if}
 		<span class="foot">
@@ -415,7 +451,7 @@
 	}
 
 	.art.compact.both {
-		flex: 0 0 1.2em;
+		flex: 0 0 1.05em;
 	}
 
 	.city-slip {
@@ -424,14 +460,14 @@
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
-		gap: 0.28em;
-		margin: 0.25em 0.38em 0;
-		padding: 0.34em 0.44em;
+		gap: 0.24em;
+		margin: 0.22em 0.38em 0;
+		padding: 0.3em 0.42em;
 		border-left: 0.22em solid color-mix(in srgb, var(--band) 85%, #140c06);
 		border-radius: 0.2em;
 		background: rgb(252 248 237 / 0.96);
 		color: #19140e;
-		line-height: 1.24;
+		line-height: 1.22;
 		overflow: hidden;
 	}
 
@@ -440,15 +476,61 @@
 	}
 
 	.slip-block + .slip-block {
-		padding-top: 0.26em;
+		padding-top: 0.22em;
 		border-top: 1px solid rgb(25 20 14 / 0.14);
 	}
 
 	.slip-head {
 		display: inline-flex;
+		flex-wrap: wrap;
 		align-items: center;
-		gap: 0.24em;
-		margin-right: 0.22em;
+		gap: 0.22em;
+		margin-right: 0.2em;
+	}
+
+	.search-foil {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.28em;
+		padding: 0.24em 0.34em;
+		border: 1px solid #7f7a70;
+		border-radius: 0.16em;
+		background:
+			repeating-linear-gradient(-45deg, rgb(255 255 255 / 0.16) 0 0.22em, transparent 0.22em 0.44em),
+			linear-gradient(135deg, #cac5bb, #a7a298 50%, #d5d0c6);
+		color: #24201a;
+		font-weight: 800;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		white-space: nowrap;
+		text-shadow: 0 1px 0 rgb(255 255 255 / 0.45);
+	}
+
+	.slip-block + .search-foil {
+		padding-top: 0.24em;
+		border-top: 1px solid #7f7a70;
+	}
+
+	.foil-icon {
+		font-size: 1.05em;
+		line-height: 1;
+	}
+
+	.pill {
+		display: inline-block;
+		padding: 0.04em 0.3em;
+		border-radius: 0.16em;
+		font-size: 0.72em;
+		font-weight: 800;
+		letter-spacing: 0.03em;
+		text-transform: uppercase;
+		line-height: 1.15;
+	}
+
+	.pill.companion {
+		background: #235847;
+		color: #eef9f4;
 	}
 
 	.swatch-wild {

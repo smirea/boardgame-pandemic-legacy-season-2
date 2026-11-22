@@ -16,7 +16,18 @@ import type {
 import { sealKey } from './content/types';
 import type { CardId, CharacterId, CityId, RegionId, SeatId } from './ids';
 import { edgeKey } from './ids';
-import type { Campaign, Character, Game, LogInput, Player, PlayerCard, World } from './state';
+import type {
+	Campaign,
+	Character,
+	ExposureBox,
+	Game,
+	InfectionCard,
+	LogInput,
+	Player,
+	PlayerCard,
+	SearchBox,
+	World,
+} from './state';
 
 const cityIndex = new Map(pack.cities.map(city => [city.id, city]));
 
@@ -181,6 +192,43 @@ export function infest(campaign: Campaign, city: CityId) {
 	if (record.infested) return;
 	const used = pack.cities.filter(entry => !entry.startsInfested && campaign.locations[entry.id]!.infested).length;
 	if (used < INFESTED_STICKERS) record.infested = true;
+}
+
+/** Whether a City card has a printed improvement slot (non-search City cards, excluding Utopia). */
+export const hasCityImprovementSlot = (card: PlayerCard): boolean =>
+	card.kind === 'city' && card.search.length === 0 && card.city !== ('utopia' as CityId);
+
+/** Whether a City card can currently receive a City Card Improvement sticker. */
+export const canImproveCityCard = (card: PlayerCard): boolean =>
+	card.kind === 'city' && hasCityImprovementSlot(card) && card.improvement === null;
+
+/** Whether an Infection card has a printed improvement slot (City cards, excluding Utopia). */
+export const hasInfectionImprovementSlot = (card: InfectionCard): boolean =>
+	card.kind === 'city' && card.city !== ('utopia' as CityId);
+
+/** Whether an Infection card can currently receive an Infection Card Improvement sticker. */
+export const canImproveInfectionCard = (card: InfectionCard): boolean =>
+	card.kind === 'city' && hasInfectionImprovementSlot(card) && card.improvement === null;
+
+/** The companion revealed on a search City card from its scratched search boxes, if any. */
+export function searchCardCompanion(search: readonly SearchBox[]): CompanionId | null {
+	for (const box of search) {
+		if (box.scratched && box.result.t === 'companion') return box.result.companion;
+	}
+	return null;
+}
+
+/** Every card shows the same number of boxes, so the boxes past the one that kills are blank and never reached. */
+export const paddedTrack = (layout: readonly ExposureBox[]): ExposureBox[] => [
+	...layout,
+	...Array<ExposureBox>(Math.max(0, pack.numbers.exposureBoxes - layout.length)).fill('empty'),
+];
+
+const characterTrackKeys = pack.characterCards.map(layout => paddedTrack(layout).join(','));
+
+/** Canonical index (`0..9`) in `pack.characterCards` for any padded or unpadded exposure track, or -1 if unknown. */
+export function characterCardIndex(track: readonly ExposureBox[]): number {
+	return characterTrackKeys.indexOf(paddedTrack(track).slice(0, pack.numbers.exposureBoxes).join(','));
 }
 
 /** Whether a City card counts as `color`. Local Operatives also makes it red, for every purpose. */

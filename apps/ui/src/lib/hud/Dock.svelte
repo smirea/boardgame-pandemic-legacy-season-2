@@ -91,8 +91,13 @@
 			return card?.kind === 'city' && card.improvement === 'lockdown' ? [{ id, city: card.city }] : [];
 		}),
 	);
-	const anyLockPay = $derived(
-		game.seats.flatMap(other => game.players[other]!.hand.map(pay => ({ seat: other, pay })))[0] ?? null,
+	const myLockPay = $derived(
+		game.seats.filter(owns).flatMap(other => game.players[other]!.hand.map(pay => ({ seat: other, pay })))[0] ?? null,
+	);
+	const lockableHere = $derived(
+		onlockdown && myLockPay && snap.phase.startsWith('playing') && !(canAct && snap.phase === 'playing.actions')
+			? lockable.filter(card => reject(world, snap.phase, { type: 'LOCKDOWN', card: card.id, ...myLockPay }) === null)
+			: [],
 	);
 	const cardsOf = (other: SeatId) =>
 		(game.players[other]?.hand ?? []).flatMap(id => world.campaign.playerCards[id] ?? []);
@@ -355,7 +360,7 @@
 							is finished.
 						</p>
 					</div>
-				{:else if pending && (!epidemicStep || elsewhere.length || (pending.t === 'intensify' && lockable.length))}
+				{:else if pending && (!epidemicStep || elsewhere.length || lockableHere.length)}
 					<div class="slip">
 						<p class="prompt">{decisionTitle(world, pending)}</p>
 						{#if choices.length}
@@ -367,21 +372,16 @@
 						{:else if !epidemicStep}
 							<p class="waiting">Waiting for {seatName(world, decider)}.</p>
 						{/if}
-						{#if elsewhere.length || (pending.t === 'intensify' && lockable.length && onlockdown)}
+						{#if elsewhere.length || (lockableHere.length && onlockdown)}
 							<div class="chips" data-testid="play-elsewhere">
 								{#each elsewhere as option (option.card)}
 									<button onclick={() => onplaycard(option.seat, option.card)}>
 										{seatName(world, option.seat)}: play {cardName(world, option.card)}
 									</button>
 								{/each}
-								{#if pending.t === 'intensify' && onlockdown}
-									{#each lockable as card (card.id)}
-										<button
-											disabled={!anyLockPay ||
-												reject(world, snap.phase, { type: 'LOCKDOWN', card: card.id, ...anyLockPay }) !== null}
-											onclick={() => onlockdown(card.id)}
-											data-testid="lockdown"
-										>
+								{#if onlockdown}
+									{#each lockableHere as card (card.id)}
+										<button onclick={() => onlockdown(card.id)} data-testid="lockdown">
 											Lockdown: destroy {cityName(card.city)}
 										</button>
 									{/each}
@@ -389,17 +389,26 @@
 							</div>
 						{/if}
 					</div>
-				{:else if snap.phase === 'playing.actions'}
-					{#if canAct && aiming}
-						<div class="slip step aiming" data-testid="aiming">
-							{#if aiming.a}<ActionIcon action={aiming.a} size="2.4rem" />{/if}
-							<div class="say">
-								<strong>{aiming.label}</strong>
-								<span>{aiming.prompt} Esc or a right click cancels.</span>
-							</div>
-							<button onclick={oncancel} data-testid="cancel-aim">Cancel</button>
+				{:else if snap.phase === 'playing.actions' && canAct && aiming}
+					<div class="slip step aiming" data-testid="aiming">
+						{#if aiming.a}<ActionIcon action={aiming.a} size="2.4rem" />{/if}
+						<div class="say">
+							<strong>{aiming.label}</strong>
+							<span>{aiming.prompt} Esc or a right click cancels.</span>
 						</div>
-					{/if}
+						<button onclick={oncancel} data-testid="cancel-aim">Cancel</button>
+					</div>
+				{/if}
+				{#if lockableHere.length && onlockdown && (discarding.length || !pending)}
+					<div class="slip">
+						<div class="chips" data-testid="lockdown-bar">
+							{#each lockableHere as card (card.id)}
+								<button onclick={() => onlockdown(card.id)} data-testid="lockdown">
+									Lockdown: destroy {cityName(card.city)}
+								</button>
+							{/each}
+						</div>
+					</div>
 				{/if}
 			</div>
 		{/if}

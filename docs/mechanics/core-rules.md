@@ -386,15 +386,15 @@ Add 1 if the game was won. Units form one group pool. Unspent units are lost.
 
 Purchases available from the start [R]:
 
-| Purchase                   | Cost                        | Rule                                                                                                                                |
-| -------------------------- | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Character ability          | printed next to the sticker | Place on any created, living character, even one who did not play. Use an empty slot. Never over a scar, a job, or another ability. |
-| City card improvement      | printed next to the sticker | Place on a City card with an empty improvement slot. The city must be on the grid. One sticker per slot.                            |
-| Infection card improvement | printed next to the sticker | Same rules on an Infection card. Shaped differently from City improvements.                                                         |
-| Population +1              | 1 per step                  | Any location that is not forsaken. Several steps may be bought at once. Place only the final value sticker. Max 8.                  |
-| Restore forsaken city to 1 | 2                           | A forsaken city returns to population 1.                                                                                            |
+| Purchase                   | Cost                        | Rule                                                                                                                                                  |
+| -------------------------- | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Character ability          | printed next to the sticker | Place on any created, living character, even one who did not play. Use an empty slot. Never over a scar, a job, or another ability.                   |
+| City card improvement      | printed next to the sticker | Place on a plain City card with an empty improvement slot (search cards and Utopia have no slot). The city must be on the grid. One sticker per slot. |
+| Infection card improvement | printed next to the sticker | Same rules on an Infection card (except Utopia). Shaped differently from City improvements.                                                           |
+| Population +1              | 1 per step                  | Any location that is not forsaken. Several steps may be bought at once. Place only the final value sticker. Max 8.                                    |
+| Restore forsaken city to 1 | 2                           | A forsaken city returns to population 1.                                                                                                              |
 
-Cards are referred to by the city they name. Each City card or Infection card has at most 1 improvement slot.
+Cards are referred to by the city they name. Plain City cards and non-Utopia Infection cards have 1 improvement slot; search City cards and Utopia cards have none.
 
 Infection card improvements apply whenever that card is drawn: during setup infection, during an Epidemic's Infect step, and during every turn's Infect step [R].
 

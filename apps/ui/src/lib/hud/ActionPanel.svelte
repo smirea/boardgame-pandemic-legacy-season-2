@@ -17,6 +17,8 @@
 		live: boolean;
 		/** This screen plays the active seat, so the controls that move the turn on are offered. */
 		canAct: boolean;
+		/** Whether this screen plays the given seat (for Lockdown card payment). */
+		owns: (seat: SeatId) => boolean;
 		/** The kind of action whose targets are lit on the map. */
 		aiming: Action['a'] | null;
 		onchoose: (choice: ActionChoice) => void;
@@ -25,7 +27,7 @@
 		onlockdown: (card: CardId) => void;
 	};
 
-	let { snap, seat, name, menu, live, canAct, aiming, onchoose, send, onlockdown }: Props = $props();
+	let { snap, seat, name, menu, live, canAct, owns, aiming, onchoose, send, onlockdown }: Props = $props();
 
 	let showUnavailable = $state(false);
 	keep(
@@ -38,8 +40,8 @@
 
 	const world = $derived(snap.world);
 	const game = $derived(world.game!);
-	const anyPay = $derived(
-		game.seats.flatMap(other => game.players[other]!.hand.map(pay => ({ seat: other, pay })))[0] ?? null,
+	const myPay = $derived(
+		game.seats.filter(owns).flatMap(other => game.players[other]!.hand.map(pay => ({ seat: other, pay })))[0] ?? null,
 	);
 	const refused = (command: Command) => !canAct || reject(world, snap.phase, command) !== null;
 
@@ -178,7 +180,7 @@
 		{#each lockable as card (card.id)}
 			<button
 				class="lockdown"
-				disabled={!anyPay || reject(world, snap.phase, { type: 'LOCKDOWN', card: card.id, ...anyPay }) !== null}
+				disabled={!myPay || reject(world, snap.phase, { type: 'LOCKDOWN', card: card.id, ...myPay }) !== null}
 				onclick={() => onlockdown(card.id)}
 				data-testid="lockdown">Lockdown: destroy {cityName(card.city)}</button
 			>

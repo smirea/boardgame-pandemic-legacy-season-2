@@ -10,7 +10,7 @@
 		"front": "city-istanbul.jpg",
 		"back": "back.jpg"
 	},
-	"hasImprovementSlot": false,
+	"hasImprovementSlot": true,
 	"coordinates": "41°0′30″N 28°58′42″E",
 	"frontText": "ISTANBUL\n41°0′30″N 28°58′42″E",
 	"backText": null,
@@ -23,7 +23,8 @@
 			"The city name and coordinates are printed again, rotated 180 degrees, along the bottom edge.",
 			"A compass rose in the top right shows N and an anchor.",
 			"The map has a crosshair over the city.",
-			"A small unlabelled schematic sits in the bottom-left corner. It is not a sticker slot."
+			"A small unlabelled schematic sits in the bottom-left corner. It is not a sticker slot.",
+			"A dashed improvement slot is printed across the center of the map."
 		]
 	}
 }

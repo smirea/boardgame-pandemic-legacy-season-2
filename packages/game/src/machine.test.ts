@@ -3148,3 +3148,212 @@ describe('scars and the sticker pool', () => {
 		expect(gameOf(actor).playerDiscard).toContain(card);
 	});
 });
+
+describe('card states, improvements and companion audit', () => {
+	test('search City cards and Utopia cannot buy City Card Improvements, while a plain copy of the same city can', () => {
+		const shop = late(world => {
+			world.campaign.month = 8;
+			world.game!.outcome = { won: true, reason: 'test' };
+			world.campaign.cityImprovementsForSale = ['double', 'wild'];
+			world.campaign.infectionImprovementsForSale = ['wellStocked'];
+		}, 'over');
+		send(shop, { type: 'CONTINUE' });
+		const world = worldOf(shop);
+		const denverCards = Object.values(world.campaign.playerCards).filter(
+			card => card.kind === 'city' && card.city === city('denver'),
+		);
+		const searchCopy = denverCards.find(card => card.kind === 'city' && card.search.length > 0)!;
+		const plainCopy = denverCards.find(card => card.kind === 'city' && card.search.length === 0)!;
+		expect(
+			reject(world, 'upkeep', {
+				type: 'PURCHASE',
+				purchase: { t: 'cityImprovement', improvement: 'double', card: searchCopy.id },
+			}),
+		).toBe('Search cards have no improvement slot');
+		expect(
+			reject(world, 'upkeep', {
+				type: 'PURCHASE',
+				purchase: { t: 'cityImprovement', improvement: 'double', card: plainCopy.id },
+			}),
+		).toBeNull();
+		const utopia = Object.values(world.campaign.playerCards).find(
+			card => card.kind === 'city' && card.city === city('utopia'),
+		)!;
+		expect(
+			reject(world, 'upkeep', {
+				type: 'PURCHASE',
+				purchase: { t: 'cityImprovement', improvement: 'double', card: utopia.id },
+			}),
+		).toBe('Utopia cannot be improved');
+	});
+
+	test('tabletopSave holds all unrevealed East Asia and Utopia cards at base state 0 and passes invariants', () => {
+		const save = tabletopSave();
+		expect(violations(save.world, new Map())).toEqual([]);
+		const unrevealed: CityId[] = [
+			'jakarta',
+			'bangkok',
+			'ho-chi-minh-city',
+			'manila',
+			'hong-kong',
+			'shanghai',
+			'seoul',
+			'tokyo',
+			'osaka',
+			'utopia',
+		] as CityId[];
+		for (const id of unrevealed) {
+			const playerCards = Object.values(save.world.campaign.playerCards).filter(
+				card => card.kind === 'city' && card.city === id,
+			);
+			const infCards = Object.values(save.world.campaign.infectionCards).filter(
+				card => card.kind === 'city' && card.city === id,
+			);
+			expect(playerCards.length).toBeGreaterThan(0);
+			expect(infCards.length).toBeGreaterThan(0);
+			for (const card of playerCards) {
+				if (card.kind !== 'city') continue;
+				expect(card.improvement).toBeNull();
+				expect(card.companion).toBeNull();
+				expect(card.search.every(box => !box.scratched)).toBe(true);
+			}
+			for (const card of infCards) {
+				if (card.kind !== 'city') continue;
+				expect(card.improvement).toBeNull();
+			}
+		}
+	});
+
+	test('Exacting exposes the 6-card buildCenter option in legalActions', () => {
+		const actor = late((world, game) => {
+			character(world, A).slots[3] = { kind: 'scar', id: 'buildExtraCard' };
+			game.players[A]!.location = city('chicago');
+			give(world, A, [...cityCards(world, 'new-york', 4), ...cityCards(world, 'washington', 2)]);
+		});
+		const builds = legalActions(worldOf(actor), A).filter(action => action.a === 'buildCenter');
+		expect(builds.length).toBeGreaterThan(0);
+		expect(builds[0]!.a === 'buildCenter' && builds[0]!.cards.length).toBe(6);
+	});
+
+	test('Cautious Approach played by another player deals kept City cards to the active player', () => {
+		let eventCard = '' as CardId;
+		let keptCity = '' as CardId;
+		let discardedEvent = '' as CardId;
+		const actor = late((world, game) => {
+			emptyHand(world, A);
+			eventCard = conjure(world, B, { kind: 'event', event: 'scavenge' });
+			keptCity = cityCards(world, 'london', 1)[0]!;
+			const secondCity = cityCards(world, 'paris', 1)[0]!;
+			const thirdCity = cityCards(world, 'cairo', 1)[0]!;
+			discardedEvent = Object.values(world.campaign.playerCards).find(
+				card => card.kind === 'event' && card.id !== eventCard,
+			)!.id;
+			const top4 = [keptCity, discardedEvent, secondCity, thirdCity];
+			game.playerDeck.order = [...top4, ...game.playerDeck.order.filter(id => !top4.includes(id))];
+			game.playerDeck.piles = [{ size: game.playerDeck.order.length, epidemics: 0 }];
+		});
+		send(actor, { type: 'PLAY', seat: B, card: eventCard, play: { e: 'scavenge' } });
+		expect(gameOf(actor).players[A]!.hand).toContain(keptCity);
+		expect(gameOf(actor).players[B]!.hand).not.toContain(keptCity);
+		expect(gameOf(actor).playerDiscard).toContain(discardedEvent);
+	});
+
+	test('Portable Antiviral Lab only plays in actions and lets the Immunologist draw from reserve first', () => {
+		let surplusCard = '' as CardId;
+		const inDraw = late((world, game) => {
+			surplusCard = conjure(world, A, { kind: 'event', event: 'surplus' });
+			game.players[A]!.used.push('madeSupplies');
+			game.drawsLeft = 2;
+		}, 'playing.draw');
+		expect(
+			reject(worldOf(inDraw), 'playing.draw', { type: 'PLAY', seat: A, card: surplusCard, play: { e: 'surplus' } }),
+		).toBe('Play it after you Make Supplies this turn');
+
+		let labCard = '' as CardId;
+		const imm = late((world, game) => {
+			character(world, A).job = 'immunologist';
+			character(world, A).jobScar = null;
+			labCard = conjure(world, A, { kind: 'event', event: 'surplus' });
+			game.players[A]!.used.push('madeSupplies');
+			game.reserve = 2;
+			game.stockpile = 5;
+			game.players[A]!.supplies = 0;
+		});
+		send(imm, { type: 'PLAY', seat: A, card: labCard, play: { e: 'surplus' } });
+		expect(gameOf(imm).players[A]!.supplies).toBe(3);
+		expect(gameOf(imm).reserve).toBe(0);
+		expect(gameOf(imm).stockpile).toBe(4);
+	});
+
+	test('Careless searching Moscow as the last card in hand clears the empty giveCard decision', () => {
+		const actor = late((world, game) => {
+			character(world, A).slots[3] = { kind: 'scar', id: 'searchDiscard' };
+			game.players[A]!.location = city('moscow');
+			give(world, A, cityCards(world, 'moscow', 1));
+		});
+		const moscow = gameOf(actor).players[A]!.hand[0]!;
+		act(actor, { a: 'search', card: moscow, box: 0 });
+		expect(gameOf(actor).players[A]!.hand).toEqual([]);
+		expect(gameOf(actor).pending).toEqual([]);
+	});
+
+	test('Purge, Purifier and Marksman refuse cities off the grid', () => {
+		let purgeCard = '' as CardId;
+		let purifierCard = '' as CardId;
+		let marksmanCard = '' as CardId;
+		const actor = late((world, game) => {
+			purgeCard = conjure(world, A, { kind: 'event', event: 'purge' });
+			purifierCard = conjure(world, A, { kind: 'companion', companion: 'purifier' });
+			marksmanCard = conjure(world, A, { kind: 'companion', companion: 'marksman' });
+			world.campaign.edges = world.campaign.edges.filter(
+				edge => edge.a !== city('santiago') && edge.b !== city('santiago'),
+			);
+			game.locations[city('santiago')]!.plague = 2;
+			game.locations[city('santiago')]!.hollow = 1;
+		});
+		expect(
+			reject(worldOf(actor), 'playing.actions', {
+				type: 'PLAY',
+				seat: A,
+				card: purgeCard,
+				play: { e: 'purge', city: city('santiago') },
+			}),
+		).toBe('Pick a location on the grid with Plague cubes');
+		expect(
+			reject(worldOf(actor), 'playing.actions', {
+				type: 'PLAY',
+				seat: A,
+				card: purifierCard,
+				play: { e: 'purifier', city: city('santiago') },
+			}),
+		).toBe('Pick a location on the grid with Plague cubes');
+		expect(
+			reject(worldOf(actor), 'playing.actions', {
+				type: 'PLAY',
+				seat: A,
+				card: marksmanCard,
+				play: { e: 'marksman', city: city('santiago') },
+			}),
+		).toBe('Pick a location on the grid with Hollow Men');
+	});
+
+	test('playable companions discard for reuse across the campaign while unrationed events are permanently destroyed', () => {
+		let healer = '' as CardId;
+		let unrationed = '' as CardId;
+		const actor = late((world, game) => {
+			game.players[A]!.location = city('london');
+			game.locations[city('london')]!.plague = 2;
+			healer = conjure(world, A, { kind: 'companion', companion: 'medic' });
+			unrationed = conjure(world, A, { kind: 'event', event: 'purge' });
+			const eventCard = world.campaign.playerCards[unrationed];
+			if (eventCard?.kind === 'event') eventCard.mode = 'unrationed';
+		});
+		send(actor, { type: 'PLAY', seat: A, card: healer, play: { e: 'medic' } });
+		expect(gameOf(actor).playerDiscard).toContain(healer);
+		expect(worldOf(actor).campaign.playerCards[healer]).toBeDefined();
+
+		send(actor, { type: 'PLAY', seat: A, card: unrationed, play: { e: 'purge', city: city('london') } });
+		expect(gameOf(actor).playerDiscard).not.toContain(unrationed);
+		expect(worldOf(actor).campaign.playerCards[unrationed]).toBeUndefined();
+	});
+});

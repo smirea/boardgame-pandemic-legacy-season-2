@@ -1,13 +1,15 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
-	import { cityDef, pack } from '@repo/game';
+	import { cityDef } from '@repo/game';
 	import type { CardId, InfectionCard } from '@repo/game';
 	import { CITY_COLOR } from '#lib/board/CityMarker.svelte';
 	import RichText from '#lib/hud/RichText.svelte';
+	import { infectionCardScan, originals, scanUrl } from '#lib/scans.svelte.ts';
 	import MapArt from './MapArt.svelte';
 	import { fitText } from './fit.ts';
 	import { mapArt } from './mapArt.ts';
+	import { INFECTION_IMPROVEMENT_PRINT } from './playerPrint.ts';
 
 	const hoverCard = getContext<((card: CardId | null) => void) | undefined>('card-hover');
 
@@ -18,7 +20,13 @@
 	const city = $derived(card.kind === 'city' ? cityDef(card.city) : null);
 	const accent = $derived(city ? CITY_COLOR[city.color ?? 'haven'] : '#8f74ad');
 	const improvement = $derived(
-		card.kind === 'city' ? pack.infectionImprovements.find(item => item.id === card.improvement) : undefined,
+		card.kind === 'city' && card.improvement
+			? { id: card.improvement, ...INFECTION_IMPROVEMENT_PRINT[card.improvement] }
+			: undefined,
+	);
+	const originalScan = $derived(infectionCardScan(card));
+	const cardTitle = $derived(
+		card.kind === 'city' && city ? city.name : card.kind === 'gather' ? 'Hollow Men gather' : 'Hollow Men assemble',
 	);
 	const hollowRule =
 		'Discard this card and flip again until you reach a city. Place a Hollow Man there instead of infecting it.';
@@ -35,13 +43,27 @@
 	<button
 		class="card"
 		class:improved={!!improvement}
+		data-card={card.id}
+		data-original-active={originals.held && Boolean(originalScan)}
 		style:--accent={accent}
 		disabled={!onclick}
 		{onclick}
 		onfocus={() => hoverCard?.(card.id)}
 		onblur={() => hoverCard?.(null)}
 	>
-		{#if card.kind === 'city' && city}
+		{#if originals.held && originalScan}
+			<span class="original-frame">
+				<img
+					class="original-swap"
+					class:rotated={Boolean(originalScan.card.rotated)}
+					src={scanUrl(originalScan.card.src)}
+					alt={cardTitle}
+				/>
+				{#if originalScan.sticker}
+					<img class="original-sticker" src={scanUrl(originalScan.sticker.src)} alt={originalScan.sticker.title} />
+				{/if}
+			</span>
+		{:else if card.kind === 'city' && city}
 			<span class="art"><MapArt city={card.city} {accent} tone="night" /></span>
 			<span class="plate">
 				<span class="kicker">Infection</span>
@@ -59,7 +81,7 @@
 		{:else}
 			<span class="hollow">
 				<span class="kicker">Infection</span>
-				<span class="title">{card.kind === 'gather' ? 'Hollow Men gather' : 'Hollow Men assemble'}</span>
+				<span class="title">{cardTitle}</span>
 				<span class="hollow-rule" {@attach fitText(hollowRule, { min: 0.65, max: 0.86 })}>
 					<RichText text={hollowRule} />
 				</span>
@@ -97,6 +119,49 @@
 	.card.improved,
 	.card:has(.hollow) {
 		height: 9em;
+	}
+
+	.card[data-original-active='true'] {
+		display: grid;
+		place-items: center;
+		background: #14110e;
+	}
+
+	.original-frame {
+		position: relative;
+		width: 100%;
+		max-height: 100%;
+		aspect-ratio: 571 / 410;
+		overflow: hidden;
+	}
+
+	.original-swap {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	.original-swap.rotated {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: 71.8%;
+		height: 139.3%;
+		transform: translate(-50%, -50%) rotate(-90deg);
+		object-fit: cover;
+	}
+
+	.original-sticker {
+		position: absolute;
+		left: 11%;
+		top: 58%;
+		width: 78%;
+		height: auto;
+		transform: translateY(-50%);
+		border-radius: 0.16em;
+		box-shadow: 0 1px 4px rgb(0 0 0 / 0.55);
+		pointer-events: none;
 	}
 
 	.art {

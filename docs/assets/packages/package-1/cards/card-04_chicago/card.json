@@ -12,7 +12,7 @@
 	"color": "blue",
 	"coordinates": "41°52'41\"N 87°37'47\"W",
 	"copies": 1,
-	"hasImprovementSlot": false,
+	"hasImprovementSlot": true,
 	"images": {
 		"sideA": "side-a.jpg",
 		"sideB": "side-b.jpg"
@@ -31,7 +31,7 @@
 		"notes": [
 			"Card id 903. Printed code P1-04b.",
 			"Same coordinates as the search card: 41°52'41\"N 87°37'47\"W.",
-			"No improvement slot is printed."
+			"A dashed improvement slot is printed across the map."
 		]
 	}
 }

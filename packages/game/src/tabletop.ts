@@ -599,6 +599,35 @@ export function tabletopSave(seed = 7): Save {
 		const card = id('gather');
 		campaign.infectionCards[card] = { id: card, kind: 'gather' };
 	}
+	const openedRegions = new Set<string>(['starting']);
+	for (const seal of pack.seals) {
+		if (!campaign.opened.includes(sealKey(seal.seal))) continue;
+		for (const unlock of seal.unlocks) if (unlock.t === 'region') openedRegions.add(unlock.region);
+	}
+	for (const city of pack.cities) {
+		if (city.kind !== 'city' || openedRegions.has(city.region)) continue;
+		const boxes = pack.searches[city.id] ?? [];
+		for (let copy = 0; copy < city.playerCards; copy++) {
+			const card = id(city.id);
+			campaign.playerCards[card] = {
+				id: card,
+				kind: 'city',
+				city: city.id,
+				improvement: null,
+				companion: null,
+				search: copy === 0 ? boxes.map(box => ({ ...box, scratched: false })) : [],
+			};
+		}
+		for (let copy = 0; copy < (city.noInfectionCards ? 0 : city.population); copy++) {
+			const card = id(`inf-${city.id}`);
+			campaign.infectionCards[card] = {
+				id: card,
+				kind: 'city',
+				city: city.id,
+				improvement: null,
+			};
+		}
+	}
 	campaign.nextCardId = next;
 
 	campaign.characters = {};
