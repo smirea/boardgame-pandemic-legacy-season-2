@@ -26,11 +26,21 @@ export type Glyph =
 
 export type HintCount = { glyph: 'supplies' | 'plague' | 'hollow'; count: number; tone?: HintTone };
 
+/** A lasting condition of a city, named and explained first, right under the heading. */
+export type HintEffect = { name: string; text: string; tone: HintTone };
+
 /**
  * What a hover over the board explains: a heading, aligned rows of facts, and a sentence or two of rules.
  * A city's heading also carries what marks it (port, buildings) before its name and its cubes after it.
  */
-export type HintText = { title: string; marks?: Glyph[]; counts?: HintCount[]; rows: HintRow[]; notes: string[] };
+export type HintText = {
+	title: string;
+	marks?: Glyph[];
+	counts?: HintCount[];
+	effects?: HintEffect[];
+	rows: HintRow[];
+	notes: string[];
+};
 
 export type Part =
 	| 'city'
@@ -55,6 +65,47 @@ function structureValue(entry: { permanent: boolean; placed: boolean }, inGame: 
 	if (entry.permanent && entry.placed) return 'Permanent';
 	if (entry.permanent) return inGame ? 'Permanent sticker (piece moved)' : 'Permanent (placed on game start)';
 	return 'This game';
+}
+
+const plural = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`;
+
+const SHELTERED = 'Its Shelter keeps characters here from exposure and the city from losing population.';
+
+/** What sets this city apart, worst first, each with what it does here. */
+function cityEffects(city: CityView): HintEffect[] {
+	const sheltered = city.structures.some(entry => entry.kind === 'shelter' && entry.placed);
+	const effects: HintEffect[] = [];
+	if (city.forsaken)
+		effects.push({
+			name: 'Forsaken',
+			text: 'Population 0. Its Infection cards are set aside when flipped, and only Drive or Ferry works here.',
+			tone: 'bad',
+		});
+	if (city.infested)
+		effects.push({
+			name: 'Infested',
+			text: `For good. ${sheltered ? SHELTERED : 'A character who starts a turn here is exposed.'}`,
+			tone: 'bad',
+		});
+	if (city.plague)
+		effects.push({
+			name: 'Infected',
+			text: `${plural(city.plague, 'plague cube', 'plague cubes')}. ${sheltered ? SHELTERED : 'A character who starts a turn here is exposed, and it loses 1 population at Game End.'}`,
+			tone: 'bad',
+		});
+	if (city.hollow)
+		effects.push({
+			name: 'Hollowed',
+			text: `${plural(city.hollow, 'Hollow Man', 'Hollow Men')}. ${sheltered ? SHELTERED : 'A character who leaves is exposed, and it loses 1 population at Game End.'}`,
+			tone: 'bad',
+		});
+	if (city.inoculated)
+		effects.push({
+			name: 'Inoculated',
+			text: `Every Infection card of ${city.name} is in storage, so the Infection deck cannot infect it.${city.storageLeaks ? ' An Epidemic may still pull one back out.' : ''}`,
+			tone: 'good',
+		});
+	return effects;
 }
 
 /** Everything at one city, for a hover over its disc. */
@@ -111,20 +162,11 @@ export function cityHint(city: CityView): HintText {
 				tone: city.labInfo.doses.left === 0 ? 'bad' : 'good',
 			});
 	} else if (city.lab) rows.push({ label: 'Lab', value: 'Found (permanent)', tone: 'good' });
-	if (city.infested) rows.push({ label: 'Infested', value: 'Permanent sticker', tone: 'bad' });
-	if (city.forsaken) rows.push({ label: 'Forsaken', value: 'Yes', tone: 'bad' });
-	if (city.plague) rows.push({ label: 'Plague cubes', value: String(city.plague), tone: 'bad' });
-	if (city.hollow) rows.push({ label: 'Hollow Men', value: String(city.hollow), tone: 'bad' });
 	const notes = [
 		...(city.haven ? ['No Infection card names a haven. An outbreak in a neighbouring city still strikes it.'] : []),
 		...(city.labInfo?.effect ? [`${city.labInfo.name}: ${city.labInfo.effect}`] : []),
-		...(city.inoculated
-			? [
-					`Fully inoculated: every Infection card of ${city.name} is in storage, so the Infection deck cannot infect it.${city.storageLeaks ? ' An Epidemic may still pull one back out.' : ''}`,
-				]
-			: []),
 	];
-	return { title: city.name, marks, counts, rows, notes };
+	return { title: city.name, marks, counts, effects: cityEffects(city), rows, notes };
 }
 
 /** One piece or printed mark beside a city. */

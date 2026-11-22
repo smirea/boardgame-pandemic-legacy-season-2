@@ -391,6 +391,13 @@
 					</span>
 				{/if}
 			</div>
+			{#if hint.effects?.length}
+				<ul class="effects" data-testid="board-hint-effects">
+					{#each hint.effects as effect (effect.name)}
+						<li class={effect.tone ?? ''}><b>{effect.name}</b> <RichText text={effect.text} /></li>
+					{/each}
+				</ul>
+			{/if}
 			{#if hint.rows.length}
 				<dl>
 					{#each hint.rows as row (row.label)}
@@ -585,6 +592,30 @@
 
 	.counts > .bad {
 		color: #a3301c;
+	}
+
+	.effects {
+		display: grid;
+		gap: 0.2rem;
+		max-width: 17rem;
+		margin: 0;
+		padding: 0 0 0.35rem;
+		border-bottom: 1px solid rgb(42 32 23 / 0.15);
+		list-style: none;
+		font-size: 0.8rem;
+		line-height: 1.3;
+	}
+
+	.effects b {
+		font-weight: 700;
+	}
+
+	.effects .bad b {
+		color: #a3301c;
+	}
+
+	.effects .good b {
+		color: #2f6e5c;
 	}
 
 	.hint dl {
