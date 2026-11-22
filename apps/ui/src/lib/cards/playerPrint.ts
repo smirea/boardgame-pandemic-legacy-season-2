@@ -221,7 +221,7 @@ export function searchResultPrint(result: SearchResult): SearchRevealPrint | nul
 			return { before: text, plain: text };
 		}
 		case 'removeHollow': {
-			const text = `Remove up to ${result.amount} Hollow Men from the grid.`;
+			const text = `Remove up to ${result.amount} Hollow Men from the board.`;
 			return { before: text, plain: text };
 		}
 		case 'freeEdge': {

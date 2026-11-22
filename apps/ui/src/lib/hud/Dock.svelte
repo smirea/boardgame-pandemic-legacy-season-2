@@ -2,6 +2,7 @@
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { handLimit, pack, reject } from '@repo/game';
 	import type { Action, CardId, Command, Decide, Play, PublicState, Purchase, SeatId } from '@repo/game';
+	import { untrack } from 'svelte';
 	import { flip } from 'svelte/animate';
 	import { cubicIn } from 'svelte/easing';
 	import { fade, fly } from 'svelte/transition';
@@ -156,8 +157,10 @@
 		pending && (pending.t === 'cordon' || pending.t === 'shield' || pending.t === 'giveCard') ? pending.t : null,
 	);
 	let pickedGiveCard = $state<CardId | null>(null);
+	let lastPending = untrack(() => pending);
 	$effect(() => {
-		void pending;
+		if (pending === lastPending) return;
+		lastPending = pending;
 		pickedGiveCard = null;
 	});
 	const pendingHandSeats = $derived.by(() => {
@@ -228,12 +231,14 @@
 	function clickPendingHandCard(card: CardId) {
 		const options = pendingHandMap.get(card);
 		if (!options?.length) return;
+		if (pendingHandKind === 'giveCard') {
+			pickedGiveCard = pickedGiveCard === card ? null : card;
+			return;
+		}
 		if (options.length === 1) {
 			send({ type: 'DECIDE', decide: options[0]! });
 			pickedGiveCard = null;
-			return;
 		}
-		if (pendingHandKind === 'giveCard') pickedGiveCard = pickedGiveCard === card ? null : card;
 	}
 	const overLimit = $derived(game.seats.filter(other => game.players[other]!.hand.length > handLimit(world, other)));
 	// The hand limit waits until both cards of a draw are in hand, so being over it does not always mean discarding now.
@@ -249,8 +254,11 @@
 	let draft = $state<CardId[] | null>(null);
 	keep(
 		'dock',
-		() => ({ draft }),
-		saved => (draft = saved.draft),
+		() => ({ draft, pickedGiveCard }),
+		saved => {
+			draft = saved.draft ?? null;
+			pickedGiveCard = saved.pickedGiveCard ?? null;
+		},
 	);
 	const picked = $derived(draft ?? game.pickedEvents);
 
@@ -264,8 +272,15 @@
 
 <svelte:window onkeydown={event => event.key === 'Escape' && (pickedGiveCard = null)} />
 
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	class="frame"
+	oncontextmenu={event => {
+		if (handPick || dockChoice || aiming) {
+			event.preventDefault();
+			oncancel();
+		}
+	}}
 	{@attach feedback(undefined, () => ({
 		seat,
 		home,
@@ -384,7 +399,7 @@
 					>
 						{#each handCards as card, index (card.id)}
 							{@const tags = handSelectionMode
-								? mustDiscard && playable.has(card.id)
+								? (mustDiscard || pendingHandKind === 'giveCard') && playable.has(card.id)
 									? uses(seat, card.id).filter(tag => tag.key === 'play')
 									: []
 								: uses(seat, card.id)}
@@ -467,7 +482,7 @@
 										onclick={cardClick}
 									/>
 									{#if pickSelected || pendingSelected}
-										<span class="hand-check" aria-label="selected">✓</span>
+										<span class="hand-check" aria-hidden="true">✓</span>
 									{/if}
 								</div>
 							</div>
@@ -526,7 +541,7 @@
 						{#if dockChoice.a}<ActionIcon action={dockChoice.a} size="2.4rem" />{/if}
 						<div class="say">
 							<strong>{dockChoice.title}</strong>
-							<span>{dockChoice.prompt}</span>
+							<span>{dockChoice.prompt} Esc or a right click cancels.</span>
 							<div class="chips">
 								{#each dockChoice.options as option (option.key)}
 									<button type="button" data-use={option.key} onclick={option.run}>{option.label}</button>
@@ -554,7 +569,7 @@
 						<p class="prompt">
 							{decisionTitle(world, pending)}
 							{#if pendingHandActive && pendingHandKind === 'giveCard' && !pickedGiveCard}
-								Click a card in your hand to give.
+								Click a card in your hand to give{playable.size ? ', or play an event' : ''}.
 							{:else if pendingHandActive && (pendingHandKind === 'cordon' || pendingHandKind === 'shield')}
 								Click a highlighted card in hand to discard.
 							{/if}
@@ -783,20 +798,25 @@
 		transform: translateY(-0.95rem) rotate(calc(var(--angle) * 0.2));
 	}
 
-	/* Each way to use a card stands as a tag over it once it rises out of the fan. The bottom padding overlaps the
+	/* Each way to use a card stands as a tag over it once it rises out of the fan. The bottom padding meets the
 	   top edge of the lifted card so moving the pointer from the card onto a tag never drops :hover. */
 	.tags {
 		position: absolute;
-		bottom: calc(100% + 3.55rem);
+		bottom: calc(100% + 3.9rem);
 		left: 50%;
 		z-index: 6;
 		display: none;
 		flex-direction: column;
 		align-items: center;
 		gap: 0.25rem;
-		padding-bottom: 0.85rem;
+		padding-bottom: 0.45rem;
 		translate: -50% 0;
 		pointer-events: auto;
+	}
+
+	.hand.picking .tags {
+		bottom: calc(100% + 1.95rem);
+		padding-bottom: 0.45rem;
 	}
 
 	.slot:hover .tags,
@@ -808,6 +828,11 @@
 
 	.slot:has(:global([data-floating-upgrade])) .tags {
 		bottom: calc(100% + 8.1rem);
+		padding-bottom: 1rem;
+	}
+
+	.hand.picking .slot:has(:global([data-floating-upgrade])) .tags {
+		bottom: calc(100% + 5.6rem);
 		padding-bottom: 1rem;
 	}
 

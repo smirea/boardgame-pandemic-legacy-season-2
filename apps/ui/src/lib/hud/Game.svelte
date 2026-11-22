@@ -668,6 +668,9 @@
 				scannerOpen = false;
 				return;
 			}
+			if (document.activeElement instanceof HTMLElement && document.activeElement.classList.contains('focus-only')) {
+				document.activeElement.blur();
+			}
 			cancel();
 			menu = false;
 		}
@@ -693,9 +696,15 @@
 			tools.toggleEraser();
 			return;
 		}
-		if (onButton(event) || !game) return;
-		if (key === 'z' && snap.canUndo && canAct) send({ type: 'UNDO' });
+		const focused = event.composedPath()[0];
+		const onFocusOnly = focused instanceof HTMLButtonElement && focused.classList.contains('focus-only');
+		if ((onButton(event) && !onFocusOnly) || !game) return;
+		if (key === 'z' && snap.canUndo && canAct) {
+			if (onFocusOnly) focused.blur();
+			send({ type: 'UNDO' });
+		}
 		if (key !== ' ') return;
+		if (onFocusOnly) focused.blur();
 		// The cards that open a game are anyone's to flip.
 		if (admin.opening) {
 			event.preventDefault();

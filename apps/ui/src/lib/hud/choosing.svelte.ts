@@ -1,9 +1,10 @@
-import { actionMenu, checkAction, grid, legalPlays, pack, playDetail, reject } from '@repo/game';
+import { actionMenu, checkAction, grid, has, legalPlays, pack, playDetail, reject, sealDef } from '@repo/game';
 import type { Action, CardId, CityId, Command, EventId, Phase, Play, ReconBox, SeatId, World } from '@repo/game';
 import type { UiStep } from '#lib/studio/scene.ts';
 import { untrack } from 'svelte';
 import {
 	ACTION_NAMES,
+	actionAt,
 	actionDetail,
 	actionTarget,
 	cardName,
@@ -171,11 +172,11 @@ export function createChoosing(source: ChoosingSource) {
 		chooser = null;
 		ring = null;
 	}
-	// Whatever was half-chosen belongs to the turn and phase it was chosen in.
+	// Whatever was half-chosen belongs to the game state it was chosen in, so UNDO, PLAY, DECIDE or remote changes clear it.
 	$effect(() => {
 		void live;
 		void snap.phase;
-		void game?.active;
+		void game;
 		untrack(dismiss);
 	});
 	const actionOption = (action: Action): Option => ({
@@ -199,9 +200,14 @@ export function createChoosing(source: ChoosingSource) {
 		const sites =
 			mode === 'local'
 				? [at]
-				: pack.cities
-						.filter(city => onGrid.has(city.id) && (city.kind === 'haven' || game.locations[city.id]!.center))
-						.map(city => city.id);
+				: [
+						...new Set([
+							at,
+							...pack.cities
+								.filter(city => onGrid.has(city.id) && (city.kind === 'haven' || game.locations[city.id]!.center))
+								.map(city => city.id),
+						]),
+					];
 		const needed = sites.reduce(
 			(sum, city) => sum + Math.max(0, campaign.locations[city]!.population - game.locations[city]!.supplies),
 			0,
@@ -340,10 +346,17 @@ export function createChoosing(source: ChoosingSource) {
 			const selectedSet = new Set(selected);
 			const hand = game!.players[activeSeat]!.hand;
 			const eligibleIds = new Set<CardId>(selected.length < 2 ? hand : selected);
-			const readyTakes =
-				selected.length === 2
-					? allTakes.filter(take => checkAction(world, activeSeat, { a: name, discard: selected, take }) === null)
-					: [];
+			const readyTakes = (() => {
+				if (selected.length !== 2) return [];
+				const seen = new Set<string>();
+				return allTakes.filter(take => {
+					if (checkAction(world, activeSeat, { a: name, discard: selected, take }) !== null) return false;
+					const twin = cardTwin(world, take);
+					if (seen.has(twin)) return false;
+					seen.add(twin);
+					return true;
+				});
+			})();
 			const canConfirm = selected.length === 2 && readyTakes.length > 0;
 			const confirmLabel = !canConfirm
 				? `Select 2 cards (${selected.length}/2)`
@@ -404,6 +417,7 @@ export function createChoosing(source: ChoosingSource) {
 			const matching: Action[] = [];
 			for (const variant of variants) {
 				if (!('card' in variant) || !variant.card) continue;
+				if (cardId !== variant.card && cardTwin(world, cardId) !== cardTwin(world, variant.card)) continue;
 				const candidate = { ...variant, card: cardId } as Action;
 				const key = JSON.stringify(candidate);
 				if (seen.has(key)) continue;
@@ -428,7 +442,13 @@ export function createChoosing(source: ChoosingSource) {
 				act(offered[0]!);
 				return true;
 			}
-			choose(title, offered.map(actionOption), name);
+			const nextTitle =
+				name === 'broker' || name === 'trade' || name === 'investigate'
+					? `${ACTION_NAMES[name]}: take a card for ${cardName(world, onlyCard)}`
+					: name === 'transmit'
+						? `Transmit ${cardName(world, onlyCard)} to …`
+						: title;
+			choose(nextTitle, offered.map(actionOption), name);
 			return true;
 		}
 		const eligibleIds = new Set(byCard.keys());
@@ -547,9 +567,16 @@ export function createChoosing(source: ChoosingSource) {
 				title,
 				routeIds.map(routeId => {
 					const route = pack.reconRoutes.find(candidate => candidate.id === routeId)!;
+					const planColor = `${route.color[0]!.toUpperCase()}${route.color.slice(1)}`;
+					const needed = Math.max(
+						1,
+						route.count +
+							(has(world, game!.active, 'reconExtraCard') ? 1 : 0) -
+							(has(world, game!.active, 'outrider') ? 1 : 0),
+					);
 					return {
-						label: route.opens ? `Recon (${routeId})` : `The Plan (${route.color})`,
-						detail: `${route.count} ${route.unique ? 'unique ' : ''}${route.color} cards`,
+						label: route.opens ? sealDef(route.opens).name : `The Plan (${planColor})`,
+						detail: `${needed} ${route.unique ? 'unique ' : ''}${route.color} card${needed === 1 ? '' : 's'}`,
 						run: () => {
 							chooser = null;
 							pickRoute(routeId);
@@ -613,13 +640,11 @@ export function createChoosing(source: ChoosingSource) {
 			}
 			if (byCity.size === 1) {
 				const [city, cityActions] = [...byCity.entries()][0]!;
-				return resolveActionVariants(`${ACTION_NAMES[name]} to ${cityName(city)}`, name, cityActions);
+				return resolveActionVariants(actionAt(name, city), name, cityActions);
 			}
 			const cities = new Map<CityId, () => void>();
 			for (const [city, cityActions] of byCity) {
-				const label =
-					name === 'sabotage' ? `Sabotage in ${cityName(city)}` : `${ACTION_NAMES[name]} to ${cityName(city)}`;
-				cities.set(city, () => resolveActionVariants(label, name, cityActions));
+				cities.set(city, () => resolveActionVariants(actionAt(name, city), name, cityActions));
 			}
 			targeting = { label: ACTION_NAMES[name], a: name, cities };
 			return;
@@ -757,7 +782,7 @@ export function createChoosing(source: ChoosingSource) {
 				const target = offered.length === 1 ? actionTarget(world, offered[0]!) : null;
 				uses.push({
 					key: choice.a,
-					label: ACTION_NAMES[choice.a] + (target ? ` to ${cityName(target)}` : ''),
+					label: target ? actionAt(choice.a, target) : ACTION_NAMES[choice.a],
 					icon: choice.a,
 					run: () => step({ t: 'start', a: choice.a, via: { card } }),
 				});
@@ -836,10 +861,10 @@ export function createChoosing(source: ChoosingSource) {
 			if (!pickPawn) return false;
 			pickPawn();
 		} else if (click.t === 'handCard') {
-			if (!handPick) return false;
+			if (!handPick || !handPick.eligible(click.seat).has(click.card)) return false;
 			handPick.oncard(click.seat, click.card);
 		} else if (click.t === 'handConfirm') {
-			if (!handPick?.onconfirm) return false;
+			if (!handPick?.onconfirm || !handPick.canConfirm) return false;
 			handPick.onconfirm();
 		} else if (click.t === 'handToggle') {
 			if (!handPick?.ontoggle) return false;

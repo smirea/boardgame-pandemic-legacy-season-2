@@ -118,9 +118,10 @@
 				},
 			];
 		});
+		const hasRevealed = searchEntries.some(entry => entry.kind === 'revealed');
 		const floatingUpgrade = Boolean(improvement && companion);
 		const diagonalUpgrade = Boolean(improvement && !companion);
-		return { city, improvement, companion, searchEntries, floatingUpgrade, diagonalUpgrade };
+		return { city, improvement, companion, searchEntries, hasRevealed, floatingUpgrade, diagonalUpgrade };
 	});
 
 	const cityCopies = $derived.by(() => {
@@ -221,10 +222,12 @@
 	<RichText text={improvement.text} />
 {/snippet}
 
-{#snippet searchChip(entry: SearchDisplay)}
+{#snippet searchChip(entry: SearchDisplay, layout: { compact: boolean; two: boolean; top: boolean })}
 	{#if entry.kind === 'sealed'}
 		<span class="search-chip" role="note" aria-label={entry.label}>{entry.label}</span>
 	{:else}
+		{@const maxSize =
+			layout.compact && layout.two ? 0.46 : layout.compact || layout.top ? 0.5 : layout.two ? 0.52 : 0.54}
 		<span
 			class="search-revealed"
 			role="note"
@@ -232,7 +235,7 @@
 			aria-label={`${entry.heading}: ${entry.info.plain}`}
 		>
 			<span class="search-revealed-head">{entry.heading}</span>
-			<span class="search-revealed-body">
+			<span class="search-revealed-body" {@attach fitText(entry.info.plain, { max: maxSize, min: 0.34 })}>
 				<RichText
 					text={entry.info.before}
 				/>{#if entry.info.doors?.length}{' '}{#each entry.info.doors as door, doorIndex (door)}{#if doorIndex > 0}{' '}{/if}<span
@@ -274,9 +277,13 @@
 				{#if cityDetails.companion}
 					<img class="companion-art" src={companionArtUrl(cityDetails.companion.id)} alt="" aria-hidden="true" />
 					{#if cityDetails.searchEntries.length > 0}
-						<span class="search-stack top">
+						<span class="search-stack top" class:two={cityDetails.searchEntries.length >= 2}>
 							{#each cityDetails.searchEntries as search, index (index)}
-								{@render searchChip(search)}
+								{@render searchChip(search, {
+									compact: false,
+									two: cityDetails.searchEntries.length >= 2,
+									top: true,
+								})}
 							{/each}
 						</span>
 					{/if}
@@ -301,16 +308,31 @@
 							class="upgrade-sticker upgrade-diagonal"
 							class:above-one={cityDetails.searchEntries.length === 1}
 							class:above-two={cityDetails.searchEntries.length >= 2}
+							class:has-revealed={cityDetails.hasRevealed}
 						>
-							<span class="sticker-fit" {@attach fitText(cityDetails.improvement.plain, { max: 0.76, min: 0.46 })}>
+							<span
+								class="sticker-fit"
+								{@attach fitText(cityDetails.improvement.plain, {
+									max: cityDetails.hasRevealed && cityDetails.searchEntries.length >= 2 ? 0.62 : 0.76,
+									min: 0.4,
+								})}
+							>
 								{@render upgradeBody(cityDetails.improvement)}
 							</span>
 						</span>
 					{/if}
 					{#if cityDetails.searchEntries.length > 0}
-						<span class="search-stack" class:compact={cityDetails.diagonalUpgrade}>
+						<span
+							class="search-stack"
+							class:compact={cityDetails.diagonalUpgrade}
+							class:two={cityDetails.searchEntries.length >= 2}
+						>
 							{#each cityDetails.searchEntries as search, index (index)}
-								{@render searchChip(search)}
+								{@render searchChip(search, {
+									compact: cityDetails.diagonalUpgrade,
+									two: cityDetails.searchEntries.length >= 2,
+									top: false,
+								})}
 							{/each}
 						</span>
 					{/if}
@@ -414,60 +436,39 @@
 	{/if}
 {/snippet}
 
-{#if onclick || focusable}
-	<button
-		type="button"
-		class="card {card.kind}"
-		class:unrationed={eventInfo?.print.mode === 'unrationed'}
-		class:permanent={eventInfo?.print.mode === 'permanent'}
-		class:floating-upgrade={floatUpgradeActive}
-		class:selected
-		class:dimmed
-		class:focus-only={!onclick}
-		aria-haspopup={!onclick ? 'menu' : undefined}
-		data-card={card.id}
-		data-original-active={showingOriginal}
-		data-floating-upgrade={floatUpgradeActive ? '' : undefined}
-		data-selected={selected ? '' : undefined}
-		onmouseenter={() => hoverCard?.(card.id)}
-		onmouseleave={() => hoverCard?.(null)}
-		onfocus={() => hoverCard?.(card.id)}
-		onblur={() => hoverCard?.(null)}
-		class:small
-		class:play={tone === 'play'}
-		class:discard={tone === 'discard'}
-		style:--band={face.color}
-		style:--on={inkOn(face.color)}
-		onclick={onclick ?? (event => event.currentTarget.focus())}
-	>
-		{@render cardBody()}
-	</button>
-{:else}
-	<!-- Non-clickable cards stay out of <button disabled> so mouseenter events still fire for map highlights. -->
-	<div
-		class="card {card.kind}"
-		class:unrationed={eventInfo?.print.mode === 'unrationed'}
-		class:permanent={eventInfo?.print.mode === 'permanent'}
-		class:floating-upgrade={floatUpgradeActive}
-		class:selected
-		class:dimmed
-		role="group"
-		aria-label={face.title}
-		data-card={card.id}
-		data-original-active={showingOriginal}
-		data-floating-upgrade={floatUpgradeActive ? '' : undefined}
-		data-selected={selected ? '' : undefined}
-		onmouseenter={() => hoverCard?.(card.id)}
-		onmouseleave={() => hoverCard?.(null)}
-		class:small
-		class:play={tone === 'play'}
-		class:discard={tone === 'discard'}
-		style:--band={face.color}
-		style:--on={inkOn(face.color)}
-	>
-		{@render cardBody()}
-	</div>
-{/if}
+<!-- Always one <button> (never disabled) so toggling clickability never remounts fitText/images and mouseenter always fires. -->
+<button
+	type="button"
+	class="card {card.kind}"
+	class:unrationed={eventInfo?.print.mode === 'unrationed'}
+	class:permanent={eventInfo?.print.mode === 'permanent'}
+	class:floating-upgrade={floatUpgradeActive}
+	class:selected
+	class:dimmed
+	class:focus-only={!onclick && focusable}
+	aria-disabled={!onclick && !focusable ? 'true' : undefined}
+	aria-pressed={selected ? 'true' : undefined}
+	tabindex={onclick || focusable ? 0 : -1}
+	data-card={card.id}
+	data-original-active={showingOriginal}
+	data-floating-upgrade={floatUpgradeActive ? '' : undefined}
+	data-selected={selected ? '' : undefined}
+	onmouseenter={() => hoverCard?.(card.id)}
+	onmouseleave={() => hoverCard?.(null)}
+	onfocus={() => hoverCard?.(card.id)}
+	onblur={() => hoverCard?.(null)}
+	onmousedown={event => {
+		if (!onclick && !focusable) event.preventDefault();
+	}}
+	class:small
+	class:play={tone === 'play'}
+	class:discard={tone === 'discard'}
+	style:--band={face.color}
+	style:--on={inkOn(face.color)}
+	onclick={onclick ?? (focusable ? event => event.currentTarget.focus() : undefined)}
+>
+	{@render cardBody()}
+</button>
 
 <style>
 	/* A player card is printed solid in its region's colour, with the map inset like a plate on the front. */
@@ -570,8 +571,13 @@
 		pointer-events: none;
 	}
 
-	button.card:not(:disabled) {
+	button.card:not([aria-disabled='true']):not(.focus-only) {
 		cursor: pointer;
+	}
+
+	button.card[aria-disabled='true'],
+	button.card.focus-only {
+		cursor: default;
 	}
 
 	.card.play {
@@ -742,7 +748,9 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.08em;
+		max-height: 5em;
 		padding: 0.24em 0.34em;
+		overflow: hidden;
 		border: 1px solid rgb(42 32 22 / 0.42);
 		border-radius: 0.2em;
 		background: rgb(246 239 222 / 0.92);
@@ -755,7 +763,12 @@
 		line-height: 1.18;
 	}
 
+	.search-stack.two .search-revealed {
+		max-height: 3.1em;
+	}
+
 	.search-revealed-head {
+		flex: none;
 		font-size: 0.46em;
 		font-weight: 850;
 		letter-spacing: 0.07em;
@@ -765,19 +778,29 @@
 	}
 
 	.search-revealed-body {
+		display: block;
+		flex: 0 1 auto;
+		min-height: 0;
+		overflow: hidden;
 		font-size: 0.54em;
 		font-weight: 600;
-		line-height: 1.2;
+		line-height: 1.18;
 	}
 
-	.search-stack.compact .search-revealed,
-	.search-stack.top .search-revealed {
+	.search-stack.compact .search-revealed {
+		max-height: 2.95em;
 		padding: 0.18em 0.3em;
 	}
 
-	.search-stack.compact .search-revealed-body,
-	.search-stack.top .search-revealed-body {
-		font-size: 0.5em;
+	.search-stack.compact.two .search-revealed {
+		gap: 0.04em;
+		max-height: 2.05em;
+		padding: 0.14em 0.28em;
+	}
+
+	.search-stack.top .search-revealed {
+		max-height: 2.25em;
+		padding: 0.18em 0.3em;
 	}
 
 	.door-badge {
@@ -866,12 +889,27 @@
 		transform: translate(-50%, -50%) rotate(-5.5deg);
 	}
 
+	.upgrade-diagonal.above-one.has-revealed {
+		top: 2.05em;
+		max-height: 3.3em;
+		padding: 0.26em 0.42em;
+		transform: translate(-50%, -50%) rotate(-4deg);
+	}
+
 	.upgrade-diagonal.above-two {
 		top: 2.32em;
 		width: 7.6em;
 		max-height: 3.65em;
 		padding: 0.28em 0.42em;
 		transform: translate(-50%, -50%) rotate(-4.5deg);
+	}
+
+	.upgrade-diagonal.above-two.has-revealed {
+		top: 1.48em;
+		width: 7.6em;
+		max-height: 2.45em;
+		padding: 0.22em 0.38em;
+		transform: translate(-50%, -50%) rotate(-2.5deg);
 	}
 
 	.upgrade-float {
