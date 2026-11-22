@@ -164,7 +164,6 @@
 	// A replay seats the first player there.
 	const seatAt = $derived(game ? placeSeats(game.seats, me) : null);
 	const listed = $derived(actionChoices.length > 0);
-	let actionColumns = $state(1);
 	const panels = measurePanels({
 		get stage() {
 			return stage;
@@ -178,9 +177,9 @@
 		get goals() {
 			return goals;
 		},
-		// The Actions panel comes and goes with the turn's steps and grows columns, and is one of the panels measured.
+		// The Actions panel comes and goes with the turn's steps, and is one of the panels measured.
 		get layout() {
-			return [seatAt, listed, actionColumns, admin.deck];
+			return [seatAt, listed, admin.deck];
 		},
 	});
 	let resetView = $state(0);
@@ -722,7 +721,6 @@
 				onchoose={choice => choosing.step({ t: 'start', a: choice.a, via: 'panel' })}
 				{send}
 				onlockdown={card => choosing.step({ t: 'lockdown', card })}
-				bind:columns={actionColumns}
 			/>
 		</div>
 	{/if}
@@ -1330,11 +1328,10 @@
 	}
 
 	/* The action list sits in whichever side column has room, beside the seats. */
-	/* At least as wide as a seat. A list too long for one column grows another, reaching in over the board. */
 	.actions-slot {
 		display: flex;
 		flex-direction: column;
-		width: min-content;
+		width: 100%;
 		min-width: 15.5rem;
 		min-height: 0;
 		flex: 0 1 auto;
