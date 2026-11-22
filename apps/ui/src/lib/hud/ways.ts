@@ -2,7 +2,7 @@ import { isFreeAction } from '@repo/game';
 import type { Action, CardId, World } from '@repo/game';
 
 /** What a card is, apart from which copy it is: two cards that read the same are one choice. */
-function twin(world: World, id: CardId): string {
+export function cardTwin(world: World, id: CardId): string {
 	const card = world.campaign.playerCards[id];
 	if (!card) return id;
 	if (card.kind === 'city')
@@ -25,11 +25,12 @@ export function ways(world: World, variants: Action[]): Action[] {
 			: variants.filter(action => !('count' in action) || action.count === 1);
 	const seen = new Set<string>();
 	return stepped.filter(action => {
-		const spent = action as { card?: CardId; cards?: CardId[] };
+		const spent = action as { card?: CardId; cards?: CardId[]; discard?: CardId[] };
 		const key = JSON.stringify({
 			...action,
-			...(spent.card ? { card: twin(world, spent.card) } : {}),
-			...(spent.cards ? { cards: spent.cards.map(id => twin(world, id)).toSorted() } : {}),
+			...(spent.card ? { card: cardTwin(world, spent.card) } : {}),
+			...(spent.cards ? { cards: spent.cards.map(id => cardTwin(world, id)).toSorted() } : {}),
+			...(spent.discard ? { discard: spent.discard.map(id => cardTwin(world, id)).toSorted() } : {}),
 		});
 		if (seen.has(key)) return false;
 		seen.add(key);

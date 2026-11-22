@@ -1,5 +1,5 @@
-import { pack } from '@repo/game';
-import type { CityImprovementId, CompanionId, EventId, InfectionImprovementId } from '@repo/game';
+import { LABS, pack } from '@repo/game';
+import type { CityImprovementId, CompanionId, EventId, InfectionImprovementId, SearchResult } from '@repo/game';
 
 export type EventPrint = {
 	mode: 'rationed' | 'unrationed' | 'permanent';
@@ -181,12 +181,83 @@ export const producePrint = (boxesLeft: number) => {
 	const usesLeft = Math.max(0, boxesLeft);
 	return {
 		localTitle: 'Local',
-		local: 'Fill this location to population with Supply cubes.',
+		local: 'At a haven or center, fill this location to population with Supply cubes.',
 		systemTitle: 'System-Wide',
-		system: 'Fill all havens & centers to population.',
+		system: 'At a haven or center, fill all havens & centers to population.',
 		uses: `${usesLeft} ${usesLeft === 1 ? 'use' : 'uses'} left`,
 	};
 };
+
+export type SearchRevealPrint = {
+	before: string;
+	doors?: string[];
+	after?: string;
+	plain: string;
+};
+
+/** Printed instructions revealed under a scratched search box (companions use the companion face instead). */
+export function searchResultPrint(result: SearchResult): SearchRevealPrint | null {
+	switch (result.t) {
+		case 'companion':
+			return null;
+		case 'supplies': {
+			const text = `Put ${result.amount} Supply cubes here from the ${result.from}.`;
+			return { before: text, plain: text };
+		}
+		case 'stockpile': {
+			const text = `Add ${result.amount} Supply cubes from the reserve to the stockpile.`;
+			return { before: text, plain: text };
+		}
+		case 'actions': {
+			const text = `Gain ${result.amount} extra ${result.amount === 1 ? 'action' : 'actions'} this turn.`;
+			return { before: text, plain: text };
+		}
+		case 'retrieve': {
+			const text = 'Take 1 card from the Player discard pile.';
+			return { before: text, plain: text };
+		}
+		case 'quarantineCard': {
+			const text = 'Move 1 Infection card from discard to Game End.';
+			return { before: text, plain: text };
+		}
+		case 'removeHollow': {
+			const text = `Remove up to ${result.amount} Hollow Men from the grid.`;
+			return { before: text, plain: text };
+		}
+		case 'freeEdge': {
+			const text = `Draw 1 ${result.kind === 'land' ? 'Supply line' : 'Sea lane'} from here for free.`;
+			return { before: text, plain: text };
+		}
+		case 'discover': {
+			const doors = result.seals.flatMap(seal => (seal.t === 'door' ? [seal.id] : []));
+			const lab = result.lab
+				? Object.entries(LABS)
+						.find(([, city]) => city === result.lab)?.[0]
+						?.toUpperCase()
+				: undefined;
+			const open = doors.length > 1 ? 'Open doors' : 'Open door';
+			const before = lab ? `Found ${lab} lab. ${open}` : open;
+			const after = result.orAction ? '(or +1 action if open).' : '.';
+			const plain = `${before} ${doors.join(', ')}${result.orAction ? ` ${after}` : after}`;
+			return { before, doors, after, plain };
+		}
+		case 'infest': {
+			const doors = result.opens?.t === 'door' ? [result.opens.id] : [];
+			const before = doors.length ? 'Infest this city. Open door' : 'Infest this city.';
+			const after = doors.length ? '.' : undefined;
+			const plain = doors.length ? `${before} ${doors.join(', ')}.` : before;
+			return { before, ...(doors.length ? { doors, after } : {}), plain };
+		}
+		case 'giveCard': {
+			const text = 'Give 1 Player card to another player.';
+			return { before: text, plain: text };
+		}
+		case 'nothing': {
+			const text = 'Nothing found.';
+			return { before: text, plain: text };
+		}
+	}
+}
 
 export type ImprovementPrint = { text: string; swatch?: 'wild' | 'red' };
 

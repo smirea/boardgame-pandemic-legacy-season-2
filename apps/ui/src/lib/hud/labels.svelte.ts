@@ -228,6 +228,8 @@ export function actionTarget(world: World, action: Action): CityId | null {
 			return action.to;
 		case 'run':
 			return action.to;
+		case 'sabotage':
+			return action.city;
 		case 'supply': {
 			const card = world.campaign.playerCards[action.card];
 			return card?.kind === 'city' ? card.city : null;

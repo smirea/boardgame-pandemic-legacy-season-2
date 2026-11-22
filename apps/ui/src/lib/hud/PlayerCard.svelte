@@ -34,7 +34,9 @@
 		companionArtUrl,
 		eventArtUrl,
 		producePrint,
+		searchResultPrint,
 	} from '#lib/cards/playerPrint.ts';
+	import type { SearchRevealPrint } from '#lib/cards/playerPrint.ts';
 	import { inkOn } from '#lib/color.ts';
 	import { originals, playerCardScan, scanUrl } from '#lib/scans.svelte.ts';
 	import RichText from './RichText.svelte';
@@ -46,14 +48,30 @@
 		card: PlayerCard;
 		onclick?: () => void;
 		tone?: 'play' | 'discard' | null;
+		selected?: boolean;
+		dimmed?: boolean;
+		focusable?: boolean;
 		small?: boolean;
 		/** Overrides live deck copy counts for a city card (used by debug showcases). */
 		copies?: CityCardCopies;
 	};
 
-	let { card, onclick, tone = null, small = false, copies }: Props = $props();
+	let {
+		card,
+		onclick,
+		tone = null,
+		selected = false,
+		dimmed = false,
+		focusable = false,
+		small = false,
+		copies,
+	}: Props = $props();
 
 	const EPIDEMIC_PLAIN = EPIDEMIC_STEPS.map(step => `${step.heading}: ${step.text}`).join(' ');
+
+	type SearchDisplay =
+		| { kind: 'sealed'; scope: 'land' | 'sea'; label: string }
+		| { kind: 'revealed'; scope: 'land' | 'sea'; heading: string; info: SearchRevealPrint };
 
 	const cityDetails = $derived.by(() => {
 		if (card.kind !== 'city') return null;
@@ -72,22 +90,37 @@
 					return { id: card.companion, name, ...print, plain: `${name}: ${print.text}` };
 				})()
 			: null;
-		const exposedSearches = card.search
-			.filter(box => !box.scratched)
-			.map(box => ({
-				scope: box.scope,
-				label:
-					card.search.length > 1
-						? box.scope === 'sea'
-							? 'Search the sea'
-							: 'Search the land'
-						: box.scope === 'sea'
-							? 'Search the sea'
-							: 'Search',
-			}));
+		const searchEntries: SearchDisplay[] = card.search.flatMap<SearchDisplay>(box => {
+			if (!box.scratched) {
+				return [
+					{
+						kind: 'sealed' as const,
+						scope: box.scope,
+						label:
+							card.search.length > 1
+								? box.scope === 'sea'
+									? 'Search the sea'
+									: 'Search the land'
+								: box.scope === 'sea'
+									? 'Search the sea'
+									: 'Search',
+					},
+				];
+			}
+			const info = searchResultPrint(box.result);
+			if (!info) return [];
+			return [
+				{
+					kind: 'revealed' as const,
+					scope: box.scope,
+					heading: card.search.length > 1 ? (box.scope === 'sea' ? 'Sea' : 'Land') : 'Searched',
+					info,
+				},
+			];
+		});
 		const floatingUpgrade = Boolean(improvement && companion);
 		const diagonalUpgrade = Boolean(improvement && !companion);
-		return { city, improvement, companion, exposedSearches, floatingUpgrade, diagonalUpgrade };
+		return { city, improvement, companion, searchEntries, floatingUpgrade, diagonalUpgrade };
 	});
 
 	const cityCopies = $derived.by(() => {
@@ -188,26 +221,29 @@
 	<RichText text={improvement.text} />
 {/snippet}
 
-<button
-	class="card {card.kind}"
-	class:unrationed={eventInfo?.print.mode === 'unrationed'}
-	class:permanent={eventInfo?.print.mode === 'permanent'}
-	class:floating-upgrade={floatUpgradeActive}
-	data-card={card.id}
-	data-original-active={showingOriginal}
-	data-floating-upgrade={floatUpgradeActive ? '' : undefined}
-	onmouseenter={() => hoverCard?.(card.id)}
-	onmouseleave={() => hoverCard?.(null)}
-	onfocus={() => hoverCard?.(card.id)}
-	onblur={() => hoverCard?.(null)}
-	class:small
-	class:play={tone === 'play'}
-	class:discard={tone === 'discard'}
-	style:--band={face.color}
-	style:--on={inkOn(face.color)}
-	disabled={!onclick}
-	{onclick}
->
+{#snippet searchChip(entry: SearchDisplay)}
+	{#if entry.kind === 'sealed'}
+		<span class="search-chip" role="note" aria-label={entry.label}>{entry.label}</span>
+	{:else}
+		<span
+			class="search-revealed"
+			role="note"
+			data-search-revealed={entry.scope}
+			aria-label={`${entry.heading}: ${entry.info.plain}`}
+		>
+			<span class="search-revealed-head">{entry.heading}</span>
+			<span class="search-revealed-body">
+				<RichText
+					text={entry.info.before}
+				/>{#if entry.info.doors?.length}{' '}{#each entry.info.doors as door, doorIndex (door)}{#if doorIndex > 0}{' '}{/if}<span
+							class="door-badge">{door}</span
+						>{/each}{/if}{#if entry.info.after}{#if entry.info.after !== '.'}{' '}{/if}{entry.info.after}{/if}
+			</span>
+		</span>
+	{/if}
+{/snippet}
+
+{#snippet cardBody()}
 	{#if showingOriginal && originalScan}
 		<img class="original-swap" src={scanUrl(originalScan.card.src)} alt={face.title} />
 		{#if originalScan.sticker}
@@ -237,10 +273,10 @@
 			<span class="art">
 				{#if cityDetails.companion}
 					<img class="companion-art" src={companionArtUrl(cityDetails.companion.id)} alt="" aria-hidden="true" />
-					{#if cityDetails.exposedSearches.length > 0}
+					{#if cityDetails.searchEntries.length > 0}
 						<span class="search-stack top">
-							{#each cityDetails.exposedSearches as search, index (index)}
-								<span class="search-chip" role="note" aria-label={search.label}>{search.label}</span>
+							{#each cityDetails.searchEntries as search, index (index)}
+								{@render searchChip(search)}
 							{/each}
 						</span>
 					{/if}
@@ -263,18 +299,18 @@
 					{#if cityDetails.diagonalUpgrade && cityDetails.improvement}
 						<span
 							class="upgrade-sticker upgrade-diagonal"
-							class:above-one={cityDetails.exposedSearches.length === 1}
-							class:above-two={cityDetails.exposedSearches.length >= 2}
+							class:above-one={cityDetails.searchEntries.length === 1}
+							class:above-two={cityDetails.searchEntries.length >= 2}
 						>
 							<span class="sticker-fit" {@attach fitText(cityDetails.improvement.plain, { max: 0.76, min: 0.46 })}>
 								{@render upgradeBody(cityDetails.improvement)}
 							</span>
 						</span>
 					{/if}
-					{#if cityDetails.exposedSearches.length > 0}
+					{#if cityDetails.searchEntries.length > 0}
 						<span class="search-stack" class:compact={cityDetails.diagonalUpgrade}>
-							{#each cityDetails.exposedSearches as search, index (index)}
-								<span class="search-chip" role="note" aria-label={search.label}>{search.label}</span>
+							{#each cityDetails.searchEntries as search, index (index)}
+								{@render searchChip(search)}
 							{/each}
 						</span>
 					{/if}
@@ -376,7 +412,62 @@
 			{/each}
 		</span>
 	{/if}
-</button>
+{/snippet}
+
+{#if onclick || focusable}
+	<button
+		type="button"
+		class="card {card.kind}"
+		class:unrationed={eventInfo?.print.mode === 'unrationed'}
+		class:permanent={eventInfo?.print.mode === 'permanent'}
+		class:floating-upgrade={floatUpgradeActive}
+		class:selected
+		class:dimmed
+		class:focus-only={!onclick}
+		aria-haspopup={!onclick ? 'menu' : undefined}
+		data-card={card.id}
+		data-original-active={showingOriginal}
+		data-floating-upgrade={floatUpgradeActive ? '' : undefined}
+		data-selected={selected ? '' : undefined}
+		onmouseenter={() => hoverCard?.(card.id)}
+		onmouseleave={() => hoverCard?.(null)}
+		onfocus={() => hoverCard?.(card.id)}
+		onblur={() => hoverCard?.(null)}
+		class:small
+		class:play={tone === 'play'}
+		class:discard={tone === 'discard'}
+		style:--band={face.color}
+		style:--on={inkOn(face.color)}
+		onclick={onclick ?? (event => event.currentTarget.focus())}
+	>
+		{@render cardBody()}
+	</button>
+{:else}
+	<!-- Non-clickable cards stay out of <button disabled> so mouseenter events still fire for map highlights. -->
+	<div
+		class="card {card.kind}"
+		class:unrationed={eventInfo?.print.mode === 'unrationed'}
+		class:permanent={eventInfo?.print.mode === 'permanent'}
+		class:floating-upgrade={floatUpgradeActive}
+		class:selected
+		class:dimmed
+		role="group"
+		aria-label={face.title}
+		data-card={card.id}
+		data-original-active={showingOriginal}
+		data-floating-upgrade={floatUpgradeActive ? '' : undefined}
+		data-selected={selected ? '' : undefined}
+		onmouseenter={() => hoverCard?.(card.id)}
+		onmouseleave={() => hoverCard?.(null)}
+		class:small
+		class:play={tone === 'play'}
+		class:discard={tone === 'discard'}
+		style:--band={face.color}
+		style:--on={inkOn(face.color)}
+	>
+		{@render cardBody()}
+	</div>
+{/if}
 
 <style>
 	/* A player card is printed solid in its region's colour, with the map inset like a plate on the front. */
@@ -479,7 +570,7 @@
 		pointer-events: none;
 	}
 
-	.card:not(:disabled) {
+	button.card:not(:disabled) {
 		cursor: pointer;
 	}
 
@@ -489,6 +580,18 @@
 
 	.card.discard {
 		outline-color: var(--danger);
+	}
+
+	.card.selected {
+		outline-color: var(--good);
+		box-shadow:
+			0 0 0 0.14em rgb(92 178 136 / 0.55),
+			0 0.25em 0.65em rgb(0 0 0 / 0.45);
+	}
+
+	.card.dimmed {
+		opacity: 0.42;
+		filter: saturate(0.45);
 	}
 
 	/* City cards drop the inner inset frame so the map runs truly full bleed to the outer edge. */
@@ -633,6 +736,63 @@
 	.search-stack.top .search-chip {
 		padding: 0.18em 0.34em;
 		font-size: 0.52em;
+	}
+
+	.search-revealed {
+		display: flex;
+		flex-direction: column;
+		gap: 0.08em;
+		padding: 0.24em 0.34em;
+		border: 1px solid rgb(42 32 22 / 0.42);
+		border-radius: 0.2em;
+		background: rgb(246 239 222 / 0.92);
+		backdrop-filter: blur(1.5px);
+		box-shadow:
+			inset 0 1px 2px rgb(34 25 16 / 0.12),
+			0 0.08em 0.22em rgb(0 0 0 / 0.24);
+		color: #1c1610;
+		text-align: left;
+		line-height: 1.18;
+	}
+
+	.search-revealed-head {
+		font-size: 0.46em;
+		font-weight: 850;
+		letter-spacing: 0.07em;
+		text-transform: uppercase;
+		color: #6b563c;
+		line-height: 1;
+	}
+
+	.search-revealed-body {
+		font-size: 0.54em;
+		font-weight: 600;
+		line-height: 1.2;
+	}
+
+	.search-stack.compact .search-revealed,
+	.search-stack.top .search-revealed {
+		padding: 0.18em 0.3em;
+	}
+
+	.search-stack.compact .search-revealed-body,
+	.search-stack.top .search-revealed-body {
+		font-size: 0.5em;
+	}
+
+	.door-badge {
+		display: inline-grid;
+		place-items: center;
+		min-width: 1.35em;
+		height: 1.25em;
+		padding: 0 0.24em;
+		border-radius: 0.2em;
+		background: linear-gradient(160deg, #df7224, #b94e16);
+		color: #fffaf0;
+		font-size: 0.92em;
+		font-weight: 800;
+		line-height: 1;
+		vertical-align: baseline;
 	}
 
 	.companion-scrim {
