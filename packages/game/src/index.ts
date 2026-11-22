@@ -19,7 +19,7 @@ export { playDetail } from './plays';
 export type { Purchase } from './legacy';
 export type { DossierSlot, DossierView } from './dossier';
 export { dossierView, rulebook, stickerStock } from './dossier';
-export { actionBriefs, briefingSections, openings, ruleBriefs, unlockText } from './briefing';
+export { actionBriefs, briefingSections, openings, ruleBriefs, searchFind, unlockText } from './briefing';
 export type { Opening } from './briefing';
 export type { BriefedUnlock, BriefingSection } from './briefing';
 export {

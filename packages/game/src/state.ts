@@ -218,7 +218,7 @@ export type LogEntry = { seq: number } & (
 	| { t: 'reveal'; region: RegionId }
 	| { t: 'unlock'; seal: SealKey; forced: boolean }
 	| { t: 'objective'; objective: ObjectiveId }
-	| { t: 'search'; seat: SeatId; city: CityId; result: SearchResult['t'] }
+	| { t: 'search'; seat: SeatId; city: CityId; card: CardId; box: number; result: SearchResult['t'] }
 	| { t: 'note'; text: string }
 	| { t: 'end'; won: boolean; reason: string }
 );

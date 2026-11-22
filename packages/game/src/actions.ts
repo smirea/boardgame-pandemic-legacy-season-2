@@ -523,7 +523,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 			const target = held.search[box]!;
 			target.scratched = true;
 			ctx.game.searches += 1;
-			log(ctx.game, { t: 'search', seat: ctx.seat, city: ctx.here, result: target.result.t });
+			log(ctx.game, { t: 'search', seat: ctx.seat, city: ctx.here, card, box, result: target.result.t });
 			resolveSearch(ctx, target.result, card);
 			bump(ctx.world, 'searches');
 			if (trait(ctx, 'searchDiscard') && ctx.me.hand.includes(card)) discardFromHand(ctx.game, ctx.seat, card);

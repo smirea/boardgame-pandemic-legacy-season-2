@@ -41,7 +41,7 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
 	import type { CardId, CityId } from '@repo/game';
-	import { pack } from '@repo/game';
+	import { pack, searchFind } from '@repo/game';
 	import { fitText } from '#lib/cards/fit.ts';
 	import MapArt from '#lib/cards/MapArt.svelte';
 	import {
@@ -66,9 +66,11 @@
 		small?: boolean;
 		/** Overrides live deck copy counts for a city card (used by debug showcases). */
 		copies?: CityCardCopies;
+		/** The search box just scratched, which wipes open to show what it found. */
+		revealing?: number;
 	};
 
-	let { card, onclick, tone = null, small = false, copies }: Props = $props();
+	let { card, onclick, tone = null, small = false, copies, revealing }: Props = $props();
 
 	const EPIDEMIC_PLAIN = EPIDEMIC_STEPS.map(step => `${step.heading}: ${step.text}`).join(' ');
 
@@ -89,22 +91,22 @@
 					return { id: card.companion, name, ...print, plain: `${name}: ${print.text}` };
 				})()
 			: null;
-		const exposedSearches = card.search
-			.filter(box => !box.scratched)
-			.map(box => ({
+		const scopeLabel = (scope: 'land' | 'sea') =>
+			scope === 'sea' ? 'Search the sea' : card.search.length > 1 ? 'Search the land' : 'Search';
+		// A spent box keeps what it found printed on the card. The one box it gives way to is a companion's,
+		// whose portrait and text already fill the face.
+		const searches = card.search
+			.map((box, index) => ({
+				index,
 				scope: box.scope,
-				label:
-					card.search.length > 1
-						? box.scope === 'sea'
-							? 'Search the sea'
-							: 'Search the land'
-						: box.scope === 'sea'
-							? 'Search the sea'
-							: 'Search',
-			}));
+				label: box.scratched ? `${scopeLabel(box.scope)}: ${searchFind(box.result)}` : scopeLabel(box.scope),
+				found: box.scratched ? searchFind(box.result) : null,
+				result: box.result.t,
+			}))
+			.filter(box => !(box.found && box.result === 'companion' && companion));
 		const floatingUpgrade = Boolean(improvement && companion);
 		const diagonalUpgrade = Boolean(improvement && !companion);
-		return { city, improvement, companion, exposedSearches, floatingUpgrade, diagonalUpgrade };
+		return { city, improvement, companion, searches, floatingUpgrade, diagonalUpgrade };
 	});
 
 	const cityCopies = $derived.by(() => {
@@ -170,6 +172,17 @@
 	const showingOriginal = $derived(originals.held && Boolean(originalScan));
 	const floatUpgradeActive = $derived(!small && !showingOriginal && Boolean(cityDetails?.floatingUpgrade));
 </script>
+
+{#snippet searchChip(search: NonNullable<typeof cityDetails>['searches'][number])}
+	{#if search.found}
+		<span class="search-chip spent" class:revealing={revealing === search.index} role="note" aria-label={search.label}>
+			<span class="spent-kicker">{search.scope === 'sea' ? 'Sea searched' : 'Searched'}</span>
+			<span class="spent-find" {@attach fitText(search.found, { max: 1, min: 0.6, across: true })}>{search.found}</span>
+		</span>
+	{:else}
+		<span class="search-chip" role="note" aria-label={search.label}>{search.label}</span>
+	{/if}
+{/snippet}
 
 {#snippet portAnchor()}
 	<svg class="port-anchor" viewBox="0 0 24 24" role="img" aria-label="Port">
@@ -254,10 +267,10 @@
 			<span class="art">
 				{#if cityDetails.companion}
 					<img class="companion-art" src={companionArtUrl(cityDetails.companion.id)} alt="" aria-hidden="true" />
-					{#if cityDetails.exposedSearches.length > 0}
+					{#if cityDetails.searches.length > 0}
 						<span class="search-stack top">
-							{#each cityDetails.exposedSearches as search, index (index)}
-								<span class="search-chip" role="note" aria-label={search.label}>{search.label}</span>
+							{#each cityDetails.searches as search (search.index)}
+								{@render searchChip(search)}
 							{/each}
 						</span>
 					{/if}
@@ -280,18 +293,18 @@
 					{#if cityDetails.diagonalUpgrade && cityDetails.improvement}
 						<span
 							class="upgrade-sticker upgrade-diagonal"
-							class:above-one={cityDetails.exposedSearches.length === 1}
-							class:above-two={cityDetails.exposedSearches.length >= 2}
+							class:above-one={cityDetails.searches.length === 1}
+							class:above-two={cityDetails.searches.length >= 2}
 						>
 							<span class="sticker-fit" {@attach fitText(cityDetails.improvement.plain, { max: 0.76, min: 0.46 })}>
 								{@render upgradeBody(cityDetails.improvement)}
 							</span>
 						</span>
 					{/if}
-					{#if cityDetails.exposedSearches.length > 0}
+					{#if cityDetails.searches.length > 0}
 						<span class="search-stack" class:compact={cityDetails.diagonalUpgrade}>
-							{#each cityDetails.exposedSearches as search, index (index)}
-								<span class="search-chip" role="note" aria-label={search.label}>{search.label}</span>
+							{#each cityDetails.searches as search (search.index)}
+								{@render searchChip(search)}
 							{/each}
 						</span>
 					{/if}
@@ -644,6 +657,45 @@
 		text-transform: uppercase;
 		line-height: 1.1;
 		text-align: center;
+	}
+
+	.search-chip.spent {
+		display: flex;
+		flex-direction: column;
+		gap: 0.08em;
+		border-color: rgb(92 64 24 / 0.5);
+		background: linear-gradient(180deg, rgb(246 236 210 / 0.94), rgb(232 216 178 / 0.94));
+		text-transform: none;
+		letter-spacing: 0;
+	}
+
+	.spent-kicker {
+		font-size: 0.78em;
+		font-weight: 800;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: rgb(92 64 24 / 0.78);
+	}
+
+	.spent-find {
+		display: block;
+		overflow: hidden;
+		white-space: nowrap;
+		font-weight: 800;
+	}
+
+	/* A box just scratched wipes open left to right, the way a coin takes the silver off. */
+	.search-chip.revealing {
+		animation: scratch-open 900ms 250ms cubic-bezier(0.3, 0.7, 0.3, 1) both;
+	}
+
+	@keyframes scratch-open {
+		from {
+			clip-path: inset(0 100% 0 0);
+		}
+		to {
+			clip-path: inset(0 0 0 0);
+		}
 	}
 
 	.search-stack.compact .search-chip,
