@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { typing } from '#lib/keys.ts';
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { openings, pack, tablePlayers } from '@repo/game';
 	import type {
@@ -328,6 +329,7 @@
 
 <svelte:window
 	onkeydown={event => {
+		if (typing(event)) return;
 		if (full) {
 			if (event.key === 'Escape') full = false;
 			return;

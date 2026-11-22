@@ -21,7 +21,7 @@
 	import type { SessionView } from '#lib/session/session.svelte.ts';
 	import { inkOn } from '#lib/color.ts';
 	import { presentFeedback } from '#lib/feedback.ts';
-	import { onButton, typing } from '#lib/keys.ts';
+	import { inFeedback, onButton, typing } from '#lib/keys.ts';
 	import { LS } from '#lib/storage.ts';
 	import { setContext, tick, untrack } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
@@ -677,6 +677,8 @@
 
 	/** Space advances the turn, Z undoes, F draws, E toggles eraser, Tab pings the map, ? opens hotkeys, Escape closes. */
 	function onkey(event: KeyboardEvent) {
+		// Escape still closes the chooser from its own filter field.
+		if (inFeedback(event)) return;
 		if (event.key === 'Escape') {
 			if (peeking) {
 				peeking = false;
@@ -746,7 +748,7 @@
 	}
 
 	function onkeyup(event: KeyboardEvent) {
-		if (event.key.toLowerCase() === 'f') {
+		if (event.key.toLowerCase() === 'f' && !typing(event)) {
 			tools.releasePen();
 		}
 	}
