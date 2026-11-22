@@ -378,15 +378,15 @@
 				<T.Mesh
 					geometry={pieceModels.tower}
 					material={pieceMaterials.tower}
-					scale={2.45}
-					rotation.y={-0.35}
+					scale={3.68}
+					rotation.y={-0.35 - Math.PI / 4}
 					castShadow
 					receiveShadow
 					dispose={false}
 				/>
 			{/if}
-			<T.Mesh position.y={1.25} {...explain({ structure: 'tower', permanent: tower.permanent, placed: true })}>
-				<T.CylinderGeometry args={[1.15, 1.15, 2.6, 12]} />
+			<T.Mesh position.y={1.85} {...explain({ structure: 'tower', permanent: tower.permanent, placed: true })}>
+				<T.CylinderGeometry args={[1.55, 1.55, 3.8, 12]} />
 				<T.MeshBasicMaterial colorWrite={false} depthWrite={false} />
 			</T.Mesh>
 		</Pop>
