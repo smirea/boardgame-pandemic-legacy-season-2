@@ -10,7 +10,10 @@
 	let { card, print, code }: Props = $props();
 
 	type Family = 'stop' | 'pause' | 'keep' | 'turning' | 'rules' | 'story' | 'blank';
-	type Block = { kind: 'line'; text: string } | { kind: 'list'; items: string[] };
+	type Block =
+		| { kind: 'line'; text: string; story?: boolean }
+		| { kind: 'list'; items: string[] }
+		| { kind: 'band'; text: string };
 
 	const MONTHS = /\b(january|february|march|april|may|june|july|august|september|october|november|december)\b/g;
 	const TERMS: [RegExp, string][] = [
@@ -29,7 +32,7 @@
 		return out.replace(/(^|[.!?:]\s+|•\s*)([a-z])/g, (_, lead: string, letter: string) => lead + letter.toUpperCase());
 	};
 
-	/** Story the print opens with before its instructions; it stays on the scan. */
+	/** Story the print opens with before its instructions. */
 	const STORY_LEAD: Record<string, number> = { '08-04': 1, '11-05': 1 };
 	/** The paragraphs of a journal entry that are instructions; the rest of the entry is story. */
 	const JOURNAL_RULES: Record<string, number[]> = { '00-01': [0], '08-02': [1] };
@@ -48,24 +51,20 @@
 		return 'blank';
 	});
 
-	/** An ending's back prints the story for two score bands, each under its band. */
-	const titles = $derived.by(() => {
-		const bands = card.kind === 'ending' ? side.text.split('\n').filter(line => BAND.test(line.trim())) : [];
-		return (bands.length ? bands : [side.header])
-			.filter(Boolean)
-			.map(line => sentence(line.trim()).replace(/(\d)-(\d)/, '$1\u2013\u2060$2'));
-	});
-	const storied = $derived(family === 'story' || card.id in STORY_LEAD);
+	const banded = $derived(card.kind === 'ending' && side.text.split('\n').some(line => BAND.test(line.trim())));
+	// An ending's back prints its score bands inside the text, each over its own story.
+	const title = $derived(side.header && !banded ? sentence(side.header) : '');
 
 	const paragraphs = $derived.by(() => {
 		const header = side.header.trim().toUpperCase();
-		const parts = side.text
+		return side.text
 			.split(/\n\s*\n/)
 			.map(part => part.trim())
-			.filter(part => part && part.toUpperCase() !== header);
-		if (family === 'story') return (JOURNAL_RULES[card.id] ?? []).map(index => parts[index]!);
-		return parts.slice(STORY_LEAD[card.id] ?? 0);
+			.filter(part => part && (banded || part.toUpperCase() !== header));
 	});
+
+	const isStory = (index: number) =>
+		family === 'story' ? !(JOURNAL_RULES[card.id] ?? []).includes(index) : index < (STORY_LEAD[card.id] ?? 0);
 
 	/** The first card warns before its STOP, the rest of the stop or pause card is its trigger. */
 	const warning = $derived(
@@ -79,21 +78,25 @@
 			return [{ kind: 'line', text: sentence(trigger) }];
 		}
 		const out: Block[] = [];
-		for (const line of paragraphs.join('\n').split('\n')) {
-			const text = line.trim();
-			if (!text) continue;
-			if (text.startsWith('•')) {
-				const item = sentence(text.replace(/^•\s*/, ''));
-				const last = out.at(-1);
-				if (last?.kind === 'list') last.items.push(item);
-				else out.push({ kind: 'list', items: [item] });
-			} else out.push({ kind: 'line', text: sentence(text) });
-		}
+		paragraphs.forEach((paragraph, index) => {
+			const story = isStory(index);
+			for (const line of paragraph.split('\n')) {
+				const text = line.trim();
+				if (!text) continue;
+				if (BAND.test(text)) out.push({ kind: 'band', text: sentence(text).replace(/(\d)-(\d)/, '$1\u2013\u2060$2') });
+				else if (text.startsWith('•')) {
+					const item = sentence(text.replace(/^•\s*/, ''));
+					const last = out.at(-1);
+					if (last?.kind === 'list') last.items.push(item);
+					else out.push({ kind: 'list', items: [item] });
+				} else out.push({ kind: 'line', text: sentence(text), story });
+			}
+		});
 		return out;
 	});
 
 	const fitKey = $derived(
-		blocks.map(block => (block.kind === 'line' ? block.text : block.items.join(' '))).join(' ') + warning,
+		blocks.map(block => (block.kind === 'list' ? block.items.join(' ') : block.text)).join(' ') + warning,
 	);
 </script>
 
@@ -135,12 +138,14 @@
 			</svg>
 		{/if}
 	</div>
-	{#each titles as title (title)}<strong class="title">{title}</strong>{/each}
+	{#if title}<strong class="title">{title}</strong>{/if}
 	{#if blocks.length}
 		<div class="body" {@attach fitText(fitKey, { max: 1.05, min: 0.45 })}>
 			{#each blocks as block, index (index)}
 				{#if block.kind === 'line'}
-					<p><RichText text={block.text} /></p>
+					{#if block.story}<p class="story">{block.text}</p>{:else}<p><RichText text={block.text} /></p>{/if}
+				{:else if block.kind === 'band'}
+					<p class="band">{block.text}</p>
 				{:else}
 					<ul>
 						{#each block.items as item (item)}<li><RichText text={item} /></li>{/each}
@@ -149,7 +154,7 @@
 			{/each}
 		</div>
 	{/if}
-	{#if storied}<p class="story-hint">Hold <kbd>O</kbd> for the printed story</p>{/if}
+	{#if side.footer}<p class="foot">{side.footer}</p>{/if}
 	<span class="code">{code}</span>
 </div>
 
@@ -215,13 +220,11 @@
 		text-align: center;
 	}
 
-	.blank,
-	.story {
+	.blank {
 		justify-content: center;
 	}
 
 	.story .body {
-		flex: none;
 		text-align: left;
 	}
 
@@ -255,6 +258,7 @@
 	}
 
 	.rules .emblem,
+	.story .emblem,
 	.keep .emblem,
 	.turning .emblem {
 		width: 3em;
@@ -360,24 +364,32 @@
 		justify-content: center;
 	}
 
-	.story-hint {
+	.foot {
+		flex: none;
+		width: 100%;
 		margin: 0;
-		font-size: 0.74em;
-		font-style: italic;
-		opacity: 0.6;
+		padding-right: 4.5em;
+		font-size: 0.62em;
+		font-weight: 700;
+		line-height: 1.25;
+		text-align: left;
 	}
 
-	kbd {
-		padding: 0 0.35em;
-		border: 1px solid currentColor;
-		border-radius: 0.2em;
-		font-family: inherit;
-		font-style: normal;
-		font-weight: 700;
+	.body p.story {
+		font-style: italic;
+		color: rgb(244 235 216 / 0.8);
+	}
+
+	.body .band {
+		margin: 0.2em 0 0.3em;
+		font-family: var(--font-display);
+		font-size: 1.35em;
+		line-height: 1.05;
+		color: color-mix(in srgb, var(--mark) 55%, #fff8eb);
 	}
 
 	:global(.legacy-card.size-mini) .back::before,
-	:global(.legacy-card.size-mini) .story-hint,
+	:global(.legacy-card.size-mini) .foot,
 	:global(.legacy-card.size-mini) .warning,
 	:global(.legacy-card.size-mini) .title,
 	:global(.legacy-card.size-mini) .body {

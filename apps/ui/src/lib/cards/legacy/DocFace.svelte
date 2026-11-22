@@ -20,7 +20,8 @@
 		| { t: 'coords'; rows: (readonly [string, string])[] }
 		| { t: 'wells'; boxes: Well[] }
 		| { t: 'panel'; blocks: Block[] }
-		| { t: 'tens' };
+		| { t: 'tens' }
+		| { t: 'story'; at?: number[]; plain?: boolean };
 	type Well =
 		| { rule: 'package'; id: number; body: Block[] }
 		| { rule: 'door'; id: string; body: Block[] }
@@ -41,6 +42,8 @@
 	const DESTROY = 'Destroy this card after resolving it.';
 	const GAME_END = 'Put this card into the Game End area each game until it is destroyed.';
 	const NO_OBJECTIVE = '(This does not complete any objectives.)';
+	const STORY: Block = { t: 'story' };
+	const BAND = /^(DID NOT DELIVER|DELIVERED):/i;
 
 	const openPkg = (id: number, ...lines: string[]): Well => ({
 		rule: 'package',
@@ -57,7 +60,7 @@
 		family: 'paper',
 		kicker: 'From the archives',
 		title,
-		blocks,
+		blocks: blocks.length ? blocks : [{ t: 'story' }],
 		foot: PAPERS,
 	});
 	const priorities = (blocks: Block[]): Face => ({
@@ -87,7 +90,6 @@
 		foot: DESTROY,
 	});
 
-	// Instructions only. Narrative on the same face is left off. Dates and titles stay, because they name the paper.
 	// 03-01's second box is a decoy the card never asks players to scratch, so it stays covered.
 	// 02-06's three 10s follow losingStreakBonusGames, which counts down at game end: during a game the
 	// cross-out from this setup is still ahead by one.
@@ -120,7 +122,10 @@
 		'01-01': {
 			family: 'paper',
 			kicker: 'Journal entry',
-			blocks: [{ t: 'p', text: 'Priorities: Find our leaders. Find more supplies.' }],
+			blocks: [
+				{ t: 'p', text: 'Priorities: Find our leaders. Find more supplies.' },
+				{ t: 'story', at: [1] },
+			],
 			foot: JOURNAL,
 		},
 
@@ -138,7 +143,7 @@
 				body: [
 					{
 						t: 'p',
-						text: 'Recon South America soon.',
+						text: "It's critical that we Recon South America soon–before the Hollow Men sabotage anything important.",
 					},
 				],
 			},
@@ -218,6 +223,7 @@
 			family: 'last',
 			title: 'At last',
 			blocks: [
+				{ t: 'story', at: [0] },
 				{
 					t: 'p',
 					text: 'Look at the following two cards to see what happens next, then calculate your score to determine the ultimate fate of your world.',
@@ -228,15 +234,19 @@
 		'01-02': archive('October 15, year 70'),
 		'02-02': archive('April 24, year 40'),
 		'03-02': archive('Year 57 summary'),
-		'04-02': archive('Year 42', {
-			t: 'coords',
-			rows: [
-				['J', '26°11\'28"S  28°02\'43"E'],
-				['O', '34°29\'38"S  58°31\'35"W'],
-				['T', '41°11\'46"S  174°56\'29"E'],
-				['P', '53°19\'21"N  1'],
-			],
-		}),
+		'04-02': archive(
+			'Year 42',
+			{ t: 'story', at: [0] },
+			{
+				t: 'coords',
+				rows: [
+					['J', '26°11\'28"S  28°02\'43"E'],
+					['O', '34°29\'38"S  58°31\'35"W'],
+					['T', '41°11\'46"S  174°56\'29"E'],
+					['P', '53°19\'21"N  1'],
+				],
+			},
+		),
 		'05-02': archive('November 5, year 70'),
 		'06-02': archive('May 23, year 14 after the fall'),
 		'07-02': archive('July, year 38'),
@@ -425,36 +435,22 @@
 		'03-06': now([doors(['K', '24', '47', 'E'])]),
 		'04-03': now([doors(['42'], true)]),
 		'05-03': now([doors(['31', '36'])]),
-		'06-03': now([doors(['44', '49'])]),
+		'06-03': now([{ t: 'story', at: [0] }, doors(['44', '49'])]),
 		'08-05': now([doors(['29', '48'])]),
 		'09-05': now([doors(['33'], true)]),
 		'10-06': now([doors(['28', '45'])]),
 
-		'12-06': { family: 'close', kicker: 'Ending', title: 'If you failed to deliver the sample...', blocks: [] },
-		'12-07': { family: 'close', kicker: 'Ending', title: 'If you delivered the sample...', blocks: [] },
-		'12-09': {
-			family: 'close',
-			kicker: 'Ending',
-			blocks: [
-				{ t: 'band', text: 'Did not deliver: 851 and above' },
-				{ t: 'band', text: 'Did not deliver: 701–850' },
-			],
-		},
-		'12-10': { family: 'close', kicker: 'Ending', title: 'Did not deliver: 400 and below', blocks: [] },
-		'12-11': {
-			family: 'close',
-			kicker: 'Ending',
-			blocks: [
-				{ t: 'band', text: 'Delivered: 851 and above' },
-				{ t: 'band', text: 'Delivered: 701–850' },
-			],
-		},
-		'12-12': { family: 'close', kicker: 'Ending', title: 'Delivered: 400 and below', blocks: [] },
+		'12-06': { family: 'close', kicker: 'Ending', title: 'If you failed to deliver the sample...', blocks: [STORY] },
+		'12-07': { family: 'close', kicker: 'Ending', title: 'If you delivered the sample...', blocks: [STORY] },
+		'12-09': { family: 'close', kicker: 'Ending', blocks: [STORY] },
+		'12-10': { family: 'close', kicker: 'Ending', title: 'Did not deliver: 400 and below', blocks: [STORY] },
+		'12-11': { family: 'close', kicker: 'Ending', blocks: [STORY] },
+		'12-12': { family: 'close', kicker: 'Ending', title: 'Delivered: 400 and below', blocks: [STORY] },
 		'12-13': {
 			family: 'end',
 			kicker: 'Legacy deck',
 			title: 'Congratulations!',
-			blocks: [{ t: 'p', text: 'You have reached the end of the Legacy deck.' }],
+			blocks: [{ t: 'story', plain: true }],
 		},
 	};
 
@@ -484,6 +480,40 @@
 		if (box.rule === 'scratched') return campaign.scratched.includes(box.box);
 		const index = pack.legacyDeck.findIndex(entry => entry.id === '02-06');
 		return campaign.legacyIndex > index && !campaign.turningPoints.includes('losingStreak');
+	}
+
+	// The last card is printed upside down at the bottom of the deck: its face is the archive's side A.
+	const printed = $derived(card.kind === 'end' ? print.a : print.b);
+	const flat = (line: string) => line.toLowerCase().replace(/[–-]/g, '-').trim();
+
+	/** The face's printed paragraphs, less the lines its kicker and title already show. */
+	const storyParagraphs = $derived.by(() => {
+		const shown = new Set([face.kicker, face.title].filter(Boolean).map(line => flat(line!)));
+		return printed.text
+			.split(/\n\s*\n/)
+			.map(part =>
+				part
+					.split('\n')
+					.map(line => line.trim())
+					.filter(line => line && !shown.has(flat(line)))
+					.join('\n'),
+			)
+			.filter(Boolean);
+	});
+
+	function storyLines(at?: number[]): string[] {
+		const paragraphs = at ? at.map(index => storyParagraphs[index] ?? '') : storyParagraphs;
+		return paragraphs.flatMap(paragraph => paragraph.split('\n')).filter(Boolean);
+	}
+
+	const caseLine = (line: string) => (line === line.toUpperCase() ? line[0] + line.slice(1).toLowerCase() : line);
+	const bandText = (line: string) => caseLine(line).replace(/(\d)-(\d)/, '$1–\u2060$2');
+
+	/** A perimeter report's box opens with the scouts' story line before its instructions. */
+	function wellLead(index: number): string {
+		if (face.family !== 'report') return '';
+		const lines = (print.boxes[index]?.revealed ?? '').split('\n').filter(line => line.trim());
+		return lines.length > 1 ? lines[0]!.replace(/\s*Do the following:$/, '') : '';
 	}
 
 	function openBody(box: Well): Block[] | null {
@@ -575,7 +605,9 @@
 			{#each block.boxes as box, index (index)}
 				{@const body = openBody(box)}
 				{#if body}
+					{@const lead = wellLead(index)}
 					<div class="well open">
+						{#if lead}<p class="story">{lead}</p>{/if}
 						{#each body as child, childIndex (childIndex)}
 							{@render show(child)}
 						{/each}
@@ -589,6 +621,14 @@
 				{/if}
 			{/each}
 		</div>
+	{:else if block.t === 'story'}
+		{#each storyLines(block.at) as line, index (index)}
+			{#if BAND.test(line)}
+				<p class="band-title">{bandText(line)}</p>
+			{:else}
+				<p class:story={!block.plain}>{caseLine(line)}</p>
+			{/if}
+		{/each}
 	{:else if block.t === 'tens'}
 		<div class="tens" aria-label="Stockpile bonuses">
 			{#each [0, 1, 2] as index (index)}
@@ -614,9 +654,6 @@
 		{#each face.blocks as block, index (index)}
 			{@render show(block)}
 		{/each}
-		{#if face.family === 'paper' || face.family === 'close'}
-			<p class="story-hint">Hold <kbd>O</kbd> for the printed story</p>
-		{/if}
 	</div>
 	{#if face.foot}<p class="foot">{face.foot}</p>{/if}
 	<span class="code">{code}</span>
@@ -677,29 +714,8 @@
 		margin-top: 0.15em;
 	}
 
-	.story-hint {
-		margin-top: auto;
-		font-size: 0.74em;
+	.story {
 		font-style: italic;
-		text-align: center;
-		opacity: 0.6;
-	}
-
-	.sheet:has(> .story-hint:only-child) {
-		justify-content: center;
-	}
-
-	.story-hint:only-child {
-		margin-top: 0;
-	}
-
-	kbd {
-		padding: 0 0.35em;
-		border: 1px solid currentColor;
-		border-radius: 0.2em;
-		font-family: inherit;
-		font-style: normal;
-		font-weight: 700;
 	}
 
 	.foot {
