@@ -13,12 +13,6 @@ type Attachment = { id: string; role: SignalRole };
 
 /** A Cloudflare TURN key, set on the deployed Worker. Without one, players connect directly or not at all. */
 type TurnEnv = { TURN_KEY_ID?: string; TURN_KEY_API_TOKEN?: string };
-/** The personal token the feedback editor files ProcrastiMate tasks with, set on the deployed Worker. */
-type FeedbackEnv = { PROCRASTIMATE_TOKEN?: string };
-
-/** Where the UI's feedback editor sends ProcrastiMate requests, followed by the passphrase and ProcrastiMate's path. */
-const FEEDBACK_PATH = '/__feedback/procrastimate/';
-const PROCRASTIMATE = 'https://procrastimate.stf.lol';
 
 /** How long the relay credentials handed to players work, and how long one set is handed out before a new one is made. */
 const ICE_TTL_SECONDS = 24 * 60 * 60;
@@ -110,7 +104,6 @@ export class SignalRoom extends DurableObject<Env> {
 export default {
 	async fetch(request, env): Promise<Response> {
 		const url = new URL(request.url);
-		if (url.pathname.startsWith(FEEDBACK_PATH)) return procrastimate(request, url, env);
 		// `/signal` is where the deployed site, which shares this Worker with the UI, sends players.
 		if (url.pathname !== '/' && url.pathname !== '/signal') return new Response('Not found', { status: 404 });
 		if (request.headers.get('Upgrade')?.toLowerCase() !== 'websocket')
@@ -127,34 +120,6 @@ export default {
 		return env.SIGNAL_ROOM.getByName('session').fetch(request);
 	},
 } satisfies ExportedHandler<Env>;
-
-/**
- * Forwards the feedback editor's requests to ProcrastiMate with the token added, which the page must never hold. The
- * site is public, so only someone who knows the players' passphrase may file tasks: it is the path's first segment.
- */
-async function procrastimate(request: Request, url: URL, env: Env): Promise<Response> {
-	const { PROCRASTIMATE_TOKEN } = env as FeedbackEnv;
-	if (!PROCRASTIMATE_TOKEN) return Response.json({ message: 'ProcrastiMate is not configured' }, { status: 501 });
-	if (!env.SIGNAL_SECRET) throw new Error('SIGNAL_SECRET is not configured');
-	const rest = url.pathname.slice(FEEDBACK_PATH.length);
-	const slash = rest.indexOf('/');
-	const secret = decodeURIComponent(slash < 0 ? rest : rest.slice(0, slash));
-	if (slash < 0 || !(await secretMatches(secret, env.SIGNAL_SECRET)))
-		return Response.json({ message: 'wrong passphrase' }, { status: 403 });
-	const upstream = await fetch(`${PROCRASTIMATE}${rest.slice(slash)}${url.search}`, {
-		method: request.method,
-		headers: {
-			Authorization: `Bearer ${PROCRASTIMATE_TOKEN}`,
-			'User-Agent': 'Feedback',
-			...(request.headers.get('content-type') ? { 'Content-Type': request.headers.get('content-type')! } : {}),
-		},
-		body: request.method === 'GET' || request.method === 'HEAD' ? undefined : request.body,
-	});
-	return new Response(upstream.body, {
-		status: upstream.status,
-		headers: { 'Content-Type': upstream.headers.get('content-type') ?? 'application/json' },
-	});
-}
 
 /** Browsers hide HTTP status on a failed upgrade, so refusals complete the upgrade and close with a code they can read. */
 function rejectSocket(code: number, reason: string): Response {

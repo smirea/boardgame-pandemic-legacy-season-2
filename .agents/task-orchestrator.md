@@ -30,7 +30,7 @@ Repo config for the global `task-orchestrator` skill (`~/code/ai-files/skills/ta
 ## Setup
 
 - `AGENTS.md` is the rulebook: read it first, then the `docs/mechanics/` pages your task touches.
-- Your worktree builds from the `.env` defaults on its own ports. It has no `PROCRASTIMATE_TOKEN`, so its Feedback editor has no ProcrastiMate entry; you never need one.
+- Your worktree builds from the `.env` defaults on its own ports.
 
 ## Verification
 

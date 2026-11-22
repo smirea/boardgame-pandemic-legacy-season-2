@@ -2,7 +2,7 @@
 /**
  * Hands env-manager prod's secrets to where the deployed site reads them. Logs names, never values.
  *
- *   ./scripts/secrets.ts push     SIGNAL_SECRET, the TURN key and PROCRASTIMATE_TOKEN to the production Worker
+ *   ./scripts/secrets.ts push     SIGNAL_SECRET and the TURN key to the production Worker
  *   ./scripts/secrets.ts github   the Cloudflare credentials CI deploys with, as repository secrets
  *
  * Both read env-manager, which needs this Mac's AWS access.
@@ -11,7 +11,7 @@ import { spawnSync } from 'node:child_process';
 
 const PROJECT = 'boardgame-pandemic-legacy-season-2';
 const REPO = 'smirea/boardgame-pandemic-legacy-season-2';
-const WORKER_SECRETS = ['SIGNAL_SECRET', 'TURN_KEY_ID', 'TURN_KEY_API_TOKEN', 'PROCRASTIMATE_TOKEN'] as const;
+const WORKER_SECRETS = ['SIGNAL_SECRET', 'TURN_KEY_ID', 'TURN_KEY_API_TOKEN'] as const;
 const CLOUDFLARE = ['CLOUDFLARE_API_TOKEN', 'CLOUDFLARE_ACCOUNT_ID'] as const;
 
 type Values = Record<string, string>;

@@ -1,7 +1,7 @@
 import adapter from '@sveltejs/adapter-static';
 import { sveltekit } from '@sveltejs/kit/vite';
 import tailwindcss from '@tailwindcss/vite';
-import { feedbackEngine, feedbackProcrastimate } from '@stefan.inc/feedback-engine/vite';
+import { feedbackEngine } from '@stefan.inc/feedback-engine/vite';
 import env from '../../packages/shared/src/env.ts';
 import { defineConfig } from 'vite';
 
@@ -10,11 +10,6 @@ const uiHost = new URL(env.UI_URL).hostname;
 export default defineConfig(({ command }) => ({
 	plugins: [
 		tailwindcss(),
-		// Only the dev server forwards to ProcrastiMate. A built site has no proxy, so it must not offer the entry.
-		feedbackProcrastimate({
-			token: command === 'serve' ? env.PROCRASTIMATE_TOKEN : undefined,
-			projects: ['a/bg-pandemic-2'],
-		}),
 		sveltekit({
 			preprocess: [feedbackEngine()],
 			adapter: adapter({

@@ -1,33 +1,18 @@
 import type { FeedbackEngine } from '@stefan.inc/feedback-engine/svelte';
-import { LS } from '#lib/storage.ts';
 
 let engine: Promise<FeedbackEngine> | undefined;
-let filedWith: string | undefined;
-
-/**
- * Where the editor files ProcrastiMate tasks. The dev server's own proxy is wired in by `feedbackProcrastimate()`. The
- * deployed Worker's (`apps/signal`) files only for someone who knows the players' passphrase, which leads its path.
- */
-function procrastimate(passphrase: string) {
-	if (import.meta.env.DEV || !passphrase) return undefined;
-	return {
-		url: `/__feedback/procrastimate/${encodeURIComponent(passphrase)}`,
-		projects: ['a/bg-pandemic-2'],
-	};
-}
 
 /**
  * Alt+Meta+click anything to open the feedback editor on it, in every build. The import is dynamic, so the editor
- * loads after the page and never delays the first frame.
+ * loads after the page and never delays the first frame. ProcrastiMate posts open `/feedback` on ProcrastiMate's own
+ * origin using whoever is signed in there, with no token or proxy.
  */
 export function startFeedback(): () => void {
-	const passphrase = LS.get('passphrase', '');
-	filedWith = passphrase;
 	const started = import('@stefan.inc/feedback-engine/svelte').then(({ setupFeedbackEngine }) => {
 		const feedback = setupFeedbackEngine({
 			app: 'Pandemic Legacy S2',
 			pinned: ['ProcrastiMate'],
-			procrastimate: procrastimate(passphrase),
+			procrastimate: { projects: ['a/bg-pandemic-2'] },
 		});
 		feedback.context('Connection', () => window.DEBUG?.connection() ?? null);
 		feedback.context('Game', () => {
@@ -53,11 +38,6 @@ export function startFeedback(): () => void {
 		if (engine === started) engine = undefined;
 		void started.then(feedback => feedback.destroy());
 	};
-}
-
-/** Starts the editor again once the passphrase it files ProcrastiMate tasks with has changed. */
-export function passphraseChanged() {
-	if (engine && LS.get('passphrase', '') !== filedWith) startFeedback();
 }
 
 export async function presentFeedback() {

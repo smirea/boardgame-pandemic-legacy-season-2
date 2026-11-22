@@ -4,7 +4,6 @@
 	import { GameSession } from '#lib/session/session.svelte.ts';
 	import type { Mode } from '#lib/session/session.svelte.ts';
 	import { LS } from '#lib/storage.ts';
-	import { passphraseChanged } from '#lib/feedback.ts';
 	import Engraving from '#lib/board/Engraving.svelte';
 	import { onDestroy } from 'svelte';
 
@@ -17,7 +16,6 @@
 	function start(mode: Mode) {
 		error = null;
 		LS.set({ passphrase: secret, mode });
-		passphraseChanged();
 		try {
 			session = new GameSession({ mode, secret });
 			window.DEBUG = session.debugApi();
