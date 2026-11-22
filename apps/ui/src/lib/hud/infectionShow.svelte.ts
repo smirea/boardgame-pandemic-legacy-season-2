@@ -10,7 +10,8 @@ type Hidden = { city: CityId | null; piece: Piece | 'stockpile'; amount: number 
 
 type Beat = {
 	seq: number;
-	city: CityId;
+	/** A Gather card names no city, so the camera stays where it is. */
+	city: CityId | null;
 	card: InfectionCard;
 	note: string;
 	/** The card cost the table an incident, so its note is drawn as a warning. */
@@ -20,7 +21,7 @@ type Beat = {
 	incidents: { city: CityId; hidden: Hidden[] }[];
 };
 
-export type DrawnInfection = { key: number; card: InfectionCard; note: string; alarm: boolean; city: CityId };
+export type DrawnInfection = { key: number; card: InfectionCard; note: string; alarm: boolean; city: CityId | null };
 export type Lag = { cities: Partial<Record<CityId, Pieces>>; stockpile: number };
 
 const NOTE = {
@@ -216,6 +217,19 @@ export class InfectionShow {
 				};
 				if (entry.effect === 'outbreak') outbreak ??= beat;
 				beats.push(beat);
+			} else if (entry.t === 'gather') {
+				const card = world.campaign.infectionCards[entry.card];
+				if (!card) continue;
+				beats.push({
+					seq: entry.seq,
+					city: null,
+					card,
+					note: 'next city gets a Hollow Man',
+					alarm: true,
+					strike: [],
+					pulse: null,
+					incidents: [],
+				});
 			} else if (entry.t === 'epidemic' && entry.city && entry.card) {
 				const card = world.campaign.infectionCards[entry.card];
 				if (!card) continue;
@@ -275,10 +289,10 @@ export class InfectionShow {
 				{ key: beat.seq, card: beat.card, note: beat.note, alarm: beat.alarm, city: beat.city },
 				...this.stack,
 			];
-			this.focus = beat.city;
+			if (beat.city) this.focus = beat.city;
 			if (!(await wait(slow ? 1050 : 630))) return;
 			this.reveal(beat.strike);
-			if (beat.pulse) this.pulse(beat.city, beat.pulse);
+			if (beat.pulse && beat.city) this.pulse(beat.city, beat.pulse);
 			for (const incident of beat.incidents) {
 				if (incident.city !== this.focus) {
 					this.focus = incident.city;

@@ -161,6 +161,7 @@ export function createGame(world: World, seating: { seat: SeatId; character: Cha
 		),
 		pending: [],
 		skipInfection: false,
+		gathering: false,
 		pickedEvents: [],
 		centersBuilt: 0,
 		searches: 0,
@@ -222,7 +223,7 @@ export function openingInfectStep(world: World) {
 	const game = world.game!;
 	const infects = openingInfectionsLeft(world) > 0;
 	const card = drawInfectionCard(world, 'top');
-	if (!card) return void (game.infectionsLeft = 0);
+	if (!card?.city) return void (game.infectionsLeft = 0);
 	game.infectionsLeft -= 1;
 	if (infects) infectCity(world, card.city, card.id);
 	else placeHollow(world, card.city, card.id);
@@ -402,12 +403,13 @@ export function checkDelivery(world: World) {
 type DrawnCity = { id: CardId; city: CityId };
 
 /**
- * Draws Infection cards until one names a city that can be infected. Forsaken cities' cards wait in
- * the Game End area, and Hollow Men cards met on the way are returned as `gather`.
+ * Turns over one Infection card. A forsaken city's card goes to the Game End area and the next card is turned
+ * instead; a Gather card is returned with no city, and from the bottom of the deck it is discarded without effect.
  */
-function drawInfectionCard(world: World, end: 'top' | 'bottom'): (DrawnCity & { gathers: number }) | null {
+function drawInfectionCard(world: World, end: 'bottom'): DrawnCity | null;
+function drawInfectionCard(world: World, end: 'top'): DrawnCity | { id: CardId; city: null } | null;
+function drawInfectionCard(world: World, end: 'top' | 'bottom'): DrawnCity | { id: CardId; city: null } | null {
 	const { campaign, game } = world as { campaign: World['campaign']; game: Game };
-	let gathers = 0;
 	for (;;) {
 		if (game.infectionDeck.order.length === 0) {
 			// With every city forsaken the discard pile holds only Hollow Men cards, and reshuffling them would never end.
@@ -427,21 +429,14 @@ function drawInfectionCard(world: World, end: 'top' | 'bottom'): (DrawnCity & { 
 		const card = campaign.infectionCards[id]!;
 		if (card.kind !== 'city') {
 			game.infectionDiscard.push(id);
-			if (end === 'bottom') return null;
-			gathers += 1;
-			if (gathers === 1)
-				log(game, {
-					t: 'note',
-					text: 'A Hollow Men card was flipped: the next city gets a Hollow Man and is not infected',
-				});
-			continue;
+			return end === 'bottom' ? null : { id, city: null };
 		}
 		if (isForsaken(campaign, card.city)) {
 			game.gameEndArea.push(id);
 			log(game, { t: 'infect', city: card.city, card: id, effect: 'skipped' });
 			continue;
 		}
-		return { id, city: card.city, gathers };
+		return { id, city: card.city };
 	}
 }
 
@@ -539,14 +534,29 @@ export function placeHollow(world: World, city: CityId, cardId: CardId) {
 	location.hollow += 1;
 }
 
-/** Flips one card of the turn's Infect step. */
+/**
+ * Flips one card of the turn's Infect step. A Gather card is a flip of its own that does not count toward the
+ * rate: it waits face up for the next flip, whose city gets a Hollow Man instead of being infected.
+ */
 export function infectStep(world: World) {
 	const game = world.game!;
 	const drawn = drawInfectionCard(world, 'top');
+	if (!drawn) {
+		game.gathering = false;
+		game.infectionsLeft -= 1;
+		return;
+	}
+	if (drawn.city === null) {
+		log(game, { t: 'gather', card: drawn.id });
+		if (game.gathering)
+			log(game, { t: 'note', text: 'Another Gather card was flipped: it is discarded without effect' });
+		game.gathering = true;
+		return;
+	}
 	game.infectionsLeft -= 1;
-	if (!drawn) return;
-	if (drawn.gathers > 0) placeHollow(world, drawn.city, drawn.id);
+	if (game.gathering) placeHollow(world, drawn.city, drawn.id);
 	else infectCity(world, drawn.city, drawn.id);
+	game.gathering = false;
 	game.infectionDiscard.push(drawn.id);
 	const card = world.campaign.infectionCards[drawn.id];
 	const anyCards = game.seats.some(seat => player(game, seat).hand.length > 0);

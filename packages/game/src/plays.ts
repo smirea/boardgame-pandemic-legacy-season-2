@@ -140,6 +140,8 @@ export function checkPlay(world: World, seat: SeatId, card: CardId, play: Play, 
 	// An Epidemic that has been started is the table's exception: any Event may be played between its steps.
 	const unresolved = game.pending[0]?.t;
 	if (unresolved === 'shield' || unresolved === 'cordon') return 'Resolve the card that was just drawn first';
+	// A designer ruling: a Gather card and the city it gathers in are one draw, with no Event window between them.
+	if (game.gathering) return 'Flip the card the Hollow Men gather in first';
 	if (unresolved === 'epidemicDrawn' && play.e !== 'antidote') return 'The Epidemic must strike first';
 	const onGrid = grid(campaign);
 	const onMap = (city: CityId) => campaign.locations[city]?.revealed === true;

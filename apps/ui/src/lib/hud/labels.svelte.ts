@@ -536,6 +536,8 @@ export function logLine(world: World, entry: LogEntry): { tone: '' | 'head' | 'g
 				tone: entry.effect === 'supply' || entry.effect === 'blocked' ? '' : 'bad',
 				text: `${cityName(entry.city)}: ${{ supply: 'lost a cube', plague: 'plague cube', outbreak: 'outbreak', hollow: 'Hollow Men arrive', skipped: 'forsaken, skipped', blocked: 'held firm' }[entry.effect]}`,
 			};
+		case 'gather':
+			return { tone: 'bad', text: 'Hollow Men gather: the next city flipped gets a Hollow Man' };
 		case 'incident':
 			return { tone: 'bad', text: `Incident ${entry.total} in ${cityName(entry.city)}` };
 		case 'exposure':

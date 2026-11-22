@@ -916,6 +916,7 @@
 				epidemic={admin.epidemic !== null}
 				stack={show.stack}
 				exit={show.exit}
+				gathering={game.gathering}
 			/>
 		</div>
 	{:else if game && !spectator && actionChoices.length && canAct && snap.phase === 'playing.actions'}

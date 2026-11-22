@@ -65,6 +65,7 @@ An independent audit (November 2026) checked all 170 interactions against the en
 - An Epidemic also waits before the reshuffle when a Lockdown card is in the discard pile.
 - Taking the sample needs two free slots for the Carrier scar.
 - A city emptied mid-game by a fourth Hollow Man is infested at once.
+- A Gather card is turned over by a flip of its own (`INFECT`) and does not count toward the rate. It stays out on the turn desk, and the next flip's city gets a Hollow Man instead of an infection. A second Gather before that city is discarded without effect, and no Event may be played between a Gather and its city (81, 166).
 - Monitor keeps only cards it revealed.
 - The hand limit waits until both cards of the draw are in hand.
 - A game seats 2 to 4, and a haven worker only when no living character is free.

@@ -177,6 +177,8 @@ export function renderLog(world: World, entry: LogEntry): string {
 					: null;
 			return `infect ${city(entry.city)}: ${entry.effect}${entry.effect === 'blocked' && improved ? ` by its ${improved} card` : improved ? ` (a ${improved} card)` : ''}`;
 		}
+		case 'gather':
+			return 'Gather card flipped: the next city gets a Hollow Man';
 		case 'outbreak':
 			return `OUTBREAK in ${city(entry.city)}`;
 		case 'incident':

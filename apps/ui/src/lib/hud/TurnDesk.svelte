@@ -28,9 +28,11 @@
 		stack: DrawnInfection[];
 		/** Where the cards flipped go when they leave: an Epidemic's reshuffle puts them back on the deck. */
 		exit: 'discard' | 'deck';
+		/** A Gather card lies flipped: the next flip names the city that gets a Hollow Man. */
+		gathering: boolean;
 	};
 
-	let { side, deck, count, left, task, action, name, color, epidemic, stack, exit }: Props = $props();
+	let { side, deck, count, left, task, action, name, color, epidemic, stack, exit, gathering }: Props = $props();
 
 	// A card comes off the deck with a click on the deck. A step that turns no card over has a button under it.
 	const fromPile = $derived(task === 'draw' || task === 'flip' || task === 'bottom');
@@ -49,15 +51,19 @@
 						? action
 							? `Draw · ${left} left`
 							: `${left} to draw`
-						: task === 'flip'
+						: task === 'flip' && gathering
 							? action
-								? `Flip · ${left} left`
-								: `${left} to flip`
-							: task === 'done'
-								? 'Turn ending'
-								: deck === 'player'
-									? 'Cards drawn'
-									: 'Cities infected',
+								? 'Flip for the Hollow Men'
+								: 'Hollow Men gather'
+							: task === 'flip'
+								? action
+									? `Flip · ${left} left`
+									: `${left} to flip`
+								: task === 'done'
+									? 'Turn ending'
+									: deck === 'player'
+										? 'Cards drawn'
+										: 'Cities infected',
 	);
 	const away = $derived(side === 'left' ? -1 : 1);
 
@@ -119,6 +125,7 @@
 		epidemic,
 		mine: action !== null,
 		flipped: stack.length,
+		gathering,
 	}))}
 >
 	<div class="well" data-turn-well>
@@ -134,7 +141,9 @@
 					? `Draw from the Player deck (${left} left)`
 					: task === 'bottom'
 						? 'Draw the bottom Infection card'
-						: `Flip an Infection card (${left} left)`}
+						: gathering
+							? 'Flip an Infection card for the Hollow Men to gather in'
+							: `Flip an Infection card (${left} left)`}
 				in:fly={{ x: away * 160, duration: 380, delay: 220 }}
 				out:fly={{ x: away * 160, duration: 240 }}
 			>
@@ -164,7 +173,11 @@
 				data-testid="turn-desk-go">{go}</button
 			>
 		{:else}
-			<span class="badge" class:alarm={epidemic || task === 'bottom'} data-testid="turn-desk-badge">{badge}</span>
+			<span
+				class="badge"
+				class:alarm={epidemic || task === 'bottom' || (task === 'flip' && gathering)}
+				data-testid="turn-desk-badge">{badge}</span
+			>
 		{/if}
 	</div>
 	<!-- A drawn Player card is laid over this by `CardFlights`, which finds it by its mark. -->

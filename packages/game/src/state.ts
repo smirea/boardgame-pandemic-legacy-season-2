@@ -209,6 +209,7 @@ export type LogEntry = { seq: number } & (
 			card: CardId;
 			effect: 'supply' | 'plague' | 'outbreak' | 'hollow' | 'skipped' | 'blocked';
 	  }
+	| { t: 'gather'; card: CardId }
 	| { t: 'outbreak'; city: CityId }
 	| { t: 'incident'; city: CityId; total: number }
 	| { t: 'exposure'; seat: SeatId; result: 'empty' | 'scar' | 'skull' | 'worker' }
@@ -255,6 +256,8 @@ export type Game = {
 	waived: ObjectiveId[];
 	pending: Decision[];
 	skipInfection: boolean;
+	/** A Gather card was flipped in this Infect step: the next city card flipped gets a Hollow Man instead of infecting. */
+	gathering: boolean;
 	pickedEvents: CardId[];
 	centersBuilt: number;
 	searches: number;

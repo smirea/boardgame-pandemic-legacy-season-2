@@ -249,9 +249,11 @@ export function reject(world: World, phase: Phase, command: Command): string | n
 			);
 		case 'DECIDE':
 			if (world.table.undoVote) return 'Finish the undo vote first';
+			if (game?.gathering) return 'Flip the card the Hollow Men gather in first';
 			return inPhase('playing.actions', 'playing.draw', 'playing.infect') ?? checkDecide(world, command.decide);
 		case 'LOCKDOWN': {
 			if (world.table.undoVote) return 'Finish the undo vote first';
+			if (game?.gathering) return 'Flip the card the Hollow Men gather in first';
 			const card = campaign.infectionCards[command.card];
 			const armed =
 				game?.infectionDiscard.includes(command.card) && card?.kind === 'city' && card.improvement === 'lockdown';

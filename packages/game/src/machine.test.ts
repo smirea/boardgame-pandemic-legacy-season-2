@@ -591,9 +591,11 @@ describe('Hollow Men and forsaken cities', () => {
 		const full = gather(world => void (world.game!.locations[city('cairo')]!.hollow = 3));
 		const before = worldOf(full).campaign.locations[city('cairo')]!.population;
 		send(full, { type: 'INFECT' });
+		send(full, { type: 'INFECT' });
 		expect(gameOf(full).locations[city('cairo')]!.hollow).toBe(3);
 		expect(worldOf(full).campaign.locations[city('cairo')]!.population).toBe(before - 1);
 		const empty = gather(world => void (world.game!.pieces.hollow = 0));
+		send(empty, { type: 'INFECT' });
 		send(empty, { type: 'INFECT' });
 		expect(gameOf(empty).outcome).toMatchObject({ won: false });
 	});
@@ -2840,7 +2842,8 @@ describe('infection', () => {
 		expect(after.infectionDeck.order.slice(0, 2).toSorted()).toEqual(after.infectionDeck.strata[0]!);
 	});
 
-	test('Hollow Men cards put a figure on the next city instead of infecting it, and leaving them costs an exposure', () => {
+	test('a Hollow Men card is a flip of its own that leaves no Event window and puts a figure on the next city flipped instead of infecting it, and leaving them costs an exposure', () => {
+		let quiet = '' as CardId;
 		const actor = january((world, game) => {
 			const id = 'gather#900' as CardId;
 			world.campaign.infectionCards[id] = { id, kind: 'gather' };
@@ -2848,8 +2851,16 @@ describe('infection', () => {
 			game.infectionDeck.order.unshift(id);
 			game.infectionDeck.strata[0]!.push(id);
 			game.infectionsLeft = 1;
+			quiet = conjure(world, B, { kind: 'event', event: 'quietNight' });
 		}, 'playing.infect');
+		const play = { type: 'PLAY', seat: B, card: quiet, play: { e: 'quietNight' } } as const;
+		expect(reject(worldOf(actor), 'playing.infect', play)).toBeNull();
 		send(actor, { type: 'INFECT' });
+		expect(gameOf(actor)).toMatchObject({ gathering: true, infectionsLeft: 1 });
+		expect(gameOf(actor).locations[city('cairo')]).toMatchObject({ supplies: 2, hollow: 0 });
+		expect(reject(worldOf(actor), 'playing.infect', play)).not.toBeNull();
+		send(actor, { type: 'INFECT' });
+		expect(gameOf(actor)).toMatchObject({ gathering: false, infectionsLeft: 0 });
 		expect(gameOf(actor).locations[city('cairo')]).toMatchObject({ supplies: 2, hollow: 1 });
 
 		const leaving = january((world, game) => {
