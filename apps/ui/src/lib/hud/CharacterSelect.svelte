@@ -139,6 +139,16 @@
 	);
 	const refusal = $derived(create ? reject(world, snap.phase, create) : 'Every starting job is taken');
 
+	// The table names its havens in the lobby, the starting three before the first game, as the box asks.
+	const canRename = (city: CityId) =>
+		reject(world, snap.phase, { type: 'RENAME_HAVEN', city, name: cityName(city) }) === null;
+	let naming = $state<CityId | null>(null);
+	function nameHaven(city: CityId, input: HTMLInputElement) {
+		const name = input.value.trim();
+		naming = null;
+		if (name && name !== cityName(city)) send({ type: 'RENAME_HAVEN', city, name });
+	}
+
 	function renamed(event: Event & { currentTarget: HTMLInputElement }) {
 		const name = event.currentTarget.value.trim();
 		if (name && name !== nameOf(player)) rename(name);
@@ -424,7 +434,46 @@
 								onfocusout={() => onfocus(null)}
 							>
 								<input type="radio" name="home" value={haven.id} bind:group={home} />
-								<span><b>{cityName(haven.id)}</b></span>
+								{#if naming === haven.id}
+									<input
+										class="haven-name"
+										value={cityName(haven.id)}
+										maxlength="24"
+										aria-label={`Name for ${cityName(haven.id)}`}
+										{@attach element => {
+											element.focus();
+											element.select();
+										}}
+										onblur={event => nameHaven(haven.id, event.currentTarget)}
+										onkeydown={event => {
+											if (event.key === 'Enter') {
+												event.preventDefault();
+												event.currentTarget.blur();
+											}
+											if (event.key === 'Escape') {
+												event.stopPropagation();
+												event.currentTarget.value = cityName(haven.id);
+												event.currentTarget.blur();
+											}
+										}}
+										data-testid={`haven-name-${haven.id}`}
+									/>
+								{:else}
+									<span><b>{cityName(haven.id)}</b></span>
+									{#if canRename(haven.id)}
+										<button
+											type="button"
+											class="rename"
+											aria-label={`Rename ${cityName(haven.id)}`}
+											onclick={() => (naming = haven.id)}
+											data-testid={`rename-${haven.id}`}
+										>
+											<svg class="pen" viewBox="0 0 16 16" aria-hidden="true"
+												><path d="M11.3 1.7l3 3-8.6 8.6-3.8.8.8-3.8z" /></svg
+											>
+										</button>
+									{/if}
+								{/if}
 							</label>
 						{/each}
 					</fieldset>
@@ -861,32 +910,47 @@
 		background: var(--slip-ink);
 	}
 
-	/* Compact single-column create panel beside the character grid so 8 cards and the form fit on a laptop screen. */
+	/* A single-column create panel beside the character grid. Everything in it scales with --k, which shorter and
+	   narrower laptops turn down so the cards and the map still fit beside it. Its width grows faster than its type, so
+	   the eight portraits a row come out twice the size they were at 16.5rem. */
 	.new {
+		--k: 1.5;
 		flex: none;
 		align-self: flex-start;
-		width: 16.5rem;
+		width: calc(21.5rem * var(--k));
 		max-height: 100%;
+	}
+
+	@media (max-height: 1000px), (max-width: 1500px) {
+		.new {
+			--k: 1.3;
+		}
+	}
+
+	@media (max-height: 840px), (max-width: 1320px) {
+		.new {
+			--k: 1.15;
+		}
 	}
 
 	.new form {
 		display: flex;
 		flex-direction: column;
-		gap: 0.32rem;
+		gap: calc(0.32rem * var(--k));
 		min-height: 0;
-		padding: 0.45rem 0.55rem;
+		padding: calc(0.45rem * var(--k)) calc(0.55rem * var(--k));
 		overflow-y: auto;
 	}
 
 	.who-new {
 		display: flex;
-		gap: 0.45rem;
+		gap: calc(0.45rem * var(--k));
 		align-items: center;
 	}
 
 	.who-new .portrait {
-		width: 2.15rem;
-		height: 2.15rem;
+		width: calc(2.15rem * var(--k));
+		height: calc(2.15rem * var(--k));
 	}
 
 	.havens {
@@ -894,7 +958,7 @@
 	}
 
 	.jobs {
-		gap: 0.1rem;
+		gap: calc(0.1rem * var(--k));
 	}
 
 	.named {
@@ -906,21 +970,21 @@
 	legend {
 		display: flex;
 		flex-direction: column;
-		gap: 0.08rem;
+		gap: calc(0.08rem * var(--k));
 		color: var(--slip-muted);
-		font-size: 0.66rem;
+		font-size: calc(0.66rem * var(--k));
 	}
 
 	.named input {
 		width: 100%;
 		min-width: 0;
-		padding: 0.16rem 0.2rem;
+		padding: calc(0.16rem * var(--k)) calc(0.2rem * var(--k));
 		border: 0;
 		border-bottom: 1px solid rgb(42 32 23 / 0.35);
 		background: rgb(255 252 242 / 0.35);
 		color: var(--slip-ink);
 		font: inherit;
-		font-size: 0.8rem;
+		font-size: calc(0.8rem * var(--k));
 	}
 
 	.named input:focus {
@@ -935,14 +999,14 @@
 	}
 
 	legend {
-		margin-bottom: 0.12rem;
+		margin-bottom: calc(0.12rem * var(--k));
 		padding: 0;
 	}
 
 	.avatars {
 		display: grid;
 		grid-template-columns: repeat(8, minmax(0, 1fr));
-		gap: 0.16rem;
+		gap: calc(0.16rem * var(--k));
 	}
 
 	.avatars legend {
@@ -1004,7 +1068,7 @@
 
 	.choices {
 		display: grid;
-		gap: 0.12rem;
+		gap: calc(0.12rem * var(--k));
 	}
 
 	.choices legend {
@@ -1014,9 +1078,9 @@
 	.new .choice {
 		position: relative;
 		flex-direction: row;
-		gap: 0.3rem;
+		gap: calc(0.3rem * var(--k));
 		align-items: baseline;
-		padding: 0.12rem 0.25rem;
+		padding: calc(0.12rem * var(--k)) calc(0.25rem * var(--k));
 		border: 1px solid transparent;
 		border-radius: 3px;
 		color: var(--slip-ink);
@@ -1036,20 +1100,66 @@
 
 	.havens .choice {
 		justify-content: center;
-		padding: 0.12rem 0.15rem;
+		padding: calc(0.12rem * var(--k)) calc(0.15rem * var(--k));
+		align-items: center;
 		text-align: center;
-		white-space: nowrap;
 	}
 
 	.havens .choice b {
-		font-size: 0.66rem;
+		font-size: calc(0.66rem * var(--k));
+		overflow-wrap: anywhere;
+	}
+
+	.rename {
+		flex: none;
+		display: grid;
+		place-items: center;
+		width: calc(0.95rem * var(--k));
+		height: calc(0.95rem * var(--k));
+		padding: 0;
+		border: 0;
+		border-radius: 2px;
+		background: none;
+		color: var(--slip-muted);
+		cursor: pointer;
+	}
+
+	.rename:hover,
+	.rename:focus-visible {
+		background: rgb(42 32 23 / 0.12);
+		color: var(--slip-ink);
+	}
+
+	.rename .pen {
+		width: 70%;
+		height: 70%;
+		fill: currentColor;
+		opacity: 1;
+	}
+
+	.haven-name {
+		width: 100%;
+		min-width: 0;
+		padding: 0 calc(0.1rem * var(--k));
+		border: 0;
+		border-bottom: 1px solid var(--slip-ink);
+		background: rgb(255 252 242 / 0.6);
+		color: var(--slip-ink);
+		font: inherit;
+		font-size: calc(0.66rem * var(--k));
+		font-weight: 700;
+		text-align: center;
+	}
+
+	.haven-name:focus {
+		outline: none;
 	}
 
 	.mark {
 		position: relative;
 		flex: none;
-		width: 1.15rem;
-		height: 1.15rem;
+		width: calc(1.15rem * var(--k));
+		height: calc(1.15rem * var(--k));
 	}
 
 	.choice.used {
@@ -1085,13 +1195,13 @@
 	}
 
 	.choice b {
-		font-size: 0.7rem;
+		font-size: calc(0.7rem * var(--k));
 		line-height: 1.12;
 	}
 
 	.choice small {
 		color: var(--slip-muted);
-		font-size: 0.62rem;
+		font-size: calc(0.62rem * var(--k));
 		line-height: 1.15;
 	}
 
@@ -1109,13 +1219,13 @@
 	}
 
 	.make {
-		padding: 0.35rem;
+		padding: calc(0.35rem * var(--k));
 		border: 1px solid var(--slip-ink);
 		border-radius: 2px;
 		background: var(--slip-ink);
 		color: #efe6d2;
 		font: inherit;
-		font-size: 0.78rem;
+		font-size: calc(0.78rem * var(--k));
 		font-weight: 700;
 		cursor: pointer;
 	}
