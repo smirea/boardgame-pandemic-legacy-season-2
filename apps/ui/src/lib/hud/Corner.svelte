@@ -144,12 +144,6 @@
 			/>
 		</button>
 
-		{#if active}
-			<span class="turn-rail" class:on-left={right} data-testid="current-turn-rail" aria-label="Current turn"
-				>Current turn</span
-			>
-		{/if}
-
 		{#if reading && character}
 			<!-- The whole character, grown out of the seat over the board while the pointer rests on it. -->
 			<div
@@ -275,8 +269,6 @@
 	}
 
 	.seat {
-		--rail: 1.55rem;
-		--rail-gap: 0.4rem;
 		position: relative;
 		width: 100%;
 	}
@@ -324,65 +316,6 @@
 	.slip:focus-visible {
 		outline: 2px solid #f7d68b;
 		outline-offset: 3px;
-	}
-
-	/* From the top of the character to its cut line, and moved with it. */
-	.turn-rail {
-		position: absolute;
-		top: 0;
-		bottom: 1.2rem;
-		left: calc(100% + var(--rail-gap));
-		z-index: 38;
-		display: grid;
-		place-items: center;
-		box-sizing: border-box;
-		width: var(--rail);
-		padding: 0.45rem 0;
-		translate: 0 0.25rem;
-		border: 1px solid rgb(247 214 139 / 0.72);
-		border-radius: 3px;
-		background: rgb(18 14 10 / 0.86);
-		writing-mode: vertical-rl;
-		text-orientation: mixed;
-		font-size: 0.7rem;
-		font-weight: 800;
-		letter-spacing: 0.16em;
-		text-transform: uppercase;
-		color: #ffeaad;
-		text-shadow:
-			0 0 8px rgb(255 212 104 / 0.95),
-			0 0 18px rgb(227 178 60 / 0.75);
-		box-shadow:
-			0 0 14px rgb(227 178 60 / 0.55),
-			0 0.35rem 0.9rem rgb(0 0 0 / 0.55);
-		pointer-events: none;
-		user-select: none;
-		white-space: nowrap;
-		animation: turn-glow 2s ease-in-out 3;
-	}
-
-	.turn-rail.on-left {
-		left: auto;
-		right: calc(100% + var(--rail-gap));
-		rotate: 180deg;
-	}
-
-	.bl .turn-rail,
-	.br .turn-rail {
-		translate: 0 -0.25rem;
-	}
-
-	@keyframes turn-glow {
-		50% {
-			color: #fff7dc;
-			border-color: rgb(255 232 166 / 0.95);
-			text-shadow:
-				0 0 12px rgb(255 224 128 / 1),
-				0 0 26px rgb(227 178 60 / 0.95);
-			box-shadow:
-				0 0 22px rgb(255 208 86 / 0.85),
-				0 0.35rem 0.9rem rgb(0 0 0 / 0.55);
-		}
 	}
 
 	.sr-only {
@@ -454,11 +387,10 @@
 	}
 
 	/* The active player's turn so far, floating beside the card toward the board. */
-	/* Only the active seat lists its steps, so they always clear its Current turn rail. */
 	.steps {
 		position: absolute;
 		top: 0;
-		left: calc(100% + var(--rail) + 2 * var(--rail-gap));
+		left: calc(100% + 0.4rem);
 		display: flex;
 		flex-direction: column;
 		gap: 0.25rem;
@@ -472,7 +404,7 @@
 
 	.tr .steps,
 	.br .steps {
-		right: calc(100% + var(--rail) + 2 * var(--rail-gap));
+		right: calc(100% + 0.4rem);
 		left: auto;
 	}
 

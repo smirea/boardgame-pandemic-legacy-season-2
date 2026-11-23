@@ -39,6 +39,7 @@
 	<svg class="cut" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
 		<path d="M-2 98 L50 88" vector-effect="non-scaling-stroke" />
 	</svg>
+	{#if active}<span class="turn" data-testid="current-turn">Current turn</span>{/if}
 	{#if supplies}
 		<span class="cubes" role="img" aria-label={`${supplies} supply cubes carried`}>
 			{#each { length: supplies } as _, index (index)}<i></i>{/each}
@@ -130,6 +131,43 @@
 		stroke: var(--seat);
 		stroke-width: 4.5;
 		stroke-linecap: round;
+	}
+
+	/* Hangs under the cut line at its angle, which follows the seat's shape (the line runs from (-2, 98) to (50, 88)). */
+	.turn {
+		position: absolute;
+		top: 97.25cqh;
+		left: 2cqw;
+		z-index: 1;
+		transform-origin: 0 0;
+		rotate: atan2(-10cqh, 52cqw);
+		translate: 0 3px;
+		color: #fff6e0;
+		font-family: var(--font-display);
+		font-size: clamp(0.75rem, 6cqw, 1.15rem);
+		line-height: 1;
+		white-space: nowrap;
+		-webkit-text-stroke: 0.16em var(--seat);
+		paint-order: stroke fill;
+		text-shadow: none;
+		filter: drop-shadow(0 0 0.15rem var(--seat)) drop-shadow(0 0 0.45rem var(--seat))
+			drop-shadow(0 0 0.8rem color-mix(in srgb, var(--seat) 70%, transparent));
+		pointer-events: none;
+		animation: turn-glow 1.8s ease-in-out 3;
+	}
+
+	.right .turn {
+		right: 2cqw;
+		left: auto;
+		transform-origin: 100% 0;
+		rotate: atan2(10cqh, 52cqw);
+	}
+
+	@keyframes turn-glow {
+		50% {
+			filter: drop-shadow(0 0 0.25rem var(--seat)) drop-shadow(0 0 0.7rem var(--seat))
+				drop-shadow(0 0 1.3rem var(--seat));
+		}
 	}
 
 	/* Carried cubes ride the cut under the figure. */
