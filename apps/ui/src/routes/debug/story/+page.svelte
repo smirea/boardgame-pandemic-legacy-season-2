@@ -1,9 +1,12 @@
 <script lang="ts">
+	import { pack } from '@repo/game';
+	import type { JobId } from '@repo/game';
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { onDestroy, onMount } from 'svelte';
 	import AudioMenu from '#lib/audio/AudioMenu.svelte';
 	import { bindAudioUnlock } from '#lib/audio/engine.ts';
 	import { ambientMusic } from '#lib/audio/music.ts';
+	import { tensionOf } from '#lib/audio/score.ts';
 	import {
 		sfxBuildStructure,
 		sfxCardDraw,
@@ -18,7 +21,6 @@
 		sfxIncident,
 		sfxInoculationMotif,
 		sfxOutbreak,
-		sfxOutcome,
 		sfxRadioTune,
 		sfxRouteDraw,
 		sfxScratchBox,
@@ -26,6 +28,9 @@
 		sfxUtopiaCorrupt,
 		sfxVialClink,
 	} from '#lib/audio/sfx.ts';
+	import { CUES, type Cue } from '#lib/audio/themes.ts';
+	import { TONES, type ToneId } from '#lib/audio/tones.ts';
+	import { CREATURES, type CreatureId } from '#lib/audio/wildlife.ts';
 	import { CAST_LIST } from '#lib/story/cast.ts';
 	import { STORY_SCENES } from '#lib/story/script.ts';
 	import type { SetPieceId, StoryScene } from '#lib/story/script.ts';
@@ -40,39 +45,29 @@
 	let activePiece = $state<SetPieceId | null>(null);
 	let delivered = $state(true);
 
-	// Adaptive Music Simulator state
 	let musicActive = $state(false);
+	let tone = $state<ToneId>('adrift');
+	let occupation = $state<JobId | null>(null);
 	let incidents = $state(0);
 	let epidemics = $state(0);
-	let month = $state(1);
-	let hollowPresent = $state(false);
-	let inoculationSafe = $state(false);
-	let wearingOff = $state(false);
+	let sea = $state(0.85);
+	let alarm = $state(false);
+	let hollow = $state(false);
+	let safe = $state(false);
 
-	const tensionPct = $derived(
-		Math.round(
-			Math.min(
-				1,
-				Math.min(1, incidents / 7) * 0.58 +
-					Math.min(1, epidemics / 5) * 0.42 +
-					Math.min(0.2, Math.max(0, (month - 6) / 30)),
-			) * 100,
-		),
-	);
+	const tension = $derived(tensionOf(incidents, epidemics));
+	const toneIds = Object.keys(TONES) as ToneId[];
+	const cueIds = Object.keys(CUES) as Cue[];
+	const creatureIds = Object.keys(CREATURES) as CreatureId[];
 
 	onMount(() => bindAudioUnlock());
 
 	$effect(() => {
-		ambientMusic.update({
-			active: musicActive,
-			incidents,
-			epidemics,
-			month,
-			hollowPresent,
-			inoculationSafe,
-			wearingOff,
-			storyOpen: activeScene !== null,
-		});
+		if (!musicActive) {
+			ambientMusic.stop();
+			return;
+		}
+		ambientMusic.update({ tone, tension, occupation, sea, alarm, hollow, safe, hush: activeScene !== null });
 	});
 
 	onDestroy(() => ambientMusic.stop());
@@ -121,8 +116,6 @@
 		{ label: 'Vial Clink', run: () => sfxVialClink(1) },
 		{ label: 'City Destroyed', run: () => sfxCityDestroyed() },
 		{ label: 'Utopia Corrupt', run: () => sfxUtopiaCorrupt() },
-		{ label: 'Victory', run: () => sfxOutcome(true) },
-		{ label: 'Defeat', run: () => sfxOutcome(false) },
 	];
 </script>
 
@@ -136,7 +129,7 @@
 			<span class="kicker">STORY & AUDIO WORKBENCH</span>
 			<h1>Narrative Theater, Cast & Sound</h1>
 			<p class="sub">
-				{allScenes.length} campaign scenes · {CAST_LIST.length} cast voices · {voiceCount} synthesized ElevenLabs tracks
+				{allScenes.length} campaign scenes · {CAST_LIST.length} cast voices · {voiceCount} synthesized Gemini voice tracks
 			</p>
 		</div>
 		<div class="top-right">
@@ -164,27 +157,61 @@
 	</section>
 
 	<section class="section">
-		<h2>Adaptive Escalating Ambient Music & SFX</h2>
+		<h2>Score & SFX</h2>
 		<div class="audio-grid">
-			<div class="music-box">
+			<div class="music-box" {@attach feedback('Score audition', () => ({ tone, occupation, tension, sea, alarm }))}>
 				<div class="music-head">
-					<strong>Ambient Score Engine</strong>
-					<span class="meter">Tension {tensionPct}%</span>
+					<strong>The score</strong>
+					<span class="meter">Tension {Math.round(tension * 100)}%</span>
 					<button type="button" class="primary" onclick={() => (musicActive = !musicActive)} data-testid="toggle-music">
 						{musicActive ? 'Stop Music' : 'Start Music'}
 					</button>
-					<button type="button" onclick={() => ambientMusic.triggerEpidemicShift()}>Epidemic Shift</button>
+				</div>
+
+				<div class="pick" role="group" aria-label="Campaign tone">
+					<span class="pick-label">Campaign tone</span>
+					{#each toneIds as id (id)}
+						<button type="button" aria-pressed={tone === id} onclick={() => (tone = id)}>{TONES[id].label}</button>
+					{/each}
+					<span class="pick-note">{TONES[tone].since}</span>
+				</div>
+
+				<div class="pick" role="group" aria-label="Whose turn it is">
+					<span class="pick-label">Whose turn</span>
+					<button type="button" aria-pressed={occupation === null} onclick={() => (occupation = null)}>Nobody</button>
+					{#each pack.jobs as job (job.id)}
+						<button type="button" aria-pressed={occupation === job.id} onclick={() => (occupation = job.id)}>
+							{job.name}
+						</button>
+					{/each}
+				</div>
+
+				<div class="pick" role="group" aria-label="Turning points">
+					<span class="pick-label">Turning point</span>
+					{#each cueIds as id (id)}
+						<button type="button" onclick={() => ambientMusic.accent(id)}>{CUES[id].label}</button>
+					{/each}
+					<label><input type="checkbox" bind:checked={alarm} /> Epidemic being resolved</label>
+				</div>
+
+				<div class="pick" role="group" aria-label="Sea life and wilderness">
+					<span class="pick-label">Hear a creature</span>
+					{#each creatureIds as id (id)}
+						<button type="button" onclick={() => ambientMusic.hear(id)}>{CREATURES[id].label}</button>
+					{/each}
 				</div>
 
 				<div class="sliders">
 					<label>Incidents ({incidents}/8) <input type="range" min="0" max="8" bind:value={incidents} /></label>
 					<label>Epidemics ({epidemics}/6) <input type="range" min="0" max="6" bind:value={epidemics} /></label>
-					<label>Month ({month}/12) <input type="range" min="0" max="12" bind:value={month} /></label>
+					<label>
+						Sea around the pawn ({Math.round(sea * 100)}%)
+						<input type="range" min="0" max="1" step="0.05" bind:value={sea} />
+					</label>
 				</div>
 				<div class="checks">
-					<label><input type="checkbox" bind:checked={hollowPresent} /> Hollow Men in play</label>
-					<label><input type="checkbox" bind:checked={inoculationSafe} /> Package 6 safe hum</label>
-					<label><input type="checkbox" bind:checked={wearingOff} /> Sep 09-03 wearing off</label>
+					<label><input type="checkbox" bind:checked={hollow} /> Hollow Men on the board</label>
+					<label><input type="checkbox" bind:checked={safe} /> Package 6 inoculation holds</label>
 				</div>
 			</div>
 
@@ -394,6 +421,32 @@
 		font-weight: 700;
 	}
 
+	.pick {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.35rem;
+		font-size: 0.8rem;
+	}
+
+	.pick-label {
+		flex: 0 0 100%;
+		color: var(--muted);
+		font-size: 0.72rem;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+	}
+
+	.pick-note {
+		flex: 0 0 100%;
+		color: var(--muted);
+	}
+
+	.pick button[aria-pressed='true'] {
+		border-color: #f6c88a;
+		color: #f6c88a;
+	}
+
 	.sliders {
 		display: grid;
 		gap: 0.45rem;
@@ -402,7 +455,7 @@
 
 	.sliders label {
 		display: grid;
-		grid-template-columns: 8.5rem 1fr;
+		grid-template-columns: 11.5rem 1fr;
 		align-items: center;
 		gap: 0.5rem;
 	}

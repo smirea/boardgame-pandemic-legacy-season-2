@@ -12,12 +12,12 @@
 		sfxEpidemic,
 		sfxExposure,
 		sfxInoculationMotif,
-		sfxOutcome,
 		sfxRadioTune,
 		sfxScratchBox,
 		sfxUtopiaCorrupt,
 		sfxVialClink,
 	} from '#lib/audio/sfx.ts';
+	import { ambientMusic } from '#lib/audio/music.ts';
 	import { audioSettings } from '#lib/audio/settings.svelte.ts';
 	import { CAST } from './cast.ts';
 	import type { SpeakerId } from './cast.ts';
@@ -111,12 +111,6 @@
 			case 'exposureScar':
 				sfxExposure('scar');
 				break;
-			case 'victory':
-				sfxOutcome(true);
-				break;
-			case 'defeat':
-				sfxOutcome(false);
-				break;
 		}
 	}
 
@@ -174,6 +168,7 @@
 
 		untrack(() => {
 			fireCue(current.cue);
+			if (current.swing) ambientMusic.accent(current.swing);
 
 			const onFinished = () => {
 				if (!autoAdvance || currentIndex >= total - 1) return;

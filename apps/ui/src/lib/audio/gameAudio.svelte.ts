@@ -1,7 +1,9 @@
-import { hollowInPlay } from '@repo/game';
+import { cityDef, hollowInPlay } from '@repo/game';
 import type { LogEntry, Phase, World } from '@repo/game';
 import { bindAudioUnlock } from './engine.ts';
 import { ambientMusic } from './music.ts';
+import { tensionOf, type Mood } from './score.ts';
+import { campaignTone } from './tones.ts';
 import {
 	sfxBuildStructure,
 	sfxCardDraw,
@@ -11,15 +13,34 @@ import {
 	sfxExposure,
 	sfxIncident,
 	sfxOutbreak,
-	sfxOutcome,
 	sfxRadioTune,
 	sfxRouteDraw,
 	sfxScratchBox,
 } from './sfx.ts';
 
+const EPIDEMIC_STEPS = new Set(['epidemicDrawn', 'epidemicInfect', 'intensify']);
+
+/** What the score follows, read off the game: the campaign's tone, the crisis of the game in play, whose turn it is. */
+export function moodOf(world: World, phase: Phase, storyOpen: boolean): Mood {
+	const { campaign, game } = world;
+	const inGame = game !== null && phase !== 'lobby' && phase !== 'finished';
+	const turn = game !== null && phase.startsWith('playing') ? game.players[game.active] : undefined;
+	const at = turn ? cityDef(turn.location) : null;
+	return {
+		tone: campaignTone(campaign),
+		tension: inGame ? tensionOf(game.incidents, game.epidemics) : 0,
+		occupation: turn ? (campaign.characters[turn.character]?.job ?? null) : null,
+		sea: !at || at.kind === 'haven' ? 0.85 : at.port ? 0.5 : 0.15,
+		alarm: turn !== undefined && EPIDEMIC_STEPS.has(game?.pending[0]?.t ?? ''),
+		hollow: inGame && hollowInPlay(campaign),
+		safe: campaign.rules.includes('storage') && !campaign.rules.includes('epidemicFromStorage'),
+		hush: storyOpen,
+	};
+}
+
 /**
- * Observes live game log entries and phase transitions to fire crisp tactile SFX and smoothly drive
- * the adaptive escalating ambient music score. Skips jumps (reloads, undo, replay seeks).
+ * Observes live game log entries and phase transitions to fire crisp tactile SFX and drive the score.
+ * Skips jumps (reloads, undo, replay seeks).
  */
 export class GameAudio {
 	private seenSeq: number | null = null;
@@ -33,18 +54,8 @@ export class GameAudio {
 
 	observe(world: World, phase: Phase, live: boolean, storyOpen: boolean) {
 		const game = world.game;
-		const campaign = world.campaign;
 
-		ambientMusic.update({
-			active: phase !== 'lobby' || storyOpen,
-			incidents: game?.incidents ?? 0,
-			epidemics: game?.epidemics ?? 0,
-			month: campaign.month,
-			hollowPresent: game !== null && hollowInPlay(campaign),
-			inoculationSafe: campaign.rules.includes('storage') && !campaign.rules.includes('epidemicFromStorage'),
-			wearingOff: campaign.rules.includes('epidemicFromStorage'),
-			storyOpen,
-		});
+		ambientMusic.update(moodOf(world, phase, storyOpen));
 
 		const log = game?.log ?? [];
 		const newest = log.at(-1)?.seq ?? -1;
@@ -68,18 +79,17 @@ export class GameAudio {
 
 		if (!live || !game || prevSeq === null || newest < prevSeq) return;
 
-		if (prevPending === 'epidemicDrawn' && pending === 'epidemicInfect') {
+		if (pending === 'epidemicDrawn' && prevPending !== 'epidemicDrawn') {
+			ambientMusic.accent('epidemic');
+		} else if (prevPending === 'epidemicDrawn' && pending === 'epidemicInfect') {
 			sfxEpidemic('draw');
-			ambientMusic.triggerEpidemicShift();
 		} else if (prevPending === 'epidemicInfect' && pending === 'intensify') {
 			sfxEpidemic('infect');
 		} else if (prevPending === 'intensify' && pending !== 'intensify') {
 			sfxEpidemic('intensify');
 		}
 
-		if (!prevOutcome && outcome) {
-			sfxOutcome(outcome.won);
-		}
+		if (!prevOutcome && outcome) ambientMusic.accent(outcome.won ? 'triumph' : 'setback');
 
 		const fresh = log.filter(entry => entry.seq > prevSeq);
 		if (fresh.length > 8) return;
@@ -107,6 +117,9 @@ export class GameAudio {
 				break;
 			case 'incident':
 				sfxIncident(incidents);
+				break;
+			case 'death':
+				ambientMusic.accent('setback');
 				break;
 			case 'gather':
 				sfxCubeDrop('hollow', 1);

@@ -28,9 +28,7 @@ export type SfxCue =
 	| 'radioDecode'
 	| 'utopiaCorrupt'
 	| 'vialClink'
-	| 'exposureScar'
-	| 'victory'
-	| 'defeat';
+	| 'exposureScar';
 
 export type StoryBeat = {
 	id: string;
@@ -40,9 +38,13 @@ export type StoryBeat = {
 	text: string;
 	style?: 'narrator' | 'speech' | 'thought' | 'radio';
 	cue?: SfxCue;
+	/** The story turns here, so the score breaks into its triumph or its setback. */
+	swing?: 'triumph' | 'setback';
 	setPiece?: SetPieceId;
 	/** When true, this beat reads verbatim text from the printed game component. */
 	verbatim?: boolean;
+	/** Beat-specific character-state acting direction passed to Gemini 3.8 TTS `speechMetadata.style`. */
+	direction?: string;
 };
 
 export type StoryScene = {
@@ -80,31 +82,54 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'prelude_01',
 				'chronicler',
 				"The plague came out of nowhere and ravaged the world. Fever, cough, sores, and death—once infected, most died within a week. Nothing could stop it. The world did its best. It wasn't good enough.",
-				{ verbatim: true },
+				{
+					verbatim: true,
+					direction:
+						'ominous, solemn, gravelly opening narration; build dread on "Fever, cough, sores, and death", pause heavily before the stark finality of "It wasn\'t good enough"',
+				},
 			),
 			beat(
 				'prelude_02',
 				'chronicler',
 				'The last fragments of our people have desperately kept the world from collapsing completely. For three generations we have lived on the seas, on floating stations they called "havens." Far from the plague, we are able to provide supplies to the mainland—antibiotics, food, medicine, and tools—to keep them, and us, from succumbing completely.',
-				{ verbatim: true },
+				{
+					verbatim: true,
+					direction:
+						'sweeping maritime reverence and weary pride; warm gravity on "havens", earnest steady rhythm describing the lifeline to the mainland',
+				},
 			),
 			beat(
 				'prelude_03',
 				'mara',
 				"Things have been tough the past few years. Cities far away from the havens have fallen off our grid. We don't know what's happened to them. We have only a few cities left on our grid. We are failing. The supplies aren't keeping the plague away like they used to. What's more, they're running out.",
-				{ listener: 'tomas', verbatim: true },
+				{
+					listener: 'tomas',
+					verbatim: true,
+					direction:
+						'exhausted, grimly honest confession to a trusted ally; heavy weight and bitter dread on "We are failing" and "they\'re running out"',
+				},
 			),
 			beat(
 				'prelude_04',
 				'kai',
 				'Our leadership tried to hide this fact from us, but we all knew. Last week, the leaders and thinkers of the havens gathered for their yearly summit. They did not return—and our main security team was with them. Without our soldiers, the Hollow Men will tear down what we build and steal what we offer.',
-				{ listener: 'mara', verbatim: true },
+				{
+					listener: 'mara',
+					verbatim: true,
+					direction:
+						'tense, angry, alarmed young scout reporting bad news fast; sharp disbelief on "They did not return", rising edge of warning about the Hollow Men',
+				},
 			),
 			beat(
 				'prelude_05',
 				'mara',
 				'After hours of debate, all eyes turned to a select few to lead. Us. Not because we are able to lead, but because we are willing. We are starting this journal to record our attempts to keep the world from ending. If we fail, we hope someone finds these notes to know that we may not have succeeded—but that we tried.',
-				{ listener: 'kai', verbatim: true },
+				{
+					listener: 'kai',
+					verbatim: true,
+					direction:
+						'humbled, steel-spined resolve; solemn pause on "Us", quiet fiercely determined dignity rising into an unforgettable vow on "but that we tried"',
+				},
 			),
 		],
 	},
@@ -119,13 +144,23 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'00_01_01',
 				'mara',
 				"We've barely got our heads around this mess, and yet we now find ourselves in charge. We're covering ourselves up and heading out on supply runs to see the front lines and gauge how bad things are.",
-				{ listener: 'kai', verbatim: true, cue: 'cardFlip' },
+				{
+					listener: 'kai',
+					verbatim: true,
+					cue: 'cardFlip',
+					direction:
+						'wry, overwhelmed yet steadying herself for action; bracing the crew on deck before their first voyage out',
+				},
 			),
 			beat(
 				'00_01_02',
 				'mara',
 				"Things are going to get real very soon. The Hollow Men will tear down our supply centers almost as soon as we build them, but we've got to start restoring our presence on the mainland.",
-				{ listener: 'kai', verbatim: true },
+				{
+					listener: 'kai',
+					verbatim: true,
+					direction: 'firm, practical commander rallying the crew with sober grit and urgent determination',
+				},
 			),
 		],
 	},
@@ -140,19 +175,32 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'01_01_01',
 				'chronicler',
 				'January. Seventy-one years after the Fall. The seal breaks on the first journal entry.',
-				{ cue: 'cardFlip' },
+				{
+					cue: 'cardFlip',
+					direction: 'crisp, atmospheric chapter opening; anticipatory quiet gravity like cracking open a wax seal',
+				},
 			),
 			beat(
 				'01_01_02',
 				'mara',
 				"Priorities: Find our leaders. Find more supplies. Attached a document we found dated last year. It's grim. Our supplies won't last the year. Perhaps North America will give us clues; it's where the plague started.",
-				{ listener: 'tomas', verbatim: true },
+				{
+					listener: 'tomas',
+					verbatim: true,
+					direction:
+						'focused, clipped mission briefing turning dark on "It\'s grim", then leaning forward with purposeful curiosity toward North America',
+				},
 			),
 			beat(
 				'01_01_03',
 				'mara',
 				"The Hollow Men are raiding surviving coastal cities and it's only a matter of time before they move inland. We need to recon before they do. Hope the people we meet know that we are there to help. Old prejudices last long.",
-				{ listener: 'tomas', verbatim: true },
+				{
+					listener: 'tomas',
+					verbatim: true,
+					direction:
+						'urgent tactical warning softening at the end into guarded, wistful sadness on "Old prejudices last long"',
+				},
 			),
 		],
 	},
@@ -167,19 +215,35 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'01_02_01',
 				'archive',
 				'October 15, Year 70. Degradation of supplies and routes has reached critical level. We are no longer effective. Supply lines to the interior have been abandoned. Cities will fall within a year and, when they do, we will fall.',
-				{ listener: 'tomas', style: 'radio', verbatim: true },
+				{
+					listener: 'tomas',
+					style: 'radio',
+					verbatim: true,
+					direction:
+						'chillingly clinical official council report; crisp bureaucratic precision delivering an apocalyptic forecast with eerie icy composure',
+				},
 			),
 			beat(
 				'01_02_02',
 				'archive',
 				"Next year's stockpile projections are fatalistic. Haven leadership has voted to initiate the protocol we hoped would never come.",
-				{ listener: 'tomas', style: 'radio', verbatim: true },
+				{
+					listener: 'tomas',
+					style: 'radio',
+					verbatim: true,
+					direction: 'austere, ominous finality; cool deliberate emphasis on "the protocol we hoped would never come"',
+				},
 			),
 			beat(
 				'01_02_03',
 				'tomas',
 				'"The protocol we hoped would never come." They kept this locked away for months... and never told us what it meant.',
-				{ listener: 'archive', style: 'thought' },
+				{
+					listener: 'archive',
+					style: 'thought',
+					direction:
+						"unsettled, hushed whisper repeating the quote in disbelief; creeping suspicion and hurt at leadership's secrecy",
+				},
 			),
 		],
 	},
@@ -194,7 +258,10 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'01_06_01',
 				'chronicler',
 				'Turning Point One: Forsaken Cities. Should any city on the grid fall to zero population, its lights go out for good—and Doors A and 12 will open.',
-				{ cue: 'cardFlip' },
+				{
+					cue: 'cardFlip',
+					direction: 'solemn, foreboding rule-of-fate pronouncement; ominous weight on "lights go out for good"',
+				},
 			),
 		],
 	},
@@ -209,7 +276,14 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'02_01_01',
 				'kai',
 				'Our scouts report that the Hollow Men have raided North America. We quickly mobilized... but too late. Package 1 is breached—and the Decontamination Kit inside is destroyed.',
-				{ listener: 'mara', verbatim: true, cue: 'scratch' },
+				{
+					listener: 'mara',
+					verbatim: true,
+					cue: 'scratch',
+					swing: 'setback',
+					direction:
+						'breathless, frustrated emergency field report; bitter sink on "but too late" and sharp sting at the destroyed kit',
+				},
 			),
 		],
 	},
@@ -224,13 +298,22 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'02_02_01',
 				'mara',
 				'Hollow Men are expanding their raids now that our leaders and soldiers have disappeared. Our supply routes, already abandoned, are unsafe. They are working their way into South America, likely looking for one of the labs working on a cure. We need to find a way to fortify our supply centers so they can resist their attacks.',
-				{ listener: 'tomas', verbatim: true },
+				{
+					listener: 'tomas',
+					verbatim: true,
+					direction: 'hard-pressed strategic alarm; taut, urgent commander racing an advancing enemy across the map',
+				},
 			),
 			beat(
 				'02_02_02',
 				'tomas',
 				"From the Archives—April 24, Year 40. Reports from the frontier havens. Hollow Men have breached them with help of local population who still distrust us. Sending security patrols, but it might be too late. We're going to start having to dilute supplies or abandon supply routes.",
-				{ listener: 'mara', verbatim: true },
+				{
+					listener: 'mara',
+					verbatim: true,
+					direction:
+						'sad, reflective archivist reading an old wound aloud; poignant regret on "local population who still distrust us"',
+				},
 			),
 		],
 	},
@@ -245,6 +328,10 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'02_06_01',
 				'chronicler',
 				'Turning Point Two: Give Us the Tools and We Will Finish the Job. Should four straight months end in defeat, emergency supply caches will unlock.',
+				{
+					direction:
+						'grim, steadfast solemnity with a faint spark of defiant endurance on "Give Us the Tools and We Will Finish the Job"',
+				},
 			),
 		],
 	},
@@ -259,7 +346,13 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'03_01_01',
 				'kai',
 				"It's critical that we Recon South America soon—before the Hollow Men sabotage anything important.",
-				{ listener: 'mara', verbatim: true, cue: 'scratch' },
+				{
+					listener: 'mara',
+					verbatim: true,
+					cue: 'scratch',
+					direction:
+						'fast, urgent scout warning leaning over the radio console; sharp stress on "critical" and "before"',
+				},
 			),
 		],
 	},
@@ -274,13 +367,23 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'03_02_01',
 				'mara',
 				"Havens have been in trouble for a while. Old records show that the four main labs were never meant to go beyond fifty years. Nor were the supplies. Our leaders have been putting on a good show for a long time now. They knew the end was near. Now they are gone and it's a race between us and the Hollow Men.",
-				{ listener: 'tomas', verbatim: true },
+				{
+					listener: 'tomas',
+					verbatim: true,
+					direction:
+						'growing disillusionment and bitter edge at the leaders\' facade, tightening into fierce competitive grit on "it\'s a race"',
+				},
 			),
 			beat(
 				'03_02_02',
 				'tomas',
 				'Year 57 Summary. PEARL was on the verge of a cure when it went silent. OPAL, JADE, and TOPAZ are set up to support PEARL—they are not equipped to find a cure on their own. Transporting a potential cure from PEARL to JADE was always going to be a frantic dash. We must keep the routes between them viable.',
-				{ listener: 'mara', verbatim: true },
+				{
+					listener: 'mara',
+					verbatim: true,
+					direction:
+						'scholarly awe mixed with heartbreak over PEARL going silent right on the verge of a cure; urgent emphasis on keeping routes viable',
+				},
 			),
 		],
 	},
@@ -296,13 +399,23 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'03_06_01',
 				'chronicler',
 				'The first wave of spring breaks across the Atlantic. Five Epidemic cards slide into the Player deck. From this moment on, the plague accelerates.',
-				{ cue: 'epidemicDraw', setPiece: 'epidemicsArrive' },
+				{
+					cue: 'epidemicDraw',
+					setPiece: 'epidemicsArrive',
+					swing: 'setback',
+					direction:
+						'thunderous, ominous escalation; chilling rising dread landing heavily on "the plague accelerates"',
+				},
 			),
 			beat(
 				'03_06_02',
 				'tomas',
 				'Infection rates are spiking across every port. Chart new sea lanes while you still have cubes to spend—and watch your crews closely. New scars are surfacing.',
-				{ listener: 'mara' },
+				{
+					listener: 'mara',
+					direction:
+						'alarmed chief physician calling out deteriorating vitals; urgent concern and compassionate dread for the crews',
+				},
 			),
 		],
 	},
@@ -317,7 +430,14 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'04_01_01',
 				'kai',
 				'Our scouts report that the Hollow Men have raided South America. We quickly mobilized... but too late. Package 5 is open, and Strategic Reserves is lost.',
-				{ listener: 'mara', verbatim: true, cue: 'scratch' },
+				{
+					listener: 'mara',
+					verbatim: true,
+					cue: 'scratch',
+					swing: 'setback',
+					direction:
+						'frustrated, urgent bad news; clenched jaw regret on "but too late" and "Strategic Reserves is lost"',
+				},
 			),
 		],
 	},
@@ -332,13 +452,23 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'04_02_01',
 				'mara',
 				"This year is already taking its toll. People and resources are getting stretched thin. Gearing up to be out in the world is mentally difficult as we're outsiders there. One bright spot are the laboratories. Although they lost their lead lab, the three labs in the Southern Hemisphere have kept working through the generations. We need to find out if they've made any progress.",
-				{ listener: 'tomas', verbatim: true },
+				{
+					listener: 'tomas',
+					verbatim: true,
+					direction:
+						'fatigued and bruised by mainland hostility, then lifting with a genuine spark of hope on "One bright spot are the laboratories"',
+				},
 			),
 			beat(
 				'04_02_02',
 				'tomas',
 				'Year 42. Pacific Haven not reporting. Hoping Hollow Men did not steal everything. Sending scouts to Lima to check. Also sending patrols to Indian Haven—silent since the fallout in the Indian Ocean. Presumed lost. Look at the torn slip pinned underneath: coordinates for JADE, OPAL, TOPAZ... and half a line for PEARL.',
-				{ listener: 'mara', verbatim: true },
+				{
+					listener: 'mara',
+					verbatim: true,
+					direction:
+						'somber archival reading shifting suddenly into hushed, excited detective discovery when noticing the torn slip of coordinates underneath',
+				},
 			),
 		],
 	},
@@ -353,7 +483,14 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'05_01_01',
 				'tomas',
 				'We have found records from twenty-five years ago showing the location of a now-fallen haven. It contained the equipment to generate supplies and was about to field test inoculating against the plague! We now know where it is. It is vital we access it.',
-				{ listener: 'mara', verbatim: true, cue: 'scratch' },
+				{
+					listener: 'mara',
+					verbatim: true,
+					cue: 'scratch',
+					swing: 'triumph',
+					direction:
+						'breathless, elated medical breakthrough; rising excitement on "inoculating against the plague!" and intense urgency on "It is vital we access it"',
+				},
 			),
 		],
 	},
@@ -369,19 +506,36 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'05_02_01',
 				'mara',
 				"Hollow Men have left the Americas alone and seem to be moving—retreating?—into Europe and Africa. They stop at nothing. Wherever they go, the plague follows. After seventy years, old prejudices still exist. Also... we've learned where our leaders went. And why we're still here.",
-				{ listener: 'tomas', verbatim: true },
+				{
+					listener: 'tomas',
+					verbatim: true,
+					direction:
+						'taut tactical report suddenly dropping into cold, hollow, stunned quiet on "Also... we\'ve learned where our leaders went. And why we\'re still here"',
+				},
 			),
 			beat(
 				'05_02_02',
 				'archive',
 				"November 5, Year 70. Initiating the protocol during our annual leadership summit. It's a long journey to Utopia. We are the best and brightest minds of the havens and feel confident that Utopia will take us in, despite our differences. We have knowledge, skills, and experience. Those we leave behind would not gain access to Utopia. The list is made. Not an easy task, but necessary. Godspeed us on our journey.",
-				{ listener: 'mara', style: 'radio', verbatim: true, setPiece: 'betrayal' },
+				{
+					listener: 'mara',
+					style: 'radio',
+					verbatim: true,
+					setPiece: 'betrayal',
+					direction:
+						'chilling, smug, patrician betrayal disguised as calm institutional duty; icy arrogance on "We are the best and brightest" and merciless coldness on "The list is made. Not an easy task, but necessary"',
+				},
 			),
 			beat(
 				'05_02_03',
 				'kai',
 				'They didn’t vanish. They made a list—took our soldiers, took our best gear, and left the rest of us out here on the water to rot.',
-				{ listener: 'archive' },
+				{
+					listener: 'archive',
+					swing: 'setback',
+					direction:
+						'raw, explosive fury and bitter disbelief; voice trembling with young righteous rage spitting out "left the rest of us out here on the water to rot"',
+				},
 			),
 		],
 	},
@@ -397,7 +551,13 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'06_01_01',
 				'kai',
 				'Our scouts report that the Hollow Men have raided Europe. We quickly mobilized... but too late. Relocation is gone—and open Door 21.',
-				{ listener: 'mara', verbatim: true, cue: 'scratch' },
+				{
+					listener: 'mara',
+					verbatim: true,
+					cue: 'scratch',
+					swing: 'setback',
+					direction: 'shaken, panicked emergency broadcast; dread cracking into his voice on "and open Door 21"',
+				},
 			),
 		],
 	},
@@ -412,13 +572,24 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'06_02_01',
 				'mara',
 				"Utopia. Can we reach them? Our leaders went there. It's the last true piece of civilization left—secure enough to resist both the plague and the Hollow Men. Perhaps they have a cure? We don't know exactly where Utopia is. Somewhere in the far east. Some think they would help us. Some think they would kill us on sight.",
-				{ listener: 'kai', verbatim: true },
+				{
+					listener: 'kai',
+					verbatim: true,
+					direction:
+						'wary, conflicted yearning mixed with hard-earned paranoia; stark chill on "Some think they would kill us on sight"',
+				},
 			),
 			beat(
 				'06_02_02',
 				'archive',
 				'May 23, Year 14 after the Fall. A new problem—an organized militia has started attacking our supply routes. They seem to be normal humans, but somehow dead inside. Military Director Yona has dubbed them the "Hollow Men" because of their "violent souls."',
-				{ listener: 'mara', style: 'radio', verbatim: true },
+				{
+					listener: 'mara',
+					style: 'radio',
+					verbatim: true,
+					direction:
+						'formal early-era military intelligence dispatch; crisp clinical unease on "dead inside" and stark emphasis on "Hollow Men" and "violent souls"',
+				},
 			),
 		],
 	},
@@ -433,7 +604,13 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'06_03_01',
 				'mara',
 				'New volunteers from the havens have decided to join us. A Sanitation Officer who keeps our closed decks alive, and a veteran Captain who knows every sea lane on the chart.',
-				{ listener: 'kai', verbatim: true, cue: 'doorTear' },
+				{
+					listener: 'kai',
+					verbatim: true,
+					cue: 'doorTear',
+					swing: 'triumph',
+					direction: 'warm, proud relief welcoming badly needed allies; grateful steady strength in her voice',
+				},
 			),
 		],
 	},
@@ -448,7 +625,13 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'07_01_01',
 				'kai',
 				'Our scouts report that the Hollow Men have raided Africa. We quickly mobilized... but too late. Package 7 is breached, and the TOPAZ Experimental Vaccine inside is destroyed.',
-				{ listener: 'mara', verbatim: true, cue: 'scratch' },
+				{
+					listener: 'mara',
+					verbatim: true,
+					cue: 'scratch',
+					swing: 'setback',
+					direction: 'grim, urgent setback call; exasperated anger over losing the TOPAZ vaccine to the raiders',
+				},
 			),
 		],
 	},
@@ -463,19 +646,35 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'07_02_01',
 				'kai',
 				"Satellite towers have started picking up faint broadcast signals. Need to know who is transmitting. We think it's Hollow Men, but there's someone else. Could the Hollow Men be taking orders? Is someone ordering them to spread the plague?",
-				{ listener: 'mara', verbatim: true, cue: 'radioDecode' },
+				{
+					listener: 'mara',
+					verbatim: true,
+					cue: 'radioDecode',
+					direction:
+						'electrified, stunned conspiracy realization leaning over static headphones; rising breathless shock on the final two questions',
+				},
 			),
 			beat(
 				'07_02_02',
 				'mara',
 				"The grid is growing and can't handle Hollow Men spreading the plague. We're prepared to forsake some cities if need be. Would that make us the monsters the world thinks we are?",
-				{ listener: 'kai', style: 'thought', verbatim: true },
+				{
+					listener: 'kai',
+					style: 'thought',
+					verbatim: true,
+					direction: 'heavy, haunted private guilt; low vulnerable ache questioning her own morality in the quiet dark',
+				},
 			),
 			beat(
 				'07_02_03',
 				'tomas',
 				'From the Archives—July, Year 38. Strange to see adults on the havens who never knew the world before. I dream to live on land again. I sometimes dream of fleeing for Utopia. I miss land and dirt. I hear they are close to a cure. Would they share it with our people?',
-				{ listener: 'mara', verbatim: true },
+				{
+					listener: 'mara',
+					verbatim: true,
+					direction:
+						'tender, nostalgic ache of exile; wistful longing on "I miss land and dirt" ending in a fragile, hesitant question',
+				},
 			),
 		],
 	},
@@ -490,7 +689,13 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'08_01_01',
 				'kai',
 				'Our scouts report that the Hollow Men have raided the Middle East. We quickly mobilized... but too late. Package 2 is open, and Renewal is destroyed.',
-				{ listener: 'mara', verbatim: true, cue: 'scratch' },
+				{
+					listener: 'mara',
+					verbatim: true,
+					cue: 'scratch',
+					swing: 'setback',
+					direction: 'urgent, strained field dispatch; tense grit as another region falls behind schedule',
+				},
 			),
 		],
 	},
@@ -505,13 +710,23 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'08_02_01',
 				'kai',
 				'Have finally fully accessed the satellite towers. Starting to monitor different frequencies. Whoever is broadcasting uses multiple channels. Accessing the towers has given us a sense of purpose. We feel invigorated! Spend up to three production units on character abilities right now.',
-				{ listener: 'tomas', verbatim: true, cue: 'radioDecode' },
+				{
+					listener: 'tomas',
+					verbatim: true,
+					cue: 'radioDecode',
+					direction: 'buoyant, fired-up triumph; bright energetic smile in his voice on "We feel invigorated!"',
+				},
 			),
 			beat(
 				'08_02_02',
 				'tomas',
 				'December 19, Year 48. PEARL has stopped reporting. Their last broadcast said they had found what they needed! The sediment cores contained bacteria samples in which they had identified the bacteriophage. We had it! We had a means to a cure. Now they are gone. Sending a team to investigate. They are covered properly to avoid attention.',
-				{ listener: 'kai', verbatim: true },
+				{
+					listener: 'kai',
+					verbatim: true,
+					direction:
+						'passionate scientific euphoria spiking on "We had it! We had a means to a cure!" before crashing into sudden devastated grief on "Now they are gone"',
+				},
 			),
 		],
 	},
@@ -526,7 +741,13 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'08_04_01',
 				'kai',
 				"It's time to start listening. The Frequency Scanner is live—use Monitor at any satellite tower to sweep the bands and crack their codes.",
-				{ listener: 'mara', verbatim: true, cue: 'radioDecode' },
+				{
+					listener: 'mara',
+					verbatim: true,
+					cue: 'radioDecode',
+					swing: 'triumph',
+					direction: 'eager, confident tech specialist flipping the main breaker; crisp excitement and momentum',
+				},
 			),
 		],
 	},
@@ -541,7 +762,13 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'09_01_01',
 				'kai',
 				"We've finally located another lost haven. We still need to get to it, but now, at least, we know where to go. Open Door 65.",
-				{ listener: 'mara', verbatim: true, cue: 'scratch' },
+				{
+					listener: 'mara',
+					verbatim: true,
+					cue: 'scratch',
+					swing: 'triumph',
+					direction: 'relieved, hopeful breakthrough call; bright upward lift after months of setbacks',
+				},
 			),
 		],
 	},
@@ -556,13 +783,23 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'09_02_01',
 				'mara',
 				"PEARL and its possible cure is all we have left. We need this. The year is drawing to a close and this is our last chance. We need to find it. We need to get it. We need to start making a cure. What are Utopia's motives? Are they holding PEARL hostage?",
-				{ listener: 'tomas', verbatim: true },
+				{
+					listener: 'tomas',
+					verbatim: true,
+					direction:
+						'desperate, driving, relentless urgency; hammering every "We need..." with fierce white-knuckle intensity and rising suspicion of Utopia',
+				},
 			),
 			beat(
 				'09_02_02',
 				'tomas',
 				'April 15, Year 44. Two of our havens are gone. Without their supplies, our ability to continue has been severely compromised. I feel the first real tendrils of despair entering my heart. Is someone so depraved that they would let us all die? If we were gone, then what?',
-				{ listener: 'mara', verbatim: true },
+				{
+					listener: 'mara',
+					verbatim: true,
+					direction:
+						'deeply sorrowful, trembling vulnerability; voice heavy with dread and moral horror on "so depraved that they would let us all die?"',
+				},
 			),
 		],
 	},
@@ -578,19 +815,33 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'09_03_01',
 				'chronicler',
 				'September. Every city you sealed away inside Package 6, every infection you thought was behind you—the inoculation is failing.',
-				{ cue: 'wearingOffSnap' },
+				{
+					cue: 'wearingOffSnap',
+					swing: 'setback',
+					direction: 'ice-cold creeping horror snapping into devastating gravity on "the inoculation is failing"',
+				},
 			),
 			beat(
 				'09_03_02',
 				'tomas',
 				'No... the stored samples in Package 6 are breaking down! Pull every Epidemic card from the deck—Step 2 is no longer safe! They are coming back into play!',
-				{ listener: 'mara', setPiece: 'wearingOff' },
+				{
+					listener: 'mara',
+					setPiece: 'wearingOff',
+					direction:
+						'panicked, horrified physician watching containment collapse in real time; breathless gasp on "No..." escalating into frantic alarm',
+				},
 			),
 			beat(
 				'09_03_03',
 				'mara',
 				"Two: It's wearing off. Draw a random Infection card from Package 6, strip every supply cube in that city, and throw it back into the discard pile. And worse—Hollow Men are now hitting our starting cities during setup. If we run out of figures, we lose.",
-				{ listener: 'tomas', verbatim: true },
+				{
+					listener: 'tomas',
+					verbatim: true,
+					direction:
+						'steel-nerved commander shouting orders over a collapsing bridge; grim razor-sharp urgency landing heavily on "If we run out of figures, we lose"',
+				},
 			),
 		],
 	},
@@ -605,7 +856,13 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'10_01_01',
 				'mara',
 				'We led a desperate strike force to find a path to Asia. Found one at great cost. Open Package 3, destroy Biodome Prototype, and mark a scar on one of our crew.',
-				{ listener: 'kai', verbatim: true, cue: 'exposureScar' },
+				{
+					listener: 'kai',
+					verbatim: true,
+					cue: 'exposureScar',
+					swing: 'setback',
+					direction: "bruised, bloodied exhaustion; somber pain over paying for the breach in her own crew's flesh",
+				},
 			),
 		],
 	},
@@ -620,13 +877,23 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'10_02_01',
 				'mara',
 				'So far from our homes. So much chaos. So much hatred toward us. Even still... not sure how much longer we can do this. Not sure humanity is worth it. Still, we have found a way to use the satellite towers against the Hollow Men. If we lure them onto our havens, we think we can persuade some of them to join our cause.',
-				{ listener: 'tomas', verbatim: true },
+				{
+					listener: 'tomas',
+					verbatim: true,
+					direction:
+						'bone-deep exhaustion teetering on heartbreak ("Not sure humanity is worth it"), then pulling herself back up with stubborn gritty ingenuity',
+				},
 			),
 			beat(
 				'10_02_02',
 				'tomas',
 				'From the Archives—October, Year 1. Five months on these "havens." I understand why, but I still miss home. I hope my children will soon return to the home we left. I left a note there for them to read when we return. For now, they cry every night, but soon all will feel normal... as normal as it can be.',
-				{ listener: 'mara', verbatim: true },
+				{
+					listener: 'mara',
+					verbatim: true,
+					direction:
+						'heart-wrenching, soft, tear-brimmed tenderness; gentle paternal grief knowing those children never went home',
+				},
 			),
 		],
 	},
@@ -641,7 +908,13 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'10_03_01',
 				'kai',
 				'We hijacked their channel. Broadcast Misinformation is online—pull Hollow Men onto three different havens and we can break their conditioning.',
-				{ listener: 'mara', cue: 'radioDecode' },
+				{
+					listener: 'mara',
+					cue: 'radioDecode',
+					swing: 'triumph',
+					direction:
+						"daring, electric, reckless grin in his voice; sharp triumphant momentum turning the enemy's own weapon around",
+				},
 			),
 		],
 	},
@@ -656,7 +929,13 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'11_01_01',
 				'mara',
 				"We've gotten them to turn, but at great cost. Open Door 17—and two of our characters take scars.",
-				{ listener: 'vey', verbatim: true, cue: 'exposureScar' },
+				{
+					listener: 'vey',
+					verbatim: true,
+					cue: 'exposureScar',
+					swing: 'setback',
+					direction: 'grim, battle-worn endurance; somber heavy breath acknowledging the steep bloody price',
+				},
 			),
 		],
 	},
@@ -671,13 +950,23 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'11_02_01',
 				'mara',
 				"This is our month. Every November, Utopia releases new Hollow Men into the world. For two days, they are distracted. Our recon into the city needs to happen this month or we'll miss our opportunity. We don't know what we'll find in there or what we'll find at PEARL. We need to be prepared for anything.",
-				{ listener: 'tomas', verbatim: true },
+				{
+					listener: 'tomas',
+					verbatim: true,
+					direction:
+						'steel-sharp heist briefing before the storm; focused intensity and taut readiness on "This is our month"',
+				},
 			),
 			beat(
 				'11_02_02',
 				'tomas',
 				"June 18, Year 10. Ten years upon the seas. Five years toward a cure. No one knew the long-term effects of COdA. Our minds are ours again, but our skin is forever faded. Even our children are born faded. These havens proved to be a godsend when the plague struck. Our prison became humanity's last hope.",
-				{ listener: 'mara', verbatim: true },
+				{
+					listener: 'mara',
+					verbatim: true,
+					direction:
+						'deep bittersweet pride and quiet wonder; swelling with noble solemnity on "Our prison became humanity\'s last hope"',
+				},
 			),
 		],
 	},
@@ -692,7 +981,14 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'11_05_01',
 				'kai',
 				"The Hollow Men gave us inside information to help us access Utopia. We've finalized our plan. Four steps in Shanghai—hidden entrance, access key, distraction, containment. Check all four boxes and we crack Utopia wide open.",
-				{ listener: 'vey', verbatim: true, cue: 'cardFlip' },
+				{
+					listener: 'vey',
+					verbatim: true,
+					cue: 'cardFlip',
+					swing: 'triumph',
+					direction:
+						'fast, crisp, fired-up tactical excitement laying out the four steps of the breach with infectious confidence',
+				},
 			),
 		],
 	},
@@ -707,7 +1003,14 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'12_01_01',
 				'vey',
 				'The new Hollow Men turned on Utopia, rising up to aid our cause! Open Package 8—the gates are breached, though Riot Control is lost in the fighting.',
-				{ listener: 'mara', verbatim: true, cue: 'scratch' },
+				{
+					listener: 'mara',
+					verbatim: true,
+					cue: 'scratch',
+					swing: 'triumph',
+					direction:
+						'fierce, raspy vindication surging through battle smoke; gravelly triumph mixed with grim acknowledgment of the firefight',
+				},
 			),
 		],
 	},
@@ -722,13 +1025,24 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'12_02_01',
 				'mara',
 				"Our supplies are almost gone. We have come so close. We've reconnected the world. Now we hope to cure it. We must reach Lake Baikal, find the PEARL Lab, get whatever cure they have created, and bring it to Johannesburg. We won't have this opportunity again. If we don't do it this month, then all is lost.",
-				{ listener: 'amaya', verbatim: true },
+				{
+					listener: 'amaya',
+					verbatim: true,
+					direction:
+						'all-or-nothing final stand speech; voice tight with awe at how far they came, rising to desperate, unbreakable finality on "then all is lost"',
+				},
 			),
 			beat(
 				'12_02_02',
 				'archive',
 				'December, Year 70. Final note before the exodus to Utopia. The havens failed. The labs did not do their jobs. We did not do ours. We had such hopes that the Faded could hold the world together. But the havens end "not with a bang, but with a whimper." I feel pity for those we leave behind. To Utopia we march. To salvation.',
-				{ listener: 'mara', style: 'radio', verbatim: true },
+				{
+					listener: 'mara',
+					style: 'radio',
+					verbatim: true,
+					direction:
+						'chilling tragic irony—hollow patrician condescension and pompous self-delusion on "To Utopia we march. To salvation" knowing they marched straight to their executions',
+				},
 			),
 		],
 	},
@@ -744,7 +1058,12 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'12_05_01',
 				'chronicler',
 				"It's over. Seventy-one years on the sea, twelve desperate months across a broken world. The fate of humanity was in your hands.",
-				{ verbatim: true, setPiece: 'finalReckoning' },
+				{
+					verbatim: true,
+					setPiece: 'finalReckoning',
+					direction:
+						'hushed, monumental endgame awe; long heavy exhale on "It\'s over" with sweeping reverence for the whole year\'s journey',
+				},
 			),
 		],
 	},
@@ -760,13 +1079,25 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'12_06_01',
 				'mara',
 				'We have failed to save our people. Without the supplies and the sample, the Faded living in the havens will die. We did not choose to have this disease. We shall soon be gone. Only the non-Faded humans of Utopia will be left to repopulate the earth.',
-				{ listener: 'tomas', verbatim: true, cue: 'defeat', setPiece: 'finalReckoning' },
+				{
+					listener: 'tomas',
+					verbatim: true,
+					setPiece: 'finalReckoning',
+					swing: 'setback',
+					direction:
+						'shattered, quiet tragic dignity; raw grief and quiet heartbreak on "We did not choose to have this disease"',
+				},
 			),
 			beat(
 				'12_06_02',
 				'tomas',
 				'If you are reading this, we want you to know that we, the Faded, were not monsters; we were people. Our time was brief and we inadvertently brought much pain to the world. Please remember us.',
-				{ listener: 'mara', verbatim: true },
+				{
+					listener: 'mara',
+					verbatim: true,
+					direction:
+						'devastating, tear-choked final testament left in a bottle; trembling tender plea on "we were people" fading softly on "Please remember us"',
+				},
 			),
 		],
 	},
@@ -782,13 +1113,25 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'12_07_01',
 				'amaya',
 				"The sample has been extracted from the carrier; we will always remember their sacrifice. Production will start within days. Utopia's plan of exterminating us is over.",
-				{ listener: 'mara', verbatim: true, cue: 'victory', setPiece: 'finalReckoning' },
+				{
+					listener: 'mara',
+					verbatim: true,
+					setPiece: 'finalReckoning',
+					swing: 'triumph',
+					direction:
+						'reverent solemn grief for the carrier\'s sacrifice swelling into radiant, fierce triumph on "Utopia\'s plan of exterminating us is over"',
+				},
 			),
 			beat(
 				'12_07_02',
 				'mara',
 				'The world belongs to Faded and non-Faded now. They waited for us to die, but we survived. We are here to stay.',
-				{ listener: 'amaya', verbatim: true },
+				{
+					listener: 'amaya',
+					verbatim: true,
+					direction:
+						'soaring, tear-bright, unbreakable victory; fierce proud crescendo landing like thunder on "We are here to stay"',
+				},
 			),
 		],
 	},
@@ -803,7 +1146,13 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'pkg1_01',
 				'kai',
 				'It started here, in North America. After COdA, there was chaos. Then the plague hit. The world could not handle back-to-back pandemics. We need to reconnect our supply lines, watch for any sign of other havens, and find more supplies. Perhaps our leaders went here? Too many questions.',
-				{ listener: 'mara', verbatim: true, cue: 'crateOpen' },
+				{
+					listener: 'mara',
+					verbatim: true,
+					cue: 'crateOpen',
+					direction:
+						'awed, restless young scout stepping ashore into history; sober reflection turning brisk and puzzled on "Too many questions"',
+				},
 			),
 		],
 	},
@@ -819,13 +1168,24 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'pkg2_01',
 				'chronicler',
 				'The fog parts over the Middle East—and for the first time, the shadows step onto the board.',
-				{ cue: 'hollowDrop', setPiece: 'hollowMenArrive' },
+				{
+					cue: 'hollowDrop',
+					setPiece: 'hollowMenArrive',
+					swing: 'setback',
+					direction:
+						'chilling, low, razor-taut theatrical reveal; slow ominous drawl on "the shadows step onto the board"',
+				},
 			),
 			beat(
 				'pkg2_02',
 				'kai',
 				"This region is sinister. The locals swear that the Hollow Men who roam the area transport rats and vermin and release them into cities. There are satellite towers here, picking up faint transmissions from... someone. By August we think we'll be able to fine-tune our equipment and start listening in.",
-				{ listener: 'mara', verbatim: true },
+				{
+					listener: 'mara',
+					verbatim: true,
+					direction:
+						'unnerved, whispering over his shoulder in hostile territory; creepy disgust on the rats, intrigued suspense on "from... someone"',
+				},
 			),
 		],
 	},
@@ -840,13 +1200,23 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'pkg3_01',
 				'mara',
 				"We have now Reconned East Asia. We didn't expect this. We thought maybe the world still existed here. Instead we found the people of the region huddled in shelters, living in fear of the walled-off Utopia. The Hollow Men come from there. Every November a new wave is released to terrorize the planet.",
-				{ listener: 'kai', verbatim: true, cue: 'crateOpen' },
+				{
+					listener: 'kai',
+					verbatim: true,
+					cue: 'crateOpen',
+					direction:
+						'shaken, horrified disillusionment as the myth of Utopia shatters; grim cold dread on "The Hollow Men come from there"',
+				},
 			),
 			beat(
 				'pkg3_02',
 				'kai',
 				"We've started developing a plan to get into Utopia in November, but we need inside information. We need to get some Hollow Men to defect to our side.",
-				{ listener: 'mara', verbatim: true },
+				{
+					listener: 'mara',
+					verbatim: true,
+					direction: 'bold, intense, audacious tactical pitch; energized urgency despite the wild odds',
+				},
 			),
 		],
 	},
@@ -861,7 +1231,13 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'pkg4_01',
 				'kai',
 				'We found Europe struggling as much as the rest of the world, but, surprisingly, there are some old military bases with functioning aircraft. We can adjust our supply centers to include a landing strip, and the havens already have old runways we could put back in use.',
-				{ listener: 'mara', verbatim: true, cue: 'crateOpen' },
+				{
+					listener: 'mara',
+					verbatim: true,
+					cue: 'crateOpen',
+					swing: 'triumph',
+					direction: 'delighted surprise breaking into bright excitement over discovering working aircraft',
+				},
 			),
 		],
 	},
@@ -876,7 +1252,12 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'pkg5_01',
 				'tomas',
 				"Labs. There were laboratories looking for a cure. Things didn't seem to be going well; our leaders were tight-lipped on the subject. Common rumor on the havens is that they are all far to the south. Perhaps one is here? Is it still working? Have they made any advancements?",
-				{ listener: 'mara', verbatim: true, cue: 'crateOpen' },
+				{
+					listener: 'mara',
+					verbatim: true,
+					cue: 'crateOpen',
+					direction: 'eager scholarly curiosity rising steadily through the three hopeful questions at the end',
+				},
 			),
 		],
 	},
@@ -892,13 +1273,25 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'pkg6_01',
 				'tomas',
 				'Eerie. Just like our homes. Same design... same layout. Is this our future—empty cities rusting into the ocean?',
-				{ listener: 'mara', verbatim: true, cue: 'inoculationSafe', setPiece: 'ghostHaven' },
+				{
+					listener: 'mara',
+					verbatim: true,
+					cue: 'inoculationSafe',
+					setPiece: 'ghostHaven',
+					direction: 'hushed, awestruck, chilled to the bone walking through an empty mirror of his own home',
+				},
 			),
 			beat(
 				'pkg6_02',
 				'tomas',
 				'Searching for a few days revealed some breakthroughs—portable lab technology enabling supplies to be generated in the field, and experimental medicine to inoculate populations. These cities will remain inoculated for months—buying us some time—before it slowly wears off. Plus fifteen supply cubes in the hold.',
-				{ listener: 'mara', verbatim: true },
+				{
+					listener: 'mara',
+					verbatim: true,
+					swing: 'triumph',
+					direction:
+						'wondrous scientific exhilaration and huge relief; subtle ominous hesitation on "before it slowly wears off", then joyful lift on the 15 supply cubes',
+				},
 			),
 		],
 	},
@@ -913,7 +1306,14 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'pkg7_01',
 				'kai',
 				'There is infestation here; vermin carrying the plague run through the cities. The abandonment of supply lines by our haven leadership has driven much of the world to the brink. Old satellite towers dot the landscape—we can use them to broadcast information across the grid.',
-				{ listener: 'tomas', verbatim: true, cue: 'crateOpen' },
+				{
+					listener: 'tomas',
+					verbatim: true,
+					cue: 'crateOpen',
+					swing: 'setback',
+					direction:
+						"grim anger at leadership's abandonment softening into sharp tactical spark when spotting the satellite towers",
+				},
 			),
 		],
 	},
@@ -929,19 +1329,35 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'pkg8_01',
 				'chronicler',
 				'The walls of Utopia finally part. Behind the gleaming myth of salvation waits the ugliest truth of the last seventy years.',
-				{ cue: 'utopiaCorrupt', setPiece: 'utopiaHell' },
+				{
+					cue: 'utopiaCorrupt',
+					setPiece: 'utopiaHell',
+					direction:
+						'dark, seething, theatrical dread unmasking a monstrous lie; heavy contempt on "the ugliest truth"',
+				},
 			),
 			beat(
 				'pkg8_02',
 				'mara',
 				"We have accessed Utopia. But this is no utopia... this is hell on Earth. Utopia's mission? Kill the Faded and the people we are helping, and then repopulate the world with uninfected humans. Every year they expel males to keep their population down. These Hollow Men are tasked to destroy us in order to be allowed home.",
-				{ listener: 'vey', verbatim: true },
+				{
+					listener: 'vey',
+					verbatim: true,
+					swing: 'setback',
+					direction:
+						'revulsion, horrified outrage, and burning fury; spitting out "this is hell on Earth" with raw disgust and bitter heartbreak for the Hollow Men',
+				},
 			),
 			beat(
 				'pkg8_03',
 				'vey',
 				"What's more, Utopia has had the PEARL laboratory under armed guard for thirty years. Utopia has been holding the cure from the world. They were just waiting for us to die.",
-				{ listener: 'mara', verbatim: true },
+				{
+					listener: 'mara',
+					verbatim: true,
+					direction:
+						'low, raspy, venomous betrayal; voice shaking with dark quiet rage on "They were just waiting for us to die"',
+				},
 			),
 		],
 	},
@@ -957,13 +1373,21 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'doorA_01',
 				'chronicler',
 				'Population zero. The last lamps on the shoreline go out. The city is forsaken—and the plague claims its empty streets.',
-				{ cue: 'doorTear', setPiece: 'forsakenCities' },
+				{
+					cue: 'doorTear',
+					setPiece: 'forsakenCities',
+					swing: 'setback',
+					direction: 'funereal, stark, echoing sorrow; heavy pause after "Population zero" as a light dies on the map',
+				},
 			),
 			beat(
 				'doorA_02',
 				'mara',
 				'Mark it forsaken and infested. Nothing works there now except Drive or Ferry—and bringing it back will cost double at game end.',
-				{ listener: 'tomas' },
+				{
+					listener: 'tomas',
+					direction: "hard, tight-lipped grief forced into clipped operational command so she doesn't break down",
+				},
 			),
 		],
 	},
@@ -978,7 +1402,13 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'door11_01',
 				'mara',
 				'We found a locked storage room containing supplies that will help us for the rest of the year. This has given us great hope. Fifteen more supply cubes into the stockpile—now and every month ahead—plus four actions right now!',
-				{ listener: 'kai', verbatim: true, cue: 'victory' },
+				{
+					listener: 'kai',
+					verbatim: true,
+					swing: 'triumph',
+					direction:
+						'exuberant, breathless relief and genuine joy; laughing through exhaustion at the massive supply windfall',
+				},
 			),
 		],
 	},
@@ -994,19 +1424,36 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'door17_01',
 				'vey',
 				'They told us to fear you. Told us you were monsters from the old plague—that you deserved death. And here you are, feeding the cities Utopia left to burn.',
-				{ listener: 'mara', cue: 'doorTear', setPiece: 'fadedTruth' },
+				{
+					listener: 'mara',
+					cue: 'doorTear',
+					setPiece: 'fadedTruth',
+					swing: 'triumph',
+					direction:
+						'bruised, raspy, humbled awe; voice cracking with bitter awakening as decades of propaganda collapse in front of him',
+				},
 			),
 			beat(
 				'door17_02',
 				'tomas',
 				'We are, after all, the Faded—quarantined to the havens after COdA. The vaccine created seventy years ago keeps our minds normal; it is only our skin that is forever changed. Seventy years of helping humanity and they still hate us.',
-				{ listener: 'vey', verbatim: true },
+				{
+					listener: 'vey',
+					verbatim: true,
+					direction:
+						'quiet, dignified sorrow carrying seventy years of unjust stigma; deep ache on "and they still hate us"',
+				},
 			),
 			beat(
 				'door17_03',
 				'mara',
 				'Some of our fellow Faded are disgusted we brought Hollow Men onto the havens and have left us. We think this was the right move. Open Door 58—we can now build a plan to get into Utopia.',
-				{ listener: 'vey', verbatim: true },
+				{
+					listener: 'vey',
+					verbatim: true,
+					direction:
+						'resolute, unapologetic conviction; sad over losing crewmates yet iron-steady forging the alliance against Utopia',
+				},
 			),
 		],
 	},
@@ -1021,7 +1468,14 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'door18_01',
 				'amaya',
 				"Finally, someone from the havens. Have you found our leaders? They've been gone since the summit. We stopped broadcasting on satellite towers since it attracted the Hollow Men. I'm continuing the work of my grandfather—we made a breakthrough at OPAL that can help, and Lake Baikal is where PEARL stood.",
-				{ listener: 'tomas', verbatim: true, cue: 'doorTear' },
+				{
+					listener: 'tomas',
+					verbatim: true,
+					cue: 'doorTear',
+					swing: 'triumph',
+					direction:
+						'breathless joyful relief on "Finally, someone from the havens!", shifting into warm proud dedication speaking of her grandfather\'s cure work',
+				},
 			),
 		],
 	},
@@ -1036,7 +1490,14 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'door19_01',
 				'amaya',
 				'Found TOPAZ lab in Wellington. Cut off from the rest of the world for nearly fifty years, they were surprised to see us! No haven presence, no Hollow Men, and no trace of the plague. One brave Vector Control Expert agreed to come with us—and confirmed the location of PEARL in Lake Baikal.',
-				{ listener: 'mara', verbatim: true, cue: 'doorTear' },
+				{
+					listener: 'mara',
+					verbatim: true,
+					cue: 'doorTear',
+					swing: 'triumph',
+					direction:
+						'amazed, warm wonder discovering an untouched sanctuary at the edge of the earth; bright admiring pride in the volunteer',
+				},
 			),
 		],
 	},
@@ -1051,7 +1512,14 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'door20_01',
 				'amaya',
 				"Finally, someone from the havens. We made a breakthrough that should help, and I know the other labs have as well. Some of our scientists left to visit Lake Baikal, since that's where PEARL—the primary lab—was located. Although no one has heard from them for decades now...",
-				{ listener: 'tomas', verbatim: true, cue: 'doorTear' },
+				{
+					listener: 'tomas',
+					verbatim: true,
+					cue: 'doorTear',
+					swing: 'triumph',
+					direction:
+						'warm hopeful greeting trailing softly into lingering worry on "no one has heard from them for decades now..."',
+				},
 			),
 		],
 	},
@@ -1067,13 +1535,22 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'door21_01',
 				'chronicler',
 				'Smoke rises over the heart of Europe. Frankfurt is gone—burned off the chart, its cards reduced to ash.',
-				{ cue: 'cityDestroyed', setPiece: 'frankfurtDestroyed' },
+				{
+					cue: 'cityDestroyed',
+					setPiece: 'frankfurtDestroyed',
+					swing: 'setback',
+					direction: 'stark, devastating catastrophe; grim solemn thunder on "Frankfurt is gone—burned off the chart"',
+				},
 			),
 			beat(
 				'door21_02',
 				'kai',
 				'Frankfurt no longer exists on the map and cannot become part of the grid. Destroy every Frankfurt Player and Infection card. No supply line may ever cross that crater.',
-				{ listener: 'mara', verbatim: true },
+				{
+					listener: 'mara',
+					verbatim: true,
+					direction: 'numb, horrified shock forcing out the tactical reality; cold quiet dread on "that crater"',
+				},
 			),
 		],
 	},
@@ -1089,13 +1566,27 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'door22_01',
 				'amaya',
 				"We've found PEARL lab in Lake Baikal! Scientists are here, isolated by Utopia. They have samples of a cure—we need to get it to JADE. Utopia patrols are everywhere. It's too dangerous to carry it in the open.",
-				{ listener: 'mara', verbatim: true, cue: 'vialClink', setPiece: 'selfInfect' },
+				{
+					listener: 'mara',
+					verbatim: true,
+					cue: 'vialClink',
+					setPiece: 'selfInfect',
+					swing: 'triumph',
+					direction: 'ecstatic breakthrough instantly colliding with whispered mortal danger as patrols close in',
+				},
 			),
 			beat(
 				'door22_02',
 				'tomas',
 				"We need to inject a massive dose of the sample into ourselves—carry it in our own bodies. A dose that large will certainly kill the carrier. We have exactly four doses. Once they're gone, they're gone.",
-				{ listener: 'amaya', verbatim: true, cue: 'exposureScar' },
+				{
+					listener: 'amaya',
+					verbatim: true,
+					cue: 'exposureScar',
+					swing: 'setback',
+					direction:
+						'grave, trembling physician confronting an unthinkable sacrifice; quiet horror and solemn weight on "will certainly kill the carrier" and "Once they\'re gone, they\'re gone"',
+				},
 			),
 		],
 	},
@@ -1110,7 +1601,13 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'door35_01',
 				'kai',
 				"Triangulation complete! We've picked up chatter from the Hollow Men. They primarily use three frequencies: 9.2, 9.31, and 11.88. Once the satellite towers are fully operational around August, we can listen right in.",
-				{ listener: 'mara', verbatim: true, cue: 'radioDecode' },
+				{
+					listener: 'mara',
+					verbatim: true,
+					cue: 'radioDecode',
+					swing: 'triumph',
+					direction: 'triumphant, crisp radio-hacker thrill; punchy precision rattling off the three frequencies',
+				},
 			),
 		],
 	},
@@ -1125,7 +1622,13 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'door46_01',
 				'amaya',
 				'A second-generation scientist fighting against world-wide diseases. JADE was built to mass-produce a cure—our equipment still runs. Bring us a supply center and the sample from PEARL, and we can save everyone.',
-				{ listener: 'tomas', verbatim: true, cue: 'doorTear' },
+				{
+					listener: 'tomas',
+					verbatim: true,
+					cue: 'doorTear',
+					swing: 'triumph',
+					direction: 'fierce, luminous pride and ringing hope; inspiring conviction on "and we can save everyone"',
+				},
 			),
 		],
 	},
@@ -1140,7 +1643,13 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'door43_01',
 				'kai',
 				"We've managed to decrypt an important transmission that will help us avoid the Hollow Men. Decryption Key added to our City card improvements!",
-				{ listener: 'mara', verbatim: true, cue: 'radioDecode' },
+				{
+					listener: 'mara',
+					verbatim: true,
+					cue: 'radioDecode',
+					swing: 'triumph',
+					direction: 'crisp, pumped victory call cracking the cipher wide open',
+				},
 			),
 		],
 	},
@@ -1155,7 +1664,13 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'door52_01',
 				'kai',
 				"We have decoded the Hollow Men's transmissions! We now know their patrol routes and can sneak right past them into East Asia—five unique black cards from a supply center in Kolkata!",
-				{ listener: 'mara', verbatim: true, cue: 'radioDecode' },
+				{
+					listener: 'mara',
+					verbatim: true,
+					cue: 'radioDecode',
+					swing: 'triumph',
+					direction: 'electrified eureka excitement; fast jubilant delivery laying out the secret Kolkata route',
+				},
 			),
 		],
 	},
@@ -1171,7 +1686,14 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'search_shanghai_01',
 				'kai',
 				'We found the Haven leaders. Dead. Unburied. Shot outside the walls of Utopia where they petitioned to get in. There were no survivors. Utopia accepts no outsiders. Utopia leaves no survivors.',
-				{ listener: 'mara', verbatim: true, setPiece: 'shanghaiMassacre' },
+				{
+					listener: 'mara',
+					verbatim: true,
+					setPiece: 'shanghaiMassacre',
+					swing: 'setback',
+					direction:
+						'shell-shocked, hollow, breathless horror; stark staccato pauses on "Dead. Unburied." hardening into chilling dread on the final two sentences',
+				},
 			),
 		],
 	},
@@ -1186,7 +1708,12 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'search_atlanta_01',
 				'tomas',
 				"The plague that broke the world started here. A group blew up the CDC, destroying the COdA virus, but releasing a plague that couldn't be stopped. Not sure what prompted this action—or if they knew what would result from it.",
-				{ listener: 'mara', verbatim: true, cue: 'scratch' },
+				{
+					listener: 'mara',
+					verbatim: true,
+					cue: 'scratch',
+					direction: "hushed, haunted awe standing in the blasted ashes of the old world's fatal mistake",
+				},
 			),
 		],
 	},
@@ -1201,7 +1728,13 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'search_mumbai_01',
 				'kai',
 				'Saw one of the Hollow Men down near the water. He was sketching, drawing pictures of a family. Mother. Kids. The father was clearly an image of him. He was crying silently. We kept our distance.',
-				{ listener: 'tomas', style: 'thought', verbatim: true },
+				{
+					listener: 'tomas',
+					style: 'thought',
+					verbatim: true,
+					direction:
+						'soft, hushed, deeply moved whisper; all usual bravado gone, gently stunned by the quiet humanity of his enemy',
+				},
 			),
 		],
 	},
@@ -1216,7 +1749,12 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'search_moscow_01',
 				'kai',
 				'Locals still bitter their leaders left them decades ago for a "Utopia" in the east. A week after their train left, the sky to the east started glowing. They led us to Smolensk to report our findings.',
-				{ listener: 'mara', verbatim: true, cue: 'scratch' },
+				{
+					listener: 'mara',
+					verbatim: true,
+					cue: 'scratch',
+					direction: 'eerie, conspiratorial intrigue; creeping chill on "the sky to the east started glowing"',
+				},
 			),
 		],
 	},
@@ -1231,7 +1769,12 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'search_khartoum_01',
 				'archive',
 				'Posters in the abandoned broadcast facility talk of Utopia, which will keep mankind safe until the plague has passed. It was accepting petitions before its gates closed. Faded were not welcome.',
-				{ listener: 'kai', style: 'radio', verbatim: true },
+				{
+					listener: 'kai',
+					style: 'radio',
+					verbatim: true,
+					direction: 'cold, sterile propaganda readback; icy detached sting landing flatly on "Faded were not welcome"',
+				},
 			),
 		],
 	},
@@ -1246,7 +1789,14 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'search_santiago_01',
 				'tomas',
 				"This is a town haunted by despair. A surge of refugees overwhelmed the city's resources. Plague is rampant. Must not stay.",
-				{ listener: 'mara', verbatim: true, cue: 'exposureScar' },
+				{
+					listener: 'mara',
+					verbatim: true,
+					cue: 'exposureScar',
+					swing: 'setback',
+					direction:
+						'shaken, urgent physician pulling back from an overwhelmed outbreak zone; clipped alarm on "Must not stay"',
+				},
 			),
 		],
 	},
@@ -1261,7 +1811,11 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'search_bogota_01',
 				'mara',
 				'Locals say the haven off the coast was abandoned decades ago. Haven staff fled to Bogotá, but found no solace due to their appearance. We moved on without comment.',
-				{ listener: 'tomas', verbatim: true },
+				{
+					listener: 'tomas',
+					verbatim: true,
+					direction: 'stony, restrained hurt; quiet dignity hiding old anger on "We moved on without comment"',
+				},
 			),
 		],
 	},
@@ -1276,7 +1830,11 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'search_riyadh_01',
 				'kai',
 				'Hollow Men have headquarters here. The whole city lives in fear of them. They come from Asia and new members appear every year in November. We must tread carefully. We are heading into darkness.',
-				{ listener: 'mara', verbatim: true },
+				{
+					listener: 'mara',
+					verbatim: true,
+					direction: 'taut, low, stealthy scout recon; hushed dread gathering on "We are heading into darkness"',
+				},
 			),
 		],
 	},
@@ -1291,7 +1849,12 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'search_ba_01',
 				'tomas',
 				'Found OPAL laboratory, one of four labs seeking a cure! Someone at the lab has offered to join us—open Doors 18 and 20!',
-				{ listener: 'amaya', verbatim: true, cue: 'victory' },
+				{
+					listener: 'amaya',
+					verbatim: true,
+					swing: 'triumph',
+					direction: 'joyful, breathless medical triumph; warm bright relief announcing the first surviving cure lab',
+				},
 			),
 		],
 	},
@@ -1306,7 +1869,13 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				'search_jhb_01',
 				'amaya',
 				'Found JADE laboratory, mostly abandoned—there is one holdout who offered to join us. The production equipment is still functional. Bring a supply center and a sample to start production.',
-				{ listener: 'mara', verbatim: true, cue: 'victory' },
+				{
+					listener: 'mara',
+					verbatim: true,
+					swing: 'triumph',
+					direction:
+						'determined, thrilled scientific discovery; steady passionate hope on "still functional" and "start production"',
+				},
 			),
 		],
 	},
@@ -1398,7 +1967,7 @@ export function unlockedStoryScenes(campaign: Campaign): StoryScene[] {
 	return out;
 }
 
-/** Every spoken beat across the whole game — used by scripts/gen-voices.ts to synthesize ElevenLabs audio. */
+/** Every spoken beat across the whole game — used by scripts/gen-voices.ts to synthesize Google Gemini TTS audio. */
 export function allVoiceBeats(): { sceneId: string; beat: StoryBeat }[] {
 	const list: { sceneId: string; beat: StoryBeat }[] = [];
 	for (const scene of Object.values(STORY_SCENES)) {

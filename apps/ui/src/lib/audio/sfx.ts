@@ -769,30 +769,3 @@ export function sfxUiClick() {
 		q: 2.5,
 	});
 }
-
-/** Warm maritime ship-bell harmonic on victory or somber chord on defeat. */
-export function sfxOutcome(won: boolean) {
-	const g = activeAudio();
-	if (!g) return;
-	const t = g.ctx.currentTime;
-	const notes = won ? [293.66, 369.99, 440.0, 587.33] : [220.0, 207.65, 164.81, 110.0];
-	notes.forEach((freq, idx) => {
-		const at = t + idx * (won ? 0.14 : 0.24);
-		const osc = g.ctx.createOscillator();
-		osc.type = won ? 'triangle' : 'sawtooth';
-		osc.frequency.setValueAtTime(freq, at);
-		const lp = g.ctx.createBiquadFilter();
-		lp.type = 'lowpass';
-		lp.frequency.value = won ? 1900 : 620;
-		const env = g.ctx.createGain();
-		env.gain.setValueAtTime(0.0001, at);
-		env.gain.linearRampToValueAtTime(won ? 0.11 : 0.09, at + 0.05);
-		env.gain.exponentialRampToValueAtTime(0.0001, at + 2.2);
-		osc.connect(lp);
-		lp.connect(env);
-		env.connect(g.sfx);
-		env.connect(g.hullReverb);
-		osc.start(at);
-		osc.stop(at + 2.3);
-	});
-}

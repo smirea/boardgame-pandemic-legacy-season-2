@@ -6,7 +6,9 @@
 	import AudioMenu from '#lib/audio/AudioMenu.svelte';
 	import { bindAudioUnlock } from '#lib/audio/engine.ts';
 	import { ambientMusic } from '#lib/audio/music.ts';
+	import { tensionOf } from '#lib/audio/score.ts';
 	import { sfxCardDraw, sfxCardFlip, sfxCrateOpen, sfxDoorTear } from '#lib/audio/sfx.ts';
+	import { campaignTone } from '#lib/audio/tones.ts';
 	import LegacyCard from '#lib/cards/LegacyCard.svelte';
 	import Crate from '#lib/hud/Crate.svelte';
 	import DossierDoor from '#lib/hud/DossierDoor.svelte';
@@ -110,15 +112,19 @@
 	onMount(() => bindAudioUnlock());
 
 	$effect(() => {
+		if (!musicOn) {
+			ambientMusic.stop();
+			return;
+		}
 		ambientMusic.update({
-			active: musicOn,
-			incidents: step.audio.incidents,
-			epidemics: step.audio.epidemics,
-			month: step.audio.month,
-			hollowPresent: step.audio.hollowPresent,
-			inoculationSafe: step.audio.inoculationSafe,
-			wearingOff: step.audio.wearingOff,
-			storyOpen: theaterOpen,
+			tone: campaignTone(step.campaign),
+			tension: tensionOf(step.audio.incidents, step.audio.epidemics),
+			occupation: null,
+			sea: 0.85,
+			alarm: false,
+			hollow: step.audio.hollowPresent,
+			safe: step.audio.inoculationSafe && !step.audio.wearingOff,
+			hush: theaterOpen,
 		});
 	});
 
@@ -347,7 +353,7 @@
 									{scene.beats.length}
 									{scene.beats.length === 1 ? 'beat' : 'beats'}
 									{#if voicedBeatsInScene > 0}
-										· {voicedBeatsInScene}/{scene.beats.length} ElevenLabs studio voiced
+										· {voicedBeatsInScene}/{scene.beats.length} studio voiced
 									{/if}
 									{#if scene.setPiece}
 										· Includes animated set-piece
