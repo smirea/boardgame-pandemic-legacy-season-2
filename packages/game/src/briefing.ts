@@ -70,6 +70,17 @@ const HEADING = {
 
 export type BriefedUnlock = Extract<Unlock, { t: keyof typeof HEADING }>;
 
+const EVENT_HEADING = {
+	rationed: 'Rationed Events',
+	unrationed: 'Unrationed Events',
+	permanent: HEADING.event,
+} as const;
+
+/** The heading an unlock is grouped under. Events group by how they are played, so the Rationed Events stand together. */
+export function unlockHeading(unlock: BriefedUnlock): string {
+	return unlock.t === 'event' ? EVENT_HEADING[unlock.mode] : HEADING[unlock.t];
+}
+
 export type BriefingSection =
 	| { t: 'card'; title: string; text: string | null; from: BriefingSource }
 	| { t: 'group'; heading: string; items: { unlock: BriefedUnlock; text: string }[] };
@@ -85,7 +96,7 @@ export function briefingSections(briefing: BriefingEntry[]): BriefingSection[] {
 			sections.push(entry);
 			continue;
 		}
-		const heading = HEADING[entry.unlock.t];
+		const heading = unlockHeading(entry.unlock);
 		let group = groups.get(heading);
 		if (!group) {
 			group = { t: 'group', heading, items: [] };

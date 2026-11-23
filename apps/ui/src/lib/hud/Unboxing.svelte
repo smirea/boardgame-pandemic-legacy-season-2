@@ -1,31 +1,24 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { openings, pack, tablePlayers } from '@repo/game';
-	import type {
-		BriefedUnlock,
-		BriefingEntry,
-		Campaign,
-		Command,
-		LegacyCardDef,
-		Opening,
-		PlayerId,
-		Table,
-	} from '@repo/game';
+	import type { BriefingEntry, Campaign, Command, Opening, PlayerId, Table } from '@repo/game';
 	import { onDestroy, onMount, tick } from 'svelte';
 	import { cubicOut } from 'svelte/easing';
 	import { fade, fly, scale } from 'svelte/transition';
 	import LegacyCard from '#lib/cards/LegacyCard.svelte';
+	import { fitZoom } from '#lib/cards/fit.ts';
 	import { sfxCardDraw, sfxCardFlip, sfxCrateOpen, sfxDoorTear } from '#lib/audio/sfx.ts';
 	import { audioSettings } from '#lib/audio/settings.svelte.ts';
 	import { sceneForOpening } from '#lib/story/script.ts';
 	import StoryStage from '#lib/story/StoryStage.svelte';
-	import BriefPiece from './BriefPiece.svelte';
 	import Briefing from './Briefing.svelte';
 	import Crate from './Crate.svelte';
 	import DossierDoor from './DossierDoor.svelte';
 	import { destination, flyTo } from './flight.ts';
 	import ObjectiveTag from './ObjectiveTag.svelte';
+	import PieceGroups from './PieceGroups.svelte';
 	import RichText from './RichText.svelte';
+	import { groupPieces, legacyCardOf, piecesOf, STOW_ORDER, wings, type Piece } from './unboxPieces.ts';
 	import { keep } from './viewState.ts';
 	import { typing } from '#lib/keys.ts';
 	import VoteButton from './VoteButton.svelte';
@@ -44,73 +37,6 @@
 	};
 
 	let { briefing, campaign, table, player, solo, send, ondeckout, paused = false }: Props = $props();
-
-	type StowClass = 'trash' | 'infectionDeck' | 'playerDeck' | 'map' | 'box' | 'mechanic';
-	const STOW_ORDER: StowClass[] = ['trash', 'infectionDeck', 'playerDeck', 'map', 'box', 'mechanic'];
-
-	function stowInfo(unlock: BriefedUnlock): { cls: StowClass; dest: string[] } | null {
-		switch (unlock.t) {
-			case 'objectives':
-				return null;
-			case 'gather':
-			case 'assemble':
-				return { cls: 'infectionDeck', dest: ['infectionDeck', 'box'] };
-			case 'event':
-				if (unlock.now?.[0] === 'hand') return { cls: 'playerDeck', dest: ['hand', 'playerDeck', 'box'] };
-				if (unlock.mode === 'rationed') return { cls: 'box', dest: ['box'] };
-				return { cls: 'playerDeck', dest: ['playerDeck', 'box'] };
-			case 'epidemicCard':
-				return { cls: 'playerDeck', dest: ['playerDeck', 'box'] };
-			case 'lab':
-			case 'region':
-			case 'route':
-			case 'edge':
-			case 'haven':
-			case 'stockpileBonus':
-			case 'destroy':
-			case 'infest':
-			case 'forsake':
-				return { cls: 'map', dest: ['map'] };
-			case 'action':
-			case 'actions':
-				return { cls: 'mechanic', dest: ['actions', 'box'] };
-			case 'frequencyHint':
-				return { cls: 'mechanic', dest: ['scanner', 'box'] };
-			case 'freeAbilityUnits':
-				return { cls: 'mechanic', dest: ['hand', 'box'] };
-			case 'turningPoint':
-				return { cls: 'mechanic', dest: ['campaignStatus', 'box'] };
-			case 'owedScar':
-				return { cls: 'mechanic', dest: ['box'] };
-			case 'rule':
-				if (unlock.rule === 'storage' || unlock.rule === 'epidemicFromStorage')
-					return { cls: 'mechanic', dest: ['storage', 'box'] };
-				if (unlock.rule === 'hollowSetup') return { cls: 'mechanic', dest: ['hollow', 'infectionDeck', 'box'] };
-				return { cls: 'mechanic', dest: ['campaignStatus', 'box'] };
-			default:
-				return { cls: 'box', dest: ['box'] };
-		}
-	}
-
-	function cardStow(card: LegacyCardDef): { cls: StowClass; put: string } {
-		switch (card.kind) {
-			case 'scanner':
-				return { cls: 'mechanic', put: 'scanner box' };
-			case 'plan':
-			case 'objective':
-				return { cls: 'mechanic', put: 'objectives box' };
-			case 'turningPoint':
-				return { cls: 'mechanic', put: 'campaignStatus box' };
-			case 'epidemic':
-				return { cls: 'playerDeck', put: 'playerDeck box' };
-			case 'event':
-				return { cls: 'box', put: 'playerDeck box' };
-			case 'archive':
-				return { cls: 'box', put: 'legacyDeck box' };
-			default:
-				return { cls: 'trash', put: 'trash' };
-		}
-	}
 
 	const steps = $derived(openings(briefing));
 	const progress = $derived(table.briefing);
@@ -136,7 +62,10 @@
 		const d = drawn;
 		const f = flipped;
 		const cur = current;
-		if (d !== prevDrawn) dismissedStep = null;
+		if (d !== prevDrawn) {
+			dismissedStep = null;
+			tip = null;
+		}
 		if (d > prevDrawn) {
 			sfxCardDraw();
 		} else if (d === prevDrawn && f && !prevFlipped && cur) {
@@ -152,26 +81,35 @@
 		prevDrawn = d;
 		prevFlipped = f;
 	});
-	const settled = $derived(drawn > 1 ? steps.slice(0, drawn - 1).map((step, index) => ({ step, index })) : []);
-	const leftWing = $derived(settled.filter((_, idx) => idx % 2 === 0));
-	const rightWing = $derived(settled.filter((_, idx) => idx % 2 === 1));
+	const laid = $derived(wings(steps.slice(0, Math.max(0, drawn - 1))));
+	const spotlit = $derived(current ? piecesOf(current, drawn - 1) : []);
+	const spotCard = $derived(spotlit.find(placed => placed.piece.t === 'card')?.piece ?? null);
+	const spotGroups = $derived(groupPieces(spotlit.filter(placed => placed.piece.t === 'unlock')));
+
+	let tip = $state<{ text: string; style: string } | null>(null);
+	function showTip(piece: Piece | null, at?: HTMLElement) {
+		if (!piece || !at || !root) {
+			tip = null;
+			return;
+		}
+		const box = root.getBoundingClientRect();
+		const rect = at.getBoundingClientRect();
+		const gap = 10;
+		const width = 320;
+		const x =
+			rect.right + gap + width <= box.right
+				? `left: ${rect.right - box.left + gap}px`
+				: `left: ${Math.max(gap, rect.left - box.left - gap - width)}px`;
+		const y =
+			rect.top - box.top < box.height / 2 ? `top: ${rect.top - box.top}px` : `bottom: ${box.bottom - rect.bottom}px`;
+		tip = { text: piece.tip, style: `${x}; ${y}; width: ${width}px` };
+	}
 
 	const objectives = $derived(pack.objectives.filter(objective => campaign.objectives.includes(objective.id)));
 	const objectiveSteps = $derived(
 		new Set(steps.flatMap((step, index) => (step.items.some(item => item.unlock.t === 'objectives') ? [index] : []))),
 	);
 	const showObjectives = $derived([...objectiveSteps].some(idx => idx < drawn - 1 || (idx === drawn - 1 && flipped)));
-
-	function legacyCardOf(opening: Opening): LegacyCardDef | null {
-		if (opening.from.t === 'legacy') {
-			const id = opening.from.card;
-			return pack.legacyDeck.find(card => card.id === id) ?? null;
-		}
-		if (opening.from.t === 'turningPoint') {
-			return pack.legacyDeck.find(card => card.id === '02-06') ?? null;
-		}
-		return null;
-	}
 
 	const nextDeckCard = $derived.by(() => {
 		const nextStep = steps[drawn];
@@ -272,6 +210,7 @@
 	});
 
 	async function runStow() {
+		tip = null;
 		await tick();
 		if (destroyed) return;
 
@@ -400,264 +339,169 @@
 			ready: progress.ready,
 		}))}
 	>
-		<!-- Top-middle Legacy deck (or package/door pile when no Legacy card is in this briefing) -->
-		<div class="top-dock">
-			{#if hasLegacy && !deckReturned}
-				<button
-					class="deck-pile"
-					class:pulsing={canDraw}
-					class:idle={!canDraw}
-					bind:this={deckEl}
-					disabled={!canDraw && !needsFlip}
-					onclick={step}
-					data-testid="legacy-draw-deck"
-					aria-label={canDraw
-						? `Draw from the Legacy deck (${remaining} left)`
-						: needsFlip
-							? 'Flip the drawn card'
-							: 'Legacy deck'}
-				>
-					<span class="stack">
-						{#if nextDeckCard}
-							<LegacyCard card={nextDeckCard} side="a" size="deck" {campaign} />
-						{:else}
-							<span class="fallback-card">Legacy</span>
-						{/if}
-					</span>
-					<span class="badge">
-						{#if canDraw}
-							Draw · {remaining} left
-						{:else if needsFlip}
-							Flip card
-						{:else}
-							{deckCount} in deck
-						{/if}
-					</span>
-				</button>
-			{:else if !hasLegacy && canDraw && !progress.stowing}
-				{@const next = steps[drawn]}
-				<button
-					class="seal-trigger pulsing"
-					onclick={step}
-					data-testid="legacy-draw-deck"
-					aria-label={`Open ${next?.title ?? 'package'}`}
-				>
-					<span class="seal-icon">
-						{#if next?.seals[0]?.t === 'package'}
-							<Crate id={next.seals[0].id} open={false} />
-						{:else if next?.seals[0]?.t === 'door'}
-							<DossierDoor id={next.seals[0].id} open={false} />
-						{/if}
-					</span>
-					<span class="badge">Click to open · {next?.title}</span>
-				</button>
-			{/if}
-		</div>
-
 		<!-- Main tabletop spread over the map -->
 		<div class="spread">
-			<!-- Left wing of previously drawn & opened items -->
-			<div class="wing left">
-				{#each leftWing as { step: item, index } (index)}
-					{@const cardDef = legacyCardOf(item)}
-					{@const pieces = item.items.filter(entry => entry.unlock.t !== 'objectives')}
-					<div class="scattered" style:--tilt={`${(index % 3) * 2 - 2}deg`} in:fly={{ x: 60, y: -20, duration: 420 }}>
-						<div class="scattered-head">
-							{#if cardDef}
-								{@const stow = cardStow(cardDef)}
-								<span class="mini-card" data-stow-class={stow.cls} data-put={stow.put}>
-									<LegacyCard card={cardDef} side="b" size="thumb" {campaign} />
-								</span>
-							{/if}
-							{#each item.seals as seal, sIdx (`${seal.t}:${seal.id}:${sIdx}`)}
-								<span class="mini-shell {seal.t}" data-stow-class="trash" data-put="trash">
-									{#if seal.t === 'package'}
-										<Crate id={seal.id} open={true} />
-									{:else}
-										<DossierDoor id={seal.id} open={true} />
-									{/if}
-								</span>
-							{/each}
-						</div>
-						{#if pieces.length}
-							<div class="scattered-pieces">
-								{#each pieces as entry, pIdx (pIdx)}
-									{@const stow = stowInfo(entry.unlock)}
-									<div
-										class="piece-chip"
-										class:mechanic={stow?.cls === 'mechanic'}
-										data-stow-class={stow?.cls}
-										data-put={stow?.dest.join(' ')}
-									>
-										<BriefPiece unlock={entry.unlock} {campaign} size="2.2rem" />
-										<span class="chip-label"><RichText text={entry.text} /></span>
-									</div>
-								{/each}
-							</div>
-						{/if}
-					</div>
-				{/each}
+			<div class="wing" {@attach fitZoom()}>
+				<PieceGroups groups={laid.left} {campaign} side="left" ontip={showTip} />
 			</div>
 
-			<!-- Center spotlight: the active card / package / door -->
-			<div class="center">
-				{#if current}
-					{#key drawn}
-						{@const cardDef = legacyCardOf(current)}
-						{@const pieces = current.items.filter(entry => entry.unlock.t !== 'objectives')}
-						<div class="spotlight" in:fromLegacyDeck>
-							<div class="spotlight-top">
-								{#if cardDef}
-									{@const stow = cardStow(cardDef)}
-									<button
-										class="flip-card"
-										class:flipped
-										class:clickable={needsFlip}
-										onclick={() => needsFlip && step()}
-										data-testid="legacy-active-card"
-										data-stow-class={flipped ? stow.cls : undefined}
-										data-put={stow.put}
-										aria-label={needsFlip ? `Flip ${current.title}` : current.title}
-									>
-										<span class="flipper" class:flipped>
-											<span class="card-side front">
-												<LegacyCard card={cardDef} side="a" size="full" {campaign} />
-											</span>
-											<span class="card-side back-face">
-												<LegacyCard card={cardDef} side="b" size="full" {campaign} />
-											</span>
-										</span>
-										{#if needsFlip}
-											<span class="flip-hint">Click to flip</span>
-										{/if}
-									</button>
-								{:else if current.seals.length}
-									<button
-										class="seal-spotlight"
-										class:clickable={needsFlip}
-										onclick={() => needsFlip && step()}
-										data-testid="legacy-active-card"
-										aria-label={needsFlip ? `Open ${current.title}` : current.title}
-									>
-										{#each current.seals as seal, sIdx (`${seal.t}:${seal.id}:${sIdx}`)}
-											<span class="big-shell {seal.t}" data-stow-class={flipped ? 'trash' : undefined} data-put="trash">
-												{#if seal.t === 'package'}
-													<Crate id={seal.id} open={flipped} />
-												{:else}
-													<DossierDoor id={seal.id} open={flipped} tearing={flipped} />
-												{/if}
-											</span>
-										{/each}
-										{#if needsFlip}<span class="flip-hint">Click to open</span>{/if}
-									</button>
+			<!-- The Legacy deck (or the package or door pile when no Legacy card is in this briefing) stands over the spotlight, so the wings have the table's full height. -->
+			<div class="middle">
+				<div class="top-dock">
+					{#if hasLegacy && !deckReturned}
+						<button
+							class="deck-pile"
+							class:pulsing={canDraw}
+							class:idle={!canDraw}
+							bind:this={deckEl}
+							disabled={!canDraw && !needsFlip}
+							onclick={step}
+							data-testid="legacy-draw-deck"
+							aria-label={canDraw
+								? `Draw from the Legacy deck (${remaining} left)`
+								: needsFlip
+									? 'Flip the drawn card'
+									: 'Legacy deck'}
+						>
+							<span class="stack">
+								{#if nextDeckCard}
+									<LegacyCard card={nextDeckCard} side="a" size="deck" {campaign} />
 								{:else}
-									<button
-										class="note-spotlight"
-										class:clickable={needsFlip}
-										onclick={() => needsFlip && step()}
-										data-testid="legacy-active-card"
-										data-stow-class={flipped ? 'trash' : undefined}
-										data-put="trash"
-										aria-label={needsFlip ? `Reveal ${current.title}` : current.title}
-									>
-										<strong>{current.title}</strong>
-										{#if flipped && current.text}<span><RichText text={current.text} /></span>{/if}
-										{#if needsFlip}<span class="flip-hint">Click to reveal</span>{/if}
-									</button>
+									<span class="fallback-card">Legacy</span>
 								{/if}
+							</span>
+							<span class="badge">
+								{#if canDraw}
+									Draw · {remaining} left
+								{:else if needsFlip}
+									Flip card
+								{:else}
+									{deckCount} in deck
+								{/if}
+							</span>
+						</button>
+					{:else if !hasLegacy && canDraw && !progress.stowing}
+						{@const next = steps[drawn]}
+						<button
+							class="seal-trigger pulsing"
+							onclick={step}
+							data-testid="legacy-draw-deck"
+							aria-label={`Open ${next?.title ?? 'package'}`}
+						>
+							<span class="seal-icon">
+								{#if next?.seals[0]?.t === 'package'}
+									<Crate id={next.seals[0].id} open={false} />
+								{:else if next?.seals[0]?.t === 'door'}
+									<DossierDoor id={next.seals[0].id} open={false} />
+								{/if}
+							</span>
+							<span class="badge">Click to open · {next?.title}</span>
+						</button>
+					{/if}
+				</div>
 
-								{#if flipped && cardDef && current.seals.length}
-									<div class="opened-seals" in:scale={{ start: 0.8, duration: 380 }}>
-										{#each current.seals as seal, sIdx (`${seal.t}:${seal.id}:${sIdx}`)}
-											<span class="med-shell {seal.t}" data-stow-class="trash" data-put="trash">
-												{#if seal.t === 'package'}
-													<Crate id={seal.id} open={true} />
+				<!-- Center spotlight: the active card / package / door -->
+				<div class="center" {@attach fitZoom()}>
+					{#if current}
+						{#key drawn}
+							{@const cardDef = legacyCardOf(current)}
+							{@const firstSeal = cardDef ? null : current.seals[0]}
+							{@const moreSeals = cardDef ? current.seals : current.seals.slice(1)}
+							<div class="spotlight" in:fromLegacyDeck>
+								<div class="spotlight-top">
+									{#if cardDef && spotCard}
+										<button
+											class="flip-card"
+											class:flipped
+											class:clickable={needsFlip}
+											onclick={() => needsFlip && step()}
+											data-testid="legacy-active-card"
+											data-stow-class={flipped ? spotCard.stow.cls : undefined}
+											data-put={spotCard.stow.put}
+											aria-label={needsFlip ? `Flip ${current.title}` : current.title}
+										>
+											<span class="flipper" class:flipped>
+												<span class="card-side front">
+													<LegacyCard card={cardDef} side="a" size="full" {campaign} />
+												</span>
+												<span class="card-side back-face">
+													<LegacyCard card={cardDef} side="b" size="full" {campaign} />
+												</span>
+											</span>
+											{#if needsFlip}
+												<span class="flip-hint">Click to flip</span>
+											{/if}
+										</button>
+									{:else if firstSeal}
+										<button
+											class="seal-spotlight"
+											class:clickable={needsFlip}
+											onclick={() => needsFlip && step()}
+											data-testid="legacy-active-card"
+											aria-label={needsFlip ? `Open ${current.title}` : current.title}
+										>
+											<span
+												class="big-shell {firstSeal.t}"
+												data-stow-class={flipped ? 'trash' : undefined}
+												data-put="trash"
+											>
+												{#if firstSeal.t === 'package'}
+													<Crate id={firstSeal.id} open={flipped} />
 												{:else}
-													<DossierDoor id={seal.id} open={true} tearing={true} />
+													<DossierDoor id={firstSeal.id} open={flipped} tearing={flipped} />
 												{/if}
 											</span>
-										{/each}
-									</div>
-								{/if}
-							</div>
-
-							<!-- What came out stands beside the card, never under it, so a full reading fits the table without scrolling. -->
-							<div class="spotlight-side">
-								{#if flipped}
-									<div class="caption-plate" in:fade={{ duration: 240 }}>
-										<h2>{current.title}</h2>
-										{#if current.text && !cardDef}<p><RichText text={current.text} /></p>{/if}
-									</div>
-
-									{#if pieces.length}
-										<ul class="spotlight-pieces">
-											{#each pieces as entry, pIdx (pIdx)}
-												{@const stow = stowInfo(entry.unlock)}
-												<li
-													class="big-piece"
-													class:mechanic={stow?.cls === 'mechanic'}
-													in:fly={{ y: 28, duration: 380, delay: pIdx * 90 }}
-												>
-													<span class="piece-token" data-stow-class={stow?.cls} data-put={stow?.dest.join(' ')}>
-														<BriefPiece unlock={entry.unlock} {campaign} size="2.8rem" />
-													</span>
-													<p><RichText text={entry.text} /></p>
-												</li>
-											{/each}
-										</ul>
+											{#if needsFlip}<span class="flip-hint">Click to open</span>{/if}
+										</button>
+									{:else}
+										<button
+											class="note-spotlight"
+											class:clickable={needsFlip}
+											onclick={() => needsFlip && step()}
+											data-testid="legacy-active-card"
+											data-stow-class={flipped ? 'trash' : undefined}
+											data-put="trash"
+											aria-label={needsFlip ? `Reveal ${current.title}` : current.title}
+										>
+											<strong>{current.title}</strong>
+											{#if flipped && current.text}<span><RichText text={current.text} /></span>{/if}
+											{#if needsFlip}<span class="flip-hint">Click to reveal</span>{/if}
+										</button>
 									{/if}
-								{/if}
+
+									{#if flipped && moreSeals.length}
+										<div class="opened-seals" in:scale={{ start: 0.8, duration: 380 }}>
+											{#each moreSeals as seal, sIdx (`${seal.t}:${seal.id}:${sIdx}`)}
+												<span class="med-shell {seal.t}" data-stow-class="trash" data-put="trash">
+													{#if seal.t === 'package'}
+														<Crate id={seal.id} open={true} />
+													{:else}
+														<DossierDoor id={seal.id} open={true} tearing={true} />
+													{/if}
+												</span>
+											{/each}
+										</div>
+									{/if}
+								</div>
+
+								<!-- What came out stands beside the card, never under it, each piece once and its meaning on hover. -->
+								<div class="spotlight-side">
+									{#if flipped}
+										<div class="caption-plate" in:fade={{ duration: 240 }}>
+											<h2>{current.title}</h2>
+											{#if current.text && !cardDef}<p><RichText text={current.text} /></p>{/if}
+										</div>
+										<PieceGroups groups={spotGroups} {campaign} side="spotlight" ontip={showTip} />
+									{/if}
+								</div>
 							</div>
-						</div>
-					{/key}
-				{/if}
+						{/key}
+					{/if}
+				</div>
 			</div>
 
-			<!-- Right wing of previously drawn & opened items -->
-			<div class="wing right">
-				{#each rightWing as { step: item, index } (index)}
-					{@const cardDef = legacyCardOf(item)}
-					{@const pieces = item.items.filter(entry => entry.unlock.t !== 'objectives')}
-					<div
-						class="scattered"
-						style:--tilt={`${((index + 1) % 3) * 2 - 2}deg`}
-						in:fly={{ x: -60, y: -20, duration: 420 }}
-					>
-						<div class="scattered-head">
-							{#if cardDef}
-								{@const stow = cardStow(cardDef)}
-								<span class="mini-card" data-stow-class={stow.cls} data-put={stow.put}>
-									<LegacyCard card={cardDef} side="b" size="thumb" {campaign} />
-								</span>
-							{/if}
-							{#each item.seals as seal, sIdx (`${seal.t}:${seal.id}:${sIdx}`)}
-								<span class="mini-shell {seal.t}" data-stow-class="trash" data-put="trash">
-									{#if seal.t === 'package'}
-										<Crate id={seal.id} open={true} />
-									{:else}
-										<DossierDoor id={seal.id} open={true} />
-									{/if}
-								</span>
-							{/each}
-						</div>
-						{#if pieces.length}
-							<div class="scattered-pieces">
-								{#each pieces as entry, pIdx (pIdx)}
-									{@const stow = stowInfo(entry.unlock)}
-									<div
-										class="piece-chip"
-										class:mechanic={stow?.cls === 'mechanic'}
-										data-stow-class={stow?.cls}
-										data-put={stow?.dest.join(' ')}
-									>
-										<BriefPiece unlock={entry.unlock} {campaign} size="2.2rem" />
-										<span class="chip-label"><RichText text={entry.text} /></span>
-									</div>
-								{/each}
-							</div>
-						{/if}
-					</div>
-				{/each}
+			<div class="wing" {@attach fitZoom()}>
+				<PieceGroups groups={laid.right} {campaign} side="right" ontip={showTip} />
 			</div>
 		</div>
 
@@ -666,6 +510,12 @@
 				{#each objectives as objective (objective.id)}
 					<span class="obj-tag" data-brief-objective={objective.id}><ObjectiveTag {objective} /></span>
 				{/each}
+			</div>
+		{/if}
+
+		{#if tip}
+			<div class="piece-tip" role="tooltip" style={tip.style} transition:fade={{ duration: 120 }}>
+				<RichText text={tip.text} />
 			</div>
 		{/if}
 
@@ -735,7 +585,7 @@
 	.tabletop-unboxing {
 		position: relative;
 		display: grid;
-		grid-template-rows: auto minmax(0, 1fr) auto auto;
+		grid-template-rows: minmax(0, 1fr) auto auto;
 		width: 100%;
 		height: 100%;
 		padding: 0.6rem 1.2rem 1rem;
@@ -743,8 +593,16 @@
 		pointer-events: auto;
 	}
 
+	.middle {
+		display: flex;
+		flex-direction: column;
+		min-width: 0;
+		min-height: 0;
+	}
+
 	.top-dock {
 		display: flex;
+		flex: none;
 		justify-content: center;
 		align-items: flex-start;
 		min-height: 11.4rem;
@@ -834,97 +692,32 @@
 		color: var(--muted);
 	}
 
+	/* Every column is sized by the table, never by what lies in it, so each can zoom its pieces to fit (`fitZoom`)
+	   and a reading of any size shows whole, with nothing to scroll. */
 	.spread {
 		display: grid;
-		grid-template-columns: minmax(14rem, 1fr) minmax(24rem, auto) minmax(14rem, 1fr);
-		align-items: center;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 2.4fr) minmax(0, 1fr);
 		gap: 1.2rem;
 		min-height: 0;
-		overflow: hidden;
 	}
 
 	.wing {
 		display: flex;
 		flex-direction: column;
-		gap: 0.6rem;
-		max-height: 100%;
-		overflow: auto;
-		padding: 0.3rem;
-	}
-
-	.wing.left {
-		align-items: flex-end;
-	}
-
-	.wing.right {
-		align-items: flex-start;
-	}
-
-	.scattered {
-		display: flex;
-		flex-direction: column;
-		gap: 0.45rem;
-		max-width: 22rem;
-		padding: 0.55rem 0.7rem;
-		border: 1px solid rgb(231 220 198 / 0.2);
-		border-radius: 6px;
-		background: rgb(18 15 11 / 0.78);
-		backdrop-filter: blur(6px);
-		box-shadow: 0 0.7rem 1.8rem rgb(0 0 0 / 0.45);
-		transform: rotate(var(--tilt, 0deg));
-	}
-
-	.scattered-head {
-		display: flex;
-		align-items: center;
-		gap: 0.55rem;
-		flex-wrap: wrap;
-	}
-
-	.mini-card {
-		display: inline-flex;
-		border-radius: 5px;
-		box-shadow: 0 0.35rem 0.9rem rgb(0 0 0 / 0.5);
-	}
-
-	.mini-shell.package {
-		width: 4.2rem;
-	}
-
-	.mini-shell.door {
-		width: 2.6rem;
-	}
-
-	.scattered-pieces {
-		display: flex;
-		flex-direction: column;
-		gap: 0.4rem;
-	}
-
-	.piece-chip {
-		display: flex;
-		align-items: center;
-		gap: 0.55rem;
-		padding: 0.3rem 0.45rem;
-		border-radius: 4px;
-		background: rgb(231 220 198 / 0.1);
-		color: var(--ink);
-		font-size: 0.78rem;
-		line-height: 1.25;
-	}
-
-	.piece-chip.mechanic {
-		border: 1px solid rgb(227 178 60 / 0.5);
-		background: rgb(227 178 60 / 0.14);
+		justify-content: safe center;
+		min-height: 0;
+		overflow: hidden;
 	}
 
 	.center {
+		flex: 1;
 		display: flex;
 		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		gap: 0.85rem;
+		align-items: safe center;
+		justify-content: safe center;
+		min-width: 0;
 		min-height: 0;
+		overflow: hidden;
 		padding: 0.4rem;
 		transition: padding-bottom 280ms ease;
 	}
@@ -944,7 +737,9 @@
 		flex-direction: column;
 		align-items: stretch;
 		gap: 0.7rem;
-		width: min(24rem, 26vw);
+		flex: 1 1 22rem;
+		min-width: 18rem;
+		max-width: 44rem;
 	}
 
 	.spotlight-top {
@@ -1093,42 +888,18 @@
 		font-size: 0.88rem;
 	}
 
-	.spotlight-pieces {
-		display: flex;
-		flex-direction: column;
-		gap: 0.7rem;
-		margin: 0;
-		padding: 0;
-		list-style: none;
-	}
-
-	.big-piece {
-		display: flex;
-		align-items: center;
-		gap: 0.7rem;
-		padding: 0.55rem 0.75rem;
-		border: 1px solid rgb(231 220 198 / 0.24);
+	.piece-tip {
+		position: absolute;
+		z-index: 6;
+		padding: 0.6rem 0.8rem;
+		border: 1px solid rgb(231 220 198 / 0.35);
 		border-radius: 6px;
-		background: rgb(18 15 11 / 0.86);
-		backdrop-filter: blur(6px);
-		box-shadow: 0 0.7rem 1.8rem rgb(0 0 0 / 0.5);
-	}
-
-	.big-piece.mechanic {
-		border-color: rgb(227 178 60 / 0.7);
-		background: rgb(32 25 14 / 0.92);
-	}
-
-	.big-piece p {
-		margin: 0;
-		font-size: 0.86rem;
-		line-height: 1.35;
+		background: rgb(16 13 10 / 0.95);
+		box-shadow: 0 0.8rem 2rem rgb(0 0 0 / 0.55);
 		color: var(--ink);
-	}
-
-	.piece-token {
-		display: flex;
-		flex: none;
+		font-size: 0.88rem;
+		line-height: 1.4;
+		pointer-events: none;
 	}
 
 	.table-objectives {

@@ -39,3 +39,50 @@ export const fitText =
 			observer.disconnect();
 		};
 	};
+
+/**
+ * Sets the largest CSS zoom, up to 1, at which the element's one child fits the element's content box, so a pile of
+ * any size stays whole on screen instead of scrolling. Zoom, not a transform, so the child wraps and centres at its
+ * new size. It measures layout, never paint: a piece still flying in on a transform would otherwise read as overflow
+ * and leave the pile shrunk after it lands. The element is sized by its place in the layout, never by the child, or
+ * the two would shrink each other down to `min`.
+ */
+export const fitZoom =
+	({ min = 0.3 }: { min?: number } = {}): Attachment<HTMLElement> =>
+	element => {
+		const fit = () => {
+			const child = element.firstElementChild as HTMLElement | null;
+			if (!child) return;
+			const style = getComputedStyle(element);
+			const roomX = element.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+			const roomY = element.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
+			// offsetWidth and offsetHeight are the child's own unzoomed size, so `zoom` times them is what it covers.
+			const overflows = (zoom: number) => {
+				child.style.zoom = `${zoom}`;
+				return child.offsetWidth * zoom > roomX + 0.5 || child.offsetHeight * zoom > roomY + 0.5;
+			};
+			if (!overflows(1)) return;
+			let low = min;
+			let high = 1;
+			for (let step = 0; step < 7; step++) {
+				const middle = (low + high) / 2;
+				if (overflows(middle)) high = middle;
+				else low = middle;
+			}
+			child.style.zoom = `${low}`;
+		};
+		const observer = new ResizeObserver(fit);
+		observer.observe(element);
+		// The child's own size changes as pieces arrive; the element's does not.
+		const watched = new MutationObserver(() => {
+			observer.disconnect();
+			observer.observe(element);
+			if (element.firstElementChild) observer.observe(element.firstElementChild);
+		});
+		watched.observe(element, { childList: true });
+		if (element.firstElementChild) observer.observe(element.firstElementChild);
+		return () => {
+			observer.disconnect();
+			watched.disconnect();
+		};
+	};
