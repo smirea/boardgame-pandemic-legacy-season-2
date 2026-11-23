@@ -33,7 +33,7 @@
 	},
 	"devDependencies": {
 		"@google/genai": "^3.6.1",
-		"@stefan.inc/feedback-engine": "^1.11.0",
+		"@stefan.inc/feedback-engine": "^1.12.0",
 		"@tailwindcss/vite": "^4.3.3",
 		"@types/d3-geo": "^3.1.1",
 		"@types/three": "^0.187.0",

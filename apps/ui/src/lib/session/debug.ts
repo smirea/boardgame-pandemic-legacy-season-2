@@ -1,5 +1,5 @@
 import { fillSave } from '@repo/game';
-import type { Command, GameRecord, PublicState } from '@repo/game';
+import type { Command, GameRecord, PublicState, Save } from '@repo/game';
 import type { ConnectionStatus } from '@repo/net';
 import { LS } from '../storage';
 import type { GameSession, Mode } from './session.svelte.ts';
@@ -9,6 +9,8 @@ const CHECKPOINTS = 12;
 
 export type DebugApi = {
 	getState: () => PublicState | null;
+	/** The campaign as the Menu exports it, which the Menu's import loads again. */
+	getSave: () => Save | null;
 	saveState: () => void;
 	loadState: (state?: unknown) => void;
 	setState: (state: unknown) => void;
@@ -50,6 +52,7 @@ export function createDebugApi(session: GameSession): DebugApi {
 	const checkpoints = () => LS.get('checkpoints') ?? [];
 	return {
 		getState: () => session.state,
+		getSave: () => session.save(),
 		saveState: () => LS.set({ debugSnapshot: session.save() }),
 		loadState: state => session.importSave(state ?? LS.get('debugSnapshot')),
 		setState: state => session.importSave(state),
