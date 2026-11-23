@@ -1,4 +1,4 @@
-import { activeAudio, onAudioUnlocked } from './engine.ts';
+import { activeAudio, isAudioUnlocked, onAudioUnlocked } from './engine.ts';
 import { Score, type Mood } from './score.ts';
 import { audioSettings } from './settings.svelte.ts';
 import type { Cue } from './themes.ts';
@@ -43,20 +43,32 @@ class AmbientMusic {
 	}
 
 	private sync() {
-		const g = this.mood && audioSettings.music > 0.005 ? activeAudio() : null;
-		if (!g || !this.mood) {
+		if (!this.mood || audioSettings.music <= 0.005 || !isAudioUnlocked()) {
 			this.score?.end();
 			this.score = null;
-			if (this.timer) clearInterval(this.timer);
-			this.timer = null;
+			this.pause();
+			return;
+		}
+		const g = activeAudio();
+		if (!g) {
+			// Hidden or muted: the engine suspends the context, which freezes the score where it is, so it picks up from there.
+			this.pause();
 			return;
 		}
 		if (this.score) {
 			this.score.set(this.mood);
-			return;
+		} else {
+			this.score = new Score(
+				{ ctx: g.ctx, out: g.music, cues: g.cues, reverb: g.voidReverb, noise: g.noise },
+				this.mood,
+			);
 		}
-		this.score = new Score({ ctx: g.ctx, out: g.music, cues: g.cues, reverb: g.voidReverb, noise: g.noise }, this.mood);
-		this.timer = setInterval(() => this.score?.tick(), 500);
+		this.timer ??= setInterval(() => this.score?.tick(), 500);
+	}
+
+	private pause() {
+		if (this.timer) clearInterval(this.timer);
+		this.timer = null;
 	}
 }
 
