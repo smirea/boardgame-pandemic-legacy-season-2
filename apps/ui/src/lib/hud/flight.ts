@@ -7,17 +7,21 @@ export function flyTo(from: HTMLElement, to: Element, { delay = 0, duration = 11
 	const start = from.getBoundingClientRect();
 	const end = to.getBoundingClientRect();
 	const into = end.width > start.width * 1.5 && end.height > start.height * 1.5;
-	const scale = into ? Math.min(0.3, 48 / start.width) : Math.min(end.width / start.width, end.height / start.height);
+	// A piece shown zoomed out (a pile fitted to its box) is copied at its own size and shrunk to how it looks.
+	const zoom = from.currentCSSZoom || 1;
+	const fly = into ? Math.min(0.3, 48 / start.width) : Math.min(end.width / start.width, end.height / start.height);
 	const dx = end.left + end.width / 2 - (start.left + start.width / 2);
 	const dy = end.top + end.height / 2 - (start.top + start.height / 2);
+	const width = start.width / zoom;
+	const height = start.height / zoom;
 
 	const ghost = from.cloneNode(true) as HTMLElement;
 	Object.assign(ghost.style, {
 		position: 'fixed',
-		top: `${start.top}px`,
-		left: `${start.left}px`,
-		width: `${start.width}px`,
-		height: `${start.height}px`,
+		top: `${start.top + (start.height - height) / 2}px`,
+		left: `${start.left + (start.width - width) / 2}px`,
+		width: `${width}px`,
+		height: `${height}px`,
 		margin: '0',
 		zIndex: '95',
 		pointerEvents: 'none',
@@ -25,13 +29,13 @@ export function flyTo(from: HTMLElement, to: Element, { delay = 0, duration = 11
 	});
 	document.body.append(ghost);
 	const at = (x: number, y: number, size: number, turn: number) =>
-		`translate(${x}px, ${y}px) scale(${size}) rotate(${turn}deg)`;
+		`translate(${x}px, ${y}px) scale(${size * zoom}) rotate(${turn}deg)`;
 	const flight = ghost.animate(
 		[
 			{ transform: at(0, 0, 1, 0), opacity: 1, filter: 'drop-shadow(0 0 0 rgb(0 0 0 / 0))' },
 			{ transform: at(0, -14, 1.06, -3), filter: 'drop-shadow(0 0.8rem 1rem rgb(0 0 0 / 0.45))', offset: 0.2 },
-			{ transform: at(dx * 0.5, dy * 0.5 - 70, (1 + scale) * 0.55, 5), offset: 0.6 },
-			{ transform: at(dx, dy, scale, 0), opacity: into ? 0 : 1, filter: 'drop-shadow(0 0 0 rgb(0 0 0 / 0))' },
+			{ transform: at(dx * 0.5, dy * 0.5 - 70, (1 + fly) * 0.55, 5), offset: 0.6 },
+			{ transform: at(dx, dy, fly, 0), opacity: into ? 0 : 1, filter: 'drop-shadow(0 0 0 rgb(0 0 0 / 0))' },
 		],
 		{ duration, delay, easing: 'cubic-bezier(0.5, 0, 0.25, 1)', fill: 'both' },
 	);

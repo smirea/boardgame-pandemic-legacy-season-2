@@ -20,7 +20,15 @@ export { REVEAL_COUNT, revealDone, revealOutcome } from './reveal';
 export type { Purchase } from './legacy';
 export type { DossierSlot, DossierView, RulebookBlock, RulebookChapter, RulebookSection } from './dossier';
 export { dossierView, rulebook, stickerStock } from './dossier';
-export { actionBriefs, briefingSections, openings, ruleBriefs, searchFind, unlockText } from './briefing';
+export {
+	actionBriefs,
+	briefingSections,
+	openings,
+	ruleBriefs,
+	searchFind,
+	unlockHeading,
+	unlockText,
+} from './briefing';
 export type { Opening } from './briefing';
 export type { BriefedUnlock, BriefingSection } from './briefing';
 export {
