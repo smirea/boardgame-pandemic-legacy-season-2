@@ -1,30 +1,31 @@
 <script lang="ts">
 	import { pack } from '@repo/game';
-	import type { JobId } from '@repo/game';
+	import type { ActionId, JobId } from '@repo/game';
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { onDestroy, onMount } from 'svelte';
 	import AudioMenu from '#lib/audio/AudioMenu.svelte';
 	import { bindAudioUnlock } from '#lib/audio/engine.ts';
 	import { ambientMusic } from '#lib/audio/music.ts';
 	import { tensionOf } from '#lib/audio/score.ts';
+	import { ACTIONS, MOMENTS, PIECES, TRAVEL } from '#lib/audio/foley.ts';
+	import type { MomentId, PieceId, TravelId } from '#lib/audio/foley.ts';
 	import {
-		sfxBuildStructure,
+		setSfxKey,
+		sfxAction,
 		sfxCardDraw,
 		sfxCardFlip,
 		sfxCityDestroyed,
 		sfxCrateOpen,
-		sfxCubeDrop,
-		sfxCubePickup,
 		sfxDoorTear,
 		sfxEpidemic,
 		sfxExposure,
 		sfxIncident,
 		sfxInoculationMotif,
+		sfxMoment,
 		sfxOutbreak,
-		sfxRadioTune,
-		sfxRouteDraw,
-		sfxScratchBox,
+		sfxPiece,
 		sfxTapeSlap,
+		sfxTravel,
 		sfxUtopiaCorrupt,
 		sfxVialClink,
 	} from '#lib/audio/sfx.ts';
@@ -52,6 +53,7 @@
 	let epidemics = $state(0);
 	let sea = $state(0.85);
 	let alarm = $state(false);
+	let infecting = $state(false);
 	let hollow = $state(false);
 	let safe = $state(false);
 
@@ -67,8 +69,20 @@
 			ambientMusic.stop();
 			return;
 		}
-		ambientMusic.update({ tone, tension, occupation, sea, alarm, hollow, safe, hush: activeScene !== null });
+		ambientMusic.update({ tone, tension, occupation, sea, alarm, infecting, hollow, safe, hush: activeScene !== null });
 	});
+	// Every pitched effect follows the campaign tone picked above, as it does in a game.
+	$effect(() => setSfxKey(TONES[tone].root));
+
+	const words = (id: string) => id.replace(/([A-Z])/g, ' $1').replace(/^./, letter => letter.toUpperCase());
+	const pieceIds = Object.keys(PIECES) as PieceId[];
+	const travelIds = Object.keys(TRAVEL) as TravelId[];
+	const momentIds = Object.keys(MOMENTS) as MomentId[];
+	const actionIds = (Object.keys(ACTIONS) as ActionId[]).filter(id => ACTIONS[id] !== null);
+	/** A run of the same piece, a tenth of a second apart, as a hand of cubes lands. */
+	function run(id: PieceId, count: number) {
+		for (let n = 0; n < count; n++) setTimeout(() => sfxPiece(id, n), n * 110);
+	}
 
 	onDestroy(() => ambientMusic.stop());
 
@@ -88,29 +102,22 @@
 	];
 
 	const SFX_BUTTONS: { label: string; run: () => void }[] = [
-		{ label: 'Cube Pickup', run: () => sfxCubePickup(3) },
-		{ label: 'Supply Cube Drop', run: () => sfxCubeDrop('supply', 1) },
-		{ label: 'Plague Cube Drop', run: () => sfxCubeDrop('plague', 1) },
-		{ label: 'Hollow Man Drop', run: () => sfxCubeDrop('hollow', 1) },
 		{ label: 'Incident #2', run: () => sfxIncident(2) },
 		{ label: 'Incident #7', run: () => sfxIncident(7) },
 		{ label: 'Outbreak', run: () => sfxOutbreak() },
 		{ label: 'Epidemic Draw', run: () => sfxEpidemic('draw') },
-		{ label: 'Epidemic Increase', run: () => sfxEpidemic('increase') },
 		{ label: 'Epidemic Infect', run: () => sfxEpidemic('infect') },
 		{ label: 'Epidemic Intensify', run: () => sfxEpidemic('intensify') },
 		{ label: 'Card Draw', run: () => sfxCardDraw() },
 		{ label: 'Card Flip', run: () => sfxCardFlip() },
-		{ label: 'Scratch Box', run: () => sfxScratchBox() },
 		{ label: 'Dossier Door Tear', run: () => sfxDoorTear() },
 		{ label: 'Package Crate Open', run: () => sfxCrateOpen() },
 		{ label: 'Masking-Tape Slap', run: () => sfxTapeSlap(0) },
-		{ label: 'Route Draw', run: () => sfxRouteDraw() },
-		{ label: 'Build Center', run: () => sfxBuildStructure('center') },
-		{ label: 'Build Tower', run: () => sfxBuildStructure('tower') },
-		{ label: 'Exposure: Scar', run: () => sfxExposure('scar') },
-		{ label: 'Exposure: Death', run: () => sfxExposure('death') },
-		{ label: 'Radio Decode', run: () => sfxRadioTune(true) },
+		{ label: 'Scar (voice 1)', run: () => sfxExposure('scar', 0) },
+		{ label: 'Scar (voice 2)', run: () => sfxExposure('scar', 1) },
+		{ label: 'Scar (voice 3)', run: () => sfxExposure('scar', 2) },
+		{ label: 'Scar (voice 4)', run: () => sfxExposure('scar', 3) },
+		{ label: 'Death', run: () => sfxExposure('death', 0) },
 		{ label: 'Inoculation Safe', run: () => sfxInoculationMotif(false) },
 		{ label: 'Inoculation Broken', run: () => sfxInoculationMotif(true) },
 		{ label: 'Vial Clink', run: () => sfxVialClink(1) },
@@ -192,6 +199,7 @@
 						<button type="button" onclick={() => ambientMusic.accent(id)}>{CUES[id].label}</button>
 					{/each}
 					<label><input type="checkbox" bind:checked={alarm} /> Epidemic being resolved</label>
+					<label><input type="checkbox" bind:checked={infecting} /> Infect step</label>
 				</div>
 
 				<div class="pick" role="group" aria-label="Sea life and wilderness">
@@ -215,10 +223,39 @@
 				</div>
 			</div>
 
-			<div class="sfx-board">
-				{#each SFX_BUTTONS as btn (btn.label)}
-					<button type="button" onclick={btn.run}>{btn.label}</button>
-				{/each}
+			<div class="music-box" {@attach feedback('Sound audition', () => ({ tone }))}>
+				<div class="pick" role="group" aria-label="Pieces">
+					<span class="pick-label">Pieces (a run of four where a run is heard as a scale)</span>
+					{#each pieceIds as id (id)}
+						<button type="button" onclick={() => run(id, id.startsWith('supply') && id !== 'supplyPass' ? 4 : 1)}>
+							{words(id)}
+						</button>
+					{/each}
+				</div>
+				<div class="pick" role="group" aria-label="Movement">
+					<span class="pick-label">Movement</span>
+					{#each travelIds as id (id)}
+						<button type="button" onclick={() => sfxTravel(id, 1.4)}>{words(id)}</button>
+					{/each}
+				</div>
+				<div class="pick" role="group" aria-label="Moments">
+					<span class="pick-label">Moments</span>
+					{#each momentIds as id (id)}
+						<button type="button" onclick={() => sfxMoment(id)}>{words(id)}</button>
+					{/each}
+				</div>
+				<div class="pick" role="group" aria-label="Actions">
+					<span class="pick-label">Actions</span>
+					{#each actionIds as id (id)}
+						<button type="button" onclick={() => sfxAction(id)}>{words(id)}</button>
+					{/each}
+				</div>
+				<div class="pick" role="group" aria-label="Other sounds">
+					<span class="pick-label">Cards, Epidemics, exposure and story</span>
+					{#each SFX_BUTTONS as btn (btn.label)}
+						<button type="button" onclick={btn.run}>{btn.label}</button>
+					{/each}
+				</div>
 			</div>
 		</div>
 	</section>

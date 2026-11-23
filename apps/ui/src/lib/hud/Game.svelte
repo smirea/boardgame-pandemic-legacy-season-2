@@ -30,6 +30,7 @@
 	import { backOut } from 'svelte/easing';
 	import { fade, fly, scale } from 'svelte/transition';
 	import { GameAudio } from '#lib/audio/gameAudio.svelte.ts';
+	import { sfxMoment } from '#lib/audio/sfx.ts';
 	import { STORY_SCENES } from '#lib/story/script.ts';
 	import type { StoryScene } from '#lib/story/script.ts';
 	import StoryArchive from '#lib/story/StoryArchive.svelte';
@@ -488,11 +489,14 @@
 		});
 	});
 
-	const show = new InfectionShow((city, kind) => {
-		const id = nextFx++;
-		fx = [...fx, { id, city, kind, delay: 0 }];
-		setTimeout(() => (fx = fx.filter(entry => entry.id !== id)), 4000);
-	});
+	const show = new InfectionShow(
+		(city, kind) => {
+			const id = nextFx++;
+			fx = [...fx, { id, city, kind, delay: 0 }];
+			setTimeout(() => (fx = fx.filter(entry => entry.id !== id)), 4000);
+		},
+		cue => gameAudio.showCue(cue),
+	);
 	/** The middle of the board left open between the panels, level with the middle of the stage, as fractions. */
 	function openMiddle() {
 		const width = stage?.clientWidth || 1;
@@ -1610,7 +1614,10 @@
 			canStart={canAct && !spectator}
 			who={seatName(world, game.active)}
 			onstart={admin.start}
-			onlanded={key => admin.turn.landed(key)}
+			onlanded={key => {
+				sfxMoment('cardLand');
+				admin.turn.landed(key);
+			}}
 			dest={flightDest}
 		/>
 	{/if}

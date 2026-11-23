@@ -50,6 +50,14 @@ export function travelOf(move: Move, edges: EdgeDef[]): { travel: Travel; course
 	return { travel: 'air', course: null };
 }
 
+/** How long a trip of that length takes: long ones take longer, up to a cap so a turn never drags. */
+export const tripMs = (travel: Travel, distance: number) =>
+	travel === 'land'
+		? Math.min(1500, 520 + distance * 22)
+		: travel === 'sea'
+			? Math.min(1900, 700 + distance * 20)
+			: Math.min(1800, 800 + distance * 11);
+
 /** The pieces of a course, measured, so a point a given share of the way along can be found quickly. */
 export function along(course: BoardPoint[]) {
 	const lengths = [0];

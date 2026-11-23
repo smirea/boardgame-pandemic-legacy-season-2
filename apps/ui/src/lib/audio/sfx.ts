@@ -1,148 +1,99 @@
+import type { ActionId } from '@repo/game';
 import { activeAudio, playNoiseBurst } from './engine.ts';
+import { ACTIONS, MOMENTS, PIECES, TRAVEL, type MomentId, type PieceId, type Play, type TravelId } from './foley.ts';
 
 function jitter(base: number, pct = 0.04): number {
 	return base * (1 + (Math.random() * 2 - 1) * pct);
 }
 
-/** Tactile wooden/acrylic cube pickup, pitched gently higher with stack count. */
-export function sfxCubePickup(count = 1) {
+/** Hz of the root the music is in. Every pitched effect is tuned to it, so none clashes with the month's key. */
+let key = 73.42;
+
+export function setSfxKey(hz: number) {
+	key = hz;
+}
+
+function live(): Play | null {
+	const g = activeAudio();
+	if (!g) return null;
+	return {
+		bus: { ctx: g.ctx, out: g.sfx, cues: g.sfx, reverb: g.hullReverb, noise: g.noise },
+		at: g.ctx.currentTime + 0.005,
+		key,
+	};
+}
+
+/** `n` is the piece's place in a run of the same pieces, which a run of supply cubes climbs or falls by. */
+export function sfxPiece(id: PieceId, n = 0) {
+	const p = live();
+	if (p) PIECES[id](p, n);
+}
+
+export function sfxTravel(id: TravelId, seconds: number) {
+	const p = live();
+	if (p) TRAVEL[id](p, seconds);
+}
+
+export function sfxMoment(id: MomentId) {
+	const p = live();
+	if (p) MOMENTS[id](p);
+}
+
+/** The action's own sound. False when it has none, since its pieces or its vehicle make it. */
+export function sfxAction(id: ActionId): boolean {
+	const sound = ACTIONS[id];
+	const p = sound && live();
+	if (!p) return false;
+	sound(p);
+	return true;
+}
+
+export function sfxCubeDrop(kind: 'supply' | 'plague' | 'hollow', count = 1) {
+	sfxPiece(kind === 'supply' ? 'supplyPlace' : kind === 'plague' ? 'plague' : 'hollowArrive', count - 1);
+}
+
+export const sfxScratchBox = () => void sfxAction('search');
+export const sfxRadioDecode = () => void sfxAction('monitor');
+
+const SCREAMS = 4;
+const screams = new Map<number, Promise<AudioBuffer | null>>();
+
+/** A recorded cry of pain. `who` picks the take, so a character keeps one voice. A dying one is lower and slower. */
+function scream(who: number, dying: boolean) {
 	const g = activeAudio();
 	if (!g) return;
-	const t = g.ctx.currentTime;
-	const pitch = 1 + Math.min(count, 8) * 0.045;
-
-	const osc = g.ctx.createOscillator();
-	osc.type = 'triangle';
-	osc.frequency.setValueAtTime(jitter(420 * pitch, 0.03), t);
-	osc.frequency.exponentialRampToValueAtTime(640 * pitch, t + 0.055);
-	const gain = g.ctx.createGain();
-	gain.gain.setValueAtTime(0.0001, t);
-	gain.gain.linearRampToValueAtTime(0.16, t + 0.005);
-	gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.085);
-	osc.connect(gain);
-	gain.connect(g.sfx);
-	osc.start(t);
-	osc.stop(t + 0.095);
-
-	playNoiseBurst(g, {
-		color: 'white',
-		start: t,
-		duration: 0.03,
-		gain: 0.09,
-		attack: 0.002,
-		filterType: 'bandpass',
-		freq: 2400 * pitch,
-		q: 2.2,
+	const take = (((who % SCREAMS) + SCREAMS) % SCREAMS) + 1;
+	let loading = screams.get(take);
+	if (!loading) {
+		loading = fetch(`/sfx/scream-${take}.mp3`)
+			.then(response => (response.ok ? response.arrayBuffer() : Promise.reject(new Error(String(response.status)))))
+			.then(bytes => g.ctx.decodeAudioData(bytes))
+			.catch(() => null);
+		screams.set(take, loading);
+	}
+	void loading.then(buffer => {
+		const now = activeAudio();
+		if (!buffer || !now) return;
+		const src = now.ctx.createBufferSource();
+		src.buffer = buffer;
+		src.playbackRate.value = dying ? 0.82 : 1;
+		const level = now.ctx.createGain();
+		level.gain.value = 0.6;
+		src.connect(level);
+		level.connect(now.sfx);
+		const wet = now.ctx.createGain();
+		wet.gain.value = dying ? 0.9 : 0.5;
+		level.connect(wet);
+		wet.connect(now.hullReverb);
+		src.start();
 	});
 }
 
-/** Tactile board-game cube placement with distinct acoustic materials per piece type. */
-export function sfxCubeDrop(kind: 'supply' | 'plague' | 'hollow', count = 1) {
-	const g = activeAudio();
-	if (!g) return;
-	const t = g.ctx.currentTime;
-
-	if (kind === 'supply') {
-		const pitch = 1 + Math.min(count, 6) * 0.03;
-		// Primary wood/acrylic tap + crisp micro-bounce 42ms later
-		for (const [offset, vol, freqMul] of [
-			[0, 0.22, 1],
-			[0.042, 0.08, 1.24],
-		] as const) {
-			const at = t + offset;
-			const osc = g.ctx.createOscillator();
-			osc.type = 'triangle';
-			osc.frequency.setValueAtTime(jitter(310 * pitch * freqMul, 0.04), at);
-			osc.frequency.exponentialRampToValueAtTime(145 * freqMul, at + 0.048);
-			const env = g.ctx.createGain();
-			env.gain.setValueAtTime(0.0001, at);
-			env.gain.linearRampToValueAtTime(vol, at + 0.003);
-			env.gain.exponentialRampToValueAtTime(0.0001, at + 0.065);
-			osc.connect(env);
-			env.connect(g.sfx);
-			osc.start(at);
-			osc.stop(at + 0.075);
-
-			playNoiseBurst(g, {
-				color: 'white',
-				start: at,
-				duration: 0.025,
-				gain: vol * 0.55,
-				attack: 0.002,
-				filterType: 'bandpass',
-				freq: 1950 * freqMul,
-				q: 2.6,
-			});
-		}
-		return;
-	}
-
-	if (kind === 'plague') {
-		// Hollow obsidian thud + eerie dissonant tritone shimmer
-		const sub = g.ctx.createOscillator();
-		sub.type = 'sine';
-		sub.frequency.setValueAtTime(98, t);
-		sub.frequency.exponentialRampToValueAtTime(42, t + 0.32);
-		const subEnv = g.ctx.createGain();
-		subEnv.gain.setValueAtTime(0.0001, t);
-		subEnv.gain.linearRampToValueAtTime(0.32, t + 0.006);
-		subEnv.gain.exponentialRampToValueAtTime(0.0001, t + 0.36);
-		sub.connect(subEnv);
-		subEnv.connect(g.sfx);
-		sub.start(t);
-		sub.stop(t + 0.38);
-
-		for (const freq of [311.1, 440.0]) {
-			const chime = g.ctx.createOscillator();
-			chime.type = 'triangle';
-			chime.frequency.setValueAtTime(jitter(freq, 0.01), t);
-			const env = g.ctx.createGain();
-			env.gain.setValueAtTime(0.0001, t);
-			env.gain.linearRampToValueAtTime(0.075, t + 0.012);
-			env.gain.exponentialRampToValueAtTime(0.0001, t + 0.55);
-			chime.connect(env);
-			env.connect(g.sfx);
-			env.connect(g.hullReverb);
-			chime.start(t);
-			chime.stop(t + 0.58);
-		}
-		playNoiseBurst(g, {
-			color: 'pink',
-			start: t,
-			duration: 0.09,
-			gain: 0.14,
-			filterType: 'bandpass',
-			freq: 780,
-			freqEnd: 260,
-			q: 2,
-			reverbSend: 0.25,
-		});
-		return;
-	}
-
-	// Hollow Men: heavy muffled boot/stone stomp + metallic rattle
-	const stomp = g.ctx.createOscillator();
-	stomp.type = 'sine';
-	stomp.frequency.setValueAtTime(76, t);
-	stomp.frequency.exponentialRampToValueAtTime(34, t + 0.22);
-	const stompEnv = g.ctx.createGain();
-	stompEnv.gain.setValueAtTime(0.0001, t);
-	stompEnv.gain.linearRampToValueAtTime(0.3, t + 0.008);
-	stompEnv.gain.exponentialRampToValueAtTime(0.0001, t + 0.26);
-	stomp.connect(stompEnv);
-	stompEnv.connect(g.sfx);
-	stomp.start(t);
-	stomp.stop(t + 0.28);
-
-	playNoiseBurst(g, {
-		color: 'brown',
-		start: t,
-		duration: 0.14,
-		gain: 0.22,
-		filterType: 'lowpass',
-		freq: 460,
-		reverbSend: 0.3,
-	});
+/** What a scratched exposure box did to a character. `who` is any number that stays the same for that character. */
+export function sfxExposure(outcome: 'safe' | 'scar' | 'death', who = 0) {
+	if (outcome === 'safe') return sfxMoment('exposureSafe');
+	sfxMoment(outcome);
+	scream(who, outcome === 'death');
 }
 
 /** Escalating dark metallic toll when an incident hits the track (1..8). */
@@ -151,7 +102,7 @@ export function sfxIncident(incidentCount = 1) {
 	if (!g) return;
 	const t = g.ctx.currentTime;
 	const urgency = Math.min(1, Math.max(0, (incidentCount - 1) / 7));
-	const base = 110 * Math.pow(1.06, incidentCount - 1);
+	const base = key * 1.5 * Math.pow(1.06, incidentCount - 1);
 
 	for (const [ratio, vol, dur] of [
 		[1, 0.22, 1.3],
@@ -187,8 +138,8 @@ export function sfxOutbreak() {
 		const at = t + i * 0.14;
 		const osc = g.ctx.createOscillator();
 		osc.type = 'sawtooth';
-		osc.frequency.setValueAtTime(220 * Math.pow(1.18, i), at);
-		osc.frequency.exponentialRampToValueAtTime(165 * Math.pow(1.12, i), at + 0.35);
+		osc.frequency.setValueAtTime(key * 3 * Math.pow(1.18, i), at);
+		osc.frequency.exponentialRampToValueAtTime(key * 2.25 * Math.pow(1.12, i), at + 0.35);
 		const lp = g.ctx.createBiquadFilter();
 		lp.type = 'bandpass';
 		lp.frequency.value = 650 + i * 240;
@@ -241,10 +192,10 @@ export function sfxEpidemic(stage: 'draw' | 'increase' | 'infect' | 'intensify' 
 
 		// Struck metal + distant foghorn fifth/tritone
 		for (const [freq, detune, vol, delay] of [
-			[73.42, -6, 0.19, 0.14],
-			[103.83, 8, 0.14, 0.16],
-			[146.83, -12, 0.1, 0.18],
-			[207.65, 14, 0.07, 0.2],
+			[key, -6, 0.19, 0.14],
+			[key * Math.SQRT2, 8, 0.14, 0.16],
+			[key * 2, -12, 0.1, 0.18],
+			[key * 2 * Math.SQRT2, 14, 0.07, 0.2],
 		] as const) {
 			const osc = g.ctx.createOscillator();
 			osc.type = 'sawtooth';
@@ -375,27 +326,6 @@ export function sfxCardFlip() {
 	thump.stop(t + 0.085);
 }
 
-/** Metallic coin scraping a silver scratch-off coating. */
-export function sfxScratchBox() {
-	const g = activeAudio();
-	if (!g) return;
-	const t = g.ctx.currentTime;
-	for (let i = 0; i < 4; i++) {
-		const at = t + i * 0.095;
-		playNoiseBurst(g, {
-			color: 'white',
-			start: at,
-			duration: 0.085,
-			gain: 0.13,
-			attack: 0.012,
-			filterType: 'bandpass',
-			freq: 2900 + (i % 2) * 700,
-			freqEnd: 4600 - (i % 2) * 900,
-			q: 3.4,
-		});
-	}
-}
-
 /** Perforated cardstock dossier door tearing open. */
 export function sfxDoorTear() {
 	const g = activeAudio();
@@ -507,150 +437,12 @@ export function sfxTapeSlap(pitchOffset = 0) {
 	});
 }
 
-/** Felt-tip pen / chalk line drawn across chart paper. */
-export function sfxRouteDraw() {
-	const g = activeAudio();
-	if (!g) return;
-	const t = g.ctx.currentTime;
-	playNoiseBurst(g, {
-		color: 'pink',
-		start: t,
-		duration: 0.34,
-		gain: 0.14,
-		attack: 0.02,
-		filterType: 'bandpass',
-		freq: 1600,
-		freqEnd: 2500,
-		q: 2.6,
-	});
-}
-
-/** Solid structure build anchor (Supply Center, Satellite Tower, Shelter). */
-export function sfxBuildStructure(kind: 'center' | 'tower' | 'shelter') {
-	const g = activeAudio();
-	if (!g) return;
-	const t = g.ctx.currentTime;
-	const base = kind === 'center' ? 164.8 : kind === 'tower' ? 293.7 : 220;
-
-	const osc = g.ctx.createOscillator();
-	osc.type = 'triangle';
-	osc.frequency.setValueAtTime(base, t);
-	osc.frequency.exponentialRampToValueAtTime(base * 0.65, t + 0.16);
-	const env = g.ctx.createGain();
-	env.gain.setValueAtTime(0.0001, t);
-	env.gain.linearRampToValueAtTime(0.24, t + 0.006);
-	env.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
-	osc.connect(env);
-	env.connect(g.sfx);
-	osc.start(t);
-	osc.stop(t + 0.24);
-
-	if (kind === 'tower') {
-		const ping = g.ctx.createOscillator();
-		ping.type = 'sine';
-		ping.frequency.setValueAtTime(880, t + 0.08);
-		const pEnv = g.ctx.createGain();
-		pEnv.gain.setValueAtTime(0.0001, t + 0.08);
-		pEnv.gain.linearRampToValueAtTime(0.11, t + 0.095);
-		pEnv.gain.exponentialRampToValueAtTime(0.0001, t + 0.6);
-		ping.connect(pEnv);
-		pEnv.connect(g.sfx);
-		pEnv.connect(g.hullReverb);
-		ping.start(t + 0.08);
-		ping.stop(t + 0.65);
-	}
-}
-
-/** Character exposure scratch result. */
-export function sfxExposure(outcome: 'safe' | 'scar' | 'death') {
-	const g = activeAudio();
-	if (!g) return;
-	const t = g.ctx.currentTime;
-	if (outcome === 'safe') {
-		playNoiseBurst(g, {
-			color: 'pink',
-			start: t,
-			duration: 0.18,
-			gain: 0.09,
-			filterType: 'lowpass',
-			freq: 900,
-			freqEnd: 350,
-		});
-		return;
-	}
-	// Double heartbeat thump
-	for (const offset of [0, 0.22]) {
-		const beat = g.ctx.createOscillator();
-		beat.type = 'sine';
-		beat.frequency.setValueAtTime(68, t + offset);
-		beat.frequency.exponentialRampToValueAtTime(34, t + offset + 0.16);
-		const env = g.ctx.createGain();
-		env.gain.setValueAtTime(0.0001, t + offset);
-		env.gain.linearRampToValueAtTime(0.35, t + offset + 0.01);
-		env.gain.exponentialRampToValueAtTime(0.0001, t + offset + 0.19);
-		beat.connect(env);
-		env.connect(g.sfx);
-		beat.start(t + offset);
-		beat.stop(t + offset + 0.21);
-	}
-	if (outcome === 'death') {
-		const toll = g.ctx.createOscillator();
-		toll.type = 'triangle';
-		toll.frequency.setValueAtTime(92.5, t + 0.35);
-		const env = g.ctx.createGain();
-		env.gain.setValueAtTime(0.0001, t + 0.35);
-		env.gain.linearRampToValueAtTime(0.24, t + 0.38);
-		env.gain.exponentialRampToValueAtTime(0.0001, t + 2.4);
-		toll.connect(env);
-		env.connect(g.sfx);
-		env.connect(g.hullReverb);
-		toll.start(t + 0.35);
-		toll.stop(t + 2.45);
-	}
-}
-
-/** Shortwave radio tuning lock. */
-export function sfxRadioTune(decoded = false) {
-	const g = activeAudio();
-	if (!g) return;
-	const t = g.ctx.currentTime;
-	playNoiseBurst(g, {
-		color: 'white',
-		start: t,
-		duration: 0.35,
-		gain: 0.11,
-		filterType: 'bandpass',
-		freq: 1100,
-		freqEnd: 2400,
-		q: 5.5,
-	});
-	if (decoded) {
-		for (const [offset, freq] of [
-			[0.24, 659.25],
-			[0.36, 987.77],
-		] as const) {
-			const osc = g.ctx.createOscillator();
-			osc.type = 'sine';
-			osc.frequency.setValueAtTime(freq, t + offset);
-			const env = g.ctx.createGain();
-			env.gain.setValueAtTime(0.0001, t + offset);
-			env.gain.linearRampToValueAtTime(0.12, t + offset + 0.01);
-			env.gain.exponentialRampToValueAtTime(0.0001, t + offset + 0.4);
-			osc.connect(env);
-			env.connect(g.sfx);
-			env.connect(g.hullReverb);
-			osc.start(t + offset);
-			osc.stop(t + offset + 0.44);
-		}
-	}
-}
-
 /** Package 6 sterile pure-fifth motif — intentionally echoed and broken in September. */
 export function sfxInoculationMotif(broken = false) {
 	const g = activeAudio();
 	if (!g) return;
 	const t = g.ctx.currentTime;
-	const notes = broken ? [293.66, 440, 277.18] : [293.66, 440, 587.33];
+	const notes = broken ? [key * 4, key * 6, key * 3.775] : [key * 4, key * 6, key * 8];
 	notes.forEach((freq, idx) => {
 		const at = t + idx * 0.22;
 		const osc = g.ctx.createOscillator();

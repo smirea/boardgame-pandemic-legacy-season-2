@@ -2,7 +2,9 @@
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { breakthrough, pack } from '@repo/game';
 	import type { World } from '@repo/game';
+	import { untrack } from 'svelte';
 	import { fade, scale } from 'svelte/transition';
+	import { sfxMoment } from '#lib/audio/sfx.ts';
 	import { legacyScans } from '#lib/scans.generated.ts';
 	import { originals, scanUrl } from '#lib/scans.svelte.ts';
 	import { cityName } from './labels.svelte.ts';
@@ -28,8 +30,49 @@
 	const increased = $derived(!increasing);
 
 	const rates = pack.numbers.infectionRates;
-	const currentRate = $derived(game ? (rates[game.rateIndex] ?? rates.at(-1)!) : rates[0]!);
-	const earlierRate = $derived(game ? (rates[Math.max(game.rateIndex - 1, 0)] ?? currentRate) : rates[0]!);
+	const currentAt = $derived(Math.min(game?.rateIndex ?? 0, rates.length - 1));
+	// Where the marker stood before this Epidemic: one space back, or the same space when it was already on the last.
+	// A browser that opens in the middle of one never saw that, so it takes the Epidemic count's word for it.
+	let seen = untrack(() => ({ epidemics: game?.epidemics ?? 0, at: currentAt }));
+	let earlierAt = $state(untrack(() => ((game?.epidemics ?? 0) > currentAt ? currentAt : Math.max(currentAt - 1, 0))));
+	$effect.pre(() => {
+		const now = { epidemics: game?.epidemics ?? 0, at: currentAt };
+		untrack(() => {
+			if (now.epidemics > seen.epidemics) earlierAt = Math.min(seen.at, now.at);
+			seen = now;
+		});
+	});
+	const currentRate = $derived(rates[currentAt]!);
+	const earlierRate = $derived(rates[earlierAt]!);
+
+	// The first step as it is shown: the track opens under it with the marker where it stood, the marker moves on a
+	// space, and the track closes again before the card stands aside for the second step.
+	let track = $state<'shut' | 'open' | 'moved' | 'closing'>('shut');
+	const markerAt = $derived(track === 'open' ? earlierAt : currentAt);
+	$effect(() => {
+		if (!increasing) {
+			track = 'shut';
+			return;
+		}
+		// Only the step beginning starts the sequence: nothing else that changes while it plays may start it again.
+		return untrack(() => {
+			const rises = currentRate > earlierRate;
+			track = 'open';
+			sfxMoment('rateOpen');
+			const timers = [
+				setTimeout(() => {
+					track = 'moved';
+					sfxMoment('rateMove');
+				}, 750),
+				setTimeout(() => rises && sfxMoment('rateRise'), 1300),
+				setTimeout(() => {
+					track = 'closing';
+					sfxMoment('rateShut');
+				}, 2450),
+			];
+			return () => timers.forEach(clearTimeout);
+		});
+	});
 	const wearingOff = $derived(world.campaign.rules.includes('epidemicFromStorage'));
 	const fromStorage = $derived(wearingOff && world.campaign.stored.infection.length > 0);
 	const jade = $derived(breakthrough(world.campaign, 'jade'));
@@ -99,6 +142,8 @@
 								<span class="pill">
 									{#if increaseState === 'done'}
 										Rate {currentRate}
+									{:else if track === 'open'}
+										Rate {earlierRate}
 									{:else if earlierRate === currentRate}
 										Rate stays {currentRate}
 									{:else}
@@ -107,6 +152,23 @@
 								</span>
 							</div>
 							<p><RichText text="Move the infection rate marker forward 1 space." /></p>
+							<div class="rate-run" class:open={track === 'open' || track === 'moved'}>
+								<div
+									class="rate-track"
+									class:moved={track === 'moved'}
+									role="img"
+									aria-label={`Infection rate track: ${rates[markerAt]} cards a turn`}
+									data-testid="epidemic-rate-track"
+									data-at={markerAt}
+									style:--at={markerAt}
+									style:--spaces={rates.length}
+								>
+									{#each rates as rate, index (index)}
+										<span class="space" class:passed={index < markerAt} class:now={index === markerAt}>{rate}</span>
+									{/each}
+									<span class="marker" aria-hidden="true">☣</span>
+								</div>
+							</div>
 						</div>
 					</li>
 
@@ -357,13 +419,15 @@
 
 	.row {
 		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
 		justify-content: space-between;
-		gap: 0.4rem;
+		gap: 0.25rem 0.4rem;
 		margin-bottom: 0.2rem;
 	}
 
 	.row b {
+		white-space: nowrap;
 		font-size: 0.88rem;
 		letter-spacing: 0.04em;
 		text-transform: uppercase;
@@ -377,6 +441,7 @@
 
 	.pills {
 		display: inline-flex;
+		flex-wrap: wrap;
 		align-items: center;
 		gap: 0.3rem;
 	}
@@ -416,6 +481,87 @@
 		border-color: rgb(216 198 155 / 0.55);
 		background: linear-gradient(90deg, rgb(237 225 192 / 0.14), rgb(180 52 40 / 0.16));
 		transform: rotate(-0.7deg);
+	}
+
+	/* The track folds open under the step and shut again: a row that grows from nothing. */
+	.rate-run {
+		display: grid;
+		grid-template-rows: 0fr;
+		opacity: 0;
+		transition:
+			grid-template-rows 320ms cubic-bezier(0.2, 0.9, 0.25, 1),
+			opacity 240ms ease;
+	}
+
+	.rate-run.open {
+		grid-template-rows: 1fr;
+		opacity: 1;
+	}
+
+	.rate-track {
+		position: relative;
+		display: grid;
+		grid-template-columns: repeat(var(--spaces), 1fr);
+		gap: 2px;
+		min-height: 0;
+		overflow: hidden;
+	}
+
+	.rate-run.open .rate-track {
+		margin-top: 0.5rem;
+		padding: 1.15rem 0 0.1rem;
+	}
+
+	.space {
+		display: grid;
+		place-items: center;
+		height: 1.35rem;
+		border-radius: 3px;
+		background: rgb(243 230 214 / 0.1);
+		color: #d9c8b4;
+		font-size: 0.72rem;
+		font-weight: 700;
+		transition:
+			background 300ms ease 380ms,
+			color 300ms ease 380ms;
+	}
+
+	.space.passed {
+		opacity: 0.55;
+	}
+
+	.space.now {
+		background: #b43428;
+		color: #fff1e4;
+	}
+
+	.marker {
+		position: absolute;
+		top: 0;
+		left: calc((var(--at) + 0.5) * 100% / var(--spaces));
+		transform: translateX(-50%);
+		color: #ffd166;
+		font-size: 1rem;
+		line-height: 1;
+		text-shadow: 0 0 0.5em rgb(255 120 60 / 0.9);
+		transition: left 460ms cubic-bezier(0.45, 0, 0.25, 1);
+	}
+
+	/* The marker is picked up, carried over and set down, once. */
+	.rate-track.moved .marker {
+		animation: marker-hop 460ms ease-out 1;
+	}
+
+	@keyframes marker-hop {
+		0% {
+			transform: translateX(-50%) translateY(0) scale(1);
+		}
+		45% {
+			transform: translateX(-50%) translateY(-0.45rem) scale(1.35);
+		}
+		100% {
+			transform: translateX(-50%) translateY(0) scale(1);
+		}
 	}
 
 	.body p {

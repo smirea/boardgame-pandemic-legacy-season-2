@@ -26,7 +26,7 @@ export type TurnAdminSource = {
 export type DeskTask = 'draw' | 'flip' | 'bottom' | 'intensify' | 'done';
 
 /** How long the rate marker's move is shown before an Epidemic's bottom card may be drawn. */
-const INCREASE_MS = 1200;
+export const INCREASE_MS = 3000;
 
 const SKIP = { type: 'DECIDE', decide: { d: 'skip' } } as const satisfies Command;
 

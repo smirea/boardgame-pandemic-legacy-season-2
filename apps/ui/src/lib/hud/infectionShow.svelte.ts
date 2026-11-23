@@ -10,6 +10,8 @@ type Hidden = { city: CityId | null; piece: Piece | 'stockpile'; amount: number 
 
 type Beat = {
 	seq: number;
+	/** What the card does, when that has a sound of its own. A cube lost is heard as the cube leaves. */
+	effect: Extract<ShowCue, { t: 'strike' }>['effect'] | null;
 	/** A Gather card names no city, so the camera stays where it is. */
 	city: CityId | null;
 	card: InfectionCard;
@@ -20,6 +22,15 @@ type Beat = {
 	pulse: FxKind | null;
 	incidents: { city: CityId; hidden: Hidden[] }[];
 };
+
+/** A moment of the show that is heard: the card turning over, what it does to its city, and an incident's three beats. */
+export type ShowCue =
+	| { t: 'flip' }
+	| { t: 'strike'; effect: 'hollow' | 'outbreak' | 'blocked' | 'gather' }
+	| { t: 'skull' }
+	| { t: 'plague' }
+	/** A marker lands on the incident track. `waiting` is how many more the state holds that have not landed. */
+	| { t: 'marker'; waiting: number };
 
 export type DrawnInfection = { key: number; card: InfectionCard; note: string; alarm: boolean; city: CityId | null };
 export type Lag = { cities: Partial<Record<CityId, Pieces>>; stockpile: number };
@@ -80,7 +91,10 @@ export class InfectionShow {
 	private held = false;
 	private clearTimer: ReturnType<typeof setTimeout> | null = null;
 
-	constructor(private pulse: (city: CityId, kind: FxKind) => void) {}
+	constructor(
+		private pulse: (city: CityId, kind: FxKind) => void,
+		private cue: (cue: ShowCue) => void,
+	) {}
 
 	readonly lag: Lag = $derived.by(() => {
 		const lag: Lag = { cities: {}, stockpile: 0 };
@@ -207,6 +221,7 @@ export class InfectionShow {
 				const pulse = entry.effect === 'supply' ? 'infect' : entry.effect === 'blocked' ? null : entry.effect;
 				const beat: Beat = {
 					seq: entry.seq,
+					effect: entry.effect === 'supply' || entry.effect === 'plague' ? null : entry.effect,
 					city: entry.city,
 					card,
 					note: NOTE[entry.effect],
@@ -222,6 +237,7 @@ export class InfectionShow {
 				if (!card) continue;
 				beats.push({
 					seq: entry.seq,
+					effect: 'gather',
 					city: null,
 					card,
 					note: 'next city gets a Hollow Man',
@@ -235,6 +251,7 @@ export class InfectionShow {
 				if (!card) continue;
 				beats.push({
 					seq: entry.seq,
+					effect: null,
 					city: entry.city,
 					card,
 					note: 'epidemic',
@@ -290,8 +307,10 @@ export class InfectionShow {
 				...this.stack,
 			];
 			if (beat.city) this.focus = beat.city;
+			this.cue({ t: 'flip' });
 			if (!(await wait(slow ? 1050 : 630))) return;
 			this.reveal(beat.strike);
+			if (beat.effect) this.cue({ t: 'strike', effect: beat.effect });
 			if (beat.pulse && beat.city) this.pulse(beat.city, beat.pulse);
 			for (const incident of beat.incidents) {
 				if (incident.city !== this.focus) {
@@ -300,14 +319,17 @@ export class InfectionShow {
 				}
 				if (!(await wait(450))) return;
 				this.skull = { key: beat.seq, city: incident.city, at: this.lagged(incident.city, 'plague') };
+				this.cue({ t: 'skull' });
 				if (!(await wait(1575))) return;
 				this.skull = null;
 				this.reveal(incident.hidden);
+				this.cue({ t: 'plague' });
 				this.pulse(incident.city, 'plague');
 				if (!(await wait(450))) return;
 				this.surge = true;
 				if (!(await wait(675))) return;
 				this.heldIncidents -= 1;
+				this.cue({ t: 'marker', waiting: this.heldIncidents });
 				if (!(await wait(2250))) return;
 				this.surge = false;
 				if (!(await wait(525))) return;

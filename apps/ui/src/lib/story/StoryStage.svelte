@@ -12,7 +12,7 @@
 		sfxEpidemic,
 		sfxExposure,
 		sfxInoculationMotif,
-		sfxRadioTune,
+		sfxRadioDecode,
 		sfxScratchBox,
 		sfxUtopiaCorrupt,
 		sfxVialClink,
@@ -100,7 +100,7 @@
 				sfxCubeDrop('hollow');
 				break;
 			case 'radioDecode':
-				sfxRadioTune(true);
+				sfxRadioDecode();
 				break;
 			case 'utopiaCorrupt':
 				sfxUtopiaCorrupt();

@@ -15,6 +15,8 @@ export type Mood = {
 	sea: number;
 	/** An Epidemic is being resolved. */
 	alarm: boolean;
+	/** Infection cards are being flipped: the opening of a game, and the end of every turn. */
+	infecting: boolean;
 	/** Hollow Men walk the board. */
 	hollow: boolean;
 	/** The inoculation of Package 6 still holds. */
@@ -26,7 +28,7 @@ export type Mood = {
 export const tensionOf = (incidents: number, epidemics: number) =>
 	Math.min(1, Math.min(1, incidents / 7) * 0.58 + Math.min(1, epidemics / 5) * 0.42);
 
-const dreadOf = (mood: Mood) => Math.min(1, TONES[mood.tone].dread + mood.tension * 0.5);
+const dreadOf = (mood: Mood) => Math.min(1, TONES[mood.tone].dread + mood.tension * 0.5 + (mood.infecting ? 0.25 : 0));
 
 const hz = (root: number, semitones: number) => root * 2 ** (semitones / 12);
 
@@ -225,18 +227,20 @@ export class Score {
 		// The pad's second voice sours as the game goes wrong: flat enough to beat, then a fifth becomes a tritone.
 		const sour = ten > 0.62 ? (tone.drone === 7 ? 1 : 0.4) : ten > 0.35 ? 0.4 : 0;
 		const tintAt = jolt?.tint ?? (theme ? pitch(scaleOf(tone, ten), theme.tint) : 7);
-		const droneAt = jolt?.drone ?? tone.drone - sour;
+		// Through an Infect step the pad broods: its second voice sinks to a tritone, it darkens and it swells.
+		const brood = mood.infecting && !jolt;
+		const droneAt = jolt?.drone ?? (brood ? (tone.drone === 6 ? 5.6 : 6) : tone.drone - sour);
 		for (const { osc, note, octave } of this.pad) {
 			if (note === 'root') osc.frequency.setTargetAtTime(tone.root * octave, now, glide);
-			else osc.frequency.setTargetAtTime(hz(tone.root * octave, droneAt), now, snap);
+			else osc.frequency.setTargetAtTime(hz(tone.root * octave, droneAt), now, brood ? 0.5 : snap);
 		}
 		this.safe.frequency.setTargetAtTime(tone.root * 3, now, glide);
 		this.tint.frequency.setTargetAtTime(hz(tone.root * 4, tintAt), now, snap);
 		this.tintGain.gain.setTargetAtTime(jolt ? 0.018 : theme && !mood.hush ? 0.013 : 0.0001, now, jolt ? 0.04 : 1.2);
 
-		const open = (340 + ten * 1100) * tone.light * (mood.hush ? 0.65 : 1) * (jolt?.light ?? 1);
+		const open = (340 + ten * 1100) * tone.light * (mood.hush ? 0.65 : 1) * (jolt?.light ?? 1) * (brood ? 0.72 : 1);
 		this.padFilter.frequency.setTargetAtTime(Math.min(2600, open), now, jolt ? 0.05 : 1.4);
-		this.padGain.gain.setTargetAtTime((0.065 + ten * 0.055) * (jolt ? 1.3 : 1), now, jolt ? 0.05 : 1.6);
+		this.padGain.gain.setTargetAtTime((0.065 + ten * 0.055) * (jolt ? 1.3 : brood ? 1.2 : 1), now, jolt ? 0.05 : 1.6);
 		this.safeGain.gain.setTargetAtTime(mood.safe ? 0.03 : 0.0001, now, 1.2);
 
 		// Still weather is slow and low. Dread quickens the waves and the gusts and whitens their crests.
@@ -261,7 +265,8 @@ export class Score {
 			this.melody = this.cut(this.melody);
 			this.life = this.cut(this.life);
 		}
-		if (before.alarm && !mood.alarm) this.settle(now);
+		if (mood.infecting && !before.infecting) this.melody = this.cut(this.melody);
+		if ((before.alarm && !mood.alarm) || (before.infecting && !mood.infecting)) this.settle(now);
 		this.apply(1.6);
 	}
 
@@ -367,9 +372,9 @@ export class Score {
 		const slow = 1 + (1 - dread) * 0.9;
 
 		// A heartbeat under a game going wrong, racing through an Epidemic.
-		if (mood.alarm || ten > 0.22) {
-			const period = mood.alarm ? 0.42 : Math.max(0.72, 2.4 - ten * 1.55);
-			const peak = mood.alarm ? 0.1 : (ten - 0.18) * 0.16;
+		if (mood.alarm || mood.infecting || ten > 0.22) {
+			const period = mood.alarm ? 0.42 : Math.min(mood.infecting ? 1.15 : 9, Math.max(0.72, 2.4 - ten * 1.55));
+			const peak = mood.alarm ? 0.1 : Math.max(mood.infecting ? 0.05 : 0, (ten - 0.18) * 0.16);
 			if (this.nextPulse < now) this.nextPulse = now + 0.05;
 			while (this.nextPulse < now + 1.2) {
 				cry(this.bus, this.main, {
@@ -411,7 +416,8 @@ export class Score {
 			this.nextToll = now + 21 + Math.random() * 9;
 		}
 
-		if (jolted) return;
+		// Nothing sings while the cards are flipped.
+		if (jolted || mood.infecting) return;
 
 		const theme = mood.occupation && !mood.hush ? THEMES[mood.occupation] : null;
 		if (theme && now >= this.nextTheme) {

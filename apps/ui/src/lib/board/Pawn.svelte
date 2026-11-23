@@ -7,7 +7,7 @@
 	import { Spring, Tween } from 'svelte/motion';
 	import type { BoardPoint } from './projection';
 	import { CITY_TOP } from './routes';
-	import { along, follows } from './travel';
+	import { along, follows, tripMs } from './travel';
 	import type { PawnView, Travel } from './types';
 	import Vehicle from './Vehicle.svelte';
 
@@ -45,14 +45,11 @@
 	});
 
 	// Each mode has its own way of crossing the board: a car keeps to the ground, a boat rides the water
-	// and rocks, a plane climbs and banks. Long trips take longer, up to a cap so a turn never drags.
-	const STYLE: Record<Travel, { lift: (distance: number) => number; duration: (distance: number) => number }> = {
-		land: { lift: () => 0.25, duration: distance => Math.min(1500, 520 + distance * 22) },
-		sea: { lift: () => 0, duration: distance => Math.min(1900, 700 + distance * 20) },
-		air: {
-			lift: distance => Math.min(10, 2.5 + distance * 0.16),
-			duration: distance => Math.min(1800, 800 + distance * 11),
-		},
+	// and rocks, a plane climbs and banks.
+	const LIFT: Record<Travel, (distance: number) => number> = {
+		land: () => 0.25,
+		sea: () => 0,
+		air: distance => Math.min(10, 2.5 + distance * 0.16),
 	};
 
 	let from = untrack(() => ({ ...target }));
@@ -87,7 +84,7 @@
 			trip = distance > 3;
 			mode = kind;
 			void travel.set(0, { duration: 0 });
-			void travel.set(1, { duration: trip ? STYLE[kind].duration(distance) : 300 });
+			void travel.set(1, { duration: trip ? tripMs(kind, distance) : 300 });
 		});
 	});
 
@@ -111,7 +108,7 @@
 	const morph = $derived(trip ? Math.min(1, Math.min(travel.current, 1 - travel.current) / 0.14) : 0);
 	const position = $derived.by(() => {
 		const t = travel.current;
-		const lift = trip ? STYLE[mode].lift(distance) : 0.4;
+		const lift = trip ? LIFT[mode](distance) : 0.4;
 		const raised = glow.current * 0.9;
 		const bob = trip && mode === 'sea' ? Math.sin(t * Math.PI * 10) * 0.12 : 0;
 		const base = trip && mode === 'sea' ? CITY_TOP - 0.45 : CITY_TOP;

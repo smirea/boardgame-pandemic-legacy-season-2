@@ -122,6 +122,7 @@
 			occupation: null,
 			sea: 0.85,
 			alarm: false,
+			infecting: false,
 			hollow: step.audio.hollowPresent,
 			safe: step.audio.inoculationSafe && !step.audio.wearingOff,
 			hush: theaterOpen,

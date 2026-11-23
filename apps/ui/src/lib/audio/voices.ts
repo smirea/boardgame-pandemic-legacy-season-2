@@ -183,6 +183,8 @@ export type Burst = {
 	level: number;
 	attack?: number;
 	filter: readonly [type: BiquadFilterType, hz: number, q?: number];
+	/** Hz the filter has moved to by the end. */
+	sweepTo?: number;
 	echo?: number;
 };
 
@@ -193,7 +195,8 @@ export function burst(bus: ScoreBus, dest: AudioNode, b: Burst) {
 	src.loop = true;
 	const filter = ctx.createBiquadFilter();
 	filter.type = b.filter[0];
-	filter.frequency.value = b.filter[1];
+	filter.frequency.setValueAtTime(b.filter[1], b.at);
+	if (b.sweepTo) filter.frequency.exponentialRampToValueAtTime(b.sweepTo, b.at + b.length);
 	filter.Q.value = b.filter[2] ?? 1;
 	const env = quiet(ctx);
 	const attack = b.attack ?? 0.006;

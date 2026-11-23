@@ -20,6 +20,7 @@
 	} from 'three';
 	import type { PerspectiveCamera } from 'three';
 	import type { OrbitControls as OrbitControlsImpl } from 'three/examples/jsm/controls/OrbitControls.js';
+	import { sfxPiece } from '#lib/audio/sfx.ts';
 	import { typing } from '#lib/keys.ts';
 	import CityMarker from './CityMarker.svelte';
 	import Drawings from './Drawings.svelte';
@@ -35,6 +36,7 @@
 	import { buildLandGeometry, mapToSheet } from './land';
 	import { FRAME, LAND_HEIGHT } from './projection';
 	import FlyingCube from './FlyingCube.svelte';
+	import Shatter from './Shatter.svelte';
 	import { pieceModels } from './models.svelte';
 	import Pawn from './Pawn.svelte';
 	import { fonts, nameWidth, noteSize } from './print.svelte';
@@ -669,8 +671,23 @@
 
 	// Supply cubes are pieces that travel: each one placed, taken or returned flies between the stockpile, the
 	// cities and the pawns, and joins where it lands only when it lands.
-	type Flight = { id: number; from: Holder; to: Holder; delay: number; fromIndex: number; toIndex: number };
+	type Flight = {
+		id: number;
+		from: Holder;
+		to: Holder;
+		delay: number;
+		fromIndex: number;
+		toIndex: number;
+		/** Struck off the board: a cube a city lost goes back to the stockpile. */
+		lost: boolean;
+		/** Its place among the cubes of this batch that make the same sound, so a run of them is heard as a scale. */
+		run: number;
+	};
+	type Loss = { id: number; city: CityId; count: number; delay: number };
 	let flights = $state.raw<Flight[]>([]);
+	let losses = $state.raw<Loss[]>([]);
+	// Struck cubes go one at a time, slowly enough for each to be seen and heard.
+	const LOSS_GAP = 110;
 	let held: SupplySnapshot | null = null;
 	let nextFlight = 1;
 	const snapshot = $derived.by((): SupplySnapshot | null =>
@@ -693,16 +710,31 @@
 			if (moves.length > 60) return;
 			let leaving = 0;
 			let arriving = 0;
+			let handed = 0;
+			let struck = 0;
+			const struckAt = new Map<CityId, Loss>();
 			flights = [
 				...flights,
-				...moves.map((move, index) => ({
-					id: nextFlight++,
-					...move,
-					delay: Math.min(index, 40) * 28,
-					fromIndex: move.from.kind === 'pile' ? before.stockpile - 1 - leaving++ : 0,
-					toIndex: move.to.kind === 'pile' ? before.stockpile + arriving++ : 0,
-				})),
+				...moves.map((move): Flight => {
+					const lost = move.from.kind === 'city' && move.to.kind === 'pile';
+					const delay = lost ? struck * LOSS_GAP : Math.min(handed, 40) * 28;
+					if (move.from.kind === 'city' && lost) {
+						const loss = struckAt.get(move.from.city) ?? { id: nextFlight++, city: move.from.city, count: 0, delay };
+						loss.count++;
+						struckAt.set(move.from.city, loss);
+					}
+					return {
+						id: nextFlight++,
+						...move,
+						delay,
+						fromIndex: move.from.kind === 'pile' ? before.stockpile - 1 - leaving++ : 0,
+						toIndex: move.to.kind === 'pile' ? before.stockpile + arriving++ : 0,
+						lost,
+						run: lost ? struck++ : handed++,
+					};
+				}),
 			];
+			if (struckAt.size) losses = [...losses, ...struckAt.values()];
 		});
 	});
 	const landing = $derived.by(() => {
@@ -713,6 +745,20 @@
 		}
 		return counts;
 	});
+	// A cube is heard as it leaves and as it lands, so the sound is always where the piece is.
+	function launched(flight: Flight) {
+		if (flight.lost) sfxPiece('supplyLost', flight.run);
+		else if (flight.to.kind === 'pawn' && flight.from.kind !== 'pawn') sfxPiece('supplyLift', flight.run);
+	}
+	// Cubes land in the order of their distances, not of their launch, so a run of landings counts itself as it lands.
+	let landed = { run: 0, at: 0 };
+	function arrived(flight: Flight) {
+		const now = performance.now();
+		landed = { run: now - landed.at > 700 ? 0 : landed.run + 1, at: now };
+		if (flight.to.kind === 'city') sfxPiece('supplyPlace', landed.run);
+		else if (flight.to.kind === 'pile') sfxPiece('supplyPile');
+		else if (flight.from.kind === 'pawn') sfxPiece('supplyPass');
+	}
 	function spot(holder: Holder, index: number) {
 		if (holder.kind === 'pile') {
 			const slot = PILE[Math.min(Math.max(0, index), PILE.length - 1)]!;
@@ -847,7 +893,19 @@
 		from={spot(flight.from, flight.fromIndex)}
 		to={spot(flight.to, flight.toIndex)}
 		delay={flight.delay}
+		lost={flight.lost}
+		onlaunch={() => launched(flight)}
+		onarrive={() => arrived(flight)}
 		onland={() => (flights = flights.filter(other => other.id !== flight.id))}
+	/>
+{/each}
+
+{#each losses as loss (loss.id)}
+	<Shatter
+		at={spot({ kind: 'city', city: loss.city }, 0)}
+		count={loss.count}
+		delay={loss.delay}
+		ondone={() => (losses = losses.filter(other => other.id !== loss.id))}
 	/>
 {/each}
 
