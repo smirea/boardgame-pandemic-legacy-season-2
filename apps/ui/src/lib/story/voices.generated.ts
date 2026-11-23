@@ -465,6 +465,244 @@ export const voiceManifest: Record<string, VoiceEntry> = {
 		"hash": "81181cebe5209a74",
 		"bytes": 132524
 	},
+	"bark_brink_1": {
+		"src": "/voices/bark_brink_1.mp3",
+		"speaker": "mara",
+		"voiceId": "voice_jujh8gxz6iif",
+		"hash": "aaa6474625805c9f",
+		"bytes": 50444
+	},
+	"bark_brink_2": {
+		"src": "/voices/bark_brink_2.mp3",
+		"speaker": "mara",
+		"voiceId": "voice_jujh8gxz6iif",
+		"hash": "fc67385a84a3ec47",
+		"bytes": 43532
+	},
+	"bark_brink_3": {
+		"src": "/voices/bark_brink_3.mp3",
+		"speaker": "mara",
+		"voiceId": "voice_jujh8gxz6iif",
+		"hash": "5b920a36a4ad664d",
+		"bytes": 56204
+	},
+	"bark_connected_1": {
+		"src": "/voices/bark_connected_1.mp3",
+		"speaker": "tomas",
+		"voiceId": "voice_ezdju9l8nges",
+		"hash": "57420e829d9da396",
+		"bytes": 53324
+	},
+	"bark_connected_2": {
+		"src": "/voices/bark_connected_2.mp3",
+		"speaker": "tomas",
+		"voiceId": "voice_ezdju9l8nges",
+		"hash": "0e4fee363209a19a",
+		"bytes": 57068
+	},
+	"bark_connected_3": {
+		"src": "/voices/bark_connected_3.mp3",
+		"speaker": "tomas",
+		"voiceId": "voice_ezdju9l8nges",
+		"hash": "c97b6a914957a2e4",
+		"bytes": 50444
+	},
+	"bark_epitaph_1": {
+		"src": "/voices/bark_epitaph_1.mp3",
+		"speaker": "chronicler",
+		"voiceId": "voice_9auwlihc1j6b",
+		"hash": "efe3437877918151",
+		"bytes": 126764
+	},
+	"bark_epitaph_2": {
+		"src": "/voices/bark_epitaph_2.mp3",
+		"speaker": "chronicler",
+		"voiceId": "voice_9auwlihc1j6b",
+		"hash": "b379ae0fb8101bcd",
+		"bytes": 92204
+	},
+	"bark_epitaph_3": {
+		"src": "/voices/bark_epitaph_3.mp3",
+		"speaker": "chronicler",
+		"voiceId": "voice_9auwlihc1j6b",
+		"hash": "00a67865ae3f5611",
+		"bytes": 118412
+	},
+	"bark_epitaph_4": {
+		"src": "/voices/bark_epitaph_4.mp3",
+		"speaker": "chronicler",
+		"voiceId": "voice_9auwlihc1j6b",
+		"hash": "7270b2e59898a5f2",
+		"bytes": 104588
+	},
+	"bark_firstIncident_1": {
+		"src": "/voices/bark_firstIncident_1.mp3",
+		"speaker": "kai",
+		"voiceId": "voice_mlv0fgmm505j",
+		"hash": "5c92f22215b05298",
+		"bytes": 47564
+	},
+	"bark_firstIncident_2": {
+		"src": "/voices/bark_firstIncident_2.mp3",
+		"speaker": "kai",
+		"voiceId": "voice_mlv0fgmm505j",
+		"hash": "44d4bacfc673f698",
+		"bytes": 34892
+	},
+	"bark_firstIncident_3": {
+		"src": "/voices/bark_firstIncident_3.mp3",
+		"speaker": "kai",
+		"voiceId": "voice_mlv0fgmm505j",
+		"hash": "2736be6969c9cb75",
+		"bytes": 35468
+	},
+	"bark_hollow_1": {
+		"src": "/voices/bark_hollow_1.mp3",
+		"speaker": "kai",
+		"voiceId": "voice_mlv0fgmm505j",
+		"hash": "ba4aa2efa1ce9194",
+		"bytes": 44972
+	},
+	"bark_hollow_2": {
+		"src": "/voices/bark_hollow_2.mp3",
+		"speaker": "kai",
+		"voiceId": "voice_mlv0fgmm505j",
+		"hash": "0f4129cb0f8de66d",
+		"bytes": 46412
+	},
+	"bark_hollow_3": {
+		"src": "/voices/bark_hollow_3.mp3",
+		"speaker": "kai",
+		"voiceId": "voice_mlv0fgmm505j",
+		"hash": "7017b9fa388cc8fb",
+		"bytes": 30284
+	},
+	"bark_lost_1": {
+		"src": "/voices/bark_lost_1.mp3",
+		"speaker": "mara",
+		"voiceId": "voice_jujh8gxz6iif",
+		"hash": "644f4774ff0b816b",
+		"bytes": 46988
+	},
+	"bark_lost_2": {
+		"src": "/voices/bark_lost_2.mp3",
+		"speaker": "mara",
+		"voiceId": "voice_jujh8gxz6iif",
+		"hash": "f859133394c6a182",
+		"bytes": 35468
+	},
+	"bark_lost_3": {
+		"src": "/voices/bark_lost_3.mp3",
+		"speaker": "mara",
+		"voiceId": "voice_jujh8gxz6iif",
+		"hash": "459a47ab45ac29a8",
+		"bytes": 38348
+	},
+	"bark_lowDeck_1": {
+		"src": "/voices/bark_lowDeck_1.mp3",
+		"speaker": "tomas",
+		"voiceId": "voice_ezdju9l8nges",
+		"hash": "f72fafa6bb69bfda",
+		"bytes": 46988
+	},
+	"bark_lowDeck_2": {
+		"src": "/voices/bark_lowDeck_2.mp3",
+		"speaker": "tomas",
+		"voiceId": "voice_ezdju9l8nges",
+		"hash": "ae8658042acebf1b",
+		"bytes": 44972
+	},
+	"bark_lowDeck_3": {
+		"src": "/voices/bark_lowDeck_3.mp3",
+		"speaker": "tomas",
+		"voiceId": "voice_ezdju9l8nges",
+		"hash": "f674d41d49793f9a",
+		"bytes": 53612
+	},
+	"bark_objective_1": {
+		"src": "/voices/bark_objective_1.mp3",
+		"speaker": "mara",
+		"voiceId": "voice_jujh8gxz6iif",
+		"hash": "ea8678e61623f8bd",
+		"bytes": 41228
+	},
+	"bark_objective_2": {
+		"src": "/voices/bark_objective_2.mp3",
+		"speaker": "mara",
+		"voiceId": "voice_jujh8gxz6iif",
+		"hash": "2f9dbae261895e2c",
+		"bytes": 34028
+	},
+	"bark_objective_3": {
+		"src": "/voices/bark_objective_3.mp3",
+		"speaker": "mara",
+		"voiceId": "voice_jujh8gxz6iif",
+		"hash": "c7848f2d1f4dbc57",
+		"bytes": 32012
+	},
+	"bark_outbreak_1": {
+		"src": "/voices/bark_outbreak_1.mp3",
+		"speaker": "tomas",
+		"voiceId": "voice_ezdju9l8nges",
+		"hash": "4533becf0efc7126",
+		"bytes": 65708
+	},
+	"bark_outbreak_2": {
+		"src": "/voices/bark_outbreak_2.mp3",
+		"speaker": "tomas",
+		"voiceId": "voice_ezdju9l8nges",
+		"hash": "85c87bea4131b7d2",
+		"bytes": 54188
+	},
+	"bark_outbreak_3": {
+		"src": "/voices/bark_outbreak_3.mp3",
+		"speaker": "tomas",
+		"voiceId": "voice_ezdju9l8nges",
+		"hash": "bd10e1b8032d5c1b",
+		"bytes": 55628
+	},
+	"bark_stockpileDry_1": {
+		"src": "/voices/bark_stockpileDry_1.mp3",
+		"speaker": "mara",
+		"voiceId": "voice_jujh8gxz6iif",
+		"hash": "a10e26f03682ce04",
+		"bytes": 52172
+	},
+	"bark_stockpileDry_2": {
+		"src": "/voices/bark_stockpileDry_2.mp3",
+		"speaker": "mara",
+		"voiceId": "voice_jujh8gxz6iif",
+		"hash": "575d35279dcbf44b",
+		"bytes": 44972
+	},
+	"bark_stockpileDry_3": {
+		"src": "/voices/bark_stockpileDry_3.mp3",
+		"speaker": "mara",
+		"voiceId": "voice_jujh8gxz6iif",
+		"hash": "541e9f10cb64beef",
+		"bytes": 56204
+	},
+	"bark_won_1": {
+		"src": "/voices/bark_won_1.mp3",
+		"speaker": "mara",
+		"voiceId": "voice_jujh8gxz6iif",
+		"hash": "d5acaf27751d97b4",
+		"bytes": 37772
+	},
+	"bark_won_2": {
+		"src": "/voices/bark_won_2.mp3",
+		"speaker": "mara",
+		"voiceId": "voice_jujh8gxz6iif",
+		"hash": "b6d490b964ad9698",
+		"bytes": 46988
+	},
+	"bark_won_3": {
+		"src": "/voices/bark_won_3.mp3",
+		"speaker": "mara",
+		"voiceId": "voice_jujh8gxz6iif",
+		"hash": "be123501e5630ccb",
+		"bytes": 49004
+	},
 	"door11_01": {
 		"src": "/voices/door11_01.mp3",
 		"speaker": "mara",

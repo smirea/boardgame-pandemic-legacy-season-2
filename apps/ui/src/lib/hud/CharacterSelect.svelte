@@ -364,7 +364,9 @@
 										<span class="trait-icon"><CardIcon path={SCAR_ICON} size="0.72rem" /></span>
 									{/if}
 									<span class="sr-only">{TRAIT_KIND[trait.kind]}{trait.struck ? ', covered by a scar' : ''}: </span>
-									<b>{trait.name}</b>
+									<b
+										>{trait.name}{#if trait.taken}<i class="taken">{trait.taken}</i>{/if}</b
+									>
 									<span class="text">{trait.text}</span>
 								</span>
 							{/each}
@@ -838,6 +840,13 @@
 
 	.line.scar .trait-icon {
 		color: var(--ink-danger);
+	}
+
+	.taken {
+		margin-left: 0.4em;
+		font-style: italic;
+		font-weight: 400;
+		opacity: 0.75;
 	}
 
 	.line b {

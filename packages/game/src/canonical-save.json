@@ -8,23 +8,104 @@
 			"attempt": 2,
 			"rationing": 2,
 			"results": [
-				{ "month": 0, "attempt": 1, "won": false, "gridCities": 0, "rationing": 4, "characters": [] },
-				{ "month": 1, "attempt": 1, "won": true, "gridCities": 10, "rationing": 4, "characters": [] },
-				{ "month": 2, "attempt": 1, "won": true, "gridCities": 10, "rationing": 2, "characters": [] },
-				{ "month": 3, "attempt": 1, "won": false, "gridCities": 11, "rationing": 0, "characters": [] },
-				{ "month": 3, "attempt": 2, "won": true, "gridCities": 11, "rationing": 2, "characters": [] },
-				{ "month": 4, "attempt": 1, "won": false, "gridCities": 11, "rationing": 0, "characters": [] },
-				{ "month": 4, "attempt": 2, "won": false, "gridCities": 11, "rationing": 2, "characters": [] },
-				{ "month": 5, "attempt": 1, "won": true, "gridCities": 12, "rationing": 4, "characters": [] },
-				{ "month": 6, "attempt": 1, "won": false, "gridCities": 13, "rationing": 2, "characters": [] },
-				{ "month": 6, "attempt": 2, "won": true, "gridCities": 13, "rationing": 4, "characters": [] },
+				{
+					"month": 0,
+					"attempt": 1,
+					"won": false,
+					"gridCities": 0,
+					"rationing": 4,
+					"characters": [],
+					"chronicle": null
+				},
+				{
+					"month": 1,
+					"attempt": 1,
+					"won": true,
+					"gridCities": 10,
+					"rationing": 4,
+					"characters": [],
+					"chronicle": null
+				},
+				{
+					"month": 2,
+					"attempt": 1,
+					"won": true,
+					"gridCities": 10,
+					"rationing": 2,
+					"characters": [],
+					"chronicle": null
+				},
+				{
+					"month": 3,
+					"attempt": 1,
+					"won": false,
+					"gridCities": 11,
+					"rationing": 0,
+					"characters": [],
+					"chronicle": null
+				},
+				{
+					"month": 3,
+					"attempt": 2,
+					"won": true,
+					"gridCities": 11,
+					"rationing": 2,
+					"characters": [],
+					"chronicle": null
+				},
+				{
+					"month": 4,
+					"attempt": 1,
+					"won": false,
+					"gridCities": 11,
+					"rationing": 0,
+					"characters": [],
+					"chronicle": null
+				},
+				{
+					"month": 4,
+					"attempt": 2,
+					"won": false,
+					"gridCities": 11,
+					"rationing": 2,
+					"characters": [],
+					"chronicle": null
+				},
+				{
+					"month": 5,
+					"attempt": 1,
+					"won": true,
+					"gridCities": 12,
+					"rationing": 4,
+					"characters": [],
+					"chronicle": null
+				},
+				{
+					"month": 6,
+					"attempt": 1,
+					"won": false,
+					"gridCities": 13,
+					"rationing": 2,
+					"characters": [],
+					"chronicle": null
+				},
+				{
+					"month": 6,
+					"attempt": 2,
+					"won": true,
+					"gridCities": 13,
+					"rationing": 4,
+					"characters": [],
+					"chronicle": null
+				},
 				{
 					"month": 7,
 					"attempt": 1,
 					"won": true,
 					"gridCities": 14,
 					"rationing": 2,
-					"characters": ["char-2", "char-3", "char-4"]
+					"characters": ["char-2", "char-3", "char-4"],
+					"chronicle": null
 				},
 				{
 					"month": 8,
@@ -32,7 +113,8 @@
 					"won": true,
 					"gridCities": 27,
 					"rationing": 0,
-					"characters": ["char-4", "char-3", "char-2"]
+					"characters": ["char-4", "char-3", "char-2"],
+					"chronicle": null
 				},
 				{
 					"month": 9,
@@ -40,7 +122,8 @@
 					"won": false,
 					"gridCities": 27,
 					"rationing": 0,
-					"characters": ["char-4", "char-3", "char-2"]
+					"characters": ["char-4", "char-3", "char-2"],
+					"chronicle": null
 				}
 			],
 			"rules": ["epidemicScaling", "storage", "forsaken", "epidemicFromStorage", "hollowSetup"],
@@ -271,6 +354,7 @@
 					"exposure": 2,
 					"dead": false,
 					"diedAt": null,
+					"scarred": {},
 					"worker": false,
 					"carrier": false,
 					"player": null
@@ -292,6 +376,7 @@
 					"exposure": 1,
 					"dead": false,
 					"diedAt": null,
+					"scarred": {},
 					"worker": false,
 					"carrier": false,
 					"player": "6a3b1fbc-2c20-492c-b4a5-b8d38d215785"
@@ -313,6 +398,7 @@
 					"exposure": 3,
 					"dead": false,
 					"diedAt": null,
+					"scarred": {},
 					"worker": false,
 					"carrier": false,
 					"player": "f88f4a5b-6cc8-4ad9-bc34-865db7697f07"
@@ -334,6 +420,7 @@
 					"exposure": 4,
 					"dead": false,
 					"diedAt": null,
+					"scarred": {},
 					"worker": false,
 					"carrier": false,
 					"player": "2e1f6d45-fd2a-4639-be2f-e4f28072d4bc"
@@ -350,6 +437,7 @@
 					"exposure": 0,
 					"dead": false,
 					"diedAt": null,
+					"scarred": {},
 					"worker": false,
 					"carrier": false,
 					"player": null
@@ -371,6 +459,7 @@
 					"exposure": 0,
 					"dead": false,
 					"diedAt": null,
+					"scarred": {},
 					"worker": false,
 					"carrier": false,
 					"player": null

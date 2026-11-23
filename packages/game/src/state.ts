@@ -67,6 +67,8 @@ export type Character = {
 	exposure: number;
 	dead: boolean;
 	diedAt: CityId | null;
+	/** Where and in which month each scar was taken. A scar a Legacy card handed out has no place. */
+	scarred: Partial<Record<ScarId, { at: CityId | null; month: number }>>;
 	worker: boolean;
 	carrier: boolean;
 	/** The person who played the character last, so the table deals it back to them. */
@@ -89,6 +91,29 @@ export type GameResult = {
 	rationing: number;
 	/** Who played, in seat order. */
 	characters: CharacterId[];
+	/** Null for a game played before the logbook was kept. */
+	chronicle: GameChronicle | null;
+};
+
+/**
+ * What a game left behind, for the logbook. Characters are written down by name, since a prologue game's characters
+ * are rolled back with everything else it did.
+ */
+export type GameChronicle = {
+	reason: string;
+	turns: number;
+	incidents: number;
+	epidemics: number;
+	/** Each character played and the person who played it, in seat order. */
+	crew: { character: string; job: JobId | null; player: string | null }[];
+	deaths: { character: string; at: CityId }[];
+	scars: { character: string; scar: ScarId; at: CityId | null }[];
+	objectives: ObjectiveId[];
+	opened: SealKey[];
+	built: { city: CityId; structure: StructureKind }[];
+	connected: CityId[];
+	revealed: RegionId[];
+	population: { city: CityId; delta: number; reason: PopulationReason }[];
 };
 
 /** A Legacy card or opened bundle as read, or one thing it unlocked, worded for its heading (`briefingSections`). */
@@ -179,7 +204,8 @@ export type Player = {
 export type Decision =
 	| { t: 'discard'; seat: SeatId; count: number }
 	/** A null seat means the group chooses which character takes it. */
-	| { t: 'scar'; seat: SeatId | null }
+	/** `at` is where the exposure that gave the scar happened. A scar a Legacy card hands out has no seat and no place. */
+	| { t: 'scar'; seat: SeatId | null; at: CityId | null }
 	| { t: 'replace'; seat: SeatId }
 	| { t: 'retrieve'; seat: SeatId; filter: 'any' | 'city' }
 	| { t: 'freeEdge'; seat: SeatId; kind: 'land' | 'sea'; ignoreRedLines: boolean }
@@ -220,6 +246,7 @@ export type LogEntry = { seq: number } & (
 	| { t: 'incident'; city: CityId; total: number }
 	| { t: 'exposure'; seat: SeatId; result: 'empty' | 'scar' | 'skull' | 'worker' }
 	| { t: 'death'; seat: SeatId; character: CharacterId; at: CityId }
+	| { t: 'scar'; seat: SeatId; character: CharacterId; scar: ScarId; at: CityId | null }
 	| { t: 'event'; seat: SeatId; event: EventId; detail: string }
 	| { t: 'edge'; a: CityId; b: CityId; kind: 'land' | 'sea' }
 	| { t: 'connected'; city: CityId }

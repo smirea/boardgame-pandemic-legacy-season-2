@@ -13,11 +13,26 @@ export function setSfxKey(hz: number) {
 	key = hz;
 }
 
-function live(): Play | null {
+let hushed = false;
+
+/** Stops every interaction sound while the board shows something nobody is playing, such as a game played back. */
+export function hushSfx(on: boolean) {
+	hushed = on;
+}
+
+/** `level` scales the whole sound, for one heard again and again. */
+function live(level = 1): Play | null {
 	const g = activeAudio();
-	if (!g) return null;
+	if (!g || hushed) return null;
+	let out: AudioNode = g.sfx;
+	if (level !== 1) {
+		const gain = g.ctx.createGain();
+		gain.gain.value = level;
+		gain.connect(g.sfx);
+		out = gain;
+	}
 	return {
-		bus: { ctx: g.ctx, out: g.sfx, cues: g.sfx, reverb: g.hullReverb, noise: g.noise },
+		bus: { ctx: g.ctx, out, cues: out, reverb: g.hullReverb, noise: g.noise },
 		at: g.ctx.currentTime + 0.005,
 		key,
 	};
@@ -29,8 +44,8 @@ export function sfxPiece(id: PieceId, n = 0) {
 	if (p) PIECES[id](p, n);
 }
 
-export function sfxTravel(id: TravelId, seconds: number) {
-	const p = live();
+export function sfxTravel(id: TravelId, seconds: number, level = 1) {
+	const p = live(level);
 	if (p) TRAVEL[id](p, seconds);
 }
 
@@ -40,9 +55,9 @@ export function sfxMoment(id: MomentId) {
 }
 
 /** The action's own sound. False when it has none, since its pieces or its vehicle make it. */
-export function sfxAction(id: ActionId): boolean {
+export function sfxAction(id: ActionId, level = 1): boolean {
 	const sound = ACTIONS[id];
-	const p = sound && live();
+	const p = sound && live(level);
 	if (!p) return false;
 	sound(p);
 	return true;

@@ -30,9 +30,15 @@
 		exit: 'discard' | 'deck';
 		/** A Gather card lies flipped: the next flip names the city that gets a Hollow Man. */
 		gathering: boolean;
+		/** An Epidemic's reshuffle to play: the discard pile is riffled back onto the Infection deck. */
+		shuffle: { key: number; cards: number } | null;
 	};
 
-	let { side, deck, count, left, task, action, name, color, epidemic, stack, exit, gathering }: Props = $props();
+	let { side, deck, count, left, task, action, name, color, epidemic, stack, exit, gathering, shuffle }: Props =
+		$props();
+
+	/** As many card backs as read as a pile being shuffled, however many cards it held. */
+	const RIFFLED = 8;
 
 	// A card comes off the deck with a click on the deck. A step that turns no card over has a button under it.
 	const fromPile = $derived(task === 'draw' || task === 'flip' || task === 'bottom');
@@ -164,6 +170,16 @@
 				</span>
 			</button>
 		{/key}
+		{#if shuffle && deck === 'infection'}
+			{#key shuffle.key}
+				<!-- The discard pile comes in as two halves, is riffled together and drops onto the deck. -->
+				<span class="riffle" aria-hidden="true" data-testid="intensify-riffle" data-cards={shuffle.cards}>
+					{#each { length: Math.min(RIFFLED, Math.max(2, shuffle.cards)) } as _, index (index)}
+						<i class={index % 2 ? 'odd' : 'even'} style:--i={index}></i>
+					{/each}
+				</span>
+			{/key}
+		{/if}
 		<span class="who"><i></i>{name ?? 'Everyone'}</span>
 		{#if go}
 			<button
@@ -254,6 +270,80 @@
 			0.18rem 0.18rem 0 #1d1922,
 			0.36rem 0.36rem 0 #141118,
 			0 0.9rem 1.8rem rgb(0 0 0 / 0.5);
+	}
+
+	/* Over the deck, in its cell of the well. Every card back plays once and ends unseen on the pile. */
+	.riffle {
+		position: relative;
+		grid-area: 1 / 1;
+		z-index: 3;
+		width: 5.6rem;
+		height: 7.6rem;
+		pointer-events: none;
+	}
+
+	.riffle i {
+		position: absolute;
+		inset: 0;
+		border: 2px solid rgb(147 178 54 / 0.7);
+		border-radius: 0.5rem;
+		background: repeating-linear-gradient(135deg, #2c2733 0 0.4rem, #262130 0.4rem 0.8rem);
+		box-shadow: 0 0.3rem 0.7rem rgb(0 0 0 / 0.5);
+		opacity: 0;
+		animation: riffle-even 1500ms cubic-bezier(0.4, 0, 0.3, 1) calc(var(--i) * 55ms) 1 both;
+	}
+
+	.riffle i.odd {
+		animation-name: riffle-odd;
+	}
+
+	/* Each half arrives from its side, hangs a moment, then its cards fall onto the pile one after another. */
+	@keyframes riffle-even {
+		0% {
+			opacity: 0;
+			transform: translate(-7rem, -3rem) rotate(-24deg);
+		}
+		22%,
+		52% {
+			opacity: 1;
+			transform: translate(-2.4rem, calc(-1.4rem - var(--i) * 0.14rem)) rotate(-11deg);
+		}
+		80% {
+			opacity: 1;
+			transform: translate(0, -0.5rem) rotate(0deg);
+		}
+		92% {
+			opacity: 1;
+			transform: none;
+		}
+		100% {
+			opacity: 0;
+			transform: none;
+		}
+	}
+
+	@keyframes riffle-odd {
+		0% {
+			opacity: 0;
+			transform: translate(7rem, -3rem) rotate(24deg);
+		}
+		22%,
+		52% {
+			opacity: 1;
+			transform: translate(2.4rem, calc(-1.4rem - var(--i) * 0.14rem)) rotate(11deg);
+		}
+		80% {
+			opacity: 1;
+			transform: translate(0, -0.5rem) rotate(0deg);
+		}
+		92% {
+			opacity: 1;
+			transform: none;
+		}
+		100% {
+			opacity: 0;
+			transform: none;
+		}
 	}
 
 	.emblem {

@@ -22,7 +22,7 @@ import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'no
 import { dirname, resolve } from 'node:path';
 import { CAST, CAST_LIST } from '../src/lib/story/cast.ts';
 import type { SpeakerId } from '../src/lib/story/cast.ts';
-import { allVoiceBeats, STORY_SCENES } from '../src/lib/story/script.ts';
+import { allVoiceBeats, voiceScene } from '../src/lib/story/script.ts';
 import type { StoryBeat, StoryScene } from '../src/lib/story/script.ts';
 import type { DesignedVoiceEntry, VoiceEntry } from '../src/lib/story/voices.generated.ts';
 
@@ -341,7 +341,7 @@ if (import.meta.main) {
 	let cachedCount = 0;
 
 	for (const item of beats) {
-		const scene = STORY_SCENES[item.sceneId]!;
+		const scene = voiceScene(item.sceneId)!;
 		const voiceId = state.voices[item.beat.speaker]!.voiceId;
 		const hash = beatHash(voiceId, scene, item.beat);
 		const file = resolve(OUT_DIR, `${item.beat.id}.mp3`);
@@ -367,7 +367,7 @@ if (import.meta.main) {
 		while (cursor < pending.length && !firstError) {
 			const item = pending[cursor++]!;
 			const { beat, sceneId } = item;
-			const scene = STORY_SCENES[sceneId]!;
+			const scene = voiceScene(sceneId)!;
 			const voiceId = state.voices[beat.speaker]!.voiceId;
 			const hash = beatHash(voiceId, scene, beat);
 			const file = resolve(OUT_DIR, `${beat.id}.mp3`);

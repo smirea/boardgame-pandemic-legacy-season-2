@@ -33,7 +33,7 @@ import {
 } from './helpers';
 import type { CardId, CharacterId, CityId, SeatId } from './ids';
 import { shuffle } from './rng';
-import type { Bought, Campaign, Character, ExposureBox, Upkeep, World } from './state';
+import type { Bought, Campaign, Character, ExposureBox, GameChronicle, LogEntry, Upkeep, World } from './state';
 
 const numbers = pack.numbers;
 
@@ -173,6 +173,7 @@ export function createCharacter(
 		exposure: card?.exposure ?? 0,
 		dead: false,
 		diedAt: null,
+		scarred: {},
 		worker: input.worker ?? false,
 		carrier: false,
 		player: null,
@@ -656,6 +657,40 @@ export function refundPurchase(world: World, index: number) {
 	}
 }
 
+/** The game just played as the logbook keeps it, read off its log before the board is cleared. */
+function chronicleOf(world: World): GameChronicle {
+	const { campaign, game, table } = world as {
+		campaign: Campaign;
+		game: NonNullable<World['game']>;
+		table: World['table'];
+	};
+	const name = (id: CharacterId) => campaign.characters[id]?.name ?? 'Someone';
+	const of = <T extends LogEntry['t']>(t: T) =>
+		game.log.filter((entry): entry is Extract<LogEntry, { t: T }> => entry.t === t);
+	return {
+		reason: game.outcome?.reason ?? '',
+		turns: game.turn,
+		incidents: game.incidents,
+		epidemics: game.epidemics,
+		crew: game.seats.map(seat => {
+			const character = campaign.characters[game.players[seat]!.character]!;
+			return {
+				character: character.name,
+				job: character.job,
+				player: table.seats.find(entry => entry.seat === seat)?.name ?? null,
+			};
+		}),
+		deaths: of('death').map(entry => ({ character: name(entry.character), at: entry.at })),
+		scars: of('scar').map(entry => ({ character: name(entry.character), scar: entry.scar, at: entry.at })),
+		objectives: [...game.completed],
+		opened: of('unlock').map(entry => entry.seal),
+		built: of('structure').map(entry => ({ city: entry.city, structure: entry.structure })),
+		connected: of('connected').map(entry => entry.city),
+		revealed: of('reveal').map(entry => entry.region),
+		population: [...(game.upkeep?.populationChanges ?? [])],
+	};
+}
+
 /** Records the result, moves the calendar, and clears the board. */
 export function closeGame(world: World) {
 	const { campaign, game } = world as { campaign: Campaign; game: NonNullable<World['game']> };
@@ -667,6 +702,7 @@ export function closeGame(world: World) {
 		gridCities: gridCityCount(campaign),
 		rationing: campaign.rationing,
 		characters: game.seats.map(seat => game.players[seat]!.character),
+		chronicle: chronicleOf(world),
 	};
 	if (game.prologueRestore) {
 		// Nothing a prologue game does is permanent: scars, deaths, drawn lines and used cards all roll back.

@@ -1,4 +1,5 @@
 import type { Campaign, CityId, Opening, SealKey } from '@repo/game';
+import { BARK_SCENE } from './barks.ts';
 import type { SpeakerId } from './cast.ts';
 
 export type SetPieceId =
@@ -1970,11 +1971,15 @@ export function unlockedStoryScenes(campaign: Campaign): StoryScene[] {
 /** Every spoken beat across the whole game — used by scripts/gen-voices.ts to synthesize Google Gemini TTS audio. */
 export function allVoiceBeats(): { sceneId: string; beat: StoryBeat }[] {
 	const list: { sceneId: string; beat: StoryBeat }[] = [];
-	for (const scene of Object.values(STORY_SCENES)) {
+	for (const scene of [...Object.values(STORY_SCENES), BARK_SCENE]) {
 		for (const entry of scene.beats) list.push({ sceneId: scene.id, beat: entry });
 	}
 	return list;
 }
+
+/** The scene a voiced beat belongs to: one of the story's, or the radio traffic of `barks.ts`. */
+export const voiceScene = (id: string): StoryScene | undefined =>
+	id === BARK_SCENE.id ? BARK_SCENE : STORY_SCENES[id];
 
 /** Verbatim ending story text for Final Reckoning score bands. */
 export const ENDING_TIERS = {

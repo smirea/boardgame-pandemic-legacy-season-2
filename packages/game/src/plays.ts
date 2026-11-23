@@ -695,6 +695,9 @@ export function applyDecide(world: World, decide: Decide) {
 			campaign.scars.splice(campaign.scars.indexOf(decide.scar), 1);
 			if (decide.target === 'job') character.jobScar = decide.scar;
 			else character.slots[decide.target] = { kind: 'scar', id: decide.scar };
+			const { at } = pending as Extract<Decision, { t: 'scar' }>;
+			character.scarred[decide.scar] = { at, month: campaign.month };
+			log(game, { t: 'scar', seat, character: character.id, scar: decide.scar, at });
 			return;
 		}
 		case 'replace': {

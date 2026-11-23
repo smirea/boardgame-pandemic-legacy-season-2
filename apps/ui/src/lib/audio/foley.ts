@@ -372,6 +372,10 @@ export const MOMENTS = {
 		note(p, 0.3, 'horn', 1, 7, 1.9, 0.06);
 		hiss(p, 0, 0.5, 0.05, ['bandpass', 1800, 1.2], { attack: 0.1, sweepTo: 2800 });
 	},
+	infectStep: trim(-6, p => {
+		note(p, 0, 'cello', 1, 0, 0.9, 0.14);
+		thud(p, 0, 82, 0.3, 0.14);
+	}),
 	infestation: trim(-3, p => {
 		note(p, 0, 'cello', 1, 1, 0.75, 0.14);
 		note(p, 0.75, 'cello', 1, 0, 1.3, 0.16);

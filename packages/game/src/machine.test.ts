@@ -1276,6 +1276,7 @@ describe('game end and the campaign', () => {
 					gridCities: 40,
 					rationing: 6,
 					characters: [],
+					chronicle: null,
 				})),
 			);
 		});
@@ -1628,7 +1629,7 @@ test('a scar owed from a forced opening goes to a character the group picks as t
 		],
 	});
 	setUp(owed);
-	expect(gameOf(owed).pending[0]).toEqual({ t: 'scar', seat: null });
+	expect(gameOf(owed).pending[0]).toEqual({ t: 'scar', seat: null, at: null });
 	send(owed, { type: 'DECIDE', decide: { d: 'scar', scar: 'smallHand', target: 2, seat: B } });
 	expect(character(worldOf(owed), B).slots[2]).toEqual({ kind: 'scar', id: 'smallHand' });
 	expect(worldOf(owed).campaign.owedScars).toBe(0);
@@ -2559,7 +2560,7 @@ test('a character cannot take a scar it already carries', () => {
 	const actor = late((world, game) => {
 		world.campaign.scars = ['smallHand', 'reconExtraCard'];
 		character(world, A).slots[0] = { kind: 'scar', id: 'smallHand' };
-		game.pending = [{ t: 'scar', seat: A }];
+		game.pending = [{ t: 'scar', seat: A, at: null }];
 	});
 	expect(
 		reject(worldOf(actor), phase(actor), { type: 'DECIDE', decide: { d: 'scar', scar: 'smallHand', target: 1 } }),
@@ -3169,9 +3170,9 @@ describe('between games', () => {
 		const actor = january();
 		const campaign = structuredClone(worldOf(actor).campaign);
 		campaign.results = [
-			{ month: 1, attempt: 1, won: true, gridCities: 9, rationing: 4, characters: [] },
-			{ month: 2, attempt: 1, won: false, gridCities: 9, rationing: 2, characters: [] },
-			{ month: 2, attempt: 2, won: true, gridCities: 9, rationing: 4, characters: [] },
+			{ month: 1, attempt: 1, won: true, gridCities: 9, rationing: 4, characters: [], chronicle: null },
+			{ month: 2, attempt: 1, won: false, gridCities: 9, rationing: 2, characters: [], chronicle: null },
+			{ month: 2, attempt: 2, won: true, gridCities: 9, rationing: 4, characters: [], chronicle: null },
 		];
 		campaign.locations[city('cairo')]!.population = 0;
 		campaign.locations[city('lagos')]!.lab = true;
@@ -3281,7 +3282,7 @@ test('an objective completed in a lost early attempt starts the late attempt com
 test('a scar placed over the job switches the job off and still applies', () => {
 	const actor = january((world, game) => {
 		world.campaign.scars = ['smallHand'];
-		game.pending = [{ t: 'scar', seat: A }];
+		game.pending = [{ t: 'scar', seat: A, at: null }];
 		game.stockpile = 4;
 	});
 	send(actor, { type: 'DECIDE', decide: { d: 'scar', scar: 'smallHand', target: 'job' } });
@@ -3334,7 +3335,7 @@ describe('scars and the sticker pool', () => {
 	test('a scar a character takes leaves the pool, and a sticker that is bought leaves the shop', () => {
 		const actor = late((world, game) => {
 			world.campaign.scars = ['smallHand', 'frail'];
-			game.pending = [{ t: 'scar', seat: A }];
+			game.pending = [{ t: 'scar', seat: A, at: null }];
 		});
 		send(actor, { type: 'DECIDE', decide: { d: 'scar', scar: 'smallHand', target: 1 } });
 		expect(worldOf(actor).campaign.scars).toEqual(['frail']);

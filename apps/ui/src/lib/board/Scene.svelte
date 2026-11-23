@@ -682,7 +682,14 @@
 		lost: boolean;
 		/** Its place among the cubes of this batch that make the same sound, so a run of them is heard as a scale. */
 		run: number;
+		/** One of a deal: its run is its place in its city's share. */
+		dealt: boolean;
 	};
+	const DEAL_FROM = 12;
+	const DEAL_CITY_GAP = 230;
+	/** However many cities share in it, the deal crosses the board in about this long. */
+	const DEAL_MS = 2600;
+	const DEAL_CUBE_GAP = 85;
 	type Loss = { id: number; city: CityId; count: number; delay: number };
 	let flights = $state.raw<Flight[]>([]);
 	let losses = $state.raw<Loss[]>([]);
@@ -713,11 +720,32 @@
 			let handed = 0;
 			let struck = 0;
 			const struckAt = new Map<CityId, Loss>();
+			// Many cubes leaving the stockpile at once is a deal, such as the one that opens a game: it crosses the board
+			// from west to east, a city at a time, so each city is seen and heard taking its share.
+			const toCities = moves.flatMap(move =>
+				move.from.kind === 'pile' && move.to.kind === 'city' ? [move.to.city] : [],
+			);
+			const dealOrder =
+				toCities.length >= DEAL_FROM
+					? new Map(
+							[...new Set(toCities)]
+								.toSorted((a, b) => layout[a]!.x - layout[b]!.x)
+								.map((city, index) => [city, index]),
+						)
+					: null;
+			const dealtTo = new Map<CityId, number>();
 			flights = [
 				...flights,
 				...moves.map((move): Flight => {
 					const lost = move.from.kind === 'city' && move.to.kind === 'pile';
-					const delay = lost ? struck * LOSS_GAP : Math.min(handed, 40) * 28;
+					const dealt = dealOrder && move.from.kind === 'pile' && move.to.kind === 'city' ? move.to.city : null;
+					const share = dealt ? (dealtTo.get(dealt) ?? 0) : 0;
+					if (dealt) dealtTo.set(dealt, share + 1);
+					const delay = lost
+						? struck * LOSS_GAP
+						: dealt
+							? dealOrder!.get(dealt)! * Math.min(DEAL_CITY_GAP, DEAL_MS / dealOrder!.size) + share * DEAL_CUBE_GAP
+							: Math.min(handed, 40) * 28;
 					if (move.from.kind === 'city' && lost) {
 						const loss = struckAt.get(move.from.city) ?? { id: nextFlight++, city: move.from.city, count: 0, delay };
 						loss.count++;
@@ -730,7 +758,8 @@
 						fromIndex: move.from.kind === 'pile' ? before.stockpile - 1 - leaving++ : 0,
 						toIndex: move.to.kind === 'pile' ? before.stockpile + arriving++ : 0,
 						lost,
-						run: lost ? struck++ : handed++,
+						run: lost ? struck++ : dealt ? (handed++, share) : handed++,
+						dealt: dealt !== null,
 					};
 				}),
 			];
@@ -755,7 +784,7 @@
 	function arrived(flight: Flight) {
 		const now = performance.now();
 		landed = { run: now - landed.at > 700 ? 0 : landed.run + 1, at: now };
-		if (flight.to.kind === 'city') sfxPiece('supplyPlace', landed.run);
+		if (flight.to.kind === 'city') sfxPiece('supplyPlace', flight.dealt ? flight.run : landed.run);
 		else if (flight.to.kind === 'pile') sfxPiece('supplyPile');
 		else if (flight.from.kind === 'pawn') sfxPiece('supplyPass');
 	}
@@ -935,7 +964,7 @@
 {/if}
 
 {#each view.marks?.rings ?? [] as ring (`${ring.city}:${ring.color}`)}
-	<Ring at={layout[ring.city]!} color={ring.color} />
+	<Ring at={layout[ring.city]!} color={ring.color} faint={ring.faint} />
 {/each}
 
 {#each view.marks?.trails ?? [] as trail (trail.id)}

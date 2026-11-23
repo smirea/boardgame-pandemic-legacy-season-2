@@ -69,6 +69,30 @@
 		});
 	});
 
+	// An objective completed while this watched is stamped where it hangs. A jump or a reload stamps nothing.
+	let stamped = $state.raw<ObjectiveId[]>([]);
+	let completedBefore = untrack(() => game?.completed.length ?? null);
+	$effect(() => {
+		const completed = game?.completed ?? null;
+		untrack(() => {
+			const before = completedBefore;
+			completedBefore = completed?.length ?? null;
+			if (!completed || before === null || completed.length <= before || completed.length - before > 2) return;
+			const fresh = completed.slice(before);
+			stamped = [...stamped, ...fresh];
+			for (const id of fresh)
+				slots[id]?.animate(
+					[{ scale: '1' }, { scale: '0.9', offset: 0.35 }, { scale: '1.12', offset: 0.6 }, { scale: '1' }],
+					{
+						duration: 620,
+						delay: 260,
+						easing: 'ease-out',
+					},
+				);
+			setTimeout(() => (stamped = stamped.filter(id => !fresh.includes(id))), 2600);
+		});
+	});
+
 	let slots = $state<Partial<Record<ObjectiveId, HTMLElement>>>({});
 	let inAir = $state.raw<ObjectiveId[]>([]);
 	// The track stays empty while the briefing is open, and its diamonds come in once the objectives have landed.
@@ -229,6 +253,9 @@
 					waived={game?.waived.includes(objective.id) ?? false}
 					onclick={game ? () => onwaive(objective.id) : undefined}
 				/>
+				{#if stamped.includes(objective.id)}
+					<span class="stamp" aria-hidden="true" data-testid="objective-stamp">Complete</span>
+				{/if}
 			</span>
 		{/each}
 	</div>
@@ -274,7 +301,51 @@
 	}
 
 	.slot {
+		position: relative;
 		display: flex;
+	}
+
+	/* Slammed onto the tag from above the table, then left to fade. */
+	.stamp {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		z-index: 2;
+		padding: 0.12rem 0.6rem 0.16rem;
+		border: 3px double var(--good);
+		border-radius: 3px;
+		background: rgb(12 28 18 / 0.9);
+		color: var(--good);
+		font-family: var(--font-display);
+		font-size: 1.25rem;
+		letter-spacing: 0.08em;
+		line-height: 1;
+		text-transform: uppercase;
+		translate: -50% -50%;
+		rotate: -7deg;
+		pointer-events: none;
+		animation: objective-stamp 2600ms cubic-bezier(0.2, 1.4, 0.4, 1) both;
+	}
+
+	@keyframes objective-stamp {
+		0% {
+			opacity: 0;
+			scale: 3.2;
+		}
+		11% {
+			opacity: 1;
+			scale: 0.92;
+		}
+		15% {
+			scale: 1;
+		}
+		78% {
+			opacity: 1;
+		}
+		100% {
+			opacity: 0;
+			scale: 1;
+		}
 	}
 
 	.slot.away {

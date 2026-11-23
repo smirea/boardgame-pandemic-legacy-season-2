@@ -1,3 +1,4 @@
+import { pack } from '@repo/game';
 import type { CityId, InfectionCard, LogEntry, Phase, World } from '@repo/game';
 import type { FxKind } from '#lib/board/types.ts';
 
@@ -21,7 +22,17 @@ type Beat = {
 	strike: Hidden[];
 	pulse: FxKind | null;
 	incidents: { city: CityId; hidden: Hidden[] }[];
+	/**
+	 * How much rides on the card, which sets how long it is held: `low` for a cube from a city with cubes to spare,
+	 * `close` for one that leaves a city with one cube or none, and `brink` for an incident with the track nearly full.
+	 */
+	stakes: 'low' | 'close' | 'brink';
 };
+
+/** How long a card lies face up before it strikes, and how long after, in milliseconds. */
+const HOLD = { low: [430, 430], close: [900, 700], incident: [1050, 750], brink: [1900, 900] } as const;
+/** With this many incidents left or fewer, each one is held as the one that may lose the game. */
+const BRINK = 2;
 
 /** A moment of the show that is heard: the card turning over, what it does to its city, and an incident's three beats. */
 export type ShowCue =
@@ -42,6 +53,9 @@ const NOTE = {
 	hollow: 'Hollow Men',
 	blocked: 'held',
 } as const;
+
+/** How long the riffle on the turn desk takes, with a little to spare. */
+const SHUFFLE_MS = 2200;
 
 /** More beats than this at once is a jump, such as a reload or a replay seeking, and is not shown. */
 const MOST_BEATS = 12;
@@ -80,6 +94,8 @@ export class InfectionShow {
 	heldIncidents = $state(0);
 	/** True while a flipped card is being played out, or more wait their turn. */
 	playing = $state(false);
+	/** An Epidemic's reshuffle that this watched: the discard pile riffled back onto the deck, with how many cards it held. */
+	shuffle = $state.raw<{ key: number; cards: number } | null>(null);
 
 	private hidden = $state.raw<Hidden[]>([]);
 	private queue: Beat[] = [];
@@ -89,6 +105,7 @@ export class InfectionShow {
 	private phase: Phase | null = null;
 	private step: string | null = null;
 	private held = false;
+	private discarded = 0;
 	private clearTimer: ReturnType<typeof setTimeout> | null = null;
 
 	constructor(
@@ -119,6 +136,8 @@ export class InfectionShow {
 		const log = world.game?.log ?? [];
 		const newest = log.at(-1)?.seq ?? -1;
 		const before = this.board;
+		const discarded = this.discarded;
+		this.discarded = world.game?.infectionDiscard.length ?? 0;
 		this.board = boardOf(world);
 		const fresh = log.filter(entry => entry.seq > this.seen);
 		const undone = newest < this.seen;
@@ -128,8 +147,15 @@ export class InfectionShow {
 		const beats = this.beats(world, fresh, before, this.board);
 		if (beats.length > MOST_BEATS) return this.stop();
 		// Intensify takes every card flipped so far back onto the deck.
-		if (prevStep === 'intensify' && this.step !== 'intensify') this.clear('deck');
-		else if (!wasHeld && this.held && !this.playing) this.clear('discard');
+		if (prevStep === 'intensify' && this.step !== 'intensify') {
+			this.clear('deck');
+			if (discarded > 0 && this.discarded === 0) {
+				const shuffle = { key: newest, cards: discarded };
+				this.shuffle = shuffle;
+				// Gone once it has played, so the deck coming back out next turn does not play it again.
+				setTimeout(() => this.shuffle === shuffle && (this.shuffle = null), SHUFFLE_MS);
+			}
+		} else if (!wasHeld && this.held && !this.playing) this.clear('discard');
 		if (beats.length > 0) {
 			this.cancelClear();
 			this.queue.push(...beats);
@@ -159,6 +185,7 @@ export class InfectionShow {
 		this.focus = null;
 		this.skull = null;
 		this.surge = false;
+		this.shuffle = null;
 	}
 
 	private clear(exit: 'discard' | 'deck') {
@@ -208,6 +235,13 @@ export class InfectionShow {
 		};
 		const beats: Beat[] = [];
 		let outbreak: Beat | null = null;
+		const left = new Map<CityId, number>();
+		const cubesLeft = (city: CityId, taken: number) => {
+			const now = (left.get(city) ?? before.cities[city]?.supplies ?? 0) - taken;
+			left.set(city, now);
+			return now;
+		};
+		const limit = pack.numbers.incidentLimit;
 		for (const entry of fresh) {
 			if (entry.t === 'infect' && entry.effect !== 'skipped') {
 				const card = world.campaign.infectionCards[entry.card];
@@ -229,6 +263,7 @@ export class InfectionShow {
 					strike,
 					pulse: pulse === 'plague' ? null : pulse,
 					incidents: [],
+					stakes: entry.effect === 'supply' && cubesLeft(entry.city, 1) >= 2 ? 'low' : 'close',
 				};
 				if (entry.effect === 'outbreak') outbreak ??= beat;
 				beats.push(beat);
@@ -245,6 +280,7 @@ export class InfectionShow {
 					strike: [],
 					pulse: null,
 					incidents: [],
+					stakes: 'close',
 				});
 			} else if (entry.t === 'epidemic' && entry.city && entry.card) {
 				const card = world.campaign.infectionCards[entry.card];
@@ -259,9 +295,12 @@ export class InfectionShow {
 					strike: [...take(entry.city, 'supplies', -entry.removed), ...take(null, 'stockpile', entry.removed)],
 					pulse: 'epidemic',
 					incidents: [],
+					stakes: 'close',
 				});
 			} else if (entry.t === 'incident' && beats.length) {
-				beats.at(-1)!.incidents.push({ city: entry.city, hidden: take(entry.city, 'plague', 1) });
+				const beat = beats.at(-1)!;
+				beat.incidents.push({ city: entry.city, hidden: take(entry.city, 'plague', 1) });
+				if (limit - entry.total < BRINK) beat.stakes = 'brink';
 			}
 		}
 		// An outbreak takes cubes from its neighbours without a log entry for each, so they go with the outbreak.
@@ -301,14 +340,15 @@ export class InfectionShow {
 		for (;;) {
 			const beat = this.queue.shift();
 			if (!beat) break;
-			const slow = beat.incidents.length > 0;
+			const [before, after] = HOLD[beat.stakes === 'brink' || !beat.incidents.length ? beat.stakes : 'incident'];
+			const brink = beat.stakes === 'brink';
 			this.stack = [
 				{ key: beat.seq, card: beat.card, note: beat.note, alarm: beat.alarm, city: beat.city },
 				...this.stack,
 			];
 			if (beat.city) this.focus = beat.city;
 			this.cue({ t: 'flip' });
-			if (!(await wait(slow ? 1050 : 630))) return;
+			if (!(await wait(before))) return;
 			this.reveal(beat.strike);
 			if (beat.effect) this.cue({ t: 'strike', effect: beat.effect });
 			if (beat.pulse && beat.city) this.pulse(beat.city, beat.pulse);
@@ -320,7 +360,7 @@ export class InfectionShow {
 				if (!(await wait(450))) return;
 				this.skull = { key: beat.seq, city: incident.city, at: this.lagged(incident.city, 'plague') };
 				this.cue({ t: 'skull' });
-				if (!(await wait(1575))) return;
+				if (!(await wait(brink ? 2400 : 1575))) return;
 				this.skull = null;
 				this.reveal(incident.hidden);
 				this.cue({ t: 'plague' });
@@ -334,7 +374,7 @@ export class InfectionShow {
 				this.surge = false;
 				if (!(await wait(525))) return;
 			}
-			if (!(await wait(slow ? 750 : 650))) return;
+			if (!(await wait(after))) return;
 		}
 		this.playing = false;
 		// The camera stays on the city while more cards are to come, and zooms back out once the step is over.

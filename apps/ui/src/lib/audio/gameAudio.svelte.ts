@@ -1,6 +1,7 @@
 import { cityDef, hollowInPlay } from '@repo/game';
 import type { CityId, LogEntry, Phase, World } from '@repo/game';
 import { along, travelOf, tripMs } from '#lib/board/travel.ts';
+import type { FateCue } from '#lib/hud/fateShow.svelte.ts';
 import type { ShowCue } from '#lib/hud/infectionShow.svelte.ts';
 import { bindAudioUnlock } from './engine.ts';
 import type { TravelId } from './foley.ts';
@@ -17,6 +18,7 @@ import {
 	sfxMoment,
 	sfxOutbreak,
 	sfxPiece,
+	sfxScratchBox,
 	sfxTravel,
 } from './sfx.ts';
 import { campaignTone, TONES } from './tones.ts';
@@ -63,8 +65,6 @@ function travelSound(world: World, move: Extract<LogEntry, { t: 'move' }>): { id
 	return { id, seconds: course ? tripMs(travel, along(course).total) / 1000 : 1.3 };
 }
 
-const voiceOf = (id: string) => [...id].reduce((sum, letter) => sum + letter.charCodeAt(0), 0);
-
 /**
  * Turns the game into sound. What happens at once is heard from the log: an action, a move, a turn passing. What
  * the board shows late is heard when it is shown: the infection show reports each beat through `showCue`, and a
@@ -74,9 +74,9 @@ export class GameAudio {
 	private seenSeq: number | null = null;
 	private prevPending: string | null = null;
 	private prevPhase: Phase | null = null;
-	private prevOutcome: { won: boolean; reason: string } | null = null;
 	private prevHollow = new Map<CityId, number>();
 	private incidents = 0;
+	private last = { sound: '', at: 0, repeats: 0 };
 
 	constructor() {
 		bindAudioUnlock();
@@ -91,26 +91,28 @@ export class GameAudio {
 		const log = game?.log ?? [];
 		const newest = log.at(-1)?.seq ?? -1;
 		const pending = game?.pending[0]?.t ?? null;
-		const outcome = game?.outcome ?? null;
 		const hollow = new Map<CityId, number>();
 		if (game) for (const [city, place] of Object.entries(game.locations)) hollow.set(city as CityId, place.hollow);
 
 		const prevSeq = this.seenSeq;
 		const prevPending = this.prevPending;
 		const prevPhase = this.prevPhase;
-		const prevOutcome = this.prevOutcome;
 		const prevHollow = this.prevHollow;
 		this.seenSeq = newest;
 		this.prevPending = pending;
 		this.prevPhase = phase;
-		this.prevOutcome = outcome;
 		this.prevHollow = hollow;
 		this.incidents = game?.incidents ?? 0;
 
 		if (!live || !game || prevSeq === null || newest < prevSeq) return;
 
 		if (prevPhase === 'lobby' && phase.startsWith('setup')) sfxMoment('gameStart');
-		if (INFECTING.has(phase) && prevPhase !== phase) sfxMoment('infestation');
+		if (INFECTING.has(phase) && prevPhase !== phase) {
+			// The full sting is for the cards that open a game and the turn an Epidemic struck. Any other turn gets a low note.
+			const turn = log.slice(log.findLastIndex(entry => entry.t === 'turn') + 1);
+			const heavy = phase === 'setup.infect' || turn.some(entry => entry.t === 'epidemic');
+			sfxMoment(heavy ? 'infestation' : 'infectStep');
+		}
 
 		if (pending === 'epidemicDrawn' && prevPending !== 'epidemicDrawn') {
 			ambientMusic.accent('epidemic');
@@ -121,8 +123,6 @@ export class GameAudio {
 		} else if (prevPending === 'intensify' && pending !== 'intensify') {
 			sfxEpidemic('intensify');
 		}
-
-		if (!prevOutcome && outcome) ambientMusic.accent(outcome.won ? 'triumph' : 'setback');
 
 		const fresh = log.filter(entry => entry.seq > prevSeq);
 		if (fresh.length > 8) return;
@@ -148,6 +148,18 @@ export class GameAudio {
 		else sfxPiece(cue.effect === 'hollow' ? 'hollowArrive' : cue.effect === 'gather' ? 'gather' : 'held');
 	}
 
+	/** The game's end, once the board has shown what ended it. */
+	outcome(won: boolean) {
+		ambientMusic.accent(won ? 'triumph' : 'setback');
+	}
+
+	/** A beat of what happens to a character, as the table is shown it. */
+	fateCue(cue: FateCue) {
+		if (cue.t === 'scratch') sfxScratchBox();
+		else if (cue.t === 'memorial') ambientMusic.accent('setback');
+		else sfxExposure(cue.result === 'empty' ? 'safe' : cue.result === 'scar' ? 'scar' : 'death', cue.voice);
+	}
+
 	private playLogEntry(world: World, entry: LogEntry, log: LogEntry[]) {
 		switch (entry.t) {
 			case 'turn':
@@ -156,11 +168,11 @@ export class GameAudio {
 				break;
 			case 'move': {
 				const { id, seconds } = travelSound(world, entry);
-				sfxTravel(id, seconds);
+				sfxTravel(id, seconds, this.again(`travel:${id}`));
 				break;
 			}
 			case 'action':
-				sfxAction(entry.action);
+				sfxAction(entry.action, this.again(entry.action));
 				break;
 			case 'draw':
 				sfxCardDraw();
@@ -171,15 +183,15 @@ export class GameAudio {
 			case 'objective':
 				sfxMoment('objective');
 				break;
-			case 'death':
-				ambientMusic.accent('setback');
-				break;
-			case 'exposure': {
-				const character = world.game?.players[entry.seat]?.character ?? entry.seat;
-				sfxExposure(entry.result === 'empty' ? 'safe' : entry.result === 'scar' ? 'scar' : 'death', voiceOf(character));
-				break;
-			}
 		}
+	}
+
+	/** How loud a sound is the next time in a row it is heard: the same thing done three times over fades into the table. */
+	private again(sound: string) {
+		const now = performance.now();
+		const repeats = this.last.sound === sound && now - this.last.at < 8000 ? this.last.repeats + 1 : 0;
+		this.last = { sound, at: now, repeats };
+		return [1, 0.7, 0.45][Math.min(repeats, 2)]!;
 	}
 
 	stop() {

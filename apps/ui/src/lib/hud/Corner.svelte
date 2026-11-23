@@ -213,6 +213,7 @@
 								<span class="mark"><CardIcon path={SCAR_ICON} size="0.9rem" /></span>
 							{/if}
 							{trait.name}
+							{#if trait.taken}<i class="taken">{trait.taken}</i>{/if}
 						</b>
 						<p>{trait.text}</p>
 					</div>
@@ -622,6 +623,13 @@
 	.line.scar .mark,
 	.line.scar b {
 		color: #8a2a1c;
+	}
+
+	.taken {
+		margin-left: 0.4em;
+		font-style: italic;
+		font-weight: 400;
+		opacity: 0.75;
 	}
 
 	.line b {

@@ -251,7 +251,7 @@ export function setupPlayerDeck(world: World) {
 		.map(card => card.id);
 	game.playerDeck = newPiledDeck(campaign.rng, deck, epidemicCards);
 	game.active = game.seats[nextInt(campaign.rng, game.seats.length)]!;
-	for (; campaign.owedScars > 0; campaign.owedScars--) game.pending.push({ t: 'scar', seat: null });
+	for (; campaign.owedScars > 0; campaign.owedScars--) game.pending.push({ t: 'scar', seat: null, at: null });
 	setProgress(world, 'triangulate', towerColours(game));
 	beginTurn(world);
 }
@@ -296,7 +296,7 @@ export function expose(world: World, seat: SeatId) {
 	const box = character.exposureTrack[character.exposure] ?? 'skull';
 	character.exposure += 1;
 	log(game, { t: 'exposure', seat, result: box });
-	if (box === 'scar' && canTakeScar(world, character)) game.pending.push({ t: 'scar', seat });
+	if (box === 'scar' && canTakeScar(world, character)) game.pending.push({ t: 'scar', seat, at: current.location });
 	if (box === 'skull') kill(world, seat);
 }
 

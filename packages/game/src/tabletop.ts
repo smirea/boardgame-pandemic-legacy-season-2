@@ -468,6 +468,7 @@ export function tabletopSave(seed = 7): Save {
 			gridCities: 0,
 			rationing: campaign.rationing,
 			characters: [],
+			chronicle: null,
 		});
 	for (let month = 1; month <= last; month++) {
 		const games = TABLE.calendar[month]!;
@@ -484,6 +485,7 @@ export function tabletopSave(seed = 7): Save {
 				gridCities: gridCityCount(campaign),
 				rationing: campaign.rationing,
 				characters: [],
+				chronicle: null,
 			});
 			campaign.rationing = Math.max(0, Math.min(10, campaign.rationing + (result === 'won' ? -2 : 2)));
 		}
@@ -658,6 +660,8 @@ export function tabletopSave(seed = 7): Save {
 			exposure: fact.exposure,
 			dead: false,
 			diedAt: null,
+			// Their table kept no record of where a scar was taken.
+			scarred: {},
 			worker: false,
 			carrier: false,
 			player: null,

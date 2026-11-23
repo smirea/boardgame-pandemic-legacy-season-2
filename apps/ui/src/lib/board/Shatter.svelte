@@ -23,12 +23,15 @@
 		};
 	});
 	const progress = new Tween(0, { duration: 820, easing: cubicOut });
+	// The count outlasts the splinters, so it can be read after the eye has found the city.
+	const tally = new Tween(0, { duration: 1500 });
 	let started = $state(false);
 	let done = false;
 	onMount(() => {
 		const timer = setTimeout(() => {
 			started = true;
-			void progress.set(1).then(() => {
+			void progress.set(1);
+			void tally.set(1).then(() => {
 				done = true;
 				ondone();
 			});
@@ -39,8 +42,14 @@
 		};
 	});
 	const k = $derived(progress.current);
+	const c = $derived(tally.current);
 </script>
 
+{#if started && c < 1}
+	<HTML position={[at.x, at.y + 2.2 + cubicOut(c) * 2.6, at.z]} center pointerEvents="none">
+		<span class="lost" style:opacity={Math.min(1, (1 - c) * 3.4)} aria-hidden="true">−{count}</span>
+	</HTML>
+{/if}
 {#if started && k < 1}
 	{#each shards as shard, index (index)}
 		<T.Mesh
@@ -59,22 +68,22 @@
 			<T.MeshBasicMaterial color="#c8361f" transparent opacity={(1 - ring) * 0.95} depthWrite={false} />
 		</T.Mesh>
 	{/each}
-	<HTML position={[at.x, at.y + 2.4 + k * 3.2, at.z]} center pointerEvents="none">
-		<span class="lost" style:opacity={Math.min(1, (1 - k) * 2.2)} aria-hidden="true">−{count}</span>
-	</HTML>
 {/if}
 
 <style>
 	.lost {
-		color: #ffe4da;
+		color: #d8331c;
 		font-family: system-ui, sans-serif;
-		font-size: 2.3rem;
+		font-size: 2.2rem;
 		font-weight: 800;
-		-webkit-text-stroke: 2px #b3261a;
-		paint-order: stroke fill;
+		/* A paper edge all round, so it reads over land, sea and a city's disc alike. */
 		text-shadow:
-			0 0 0.35em rgb(0 0 0 / 0.85),
-			0 0.06em 0 rgb(0 0 0 / 0.9);
+			0 0 3px #fff1dc,
+			1px 1px 0 #fff1dc,
+			-1px 1px 0 #fff1dc,
+			1px -1px 0 #fff1dc,
+			-1px -1px 0 #fff1dc,
+			0 0.12em 0.3em rgb(0 0 0 / 0.5);
 		white-space: nowrap;
 	}
 </style>

@@ -30,8 +30,13 @@
 	import { backOut } from 'svelte/easing';
 	import { fade, fly, scale } from 'svelte/transition';
 	import { GameAudio } from '#lib/audio/gameAudio.svelte.ts';
-	import { sfxMoment } from '#lib/audio/sfx.ts';
+	import { hushSfx, sfxMoment } from '#lib/audio/sfx.ts';
+	import { reconciler } from '#lib/reconcile.ts';
+	import { barkFor } from '#lib/story/barks.ts';
+	import { Radio } from '#lib/story/radio.svelte.ts';
+	import RadioLine from '#lib/story/RadioLine.svelte';
 	import { STORY_SCENES } from '#lib/story/script.ts';
+	import { voicePlayer } from '#lib/story/voice.svelte.ts';
 	import type { StoryScene } from '#lib/story/script.ts';
 	import StoryArchive from '#lib/story/StoryArchive.svelte';
 	import ActionPanel from './ActionPanel.svelte';
@@ -49,10 +54,15 @@
 	import { createTurnAdmin } from './turnAdmin.svelte.ts';
 	import TurnDesk from './TurnDesk.svelte';
 	import TurnInterlude from './TurnInterlude.svelte';
+	import { TimeLapse as GameLapse } from './timeLapse.svelte.ts';
+	import TimeLapse from './TimeLapse.svelte';
+	import { FateShow as FateScenes } from './fateShow.svelte.ts';
+	import FateShow from './FateShow.svelte';
 	import { InfectionShow } from './infectionShow.svelte.ts';
 	import { PopulationShow } from './populationShow.svelte.ts';
 	import { LegacyShow } from './legacyShow.svelte.ts';
 	import { cardName, cityName, seatName, SEAT_COLORS, setNames } from './labels.svelte.ts';
+	import { characterTraits } from './traits.ts';
 	import Lobby from './Lobby.svelte';
 	import CharacterSelect from './CharacterSelect.svelte';
 	import Briefing from './Briefing.svelte';
@@ -473,13 +483,8 @@
 							: `Epidemic: ${cityName(entry.city)} had no cubes to lose`,
 						'bad',
 					);
-			} else if (entry.t === 'objective') toast('Objective complete', 'good');
-			else if (entry.t === 'unlock')
+			} else if (entry.t === 'unlock')
 				toast(`Opened: ${pack.seals.find(def => sealKey(def.seal) === entry.seal)?.name}`, 'good');
-			else if (entry.t === 'death')
-				toast(`${campaign.characters[entry.character]?.name} died in ${cityName(entry.at)}`, 'bad');
-			else if (entry.t === 'exposure' && entry.result === 'scar')
-				toast(`${seatName(world, entry.seat)} takes a scar`, 'bad');
 			else if (entry.t === 'note') toast(entry.text, 'good');
 		}
 		untrack(() => {
@@ -497,6 +502,75 @@
 		},
 		cue => gameAudio.showCue(cue),
 	);
+	// Through an Infect step the cities with no cubes that a card still in the deck could strike are ringed, so the
+	// table sees what the next flip may cost before it is made. A city the show has not finished with waits its turn.
+	const sameThreats = reconciler<BoardMarks | undefined>();
+	const threats = $derived.by(() => {
+		if (snap.phase !== 'playing.infect' && snap.phase !== 'setup.infect') return sameThreats(undefined);
+		const rings = (info?.infection.atRisk ?? [])
+			.filter(entry => !show.lag.cities[entry.city]?.supplies)
+			.map(entry => ({ city: entry.city, color: '#c8361f', faint: true }));
+		return sameThreats(rings.length ? { trails: [], rings, flags: [] } : undefined);
+	});
+
+	// A scratched exposure box and a death are shown to the whole table before the screens that follow them.
+	const fate = new FateScenes(
+		{
+			scar: character => characterTraits(character).flatMap(trait => (trait.kind === 'scar' ? [trait.name] : [])),
+			ability: character => characterTraits(character).flatMap(trait => (trait.kind === 'ability' ? [trait.name] : [])),
+		},
+		cue => {
+			gameAudio.fateCue(cue);
+			if (cue.t === 'memorial') voicePlayer.play(barkFor('epitaph', cue.key).id);
+		},
+	);
+	const radio = new Radio();
+
+	// How the game ended is announced once the board has shown what ended it: the last incident's marker, a death.
+	const outcomeShown = $derived(game?.outcome != null && snap.phase === 'over' && !show.playing && !fate.playing);
+	let outcomeHeard = untrack(() => game?.outcome != null);
+	$effect(() => {
+		const shown = outcomeShown;
+		const won = game?.outcome?.won ?? false;
+		const lived = !spectator || announce;
+		untrack(() => {
+			if (shown && !outcomeHeard && lived) gameAudio.outcome(won);
+			outcomeHeard = game?.outcome != null && (shown || outcomeHeard);
+		});
+	});
+
+	// A game that ends in front of this player is played back on the board once the table has seen and heard how it
+	// ended. One reloaded onto has nothing to wait for, so it only offers the playback.
+	const lapse = new GameLapse(() => session.exportRecord());
+	let endedHere = untrack(() => snap.phase !== 'over');
+	let lapseDue = $state(false);
+	$effect(() => {
+		const over = snap.phase === 'over' && !spectator;
+		untrack(() => {
+			if (over) return void lapse.load();
+			lapse.clear();
+			lapseDue = false;
+			endedHere = true;
+		});
+	});
+	$effect(() => {
+		if (!outcomeShown || spectator) return;
+		return untrack(() => {
+			if (!endedHere) return;
+			endedHere = false;
+			const timer = setTimeout(() => (lapseDue = true), 2600);
+			return () => clearTimeout(timer);
+		});
+	});
+	$effect(() => {
+		if (!lapseDue || !lapse.ready || !outcomeShown || radio.line) return;
+		untrack(() => {
+			lapseDue = false;
+			void lapse.play();
+		});
+	});
+	$effect(() => hushSfx(lapse.playing));
+	onDestroy(() => hushSfx(false));
 	/** The middle of the board left open between the panels, level with the middle of the stage, as fractions. */
 	function openMiddle() {
 		const width = stage?.clientWidth || 1;
@@ -525,11 +599,22 @@
 		untrack(() => {
 			show.observe(next, lived, phase);
 			population.observe(next, lived, phase, held);
+			fate.observe(next, lived);
 		});
+	});
+	$effect(() => {
+		const next = world;
+		const lived = !spectator || announce;
+		const phase = snap.phase;
+		const quiet = briefingOpen || storyOpen || revealing !== null || recap !== null;
+		const busy = show.playing || fate.playing;
+		untrack(() => radio.observe(next, phase, lived, quiet, busy));
 	});
 	$effect(() => () => {
 		show.stop();
 		population.stop();
+		fate.stop();
+		radio.stop();
 	});
 
 	const legacy = new LegacyShow();
@@ -572,7 +657,7 @@
 		untrack(() => {
 			const id = nextFx++;
 			const rate = pack.numbers.infectionRates[game?.rateIndex ?? 0];
-			banner = { id, title: 'Epidemic', text: `The infection rate marker moves on: ${rate} cards a turn.` };
+			banner = { id, title: 'Epidemic', text: `Infection rate: ${rate} cards a turn.` };
 			setTimeout(() => banner?.id === id && (banner = null), 2600);
 		});
 	});
@@ -584,7 +669,7 @@
 	// The next player is announced once the last card of the turn before has been played out.
 	const nextUp = $derived.by(() => {
 		const up = admin.turn.turn;
-		if (!up || !game || game.outcome || admin.deck !== null || show.playing || !playing) return null;
+		if (!up || !game || game.outcome || admin.deck !== null || show.playing || fate.playing || !playing) return null;
 		const character = campaign.characters[game.players[up.seat]?.character as keyof typeof campaign.characters];
 		return {
 			key: up.key,
@@ -707,7 +792,7 @@
 	});
 	const boardView = createBoardView({
 		get world() {
-			return world;
+			return lapse.world ?? world;
 		},
 		get playing() {
 			return playing;
@@ -761,7 +846,7 @@
 			return fx;
 		},
 		get marks() {
-			return marks ?? population.marks;
+			return marks ?? population.marks ?? threats;
 		},
 	});
 
@@ -776,6 +861,10 @@
 		// Escape still closes the chooser from its own filter field.
 		if (inFeedback(event)) return;
 		if (event.key === 'Escape') {
+			if (lapse.playing) {
+				lapse.stop();
+				return;
+			}
 			if (peeking) {
 				peeking = false;
 				return;
@@ -944,6 +1033,7 @@
 				stack={show.stack}
 				exit={show.exit}
 				gathering={game.gathering}
+				shuffle={show.shuffle}
 			/>
 		</div>
 	{:else if game && !spectator && actionChoices.length && canAct && snap.phase === 'playing.actions'}
@@ -1181,7 +1271,8 @@
 			{/each}
 		</div>
 
-		{#if banner}
+		<!-- A player's Epidemic card lands in the middle of the table and says all of this itself. -->
+		{#if banner && (spectator || banner.title !== 'Epidemic')}
 			{#key banner.id}
 				<div class="banner" out:fade={{ duration: 450 }}>
 					<strong>{banner.title}</strong>
@@ -1207,7 +1298,29 @@
 			{#key banner.id}<div class="flash" out:fade={{ duration: 200 }}></div>{/key}
 		{/if}
 
-		{#if game?.outcome && snap.phase === 'over'}
+		{#if fate.scene && game}
+			{#key fate.scene.key}
+				<FateShow
+					scene={fate.scene}
+					color={SEAT_COLORS[game.seats.indexOf(fate.scene.who.seat)] ?? '#4a4238'}
+					epitaph={barkFor('epitaph', fate.scene.key).text}
+				/>
+			{/key}
+		{/if}
+
+		{#if radio.line}
+			{#key radio.line.key}<RadioLine line={radio.line} />{/key}
+		{/if}
+
+		{#if lapse.world}
+			<TimeLapse world={lapse.world} progress={lapse.progress} onstop={() => lapse.stop()} />
+		{:else if outcomeShown && lapse.ready}
+			<button class="rewatch" onclick={() => void lapse.play()} data-testid="time-lapse-play">
+				Play the game back
+			</button>
+		{/if}
+
+		{#if outcomeShown && game?.outcome && !lapse.world}
 			<div
 				class="outcome"
 				{@attach feedback('Outcome', () => game?.outcome)}
@@ -1334,7 +1447,7 @@
 			</div>
 		{/if}
 
-		{#if scarOwed && game}
+		{#if scarOwed && game && !fate.playing}
 			<div
 				class="scrim scar-scrim"
 				role="dialog"
@@ -1983,6 +2096,28 @@
 		100% {
 			opacity: 0;
 		}
+	}
+
+	.rewatch {
+		position: absolute;
+		top: calc(28% + 8.2rem);
+		left: 50%;
+		z-index: 46;
+		padding: 0.35rem 1rem;
+		border: 1px solid var(--line);
+		border-radius: 2px;
+		background: var(--panel-solid);
+		color: var(--ink);
+		font: inherit;
+		font-size: 0.9rem;
+		translate: -50% 0;
+		cursor: pointer;
+	}
+
+	.rewatch:hover,
+	.rewatch:focus-visible {
+		border-color: var(--good);
+		color: var(--good);
 	}
 
 	.outcome {

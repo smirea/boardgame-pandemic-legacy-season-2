@@ -8,6 +8,7 @@
 	import Crate from './Crate.svelte';
 	import PlayerCard from './PlayerCard.svelte';
 	import DossierDoor from './DossierDoor.svelte';
+	import Logbook from './Logbook.svelte';
 	import Rulebook from './Rulebook.svelte';
 	import { keep } from './viewState.ts';
 
@@ -21,6 +22,7 @@
 		{ id: 'box', label: 'Packages and dossier' },
 		{ id: 'rulebook', label: 'Rulebook' },
 		{ id: 'stickers', label: 'Stickers' },
+		{ id: 'logbook', label: 'Logbook' },
 	] as const;
 	let tab = $state<(typeof TABS)[number]['id']>('box');
 	const STRUCTURE = { center: 'Permanent supply center', tower: 'Permanent tower', shelter: 'Permanent shelter' };
@@ -157,6 +159,8 @@
 		</div>
 	{:else if tab === 'rulebook'}
 		<Rulebook {campaign} />
+	{:else if tab === 'logbook'}
+		<Logbook {campaign} />
 	{:else}
 		<div class="pages" {@attach feedback('Stickers', () => stock)}>
 			{#snippet list(title: string, items: { id: string; name: string; text: string; left: number }[])}

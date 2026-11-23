@@ -76,6 +76,7 @@ export function campaignAt(
 			gridCities: gridCityCount(campaign),
 			rationing: campaign.rationing,
 			characters: [],
+			chronicle: null,
 		});
 	}
 	campaign.month = month;
