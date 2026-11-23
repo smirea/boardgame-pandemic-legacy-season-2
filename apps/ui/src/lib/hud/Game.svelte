@@ -1648,12 +1648,6 @@
 							) && session.importSave(scenarios.canonical())}
 						data-testid="scenario-canonical">Load canonical save</button
 					>
-					<button onclick={() => session.importSave(scenarios.october())} data-testid="scenario-october"
-						>Load scenario: October</button
-					>
-					<button onclick={() => session.importSave(scenarios.december())} data-testid="scenario-december"
-						>Load scenario: December</button
-					>
 					<button
 						class="danger"
 						onclick={() =>

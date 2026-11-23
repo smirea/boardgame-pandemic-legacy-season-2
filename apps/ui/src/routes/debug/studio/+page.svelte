@@ -182,8 +182,6 @@
 	};
 	const STARTS: Record<string, () => Save> = {
 		'New campaign': freshCampaign,
-		'Scenario: October': () => scenarios.october(),
-		'Scenario: December': () => scenarios.december(),
 		'Canonical save (September lobby)': () => scenarios.canonical(),
 	};
 	function startFrom(choice: string) {

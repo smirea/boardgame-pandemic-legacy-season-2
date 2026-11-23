@@ -3,8 +3,7 @@
 	"seed": 7,
 	"start": {
 		"scenario": "tour-october",
-		"stage": "tour-october",
-		"coverage": ["campaign-2"]
+		"stage": "tour-october"
 	},
 	"lastMonth": 10,
 	"passphrase": "playtest",

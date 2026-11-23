@@ -26,8 +26,7 @@ import { legalActions, legalDecides, legalPlays } from './options';
 import { applyUnlock, closeGame, newCampaign, openSeal, readLegacy, score } from './legacy';
 import type { Purchase } from './legacy';
 import { newTable } from './table';
-import { canonicalSave, decemberSave, octoberSave } from './scenarios';
-import { tabletopSave } from './tabletop';
+import { campaignAt, canonicalSave } from './scenarios';
 import { violations } from './invariants';
 import type { Character, Game, World } from './state';
 import {
@@ -620,7 +619,7 @@ describe('Hollow Men and forsaken cities', () => {
 	});
 
 	test('each card that opens a game is flipped by its own command, and Events wait for the last', () => {
-		const actor = createGameActor({ seed: 5, save: decemberSave() }).start();
+		const actor = createGameActor({ seed: 5, save: campaignAt(12) }).start();
 		send(actor, {
 			type: 'START_GAME',
 			seating: Object.values(worldOf(actor).campaign.characters)
@@ -641,7 +640,7 @@ describe('Hollow Men and forsaken cities', () => {
 	});
 
 	test('from September the last three setup infections place Hollow Men instead', () => {
-		const actor = createGameActor({ seed: 5, save: decemberSave() }).start();
+		const actor = createGameActor({ seed: 5, save: campaignAt(12) }).start();
 		send(actor, {
 			type: 'START_GAME',
 			seating: Object.values(worldOf(actor).campaign.characters)
@@ -1616,7 +1615,7 @@ test('waiving an impossible objective lets the rest decide the game', () => {
 });
 
 test('a scar owed from a forced opening goes to a character the group picks as the game begins', () => {
-	const actor = createGameActor({ seed: 4, save: decemberSave() }).start();
+	const actor = createGameActor({ seed: 4, save: campaignAt(12) }).start();
 	const world = JSON.parse(JSON.stringify(worldOf(actor))) as World;
 	world.campaign.owedScars = 1;
 	const owed = createGameActor({ seed: 4, save: { v: 1, phase: 'lobby', world } }).start();
@@ -2058,13 +2057,6 @@ test('the Pearl lab (door 22) opens on the first arrival at Lake Baikal only onc
 	expect(reach(true)).toBe(true);
 });
 
-test('the canonical tabletop campaign still builds against the pack, at the August lobby with no invariant broken', () => {
-	const save = parseSave(JSON.parse(JSON.stringify(tabletopSave())));
-	expect(save.phase).toBe('lobby');
-	expect(save.world.campaign.month).toBe(8);
-	expect(violations(save.world, new Map())).toEqual([]);
-});
-
 test('the canonical save loads in this build, at the September lobby with no invariant broken', () => {
 	const save = canonicalSave();
 	expect(save.phase).toBe('lobby');
@@ -2110,7 +2102,7 @@ test('running out of Hollow Men figures loses the game only once the September r
 });
 
 test('the second December game lost reads the Legacy deck down to its last card', () => {
-	const world = decemberSave().world;
+	const world = campaignAt(12).world;
 	world.campaign.legacyIndex = pack.legacyDeck.findIndex(card => card.id === '12-05');
 	world.campaign.legacyHalt = { kind: 'finale', month: 12 };
 	world.campaign.attempt = 2;
@@ -2129,7 +2121,7 @@ test('the final score counts population on the grid only', () => {
 });
 
 test('free ability units are spent at setup on abilities only, and what is left is lost once the supplies go out', () => {
-	const save = octoberSave();
+	const save = campaignAt(10);
 	save.world.campaign.freeAbilityUnits = 2;
 	save.world.campaign.abilitiesForSale = ['scout'];
 	const actor = createGameActor({ seed: 3, save }).start();
@@ -2210,7 +2202,7 @@ test('a lost early attempt carries completed objectives and Plan steps, not part
 });
 
 test('a recon objective for a region already reconned counts as complete', () => {
-	const save = octoberSave();
+	const save = campaignAt(10);
 	const { campaign } = save.world;
 	campaign.objectives = ['buildCenters', 'reconRegion'];
 	campaign.required = 2;
@@ -2337,7 +2329,7 @@ test('Resilient Population can set aside two discarded Infection cards of one ci
 });
 
 test('setup says how many cubes are left when a placement asks for more', () => {
-	const save = octoberSave();
+	const save = campaignAt(10);
 	const actor = createGameActor({ seed: 3, save }).start();
 	const cast = Object.values(worldOf(actor).campaign.characters).slice(0, 3);
 	actor.send({
@@ -2716,7 +2708,7 @@ test('the hand limit waits until both cards of the draw are in hand', () => {
 });
 
 test('a game needs 2 to 4 seats, and a haven worker only when no living character is free', () => {
-	const save = octoberSave();
+	const save = campaignAt(10);
 	const actor = createGameActor({ seed: 3, save }).start();
 	const cast = Object.values(worldOf(actor).campaign.characters).filter(entry => !entry.dead && !entry.worker);
 	const start = (seating: { seat: typeof A; character: (typeof cast)[number]['id'] | null }[]) =>
@@ -3262,7 +3254,7 @@ test('both cards are drawn before the hand limit applies', () => {
 test('an objective completed in a lost early attempt starts the late attempt complete, and partial progress does not carry', () => {
 	const seats = [A, B, C];
 	const start = (carried: World['campaign']['carriedProgress']) => {
-		const save = octoberSave();
+		const save = campaignAt(10);
 		save.world.campaign.attempt = 2;
 		save.world.campaign.carriedProgress = carried;
 		const actor = createGameActor({ seed: 3, save }).start();
@@ -3505,43 +3497,6 @@ describe('card states, improvements and companion audit', () => {
 				purchase: { t: 'cityImprovement', improvement: 'double', card: utopia.id },
 			}),
 		).toBe('Utopia cannot be improved');
-	});
-
-	test('tabletopSave holds all unrevealed East Asia and Utopia cards at base state 0 and passes invariants', () => {
-		const save = tabletopSave();
-		expect(violations(save.world, new Map())).toEqual([]);
-		const unrevealed: CityId[] = [
-			'jakarta',
-			'bangkok',
-			'ho-chi-minh-city',
-			'manila',
-			'hong-kong',
-			'shanghai',
-			'seoul',
-			'tokyo',
-			'osaka',
-			'utopia',
-		] as CityId[];
-		for (const id of unrevealed) {
-			const playerCards = Object.values(save.world.campaign.playerCards).filter(
-				card => card.kind === 'city' && card.city === id,
-			);
-			const infCards = Object.values(save.world.campaign.infectionCards).filter(
-				card => card.kind === 'city' && card.city === id,
-			);
-			expect(playerCards.length).toBeGreaterThan(0);
-			expect(infCards.length).toBeGreaterThan(0);
-			for (const card of playerCards) {
-				if (card.kind !== 'city') continue;
-				expect(card.improvement).toBeNull();
-				expect(card.companion).toBeNull();
-				expect(card.search.every(box => !box.scratched)).toBe(true);
-			}
-			for (const card of infCards) {
-				if (card.kind !== 'city') continue;
-				expect(card.improvement).toBeNull();
-			}
-		}
 	});
 
 	test('Exacting exposes the 6-card buildCenter option in legalActions', () => {

@@ -6,7 +6,7 @@ import type { CityId, PlayerId } from './ids';
 import { createGameActor, reject } from './machine';
 import type { Start, World } from './state';
 import { tablePlayers, tableStart } from './table';
-import { tabletopSave } from './tabletop';
+import { campaignAt } from './scenarios';
 import { A, act, B, C, gameOf, late, phase, send, worldOf } from './testkit';
 
 const ann = 'ann' as PlayerId;
@@ -142,7 +142,7 @@ test('a player plays the character they claimed, one per seat they hold, and nob
 });
 
 test('loading a mid-campaign lobby starts at the lobby before moving to character select', () => {
-	const actor = createGameActor({ seed: 7, save: tabletopSave() }).start();
+	const actor = createGameActor({ seed: 7, save: campaignAt(8, 7) }).start();
 	send(actor, { type: 'JOIN', player: ann, name: 'Ann' });
 	send(actor, { type: 'JOIN', player: ben, name: 'Ben' });
 	expect(phase(actor)).toBe('lobby');

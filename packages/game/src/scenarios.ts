@@ -101,10 +101,8 @@ export function campaignAt(
 	return { v: 1, phase: 'lobby', world };
 }
 
-export const octoberSave = (seed?: number) => campaignAt(10, seed);
-export const decemberSave = (seed?: number) => campaignAt(12, seed);
-
 /** Our own group's campaign at the September lobby, as the deployed game exported it. */
 export const canonicalSave = () => parseSave(structuredClone(canonical));
 
-export const scenarios = { october: octoberSave, december: decemberSave, canonical: canonicalSave };
+/** The saves the game's menu can load. `campaignAt` is for tests and tools, which need a month of their choosing. */
+export const scenarios = { canonical: canonicalSave };

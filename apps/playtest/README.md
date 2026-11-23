@@ -10,7 +10,7 @@ Runs AI players through the real game, each in its own browser tab, and keeps a 
 ./apps/playtest/lab parity                                      # writes runs/<run>/parity.md
 ./apps/playtest/lab replays                                     # prints the address of the replays page
 ./apps/playtest/lab review apps/playtest/configs/campaign.json  # serves a finished run's replays without starting a game
-./apps/playtest/lab coverage campaign-2 tour-october            # what the named runs exercised, counted from their recordings
+./apps/playtest/lab coverage <run> <run>                       # what the named runs exercised, counted from their recordings
 ./apps/playtest/lab coverage ~/code/<repo>/apps/playtest/runs/*  # a path counts another checkout's runs
 ./apps/playtest/lab stop
 ```
@@ -37,7 +37,7 @@ Watch a live game from your own browser at the address `lab start` prints, with 
 
 `configs/campaign.json` sets the run name, the seed, the starting save or scenario, the ports, and the players. Each player has an id, a persona file, a memory file, a harness, and the model that plays it. Copy the file to try another table.
 
-- `configs/ui-harness.json` is a two-player example on the click-only harness, starting from the October scenario. `configs/ui-january.json` plays January from a new campaign with all three players on it.
+- `configs/ui-harness.json` is a two-player example on the click-only harness, starting from an October lobby (`october` in `labScenarios`). `configs/ui-january.json` plays January from a new campaign with all three players on it.
 - `configs/tour-october.json`, `configs/tour-november.json` and `configs/tour-searches.json` are tour games (below).
 
 `start` can also name a `stage` and a `coverage` list. `coverage` names earlier runs: what their recordings exercised counts as done, so the briefs list only what no run has reached yet.

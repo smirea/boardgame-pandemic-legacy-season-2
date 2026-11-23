@@ -33,7 +33,7 @@ To try several players in one browser, give each tab its own identity with `?DEB
 - **Checking the rules.** `bun test` runs the rule tests and plays a full campaign with a random bot, checking that every command is legal and every invariant holds after it. `CAMPAIGNS=200 bun test packages/game/src/bot.test.ts` plays more seeds.
 - **Cards.** City cards have no hand-made art. `apps/ui/src/lib/cards/mapArt.ts` draws each one from the map data: a crop around the city with a pin on it. `/debug/cards` shows every generated Player and Infection card.
 - **Console helpers.** `window.DEBUG.getState()`, `saveState()`, `loadState()` and `setState(save)` are available while a game is open.
-- **Scenarios.** The menu loads a campaign that stands in the October or December lobby with every region explored (`packages/game/src/scenarios.ts`), for testing late mechanics without playing nine months.
+- **The canonical save.** The menu loads our own campaign at the September lobby (`packages/game/src/canonical-save.json`). Tests and tools build a lobby of any month with `campaignAt(month)` in `packages/game/src/scenarios.ts`, for reaching late mechanics without playing nine months.
 - **Playing a whole campaign with AI players.** `apps/playtest/README.md` covers the lab: configs, saves, player memories, and the parity report.
 - **Replaying a game.** The host records every game as it is played. The menu saves the recording to a file, and `/replay` plays one back on the real game screen, step by step.
 

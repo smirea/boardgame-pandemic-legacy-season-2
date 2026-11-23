@@ -3,7 +3,7 @@ import type { CardId, CityId, SeatId } from './ids';
 import type { Command, GameActor, Phase } from './machine';
 import { paddedTrack } from './legacy';
 import { createGameActor, phaseOf, reject } from './machine';
-import { decemberSave } from './scenarios';
+import { campaignAt } from './scenarios';
 import type { Game, World } from './state';
 
 export const A = 'seat-1' as SeatId;
@@ -116,7 +116,7 @@ export function stackInfection(world: World, cities: string[]) {
  * Every character holds the same Character card, so a first exposure never asks for a scar.
  */
 export function late(edit?: (world: World, game: Game) => void, at: Phase = 'playing.actions'): GameActor {
-	const actor = createGameActor({ seed: 21, save: decemberSave() }).start();
+	const actor = createGameActor({ seed: 21, save: campaignAt(12) }).start();
 	const seats = [A, B, C];
 	actor.send({
 		type: 'START_GAME',

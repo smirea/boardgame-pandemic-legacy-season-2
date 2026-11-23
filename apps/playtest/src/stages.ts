@@ -87,6 +87,7 @@ export function tourSearches(seed?: number): Save {
 
 export const labScenarios = {
 	...scenarios,
+	october: (seed?: number) => campaignAt(10, seed),
 	'tour-october': tourOctober,
 	'tour-november': tourNovember,
 	'tour-searches': tourSearches,
