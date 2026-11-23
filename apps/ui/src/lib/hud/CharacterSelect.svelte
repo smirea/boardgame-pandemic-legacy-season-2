@@ -92,14 +92,19 @@
 	const portraits = Array.from({ length: pack.numbers.portraits }, (_, index) => index);
 	const worn = $derived(new Set(living.map(character => character.portrait)));
 	let picked = $state<number | null>(null);
+	// The haven being named and what has been typed so far, before it is sent.
+	let naming = $state<CityId | null>(null);
+	let draft = $state('');
 	keep(
 		'characters',
-		() => ({ newName, job, home, picked }),
+		() => ({ newName, job, home, picked, naming, draft }),
 		saved => {
 			newName = saved.newName;
 			job = saved.job;
 			home = saved.home;
 			picked = saved.picked;
+			naming = saved.naming;
+			draft = saved.draft;
 		},
 	);
 	const portrait = $derived(picked ?? portraits.find(index => !worn.has(index)) ?? 0);
@@ -142,9 +147,8 @@
 	// The table names its havens in the lobby, the starting three before the first game, as the box asks.
 	const canRename = (city: CityId) =>
 		reject(world, snap.phase, { type: 'RENAME_HAVEN', city, name: cityName(city) }) === null;
-	let naming = $state<CityId | null>(null);
-	function nameHaven(city: CityId, input: HTMLInputElement) {
-		const name = input.value.trim();
+	function nameHaven(city: CityId) {
+		const name = draft.trim();
 		naming = null;
 		if (name && name !== cityName(city)) send({ type: 'RENAME_HAVEN', city, name });
 	}
@@ -437,14 +441,14 @@
 								{#if naming === haven.id}
 									<input
 										class="haven-name"
-										value={cityName(haven.id)}
+										bind:value={draft}
 										maxlength="24"
 										aria-label={`Name for ${cityName(haven.id)}`}
 										{@attach element => {
 											element.focus();
 											element.select();
 										}}
-										onblur={event => nameHaven(haven.id, event.currentTarget)}
+										onblur={() => nameHaven(haven.id)}
 										onkeydown={event => {
 											if (event.key === 'Enter') {
 												event.preventDefault();
@@ -452,7 +456,7 @@
 											}
 											if (event.key === 'Escape') {
 												event.stopPropagation();
-												event.currentTarget.value = cityName(haven.id);
+												draft = cityName(haven.id);
 												event.currentTarget.blur();
 											}
 										}}
@@ -465,7 +469,10 @@
 											type="button"
 											class="rename"
 											aria-label={`Rename ${cityName(haven.id)}`}
-											onclick={() => (naming = haven.id)}
+											onclick={() => {
+												draft = cityName(haven.id);
+												naming = haven.id;
+											}}
 											data-testid={`rename-${haven.id}`}
 										>
 											<svg class="pen" viewBox="0 0 16 16" aria-hidden="true"
@@ -1206,7 +1213,7 @@
 	}
 
 	/* The radio itself stays for the keyboard and screen readers; the row is what shows the choice. */
-	.choice input,
+	.choice input[type='radio'],
 	.avatar input {
 		position: absolute;
 		opacity: 0;
