@@ -142,7 +142,6 @@
 		flex-direction: column;
 		align-items: center;
 		gap: 0.25rem;
-		max-width: 7.4rem;
 		padding: 0.2rem;
 		border: 1px solid transparent;
 		border-radius: 5px;
@@ -153,6 +152,11 @@
 		transition:
 			border-color 160ms ease,
 			background 160ms ease;
+	}
+
+	/* A name wraps under its sticker; a card, landscape ones included, keeps its own width. */
+	.piece:not(.card) {
+		max-width: 7.4rem;
 	}
 
 	.piece:hover,
