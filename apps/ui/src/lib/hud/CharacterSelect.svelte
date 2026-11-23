@@ -4,8 +4,10 @@
 	import type { Character, CityId, Command, PlayerId, PublicState } from '@repo/game';
 	import { flip } from 'svelte/animate';
 	import { fly } from 'svelte/transition';
+	import { jobFigure } from '#lib/characters/figures.ts';
 	import CharacterSheet from './characters/CharacterSheet.svelte';
 	import Creator from './characters/Creator.svelte';
+	import Faces from './characters/Faces.svelte';
 	import { cityName, MONTHS, SEAT_COLORS } from './labels.svelte.ts';
 	import Ready from './Ready.svelte';
 
@@ -51,23 +53,14 @@
 	const choosing = $derived(players.filter(who => claimedBy(who).length < seatsOf(who).length));
 	const mine = $derived(claimedBy(player));
 
-	// One screen can play several characters: each seat this player holds is one more hand.
-	const hands = $derived(seatsOf(player).length);
-	const addHand: Command = $derived({ type: 'ADD_SEAT', player });
-	const cannotAdd = $derived(reject(world, snap.phase, addHand));
-	function dropHand() {
-		const seat = seatsOf(player).at(-1);
-		if (hands < 2 || !seat) return;
-		if (mine.length >= hands) release(mine.at(-1)!);
-		send({ type: 'LEAVE', player, seat });
-	}
+	// A character you have taken can wear any face nobody else wears, offered while the pointer rests on it.
+	const portraits = Array.from({ length: pack.numbers.portraits }, (_, index) => index);
+	const facesFor = (character: Character) =>
+		portraits.filter(index => !living.some(other => other.id !== character.id && other.portrait === index));
 
 	const start = $derived(tableStart(world)!);
 	const title = $derived(start === 'prologue' ? 'Prologue' : MONTHS[Math.max(1, campaign.month)]!);
 	const readyRefusal = $derived(reject(world, snap.phase, { type: 'READY', player, start }));
-	const waitingOn = $derived(
-		players.filter(who => !table.ready[who]).map(who => (who === player ? 'you' : nameOf(who))),
-	);
 
 	function take(character: Character) {
 		const holder = claimant(world, character.id);
@@ -198,7 +191,18 @@
 						{canRename}
 						rename={renameHaven}
 					>
-						{#snippet owner()}
+						{#snippet over()}
+							{#if holder === player && !(character.job && jobFigure(character.job))}
+								<div class="refit">
+									<Faces
+										faces={facesFor(character)}
+										chosen={character.portrait}
+										pick={portrait => send({ type: 'WEAR', player, character: character.id, portrait })}
+									/>
+								</div>
+							{/if}
+						{/snippet}
+						{#snippet base()}
 							{@const who = claimant(world, character.id)}
 							{#key who}
 								<span class="who" in:fly={{ y: 8, duration: 220 }}>
@@ -237,32 +241,6 @@
 	<footer>
 		<div class="status">
 			<h1><span>Choose your characters</span> {title}</h1>
-			{#if hands > 0}
-				<div class="hands" role="group" aria-label="Characters played on this screen">
-					<span>Characters on this screen</span>
-					<button onclick={dropHand} disabled={hands < 2} aria-label="One character fewer" data-testid="hand-fewer"
-						>−</button
-					>
-					<b aria-live="polite">{hands}</b>
-					<button
-						onclick={() => send(addHand)}
-						disabled={cannotAdd !== null}
-						aria-label="One more character"
-						data-testid="hand-more">+</button
-					>
-				</div>
-			{/if}
-			{#if choosing.length}
-				<p class="choosing">
-					Still choosing:
-					{#each choosing as who (who)}
-						{@const color = seatColor(who, 0)!}
-						<span class="who">
-							{#if who === player}{@render you(color)}{:else}{@render pawn(color)}<b>{nameOf(who)}</b>{/if}
-						</span>
-					{/each}
-				</p>
-			{/if}
 			{#if fallen.length}
 				<p class="fallen">
 					Fallen: {fallen
@@ -281,22 +259,18 @@
 				disabled={!table.ready[player] && readyRefusal !== null}
 			/>
 		</div>
-		<p class="hint" aria-live="polite">
-			{#if table.seats.length < 2}
-				A game needs two seats.
-			{:else if mine.length < hands}
-				Pick or create {hands - mine.length === 1 ? 'a character' : `${hands - mine.length} characters`} before readying up.
-			{:else if choosing.length}
-				Waiting for {choosing.map(nameOf).join(', ')} to pick a character.
-			{:else if waitingOn.length}
-				Waiting for {waitingOn.join(', ')}.
-				{#if waitingOn.includes('you')}
-					Taking or making a character asks everyone to ready again.
-				{/if}
-			{:else}
-				Starting.
-			{/if}
-		</p>
+		<!-- Each player's vote, by name: ready, still to vote, or still choosing a character. -->
+		<ul class="votes" aria-label="Votes" aria-live="polite" data-testid="ready-votes">
+			{#each players as who (who)}
+				{@const state = table.ready[who] ? 'ready' : choosing.includes(who) ? 'choosing' : 'waiting'}
+				<li class={state}>
+					{@render pawn(seatColor(who, 0)!)}
+					<b>{who === player ? 'You' : nameOf(who)}</b>
+					<span>{state === 'ready' ? 'Ready' : state === 'choosing' ? 'Choosing' : 'Not ready'}</span>
+				</li>
+			{/each}
+			{#if table.seats.length < 2}<li class="waiting"><span>A game needs two seats</span></li>{/if}
+		</ul>
 	</footer>
 </div>
 
@@ -462,69 +436,65 @@
 		font-size: 0.74rem;
 	}
 
-	.hands {
-		display: flex;
-		align-items: center;
-		gap: 0.35rem;
-		color: #b7a98e;
-	}
-
-	.hands b {
-		min-width: 1ch;
-		color: #f4ead6;
-		text-align: center;
-	}
-
-	.hands button {
-		width: 1.3rem;
-		height: 1.3rem;
-		padding: 0;
-		border: 1px solid rgb(231 220 198 / 0.28);
-		border-radius: 3px;
-		background: rgb(255 255 255 / 0.04);
-		color: #f4ead6;
-		font: inherit;
-		line-height: 1;
-		cursor: pointer;
-	}
-
-	.hands button:hover:not(:disabled) {
-		border-color: rgb(231 220 198 / 0.65);
-	}
-
-	.hands button:disabled {
-		opacity: 0.4;
-		cursor: default;
-	}
-
-	.choosing {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: flex-end;
-		gap: 0.45rem;
-		margin: 0;
-		color: #b7a98e;
-	}
-
-	.choosing .who {
-		color: #f4ead6;
-	}
-
 	.fallen {
 		margin: 0;
 		color: #b7a98e;
 	}
 
+	/* Your own card offers its faces only while the pointer or focus rests on it. */
+	.refit {
+		opacity: 0;
+		translate: 0 0.6rem;
+		pointer-events: none;
+		transition:
+			opacity 180ms ease,
+			translate 180ms ease;
+	}
+
+	.slot:hover .refit,
+	.slot:focus-within .refit {
+		opacity: 1;
+		translate: 0 0;
+		pointer-events: auto;
+	}
+
+	.votes {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: flex-end;
+		gap: 0.4rem 0.9rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		font-size: 0.8rem;
+	}
+
+	.votes li {
+		display: inline-flex;
+		align-items: flex-end;
+		gap: 0.3rem;
+		padding: 0.15rem 0.55rem;
+		border: 1px solid rgb(231 220 198 / 0.18);
+		border-radius: 999px;
+		background: rgb(14 11 9 / 0.55);
+		white-space: nowrap;
+	}
+
+	.votes span {
+		color: #b7a98e;
+	}
+
+	.votes .ready {
+		border-color: rgb(120 200 140 / 0.6);
+	}
+
+	.votes .ready span {
+		color: #9fe0a8;
+		font-weight: 700;
+	}
+
 	.starts {
 		display: flex;
 		gap: 0.8rem;
-	}
-
-	.hint {
-		justify-self: end;
-		margin: 0;
-		color: #b7a98e;
-		font-size: 0.74rem;
-		text-align: right;
 	}
 </style>

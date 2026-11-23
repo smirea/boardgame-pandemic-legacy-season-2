@@ -11,16 +11,14 @@
 	import { cubicIn, cubicOut } from 'svelte/easing';
 	import { fade, fly, scale } from 'svelte/transition';
 	import CardIcon from '#lib/cards/CardIcon.svelte';
-	import { SCAR_ICON } from '#lib/cards/icons.ts';
-	import { fitText } from '#lib/cards/fit.ts';
 	import { deal } from './deal.ts';
 	import { handGroups } from './handGroups.ts';
 	import { sortHand } from './handOrder.ts';
 	import { cardName } from './labels.svelte.ts';
-	import CardSpread from './CardSpread.svelte';
-	import Portrait from './Portrait.svelte';
+	import HandFan from './HandFan.svelte';
+	import CharacterSheet from './characters/CharacterSheet.svelte';
+	import MiniSheet from './characters/MiniSheet.svelte';
 	import type { Place } from './seats.ts';
-	import { characterTraits, TRAIT_KIND } from './traits.ts';
 	import { turnSteps } from './turn.ts';
 
 	const hoverCard = getContext<((cards: CardId | CardId[] | null) => void) | undefined>('card-hover');
@@ -73,12 +71,9 @@
 	const game = $derived(world.game);
 	const player = $derived(game?.players[seat]);
 	const character = $derived(player ? world.campaign.characters[player.character] : undefined);
-	const job = $derived(pack.jobs.find(candidate => candidate.id === character?.job));
 	const active = $derived(game !== null && game.active === seat && !game.outcome);
 	const top = $derived(place === 'tl' || place === 'tr');
 	const right = $derived(place === 'tr' || place === 'br');
-
-	const traits = $derived(character ? characterTraits(character) : []);
 
 	const named = (card: { id: CardId }) => cardName(world, card.id);
 	const hand = $derived(
@@ -89,19 +84,17 @@
 	);
 	const groups = $derived(handGroups(hand, named));
 	const steps = $derived(active && acting ? turnSteps(world, seat) : []);
+	// The whole character and its whole hand open while the pointer rests anywhere on the seat: the character or its
+	// piles. Leaving waits a beat, so crossing the gap between them does not close it.
 	let reading = $state(false);
-
-	// The whole hand opens while the pointer rests anywhere on the seat: its card or its piles. Leaving waits a beat, so
-	// crossing the gap between the card and the piles does not close it.
-	let spread = $state(false);
 	let closing: ReturnType<typeof setTimeout> | undefined;
 	const open = () => {
 		clearTimeout(closing);
-		spread = true;
+		reading = true;
 	};
 	const close = () => {
 		clearTimeout(closing);
-		closing = setTimeout(() => (spread = false), 160);
+		closing = setTimeout(() => (reading = false), 160);
 	};
 </script>
 
@@ -130,50 +123,25 @@
 </div>
 
 {#snippet card()}
-	<div
-		class="seat"
-		style:--seat={color}
-		style:--on={inkOn(color)}
-		onpointerenter={() => (reading = true)}
-		onpointerleave={() => (reading = false)}
-		onfocusin={() => (reading = true)}
-		onfocusout={() => (reading = false)}
-		role="group"
-		aria-label={name}
-	>
-		<button class="slip" class:highlighted class:active class:selected onclick={onselect} aria-pressed={selected}>
-			<span class="portrait">
-				<Portrait
-					portrait={character?.portrait ?? SEAT_IDS.indexOf(seat)}
-					{color}
-					job={character?.job ?? null}
-					hooded={character?.worker ?? false}
-					dead={character?.dead ?? false}
-				/>
-				{#if player?.supplies}
-					<span class="cubes" role="img" aria-label={`${player.supplies} supply cubes carried`}>
-						{#each { length: player.supplies } as _, index (index)}<i></i>{/each}
-					</span>
-				{/if}
-			</span>
-			<span class="body">
-				<span class="head">
-					{#key name}<strong {@attach fitText(name, { min: 0.4, across: true })}>{name}</strong>{/key}
-					{#if character?.carrier}
-						<span class="carrier-badge" data-testid="carrier-badge">Sample</span>
-					{/if}
-				</span>
-				{#if player && character}
-					<span class="traits">
-						{#each traits as trait, index (`${trait.kind}:${trait.name}:${index}`)}
-							<span class="trait {trait.kind}" class:struck={trait.struck}>
-								{#if trait.kind === 'scar'}<CardIcon path={SCAR_ICON} size="0.75rem" />{/if}
-								<b>{trait.name}</b>
-							</span>
-						{/each}
-					</span>
-				{/if}
-			</span>
+	<div class="seat" style:--seat={color} style:--on={inkOn(color)} role="group" aria-label={name}>
+		<button
+			class="slip"
+			class:highlighted
+			class:active
+			class:selected
+			onclick={onselect}
+			aria-pressed={selected}
+			aria-label={`${name}: ${action}`}
+		>
+			<MiniSheet
+				{character}
+				portrait={SEAT_IDS.indexOf(seat)}
+				{name}
+				{color}
+				side={right ? 'right' : 'left'}
+				supplies={player?.supplies ?? 0}
+				{active}
+			/>
 		</button>
 
 		{#if active}
@@ -182,38 +150,32 @@
 			>
 		{/if}
 
-		{#if reading && (traits.length || character?.carrier)}
-			<!-- The whole character card, readable: beside the seat on the side facing the board. -->
+		{#if reading && character}
+			<!-- The whole character, grown out of the seat over the board while the pointer rests on it. -->
 			<div
-				class="sheet-out"
+				class="big"
 				data-testid="character-sheet"
-				{@attach feedback(undefined, () => ({
-					name,
-					seat,
-					carrier: Boolean(character?.carrier),
-					traits: traits.map(trait => `${trait.kind}: ${trait.name}`),
-				}))}
-				transition:fly={{ x: right ? 18 : -18, duration: 200, easing: cubicOut }}
+				in:scale={{ start: 0.4, duration: 170, easing: cubicOut }}
+				out:scale={{ start: 0.4, duration: 110, easing: cubicIn }}
 			>
-				{#if character?.carrier}
-					<div class="line carrier">
-						<b>Carrying the Pearl Lab sample</b>
-						<p>Deliver to a supply center in Johannesburg to complete the final objective.</p>
+				<CharacterSheet
+					{character}
+					tone={character.dead ? 'dead' : 'mine'}
+					{color}
+					side={right ? 'right' : 'left'}
+					label="Character sheet"
+				>
+					{#snippet base()}
+						{#if player?.supplies}
+							<span class="carried">{player.supplies} {player.supplies === 1 ? 'cube' : 'cubes'} carried</span>
+						{/if}
+					{/snippet}
+				</CharacterSheet>
+				{#if showHand}
+					<div class="fan">
+						<HandFan label="{name}'s hand" cards={hand} size="0.82rem" testid="corner-full-hand" />
 					</div>
 				{/if}
-				{#each traits as trait, index (`${trait.kind}:${trait.name}:${index}`)}
-					<div class="line {trait.kind}" class:struck={trait.struck}>
-						<span class="sr-only">{TRAIT_KIND[trait.kind]}{trait.struck ? ', covered by a scar' : ''}: </span>
-						<b>
-							{#if trait.kind === 'scar'}
-								<span class="mark"><CardIcon path={SCAR_ICON} size="0.9rem" /></span>
-							{/if}
-							{trait.name}
-							{#if trait.taken}<i class="taken">{trait.taken}</i>{/if}
-						</b>
-						<p>{trait.text}</p>
-					</div>
-				{/each}
 			</div>
 		{/if}
 		{#if steps.length}
@@ -239,18 +201,7 @@
 {#snippet held()}
 	{#if showHand && hand.length}
 		<!-- Interchangeable cards stack into one pile, a card with its own state or ability stands alone. -->
-		<div class="hand" style:--n={groups.length} data-testid="corner-hand">
-			{#if spread}
-				<!-- The whole hand as real cards, laid over the piles and growing away from the seat card. -->
-				<CardSpread
-					class="seat-spread"
-					label="{name}'s hand"
-					testid="corner-full-hand"
-					cards={{ player: hand }}
-					from={top ? -10 : 10}
-					{onselect}
-				/>
-			{/if}
+		<div class="hand" style:--n={groups.length} data-testid="corner-hand" role="group" aria-label="{name}'s hand">
 			{#each groups as group (group.key)}
 				{@const ids = group.cards.map(card => card.id)}
 				<button
@@ -330,37 +281,24 @@
 		width: 100%;
 	}
 
-	/* A character card laid on the table: the portrait down the left, the card's lines beside it. */
+	/* The character stands in the corner with no card behind it: the figure, the cut and its lines. */
 	.slip {
-		display: grid;
-		grid-template-columns: 4.1rem minmax(0, 1fr);
+		display: block;
 		width: 100%;
-		min-height: 6.4rem;
+		height: 8.8rem;
 		padding: 0;
-		overflow: hidden;
 		border: 0;
-		border-radius: 3px;
-		background:
-			radial-gradient(ellipse at 15% 0%, rgb(255 248 228 / 0.2), transparent 65%),
-			linear-gradient(170deg, var(--seat), color-mix(in srgb, var(--seat) 82%, #140c06));
-		box-shadow: var(--slip-shadow);
-		color: var(--on);
-		font-family: var(--font-ui);
-		text-align: left;
+		border-radius: 4px;
+		background: none;
+		font: inherit;
 		cursor: pointer;
 		transition:
 			translate 300ms cubic-bezier(0.2, 0.9, 0.3, 1.2),
-			box-shadow 300ms ease,
 			opacity 250ms ease;
 	}
 
-	/* The pulse announces the turn and then rests: an animation that never ends keeps the whole screen compositing. */
 	.slip.active {
-		animation: active-border 2s ease-in-out 3;
 		translate: 0 0.25rem;
-		box-shadow:
-			0 0 0 2px var(--on),
-			0 1rem 2rem rgb(20 12 4 / 0.55);
 	}
 
 	.bl .slip.active,
@@ -378,11 +316,21 @@
 		outline-offset: 3px;
 	}
 
-	/* As tall as the card and moved with it, so its words sit at the card's middle. */
+	/* The full card takes the mini's place while it is open. */
+	.seat:has(.big) .slip :global(.mini) {
+		opacity: 0;
+	}
+
+	.slip:focus-visible {
+		outline: 2px solid #f7d68b;
+		outline-offset: 3px;
+	}
+
+	/* From the top of the character to its cut line, and moved with it. */
 	.turn-rail {
 		position: absolute;
 		top: 0;
-		bottom: 0;
+		bottom: 1.2rem;
 		left: calc(100% + var(--rail-gap));
 		z-index: 38;
 		display: grid;
@@ -437,163 +385,6 @@
 		}
 	}
 
-	.portrait {
-		position: relative;
-		display: block;
-		min-height: 100%;
-		border-right: 1px solid rgb(20 12 4 / 0.35);
-	}
-
-	.body {
-		display: flex;
-		flex-direction: column;
-		gap: 0.2rem;
-		min-width: 0;
-		padding: 0.4rem 0.55rem 0.45rem;
-	}
-
-	.head {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		min-height: 1.35rem;
-		font-family: var(--font-display);
-		font-size: 1.3rem;
-	}
-
-	/* The whole name on one line, its size fitted to the room the card leaves it. */
-	strong {
-		flex: 1 1 0;
-		min-width: 0;
-		overflow: hidden;
-		font-weight: 400;
-		line-height: 1.1;
-		white-space: nowrap;
-	}
-
-	.carrier-badge {
-		flex: none;
-		font-family: var(--font-ui);
-		padding: 0.08rem 0.36rem;
-		border: 1px solid #3fe3b0;
-		border-radius: 999px;
-		background: rgb(14 48 40 / 0.92);
-		color: #9bf5d7;
-		font-size: 0.62rem;
-		font-weight: 800;
-		letter-spacing: 0.06em;
-		text-transform: uppercase;
-		line-height: 1.15;
-	}
-
-	.line.carrier b {
-		color: #166b52;
-	}
-
-	/* Carried cubes stand along the foot of the portrait, piling up in rows as more are carried. */
-	.cubes {
-		position: absolute;
-		right: 3px;
-		bottom: 3px;
-		left: 3px;
-		display: flex;
-		flex-wrap: wrap-reverse;
-		gap: 2px;
-		filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.6));
-	}
-
-	@keyframes active-border {
-		50% {
-			box-shadow:
-				0 0 0 3px var(--on),
-				0 0 1rem var(--seat);
-		}
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		.slip.active {
-			animation: none;
-		}
-	}
-
-	.cubes i {
-		flex: none;
-		width: 0.8rem;
-		height: 0.8rem;
-		border: 1px solid rgb(20 12 4 / 0.55);
-		border-radius: 1px;
-		background: conic-gradient(from 30deg at 50% 35%, #b1a38a 0deg 120deg, #e0d5bb 120deg 240deg, #fff5dc 240deg);
-		clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
-		box-shadow: 0 1px 0 rgb(20 12 4 / 0.35);
-	}
-
-	.traits {
-		display: flex;
-		flex-direction: column;
-		gap: 1px;
-	}
-
-	.trait {
-		display: flex;
-		align-items: center;
-		gap: 0.25rem;
-		overflow: hidden;
-		padding: 0.05rem 0.3rem;
-		border-left: 2px solid color-mix(in srgb, var(--on) 45%, transparent);
-		background: color-mix(in srgb, var(--on) 10%, transparent);
-		font-size: 0.72rem;
-		line-height: 1.35;
-		white-space: nowrap;
-	}
-
-	.trait b {
-		overflow: hidden;
-		color: var(--on);
-		font-weight: 700;
-		text-overflow: ellipsis;
-	}
-
-	.trait.struck b {
-		text-decoration: line-through;
-	}
-
-	.trait.scar {
-		border-left-color: #1d140d;
-		background: rgb(20 10 6 / 0.3);
-	}
-
-	/* Above the turn's steps, which sit on the same side, while the pointer rests on the card. */
-	.sheet-out {
-		position: absolute;
-		top: 0;
-		left: calc(100% + 0.5rem);
-		z-index: 20;
-		display: flex;
-		flex-direction: column;
-		gap: 0.45rem;
-		width: 20rem;
-		max-width: calc(50vw - 100% - 1rem);
-		padding: 0.6rem 0.75rem 0.7rem;
-		border-left: 4px solid var(--seat);
-		border-radius: 3px;
-		background: rgb(240 231 210 / 0.97);
-		box-shadow: var(--slip-shadow);
-		color: var(--slip-ink);
-		pointer-events: none;
-	}
-
-	.tr .sheet-out,
-	.br .sheet-out {
-		right: calc(100% + 0.5rem);
-		left: auto;
-	}
-
-	.bl .sheet-out,
-	.br .sheet-out {
-		top: auto;
-		bottom: 0;
-	}
-
 	.sr-only {
 		position: absolute;
 		width: 1px;
@@ -605,49 +396,61 @@
 		white-space: nowrap;
 	}
 
-	.line .mark {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: 0.95rem;
-		height: 0.95rem;
-		margin-right: 0.3rem;
-		vertical-align: -0.08em;
-		color: rgb(42 32 23 / 0.7);
+	/* Grown from the seat's outer corner toward the board, over everything near it. */
+	.big {
+		position: absolute;
+		top: 0;
+		left: 0;
+		z-index: 20;
+		width: min(31rem, 46vw);
+		aspect-ratio: 1.2;
+		transform-origin: top left;
+		pointer-events: none;
 	}
 
-	.line.scar .mark,
-	.line.scar b {
-		color: #8a2a1c;
+	.tr .big,
+	.br .big {
+		right: 0;
+		left: auto;
+		transform-origin: top right;
 	}
 
-	.taken {
-		margin-left: 0.4em;
-		font-style: italic;
-		font-weight: 400;
-		opacity: 0.75;
+	.bl .big,
+	.br .big {
+		top: auto;
+		bottom: 0;
 	}
 
-	.line b {
-		display: block;
-		font-family: var(--font-display);
-		font-size: 1.15rem;
-		font-weight: 400;
-		line-height: 1.15;
+	.bl .big {
+		transform-origin: bottom left;
 	}
 
-	.line.struck {
-		opacity: 0.55;
+	.br .big {
+		transform-origin: bottom right;
 	}
 
-	.line.struck b {
-		text-decoration: line-through;
+	/* The hand fanned beside the card, on the side toward the middle of the screen. */
+	.fan {
+		position: absolute;
+		left: 1.4rem;
+		bottom: calc(100% + 0.8rem);
 	}
 
-	.line p {
-		margin: 0.1rem 0 0;
-		font-size: 0.86rem;
-		line-height: 1.35;
+	.tl .fan,
+	.tr .fan {
+		top: calc(100% + 0.8rem);
+		bottom: auto;
+	}
+
+	.tr .fan,
+	.br .fan {
+		right: 1.4rem;
+		left: auto;
+	}
+
+	.carried {
+		color: #e7dcc6;
+		font-weight: 700;
 	}
 
 	/* The active player's turn so far, floating beside the card toward the board. */
@@ -724,23 +527,6 @@
 		position: relative;
 		display: flex;
 		width: 100%;
-	}
-
-	.hand > :global(.seat-spread) {
-		bottom: -0.35rem;
-		left: -0.35rem;
-	}
-
-	.tl .hand > :global(.seat-spread),
-	.tr .hand > :global(.seat-spread) {
-		top: -0.35rem;
-		bottom: auto;
-	}
-
-	.tr .hand > :global(.seat-spread),
-	.br .hand > :global(.seat-spread) {
-		right: -0.35rem;
-		left: auto;
 	}
 
 	.tr .hand,

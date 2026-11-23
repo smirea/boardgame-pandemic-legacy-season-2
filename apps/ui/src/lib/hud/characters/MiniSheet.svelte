@@ -1,0 +1,257 @@
+<script lang="ts">
+	import type { Character } from '@repo/game';
+	import CardIcon from '#lib/cards/CardIcon.svelte';
+	import { fitText } from '#lib/cards/fit.ts';
+	import { SCAR_ICON } from '#lib/cards/icons.ts';
+	import { figureKey, figureUrl, headOf } from '#lib/characters/figures.ts';
+	import { characterTraits, TRAIT_KIND } from '../traits.ts';
+
+	type Props = {
+		character: Character | undefined;
+		/** The face a seat without a character shows. */
+		portrait: number;
+		name: string;
+		color: string;
+		/** The side of the screen the seat is on: the figure stands at the edge and looks in. */
+		side: 'left' | 'right';
+		supplies: number;
+		active?: boolean;
+	};
+
+	let { character, portrait, name, color, side, supplies, active = false }: Props = $props();
+
+	const key = $derived(
+		figureKey({
+			portrait: character?.portrait ?? portrait,
+			job: character?.job ?? null,
+			hooded: character?.worker ?? false,
+		}),
+	);
+	const head = $derived(headOf(key));
+	const traits = $derived(character ? characterTraits(character) : []);
+</script>
+
+<!-- The character as the table sees it all game: the figure from the chest up, the name and what it can do. -->
+<span class="mini {side}" class:active class:dead={character?.dead} style:--seat={color}>
+	<span class="bust" style:--hx={head.x} style:--hy={head.y} style:--hs={head.size} style:--ha={head.aspect}>
+		<img src={figureUrl(key)} alt="" />
+	</span>
+	<svg class="cut" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+		<path d="M-2 98 L50 88" vector-effect="non-scaling-stroke" />
+	</svg>
+	{#if supplies}
+		<span class="cubes" role="img" aria-label={`${supplies} supply cubes carried`}>
+			{#each { length: supplies } as _, index (index)}<i></i>{/each}
+		</span>
+	{/if}
+	<span class="info">
+		<span class="name">
+			{#key name}<strong {@attach fitText(name, { min: 0.55, across: true })}>{name}</strong>{/key}
+		</span>
+		{#if character?.carrier}<span class="sample" data-testid="carrier-badge">Sample</span>{/if}
+		{#each traits as trait, index (`${trait.kind}:${trait.name}:${index}`)}
+			<span class="trait {trait.kind}" class:struck={trait.struck}>
+				<span class="sr-only">{TRAIT_KIND[trait.kind]}: </span>
+				<b>{trait.name}</b>
+				{#if trait.kind === 'scar'}<CardIcon path={SCAR_ICON} size="1.05em" />{/if}
+			</span>
+		{/each}
+	</span>
+</span>
+
+<style>
+	.mini {
+		--bust: 44cqw;
+		position: relative;
+		display: block;
+		width: 100%;
+		height: 100%;
+		container-type: size;
+		color: #f4ead6;
+		text-align: left;
+		text-shadow:
+			0 0 0.35rem rgb(0 0 0 / 0.95),
+			0 1px 2px rgb(0 0 0 / 0.9);
+	}
+
+	/* The head takes most of the bust's width, its top just under the bust's top edge. */
+	.bust {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		width: var(--bust);
+		/* Only the cut ends the figure: its head, shoulders and glow may spill past the bust's other edges. */
+		clip-path: polygon(-30% -60%, 130% -60%, 130% 84.5%, -30% 101.5%);
+		pointer-events: none;
+	}
+
+	.right .bust {
+		right: 0;
+		left: auto;
+		scale: -1 1;
+	}
+
+	img {
+		position: absolute;
+		left: calc(var(--bust) * (0.5 - 0.66 * var(--hx) / var(--hs)));
+		top: calc(3cqh - var(--bust) * (0.66 * var(--hy) / (var(--hs) * var(--ha)) - 0.33));
+		width: calc(var(--bust) * 0.66 / var(--hs));
+		max-width: none;
+		height: auto;
+		filter: drop-shadow(0 0.4rem 0.8rem rgb(0 0 0 / 0.7));
+		transition: filter 300ms ease;
+	}
+
+	.active img {
+		filter: drop-shadow(0 0 0.7rem color-mix(in srgb, var(--seat) 80%, transparent))
+			drop-shadow(0 0.4rem 0.8rem rgb(0 0 0 / 0.7));
+	}
+
+	.dead img {
+		filter: grayscale(1) brightness(0.75);
+	}
+
+	.cut {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		overflow: visible;
+		pointer-events: none;
+	}
+
+	.right .cut {
+		scale: -1 1;
+	}
+
+	.cut path {
+		fill: none;
+		stroke: var(--seat);
+		stroke-width: 4.5;
+		stroke-linecap: round;
+	}
+
+	/* Carried cubes ride the cut under the figure. */
+	.cubes {
+		position: absolute;
+		bottom: 4cqh;
+		left: 2cqw;
+		display: flex;
+		flex-wrap: wrap-reverse;
+		gap: 2px;
+		width: calc(var(--bust) - 4cqw);
+		filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.7));
+	}
+
+	.right .cubes {
+		right: 2cqw;
+		left: auto;
+		justify-content: flex-end;
+	}
+
+	.cubes i {
+		width: 0.95rem;
+		height: 0.95rem;
+		border: 1px solid rgb(20 12 4 / 0.55);
+		background: conic-gradient(from 30deg at 50% 35%, #b1a38a 0deg 120deg, #e0d5bb 120deg 240deg, #fff5dc 240deg);
+		clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+	}
+
+	.info {
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: calc(var(--bust) - 2cqw);
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 2px;
+		font-size: 0.76rem;
+	}
+
+	.right .info {
+		right: calc(var(--bust) - 2cqw);
+		left: 0;
+		align-items: flex-end;
+	}
+
+	/* The name's largest size; it is fitted down to the room beside the figure. */
+	.name {
+		display: flex;
+		align-self: stretch;
+		margin-bottom: 1px;
+		font-family: var(--font-display);
+		font-size: 1.5rem;
+		line-height: 1.05;
+	}
+
+	.right .name {
+		justify-content: flex-end;
+	}
+
+	strong {
+		min-width: 0;
+		overflow: hidden;
+		font-weight: 400;
+		white-space: nowrap;
+	}
+
+	.active strong {
+		color: color-mix(in srgb, var(--seat) 35%, #fff4dc);
+	}
+
+	.trait {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.3em;
+		max-width: 100%;
+		padding: 0.12em 0.5em;
+		border: 1px solid rgb(240 230 206 / 0.14);
+		border-radius: 0.35em;
+		background: rgb(14 11 9 / 0.74);
+		backdrop-filter: blur(4px);
+		text-shadow: none;
+		white-space: nowrap;
+	}
+
+	.trait b {
+		overflow: hidden;
+		font-weight: 700;
+		text-overflow: ellipsis;
+	}
+
+	.trait.scar {
+		background: rgb(70 16 10 / 0.82);
+		color: #ffd9d0;
+	}
+
+	.trait.struck b {
+		text-decoration: line-through;
+		text-decoration-color: #d9573f;
+		opacity: 0.6;
+	}
+
+	.sample {
+		padding: 0.05em 0.45em;
+		border: 1px solid #3fe3b0;
+		border-radius: 999px;
+		background: rgb(14 48 40 / 0.92);
+		color: #9bf5d7;
+		font-size: 0.85em;
+		font-weight: 800;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		text-shadow: none;
+	}
+
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
+	}
+</style>

@@ -5,7 +5,12 @@
 	import CardIcon from '#lib/cards/CardIcon.svelte';
 	import { SCAR_ICON } from '#lib/cards/icons.ts';
 	import { fly } from 'svelte/transition';
-	import { cityName, seatName, SEAT_COLORS } from './labels.svelte.ts';
+	import { seatName, SEAT_COLORS } from './labels.svelte.ts';
+	import { figureKey, figureUrl } from '#lib/characters/figures.ts';
+	import Exposure, { shownTrack } from './characters/Exposure.svelte';
+	import HavenChip from './characters/HavenChip.svelte';
+	import Sheet from './characters/Sheet.svelte';
+	import TraitPanel from './characters/TraitPanel.svelte';
 	import Portrait from './Portrait.svelte';
 	import { keep } from './viewState.ts';
 
@@ -164,44 +169,40 @@
 	{/if}
 
 	<div class="table">
-		<article class="card" style:--seat={color} aria-label={`${character.name}'s character card`}>
-			<div class="top">
-				<span class="portrait"><Portrait portrait={character.portrait} {color} job={character.job} /></span>
-				<div class="title">
-					<strong>{character.name}</strong>
-					<small>Home: {cityName(character.home)}</small>
-				</div>
-			</div>
-			<ol class="rows">
-				{#each rows as row, index (index)}
-					{@const open = can(row)}
-					{@const chosen = target !== null && JSON.stringify(row.target) === JSON.stringify(target)}
-					<li>
-						<button
-							class="row {row.kind}"
-							class:open
-							class:chosen
-							disabled={!open}
-							onclick={() => (picked = { ...picked, seat: who, target: row.target })}
-							data-target={row.target === null ? undefined : String(row.target)}
-						>
-							{#if row.kind === 'empty'}
-								<span class="kind">Empty slot{row.count > 1 ? `, ${row.count} left` : ''}</span>
-								{#if chosen && scarName}<b class="incoming">{scarName}</b>{/if}
-							{:else}
-								<span class="kind">
-									{#if row.kind === 'scar'}<span class="glyph"><CardIcon path={SCAR_ICON} size="0.8rem" /></span>{/if}
-									{row.kind === 'job' ? 'Occupation' : row.kind === 'ability' ? 'Ability' : 'Scar'}
-								</span>
-								<b class:struck={(row.kind === 'job' && row.struck) || chosen}>{row.name}</b>
-								<span class="text" class:struck={(row.kind === 'job' && row.struck) || chosen}>{row.text}</span>
-								{#if chosen && scarName}<b class="incoming">Covered by {scarName}</b>{/if}
-							{/if}
-						</button>
-					</li>
-				{/each}
-			</ol>
-		</article>
+		<div class="card" aria-label={`${character.name}'s character card`}>
+			<Sheet figure={figureUrl(figureKey(character))} tone="mine" {color} fitted={character.name}>
+				{#snippet name()}{character.name}{/snippet}
+				{#snippet meta()}
+					<Exposure boxes={shownTrack(character.exposureTrack, character.exposure)} />
+					<HavenChip home={character.home} canRename={() => false} rename={() => {}} />
+				{/snippet}
+				{#snippet arch()}
+					{#each rows as row, index (index)}
+						{@const open = can(row)}
+						{@const chosen = target !== null && JSON.stringify(row.target) === JSON.stringify(target)}
+						<TraitPanel
+							at={(index + 0.5) / rows.length}
+							kind={row.kind}
+							label={row.kind === 'job'
+								? 'Occupation'
+								: row.kind === 'ability'
+									? 'Ability'
+									: row.kind === 'scar'
+										? 'Scar'
+										: 'Empty slot'}
+							name={row.kind === 'empty' ? `Empty slot${row.count > 1 ? ` (${row.count})` : ''}` : row.name}
+							text={row.kind === 'empty' ? undefined : row.text}
+							struck={row.kind === 'job' && row.struck}
+							{chosen}
+							note={chosen && scarName ? (row.kind === 'empty' ? scarName : `Covered by ${scarName}`) : null}
+							onclick={open ? () => (picked = { ...picked, seat: who, target: row.target }) : undefined}
+							testid={row.target === null ? undefined : `scar-target-${String(row.target)}`}
+						/>
+					{/each}
+				{/snippet}
+				{#snippet base()}{/snippet}
+			</Sheet>
+		</div>
 
 		<section class="scars" aria-label="Scars in the box">
 			{#each scars as { def, legal } (def.id)}
@@ -329,131 +330,35 @@
 	}
 
 	.card {
-		display: flex;
-		flex-direction: column;
-		gap: 0.8rem;
-		padding: 1rem 1.1rem 1.1rem;
-		border-top: 6px solid var(--seat);
-		border-radius: 5px;
-		background: var(--document);
-		box-shadow: var(--document-shadow);
-		color: var(--slip-ink);
+		align-self: stretch;
+		width: 100%;
+		max-height: 100%;
+		aspect-ratio: 1.2;
 	}
 
-	.top {
-		display: flex;
-		align-items: center;
-		gap: 0.9rem;
-	}
-
-	.portrait {
-		position: relative;
-		width: 5.2rem;
-		height: 5.2rem;
-		overflow: hidden;
-		border-radius: 4px;
-	}
-
-	.title strong {
-		display: block;
-		font-family: var(--font-display);
-		font-size: 2rem;
-		font-weight: 400;
-		line-height: 1.05;
-	}
-
-	.title small,
-	.kind,
 	.scar small {
 		color: var(--slip-muted);
 		font-size: 0.78rem;
 	}
 
-	.rows {
-		display: flex;
-		flex-direction: column;
-		gap: 0.45rem;
-		margin: 0;
-		padding: 0;
-		list-style: none;
-	}
-
-	.row,
 	.scar {
 		display: flex;
 		flex-direction: column;
 		gap: 0.12rem;
 		width: 100%;
-		padding: 0.5rem 0.7rem 0.55rem;
 		border: 2px solid transparent;
-		border-left: 4px solid var(--ink-good);
 		border-radius: 3px;
-		background: rgb(255 255 255 / 0.28);
 		color: inherit;
 		font: inherit;
 		text-align: left;
 	}
 
-	.row.ability {
-		border-left-color: #6a7fa8;
-	}
-
-	.row.scar,
-	.scar {
-		border-left-color: var(--ink-danger);
-	}
-
-	.row.empty {
-		min-height: 2.6rem;
-		justify-content: center;
-		border: 2px dashed rgb(42 32 23 / 0.28);
-		background: none;
-	}
-
-	.row:disabled,
 	.scar:disabled {
 		cursor: default;
 	}
 
-	.row.open {
-		border-color: rgb(163 48 28 / 0.55);
-		border-left-color: var(--ink-danger);
-		cursor: pointer;
-		animation: invite 1.4s ease-in-out 2;
-	}
-
-	.row.open:hover {
-		background: rgb(163 48 28 / 0.1);
-	}
-
-	.row.chosen {
-		border-color: var(--ink-danger);
-		background: rgb(163 48 28 / 0.14);
-	}
-
-	@keyframes invite {
-		50% {
-			border-color: rgb(163 48 28 / 0.95);
-		}
-	}
-
-	.row b,
-	.scar b {
-		font-size: 1rem;
-	}
-
 	.text {
-		font-size: 0.86rem;
 		line-height: 1.3;
-	}
-
-	.struck {
-		text-decoration: line-through;
-		text-decoration-color: var(--ink-danger);
-	}
-
-	.incoming {
-		color: var(--ink-danger);
 	}
 
 	.glyph {

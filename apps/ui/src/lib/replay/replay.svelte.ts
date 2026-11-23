@@ -107,6 +107,11 @@ export function commandLabel(world: World, command: Command | null): { who: stri
 			};
 		case 'DRAFT':
 			return { who: null, text: 'The new character changes' };
+		case 'WEAR':
+			return {
+				who: null,
+				text: `${world.campaign.characters[command.character]?.name ?? 'A character'} wears another face`,
+			};
 		case 'READY':
 			return {
 				who: null,

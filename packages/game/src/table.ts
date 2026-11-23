@@ -25,7 +25,9 @@ export type TableCommand =
 	/** Withdraws an active undo vote. */
 	| { type: 'CANCEL_UNDO_VOTE'; player: PlayerId }
 	/** Changes the new character the table is making together. */
-	| { type: 'DRAFT'; set: Partial<CharacterDraft> };
+	| { type: 'DRAFT'; set: Partial<CharacterDraft> }
+	/** Gives the character its player has taken another of the faces nobody else wears. */
+	| { type: 'WEAR'; player: PlayerId; character: CharacterId; portrait: number };
 
 export const newDraft = (): CharacterDraft => ({ name: '', portrait: null, job: null, home: null });
 export const newTableBriefing = (): TableBriefing => ({ drawn: 0, flipped: false, ready: [], stowing: false });
@@ -131,6 +133,18 @@ export function rejectTable(world: World, lobby: boolean, command: TableCommand)
 			if (job && !pack.jobs.some(candidate => candidate.id === job)) return 'No such job';
 			if (home && pack.cities.find(candidate => candidate.id === home)?.kind !== 'haven') return 'Pick a haven';
 			return null;
+		}
+		case 'WEAR': {
+			if (!lobby) return 'Characters are chosen before a game';
+			const character = campaign.characters[command.character];
+			if (!character || character.dead || character.worker) return 'Pick a living character';
+			if (claimant(world, command.character) !== command.player) return 'Take the character first';
+			if (!(Number.isInteger(command.portrait) && command.portrait >= 0 && command.portrait < pack.numbers.portraits))
+				return 'Pick one of the portraits';
+			const worn = Object.values(campaign.characters).some(
+				other => other.id !== character.id && !other.dead && !other.worker && other.portrait === command.portrait,
+			);
+			return worn ? 'Another character wears that face' : null;
 		}
 		case 'CANCEL_UNDO_VOTE': {
 			if (!table.undoVote) return 'No undo vote is open';
@@ -272,6 +286,9 @@ export function applyTable(world: World, command: TableCommand) {
 			return;
 		case 'DRAFT':
 			Object.assign(table.draft, command.set);
+			return;
+		case 'WEAR':
+			campaign.characters[command.character]!.portrait = command.portrait;
 			return;
 	}
 	table.seats.sort(bySeat);

@@ -1,5 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import CardIcon from '#lib/cards/CardIcon.svelte';
+	import { SCAR_ICON } from '#lib/cards/icons.ts';
 
 	type Props = {
 		/** Where the panel stands on the arch, from 0 at the top to 1 at the foot. */
@@ -19,6 +21,10 @@
 		/** Why the choice cannot be made, which crosses it out. */
 		refusal?: string | null;
 		testid?: string;
+		/** Picked, such as the place a scar will go. */
+		chosen?: boolean;
+		/** A line for what is about to happen to it, such as the scar that will cover it. */
+		note?: string | null;
 	};
 
 	let {
@@ -33,6 +39,8 @@
 		onclick,
 		refusal = null,
 		testid,
+		chosen = false,
+		note = null,
 	}: Props = $props();
 </script>
 
@@ -42,21 +50,24 @@
 	class="panel {kind}"
 	class:struck={struck || refusal !== null}
 	class:choice={Boolean(onclick)}
+	class:chosen
 	style:--at={at}
 	aria-hidden={kind === 'empty' ? 'true' : undefined}
 	aria-disabled={refusal !== null ? 'true' : undefined}
 	onclick={refusal === null ? onclick : undefined}
 	data-testid={testid}
 >
-	{#if kind !== 'empty'}
+	{#if kind !== 'empty' || name}
 		<div class="body" data-fit>
 			<span class="sr-only">{label}{struck ? ', covered by a scar' : ''}: </span>
 			<b
 				>{name}{#if taken}<i>{taken}</i>{/if}</b
 			>
-			<span class="text">{text}</span>
+			{#if text}<span class="text">{text}</span>{/if}
+			{#if note}<span class="note">{note}</span>{/if}
 			{#if refusal}<span class="sr-only">Unavailable: {refusal}</span>{/if}
 		</div>
+		{#if kind === 'scar'}<span class="mark" aria-hidden="true"><CardIcon path={SCAR_ICON} size="2.1em" /></span>{/if}
 		{@render children?.()}
 	{/if}
 </svelte:element>
@@ -64,7 +75,6 @@
 <style>
 	/* One stone of the arch: panels bow away from the figure in the middle and lean in at the ends. */
 	.panel {
-		--accent: #e2c36a;
 		--turn: calc(var(--at) * 180deg);
 		position: relative;
 		display: flex;
@@ -73,16 +83,17 @@
 		gap: 0.6em;
 		width: 89%;
 		min-height: 0;
-		margin-left: calc(10% * sin(var(--turn)));
-		padding: 0.35em 0.6em 0.35em 0.85em;
+		margin-left: calc((1 + var(--bow, 1)) * 5% * sin(var(--turn)));
+		margin-right: calc((1 - var(--bow, 1)) * 5% * sin(var(--turn)));
+		padding: 0.35em 0.65em;
 		border: 1px solid rgb(240 230 206 / 0.14);
 		border-radius: 0.5em;
-		background: linear-gradient(100deg, rgb(14 11 9 / 0.78), rgb(14 11 9 / 0.5));
+		background: linear-gradient(100deg, rgb(14 11 9 / 0.88), rgb(14 11 9 / 0.7));
 		backdrop-filter: blur(6px) saturate(1.2);
 		box-shadow:
 			0 0.6em 1.6em rgb(0 0 0 / 0.4),
 			inset 0 1px 0 rgb(255 248 232 / 0.06);
-		rotate: calc(cos(var(--turn)) * -2.2deg);
+		rotate: calc(cos(var(--turn)) * -2.2deg * var(--bow, 1));
 		color: #f4ead6;
 		font: inherit;
 		text-align: left;
@@ -91,17 +102,6 @@
 			opacity 200ms ease,
 			border-color 200ms ease,
 			background 200ms ease;
-	}
-
-	.panel::before {
-		content: '';
-		position: absolute;
-		top: 0.4em;
-		bottom: 0.4em;
-		left: 0.3em;
-		width: 0.22em;
-		border-radius: 1em;
-		background: var(--accent);
 	}
 
 	.choice {
@@ -115,17 +115,25 @@
 		outline: none;
 	}
 
+	.chosen,
+	.chosen:hover {
+		border-color: #d9573f !important;
+		box-shadow:
+			0 0 0 0.15em rgb(217 87 63 / 0.45),
+			0 0.6em 1.6em rgb(0 0 0 / 0.4);
+	}
+
+	.note {
+		color: #ff9a80;
+		font-weight: 700;
+	}
+
 	.choice[aria-disabled] {
 		cursor: default;
 		opacity: 0.6;
 	}
 
-	.ability {
-		--accent: #8cb8d4;
-	}
-
 	.scar {
-		--accent: #d9573f;
 		background: linear-gradient(100deg, rgb(32 10 8 / 0.8), rgb(24 9 7 / 0.52));
 	}
 
@@ -137,8 +145,13 @@
 		backdrop-filter: none;
 	}
 
-	.empty::before {
-		display: none;
+	.mark {
+		display: grid;
+		flex: none;
+		place-items: center;
+		align-self: center;
+		color: #f0b2a6;
+		opacity: 0.9;
 	}
 
 	.body {

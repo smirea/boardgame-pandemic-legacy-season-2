@@ -675,8 +675,8 @@
 			key: up.key,
 			name: seatName(world, up.seat),
 			color: SEAT_COLORS[game.seats.indexOf(up.seat)] ?? '#fff',
-			portrait: character?.portrait ?? null,
-			job: character && !character.jobScar ? character.job : null,
+			seat: up.seat,
+			character: character ?? null,
 			mine: owns(up.seat),
 		};
 	});
@@ -1286,8 +1286,8 @@
 				<TurnInterlude
 					name={nextUp.name}
 					color={nextUp.color}
-					portrait={nextUp.portrait}
-					job={nextUp.job}
+					seat={nextUp.seat}
+					character={nextUp.character}
 					mine={nextUp.mine && !spectator}
 					ondone={() => admin.turn.announced(nextUp.key)}
 				/>

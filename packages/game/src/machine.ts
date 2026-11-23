@@ -129,6 +129,7 @@ export function reject(world: World, phase: Phase, command: Command): string | n
 		case 'READY':
 		case 'CLAIM':
 		case 'DRAFT':
+		case 'WEAR':
 		case 'BRIEFING_STEP':
 		case 'BRIEFING_READY':
 			return phase === 'finished' &&
@@ -632,6 +633,7 @@ export const gameMachine = setup({
 				ADD_SEAT: { guard: { type: 'legal', params: 'lobby' }, actions: 'table' },
 				CLAIM: { guard: { type: 'legal', params: 'lobby' }, actions: 'claim' },
 				DRAFT: { guard: { type: 'legal', params: 'lobby' }, actions: 'table' },
+				WEAR: { guard: { type: 'legal', params: 'lobby' }, actions: 'table' },
 				READY: [
 					{ guard: and(['allReady', 'gameChosen']), target: 'setup', actions: 'startTable' },
 					{ guard: 'allReady', actions: 'chooseStart' },

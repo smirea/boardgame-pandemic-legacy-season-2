@@ -1,7 +1,16 @@
 import { characterAt } from '@repo/game';
 import type { Character, CityId, ExposureBox, JobId, LogEntry, SeatId, World } from '@repo/game';
 
-type Who = { name: string; portrait: number; job: JobId | null; worker: boolean; seat: SeatId; voice: number };
+type Who = {
+	name: string;
+	portrait: number;
+	job: JobId | null;
+	worker: boolean;
+	seat: SeatId;
+	voice: number;
+	/** The character as it stood at that moment, drawn as its card. */
+	character: Character;
+};
 
 /** A scratched exposure box, from the box still covered to what was under it. */
 export type Scratch = {
@@ -97,6 +106,7 @@ export class FateShow {
 							worker: character.worker,
 							seat,
 							voice: voiceOf(character.id),
+							character,
 						},
 					}
 				: null;
@@ -140,6 +150,7 @@ export class FateShow {
 						worker: character.worker,
 						seat: entry.seat,
 						voice: voiceOf(character.id),
+						character,
 					},
 					at: entry.at,
 					month: world.campaign.month,

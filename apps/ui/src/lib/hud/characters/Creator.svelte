@@ -5,9 +5,9 @@
 	import { flip } from 'svelte/animate';
 	import { fade, fly } from 'svelte/transition';
 	import { figureUrl, jobFigure, UNKNOWN_FIGURE } from '#lib/characters/figures.ts';
-	import Portrait from '../Portrait.svelte';
 	import { keep } from '../viewState.ts';
-	import Exposure from './Exposure.svelte';
+	import Exposure, { shownTrack } from './Exposure.svelte';
+	import Faces from './Faces.svelte';
 	import HavenChip from './HavenChip.svelte';
 	import Sheet from './Sheet.svelte';
 	import TraitPanel from './TraitPanel.svelte';
@@ -148,7 +148,7 @@
 			/>
 		{/snippet}
 		{#snippet meta()}
-			{#if card}<Exposure track={card.track} exposure={card.exposure} />{/if}
+			{#if card}<Exposure boxes={shownTrack(card.track, card.exposure)} />{/if}
 			{#if job}
 				<span class="home" in:fade={{ duration: 260, delay: 220 }}>
 					<HavenChip
@@ -202,21 +202,7 @@
 		{/snippet}
 		{#snippet over()}
 			{#if !own}
-				<div class="faces" role="radiogroup" aria-label="Face">
-					{#each faces as index (index)}
-						<button
-							type="button"
-							role="radio"
-							class="face"
-							aria-checked={face === index}
-							aria-label={`Face ${index + 1}`}
-							onclick={() => send({ type: 'DRAFT', set: { portrait: index } })}
-							data-testid={`face-${index}`}
-						>
-							<Portrait portrait={index} color="#3a3128" />
-						</button>
-					{/each}
-				</div>
+				<Faces {faces} chosen={face} pick={portrait => send({ type: 'DRAFT', set: { portrait } })} />
 			{/if}
 		{/snippet}
 		{#snippet base()}
@@ -289,45 +275,6 @@
 		border-color: #e2c36a;
 		background: rgb(40 31 16 / 0.85);
 		outline: none;
-	}
-
-	/* The faces still free, laid over the figure's foot: choosing one puts it on the shadow. */
-	.faces {
-		display: flex;
-		flex-wrap: wrap;
-		justify-content: center;
-		gap: 0.9cqh;
-		max-width: 46cqw;
-	}
-
-	.face {
-		position: relative;
-		width: 7cqh;
-		height: 7cqh;
-		padding: 0;
-		border: 2px solid rgb(240 230 206 / 0.35);
-		border-radius: 50%;
-		overflow: hidden;
-		background: none;
-		box-shadow: 0 0.4cqh 1.2cqh rgb(0 0 0 / 0.6);
-		cursor: pointer;
-		transition:
-			transform 160ms ease,
-			border-color 160ms ease;
-	}
-
-	.face:hover,
-	.face:focus-visible {
-		transform: translateY(-0.4cqh) scale(1.08);
-		border-color: rgb(240 230 206 / 0.8);
-		outline: none;
-	}
-
-	.face[aria-checked='true'] {
-		border-color: #e2c36a;
-		box-shadow:
-			0 0 0 0.4cqh rgb(226 195 106 / 0.35),
-			0 0.4cqh 1.2cqh rgb(0 0 0 / 0.6);
 	}
 
 	.mint {

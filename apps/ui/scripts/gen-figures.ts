@@ -82,7 +82,7 @@ The six people in it are the story's cast. The character you draw must look COMP
 Generate ONE new image:
 - Character, pose and personality: ${FIGURES[key]}
 - Framing: portrait orientation (1024x1536). The figure from roughly the waist up, centred, filling most of the width. Leave a small empty margin above the head. The body runs off the bottom edge at the waist.
-- The head must be clearly readable in the upper third, in front or three-quarter view, so that a square headshot can be cropped from it.
+- The head must be clearly readable in the upper third, so that a square headshot can be cropped from it. The face looks front or three-quarter toward the viewer's RIGHT, never to the left: a figure standing on the right of the screen is mirrored to look across its card.
 - Background: fully transparent (a real alpha channel). No backdrop, no floor, no frame, no shadow, no glow, no text, no logo.
 
 When the image is generated, copy the PNG file to exactly: ${out}

@@ -6,8 +6,13 @@
 		figure: string;
 		/** Nobody yet: the figure is drawn as a shadow. */
 		unknown?: boolean;
-		/** How the character stands at the table: yours, someone else's, free to take, or being made. */
-		tone: 'mine' | 'taken' | 'free' | 'new';
+		/** How the character stands at the table: yours, someone else's, free to take, being made, or gone. */
+		tone: 'mine' | 'taken' | 'free' | 'new' | 'dead';
+		/**
+		 * Which side the figure stands on. Every figure is drawn looking to the viewer's right, so one on the right is
+		 * mirrored to look across its card.
+		 */
+		side?: 'left' | 'right';
 		/** The colour of the seat it plays in, once someone has it. */
 		color: string | null;
 		/** The name, as text or as the field that names a new character. */
@@ -26,11 +31,24 @@
 		fitted: string;
 	};
 
-	let { figure, unknown = false, tone, color, name, meta, arch, base, over, hit, fitted }: Props = $props();
+	let {
+		figure,
+		unknown = false,
+		tone,
+		side = 'left',
+		color,
+		name,
+		meta,
+		arch,
+		base,
+		over,
+		hit,
+		fitted,
+	}: Props = $props();
 </script>
 
 <!-- The card has no face of its own: the figure, the cut under it and the arch of panels stand on the table. -->
-<div class="sheet {tone}" style:--seat={color ?? '#e7dcc6'}>
+<div class="sheet {tone} {side}" style:--seat={color ?? '#e7dcc6'}>
 	{@render hit?.()}
 	<div class="figure">
 		{#key figure}
@@ -70,9 +88,23 @@
 		left: 0;
 		width: 47cqw;
 		height: 92cqh;
-		/* The figure ends on the cut, which falls from right to left. */
-		clip-path: polygon(-10% -10%, 110% -10%, 110% 89.5%, 0% 100%);
+		/* The figure ends on the cut, which falls away from the arch; everywhere else it and its glow may spill out. */
+		clip-path: polygon(-100% -100%, 200% -100%, 200% 80.9%, -100% 109.5%);
 		pointer-events: none;
+	}
+
+	.right .figure {
+		right: 0;
+		left: auto;
+		clip-path: polygon(-100% -100%, 200% -100%, 200% 109.5%, -100% 80.9%);
+	}
+
+	.right img {
+		scale: -1 1;
+	}
+
+	.right .cut {
+		scale: -1 1;
 	}
 
 	img {
@@ -102,6 +134,10 @@
 
 	.taken img {
 		filter: brightness(0.5) saturate(0.55) drop-shadow(0 1.2cqh 2.4cqh rgb(0 0 0 / 0.72));
+	}
+
+	.dead img {
+		filter: grayscale(1) brightness(0.8) contrast(0.9) drop-shadow(0 1.2cqh 2.4cqh rgb(0 0 0 / 0.72));
 	}
 
 	img.unknown {
@@ -175,6 +211,17 @@
 		font-size: 4.2cqh;
 	}
 
+	.right .over {
+		right: 0;
+		left: auto;
+	}
+
+	.right .base {
+		right: 2.5cqw;
+		left: auto;
+		justify-content: flex-end;
+	}
+
 	.info {
 		position: absolute;
 		top: 1cqh;
@@ -187,6 +234,13 @@
 		/* The name's largest size; it is fitted down from here to its width. */
 		font-size: 8.8cqh;
 		pointer-events: none;
+	}
+
+	.right .info {
+		right: 39cqw;
+		left: 0;
+		align-items: flex-end;
+		text-align: right;
 	}
 
 	.info :global(button),
@@ -218,9 +272,18 @@
 		display: flex;
 		flex: 1;
 		flex-direction: column;
+		align-items: flex-start;
 		gap: 1.3cqh;
+		align-self: stretch;
 		min-height: 0;
 		margin-top: 2.4cqh;
+		text-align: left;
+	}
+
+	/* Mirrored, the arch bows the other way. */
+	.right .arch {
+		--bow: -1;
+		align-items: flex-end;
 	}
 
 	.taken .arch {
