@@ -1813,6 +1813,8 @@
 
 	/* The action list sits in whichever side column has room, beside the seats. */
 	.actions-slot {
+		position: relative;
+		z-index: 1;
 		display: flex;
 		flex-direction: column;
 		width: 100%;
@@ -1825,6 +1827,7 @@
 	.column > .desk-slot {
 		position: absolute;
 		left: 0;
+		z-index: 1;
 		translate: 0 -100%;
 		pointer-events: none;
 	}

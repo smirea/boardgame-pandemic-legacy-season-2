@@ -285,17 +285,15 @@
 		font: inherit;
 		cursor: pointer;
 		transition:
-			translate 300ms cubic-bezier(0.2, 0.9, 0.3, 1.2),
+			height 300ms cubic-bezier(0.2, 0.9, 0.3, 1.1),
+			margin 300ms cubic-bezier(0.2, 0.9, 0.3, 1.1),
 			opacity 250ms ease;
 	}
 
+	/* The active character stands taller, with room under its cut line for Current turn. */
 	.slip.active {
-		translate: 0 0.25rem;
-	}
-
-	.bl .slip.active,
-	.br .slip.active {
-		translate: 0 -0.25rem;
+		height: 11.2rem;
+		margin-bottom: 1.2rem;
 	}
 
 	.slip.selected {
@@ -390,6 +388,7 @@
 	.steps {
 		position: absolute;
 		top: 0;
+		z-index: 1;
 		left: calc(100% + 0.4rem);
 		display: flex;
 		flex-direction: column;
@@ -454,9 +453,11 @@
 	}
 
 	/* Mini cards overlap just enough that the whole hand spans the card's width and no more. */
+	/* Everything else in the corner stands over the character, whose figure and glow spill out under it. */
 	.hand {
 		--card: 2.45rem;
 		position: relative;
+		z-index: 1;
 		display: flex;
 		width: 100%;
 	}
@@ -559,6 +560,8 @@
 	}
 
 	.bubbles {
+		position: relative;
+		z-index: 1;
 		display: flex;
 		flex-direction: column;
 		gap: 0.35rem;

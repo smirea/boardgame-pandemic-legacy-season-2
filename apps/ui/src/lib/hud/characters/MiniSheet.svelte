@@ -82,8 +82,9 @@
 		bottom: 0;
 		left: 0;
 		width: var(--bust);
-		/* Only the cut ends the figure: its head, shoulders and glow may spill past the bust's other edges. */
-		clip-path: polygon(-30% -60%, 130% -60%, 130% 84.5%, -30% 101.5%);
+		/* Only the cut ends the figure: its head, shoulders and glow may spill far past the bust's other edges. The bottom
+		   edge is the cut line carried across the bust's coordinates. */
+		clip-path: polygon(-300% -100%, 400% -100%, 400% 63.8%, -300% 123%);
 		pointer-events: none;
 	}
 
@@ -104,9 +105,23 @@
 		transition: filter 300ms ease;
 	}
 
+	/* The active character and its Current turn share one tight glow, which pulses a few times as the turn starts.
+	   Both ends are the plain seat colour: Chrome turns a color-mix() with transparent to garbage mid-animation. */
+	.mini {
+		--glow-low: drop-shadow(0 0 0.5px var(--seat)) drop-shadow(0 0 1px var(--seat));
+		--glow-high: drop-shadow(0 0 1.5px var(--seat)) drop-shadow(0 0 3.5px var(--seat));
+		--shade: drop-shadow(0 0.4rem 0.8rem rgb(0 0 0 / 0.7));
+	}
+
 	.active img {
-		filter: drop-shadow(0 0 0.7rem color-mix(in srgb, var(--seat) 80%, transparent))
-			drop-shadow(0 0.4rem 0.8rem rgb(0 0 0 / 0.7));
+		filter: var(--glow-low) var(--shade);
+		animation: figure-glow 1.4s ease-in-out 6;
+	}
+
+	@keyframes figure-glow {
+		50% {
+			filter: var(--glow-high) var(--shade);
+		}
 	}
 
 	.dead img {
@@ -142,18 +157,17 @@
 		transform-origin: 0 0;
 		rotate: atan2(-10cqh, 52cqw);
 		translate: 0 3px;
-		color: #fff6e0;
+		color: #0b0806;
 		font-family: var(--font-display);
-		font-size: clamp(0.75rem, 6cqw, 1.15rem);
+		font-size: clamp(1.5rem, 12cqw, 2.3rem);
 		line-height: 1;
 		white-space: nowrap;
-		-webkit-text-stroke: 0.16em var(--seat);
+		-webkit-text-stroke: 0.14em var(--seat);
 		paint-order: stroke fill;
 		text-shadow: none;
-		filter: drop-shadow(0 0 0.15rem var(--seat)) drop-shadow(0 0 0.45rem var(--seat))
-			drop-shadow(0 0 0.8rem color-mix(in srgb, var(--seat) 70%, transparent));
+		filter: var(--glow-low);
 		pointer-events: none;
-		animation: turn-glow 1.8s ease-in-out 3;
+		animation: turn-glow 1.4s ease-in-out 6;
 	}
 
 	.right .turn {
@@ -165,8 +179,7 @@
 
 	@keyframes turn-glow {
 		50% {
-			filter: drop-shadow(0 0 0.25rem var(--seat)) drop-shadow(0 0 0.7rem var(--seat))
-				drop-shadow(0 0 1.3rem var(--seat));
+			filter: var(--glow-high);
 		}
 	}
 
@@ -207,6 +220,11 @@
 		align-items: flex-start;
 		gap: 2px;
 		font-size: 0.76rem;
+	}
+
+	/* Clear of Current turn, which climbs with the cut line under the traits' side. */
+	.active .info {
+		bottom: 18cqh;
 	}
 
 	.right .info {
