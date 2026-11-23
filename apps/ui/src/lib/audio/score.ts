@@ -1,4 +1,5 @@
 import type { JobId } from '@repo/game';
+import type { NoiseColor } from './engine.ts';
 import { CUES, THEMES, TIMBRES, type Cue, type CueDef, type Theme } from './themes.ts';
 import { TONES, type Tone, type ToneId } from './tones.ts';
 import { burst, cry, sing, type ScoreBus } from './voices.ts';
@@ -30,6 +31,20 @@ export const tensionOf = (incidents: number, epidemics: number) =>
 
 const dreadOf = (mood: Mood) => Math.min(1, TONES[mood.tone].dread + mood.tension * 0.5 + (mood.infecting ? 0.25 : 0));
 
+/**
+ * 0..1: the weather of a game on the brink. Nothing falls until the crisis is at its last level (about six
+ * incidents and three Epidemics); from there the rain thickens, and past `THUNDER_FROM` it is a storm.
+ */
+export const stormOf = (mood: Pick<Mood, 'tension'>) => Math.min(1, Math.max(0, (mood.tension - 0.68) / 0.27));
+const THUNDER_FROM = 0.6;
+/** Where the wind's whistle sits in still weather. */
+const WHISTLE_HZ = 320;
+/** Levels of the weather, set from renders against the pad and the themes. */
+const WIND = { calm: 0.5, dread: 0.2, storm: 0.85 };
+const RAIN = 1.25;
+const WAVE = { body: 0.55, crest: 0.035 };
+const THUNDER = 1.3;
+
 const hz = (root: number, semitones: number) => root * 2 ** (semitones / 12);
 
 /** The tone's scale as a game's crisis bends it: past the midpoint its second step sinks to a semitone over the root. */
@@ -50,11 +65,13 @@ export class Score {
 	private readonly safeGain: GainNode;
 	private readonly padFilter: BiquadFilterNode;
 	private readonly padGain: GainNode;
-	private readonly surfGain: GainNode;
 	private readonly windGain: GainNode;
-	private readonly foam: BiquadFilterNode;
-	/** The slow oscillators that roll the waves and blow the gusts, each with its rate in still weather. */
+	private readonly whistle: BiquadFilterNode;
+	private readonly rainGain: GainNode;
+	/** The slow oscillators that blow the gusts and drive the squalls, each with its rate in still weather. */
 	private readonly weather: { osc: OscillatorNode; rate: number }[] = [];
+	private nextWave: number;
+	private nextThunder: number;
 	private melody: GainNode;
 	private life: GainNode;
 	private cue: { def: CueDef; until: number } | null = null;
@@ -118,38 +135,43 @@ export class Score {
 		this.safeGain = this.gain(0.0001);
 		this.safe.connect(this.safeGain).connect(this.main);
 
-		// A wave is a low wash that takes a quarter of a minute to come in and go out; only its crest hisses.
-		this.surfGain = this.gain(0.0001);
-		this.surfGain.connect(this.main);
-		const swell = this.gain(0.5);
-		this.sway(0.045).connect(this.gain(0.26)).connect(swell.gain);
-		this.sway(0.029).connect(this.gain(0.14)).connect(swell.gain);
-		swell.connect(this.surfGain);
-		// Brown noise is mostly a rumble under 60 Hz, which shudders more than it washes, so that is taken out.
-		this.noise('brown', 0.6)
-			.connect(this.filter('highpass', 90, 0.7))
-			.connect(this.filter('lowpass', 300, 0.7))
-			.connect(this.gain(1))
-			.connect(swell);
-		this.foam = this.filter('bandpass', 600, 0.5);
-		this.noise('pink', 0.8).connect(this.foam).connect(this.gain(0.7)).connect(swell);
-
+		// Wind is the whole bed in ordinary weather. A steady wash of surf under it read as an engine running, so
+		// the sea is no longer part of the bed: it is a wave now and then (`wave`).
 		this.windGain = this.gain(0.0001);
 		this.windGain.connect(this.main);
-		const gust = this.gain(0.5);
-		this.sway(0.045).connect(this.gain(0.3)).connect(gust.gain);
-		this.sway(0.019).connect(this.gain(0.16)).connect(gust.gain);
+		// The gusts never die away altogether: a bed that falls silent and comes back is heard as something starting up.
+		const gust = this.gain(0.55);
+		this.sway(0.045).connect(this.gain(0.24)).connect(gust.gain);
+		this.sway(0.019).connect(this.gain(0.12)).connect(gust.gain);
 		gust.connect(this.windGain);
-		const whistle = this.filter('bandpass', 320, 2);
-		this.sway(0.023).connect(this.gain(110)).connect(whistle.frequency);
-		this.sway(0.07).connect(this.gain(40)).connect(whistle.frequency);
+		this.whistle = this.filter('bandpass', WHISTLE_HZ, 1.4);
+		this.sway(0.023).connect(this.gain(110)).connect(this.whistle.frequency);
+		this.sway(0.07).connect(this.gain(40)).connect(this.whistle.frequency);
 		const air = this.noise('pink', 0.9);
-		air.connect(whistle).connect(gust);
+		air.connect(this.whistle).connect(gust);
 		air
 			.connect(this.filter('bandpass', 800, 1))
 			.connect(this.gain(0.25))
 			.connect(gust);
 
+		// Rain is silent until a game is nearly lost (`stormOf`): a hiss with the patter under it, in squalls.
+		this.rainGain = this.gain(0.0001);
+		this.rainGain.connect(this.main);
+		this.rainGain.connect(this.gain(0.15)).connect(bus.reverb);
+		const squall = this.gain(0.75);
+		this.sway(0.11).connect(this.gain(0.2)).connect(squall.gain);
+		squall.connect(this.rainGain);
+		this.noise('white', 1)
+			.connect(this.filter('highpass', 3200, 0.7))
+			.connect(this.gain(0.05))
+			.connect(squall);
+		this.noise('pink', 1.4)
+			.connect(this.filter('bandpass', 1500, 0.5))
+			.connect(this.gain(0.3))
+			.connect(squall);
+
+		this.nextWave = now + 12 + Math.random() * 14;
+		this.nextThunder = now + 6;
 		this.nextTheme = now + 5;
 		this.nextWander = now + 9;
 		this.nextCall = now + 7;
@@ -188,7 +210,7 @@ export class Score {
 		return osc;
 	}
 
-	private noise(color: 'brown' | 'pink', rate: number): AudioBufferSourceNode {
+	private noise(color: NoiseColor, rate: number): AudioBufferSourceNode {
 		const node = this.bus.ctx.createBufferSource();
 		node.buffer = this.bus.noise[color];
 		node.loop = true;
@@ -243,13 +265,86 @@ export class Score {
 		this.padGain.gain.setTargetAtTime((0.065 + ten * 0.055) * (jolt ? 1.3 : brood ? 1.2 : 1), now, jolt ? 0.05 : 1.6);
 		this.safeGain.gain.setTargetAtTime(mood.safe ? 0.03 : 0.0001, now, 1.2);
 
-		// Still weather is slow and low. Dread quickens the waves and the gusts and whitens their crests.
+		// Ordinary weather is a low wind. Dread quickens its gusts, and a game about to be lost brings rain, the wind
+		// rising and whistling higher with it.
 		const dread = dreadOf(mood);
+		const storm = stormOf(mood);
 		for (const { osc, rate } of this.weather) osc.frequency.setTargetAtTime(rate * (1 + dread * 1.3), now, 4);
-		this.foam.frequency.setTargetAtTime(550 + dread * 800, now, 4);
-		const still = jolt ? 0.35 : 1;
-		this.surfGain.gain.setTargetAtTime((0.1 + mood.sea * 0.7) * still, now, jolt ? 0.1 : 2.5);
-		this.windGain.gain.setTargetAtTime((0.1 + (1 - mood.sea) * 0.55 + dread * 0.3) * still, now, jolt ? 0.1 : 2.5);
+		const still = (jolt ? 0.35 : 1) * (mood.hush ? 0.7 : 1);
+		this.whistle.frequency.setTargetAtTime(WHISTLE_HZ + storm * 240, now, 4);
+		this.windGain.gain.setTargetAtTime(
+			(WIND.calm + dread * WIND.dread + storm * WIND.storm) * still,
+			now,
+			jolt ? 0.1 : 2.5,
+		);
+		this.rainGain.gain.setTargetAtTime(storm * RAIN * still, now, jolt ? 0.1 : 3.5);
+	}
+
+	/** One wave: it gathers for a few seconds, breaks, and hisses back down the shore. */
+	private wave(at: number, size: number) {
+		const rise = 2.2 + Math.random() * 1.2;
+		burst(this.bus, this.main, {
+			color: 'pink',
+			at,
+			length: rise + 4.5 + Math.random() * 2,
+			level: WAVE.body * size,
+			attack: rise,
+			filter: ['lowpass', 750, 0.5],
+			sweepTo: 300,
+			echo: 0.2,
+		});
+		burst(this.bus, this.main, {
+			color: 'white',
+			at: at + rise * 0.6,
+			length: 5,
+			level: WAVE.crest * size,
+			attack: rise * 0.4 + 0.2,
+			filter: ['bandpass', 2000, 0.4],
+			sweepTo: 3500,
+		});
+	}
+
+	/**
+	 * Thunder some way off: a crack, then a rumble that rolls, each roll a little after the last. The rumble itself is
+	 * under what a laptop speaker carries, so every roll has a band above it that one can hear.
+	 */
+	private thunder(at: number, storm: number) {
+		const level = THUNDER * (0.6 + storm * 0.4);
+		burst(this.bus, this.main, {
+			color: 'white',
+			at,
+			length: 0.5,
+			level: level * 0.05,
+			attack: 0.01,
+			filter: ['bandpass', 1600, 0.5],
+			echo: 0.8,
+		});
+		const rolls = 3 + Math.floor(Math.random() * 3);
+		let when = at;
+		for (let roll = 0; roll < rolls; roll++) {
+			const size = level * (roll === 0 ? 1 : 0.45 + Math.random() * 0.4);
+			burst(this.bus, this.main, {
+				color: 'brown',
+				at: when,
+				length: 3 + Math.random() * 2,
+				level: size,
+				attack: 0.12,
+				filter: ['lowpass', 300, 0.6],
+				sweepTo: 90,
+				echo: 0.7,
+			});
+			burst(this.bus, this.main, {
+				color: 'pink',
+				at: when,
+				length: 2.4 + Math.random(),
+				level: size * 1.8,
+				attack: 0.08,
+				filter: ['bandpass', 420, 0.5],
+				sweepTo: 160,
+				echo: 0.7,
+			});
+			when += 0.35 + Math.random() * 0.5;
+		}
 	}
 
 	set(mood: Mood) {
@@ -323,6 +418,14 @@ export class Score {
 	/** One creature's call, for the audition page. */
 	hear(id: CreatureId) {
 		CREATURES[id].call(this.bus, this.life, this.bus.ctx.currentTime + 0.05);
+	}
+
+	/** One wave or one clap of thunder as the weather stands, for the audition page. */
+	hearWeather(kind: 'wave' | 'thunder') {
+		const at = this.bus.ctx.currentTime + 0.05;
+		const storm = stormOf(this.mood);
+		if (kind === 'wave') this.wave(at, 0.6 + this.mood.sea * 0.4 + storm * 0.5);
+		else this.thunder(at, storm);
 	}
 
 	/**
@@ -414,6 +517,17 @@ export class Score {
 				echo: 0.8,
 			});
 			this.nextToll = now + 21 + Math.random() * 9;
+		}
+
+		// The sea is a wave now and then, more often the more water surrounds the active pawn and the worse the weather.
+		const storm = stormOf(mood);
+		if (!jolted && now >= this.nextWave) {
+			if (Math.random() < mood.sea) this.wave(now + 0.2, 0.6 + mood.sea * 0.4 + storm * 0.5);
+			this.nextWave = now + (22 + Math.random() * 24) * (1 - storm * 0.5);
+		}
+		if (storm > THUNDER_FROM && !jolted && now >= this.nextThunder) {
+			this.thunder(now + 0.3, storm);
+			this.nextThunder = now + 16 + Math.random() * 22;
 		}
 
 		// Nothing sings while the cards are flipped.

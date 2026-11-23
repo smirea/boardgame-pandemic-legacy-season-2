@@ -33,6 +33,10 @@ class AmbientMusic {
 		if (activeAudio()) this.score?.hear(creature);
 	}
 
+	hearWeather(kind: 'wave' | 'thunder') {
+		if (activeAudio()) this.score?.hearWeather(kind);
+	}
+
 	stop() {
 		this.mood = null;
 		this.sync();

@@ -6,7 +6,7 @@
 	import AudioMenu from '#lib/audio/AudioMenu.svelte';
 	import { bindAudioUnlock } from '#lib/audio/engine.ts';
 	import { ambientMusic } from '#lib/audio/music.ts';
-	import { tensionOf } from '#lib/audio/score.ts';
+	import { stormOf, tensionOf } from '#lib/audio/score.ts';
 	import { ACTIONS, MOMENTS, PIECES, TRAVEL } from '#lib/audio/foley.ts';
 	import type { MomentId, PieceId, TravelId } from '#lib/audio/foley.ts';
 	import {
@@ -207,6 +207,15 @@
 					{#each creatureIds as id (id)}
 						<button type="button" onclick={() => ambientMusic.hear(id)}>{CREATURES[id].label}</button>
 					{/each}
+				</div>
+
+				<div class="pick" role="group" aria-label="Weather">
+					<span class="pick-label">
+						Weather: wind always, rain from 68% tension, thunder from 84% ({Math.round(stormOf({ tension }) * 100)}%
+						storm now)
+					</span>
+					<button type="button" onclick={() => ambientMusic.hearWeather('wave')}>A wave</button>
+					<button type="button" onclick={() => ambientMusic.hearWeather('thunder')}>Thunder</button>
 				</div>
 
 				<div class="sliders">
