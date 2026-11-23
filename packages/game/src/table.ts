@@ -1,7 +1,8 @@
 import { openings } from './briefing';
+import { pack } from './content/pack';
 import { SEAT_IDS } from './helpers';
 import type { CharacterId, PlayerId, SeatId } from './ids';
-import type { Start, Table, TableBriefing, UndoVoteChoice, World } from './state';
+import type { CharacterDraft, Start, Table, TableBriefing, UndoVoteChoice, World } from './state';
 
 export type TableCommand =
 	/** Sits a person down in the lobby, or renames them wherever they sit. */
@@ -22,8 +23,11 @@ export type TableCommand =
 	/** Votes on whether to allow undoing an action that revealed hidden information. */
 	| { type: 'UNDO_VOTE'; player: PlayerId; vote: UndoVoteChoice | null }
 	/** Withdraws an active undo vote. */
-	| { type: 'CANCEL_UNDO_VOTE'; player: PlayerId };
+	| { type: 'CANCEL_UNDO_VOTE'; player: PlayerId }
+	/** Changes the new character the table is making together. */
+	| { type: 'DRAFT'; set: Partial<CharacterDraft> };
 
+export const newDraft = (): CharacterDraft => ({ name: '', portrait: null, job: null, home: null });
 export const newTableBriefing = (): TableBriefing => ({ drawn: 0, flipped: false, ready: [], stowing: false });
 export const newTable = (): Table => ({
 	seats: [],
@@ -31,6 +35,7 @@ export const newTable = (): Table => ({
 	start: null,
 	briefing: newTableBriefing(),
 	undoVote: null,
+	draft: newDraft(),
 });
 
 /** The game the lobby is choosing characters for, set once everyone readies in the lobby. */
@@ -111,6 +116,20 @@ export function rejectTable(world: World, lobby: boolean, command: TableCommand)
 		case 'UNDO_VOTE': {
 			if (!table.undoVote) return 'No undo vote is open';
 			if (!seated(table, command.player)) return 'Sit down first';
+			return null;
+		}
+		case 'DRAFT': {
+			if (!lobby) return 'Characters are made before a game';
+			const { name, portrait, job, home } = command.set;
+			if (name !== undefined && name.length > 24) return 'Names run from 1 to 24 characters';
+			if (
+				portrait !== undefined &&
+				portrait !== null &&
+				!(Number.isInteger(portrait) && portrait >= 0 && portrait < pack.numbers.portraits)
+			)
+				return 'Pick one of the portraits';
+			if (job && !pack.jobs.some(candidate => candidate.id === job)) return 'No such job';
+			if (home && pack.cities.find(candidate => candidate.id === home)?.kind !== 'haven') return 'Pick a haven';
 			return null;
 		}
 		case 'CANCEL_UNDO_VOTE': {
@@ -250,6 +269,9 @@ export function applyTable(world: World, command: TableCommand) {
 		}
 		case 'CANCEL_UNDO_VOTE':
 			table.undoVote = null;
+			return;
+		case 'DRAFT':
+			Object.assign(table.draft, command.set);
 			return;
 	}
 	table.seats.sort(bySeat);

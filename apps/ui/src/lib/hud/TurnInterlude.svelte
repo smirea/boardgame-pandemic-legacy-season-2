@@ -5,7 +5,7 @@
 	import { backOut } from 'svelte/easing';
 	import { fade, scale } from 'svelte/transition';
 	import { inkOn } from '#lib/color.ts';
-	import OccupationIcon from '#lib/occupations/OccupationIcon.svelte';
+	import Portrait from './Portrait.svelte';
 
 	type Props = {
 		name: string;
@@ -46,12 +46,12 @@
 		<span class="kicker">{mine ? 'Your turn' : 'Next turn'}</span>
 		<div class="who">
 			{#if portrait !== null}
-				<img src={`/portraits/survivor-${portrait}.webp`} alt="" />
+				<span class="face"><Portrait {portrait} {job} {color} /></span>
 			{/if}
 			<div class="words">
 				<strong>{name}</strong>
 				{#if job && occupation}
-					<span class="job"><i><OccupationIcon {job} /></i>{occupation}</span>
+					<span class="job">{occupation}</span>
 				{/if}
 			</div>
 		</div>
@@ -105,14 +105,14 @@
 		gap: 1.2rem;
 	}
 
-	img {
+	.face {
+		position: relative;
+		flex: none;
 		width: 7.5rem;
 		height: 7.5rem;
 		border: 3px solid var(--seat);
 		border-radius: 6px;
-		background: var(--seat);
-		object-fit: cover;
-		object-position: center 30%;
+		overflow: hidden;
 	}
 
 	.words {
@@ -134,11 +134,5 @@
 		gap: 0.5rem;
 		font-size: 1.25rem;
 		color: color-mix(in srgb, var(--seat) 45%, var(--paper));
-	}
-
-	.job i {
-		display: block;
-		width: 1.9rem;
-		height: 1.9rem;
 	}
 </style>

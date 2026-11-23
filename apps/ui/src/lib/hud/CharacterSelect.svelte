@@ -1,18 +1,13 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { claimant, pack, reject, SEAT_IDS, tablePlayers, tableStart } from '@repo/game';
-	import type { Character, CharacterId, CityId, Command, JobId, PlayerId, PublicState } from '@repo/game';
+	import type { Character, CityId, Command, PlayerId, PublicState } from '@repo/game';
 	import { flip } from 'svelte/animate';
-	import { tick } from 'svelte';
 	import { fly } from 'svelte/transition';
-	import CardIcon from '#lib/cards/CardIcon.svelte';
-	import { SCAR_ICON } from '#lib/cards/icons.ts';
-	import OccupationIcon from '#lib/occupations/OccupationIcon.svelte';
+	import CharacterSheet from './characters/CharacterSheet.svelte';
+	import Creator from './characters/Creator.svelte';
 	import { cityName, MONTHS, SEAT_COLORS } from './labels.svelte.ts';
-	import Portrait from './Portrait.svelte';
 	import Ready from './Ready.svelte';
-	import { keep } from './viewState.ts';
-	import { characterTraits, TRAIT_KIND } from './traits.ts';
 
 	type Props = {
 		snap: PublicState;
@@ -43,13 +38,15 @@
 	const nameOf = (who: PlayerId) => table.seats.find(entry => entry.player === who)?.name ?? '';
 	const seatsOf = (who: PlayerId) => table.seats.filter(entry => entry.player === who).map(entry => entry.seat);
 	const claimedBy = (who: PlayerId) => living.filter(character => claimant(world, character.id) === who);
+	const seatColor = (who: PlayerId, index: number) => {
+		const seat = seatsOf(who)[index];
+		return seat ? SEAT_COLORS[SEAT_IDS.indexOf(seat)]! : null;
+	};
 
 	/** The colour a claimed character plays in: a player's characters go to their seats in order, as the deal does. */
 	function colorFor(character: Character): string | null {
 		const holder = claimant(world, character.id);
-		if (!holder) return null;
-		const seat = seatsOf(holder)[claimedBy(holder).indexOf(character)];
-		return seat ? SEAT_COLORS[SEAT_IDS.indexOf(seat)]! : null;
+		return holder ? seatColor(holder, claimedBy(holder).indexOf(character)) : null;
 	}
 	const choosing = $derived(players.filter(who => claimedBy(who).length < seatsOf(who).length));
 	const mine = $derived(claimedBy(player));
@@ -85,73 +82,10 @@
 		for (const other of kept) send({ type: 'CLAIM', player, character: other.id });
 	}
 
-	const havens = pack.cities.filter(city => city.kind === 'haven' && !city.lost);
-	let newName = $state('');
-	let job = $state<JobId | ''>('');
-	let home = $state<CityId>(havens[0]!.id);
-	const portraits = Array.from({ length: pack.numbers.portraits }, (_, index) => index);
-	const worn = $derived(new Set(living.map(character => character.portrait)));
-	let picked = $state<number | null>(null);
-	// The haven being named and what has been typed so far, before it is sent.
-	let naming = $state<CityId | null>(null);
-	let draft = $state('');
-	keep(
-		'characters',
-		() => ({ newName, job, home, picked, naming, draft }),
-		saved => {
-			newName = saved.newName;
-			job = saved.job;
-			home = saved.home;
-			picked = saved.picked;
-			naming = saved.naming;
-			draft = saved.draft;
-		},
-	);
-	const portrait = $derived(picked ?? portraits.find(index => !worn.has(index)) ?? 0);
-	// Every starting occupation and every job the group has found is listed, and the engine says which can still be
-	// taken. It is asked with a stand-in name, so a blank name field does not cross out the whole list. A found job
-	// comes with its own home.
-	const homeOf = (id: JobId) =>
-		pack.jobs.find(option => option.id === id)?.starting
-			? null
-			: (world.campaign.jobsFound.find(entry => entry.job === id)?.home ?? null);
-	const jobs = $derived(
-		pack.jobs
-			.filter(option => option.starting || world.campaign.jobsFound.some(entry => entry.job === option.id))
-			.map(option => ({
-				...option,
-				refusal: reject(world, snap.phase, {
-					type: 'CREATE_CHARACTER',
-					name: option.name,
-					job: option.id,
-					home: homeOf(option.id) ?? home,
-					portrait,
-					player,
-				}),
-			})),
-	);
-	const anyJob = $derived(jobs.some(option => option.refusal === null));
-	$effect(() => {
-		if (!job || jobs.find(option => option.id === job)?.refusal)
-			job = jobs.find(option => option.refusal === null)?.id ?? '';
-	});
-	$effect(() => {
-		const fixed = job ? homeOf(job) : null;
-		if (fixed && fixed !== home) home = fixed;
-	});
-	const create = $derived<Command | null>(
-		job ? { type: 'CREATE_CHARACTER', name: newName.trim(), job, home: homeOf(job) ?? home, portrait, player } : null,
-	);
-	const refusal = $derived(create ? reject(world, snap.phase, create) : 'Every starting job is taken');
-
 	// The table names its havens in the lobby, the starting three before the first game, as the box asks.
 	const canRename = (city: CityId) =>
 		reject(world, snap.phase, { type: 'RENAME_HAVEN', city, name: cityName(city) }) === null;
-	function nameHaven(city: CityId) {
-		const name = draft.trim();
-		naming = null;
-		if (name && name !== cityName(city)) send({ type: 'RENAME_HAVEN', city, name });
-	}
+	const renameHaven = (city: CityId, name: string) => send({ type: 'RENAME_HAVEN', city, name });
 
 	function renamed(event: Event & { currentTarget: HTMLInputElement }) {
 		const name = event.currentTarget.value.trim();
@@ -159,107 +93,54 @@
 		else event.currentTarget.value = nameOf(player);
 	}
 
-	let screen = $state<HTMLElement>();
-	let cards = $state<HTMLElement>();
-	let form = $state<HTMLElement>();
-	let footer = $state<HTMLElement>();
-
-	// Size the character grid and card scale to fill the available space without scrolling.
-	let cardCols = $state(3);
-	let cardScale = $state(1);
-	const rosterKey = $derived(
-		shown.map(character => `${character.id}:${character.slots.filter(Boolean).length}`).join('|'),
+	// Every starting occupation taken leaves nothing to make: the blank card stays off the table.
+	const canMake = $derived(
+		pack.jobs.some(
+			job =>
+				(job.starting || campaign.jobsFound.some(entry => entry.job === job.id)) &&
+				!living.some(character => character.job === job.id),
+		) && campaign.characterCards.length > 0,
 	);
+	const count = $derived(shown.length + (canMake ? 1 : 0));
+
+	// Cards keep one shape and grow to fill the table: the column count is whichever makes them largest.
+	const RATIO = 1.2;
+	const GAP = 12;
+	let stage = $state<HTMLElement>();
+	let room = $state({ width: 0, height: 0 });
 	$effect(() => {
-		void rosterKey;
-		const element = cards;
-		const count = shown.length;
-		if (!element || count === 0) return;
-		let run = 0;
-		const fit = async () => {
-			const mine = ++run;
-			const width = element.clientWidth;
-			const height = element.clientHeight;
-			if (!width || !height) return;
-			const gap = 12;
-			// Pick the column count that gives each card the largest scale inside the container.
-			let bestCols = 1;
-			let bestScale = 0;
-			for (let cols = 1; cols <= count; cols++) {
-				const rows = Math.ceil(count / cols);
-				const cellW = (width - gap * (cols - 1)) / cols;
-				const cellH = (height - gap * (rows - 1)) / rows;
-				const candidate = Math.min(cellW / 205, cellH / 260);
-				if (candidate > bestScale) {
-					bestScale = candidate;
-					bestCols = cols;
-				}
-			}
-			cardCols = bestCols;
-			const most = Math.max(0.75, Math.min(1.85, bestScale));
-			cardScale = Number(most.toFixed(3));
-			await tick();
-			if (mine !== run || !overflowing(element)) return;
-			// A card with many traits still overflows: find the largest scale at which every card fits.
-			let fits = 0.72;
-			let over = most;
-			for (let step = 0; step < 7 && mine === run; step++) {
-				const mid = (fits + over) / 2;
-				cardScale = Number(mid.toFixed(3));
-				await tick();
-				if (overflowing(element)) over = mid;
-				else fits = mid;
-			}
-			if (mine === run) cardScale = Number(fits.toFixed(3));
-		};
-		let frame = 0;
-		const observer = new ResizeObserver(() => {
-			cancelAnimationFrame(frame);
-			frame = requestAnimationFrame(() => void fit());
-		});
+		const element = stage;
+		if (!element) return;
+		const observer = new ResizeObserver(() => (room = { width: element.clientWidth, height: element.clientHeight }));
 		observer.observe(element);
-		void fit();
-		return () => {
-			run++;
-			cancelAnimationFrame(frame);
-			observer.disconnect();
-		};
+		return () => observer.disconnect();
 	});
-	// Each card against its own parts, never the grid's scrollHeight or any position: a claim reorders the cards, and
-	// while their flip runs they stand in their old places, which overflowed the grid and once shrank every card to the
-	// floor for good. Fractional heights, since the face stretches to fill a card that fits and rounding decides the
-	// rest. The flip scales a card and its parts alike, so the comparison holds mid-flight.
-	function overflowing(grid: HTMLElement) {
-		return [...grid.children].some(card => {
-			const parts = [...card.children];
-			const scale = card.getBoundingClientRect().height / ((card as HTMLElement).offsetHeight || 1);
-			const gap = (parseFloat(getComputedStyle(card).rowGap) || 0) * scale;
-			const need = parts.reduce((sum, part) => sum + part.getBoundingClientRect().height, 0) + gap * (parts.length - 1);
-			return need > card.getBoundingClientRect().height + scale;
-		});
-	}
-	// The map shows through wherever the character cards leave room left of the form: beside them or below them.
-	function look(city: CityId) {
-		if (!screen || !cards || !form || !footer) return;
-		const area = screen.getBoundingClientRect();
-		const top = cards.getBoundingClientRect().top;
-		const wall = form.getBoundingClientRect().left;
-		const floor = footer.getBoundingClientRect().top;
-		const boxes = [...cards.children].map(child => child.getBoundingClientRect());
-		const right = Math.max(area.left, ...boxes.map(box => box.right));
-		const bottom = Math.max(top, ...boxes.map(box => box.bottom));
-		const beside = (wall - right) * (floor - top);
-		const below = (wall - area.left) * (floor - bottom);
+	const cardHeight = $derived.by(() => {
+		let best = 0;
+		for (let cols = 1; cols <= Math.max(1, count); cols++) {
+			const rows = Math.ceil(count / cols);
+			const height = Math.min((room.height - GAP * (rows - 1)) / rows, (room.width - GAP * (cols - 1)) / cols / RATIO);
+			best = Math.max(best, height);
+		}
+		return Math.floor(best);
+	});
+
+	// While a haven is being picked, the other cards step aside and the map behind finds it beside the blank card.
+	let picking = $state(false);
+	let creator = $state<HTMLElement>();
+	function look(city: CityId | null) {
+		if (!city || !stage || !creator) return onfocus(null);
+		const area = stage.getBoundingClientRect();
+		const card = creator.getBoundingClientRect();
+		const left = (card.left - area.left) * area.height;
+		const above = (card.top - area.top) * area.width;
 		onfocus(
-			beside > below
-				? { city, x: (right + wall) / 2, y: (top + floor) / 2 }
-				: { city, x: (area.left + wall) / 2, y: (bottom + floor) / 2 },
+			left >= above
+				? { city, x: (area.left + card.left) / 2, y: area.top + area.height / 2 }
+				: { city, x: area.left + area.width / 2, y: (area.top + card.top) / 2 },
 		);
 	}
 	$effect(() => () => onfocus(null));
-
-	const exposureShown = (character: Character) =>
-		character.exposureTrack.map((box, index) => (index < character.exposure ? box : 'hidden'));
 </script>
 
 {#snippet pawn(color: string)}
@@ -269,11 +150,6 @@
 		<path d="M10 11.5c-4 0-6.5 4.5-6.5 9.5v1.5h13V21c0-5-2.5-9.5-6.5-9.5z" />
 		<rect x="1.5" y="22.5" width="17" height="4" rx="1.5" />
 	</svg>
-{/snippet}
-
-{#snippet marker(color: string, label: string)}
-	{@render pawn(color)}
-	<b>{label}</b>
 {/snippet}
 
 {#snippet you(color: string)}
@@ -300,7 +176,7 @@
 
 <div
 	class="select"
-	bind:this={screen}
+	class:picking
 	data-testid="character-select"
 	{@attach feedback('Character select', () => ({
 		month: campaign.month,
@@ -308,221 +184,59 @@
 		ready: table.ready,
 	}))}
 >
-	<h1>{title}</h1>
-
-	<div class="row">
-		<div class="cards" bind:this={cards} style:--cols={cardCols} style:--s={cardScale}>
-			{#each shown as character (character.id)}
+	<div class="stage" bind:this={stage}>
+		<div class="cards" style:--card-h={`${cardHeight}px`} style:--ratio={RATIO} style:--gap={`${GAP}px`}>
+			{#each shown as character, index (character.id)}
 				{@const holder = claimant(world, character.id)}
 				{@const color = colorFor(character)}
-				{@const traits = characterTraits(character)}
-				{@const empty = character.slots.filter(slot => slot === null).length}
-				<article
-					class="card"
-					class:mine={holder === player}
-					class:taken={holder !== null && holder !== player}
-					style:--seat={color ?? 'transparent'}
-					animate:flip={{ duration: 260 }}
-				>
-					<div class="claim" aria-live="polite">
-						{#if holder && color}
-							{#key holder}
-								<span class="who" in:fly={{ y: -10, duration: 240 }}>
-									{#if holder === player}
-										{@render you(color)}
+				<div class="slot" animate:flip={{ duration: 300 }} in:fly={{ y: 30, duration: 420, delay: index * 70 }}>
+					<CharacterSheet
+						{character}
+						tone={holder === player ? 'mine' : holder ? 'taken' : 'free'}
+						{color}
+						toggle={() => (holder === player ? release(character) : take(character))}
+						{canRename}
+						rename={renameHaven}
+					>
+						{#snippet owner()}
+							{@const who = claimant(world, character.id)}
+							{#key who}
+								<span class="who" in:fly={{ y: 8, duration: 220 }}>
+									{#if who && color}
+										{#if who === player}
+											{@render you(color)}
+										{:else}
+											{@render pawn(color)}<b>{nameOf(who)}</b>
+										{/if}
 									{:else}
-										{@render marker(color, nameOf(holder))}
+										<span class="free">Free to take</span>
 									{/if}
 								</span>
 							{/key}
-						{:else}
-							<span class="free">Not taken</span>
-						{/if}
-					</div>
-					<button
-						class="face"
-						onclick={() => (holder === player ? release(character) : take(character))}
-						disabled={holder !== null && holder !== player}
-						aria-pressed={holder === player}
-						data-testid={`claim-${character.id}`}
-					>
-						<span class="top">
-							<span class="portrait"
-								><Portrait portrait={character.portrait} color={color ?? '#4a4238'} job={character.job} /></span
-							>
-							<span class="title">
-								<strong>{character.name}</strong>
-								<small>Home: {cityName(character.home)}</small>
-							</span>
-						</span>
-						<span class="traits">
-							{#each traits as trait, index (`${trait.kind}:${trait.name}:${index}`)}
-								<span class="line {trait.kind}" class:struck={trait.struck}>
-									{#if trait.kind === 'job' && trait.job}
-										<span class="trait-icon"><OccupationIcon job={trait.job} /></span>
-									{:else if trait.kind === 'scar'}
-										<span class="trait-icon"><CardIcon path={SCAR_ICON} size="0.72rem" /></span>
-									{/if}
-									<span class="sr-only">{TRAIT_KIND[trait.kind]}{trait.struck ? ', covered by a scar' : ''}: </span>
-									<b
-										>{trait.name}{#if trait.taken}<i class="taken">{trait.taken}</i>{/if}</b
-									>
-									<span class="text">{trait.text}</span>
-								</span>
-							{/each}
-							{#each { length: empty } as _, index (index)}
-								<span class="slot-empty">
-									<span class="sr-only">Empty slot</span>
-								</span>
-							{/each}
-						</span>
-						<span class="exposure" aria-label={`Exposure ${character.exposure} of ${character.exposureTrack.length}`}>
-							<span class="kind">Exposure</span>
-							{#each exposureShown(character) as box, index (index)}
-								<i class={box}></i>
-							{/each}
-						</span>
-					</button>
-				</article>
+						{/snippet}
+					</CharacterSheet>
+				</div>
 			{/each}
+			{#if canMake}
+				<div class="slot new" bind:this={creator} in:fly={{ y: 30, duration: 420, delay: shown.length * 70 }}>
+					<Creator
+						{snap}
+						{player}
+						{send}
+						color={seatColor(player, mine.length)}
+						{canRename}
+						rename={renameHaven}
+						{look}
+						bind:picking
+					/>
+				</div>
+			{/if}
 		</div>
-		<article
-			class="card new"
-			bind:this={form}
-			data-testid="new-character"
-			{@attach feedback('New character', () => ({ job, home, portrait }))}
-		>
-			<form
-				class="face"
-				aria-label="New character"
-				onsubmit={event => {
-					event.preventDefault();
-					if (create && !refusal) send(create);
-					newName = '';
-					picked = null;
-				}}
-			>
-				{#if anyJob}
-					<div class="who-new">
-						<span class="portrait"><Portrait {portrait} color="#4a4238" job={job || null} /></span>
-						<label class="named"
-							>New character<input
-								bind:value={newName}
-								maxlength="24"
-								placeholder="Their name"
-								data-testid="new-name"
-							/></label
-						>
-					</div>
-					<fieldset class="avatars">
-						<legend>Portrait</legend>
-						{#each portraits as index (index)}
-							<label class="avatar" class:worn={worn.has(index)}>
-								<input
-									type="radio"
-									name="portrait"
-									aria-label={`Portrait ${index + 1}${worn.has(index) ? ', worn by another character' : ''}`}
-									value={index}
-									checked={portrait === index}
-									onchange={() => (picked = index)}
-								/>
-								<span class="portrait"><Portrait portrait={index} color="#4a4238" /></span>
-							</label>
-						{/each}
-					</fieldset>
-					<fieldset class="choices havens" data-testid="new-home" onpointerleave={() => onfocus(null)}>
-						<legend>Home haven</legend>
-						{#each havens as haven (haven.id)}
-							<label
-								class="choice"
-								onpointerenter={() => look(haven.id)}
-								onfocusin={() => look(haven.id)}
-								onfocusout={() => onfocus(null)}
-							>
-								<input type="radio" name="home" value={haven.id} bind:group={home} />
-								{#if naming === haven.id}
-									<input
-										class="haven-name"
-										bind:value={draft}
-										maxlength="24"
-										aria-label={`Name for ${cityName(haven.id)}`}
-										{@attach element => {
-											element.focus();
-											element.select();
-										}}
-										onblur={() => nameHaven(haven.id)}
-										onkeydown={event => {
-											if (event.key === 'Enter') {
-												event.preventDefault();
-												event.currentTarget.blur();
-											}
-											if (event.key === 'Escape') {
-												event.stopPropagation();
-												draft = cityName(haven.id);
-												event.currentTarget.blur();
-											}
-										}}
-										data-testid={`haven-name-${haven.id}`}
-									/>
-								{:else}
-									<span><b>{cityName(haven.id)}</b></span>
-									{#if canRename(haven.id)}
-										<button
-											type="button"
-											class="rename"
-											aria-label={`Rename ${cityName(haven.id)}`}
-											onclick={() => {
-												draft = cityName(haven.id);
-												naming = haven.id;
-											}}
-											data-testid={`rename-${haven.id}`}
-										>
-											<svg class="pen" viewBox="0 0 16 16" aria-hidden="true"
-												><path d="M11.3 1.7l3 3-8.6 8.6-3.8.8.8-3.8z" /></svg
-											>
-										</button>
-									{/if}
-								{/if}
-							</label>
-						{/each}
-					</fieldset>
-					<fieldset class="choices jobs" data-testid="new-job">
-						<legend>Occupation</legend>
-						{#each jobs as option (option.id)}
-							<label class="choice" class:used={option.refusal !== null}>
-								<input
-									type="radio"
-									name="job"
-									value={option.id}
-									bind:group={job}
-									disabled={option.refusal !== null}
-									aria-describedby={`job-${option.id}`}
-								/>
-								<span class="mark"><OccupationIcon job={option.id} /></span>
-								<span id={`job-${option.id}`}><b>{option.name}</b><small>{option.text}</small></span>
-							</label>
-						{/each}
-					</fieldset>
-					<button class="make" disabled={refusal !== null} data-testid="create-character">Create and take</button>
-				{:else}
-					<p class="text">
-						Every starting occupation is taken. A seat with no character left gets a haven worker when the game starts.
-					</p>
-				{/if}
-			</form>
-		</article>
 	</div>
 
-	{#if fallen.length}
-		<p class="fallen">
-			Fallen: {fallen
-				.map(character => `${character.name}${character.diedAt ? `, ${cityName(character.diedAt)}` : ''}`)
-				.join('; ')}
-		</p>
-	{/if}
-
-	<footer bind:this={footer}>
+	<footer>
 		<div class="status">
+			<h1><span>Choose your characters</span> {title}</h1>
 			{#if hands > 0}
 				<div class="hands" role="group" aria-label="Characters played on this screen">
 					<span>Characters on this screen</span>
@@ -542,30 +256,20 @@
 				<p class="choosing">
 					Still choosing:
 					{#each choosing as who (who)}
-						{@const color = SEAT_COLORS[SEAT_IDS.indexOf(seatsOf(who)[0]!)]!}
+						{@const color = seatColor(who, 0)!}
 						<span class="who">
-							{#if who === player}{@render you(color)}{:else}{@render marker(color, nameOf(who))}{/if}
+							{#if who === player}{@render you(color)}{:else}{@render pawn(color)}<b>{nameOf(who)}</b>{/if}
 						</span>
 					{/each}
 				</p>
 			{/if}
-			<p class="hint" aria-live="polite">
-				{#if table.seats.length < 2}
-					A game needs two seats.
-				{:else if mine.length < hands}
-					Pick or create {hands - mine.length === 1 ? 'a character' : `${hands - mine.length} characters`} before readying
-					up.
-				{:else if choosing.length}
-					Waiting for {choosing.map(nameOf).join(', ')} to pick a character.
-				{:else if waitingOn.length}
-					Waiting for {waitingOn.join(', ')}.
-					{#if waitingOn.includes('you')}
-						Taking or making a character asks everyone to ready again.
-					{/if}
-				{:else}
-					Starting.
-				{/if}
-			</p>
+			{#if fallen.length}
+				<p class="fallen">
+					Fallen: {fallen
+						.map(character => `${character.name}${character.diedAt ? `, ${cityName(character.diedAt)}` : ''}`)
+						.join('; ')}
+				</p>
+			{/if}
 		</div>
 		<div class="starts">
 			<Ready
@@ -577,6 +281,22 @@
 				disabled={!table.ready[player] && readyRefusal !== null}
 			/>
 		</div>
+		<p class="hint" aria-live="polite">
+			{#if table.seats.length < 2}
+				A game needs two seats.
+			{:else if mine.length < hands}
+				Pick or create {hands - mine.length === 1 ? 'a character' : `${hands - mine.length} characters`} before readying up.
+			{:else if choosing.length}
+				Waiting for {choosing.map(nameOf).join(', ')} to pick a character.
+			{:else if waitingOn.length}
+				Waiting for {waitingOn.join(', ')}.
+				{#if waitingOn.includes('you')}
+					Taking or making a character asks everyone to ready again.
+				{/if}
+			{:else}
+				Starting.
+			{/if}
+		</p>
 	</footer>
 </div>
 
@@ -584,96 +304,106 @@
 	.select {
 		display: flex;
 		flex-direction: column;
-		gap: 0.35rem;
+		gap: 0.4rem;
 		width: 100%;
 		height: 100%;
-		padding: 0.35rem 0.85rem 0.45rem;
-		color: var(--ink);
-		/* No backdrop: the map shows through, so the words standing on it carry their own shadow. */
+		padding: 0.5rem 1rem 0.6rem;
+		/* No card has a face, so the table under them is darkened at the edges and left clear in the middle. */
+		background:
+			radial-gradient(ellipse 80% 75% at 50% 48%, rgb(12 10 9 / 0.62), rgb(8 7 6 / 0.88)),
+			linear-gradient(180deg, rgb(8 7 6 / 0.5), transparent 18%, transparent 80%, rgb(8 7 6 / 0.6));
+		backdrop-filter: blur(3px) saturate(0.7);
+		color: #f4ead6;
 		text-shadow:
 			0 0 0.4rem rgb(0 0 0 / 0.9),
 			0 1px 2px rgb(0 0 0 / 0.9);
 		overflow: hidden;
-		animation: rise 420ms cubic-bezier(0.2, 0.9, 0.3, 1.05) both;
+		transition:
+			background 300ms ease,
+			backdrop-filter 300ms ease;
 	}
 
-	@keyframes rise {
-		from {
-			opacity: 0;
-			translate: 0 2rem;
-		}
+	/* Picking a haven lifts the dark off the table, so the map can show where it is. */
+	.select.picking {
+		background: transparent;
+		backdrop-filter: none;
 	}
 
 	h1 {
-		margin: 0;
+		display: flex;
+		align-items: baseline;
+		gap: 0.5rem;
+		margin: 0 0 0.1rem;
+		color: #f6ebd4;
 		font-family: var(--font-display);
-		font-size: 1.45rem;
+		font-size: 1.35rem;
 		font-weight: 400;
 		line-height: 1;
 	}
 
-	.row {
-		display: flex;
+	h1 span {
+		color: #d6b66f;
+		font-family: var(--font-ui);
+		font-size: 0.68rem;
+		font-weight: 800;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
+	}
+
+	.stage {
 		flex: 1 1 auto;
-		gap: 0.65rem;
 		min-height: 0;
 	}
 
-	/* Every card whole, equal-sized, and scaled up to fill the available space without scrolling. */
 	.cards {
-		display: grid;
-		flex: 1 1 auto;
-		align-self: stretch;
-		grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr));
-		grid-auto-rows: 1fr;
-		align-content: stretch;
-		gap: calc(0.45rem * var(--s, 1)) calc(0.6rem * var(--s, 1));
-		height: 100%;
-		min-height: 0;
-		padding: 0.15rem 0.2rem 0.2rem 0.15rem;
-		overflow: hidden auto;
-	}
-
-	.card {
 		display: flex;
-		flex-direction: column;
-		gap: calc(0.18rem * var(--s, 1));
-		min-height: 0;
-	}
-
-	.claim {
-		display: flex;
-		align-items: flex-end;
+		flex-wrap: wrap;
+		align-content: center;
 		justify-content: center;
-		height: calc(1.35rem * var(--s, 1));
+		gap: var(--gap);
+		height: 100%;
 	}
 
-	/* Words standing on the open map get a dark slip of their own, since the map under them may be pale land. */
-	.claim > span,
-	.status {
-		padding: 0.08rem 0.45rem;
-		border-radius: 999px;
-		background: rgb(12 10 8 / 0.72);
-		backdrop-filter: blur(4px);
+	.slot {
+		flex: none;
+		width: calc(var(--card-h) * var(--ratio));
+		height: var(--card-h);
+		transition: opacity 260ms ease;
 	}
 
-	.status {
-		justify-self: start;
-		padding: 0.25rem 0.65rem;
-		border-radius: 8px;
+	.picking .slot:not(.new) {
+		opacity: 0.08;
+		pointer-events: none;
 	}
 
 	.who {
 		display: inline-flex;
 		align-items: flex-end;
-		gap: calc(0.28rem * var(--s, 1));
-		font-size: calc(0.8rem * var(--s, 1));
+		gap: 0.3em;
+		white-space: nowrap;
+	}
+
+	.who b {
+		font-weight: 700;
+	}
+
+	.free {
+		color: #b7a98e;
+		font-style: italic;
+	}
+
+	.pawn {
+		width: 0.9em;
+		height: 1.2em;
+		flex: none;
+		fill: var(--seat);
+		filter: drop-shadow(0 2px 2px rgb(0 0 0 / 0.6));
 	}
 
 	.me {
 		display: inline-flex;
 		align-items: baseline;
-		gap: 0.2rem;
+		gap: 0.2em;
 		cursor: text;
 	}
 
@@ -681,8 +411,8 @@
 	.me input {
 		field-sizing: content;
 		min-width: 2ch;
-		max-width: calc(9rem * var(--s, 1));
-		padding: 0 0.15rem;
+		max-width: 9em;
+		padding: 0 0.15em;
 		border: 0;
 		border-bottom: 1px dashed transparent;
 		background: none;
@@ -694,18 +424,18 @@
 
 	.me:hover input,
 	.me input:focus {
-		border-bottom-color: var(--muted);
+		border-bottom-color: #b7a98e;
 		outline: none;
 	}
 
 	.me span {
-		color: var(--muted);
+		color: #b7a98e;
 	}
 
 	.pen {
-		width: calc(0.68rem * var(--s, 1));
-		height: calc(0.68rem * var(--s, 1));
-		fill: var(--muted);
+		width: 0.7em;
+		height: 0.7em;
+		fill: #b7a98e;
 		opacity: 0.6;
 	}
 
@@ -714,590 +444,52 @@
 		opacity: 1;
 	}
 
-	.pawn {
-		width: calc(0.88rem * var(--s, 1));
-		height: calc(1.15rem * var(--s, 1));
-		fill: var(--seat);
-		filter: drop-shadow(0 2px 2px rgb(0 0 0 / 0.6));
-	}
-
-	.free {
-		color: var(--muted);
-		font-size: calc(0.72rem * var(--s, 1));
-		font-style: italic;
-	}
-
-	.face {
-		display: flex;
-		flex: 1;
-		flex-direction: column;
-		gap: calc(0.38rem * var(--s, 1));
-		padding: calc(0.5rem * var(--s, 1)) calc(0.6rem * var(--s, 1));
-		border: 2px solid transparent;
-		border-radius: 4px;
-		background: var(--document);
-		box-shadow: 0 0.5rem 1.4rem rgb(0 0 0 / 0.45);
-		color: var(--slip-ink);
-		font: inherit;
-		text-align: left;
-		text-shadow: none;
-		transition:
-			border-color 180ms ease,
-			translate 180ms ease,
-			box-shadow 180ms ease,
-			opacity 180ms ease;
-	}
-
-	button.face {
-		cursor: pointer;
-	}
-
-	button.face:hover:not(:disabled) {
-		translate: 0 -2px;
-		box-shadow: 0 0.8rem 1.8rem rgb(0 0 0 / 0.55);
-	}
-
-	.card.mine .face,
-	.card.taken .face {
-		border-color: var(--seat);
-		box-shadow:
-			0 0 0 2px color-mix(in srgb, var(--seat) 35%, transparent),
-			0 0.5rem 1.4rem rgb(0 0 0 / 0.45);
-	}
-
-	.card.taken .face {
-		cursor: default;
-		opacity: 0.88;
-	}
-
-	.top {
-		display: flex;
-		gap: calc(0.5rem * var(--s, 1));
-		align-items: center;
-	}
-
-	.portrait {
-		position: relative;
-		flex: none;
-		width: calc(2.45rem * var(--s, 1));
-		height: calc(2.45rem * var(--s, 1));
-		border-radius: 3px;
-		overflow: hidden;
-	}
-
-	.title {
-		display: flex;
-		flex-direction: column;
-		gap: calc(0.06rem * var(--s, 1));
-		min-width: 0;
-	}
-
-	.title strong {
-		font-family: var(--font-display);
-		font-size: calc(1.12rem * var(--s, 1));
-		font-weight: 400;
-		line-height: 1.05;
-	}
-
-	.title small,
-	.kind {
-		color: var(--slip-muted);
-		font-size: calc(0.7rem * var(--s, 1));
-	}
-
-	.traits {
-		display: flex;
-		flex: 1;
-		flex-direction: column;
-		gap: calc(0.26rem * var(--s, 1));
-	}
-
-	.line {
-		display: block;
-		padding-left: calc(0.42rem * var(--s, 1));
-		border-left: 3px solid var(--ink-good);
-		font-size: calc(0.7rem * var(--s, 1));
-		line-height: 1.24;
-	}
-
-	.line.ability {
-		border-left-color: #6a7fa8;
-	}
-
-	.line.scar {
-		border-left-color: var(--ink-danger);
-	}
-
-	.trait-icon {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: calc(0.8rem * var(--s, 1));
-		height: calc(0.8rem * var(--s, 1));
-		margin-right: 0.15rem;
-		vertical-align: -0.14em;
-	}
-
-	.line.scar .trait-icon {
-		color: var(--ink-danger);
-	}
-
-	.taken {
-		margin-left: 0.4em;
-		font-style: italic;
-		font-weight: 400;
-		opacity: 0.75;
-	}
-
-	.line b {
-		margin-right: 0.22rem;
-		font-size: calc(0.74rem * var(--s, 1));
-		font-weight: 700;
-	}
-
-	.text {
-		margin: 0;
-		font-size: calc(0.7rem * var(--s, 1));
-		line-height: 1.24;
-	}
-
-	.line.struck b,
-	.line.struck .text {
-		text-decoration: line-through;
-		text-decoration-color: var(--ink-danger);
-		opacity: 0.6;
-	}
-
-	.line.struck .trait-icon {
-		opacity: 0.6;
-	}
-
-	.slot-empty {
-		display: block;
-		flex: 1 1 calc(1.1rem * var(--s, 1));
-		min-height: calc(1.1rem * var(--s, 1));
-		max-height: calc(2.6rem * var(--s, 1));
-		border: 1px dashed rgb(42 32 23 / 0.28);
-		border-radius: 2px;
-		background: rgb(42 32 23 / 0.035);
-	}
-
-	.sr-only {
-		position: absolute;
-		width: 1px;
-		height: 1px;
-		margin: -1px;
-		padding: 0;
-		overflow: hidden;
-		clip-path: inset(50%);
-		white-space: nowrap;
-	}
-
-	.exposure {
-		display: flex;
-		align-items: center;
-		gap: calc(0.2rem * var(--s, 1));
-		margin-top: auto;
-		padding-top: calc(0.3rem * var(--s, 1));
-		border-top: 1px dotted rgb(42 32 23 / 0.3);
-	}
-
-	.exposure .kind {
-		margin-right: calc(0.22rem * var(--s, 1));
-	}
-
-	.exposure i {
-		display: block;
-		width: calc(0.78rem * var(--s, 1));
-		height: calc(0.78rem * var(--s, 1));
-		border: 1px solid rgb(42 32 23 / 0.45);
-		border-radius: 2px;
-	}
-
-	.exposure i.hidden {
-		background: repeating-linear-gradient(45deg, rgb(42 32 23 / 0.18) 0 2px, transparent 2px 5px);
-	}
-
-	.exposure i.scar {
-		background: var(--ink-danger);
-	}
-
-	.exposure i.skull {
-		background: var(--slip-ink);
-	}
-
-	/* A single-column create panel beside the character grid. Everything in it scales with --k, which shorter and
-	   narrower laptops turn down so the cards and the map still fit beside it. Its width grows faster than its type, so
-	   the eight portraits a row come out twice the size they were at 16.5rem. */
-	.new {
-		--k: 1.5;
-		flex: none;
-		align-self: flex-start;
-		width: calc(21.5rem * var(--k));
-		max-height: 100%;
-	}
-
-	@media (max-height: 1000px), (max-width: 1500px) {
-		.new {
-			--k: 1.3;
-		}
-	}
-
-	@media (max-height: 840px), (max-width: 1320px) {
-		.new {
-			--k: 1.15;
-		}
-	}
-
-	.new form {
-		display: flex;
-		flex-direction: column;
-		gap: calc(0.32rem * var(--k));
-		min-height: 0;
-		padding: calc(0.45rem * var(--k)) calc(0.55rem * var(--k));
-		overflow-y: auto;
-	}
-
-	.who-new {
-		display: flex;
-		gap: calc(0.45rem * var(--k));
-		align-items: center;
-	}
-
-	.who-new .portrait {
-		width: calc(2.15rem * var(--k));
-		height: calc(2.15rem * var(--k));
-	}
-
-	.havens {
-		grid-template-columns: repeat(3, minmax(0, 1fr));
-	}
-
-	.jobs {
-		gap: calc(0.1rem * var(--k));
-	}
-
-	.named {
-		flex: 1;
-		min-width: 0;
-	}
-
-	.new label,
-	legend {
-		display: flex;
-		flex-direction: column;
-		gap: calc(0.08rem * var(--k));
-		color: var(--slip-muted);
-		font-size: calc(0.66rem * var(--k));
-	}
-
-	.named input {
-		width: 100%;
-		min-width: 0;
-		padding: calc(0.16rem * var(--k)) calc(0.2rem * var(--k));
-		border: 0;
-		border-bottom: 1px solid rgb(42 32 23 / 0.35);
-		background: rgb(255 252 242 / 0.35);
-		color: var(--slip-ink);
-		font: inherit;
-		font-size: calc(0.8rem * var(--k));
-	}
-
-	.named input:focus {
-		outline: none;
-		border-bottom-color: var(--slip-ink);
-	}
-
-	fieldset {
-		margin: 0;
-		padding: 0;
-		border: 0;
-	}
-
-	legend {
-		margin-bottom: calc(0.12rem * var(--k));
-		padding: 0;
-	}
-
-	.avatars {
-		display: grid;
-		grid-template-columns: repeat(8, minmax(0, 1fr));
-		gap: calc(0.16rem * var(--k));
-	}
-
-	.avatars legend {
-		grid-column: 1 / -1;
-	}
-
-	.avatar {
-		position: relative;
-		cursor: pointer;
-	}
-
-	.avatar .portrait {
-		width: 100%;
-		height: auto;
-		aspect-ratio: 1;
-		outline: 2px solid transparent;
-		outline-offset: 1px;
-		transition: outline-color 150ms ease;
-	}
-
-	.avatar.worn .portrait {
-		opacity: 0.55;
-	}
-
-	/* Taken already: a red cross over the face, which can still be chosen. */
-	.avatar.worn::after,
-	.choice.used .mark::after {
-		content: '';
-		position: absolute;
-		inset: 0;
-		background:
-			linear-gradient(
-				to top right,
-				transparent calc(50% - 1.5px),
-				var(--ink-danger) calc(50% - 1.5px) calc(50% + 1.5px),
-				transparent calc(50% + 1.5px)
-			),
-			linear-gradient(
-				to bottom right,
-				transparent calc(50% - 1.5px),
-				var(--ink-danger) calc(50% - 1.5px) calc(50% + 1.5px),
-				transparent calc(50% + 1.5px)
-			);
-		pointer-events: none;
-	}
-
-	.avatar:has(input:checked)::after {
-		opacity: 0.5;
-	}
-
-	.avatar:hover .portrait {
-		outline-color: rgb(42 32 23 / 0.4);
-	}
-
-	.avatar:has(input:checked) .portrait {
-		opacity: 1;
-		outline-color: var(--slip-ink);
-	}
-
-	.choices {
-		display: grid;
-		gap: calc(0.12rem * var(--k));
-	}
-
-	.choices legend {
-		grid-column: 1 / -1;
-	}
-
-	.new .choice {
-		position: relative;
-		flex-direction: row;
-		gap: calc(0.3rem * var(--k));
-		align-items: baseline;
-		padding: calc(0.12rem * var(--k)) calc(0.25rem * var(--k));
-		border: 1px solid transparent;
-		border-radius: 3px;
-		color: var(--slip-ink);
-		cursor: pointer;
-		transition:
-			background 150ms ease,
-			border-color 150ms ease;
-	}
-
-	.choice:hover {
-		background: rgb(255 252 242 / 0.45);
-	}
-
-	.jobs .choice {
-		align-items: center;
-	}
-
-	.havens .choice {
-		justify-content: center;
-		padding: calc(0.12rem * var(--k)) calc(0.15rem * var(--k));
-		align-items: center;
-		text-align: center;
-	}
-
-	.havens .choice b {
-		font-size: calc(0.66rem * var(--k));
-		overflow-wrap: anywhere;
-	}
-
-	.rename {
-		flex: none;
-		display: grid;
-		place-items: center;
-		width: calc(0.95rem * var(--k));
-		height: calc(0.95rem * var(--k));
-		padding: 0;
-		border: 0;
-		border-radius: 2px;
-		background: none;
-		color: var(--slip-muted);
-		cursor: pointer;
-	}
-
-	.rename:hover,
-	.rename:focus-visible {
-		background: rgb(42 32 23 / 0.12);
-		color: var(--slip-ink);
-	}
-
-	.rename .pen {
-		width: 70%;
-		height: 70%;
-		fill: currentColor;
-		opacity: 1;
-	}
-
-	.haven-name {
-		width: 100%;
-		min-width: 0;
-		padding: 0 calc(0.1rem * var(--k));
-		border: 0;
-		border-bottom: 1px solid var(--slip-ink);
-		background: rgb(255 252 242 / 0.6);
-		color: var(--slip-ink);
-		font: inherit;
-		font-size: calc(0.66rem * var(--k));
-		font-weight: 700;
-		text-align: center;
-	}
-
-	.haven-name:focus {
-		outline: none;
-	}
-
-	.mark {
-		position: relative;
-		flex: none;
-		width: calc(1.15rem * var(--k));
-		height: calc(1.15rem * var(--k));
-	}
-
-	.choice.used {
-		cursor: default;
-	}
-
-	.choice.used:hover {
-		background: none;
-	}
-
-	.choice.used .mark {
-		opacity: 0.55;
-	}
-
-	.choice.used b {
-		text-decoration: line-through;
-		text-decoration-color: var(--ink-danger);
-		text-decoration-thickness: 2px;
-	}
-
-	.choice.used small {
-		opacity: 0.6;
-	}
-
-	.choice:has(input:checked) {
-		border-color: rgb(42 32 23 / 0.45);
-		background: rgb(255 252 242 / 0.6);
-	}
-
-	.choice span {
-		display: flex;
-		flex-direction: column;
-	}
-
-	.choice b {
-		font-size: calc(0.7rem * var(--k));
-		line-height: 1.12;
-	}
-
-	.choice small {
-		color: var(--slip-muted);
-		font-size: calc(0.62rem * var(--k));
-		line-height: 1.15;
-	}
-
-	/* The radio itself stays for the keyboard and screen readers; the row is what shows the choice. */
-	.choice input[type='radio'],
-	.avatar input {
-		position: absolute;
-		opacity: 0;
-		pointer-events: none;
-	}
-
-	.choice:has(input:focus-visible),
-	.avatar:has(input:focus-visible) .portrait {
-		outline: 2px solid var(--slip-ink);
-	}
-
-	.make {
-		padding: calc(0.35rem * var(--k));
-		border: 1px solid var(--slip-ink);
-		border-radius: 2px;
-		background: var(--slip-ink);
-		color: #efe6d2;
-		font: inherit;
-		font-size: calc(0.78rem * var(--k));
-		font-weight: 700;
-		cursor: pointer;
-	}
-
-	.make:disabled {
-		opacity: 0.4;
-		cursor: default;
-	}
-
-	.fallen {
-		margin: -0.15rem 0 0;
-		color: var(--muted);
-		font-size: 0.7rem;
-	}
-
 	/* What moves the table on: who is still choosing, and the vote in the middle. */
 	footer {
 		display: grid;
+		flex: none;
 		grid-template-columns: 1fr auto 1fr;
 		align-items: center;
 		gap: 0.8rem;
-		padding-top: 0.35rem;
-		border-top: 1px solid var(--line);
+		padding-top: 0.4rem;
+		border-top: 1px solid rgb(231 220 198 / 0.18);
 	}
 
 	.status {
 		display: flex;
 		flex-direction: column;
-		gap: 0.14rem;
+		gap: 0.15rem;
+		font-size: 0.74rem;
 	}
 
 	.hands {
 		display: flex;
 		align-items: center;
 		gap: 0.35rem;
-		color: var(--muted);
-		font-size: 0.72rem;
+		color: #b7a98e;
 	}
 
 	.hands b {
 		min-width: 1ch;
-		color: var(--ink);
+		color: #f4ead6;
 		text-align: center;
 	}
 
 	.hands button {
-		width: 1.25rem;
-		height: 1.25rem;
+		width: 1.3rem;
+		height: 1.3rem;
 		padding: 0;
-		border: 1px solid var(--line-strong);
-		border-radius: 5px;
-		background: rgb(12 10 8 / 0.6);
-		color: var(--ink);
+		border: 1px solid rgb(231 220 198 / 0.28);
+		border-radius: 3px;
+		background: rgb(255 255 255 / 0.04);
+		color: #f4ead6;
 		font: inherit;
 		line-height: 1;
 		cursor: pointer;
+	}
+
+	.hands button:hover:not(:disabled) {
+		border-color: rgb(231 220 198 / 0.65);
 	}
 
 	.hands button:disabled {
@@ -1311,12 +503,16 @@
 		align-items: flex-end;
 		gap: 0.45rem;
 		margin: 0;
-		color: var(--muted);
-		font-size: 0.72rem;
+		color: #b7a98e;
 	}
 
 	.choosing .who {
-		color: var(--ink);
+		color: #f4ead6;
+	}
+
+	.fallen {
+		margin: 0;
+		color: #b7a98e;
 	}
 
 	.starts {
@@ -1325,70 +521,10 @@
 	}
 
 	.hint {
+		justify-self: end;
 		margin: 0;
-		color: var(--muted);
-		font-size: 0.68rem;
-	}
-
-	@media (max-height: 840px) {
-		.select {
-			gap: 0.25rem;
-			padding: 0.25rem 0.75rem 0.35rem;
-		}
-
-		h1 {
-			font-size: 1.25rem;
-		}
-
-		.cards {
-			gap: 0.25rem 0.45rem;
-		}
-
-		.claim {
-			height: 1.1rem;
-		}
-
-		.face {
-			gap: 0.2rem;
-			padding: 0.3rem 0.42rem;
-		}
-
-		.portrait {
-			width: 1.8rem;
-			height: 1.8rem;
-		}
-
-		.title strong {
-			font-size: 0.88rem;
-		}
-
-		.line,
-		.text {
-			font-size: 0.6rem;
-			line-height: 1.14;
-		}
-
-		.line b {
-			font-size: 0.63rem;
-		}
-
-		.slot-empty {
-			min-height: 0.95rem;
-			max-height: 1.8rem;
-		}
-
-		.new form {
-			gap: 0.22rem;
-			padding: 0.38rem 0.48rem;
-		}
-
-		.who-new .portrait {
-			width: 1.9rem;
-			height: 1.9rem;
-		}
-
-		footer {
-			padding-top: 0.25rem;
-		}
+		color: #b7a98e;
+		font-size: 0.74rem;
+		text-align: right;
 	}
 </style>

@@ -11,7 +11,6 @@
 	import { cubicIn, cubicOut } from 'svelte/easing';
 	import { fade, fly, scale } from 'svelte/transition';
 	import CardIcon from '#lib/cards/CardIcon.svelte';
-	import OccupationIcon from '#lib/occupations/OccupationIcon.svelte';
 	import { SCAR_ICON } from '#lib/cards/icons.ts';
 	import { fitText } from '#lib/cards/fit.ts';
 	import { deal } from './deal.ts';
@@ -148,7 +147,6 @@
 					portrait={character?.portrait ?? SEAT_IDS.indexOf(seat)}
 					{color}
 					job={character?.job ?? null}
-					showBadge={false}
 					hooded={character?.worker ?? false}
 					dead={character?.dead ?? false}
 				/>
@@ -207,9 +205,7 @@
 					<div class="line {trait.kind}" class:struck={trait.struck}>
 						<span class="sr-only">{TRAIT_KIND[trait.kind]}{trait.struck ? ', covered by a scar' : ''}: </span>
 						<b>
-							{#if trait.kind === 'job' && trait.job}
-								<span class="mark"><OccupationIcon job={trait.job} /></span>
-							{:else if trait.kind === 'scar'}
+							{#if trait.kind === 'scar'}
 								<span class="mark"><CardIcon path={SCAR_ICON} size="0.9rem" /></span>
 							{/if}
 							{trait.name}

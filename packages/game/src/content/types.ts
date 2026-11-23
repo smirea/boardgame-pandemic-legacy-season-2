@@ -440,7 +440,7 @@ export type ContentPack = {
 		/** The System-Wide Production boxes printed on each Produce Supplies card, one entry per card. */
 		produceBoxes: number[];
 		characterSlots: number;
-		/** How many portraits a character can wear, `/portraits/survivor-<n>.webp` in the UI. */
+		/** How many portraits a character can wear, `/figures/survivor-<n>.webp` in the UI. */
 		portraits: number;
 		exposureBoxes: number;
 		selfInfectDoses: number;

@@ -359,6 +359,17 @@ export type TableUndoVote = {
 };
 
 /**
+ * The new character the table is making together in the lobby, before anyone creates it. Every screen shows and
+ * edits the same one.
+ */
+export type CharacterDraft = {
+	name: string;
+	portrait: number | null;
+	job: JobId | null;
+	home: CityId | null;
+};
+
+/**
  * The people at the table, apart from the campaign: a prologue that rolls the campaign back leaves
  * them seated, and undo leaves them alone. One person may hold several seats.
  */
@@ -371,6 +382,7 @@ export type Table = {
 	briefing: TableBriefing;
 	/** Active consensus vote to undo an action that revealed hidden information. */
 	undoVote: TableUndoVote | null;
+	draft: CharacterDraft;
 };
 
 export type World = { campaign: Campaign; game: Game | null; table: Table };

@@ -41,6 +41,7 @@ import {
 	applyTable,
 	claimCharacter,
 	dealTable,
+	newDraft,
 	newTable,
 	newTableBriefing,
 	readyStart,
@@ -127,6 +128,7 @@ export function reject(world: World, phase: Phase, command: Command): string | n
 		case 'LEAVE':
 		case 'READY':
 		case 'CLAIM':
+		case 'DRAFT':
 		case 'BRIEFING_STEP':
 		case 'BRIEFING_READY':
 			return phase === 'finished' &&
@@ -401,6 +403,7 @@ export const gameMachine = setup({
 				const { campaign } = world;
 				const { player, ...input } = event as Of<'CREATE_CHARACTER'>;
 				const created = createCharacter(campaign, input);
+				world.table.draft = newDraft();
 				if (player && world.table.seats.some(entry => entry.player === player))
 					claimCharacter(world, player, created.id);
 				// A new character takes the first empty seat, so a new group is seated as it is created.
@@ -628,6 +631,7 @@ export const gameMachine = setup({
 				...seatEvents('lobby'),
 				ADD_SEAT: { guard: { type: 'legal', params: 'lobby' }, actions: 'table' },
 				CLAIM: { guard: { type: 'legal', params: 'lobby' }, actions: 'claim' },
+				DRAFT: { guard: { type: 'legal', params: 'lobby' }, actions: 'table' },
 				READY: [
 					{ guard: and(['allReady', 'gameChosen']), target: 'setup', actions: 'startTable' },
 					{ guard: 'allReady', actions: 'chooseStart' },

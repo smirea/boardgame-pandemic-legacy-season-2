@@ -4,7 +4,6 @@
 	import type { Command, Decide, ScarId, SeatId, World } from '@repo/game';
 	import CardIcon from '#lib/cards/CardIcon.svelte';
 	import { SCAR_ICON } from '#lib/cards/icons.ts';
-	import OccupationIcon from '#lib/occupations/OccupationIcon.svelte';
 	import { fly } from 'svelte/transition';
 	import { cityName, seatName, SEAT_COLORS } from './labels.svelte.ts';
 	import Portrait from './Portrait.svelte';
@@ -191,9 +190,6 @@
 								{#if chosen && scarName}<b class="incoming">{scarName}</b>{/if}
 							{:else}
 								<span class="kind">
-									{#if row.kind === 'job' && character.job}<span class="glyph"
-											><OccupationIcon job={character.job} /></span
-										>{/if}
 									{#if row.kind === 'scar'}<span class="glyph"><CardIcon path={SCAR_ICON} size="0.8rem" /></span>{/if}
 									{row.kind === 'job' ? 'Occupation' : row.kind === 'ability' ? 'Ability' : 'Scar'}
 								</span>

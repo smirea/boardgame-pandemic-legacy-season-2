@@ -105,6 +105,8 @@ export function commandLabel(world: World, command: Command | null): { who: stri
 					? `${world.campaign.characters[command.character]?.name ?? 'A character'} is taken for the next game`
 					: 'A player lets their character go',
 			};
+		case 'DRAFT':
+			return { who: null, text: 'The new character changes' };
 		case 'READY':
 			return {
 				who: null,

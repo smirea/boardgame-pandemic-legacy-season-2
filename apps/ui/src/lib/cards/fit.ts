@@ -86,3 +86,47 @@ export const fitZoom =
 			watched.disconnect();
 		};
 	};
+
+/**
+ * Sets the largest font size, in em of the parent, at which none of the element's `[data-fit]` boxes overflows, so a
+ * group of boxes sized by the layout, such as the panels down a character's arch, all read at one size. It refits when
+ * the element resizes and when its boxes come and go.
+ */
+export const fitGroup =
+	({ max = 1, min = 0.5 }: { max?: number; min?: number } = {}): Attachment<HTMLElement> =>
+	element => {
+		const overflows = () =>
+			[...element.querySelectorAll<HTMLElement>('[data-fit]')].some(
+				box => box.scrollHeight > box.clientHeight + 0.5 || box.scrollWidth > box.clientWidth + 0.5,
+			);
+		const fit = () => {
+			element.style.fontSize = `${max}em`;
+			if (!overflows()) return;
+			let low = min;
+			let high = max;
+			for (let step = 0; step < 7; step++) {
+				const middle = (low + high) / 2;
+				element.style.fontSize = `${middle}em`;
+				if (overflows()) high = middle;
+				else low = middle;
+			}
+			element.style.fontSize = `${low}em`;
+		};
+		let frame = 0;
+		const soon = () => {
+			cancelAnimationFrame(frame);
+			frame = requestAnimationFrame(fit);
+		};
+		let live = true;
+		void document.fonts.ready.then(() => live && fit());
+		const observer = new ResizeObserver(soon);
+		observer.observe(element);
+		const watched = new MutationObserver(soon);
+		watched.observe(element, { childList: true, subtree: true, characterData: true });
+		return () => {
+			live = false;
+			cancelAnimationFrame(frame);
+			observer.disconnect();
+			watched.disconnect();
+		};
+	};

@@ -5,7 +5,6 @@
 	import { fade, scale } from 'svelte/transition';
 	import CardIcon from '#lib/cards/CardIcon.svelte';
 	import { SCAR_ICON } from '#lib/cards/icons.ts';
-	import OccupationIcon from '#lib/occupations/OccupationIcon.svelte';
 	import type { FateScene } from './fateShow.svelte.ts';
 	import Portrait from './Portrait.svelte';
 	import { placed } from './traits.ts';
@@ -53,13 +52,13 @@
 			<span class="kicker">Exposed</span>
 			<div class="who">
 				<span class="face"
-					><Portrait portrait={scene.who.portrait} {color} hooded={scene.who.worker} showBadge={false} /></span
+					><Portrait portrait={scene.who.portrait} {color} job={scene.who.job} hooded={scene.who.worker} /></span
 				>
 				<div class="words">
 					<strong>{scene.who.name}</strong>
 					{#if occupation}
 						<span class="job">
-							{#if scene.who.job}<i><OccupationIcon job={scene.who.job} /></i>{/if}{occupation}
+							{occupation}
 						</span>
 					{/if}
 				</div>
@@ -85,12 +84,12 @@
 		<article class="card obituary" in:scale={{ start: 0.86, duration: 700 }}>
 			<span class="kicker">In memory</span>
 			<span class="face large"
-				><Portrait portrait={scene.who.portrait} {color} hooded={scene.who.worker} showBadge={false} dead /></span
+				><Portrait portrait={scene.who.portrait} {color} job={scene.who.job} hooded={scene.who.worker} dead /></span
 			>
 			<strong>{scene.who.name}</strong>
 			{#if occupation}
 				<span class="job">
-					{#if scene.who.job}<i><OccupationIcon job={scene.who.job} /></i>{/if}{occupation}
+					{occupation}
 				</span>
 			{/if}
 			<span class="where">Died in {placed(scene.at, scene.month)}</span>
@@ -190,12 +189,6 @@
 		gap: 0.45rem;
 		font-size: 1.1rem;
 		color: color-mix(in srgb, var(--seat) 45%, var(--paper));
-	}
-
-	.job i {
-		display: block;
-		width: 1.5rem;
-		height: 1.5rem;
 	}
 
 	.track {

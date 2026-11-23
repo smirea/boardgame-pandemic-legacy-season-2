@@ -1,74 +1,62 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
-	import { pack } from '@repo/game';
 	import type { JobId } from '@repo/game';
-	import OccupationIcon from '#lib/occupations/OccupationIcon.svelte';
-	const SPECIALIST_PORTRAIT: Partial<Record<JobId, string>> = {
-		immunologist: '/portraits/immunologist.webp',
-		vectorControl: '/portraits/vector-control.webp',
-		scientist: '/portraits/scientist.webp',
-	};
+	import { figureKey, figureUrl, headOf } from '#lib/characters/figures.ts';
 
 	let {
 		portrait,
 		color,
 		job = null,
-		showBadge = true,
 		hooded = false,
 		dead = false,
 	}: {
 		portrait: number;
 		color: string;
 		job?: JobId | null;
-		showBadge?: boolean;
 		hooded?: boolean;
 		dead?: boolean;
 	} = $props();
-	const occupation = $derived(job ? pack.jobs.find(candidate => candidate.id === job)!.name : null);
-	const src = $derived(
-		hooded
-			? '/portraits/haven-worker.webp'
-			: (job && SPECIALIST_PORTRAIT[job]) || `/portraits/survivor-${portrait % pack.numbers.portraits}.webp`,
-	);
+	const key = $derived(figureKey({ portrait, job, hooded }));
+	const head = $derived(headOf(key));
 </script>
 
-<img
-	{src}
-	alt=""
+<!-- A headshot cut from the character's figure, on the colour it plays in. -->
+<span
+	class="face"
 	class:dead
-	style:background={color}
+	style:--color={color}
 	data-worker={hooded}
 	{@attach feedback('Portrait', () => ({ portrait, job, dead }))}
-/>
-{#if job && showBadge}
-	<span class="job" role="img" aria-label={occupation}><OccupationIcon {job} /></span>
-{/if}
+>
+	<img
+		src={figureUrl(key)}
+		alt=""
+		style:width={`${100 / head.size}%`}
+		style:left={`${(0.5 - head.x / head.size) * 100}%`}
+		style:top={`${(0.5 - head.y / (head.size * head.aspect)) * 100}%`}
+	/>
+</span>
 
 <style>
-	img {
+	.face {
 		position: absolute;
 		inset: 0;
 		display: block;
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-		object-position: center 30%;
-	}
-	img.dead {
-		filter: grayscale(1) contrast(0.85);
+		overflow: hidden;
+		background: radial-gradient(
+			circle at 50% 40%,
+			color-mix(in srgb, var(--color) 85%, #fff),
+			color-mix(in srgb, var(--color) 60%, #000)
+		);
 	}
 
-	/* The occupation, always at the bottom left of the face, sized with the portrait. */
-	.job {
+	img {
 		position: absolute;
-		bottom: 3px;
-		left: 3px;
-		width: clamp(16px, 32%, 26px);
-		aspect-ratio: 1;
-		padding: 2px;
-		border-radius: 3px;
-		background: rgb(16 12 8 / 0.78);
-		color: #efe6d2;
-		box-shadow: 0 1px 3px rgb(0 0 0 / 0.5);
+		max-width: none;
+		height: auto;
+	}
+
+	.dead {
+		filter: grayscale(1) contrast(0.85);
 	}
 </style>

@@ -1,18 +1,23 @@
 <script lang="ts">
+	import { pack } from '@repo/game';
 	import type {
 		BriefedUnlock,
+		JobId,
 		Campaign,
 		CityId,
 		InfectionCard as InfectionCardData,
 		PlayerCard as PlayerCardData,
 	} from '@repo/game';
 	import InfectionCard from '#lib/cards/InfectionCard.svelte';
-	import OccupationIcon from '#lib/occupations/OccupationIcon.svelte';
+	import { jobFigure } from '#lib/characters/figures.ts';
+	import Portrait from './Portrait.svelte';
 	import ActionIcon from './ActionIcon.svelte';
 	import { ACTION_ICON } from './labels.svelte.ts';
 	import PlayerCard from './PlayerCard.svelte';
 
 	type Props = { unlock: BriefedUnlock; campaign: Campaign; size?: string };
+
+	const jobName = (job: JobId) => pack.jobs.find(candidate => candidate.id === job)!.name;
 
 	/** The sticker an unlock that is no card, cube or action comes as. */
 	const STICKER: Partial<Record<BriefedUnlock['t'], string>> = {
@@ -102,10 +107,12 @@
 	</span>
 {:else if piece?.t === 'action'}
 	<ActionIcon action={piece.action} {size} />
-{:else if unlock.t === 'job'}
-	<span class="job-medallion" style:--size={size} aria-label={unlock.job}>
-		<OccupationIcon job={unlock.job} />
+{:else if unlock.t === 'job' && jobFigure(unlock.job)}
+	<span class="job-medallion" style:--size={size} aria-label={jobName(unlock.job)}>
+		<Portrait portrait={0} job={unlock.job} color="#6b5a43" />
 	</span>
+{:else if unlock.t === 'job'}
+	<span class="sticker" style:--size={size}>{jobName(unlock.job)}</span>
 {:else if unlock.t === 'rule' && unlock.rule === 'storage'}
 	<span class="sticker storage-pkg" style:--size={size}>Package 6</span>
 {:else if STICKER[unlock.t]}
@@ -166,17 +173,13 @@
 	}
 
 	.job-medallion {
-		display: inline-grid;
+		position: relative;
 		flex: none;
-		place-items: center;
 		width: var(--size);
 		height: var(--size);
-		padding: 0.25rem;
-		box-sizing: border-box;
 		border: 1.5px solid var(--paper-ink);
 		border-radius: 50%;
-		background: var(--slip);
-		color: var(--paper-ink);
+		overflow: hidden;
 		box-shadow: 0 1px 2px rgb(40 26 12 / 0.35);
 	}
 
