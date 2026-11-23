@@ -1,69 +1,90 @@
 #!/usr/bin/env bun
 /**
- * Synthesizes ElevenLabs voice acting MP3s for every beat in `apps/ui/src/lib/story/script.ts`
- * into `apps/ui/static/voices/<beatId>.mp3` and writes `apps/ui/src/lib/story/voices.generated.ts`.
+ * Designs 7 custom character voices with Google Gemini 3.8 Voice Design (`ai.voices.create`)
+ * and synthesizes expressive, scene-directed voice acting MP3s via `gemini-3.8-flash-tts`
+ * (`speechMetadata.style`) for every beat in `apps/ui/src/lib/story/script.ts`.
  *
- * Resumable and content-hash cached: unchanged beats with existing MP3 files are skipped.
+ * Outputs `apps/ui/static/voices/<beatId>.mp3` and `apps/ui/src/lib/story/voices.generated.ts`.
+ * Resumable and content-hash cached: unchanged voices and beats are skipped.
  *
  * Usage:
- *   ./apps/ui/scripts/gen-voices.ts
+ *   ./apps/ui/scripts/gen-voices.ts                # design missing voices + synthesize all 104 beats
+ *   ./apps/ui/scripts/gen-voices.ts --samples      # design missing voices + synthesize 1 showcase beat per character
  *   ./apps/ui/scripts/gen-voices.ts --only prelude_01
+ *   ./apps/ui/scripts/gen-voices.ts --force        # re-synthesize selected beats even if cached
+ *   ./apps/ui/scripts/gen-voices.ts --redesign     # recreate custom voices even if cached
  *   ./apps/ui/scripts/gen-voices.ts --dry-run
  */
+import { GoogleGenAI } from '@google/genai';
+import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
-import { CAST } from '../src/lib/story/cast.ts';
+import { CAST, CAST_LIST } from '../src/lib/story/cast.ts';
 import type { SpeakerId } from '../src/lib/story/cast.ts';
-import { allVoiceBeats } from '../src/lib/story/script.ts';
-import type { VoiceEntry } from '../src/lib/story/voices.generated.ts';
+import { allVoiceBeats, STORY_SCENES } from '../src/lib/story/script.ts';
+import type { StoryBeat, StoryScene } from '../src/lib/story/script.ts';
+import type { DesignedVoiceEntry, VoiceEntry } from '../src/lib/story/voices.generated.ts';
 
 const ROOT = resolve(dirname(import.meta.path), '../../..');
 const OUT_DIR = resolve(ROOT, 'apps/ui/static/voices');
 const MANIFEST_PATH = resolve(ROOT, 'apps/ui/src/lib/story/voices.generated.ts');
 
-const MODEL_ID = 'eleven_turbo_v2_5';
-const OUTPUT_FORMAT = 'mp3_44100_64';
+const TTS_MODEL = 'gemini-3.8-flash-tts';
 const CONCURRENCY = 4;
 
-/** Hand-picked 7-voice ElevenLabs casting matching each character's visual and emotional brief. */
-const VOICE_CAST: Record<SpeakerId, { voiceId: string; label: string; speed?: number }> = {
-	chronicler: { voiceId: 'nPczCjzI2devNBz1zQrb', label: 'Brian — Deep Resonant Narrator', speed: 0.94 },
-	mara: { voiceId: 'XrExE9yKIg1WjnnlVkGX', label: 'Matilda — Commanding Alto', speed: 0.98 },
-	tomas: { voiceId: 'JBFqnCBsd6RMkjVDRZzb', label: 'George — Warm Haunted Scholar', speed: 0.95 },
-	kai: { voiceId: 'IKne3meq5aSn9XLyUdCD', label: 'Charlie — Energetic Young Scout', speed: 1.03 },
-	archive: { voiceId: 'pFZP5JQG7iQjIQuC4Bku', label: 'Lily — Patrician Archive Broadcast', speed: 0.96 },
-	amaya: { voiceId: 'EXAVITQu4vr4xnSDxMaL', label: 'Sarah — Calm Determined Scientist', speed: 0.99 },
-	vey: { voiceId: 'N2lVS1w4EtoT3dr4eOWO', label: 'Callum — Husky Weary Exile', speed: 0.92 },
+/** Signature showcase beat per cast member for audition samples (`--samples`). */
+export const SAMPLE_BEAT_IDS: Record<SpeakerId, string> = {
+	chronicler: 'prelude_01',
+	mara: '09_03_03',
+	tomas: '09_03_02',
+	kai: '05_02_03',
+	archive: '05_02_02',
+	amaya: '12_07_01',
+	vey: 'door17_01',
 };
 
 function loadKey(): string {
-	const fromEnv = process.env.ELEVENLABS_API_KEY?.trim();
+	const fromEnv = process.env.GEMINI_API_KEY?.trim();
 	if (fromEnv) return fromEnv;
 	const localPath = resolve(ROOT, '.env.local');
 	if (existsSync(localPath)) {
 		const raw = readFileSync(localPath, 'utf8');
-		const match = /^ELEVENLABS_API_KEY=(.+)$/m.exec(raw);
+		const match = /^GEMINI_API_KEY=(.+)$/m.exec(raw);
 		if (match?.[1]) return match[1].trim().replace(/^['"]|['"]$/g, '');
 	}
-	throw new Error('ELEVENLABS_API_KEY is missing. Set it in .env.local or the environment.');
+	throw new Error('GEMINI_API_KEY is missing. Set it in .env.local or the environment.');
 }
 
-function loadExistingManifest(): Record<string, VoiceEntry> {
-	if (!existsSync(MANIFEST_PATH)) return {};
+function loadExistingState(): {
+	voices: Record<string, DesignedVoiceEntry>;
+	beats: Record<string, VoiceEntry>;
+} {
+	if (!existsSync(MANIFEST_PATH)) return { voices: {}, beats: {} };
 	const text = readFileSync(MANIFEST_PATH, 'utf8');
-	const match = /export const voiceManifest: Record<string, VoiceEntry> = (\{[\s\S]*\});/.exec(text);
-	if (!match?.[1]) return {};
-	try {
-		return JSON.parse(match[1]) as Record<string, VoiceEntry>;
-	} catch {
-		return {};
-	}
+	const vMatch = /export const designedVoices: Record<string, DesignedVoiceEntry> = (\{[\s\S]*?\});/.exec(text);
+	const bMatch = /export const voiceManifest: Record<string, VoiceEntry> = (\{[\s\S]*\});/.exec(text);
+	const parse = <T>(raw: string | undefined): Record<string, T> => {
+		if (!raw) return {};
+		try {
+			return JSON.parse(raw) as Record<string, T>;
+		} catch {
+			return {};
+		}
+	};
+	return { voices: parse<DesignedVoiceEntry>(vMatch?.[1]), beats: parse<VoiceEntry>(bMatch?.[1]) };
 }
 
-function writeManifest(entries: Record<string, VoiceEntry>) {
-	const sorted = Object.fromEntries(Object.entries(entries).toSorted(([a], [b]) => a.localeCompare(b)));
-	const body = `// Generated by apps/ui/scripts/gen-voices.ts. Do not edit by hand.
+function writeManifest(voices: Record<string, DesignedVoiceEntry>, beats: Record<string, VoiceEntry>) {
+	const sortedVoices = Object.fromEntries(Object.entries(voices).toSorted(([a], [b]) => a.localeCompare(b)));
+	const sortedBeats = Object.fromEntries(Object.entries(beats).toSorted(([a], [b]) => a.localeCompare(b)));
+	const body = `// Generated by apps/ui/scripts/gen-voices.ts using Google Gemini 3.8 Flash TTS + Voice Design. Do not edit by hand.
+export type DesignedVoiceEntry = {
+	voiceId: string;
+	displayName: string;
+	designHash: string;
+};
+
 export type VoiceEntry = {
 	src: string;
 	speaker: string;
@@ -72,153 +93,317 @@ export type VoiceEntry = {
 	bytes: number;
 };
 
-export const voiceManifest: Record<string, VoiceEntry> = ${JSON.stringify(sorted, null, '\t')};
+export const designedVoices: Record<string, DesignedVoiceEntry> = ${JSON.stringify(sortedVoices, null, '\t')};
+
+export const voiceManifest: Record<string, VoiceEntry> = ${JSON.stringify(sortedBeats, null, '\t')};
 `;
 	writeFileSync(MANIFEST_PATH, body, 'utf8');
 }
 
-function beatHash(speaker: SpeakerId, text: string): string {
-	const cast = VOICE_CAST[speaker];
+function voiceDesignHash(speaker: SpeakerId): string {
 	const brief = CAST[speaker].voiceBrief;
 	return createHash('sha256')
 		.update(
 			JSON.stringify({
-				model: MODEL_ID,
-				format: OUTPUT_FORMAT,
-				voiceId: cast.voiceId,
-				speed: cast.speed ?? 1,
-				stability: brief.stability,
-				similarityBoost: brief.similarityBoost,
-				style: brief.style,
-				text,
+				model: TTS_MODEL,
+				displayName: brief.displayName,
+				gender: brief.gender,
+				languageCode: brief.languageCode,
+				accent: brief.accent,
+				designPrompt: brief.designPrompt,
 			}),
 		)
 		.digest('hex')
 		.slice(0, 16);
 }
 
-async function synthesize(apiKey: string, speaker: SpeakerId, text: string, attempt = 1): Promise<Uint8Array> {
-	const cast = VOICE_CAST[speaker];
-	const brief = CAST[speaker].voiceBrief;
-	const url = `https://api.elevenlabs.io/v1/text-to-speech/${cast.voiceId}?output_format=${OUTPUT_FORMAT}`;
-	const response = await fetch(url, {
-		method: 'POST',
-		headers: {
-			'xi-api-key': apiKey,
-			'content-type': 'application/json',
-			accept: 'audio/mpeg',
-		},
-		body: JSON.stringify({
-			text,
-			model_id: MODEL_ID,
-			voice_settings: {
-				stability: brief.stability,
-				similarity_boost: brief.similarityBoost,
-				style: brief.style,
-				use_speaker_boost: true,
-				...(cast.speed ? { speed: cast.speed } : {}),
-			},
-		}),
-	});
-	if (response.status === 429 || response.status >= 500) {
-		if (attempt <= 4) {
-			const delay = 1000 * attempt * attempt;
-			console.warn(`  retrying ${speaker} (${response.status}) in ${delay}ms...`);
-			await Bun.sleep(delay);
-			return synthesize(apiKey, speaker, text, attempt + 1);
-		}
+function beatStyleInstruction(scene: StoryScene, beat: StoryBeat): string {
+	const actor = CAST[beat.speaker];
+	const style = beat.style ?? actor.defaultStyle;
+	const parts: string[] = [actor.voiceBrief.defaultDelivery];
+
+	if (beat.direction) {
+		parts.push(beat.direction);
 	}
-	if (!response.ok) {
-		const err = await response.text();
-		throw new Error(`ElevenLabs ${response.status} for ${speaker}: ${err}`);
-	}
-	const buf = new Uint8Array(await response.arrayBuffer());
-	if (buf.byteLength < 512) throw new Error(`Audio response unexpectedly small (${buf.byteLength} bytes)`);
-	return buf;
-}
 
-const args = process.argv.slice(2);
-const dryRun = args.includes('--dry-run');
-const onlyIdx = args.indexOf('--only');
-const onlyId = onlyIdx >= 0 ? args[onlyIdx + 1] : null;
-
-const apiKey = dryRun ? '' : loadKey();
-mkdirSync(OUT_DIR, { recursive: true });
-
-const manifest = loadExistingManifest();
-const beats = allVoiceBeats().filter(item => !onlyId || item.beat.id === onlyId);
-if (!beats.length) throw new Error(onlyId ? `No beat found with id "${onlyId}"` : 'No beats found');
-
-const pending: typeof beats = [];
-let cachedCount = 0;
-
-for (const item of beats) {
-	const hash = beatHash(item.beat.speaker, item.beat.text);
-	const file = resolve(OUT_DIR, `${item.beat.id}.mp3`);
-	const existing = manifest[item.beat.id];
-	if (existing && existing.hash === hash && existsSync(file) && statSync(file).size > 512) {
-		cachedCount++;
+	if (style === 'thought') {
+		parts.push('intimate quiet internal monologue, close to mic');
+	} else if (style === 'radio') {
+		parts.push('official recorded archival radio dispatch');
+	} else if (style === 'narrator') {
+		parts.push('dramatic cinematic storytelling with bold emphasis');
 	} else {
-		pending.push(item);
+		parts.push('vivid expressive dialogue, strong human dynamics, never flat');
 	}
-}
 
-const pendingChars = pending.reduce((sum, item) => sum + item.beat.text.length, 0);
-console.log(
-	`Voices: ${beats.length} total | ${cachedCount} cached | ${pending.length} to synthesize (${pendingChars} chars, model=${MODEL_ID})`,
-);
-
-if (dryRun) {
-	for (const [id, entry] of Object.entries(VOICE_CAST)) {
-		console.log(`  ${id.padEnd(11)} -> ${entry.voiceId} (${entry.label})`);
-	}
-	process.exit(0);
-}
-
-const started = Date.now();
-let completed = 0;
-let cursor = 0;
-let firstError: Error | null = null;
-
-async function worker() {
-	while (cursor < pending.length && !firstError) {
-		const item = pending[cursor++]!;
-		const { beat } = item;
-		const cast = VOICE_CAST[beat.speaker];
-		const hash = beatHash(beat.speaker, beat.text);
-		const file = resolve(OUT_DIR, `${beat.id}.mp3`);
-		try {
-			const bytes = await synthesize(apiKey, beat.speaker, beat.text);
-			writeFileSync(file, bytes);
-			manifest[beat.id] = {
-				src: `/voices/${beat.id}.mp3`,
-				speaker: beat.speaker,
-				voiceId: cast.voiceId,
-				hash,
-				bytes: bytes.byteLength,
-			};
-			completed++;
-			if (completed % 8 === 0 || completed === pending.length) {
-				writeManifest(manifest);
-			}
-			console.log(
-				`[${completed}/${pending.length}] ${beat.id} (${beat.speaker}) -> ${(bytes.byteLength / 1024).toFixed(1)} KB`,
-			);
-		} catch (error) {
-			firstError = error instanceof Error ? error : new Error(String(error));
-			writeManifest(manifest);
-			return;
+	if (!beat.direction) {
+		const setPiece = beat.setPiece ?? scene.setPiece;
+		if (setPiece === 'wearingOff') {
+			parts.push('CATASTROPHIC ALARM — voice tight with sudden dread and desperate urgency');
+		} else if (beat.swing === 'triumph') {
+			parts.push('soaring triumphant relief, proud defiant joy');
+		} else if (beat.swing === 'setback') {
+			parts.push('heavy grim setback, taut dread');
 		}
 	}
+
+	return parts.join('; ');
 }
 
-await Promise.all(Array.from({ length: Math.min(CONCURRENCY, Math.max(1, pending.length)) }, () => worker()));
-writeManifest(manifest);
+function beatHash(voiceId: string, scene: StoryScene, beat: StoryBeat): string {
+	const actor = CAST[beat.speaker];
+	const style = beat.style ?? actor.defaultStyle;
+	return createHash('sha256')
+		.update(
+			JSON.stringify({
+				model: TTS_MODEL,
+				voiceId,
+				radioEffect: style === 'radio',
+				styleInstruction: beatStyleInstruction(scene, beat),
+				text: beat.text,
+			}),
+		)
+		.digest('hex')
+		.slice(0, 16);
+}
 
-if (firstError) throw firstError;
+function encodeAudioToMp3(audioBytes: Buffer, mimeType: string, radioEffect: boolean): Uint8Array {
+	const isPcm = /audio\/L16|pcm/i.test(mimeType);
+	const inputArgs = isPcm ? ['-f', 's16le', '-ar', '24000', '-ac', '1', '-i', 'pipe:0'] : ['-i', 'pipe:0'];
+	const filters = radioEffect
+		? 'highpass=f=320,lowpass=f=3300,acompressor=threshold=-18dB:ratio=3.5:attack=10:release=120,loudnorm=I=-16:TP=-1.5:LRA=9'
+		: 'loudnorm=I=-16:TP=-1.5:LRA=11';
 
-const totalBytes = Object.values(manifest).reduce((sum, e) => sum + e.bytes, 0);
-const elapsed = ((Date.now() - started) / 1000).toFixed(1);
-console.log(
-	`Done in ${elapsed}s: ${Object.keys(manifest).length} voice files (${(totalBytes / (1024 * 1024)).toFixed(2)} MiB total).`,
-);
+	const result = spawnSync(
+		'ffmpeg',
+		[
+			'-hide_banner',
+			'-loglevel',
+			'error',
+			...inputArgs,
+			'-af',
+			filters,
+			'-codec:a',
+			'libmp3lame',
+			'-b:a',
+			'96k',
+			'-f',
+			'mp3',
+			'pipe:1',
+		],
+		{ input: audioBytes, maxBuffer: 32 * 1024 * 1024 },
+	);
+	if (result.status !== 0) {
+		throw new Error(`ffmpeg failed (${result.status}): ${result.stderr?.toString('utf8')}`);
+	}
+	const out = new Uint8Array(result.stdout);
+	if (out.byteLength < 512) throw new Error(`Encoded MP3 unexpectedly small (${out.byteLength} bytes)`);
+	return out;
+}
+
+async function ensureDesignedVoices(
+	ai: GoogleGenAI,
+	voices: Record<string, DesignedVoiceEntry>,
+	neededSpeakers: Set<SpeakerId>,
+	redesign: boolean,
+): Promise<void> {
+	for (const actor of CAST_LIST) {
+		if (!neededSpeakers.has(actor.id)) continue;
+		const hash = voiceDesignHash(actor.id);
+		const existing = voices[actor.id];
+		if (!redesign && existing && existing.designHash === hash && existing.voiceId) {
+			console.log(`  [voice cached] ${actor.id.padEnd(11)} -> ${existing.voiceId} (${actor.voiceBrief.label})`);
+			continue;
+		}
+		console.log(`  [designing]    ${actor.id.padEnd(11)} -> ${actor.voiceBrief.label}...`);
+		const created = await ai.voices.create({
+			store: true,
+			voice: {
+				type: 'prompted',
+				model: TTS_MODEL,
+				display_name: actor.voiceBrief.displayName,
+				language_code: actor.voiceBrief.languageCode,
+				gender: actor.voiceBrief.gender,
+				accent: actor.voiceBrief.accent,
+				description: actor.voiceBrief.tone,
+				prompted: {
+					input: actor.voiceBrief.designPrompt,
+				},
+			},
+		});
+		const voiceId = (created as { id?: string }).id;
+		if (!voiceId) throw new Error(`Voice Design did not return a voice id for ${actor.id}`);
+		voices[actor.id] = {
+			voiceId,
+			displayName: actor.voiceBrief.displayName,
+			designHash: hash,
+		};
+		console.log(`  [voice ready]  ${actor.id.padEnd(11)} -> ${voiceId}`);
+	}
+}
+
+async function synthesizeBeat(
+	ai: GoogleGenAI,
+	voiceId: string,
+	scene: StoryScene,
+	beat: StoryBeat,
+	attempt = 1,
+): Promise<Uint8Array> {
+	const actor = CAST[beat.speaker];
+	const style = beat.style ?? actor.defaultStyle;
+	const styleInstruction = beatStyleInstruction(scene, beat);
+
+	try {
+		const response = await ai.models.generateContent({
+			model: TTS_MODEL,
+			contents: [
+				{
+					role: 'user',
+					parts: [
+						{
+							text: beat.text,
+							speechMetadata: { style: styleInstruction },
+						},
+					],
+				},
+			],
+			config: {
+				responseModalities: ['AUDIO'],
+				speechConfig: {
+					voiceConfig: {
+						voice: voiceId,
+					},
+				},
+			},
+		});
+
+		const part = response.candidates?.[0]?.content?.parts?.find(p => p.inlineData?.data);
+		const b64 = part?.inlineData?.data;
+		const mime = part?.inlineData?.mimeType ?? 'audio/wav';
+		if (!b64) {
+			throw new Error(`No audio returned for ${beat.id} (${beat.speaker})`);
+		}
+		const raw = Buffer.from(b64, 'base64');
+		if (raw.byteLength < 1024) {
+			throw new Error(`Audio response unexpectedly small (${raw.byteLength} bytes) for ${beat.id}`);
+		}
+		return encodeAudioToMp3(raw, mime, style === 'radio');
+	} catch (err) {
+		const msg = err instanceof Error ? err.message : String(err);
+		const retryable = /\b(429|500|502|503|504|RESOURCE_EXHAUSTED|UNAVAILABLE|deadline|fetch failed)\b/i.test(msg);
+		if (retryable && attempt <= 4) {
+			const delay = 1500 * attempt * attempt;
+			console.warn(`  retrying ${beat.id} (${beat.speaker}) in ${delay}ms: ${msg.slice(0, 120)}`);
+			await Bun.sleep(delay);
+			return synthesizeBeat(ai, voiceId, scene, beat, attempt + 1);
+		}
+		throw err;
+	}
+}
+
+if (import.meta.main) {
+	const args = process.argv.slice(2);
+	const dryRun = args.includes('--dry-run');
+	const force = args.includes('--force');
+	const redesign = args.includes('--redesign');
+	const samplesOnly = args.includes('--samples');
+	const onlyIdx = args.indexOf('--only');
+	const onlyId = onlyIdx >= 0 ? args[onlyIdx + 1] : null;
+
+	const apiKey = dryRun ? '' : loadKey();
+	mkdirSync(OUT_DIR, { recursive: true });
+
+	const state = loadExistingState();
+	const sampleSet = new Set(Object.values(SAMPLE_BEAT_IDS));
+	const beats = allVoiceBeats().filter(item => {
+		if (onlyId) return item.beat.id === onlyId;
+		if (samplesOnly) return sampleSet.has(item.beat.id);
+		return true;
+	});
+	if (!beats.length) throw new Error(onlyId ? `No beat found with id "${onlyId}"` : 'No beats found');
+
+	if (dryRun) {
+		console.log(`Google Gemini 3.8 TTS + Voice Design (${TTS_MODEL}): ${beats.length} beats selected`);
+		for (const actor of CAST_LIST) {
+			console.log(`  ${actor.id.padEnd(11)} -> ${actor.voiceBrief.label} (${actor.voiceBrief.accent})`);
+		}
+		process.exit(0);
+	}
+
+	const ai = new GoogleGenAI({ apiKey, apiVersion: 'v1beta' });
+	const neededSpeakers = new Set(beats.map(item => item.beat.speaker));
+
+	console.log(`Step 1: Designing / verifying ${neededSpeakers.size} custom character voices on ${TTS_MODEL}...`);
+	await ensureDesignedVoices(ai, state.voices, neededSpeakers, redesign);
+	writeManifest(state.voices, state.beats);
+
+	const pending: typeof beats = [];
+	let cachedCount = 0;
+
+	for (const item of beats) {
+		const scene = STORY_SCENES[item.sceneId]!;
+		const voiceId = state.voices[item.beat.speaker]!.voiceId;
+		const hash = beatHash(voiceId, scene, item.beat);
+		const file = resolve(OUT_DIR, `${item.beat.id}.mp3`);
+		const existing = state.beats[item.beat.id];
+		if (!force && existing && existing.hash === hash && existsSync(file) && statSync(file).size > 512) {
+			cachedCount++;
+		} else {
+			pending.push(item);
+		}
+	}
+
+	const pendingChars = pending.reduce((sum, item) => sum + item.beat.text.length, 0);
+	console.log(
+		`Step 2: Synthesizing (${TTS_MODEL}): ${beats.length} selected | ${cachedCount} cached | ${pending.length} to generate (${pendingChars} chars)`,
+	);
+
+	const started = Date.now();
+	let completed = 0;
+	let cursor = 0;
+	let firstError: Error | null = null;
+
+	async function worker() {
+		while (cursor < pending.length && !firstError) {
+			const item = pending[cursor++]!;
+			const { beat, sceneId } = item;
+			const scene = STORY_SCENES[sceneId]!;
+			const voiceId = state.voices[beat.speaker]!.voiceId;
+			const hash = beatHash(voiceId, scene, beat);
+			const file = resolve(OUT_DIR, `${beat.id}.mp3`);
+			try {
+				const bytes = await synthesizeBeat(ai, voiceId, scene, beat);
+				writeFileSync(file, bytes);
+				state.beats[beat.id] = {
+					src: `/voices/${beat.id}.mp3`,
+					speaker: beat.speaker,
+					voiceId,
+					hash,
+					bytes: bytes.byteLength,
+				};
+				completed++;
+				if (completed % 6 === 0 || completed === pending.length) {
+					writeManifest(state.voices, state.beats);
+				}
+				console.log(
+					`[${completed}/${pending.length}] ${beat.id} (${beat.speaker} · ${voiceId}) -> ${(bytes.byteLength / 1024).toFixed(1)} KB`,
+				);
+			} catch (error) {
+				firstError = error instanceof Error ? error : new Error(String(error));
+				writeManifest(state.voices, state.beats);
+				return;
+			}
+		}
+	}
+
+	await Promise.all(Array.from({ length: Math.min(CONCURRENCY, Math.max(1, pending.length)) }, () => worker()));
+	writeManifest(state.voices, state.beats);
+
+	if (firstError) throw firstError;
+
+	const totalBytes = Object.values(state.beats).reduce((sum, e) => sum + e.bytes, 0);
+	const elapsed = ((Date.now() - started) / 1000).toFixed(1);
+	console.log(
+		`Done in ${elapsed}s: ${Object.keys(state.voices).length} custom voices, ${Object.keys(state.beats).length} voiced lines (${(totalBytes / (1024 * 1024)).toFixed(2)} MiB total).`,
+	);
+}
