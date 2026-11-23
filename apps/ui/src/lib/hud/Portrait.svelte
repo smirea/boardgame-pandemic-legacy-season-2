@@ -3,25 +3,44 @@
 	import { pack } from '@repo/game';
 	import type { JobId } from '@repo/game';
 	import OccupationIcon from '#lib/occupations/OccupationIcon.svelte';
+	const SPECIALIST_PORTRAIT: Partial<Record<JobId, string>> = {
+		immunologist: '/portraits/immunologist.webp',
+		vectorControl: '/portraits/vector-control.webp',
+		scientist: '/portraits/scientist.webp',
+	};
+
 	let {
 		portrait,
 		color,
 		job = null,
+		showBadge = true,
 		hooded = false,
 		dead = false,
-	}: { portrait: number; color: string; job?: JobId | null; hooded?: boolean; dead?: boolean } = $props();
+	}: {
+		portrait: number;
+		color: string;
+		job?: JobId | null;
+		showBadge?: boolean;
+		hooded?: boolean;
+		dead?: boolean;
+	} = $props();
 	const occupation = $derived(job ? pack.jobs.find(candidate => candidate.id === job)!.name : null);
+	const src = $derived(
+		hooded
+			? '/portraits/haven-worker.webp'
+			: (job && SPECIALIST_PORTRAIT[job]) || `/portraits/survivor-${portrait % pack.numbers.portraits}.webp`,
+	);
 </script>
 
 <img
-	src={`/portraits/survivor-${portrait}.webp`}
+	{src}
 	alt=""
 	class:dead
 	style:background={color}
 	data-worker={hooded}
 	{@attach feedback('Portrait', () => ({ portrait, job, dead }))}
 />
-{#if job}
+{#if job && showBadge}
 	<span class="job" role="img" aria-label={occupation}><OccupationIcon {job} /></span>
 {/if}
 

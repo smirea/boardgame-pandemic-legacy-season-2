@@ -5,6 +5,7 @@
 	import LegacyCard from '#lib/cards/LegacyCard.svelte';
 	import type { Insights, PublicState } from '@repo/game';
 	import AtRisk from './AtRisk.svelte';
+	import AudioMenu from '#lib/audio/AudioMenu.svelte';
 	import Calendar from './Calendar.svelte';
 	import CampaignStatus from './CampaignStatus.svelte';
 	import Decks from './Decks.svelte';
@@ -184,6 +185,7 @@
 					{peek.on ? 'Back' : 'Show board'}
 				</button>
 			{/if}
+			<AudioMenu />
 			<button onclick={onreset}>Fit map</button>
 			<button onclick={onbox} data-testid="open-box" data-dest="box">Box</button>
 			<button onclick={onmenu}>Menu</button>

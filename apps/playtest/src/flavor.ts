@@ -1,7 +1,5 @@
 /**
- * Made-up colour for the playtesters, keyed by the start of a briefing card's title. The game itself has
- * no story. These lines only give the players something to react to in character, and none of it
- * comes from any published game.
+ * Short scene-setting lines for playtest bot logs, keyed by the start of a briefing card's title.
  */
 const FLAVOR: [prefix: string, line: string][] = [
 	[

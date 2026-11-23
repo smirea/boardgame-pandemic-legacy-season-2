@@ -3,6 +3,7 @@
 	import { ending, score, SEAT_IDS, tablePlayers } from '@repo/game';
 	import type { Command, PlayerId, PublicState, SeatId, Start } from '@repo/game';
 	import { LS } from '#lib/storage.ts';
+	import { ENDING_TIERS } from '#lib/story/script.ts';
 	import { MONTHS, SEAT_COLORS } from './labels.svelte.ts';
 	import Ready from './Ready.svelte';
 
@@ -11,15 +12,20 @@
 		player: PlayerId;
 		send: (command: Command) => void;
 		rename: (name: string) => void;
+		onintro?: () => void;
 	};
 
-	let { snap, player, send, rename }: Props = $props();
+	let { snap, player, send, rename, onintro }: Props = $props();
 
 	const campaign = $derived(snap.world.campaign);
 	const table = $derived(snap.world.table);
 	const finished = $derived(snap.phase === 'finished');
 	const total = $derived(score(campaign));
 	const end = $derived(ending(campaign));
+	const endingStory = $derived(
+		ENDING_TIERS[campaign.sampleDelivered ? 'delivered' : 'failed'].find(tier => total.total >= tier.min) ??
+			ENDING_TIERS.failed.at(-1)!,
+	);
 	const players = $derived(tablePlayers(table));
 	const colorOf = (seat: SeatId) => SEAT_COLORS[SEAT_IDS.indexOf(seat)]!;
 	const firstSeat = (who: PlayerId) => table.seats.find(entry => entry.player === who)!;
@@ -55,6 +61,7 @@
 			<span>{campaign.sampleDelivered ? 'The sample was delivered.' : 'The sample was not delivered.'}</span>
 			<b>{end.bracket}</b>
 		</p>
+		<p class="ending-story">{endingStory.text}</p>
 		<dl class="score">
 			<dt>Final score</dt>
 			<dd>{total.total}</dd>
@@ -112,6 +119,12 @@
 			>
 		{/if}
 
+		{#if campaign.month === 0 && onintro}
+			<button type="button" class="intro-btn" onclick={onintro} data-testid="lobby-watch-intro">
+				✦ Watch Campaign Intro — “The World Almost Ended 71 Years Ago”
+			</button>
+		{/if}
+
 		<div class="starts">
 			{#each starts as option (option.start)}
 				<Ready {table} {player} {send} start={option.start} label={option.label} surface="outline" />
@@ -142,6 +155,27 @@
 		font-family: var(--font-display);
 		font-size: 1.4rem;
 		font-weight: 400;
+	}
+
+	.ending-story {
+		margin: -0.35rem 0 0.5rem;
+		padding: 0.65rem 0.85rem;
+		border-left: 3px solid #9d2c22;
+		background: rgb(42 32 23 / 0.06);
+		font-size: 0.86rem;
+		line-height: 1.48;
+		color: var(--slip-ink);
+	}
+
+	.intro-btn {
+		padding: 0.48rem 0.8rem;
+		border: 1px solid rgb(138 98 42 / 0.55);
+		border-radius: 3px;
+		background: linear-gradient(180deg, rgb(226 195 106 / 0.2), rgb(184 138 56 / 0.1));
+		color: var(--slip-ink);
+		font-size: 0.82rem;
+		font-weight: 700;
+		text-align: center;
 	}
 
 	.ending .hint {

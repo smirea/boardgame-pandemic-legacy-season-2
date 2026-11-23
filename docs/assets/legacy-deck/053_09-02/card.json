@@ -17,12 +17,12 @@
 		"stopOrPause": "NONE",
 		"header": "Journal Entry",
 		"trigger": "",
-		"text": "PEARL and its possible cure are all they have left. The year is almost over and this is the last chance, so they have to find PEARL and start making a cure. They ask what Utopia's motives are, and whether Utopia is holding PEARL hostage.",
+		"text": "PEARL and its possible cure is all we have left. We need this. The year is drawing to a close and this is our last chance. We need to find it. We need to get it. We need to start making a cure. What are Utopia’s motives? Are they holding PEARL hostage?",
 		"footer": ""
 	},
 	"sideB": {
 		"header": "FROM THE ARCHIVES",
-		"text": "APRIL 15, YEAR 44\n\nTwo havens are gone. Without their supplies, the ability to continue is severely compromised, and the writer feels real despair. They ask whether someone would let them all die. They were condemned to the havens but had tried to help the whole world. If the havens are gone, then what?",
+		"text": "APRIL 15, YEAR 44\n\nTwo of our havens are gone. Without their supplies, our ability to continue has been severely compromised. I feel the first real tendrils of despair entering my heart.\n\nIs someone so depraved that they would let us all die? We were condemned to these havens, but we have made every effort to help the whole world. If we were gone, then what?",
 		"footer": "Keep papers like this in the reserve.",
 		"scratchBoxes": []
 	},

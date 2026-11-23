@@ -1,6 +1,6 @@
 # Pandemic Legacy Season 2 box contents
 
-**Full campaign spoilers.** This reference records where the physical components come from, when they enter play, and how the engine represents their mechanics. Printed codes identify the components. The descriptions paraphrase rules and omit story text.
+**Full campaign spoilers.** This reference records where the physical components come from, when they enter play, and how the engine represents their mechanics. Printed codes identify the components.
 
 ## Implementation since this audit
 

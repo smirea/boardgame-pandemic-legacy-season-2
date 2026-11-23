@@ -1,6 +1,6 @@
 # Mechanics catalogue
 
-This is a functional spec of the mechanics of Pandemic Legacy: Season 2 (Z-Man Games, 2017). The engine for this repo's original co-op legacy game reuses these mechanics on its own theme, map, and campaign. Everything here is paraphrased. Nothing is transcribed from cards, stickers, or story text.
+This is a functional spec of the mechanics of Pandemic Legacy: Season 2, paired with the physical component scans and sidecars in `docs/assets/`.
 
 ## Files
 

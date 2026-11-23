@@ -15,6 +15,10 @@
 	import { cubicOut } from 'svelte/easing';
 	import { fade, fly, scale } from 'svelte/transition';
 	import LegacyCard from '#lib/cards/LegacyCard.svelte';
+	import { sfxCardDraw, sfxCardFlip, sfxCrateOpen, sfxDoorTear } from '#lib/audio/sfx.ts';
+	import { audioSettings } from '#lib/audio/settings.svelte.ts';
+	import { sceneForOpening } from '#lib/story/script.ts';
+	import StoryStage from '#lib/story/StoryStage.svelte';
 	import BriefPiece from './BriefPiece.svelte';
 	import Briefing from './Briefing.svelte';
 	import Crate from './Crate.svelte';
@@ -119,6 +123,35 @@
 	const allDrawn = $derived(steps.length > 0 && drawn >= steps.length && flipped);
 
 	const current = $derived<Opening | null>(drawn > 0 ? (steps[drawn - 1] ?? null) : null);
+	let dismissedStep = $state<number | null>(null);
+	const activeStory = $derived(
+		current && flipped && !progress.stowing && !paused && dismissedStep !== drawn
+			? sceneForOpening(current, campaign)
+			: null,
+	);
+	let storyStage = $state<StoryStage>();
+	let prevDrawn = 0;
+	let prevFlipped = false;
+	$effect(() => {
+		const d = drawn;
+		const f = flipped;
+		const cur = current;
+		if (d !== prevDrawn) dismissedStep = null;
+		if (d > prevDrawn) {
+			sfxCardDraw();
+		} else if (d === prevDrawn && f && !prevFlipped && cur) {
+			if (cur.from.t === 'seal') {
+				if (cur.from.seal.t === 'package') sfxCrateOpen();
+				else sfxDoorTear();
+			} else {
+				sfxCardFlip();
+				if (cur.seals.some(s => s.t === 'door')) setTimeout(() => sfxDoorTear(), 260);
+				else if (cur.seals.some(s => s.t === 'package')) setTimeout(() => sfxCrateOpen(), 260);
+			}
+		}
+		prevDrawn = d;
+		prevFlipped = f;
+	});
 	const settled = $derived(drawn > 1 ? steps.slice(0, drawn - 1).map((step, index) => ({ step, index })) : []);
 	const leftWing = $derived(settled.filter((_, idx) => idx % 2 === 0));
 	const rightWing = $derived(settled.filter((_, idx) => idx % 2 === 1));
@@ -339,6 +372,7 @@
 		}
 		if (event.key === ' ' && !progress.stowing && !paused) {
 			event.preventDefault();
+			if (activeStory && audioSettings.pacing === 'story' && storyStage?.advance()) return;
 			if (allDrawn) toggleReady();
 			else step();
 		}
@@ -353,6 +387,7 @@
 	<div
 		class="tabletop-unboxing"
 		class:stowing={progress.stowing}
+		class:narrating={Boolean(activeStory)}
 		bind:this={root}
 		data-drawn={drawn}
 		data-total={steps.length}
@@ -634,6 +669,22 @@
 			</div>
 		{/if}
 
+		{#if activeStory}
+			<StoryStage
+				bind:this={storyStage}
+				scene={activeStory}
+				overlay
+				delivered={campaign.sampleDelivered}
+				ondone={() => {
+					if (!allDrawn) step();
+					else dismissedStep = drawn;
+				}}
+				onclose={() => {
+					dismissedStep = drawn;
+				}}
+			/>
+		{/if}
+
 		<!-- Bottom action bar: Trash receptacle + Done button with multiplayer agreement -->
 		<footer class="bottom-bar">
 			<span
@@ -875,6 +926,11 @@
 		gap: 0.85rem;
 		min-height: 0;
 		padding: 0.4rem;
+		transition: padding-bottom 280ms ease;
+	}
+
+	.narrating .center {
+		padding-bottom: 8.5rem;
 	}
 
 	.spotlight {

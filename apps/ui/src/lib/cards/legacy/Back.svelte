@@ -9,8 +9,12 @@
 
 	let { card, print, code }: Props = $props();
 
-	type Family = 'stop' | 'pause' | 'keep' | 'turning' | 'rules' | 'story' | 'blank';
-	type Block = { kind: 'line'; text: string } | { kind: 'list'; items: string[] };
+	type Family = 'stop' | 'pause' | 'keep' | 'turning' | 'rules' | 'journal' | 'ending' | 'blank';
+	type Block =
+		| { kind: 'line'; text: string }
+		| { kind: 'band'; text: string }
+		| { kind: 'rule'; text: string }
+		| { kind: 'list'; items: string[] };
 
 	const MONTHS = /\b(january|february|march|april|may|june|july|august|september|october|november|december)\b/g;
 	const TERMS: [RegExp, string][] = [
@@ -29,10 +33,6 @@
 		return out.replace(/(^|[.!?:]\s+|•\s*)([a-z])/g, (_, lead: string, letter: string) => lead + letter.toUpperCase());
 	};
 
-	/** Story the print opens with before its instructions; it stays on the scan. */
-	const STORY_LEAD: Record<string, number> = { '08-04': 1, '11-05': 1 };
-	/** The paragraphs of a journal entry that are instructions; the rest of the entry is story. */
-	const JOURNAL_RULES: Record<string, number[]> = { '00-01': [0], '08-02': [1] };
 	const BAND = /^(DID NOT DELIVER|DELIVERED):/;
 
 	// The last card is printed upside down at the bottom of the deck: its back is the archive's side B.
@@ -43,28 +43,23 @@
 		if (side.stopOrPause === 'PAUSE') return 'pause';
 		if (side.stopOrPause === 'CONTINUE') return 'keep';
 		if (side.header === 'TURNING POINT') return 'turning';
-		if (/journal entry/i.test(side.header) || (card.kind === 'ending' && side.header)) return 'story';
+		if (/journal entry/i.test(side.header)) return 'journal';
+		if (card.kind === 'ending' && (side.header || side.text)) return 'ending';
 		if (side.header || side.text) return 'rules';
 		return 'blank';
 	});
 
-	/** An ending's back prints the story for two score bands, each under its band. */
-	const titles = $derived.by(() => {
-		const bands = card.kind === 'ending' ? side.text.split('\n').filter(line => BAND.test(line.trim())) : [];
-		return (bands.length ? bands : [side.header])
-			.filter(Boolean)
-			.map(line => sentence(line.trim()).replace(/(\d)-(\d)/, '$1\u2013\u2060$2'));
+	const title = $derived.by(() => {
+		if (family === 'ending' && side.text.split('\n').some(line => BAND.test(line.trim()))) return '';
+		return side.header ? sentence(side.header.trim()) : '';
 	});
-	const storied = $derived(family === 'story' || card.id in STORY_LEAD);
 
 	const paragraphs = $derived.by(() => {
 		const header = side.header.trim().toUpperCase();
-		const parts = side.text
+		return side.text
 			.split(/\n\s*\n/)
 			.map(part => part.trim())
 			.filter(part => part && part.toUpperCase() !== header);
-		if (family === 'story') return (JOURNAL_RULES[card.id] ?? []).map(index => parts[index]!);
-		return parts.slice(STORY_LEAD[card.id] ?? 0);
 	});
 
 	/** The first card warns before its STOP, the rest of the stop or pause card is its trigger. */
@@ -79,21 +74,31 @@
 			return [{ kind: 'line', text: sentence(trigger) }];
 		}
 		const out: Block[] = [];
-		for (const line of paragraphs.join('\n').split('\n')) {
-			const text = line.trim();
-			if (!text) continue;
-			if (text.startsWith('•')) {
-				const item = sentence(text.replace(/^•\s*/, ''));
-				const last = out.at(-1);
-				if (last?.kind === 'list') last.items.push(item);
-				else out.push({ kind: 'list', items: [item] });
-			} else out.push({ kind: 'line', text: sentence(text) });
+		for (const part of paragraphs) {
+			if (family === 'journal' && /^Immediately spend up to 3 production units/i.test(part)) {
+				out.push({ kind: 'rule', text: part });
+				continue;
+			}
+			for (const rawLine of part.split('\n')) {
+				const text = rawLine.trim();
+				if (!text) continue;
+				if (family === 'ending' && BAND.test(text)) {
+					out.push({ kind: 'band', text: sentence(text).replace(/(\d)-(\d)/, '$1\u2013\u2060$2') });
+				} else if (text.startsWith('•')) {
+					const item = sentence(text.replace(/^•\s*/, ''));
+					const last = out.at(-1);
+					if (last?.kind === 'list') last.items.push(item);
+					else out.push({ kind: 'list', items: [item] });
+				} else {
+					out.push({ kind: 'line', text: sentence(text) });
+				}
+			}
 		}
 		return out;
 	});
 
 	const fitKey = $derived(
-		blocks.map(block => (block.kind === 'line' ? block.text : block.items.join(' '))).join(' ') + warning,
+		blocks.map(block => (block.kind === 'list' ? block.items.join(' ') : block.text)).join(' ') + warning + side.footer,
 	);
 </script>
 
@@ -104,42 +109,65 @@
 	data-back-family={family}
 >
 	{#if warning}<p class="warning">{warning}</p>{/if}
-	<div class="emblem" aria-hidden="true">
-		{#if family === 'stop'}
-			<svg viewBox="0 0 64 64">
-				<polygon points="19,3 45,3 61,19 61,45 45,61 19,61 3,45 3,19" />
-				<text x="32" y="38.5">STOP</text>
-			</svg>
-		{:else if family === 'pause'}
-			<svg viewBox="0 0 64 64">
-				<circle cx="32" cy="32" r="29" />
-				<rect x="22" y="19" width="7" height="26" rx="1.5" />
-				<rect x="35" y="19" width="7" height="26" rx="1.5" />
-			</svg>
-		{:else if family === 'keep'}
-			<svg viewBox="0 0 64 64">
-				<rect x="12" y="10" width="28" height="38" rx="3" class="ghost" />
-				<rect x="24" y="16" width="28" height="38" rx="3" />
-				<path d="M31 35h14M39 29l6 6-6 6" class="cut" />
-			</svg>
-		{:else if family === 'turning'}
-			<svg viewBox="0 0 64 64">
-				<circle cx="32" cy="32" r="27" class="ring" />
-				<path d="M20 38a13 13 0 0 1 22-15l3-4 2 14-13-3 4-3a8 8 0 0 0-13 10z" />
-			</svg>
-		{:else if family === 'blank' || family === 'story'}
-			<svg viewBox="0 0 64 64">
-				<circle cx="32" cy="32" r="27" class="ring" />
-				<circle cx="32" cy="32" r="19" class="ring thin" />
-				<path d="M32 9l4 19 19 4-19 4-4 19-4-19-19-4 19-4z" />
-			</svg>
-		{/if}
-	</div>
-	{#each titles as title (title)}<strong class="title">{title}</strong>{/each}
+	{#if family !== 'journal' && family !== 'ending'}
+		<div class="emblem" aria-hidden="true">
+			{#if family === 'stop'}
+				<svg viewBox="0 0 64 64">
+					<polygon points="19,3 45,3 61,19 61,45 45,61 19,61 3,45 3,19" />
+					<text x="32" y="38.5">STOP</text>
+				</svg>
+			{:else if family === 'pause'}
+				<svg viewBox="0 0 64 64">
+					<circle cx="32" cy="32" r="29" />
+					<rect x="22" y="19" width="7" height="26" rx="1.5" />
+					<rect x="35" y="19" width="7" height="26" rx="1.5" />
+				</svg>
+			{:else if family === 'keep'}
+				<svg viewBox="0 0 64 64">
+					<rect x="12" y="10" width="28" height="38" rx="3" class="ghost" />
+					<rect x="24" y="16" width="28" height="38" rx="3" />
+					<path d="M31 35h14M39 29l6 6-6 6" class="cut" />
+				</svg>
+			{:else if family === 'turning'}
+				<svg viewBox="0 0 64 64">
+					<circle cx="32" cy="32" r="27" class="ring" />
+					<path d="M20 38a13 13 0 0 1 22-15l3-4 2 14-13-3 4-3a8 8 0 0 0-13 10z" />
+				</svg>
+			{:else if family === 'blank'}
+				<svg viewBox="0 0 64 64">
+					<circle cx="32" cy="32" r="27" class="ring" />
+					<circle cx="32" cy="32" r="19" class="ring thin" />
+					<path d="M32 9l4 19 19 4-19 4-4 19-4-19-19-4 19-4z" />
+				</svg>
+			{/if}
+		</div>
+	{/if}
+	{#if family === 'journal'}
+		<header class="paper-head">
+			<span class="paper-kicker">Journal entry</span>
+		</header>
+	{:else if family === 'ending'}
+		<header class="paper-head">
+			<span class="paper-kicker">Ending</span>
+			{#if title}<strong class="title">{title}</strong>{/if}
+		</header>
+	{:else if title}
+		<strong class="title">{title}</strong>
+	{/if}
 	{#if blocks.length}
-		<div class="body" {@attach fitText(fitKey, { max: 1.05, min: 0.45 })}>
+		<div
+			class="body"
+			{@attach fitText(fitKey, {
+				max: family === 'journal' || family === 'ending' ? 0.92 : 1.05,
+				min: 0.44,
+			})}
+		>
 			{#each blocks as block, index (index)}
-				{#if block.kind === 'line'}
+				{#if block.kind === 'band'}
+					<p class="band-title">{block.text}</p>
+				{:else if block.kind === 'rule'}
+					<p class="rule-callout"><RichText text={block.text} /></p>
+				{:else if block.kind === 'line'}
 					<p><RichText text={block.text} /></p>
 				{:else}
 					<ul>
@@ -149,7 +177,9 @@
 			{/each}
 		</div>
 	{/if}
-	{#if storied}<p class="story-hint">Hold <kbd>O</kbd> for the printed story</p>{/if}
+	{#if side.footer && (family === 'journal' || family === 'ending')}
+		<p class="paper-foot">{side.footer}</p>
+	{/if}
 	<span class="code">{code}</span>
 </div>
 
@@ -215,14 +245,95 @@
 		text-align: center;
 	}
 
-	.blank,
-	.story {
+	.blank {
 		justify-content: center;
 	}
 
-	.story .body {
-		flex: none;
+	.journal,
+	.ending {
+		align-items: stretch;
+		gap: 0.45em;
+		padding: 1.05em 1em 1.5em;
+		background:
+			radial-gradient(ellipse at 20% 0%, rgb(255 250 238 / 0.5), transparent 62%),
+			linear-gradient(175deg, #f3ead6, #e5d6b7);
+		color: #241b13;
+		box-shadow: inset 0 0 0 1.5px rgb(42 32 23 / 0.35);
 		text-align: left;
+	}
+
+	.ending {
+		background: radial-gradient(ellipse at 50% 0%, rgb(255 248 232 / 0.45), transparent 65%), #f6efe4;
+		box-shadow: inset 0 0 0 2px #9d2c22;
+	}
+
+	.journal::before,
+	.ending::before {
+		display: none;
+	}
+
+	.paper-head {
+		display: flex;
+		flex-direction: column;
+		gap: 0.12em;
+		flex: none;
+		padding-bottom: 0.3em;
+		border-bottom: 1px solid rgb(42 32 23 / 0.22);
+	}
+
+	.paper-kicker {
+		font-size: 0.68em;
+		font-weight: 800;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: #5b452d;
+	}
+
+	.ending .paper-kicker {
+		color: #9d2c22;
+	}
+
+	.ending .title {
+		color: #9d2c22;
+		font-size: 1.25em;
+	}
+
+	.journal .body,
+	.ending .body {
+		color: #241b13;
+		text-align: left;
+		line-height: 1.34;
+	}
+
+	.band-title {
+		margin: 0.35em 0 0.2em;
+		font-family: var(--font-display);
+		font-size: 1.15em;
+		line-height: 1.12;
+		color: #9d2c22;
+	}
+
+	.band-title:first-child {
+		margin-top: 0;
+	}
+
+	.rule-callout {
+		padding: 0.42em 0.55em;
+		border-radius: 0.24em;
+		border-left: 3px solid #24578a;
+		background: rgb(36 87 138 / 0.13);
+		color: #16304c;
+		font-weight: 700;
+	}
+
+	.paper-foot {
+		margin: 0;
+		flex: none;
+		padding-right: 3.4em;
+		color: #6b563c;
+		font-size: 0.66em;
+		font-style: italic;
+		line-height: 1.22;
 	}
 
 	.stop,
@@ -360,25 +471,10 @@
 		justify-content: center;
 	}
 
-	.story-hint {
-		margin: 0;
-		font-size: 0.74em;
-		font-style: italic;
-		opacity: 0.6;
-	}
-
-	kbd {
-		padding: 0 0.35em;
-		border: 1px solid currentColor;
-		border-radius: 0.2em;
-		font-family: inherit;
-		font-style: normal;
-		font-weight: 700;
-	}
-
 	:global(.legacy-card.size-mini) .back::before,
-	:global(.legacy-card.size-mini) .story-hint,
 	:global(.legacy-card.size-mini) .warning,
+	:global(.legacy-card.size-mini) .paper-head,
+	:global(.legacy-card.size-mini) .paper-foot,
 	:global(.legacy-card.size-mini) .title,
 	:global(.legacy-card.size-mini) .body {
 		display: none;

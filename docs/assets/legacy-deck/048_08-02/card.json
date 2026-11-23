@@ -17,12 +17,12 @@
 		"stopOrPause": "NONE",
 		"header": "Journal Entry",
 		"trigger": "",
-		"text": "They have finally fully accessed the satellite towers and started monitoring different frequencies. Whoever is broadcasting uses multiple channels, and a lot of time has been lost on decoy stations. Accessing the towers has given them a sense of purpose. They feel invigorated.\n\nImmediately spend up to 3 production units on character abilities.\nFinish spending these before step 3 of setup (Supply the Grid).",
+		"text": "Have finally fully accessed the satellite towers. Starting to monitor different frequencies. Whoever is broadcasting uses multiple channels. We’ve lost a lot of time listening to these decoy stations.\n\nAccessing the towers has given us a sense of purpose. We feel invigorated!\n\nImmediately spend up to 3 production units on character abilities. Finish spending these before step 3 of setup (Supply the Grid).",
 		"footer": ""
 	},
 	"sideB": {
 		"header": "FROM THE ARCHIVES",
-		"text": "DECEMBER 19, YEAR 48\n\nThe three labs in the Southern Hemisphere have made limited advances, perhaps too late, because PEARL has stopped reporting. Their last broadcast said they had found what they needed. The sediment cores contained bacteria in which they had identified the bacteriophage. They had a cure, and now they are gone. A team is being sent to investigate, covered properly so they do not draw attention.",
+		"text": "DECEMBER 19, YEAR 48\n\nThe three labs in the Southern Hemisphere have made limited advancements, but perhaps too late as PEARL has stopped reporting. Their last broadcast said they had found what they needed!\n\nThe sediment cores contained bacteria samples in which they had identified the bacteriophage. We had it! We had a means to a cure. Now they are gone. Sending a team to investigate. They are covered properly to avoid attention.",
 		"footer": "Keep papers like this in the reserve.",
 		"scratchBoxes": []
 	},

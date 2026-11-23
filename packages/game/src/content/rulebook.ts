@@ -95,9 +95,41 @@ const bands = <T extends Record<K, number>, K extends keyof T>(rows: T[], key: K
 /**
  * The rulebook as the group's copy reads with every rule sticker placed, in the printed book's order. Each sticker
  * and each rule a package or door brings is gated on the seal that holds it, so `rulebook` shows only what the
- * campaign has opened. Rules, not story: the printed book's fiction is left to the scans.
+ * campaign has opened.
  */
 export const RULEBOOK: RuleChapter[] = [
+	{
+		id: 'story',
+		title: 'The World Almost Ended 71 Years Ago',
+		sections: [
+			{
+				id: 'prologue-story',
+				title: 'Instructions for a Better Life on the Havens',
+				blocks: [
+					p(
+						"The plague came out of nowhere and ravaged the world. Fever, cough, sores, and death—once infected, most died within a week. Nothing could stop it. The world did its best. It wasn't good enough.",
+					),
+					p(
+						"The last fragments of our people have desperately kept the world from collapsing completely. For three generations we have lived on the seas, on floating stations they called \"havens.\" Far from the plague, we are able to provide supplies to the mainland—antibiotics, food, medicine, and tools—to keep them (and us) from succumbing completely. We keep a network of the largest known cities in the world alive. Things have been tough the past few years. Cities far away from the havens have fallen off our grid. We don't know what's happened to them. We don't know why the supplies aren't reaching them. We have only a few cities left on our grid. We are failing.",
+					),
+					p("The supplies aren't keeping the plague away like they used to. What's more, they're running out."),
+					p('Our leadership tried to hide this fact from us, but we all knew.'),
+					p(
+						"Last week, the leaders and thinkers of the havens gathered together as they do every year to discuss the state of the havens and the state of the world. They did not return. What's worse is that our main security team was with them. Without our soldiers, the Hollow Men—roving bands of savages bent on our elimination—will expand their attacks, tearing down what we build and stealing what we offer.",
+					),
+					p(
+						'Those of us left met on the havens to discuss what to do next. After hours of debate, we realized that all eyes had turned to a select few to lead. Us.',
+					),
+					p('Not because we are able to lead but because we are willing.'),
+					p('We are starting this journal to record our attempts to keep the world from ending.'),
+					p("We know we can't save all the cities but we will do what we can to save most of them."),
+					p(
+						'If we fail, we hope that someone, somewhere, finds these notes to know that we may not have succeeded but that we tried.',
+					),
+				],
+			},
+		],
+	},
 	{
 		id: 'campaign',
 		title: 'Playing the campaign',

@@ -47,6 +47,7 @@
 	import {
 		COMPANION_PRINT,
 		EPIDEMIC_STEPS,
+		EPIDEMIC_WEARING_OFF_STEP,
 		IMPROVEMENT_PRINT,
 		companionArtUrl,
 		eventArtUrl,
@@ -60,6 +61,7 @@
 
 	const hoverCard = getContext<((card: CardId | null) => void) | undefined>('card-hover');
 	const copiesFromGame = getContext<((city: CityId) => CityCardCopies) | undefined>('card-copies');
+	const wearingOffFromGame = getContext<(() => boolean) | undefined>('epidemic-wearing-off');
 
 	type Props = {
 		card: PlayerCard;
@@ -71,6 +73,8 @@
 		small?: boolean;
 		/** Overrides live deck copy counts for a city card (used by debug showcases). */
 		copies?: CityCardCopies;
+		/** Overrides Door R / 55 "2-It's wearing off" sticker on Epidemic cards. */
+		wearingOff?: boolean;
 		/** The search box just scratched, which wipes open to show what it found. */
 		revealing?: number;
 	};
@@ -84,10 +88,15 @@
 		focusable = false,
 		small = false,
 		copies,
+		wearingOff,
 		revealing,
 	}: Props = $props();
 
-	const EPIDEMIC_PLAIN = EPIDEMIC_STEPS.map(step => `${step.heading}: ${step.text}`).join(' ');
+	const epidemicWearingOff = $derived(wearingOff ?? wearingOffFromGame?.() ?? false);
+	const epidemicSteps = $derived(
+		epidemicWearingOff ? [EPIDEMIC_STEPS[0], EPIDEMIC_WEARING_OFF_STEP, EPIDEMIC_STEPS[2]] : EPIDEMIC_STEPS,
+	);
+	const epidemicPlain = $derived(epidemicSteps.map(step => `${step.heading}: ${step.text}`).join(' '));
 
 	type SearchDisplay =
 		| { kind: 'sealed'; index: number; scope: 'land' | 'sea'; label: string }
@@ -128,7 +137,7 @@
 					},
 				];
 			}
-			const info = searchResultPrint(box.result);
+			const info = searchResultPrint(box.result, card.city, box.scope);
 			if (!info) return [];
 			return [
 				{
@@ -199,7 +208,9 @@
 			case 'epidemic':
 				return {
 					title: 'Epidemic',
-					kicker: '1-Increase · 2-Infect · 3-Intensify',
+					kicker: epidemicWearingOff
+						? "1-Increase · 2-It's wearing off · 3-Intensify"
+						: '1-Increase · 2-Infect · 3-Intensify',
 					color: cardColor(card),
 				};
 		}
@@ -258,12 +269,19 @@
 			aria-label={`${entry.heading}: ${entry.info.plain}`}
 		>
 			<span class="search-revealed-head">{entry.heading}</span>
-			<span class="search-revealed-body" {@attach fitText(entry.info.plain, { max: maxSize, min: 0.34 })}>
-				<RichText
-					text={entry.info.before}
-				/>{#if entry.info.doors?.length}{' '}{#each entry.info.doors as door, doorIndex (door)}{#if doorIndex > 0}{' '}{/if}<span
-							class="door-badge">{door}</span
-						>{/each}{/if}{#if entry.info.after}{#if entry.info.after !== '.'}{' '}{/if}{entry.info.after}{/if}
+			<span class="search-revealed-body" {@attach fitText(entry.info.plain, { max: maxSize, min: 0.28 })}>
+				{#if entry.info.story}
+					<span class="search-story">{entry.info.story}</span>
+				{/if}
+				{#if entry.info.before || entry.info.doors?.length}
+					<span class="search-rule">
+						<RichText
+							text={entry.info.before}
+						/>{#if entry.info.doors?.length}{' '}{#each entry.info.doors as door, doorIndex (door)}{#if doorIndex > 0}{' '}{/if}<span
+									class="door-badge">{door}</span
+								>{/each}{/if}{#if entry.info.after}{#if entry.info.after !== '.'}{' '}{/if}{entry.info.after}{/if}
+					</span>
+				{/if}
 			</span>
 		</span>
 	{/if}
@@ -441,7 +459,7 @@
 		<span class="ep-top">
 			<span class="ep-title">EPIDEMIC</span>
 		</span>
-		<span class="ep-body" {@attach fitText(EPIDEMIC_PLAIN, { max: 0.78, min: 0.48 })}>
+		<span class="ep-body" {@attach fitText(epidemicPlain, { max: 0.76, min: 0.44 })}>
 			<svg class="ep-art" viewBox="0 0 24 24" aria-hidden="true">
 				<circle cx="12" cy="12" r="2.2" fill="currentColor" />
 				<path
@@ -449,8 +467,8 @@
 					fill="currentColor"
 				/>
 			</svg>
-			{#each EPIDEMIC_STEPS as step (step.heading)}
-				<span class="ep-step">
+			{#each epidemicSteps as step, idx (step.heading)}
+				<span class="ep-step" class:wearing-off={epidemicWearingOff && idx === 1}>
 					<strong>{step.heading}</strong>
 					<span><RichText text={step.text} /></span>
 				</span>
@@ -815,13 +833,28 @@
 	}
 
 	.search-revealed-body {
-		display: block;
+		display: flex;
+		flex-direction: column;
+		gap: 0.14em;
 		flex: 0 1 auto;
 		min-height: 0;
 		overflow: hidden;
 		font-size: 0.54em;
 		font-weight: 600;
 		line-height: 1.18;
+	}
+
+	.search-story {
+		display: block;
+		font-weight: 500;
+		font-style: italic;
+		color: #2f2418;
+	}
+
+	.search-rule {
+		display: block;
+		font-weight: 700;
+		color: #16100a;
 	}
 
 	.search-stack.compact .search-revealed {
@@ -1386,5 +1419,25 @@
 		color: #ffffff;
 		font-style: italic;
 		letter-spacing: 0.02em;
+	}
+
+	.ep-step.wearing-off {
+		margin: 0 -0.22em;
+		padding: 0.24em 0.34em;
+		border: 1px solid rgb(56 42 24 / 0.55);
+		border-radius: 0.14em;
+		background:
+			repeating-linear-gradient(-12deg, rgb(120 92 48 / 0.05) 0 4px, transparent 4px 9px),
+			linear-gradient(170deg, #ede1c0, #d8c69b);
+		color: #231a11;
+		box-shadow:
+			0 0.18em 0.45em rgb(0 0 0 / 0.52),
+			inset 0 0 0 1px rgb(255 250 234 / 0.35);
+		transform: rotate(-1.8deg);
+	}
+
+	.ep-step.wearing-off strong {
+		color: #9e2119;
+		font-style: normal;
 	}
 </style>

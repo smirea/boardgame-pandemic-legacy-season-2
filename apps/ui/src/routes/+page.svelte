@@ -42,7 +42,7 @@
 </script>
 
 <svelte:head>
-	<title>Legacy</title>
+	<title>Pandemic Legacy: Season 2</title>
 </svelte:head>
 
 {#if session?.fatal}

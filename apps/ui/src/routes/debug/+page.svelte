@@ -13,6 +13,16 @@
 			text: 'The real machine and screen with every seat on this client and no networking, on this browser’s campaign. window.DEBUG reads and replaces the state.',
 		},
 		{
+			href: '/debug/story-mode',
+			name: 'Story Mode',
+			text: 'Play straight through the entire Legacy deck without playing the board game: pick branches at every inflection point, step forward or reverse in time, change past decisions, and watch voiced scenes & set-pieces.',
+		},
+		{
+			href: '/debug/story',
+			name: 'Story & Audio',
+			text: 'Play any campaign narrative scene, voiced cast character, high-impact set-piece (including September 09-03), SFX soundboard, and adaptive ambient music simulator.',
+		},
+		{
 			href: '/debug/cards',
 			name: 'Cards',
 			text: 'Every generated card face: city, event, companion, Infection and Hollow Men cards.',

@@ -17,12 +17,12 @@
 		"stopOrPause": "NONE",
 		"header": "Journal Entry",
 		"trigger": "",
-		"text": "Satellite towers are picking up faint broadcasts. The writers think the Hollow Men are involved, but someone else may be transmitting, and the Hollow Men may be taking orders. They ask whether someone is ordering the plague to be spread. The grid is growing and cannot absorb that spread, so they are prepared to forsake some cities, and they wonder if that would make them the monsters the world already thinks they are.",
+		"text": "Satellite towers have started picking up faint broadcast signals. Need to know who is transmitting. We think it’s Hollow Men, but there’s someone else. Could the Hollow Men be taking orders?\n\nIs someone ordering them to spread the plague?\n\nThe grid is growing and can’t handle Hollow Men spreading the plague. We’re prepared to forsake some if need be. Would that make us the monsters the world thinks we are?",
 		"footer": ""
 	},
 	"sideB": {
 		"header": "FROM THE ARCHIVES",
-		"text": "JULY, YEAR 38\n\nHaven networks are still at full capacity after the relocation, and hope is still kindled. The writer finds it strange to see adults who never knew the world before, dreams of living on land again, and sometimes dreams of fleeing to Utopia. They imagine Utopia still works like the old world. They miss land and dirt, have heard a cure is close, and wonder whether Utopia would share it.",
+		"text": "JULY, YEAR 38\n\nHaven networks still at full capacity – when we were re-located here, they set us up properly. Hope is still kindled. Strange to see adults on the havens who never knew the world before. I dream to live on land again. I sometimes dream of fleeing for Utopia. I imagine they still function like the old world. I miss land and dirt. I hear they are close to a cure. Would they share it with our people?",
 		"footer": "Keep papers like this in the reserve.",
 		"scratchBoxes": []
 	},

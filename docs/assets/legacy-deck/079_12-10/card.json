@@ -18,13 +18,13 @@
 		"header": "DID NOT DELIVER: 551-700",
 		"trigger": "",
 		"summary": "DID NOT DELIVER: 551-700. Despite inexperience, they did the impossible, and the world paid for their leaders' fear, Utopia's malice, and the Hollow Men's savagery. Failing to get the sample has a price. They believe the world recovers in time, with new cities and new countries, and hope to be remembered. DID NOT DELIVER: 401-550. The world is rioting, in anarchy, and near collapse. Without Utopia in the east, those cities have risen. There is no cure, and it is not clear the world lasts long enough to use one. Some cities may make it, and the Faded will be gone soon.",
-		"text": "DID NOT DELIVER: 551-700\nThey did the impossible despite their inexperience. The world paid for their leaders' fear, Utopia's malice, and the Hollow Men's savagery, and they are paying for failing to get the sample. They believe the world recovers in time, with new cities and new countries, and hope to be remembered.\n\nDID NOT DELIVER: 401-550\nRioting, anarchy, near collapse. Without Utopia in the east, those cities have risen. There is no cure, and they are not sure the world survives long enough to use one. Some cities may make it and rebuild from there. The Faded will be gone soon.",
+		"text": "DID NOT DELIVER: 551-700\nDespite our inexperience, we did the impossible. The world has paid the price of our leaders’ fear, Utopia’s malice, and the Hollow Men’s savagery. We are paying the price for failing to get the sample. We believe that the world will recover in time. There will be new cities and new countries. We hope they remember what we did.\n\nDID NOT DELIVER: 401-550\nThe world is a disaster. There is rioting, anarchy, near collapse. Without Utopia in the east, those cities have risen up. We have no cure. We’re not sure the world would survive long enough to use it. Some cities will make it. We hope the world can rebuild from there. We will be gone soon.",
 		"footer": ""
 	},
 	"sideB": {
 		"header": "DID NOT DELIVER: 400 AND BELOW",
 		"summary": "DID NOT DELIVER: 400 AND BELOW. A note left in hope that someone finds it. Mistrust between Faded and normal humans was too much, and they were overwhelmed. Utopia may save the humans, but not the Faded. The effort was great and the burden too heavy. They tried and failed. Found in the ruins of North Atlantic Haven.",
-		"text": "DID NOT DELIVER: 400 AND BELOW\nA note: mistrust between Faded and normal humans was too much. They were overwhelmed. Utopia may save the humans, but not the Faded. The effort was great and the burden too heavy. They tried and failed.\nFound in the ruins of North Atlantic Haven.",
+		"text": "DID NOT DELIVER: 400 AND BELOW\n\"I hope someone finds this note. The mistrust between Faded and normal humans was too much for the world. We were overwhelmed. Utopia may save the humans...but not us. Our efforts were great but the burden was too heavy. We tried. We failed.\" – Found in ruins of North Atlantic Haven",
 		"footer": "",
 		"scratchBoxes": []
 	},

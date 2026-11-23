@@ -564,7 +564,7 @@ export function infectStep(world: World) {
 		game.pending.push({ t: 'cordon' });
 }
 
-/** Step 1 of an Epidemic: advance the infection rate and apply Rattled, then wait for Step 2 (Infect). */
+/** Step 1 of an Epidemic: advance the infection rate and apply Demoralized, then wait for Step 2 (Infect). */
 export function epidemicIncrease(world: World) {
 	const { game } = world as { campaign: World['campaign']; game: Game };
 	game.epidemics += 1;

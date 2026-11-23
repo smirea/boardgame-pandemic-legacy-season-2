@@ -17,12 +17,12 @@
 		"stopOrPause": "NONE",
 		"header": "Journal Entry",
 		"trigger": "",
-		"text": "They are far from home, in chaos, and hated. They are not sure how much longer they can do this, or whether humanity is worth it. They have found a way to use the satellite towers against the Hollow Men: broadcasting on Hollow Men frequencies leads them astray, which should let the havens move more freely. If Hollow Men get onto the havens, the writers think some of them can be persuaded to join.",
+		"text": "So far from our homes. So much chaos. So much hatred toward us. Even still. Not sure how much longer we can do this. Not sure humanity is worth it.\n\nStill, we have found a way to use the satellite towers against the Hollow Men. By broadcasting on their frequencies, we can lead them astray, which should help us move around more freely.\n\nIf we get them onto our havens, we think we can persuade some of them to join our cause.",
 		"footer": ""
 	},
 	"sideB": {
 		"header": "FROM THE ARCHIVES",
-		"text": "OCTOBER, YEAR 1\n\nFive months on the havens. The writer understands why, but still misses home. They hear stories of a plague on the mainland and ask whether they can leave. They hope the children will soon return to the home they left, and they left a note there to be read on return. For now the children cry every night, but soon it should feel as normal as it can.",
+		"text": "OCTOBER, YEAR 1\n\nFive months on these \"havens.\" I understand why, but I still miss home. We hear stories of a plague on the mainland. If the world collapses, can we leave? I hope my children will soon return to the home we left.\n\nI left a note there for them to read when we return. For now, they cry every night, but soon all will feel normal... as normal as it can be.",
 		"footer": "Keep papers like this in the reserve.",
 		"scratchBoxes": []
 	},

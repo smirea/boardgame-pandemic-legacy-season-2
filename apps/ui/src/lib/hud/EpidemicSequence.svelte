@@ -30,9 +30,8 @@
 	const rates = pack.numbers.infectionRates;
 	const currentRate = $derived(game ? (rates[game.rateIndex] ?? rates.at(-1)!) : rates[0]!);
 	const earlierRate = $derived(game ? (rates[Math.max(game.rateIndex - 1, 0)] ?? currentRate) : rates[0]!);
-	const fromStorage = $derived(
-		world.campaign.rules.includes('epidemicFromStorage') && world.campaign.stored.infection.length > 0,
-	);
+	const wearingOff = $derived(world.campaign.rules.includes('epidemicFromStorage'));
+	const fromStorage = $derived(wearingOff && world.campaign.stored.infection.length > 0);
 	const jade = $derived(breakthrough(world.campaign, 'jade'));
 	const lastEpidemic = $derived.by(() => {
 		if (!game) return null;
@@ -83,7 +82,7 @@
 							{#if stage === 'epidemicInfect' && !increased}
 								Step 1 of 3 · Increase
 							{:else if stage === 'epidemicInfect'}
-								Step 2 of 3 · Infect
+								{wearingOff ? "Step 2 of 3 · It's wearing off" : 'Step 2 of 3 · Infect'}
 							{:else}
 								Step 3 of 3 · Intensify
 							{/if}
@@ -111,11 +110,16 @@
 						</div>
 					</li>
 
-					<li class="stage {infectState}" data-epidemic-step="infect" data-state={infectState}>
+					<li
+						class="stage {infectState}"
+						class:wearing-off={wearingOff}
+						data-epidemic-step="infect"
+						data-state={infectState}
+					>
 						<span class="num" aria-hidden="true">{infectState === 'done' ? '✓' : '2'}</span>
 						<div class="body">
 							<div class="row">
-								<b>Infect</b>
+								<b>{wearingOff ? "It's wearing off" : 'Infect'}</b>
 								<span class="pills">
 									{#if jade}
 										<span class="pill jade">Jade Lab</span>
@@ -125,7 +129,9 @@
 											{cityName(lastEpidemic.city)}{lastEpidemic.removed > 0 ? ` −${lastEpidemic.removed}` : ''}
 										</span>
 									{:else if fromStorage}
-										<span class="pill">From storage</span>
+										<span class="pill tape">Package 6</span>
+									{:else if wearingOff}
+										<span class="pill tape">Package 6 empty · Bottom card</span>
 									{:else}
 										<span class="pill">Bottom card</span>
 									{/if}
@@ -135,8 +141,8 @@
 								<RichText
 									text={fromStorage
 										? jade
-											? 'Pull a stored Infection card and remove 1 supply cube from that city (Jade Lab).'
-											: 'Pull a stored Infection card and remove all supply cubes from that city.'
+											? 'Draw a random Infection card from Package 6 and remove 1 supply cube from that city (Jade Lab).'
+											: 'Draw a random Infection card from Package 6. Remove all the Supply cubes (if any) in that city. Then, discard that card.'
 										: jade
 											? 'Draw the bottom Infection card and remove 1 supply cube from that city (Jade Lab).'
 											: 'Draw the bottom Infection card and remove all supply cubes from that city.'}
@@ -398,6 +404,18 @@
 	.pill.struck {
 		background: rgb(180 52 40 / 0.4);
 		color: #ffd0c8;
+	}
+
+	.pill.tape {
+		background: linear-gradient(170deg, #ede1c0, #d8c69b);
+		color: #7d1b14;
+		border: 1px solid rgb(56 42 24 / 0.45);
+	}
+
+	.stage.wearing-off {
+		border-color: rgb(216 198 155 / 0.55);
+		background: linear-gradient(90deg, rgb(237 225 192 / 0.14), rgb(180 52 40 / 0.16));
+		transform: rotate(-0.7deg);
 	}
 
 	.body p {

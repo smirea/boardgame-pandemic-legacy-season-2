@@ -1,6 +1,6 @@
-# Legacy
+# Pandemic Legacy: Season 2
 
-A co-op legacy board game for two to four friends, played in the browser on a 3D world map. It has the mechanics of Pandemic Legacy: Season 2 on generic geography and original art, with no story text. One player hosts and owns the campaign. Everyone else connects straight to the host over WebRTC. There is no game server.
+A co-op legacy board game for two to four friends, played in the browser on a 3D world map. Full rules, printed story, voice-acted narrative sequences, procedural sound effects, and adaptive ambient music. One player hosts and owns the campaign. Everyone else connects straight to the host over WebRTC. There is no game server.
 
 ```sh
 bun install            # also installs the git hooks

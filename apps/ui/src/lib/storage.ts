@@ -26,6 +26,8 @@ export const LS = new LocalStorage<{
 	/** The studio stage's game (`/debug/studio`), kept apart from the campaign so a reload resumes it. */
 	studio: unknown;
 	studioView: { viewport: { width: number; height: number }; panel: boolean };
+	/** Audio mixer volumes, mute, voice acting toggle, and narrative pacing preference. */
+	audio: unknown;
 }>({
 	namespace,
 	getDefaults: () => ({
@@ -42,5 +44,6 @@ export const LS = new LocalStorage<{
 		replay: { speed: 1, panel: true, bubbles: true },
 		studio: null,
 		studioView: { viewport: { width: 1440, height: 810 }, panel: false },
+		audio: null,
 	}),
 });

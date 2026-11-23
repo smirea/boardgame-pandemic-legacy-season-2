@@ -147,6 +147,8 @@
 				<Portrait
 					portrait={character?.portrait ?? SEAT_IDS.indexOf(seat)}
 					{color}
+					job={character?.job ?? null}
+					showBadge={false}
 					hooded={character?.worker ?? false}
 					dead={character?.dead ?? false}
 				/>

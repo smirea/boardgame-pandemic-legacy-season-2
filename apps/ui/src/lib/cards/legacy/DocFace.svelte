@@ -20,7 +20,9 @@
 		| { t: 'coords'; rows: (readonly [string, string])[] }
 		| { t: 'wells'; boxes: Well[] }
 		| { t: 'panel'; blocks: Block[] }
-		| { t: 'tens' };
+		| { t: 'tens' }
+		| { t: 'printBody' }
+		| { t: 'printEnding' };
 	type Well =
 		| { rule: 'package'; id: number; body: Block[] }
 		| { rule: 'door'; id: string; body: Block[] }
@@ -53,12 +55,18 @@
 		body: lines.map(text => ({ t: 'p', text })),
 	});
 
-	const archive = (title: string, ...blocks: Block[]): Face => ({
+	const archive = (title: string, ...extra: Block[]): Face => ({
 		family: 'paper',
 		kicker: 'From the archives',
 		title,
-		blocks,
+		blocks: [{ t: 'printBody' }, ...extra],
 		foot: PAPERS,
+	});
+	const ending = (title?: string): Face => ({
+		family: 'close',
+		kicker: 'Ending',
+		title,
+		blocks: [{ t: 'printEnding' }],
 	});
 	const priorities = (blocks: Block[]): Face => ({
 		family: 'priorities',
@@ -87,7 +95,6 @@
 		foot: DESTROY,
 	});
 
-	// Instructions only. Narrative on the same face is left off. Dates and titles stay, because they name the paper.
 	// 03-01's second box is a decoy the card never asks players to scratch, so it stays covered.
 	// 02-06's three 10s follow losingStreakBonusGames, which counts down at game end: during a game the
 	// cross-out from this setup is still ahead by one.
@@ -120,14 +127,15 @@
 		'01-01': {
 			family: 'paper',
 			kicker: 'Journal entry',
-			blocks: [{ t: 'p', text: 'Priorities: Find our leaders. Find more supplies.' }],
+			blocks: [{ t: 'printBody' }],
 			foot: JOURNAL,
 		},
 
 		'02-01': report('Perimeter report', 'If you have not opened {{d:66}}, scratch the box below.', [
 			openPkg(
 				1,
-				`Open {{p:1}} and follow the instructions inside.${NO_OBJECTIVE}`,
+				'Our scouts report that the Hollow Men have raided North America. We quickly mobilized... but too late.',
+				`Open {{p:1}} and follow the instructions inside. ${NO_OBJECTIVE}`,
 				'Destroy the "Decontamination Kit" Unrationed Event card inside.',
 			),
 		]),
@@ -138,7 +146,7 @@
 				body: [
 					{
 						t: 'p',
-						text: 'Recon South America soon.',
+						text: "It's critical that we Recon South America soon—before the Hollow Men sabotage anything important.",
 					},
 				],
 			},
@@ -147,16 +155,22 @@
 		'04-01': report('Perimeter report', 'If you have not opened {{d:67}} (South America), scratch the box below.', [
 			openPkg(
 				5,
+				'Our scouts report that the Hollow Men have raided South America. We quickly mobilized... but too late.',
 				`Open {{p:5}} and follow the instructions inside. ${NO_OBJECTIVE}`,
 				'Destroy the "Strategic Reserves" Unrationed Event card inside.',
 			),
 		]),
 		'05-01': report('Perimeter report', 'If you have not opened {{d:60}}, scratch the box below.', [
-			openDoor('60', 'Open {{d:60}} and put it on the board. You have not yet accessed this haven.'),
+			openDoor(
+				'60',
+				'We have found records from 25 years ago showing the location of a now-fallen haven. It contained the equipment to generate supplies and was about to field test inoculating against the plague! We now know where it is. It is vital we access it.',
+				'Open {{d:60}} and put it on the board. You have not yet accessed this haven.',
+			),
 		]),
 		'06-01': report('Perimeter report', 'If you have not opened {{d:64}} (Europe), scratch the box below.', [
 			openPkg(
 				4,
+				'Our scouts report that the Hollow Men have raided Europe. We quickly mobilized... but too late.',
 				`Open {{p:4}} and follow the instructions inside. ${NO_OBJECTIVE}`,
 				'Destroy the "Relocation" Unrationed Event card inside.',
 				'Then, open {{d:21}}.',
@@ -165,6 +179,7 @@
 		'07-01': report('Perimeter report', 'If you have not opened {{d:57}} (Africa), scratch the box below.', [
 			openPkg(
 				7,
+				'Our scouts report that the Hollow Men have raided Africa. We quickly mobilized... but too late.',
 				`Open {{p:7}} and follow the instructions inside. ${NO_OBJECTIVE}`,
 				'Destroy the "TOPAZ Experimental Vaccine" Unrationed Event card inside.',
 			),
@@ -172,12 +187,17 @@
 		'08-01': report('Perimeter report', 'If you have not opened {{d:62}} (the Middle East), scratch the box below.', [
 			openPkg(
 				2,
+				'Our scouts report that the Hollow Men have raided the Middle East. We quickly mobilized... but too late.',
 				`Open {{p:2}} and follow the instructions inside. ${NO_OBJECTIVE}`,
 				'Destroy the "Renewal" Unrationed Event card inside.',
 			),
 		]),
 		'09-01': report('Perimeter report', 'If you have not opened {{d:65}}, scratch the box below.', [
-			openDoor('65', 'Open {{d:65}} and place it on the board. You have not yet accessed this haven.'),
+			openDoor(
+				'65',
+				"We've finally located another lost haven. We still need to get to it but now, at least, we know where to go.",
+				'Open {{d:65}} and place it on the board. You have not yet accessed this haven.',
+			),
 		]),
 		'10-01': report(
 			'Perimeter report',
@@ -187,7 +207,10 @@
 					rule: 'package',
 					id: 3,
 					body: [
-						{ t: 'p', text: 'Do the following:' },
+						{
+							t: 'p',
+							text: 'We led a desperate strike force to find a path to Asia. Found one at great cost. Do the following:',
+						},
 						{
 							t: 'ul',
 							items: [
@@ -203,6 +226,7 @@
 		'11-01': report('Intelligence report', 'If Hollow Men have not yet defected, scratch the box below.', [
 			openDoor(
 				'17',
+				"We've gotten them to turn, but at great cost.",
 				`Open {{d:17}} and follow the instructions inside. ${NO_OBJECTIVE}`,
 				'Then, after selecting characters for this game, add a scar to 2 of these characters.',
 			),
@@ -210,6 +234,7 @@
 		'12-01': report('Perimeter report', 'If you have not completed the plan, scratch the box below.', [
 			openPkg(
 				8,
+				'The new Hollow Men turned on Utopia, rising up to aid our cause!',
 				`Open {{p:8}} and follow the instructions inside. ${NO_OBJECTIVE}`,
 				'Destroy the "Riot Control" Unrationed Event card inside.',
 			),
@@ -218,6 +243,7 @@
 			family: 'last',
 			title: 'At last',
 			blocks: [
+				{ t: 'p', text: "It's over. The fate of humanity was in your hands." },
 				{
 					t: 'p',
 					text: 'Look at the following two cards to see what happens next, then calculate your score to determine the ultimate fate of your world.',
@@ -425,31 +451,17 @@
 		'03-06': now([doors(['K', '24', '47', 'E'])]),
 		'04-03': now([doors(['42'], true)]),
 		'05-03': now([doors(['31', '36'])]),
-		'06-03': now([doors(['44', '49'])]),
+		'06-03': now([{ t: 'sub', text: 'New volunteers from the havens have decided to join us.' }, doors(['44', '49'])]),
 		'08-05': now([doors(['29', '48'])]),
 		'09-05': now([doors(['33'], true)]),
 		'10-06': now([doors(['28', '45'])]),
 
-		'12-06': { family: 'close', kicker: 'Ending', title: 'If you failed to deliver the sample...', blocks: [] },
-		'12-07': { family: 'close', kicker: 'Ending', title: 'If you delivered the sample...', blocks: [] },
-		'12-09': {
-			family: 'close',
-			kicker: 'Ending',
-			blocks: [
-				{ t: 'band', text: 'Did not deliver: 851 and above' },
-				{ t: 'band', text: 'Did not deliver: 701–850' },
-			],
-		},
-		'12-10': { family: 'close', kicker: 'Ending', title: 'Did not deliver: 400 and below', blocks: [] },
-		'12-11': {
-			family: 'close',
-			kicker: 'Ending',
-			blocks: [
-				{ t: 'band', text: 'Delivered: 851 and above' },
-				{ t: 'band', text: 'Delivered: 701–850' },
-			],
-		},
-		'12-12': { family: 'close', kicker: 'Ending', title: 'Delivered: 400 and below', blocks: [] },
+		'12-06': ending('If you failed to deliver the sample...'),
+		'12-07': ending('If you delivered the sample...'),
+		'12-09': ending(),
+		'12-10': ending(),
+		'12-11': ending(),
+		'12-12': ending(),
 		'12-13': {
 			family: 'end',
 			kicker: 'Legacy deck',
@@ -457,6 +469,62 @@
 			blocks: [{ t: 'p', text: 'You have reached the end of the Legacy deck.' }],
 		},
 	};
+
+	const BAND_HEAD = /^(DID NOT DELIVER|DELIVERED):/i;
+	const DATE_HEAD = /^(OCTOBER|APRIL|YEAR|NOVEMBER|MAY|JULY|DECEMBER|JUNE)\b/i;
+
+	const printParagraphs = $derived.by(() => {
+		const raw = print.b.text.trim();
+		if (!raw) return [];
+		const parts = raw
+			.split(/\n\s*\n/)
+			.map(part => part.trim())
+			.filter(Boolean);
+		const out: string[] = [];
+		for (const part of parts) {
+			if (part.startsWith('Handwritten coordinate slip')) continue;
+			const lines = part
+				.split('\n')
+				.map(line => line.trim())
+				.filter(Boolean);
+			if (lines.length > 1 && DATE_HEAD.test(lines[0]!) && lines[0] === lines[0]!.toUpperCase()) {
+				out.push(lines.slice(1).join(' '));
+			} else if (lines.length === 1 && DATE_HEAD.test(lines[0]!) && lines[0] === lines[0]!.toUpperCase()) {
+				continue;
+			} else {
+				out.push(lines.join('\n'));
+			}
+		}
+		return out;
+	});
+
+	const printEndingBlocks = $derived.by(() => {
+		const raw = print.b.text.trim();
+		if (!raw) return [] as { kind: 'band' | 'p'; text: string }[];
+		const out: { kind: 'band' | 'p'; text: string }[] = [];
+		for (const part of raw
+			.split(/\n\s*\n/)
+			.map(p => p.trim())
+			.filter(Boolean)) {
+			const lines = part
+				.split('\n')
+				.map(l => l.trim())
+				.filter(Boolean);
+			for (const line of lines) {
+				if (/^IF YOU (FAILED TO DELIVER|DELIVERED)/i.test(line)) continue;
+				if (BAND_HEAD.test(line)) {
+					const pretty = line
+						.toLowerCase()
+						.replace(/^\w/, ch => ch.toUpperCase())
+						.replace(/(\d)-(\d)/, '$1\u2013\u2060$2');
+					out.push({ kind: 'band', text: pretty });
+				} else {
+					out.push({ kind: 'p', text: line });
+				}
+			}
+		}
+		return out;
+	});
 
 	const face = $derived.by(() => {
 		if (card.id === '12-13' && !/congrat/i.test(print.a.header))
@@ -589,6 +657,18 @@
 				{/if}
 			{/each}
 		</div>
+	{:else if block.t === 'printBody'}
+		{#each printParagraphs as para, pIndex (pIndex)}
+			<p class="story-para">{@render bits(para)}</p>
+		{/each}
+	{:else if block.t === 'printEnding'}
+		{#each printEndingBlocks as item, eIndex (eIndex)}
+			{#if item.kind === 'band'}
+				<p class="band-title">{item.text}</p>
+			{:else}
+				<p class="story-para">{item.text}</p>
+			{/if}
+		{/each}
 	{:else if block.t === 'tens'}
 		<div class="tens" aria-label="Stockpile bonuses">
 			{#each [0, 1, 2] as index (index)}
@@ -610,13 +690,10 @@
 			{/if}
 		</header>
 	{/if}
-	<div class="sheet" {@attach fitText(fitKey, { max: 1, min: 0.5 })}>
+	<div class="sheet" {@attach fitText(fitKey, { max: 0.96, min: 0.44 })}>
 		{#each face.blocks as block, index (index)}
 			{@render show(block)}
 		{/each}
-		{#if face.family === 'paper' || face.family === 'close'}
-			<p class="story-hint">Hold <kbd>O</kbd> for the printed story</p>
-		{/if}
 	</div>
 	{#if face.foot}<p class="foot">{face.foot}</p>{/if}
 	<span class="code">{code}</span>
@@ -677,29 +754,12 @@
 		margin-top: 0.15em;
 	}
 
-	.story-hint {
-		margin-top: auto;
-		font-size: 0.74em;
-		font-style: italic;
-		text-align: center;
-		opacity: 0.6;
+	.story-para {
+		line-height: 1.36;
 	}
 
-	.sheet:has(> .story-hint:only-child) {
-		justify-content: center;
-	}
-
-	.story-hint:only-child {
-		margin-top: 0;
-	}
-
-	kbd {
-		padding: 0 0.35em;
-		border: 1px solid currentColor;
-		border-radius: 0.2em;
-		font-family: inherit;
-		font-style: normal;
-		font-weight: 700;
+	.story-para + .story-para {
+		margin-top: 0.18em;
 	}
 
 	.foot {

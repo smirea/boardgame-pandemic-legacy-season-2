@@ -1,5 +1,5 @@
 import { LABS, pack } from '@repo/game';
-import type { CityImprovementId, CompanionId, EventId, InfectionImprovementId, SearchResult } from '@repo/game';
+import type { CityId, CityImprovementId, CompanionId, EventId, InfectionImprovementId, SearchResult } from '@repo/game';
 
 export type EventPrint = {
 	mode: 'rationed' | 'unrationed' | 'permanent';
@@ -177,6 +177,11 @@ export const EPIDEMIC_STEPS = [
 	},
 ] as const;
 
+export const EPIDEMIC_WEARING_OFF_STEP = {
+	heading: "2-IT'S WEARING OFF",
+	text: 'Draw a random Infection card from Package 6. Remove all the Supply cubes (if any) in that city. Then, discard that card.',
+} as const;
+
 export const producePrint = (boxesLeft: number) => {
 	const usesLeft = Math.max(0, boxesLeft);
 	return {
@@ -188,73 +193,129 @@ export const producePrint = (boxesLeft: number) => {
 	};
 };
 
+/** Verbatim printed story text revealed under each non-companion city search box. */
+export const SEARCH_STORY: Record<string, string> = {
+	'chicago:land':
+		'Survivors here are holding on despite supplies being gone for years. They told us how their haven in the Pacific stopped supply runs for unknown reasons.',
+	'atlanta:land':
+		'The plague that broke the world started here. A group blew up the CDC, destroying the COdA virus but releasing a plague that couldn’t be stopped. Not sure what prompted this action or if they knew what would result from it.',
+	'los-angeles:land': 'Found old shipping containers. They contained old but surprisingly effective supplies.',
+	'los-angeles:sea': 'We have learned the location of a lost haven. We have not yet accessed it.',
+	'san-francisco:land': 'We discovered a long-lost supply cache.',
+	'san-francisco:sea': 'We have learned the location of a lost haven. We have not yet accessed it.',
+	'buenos-aires:land':
+		'Found OPAL laboratory, one of four labs seeking a cure. Someone at the lab has offered to join us.',
+	'buenos-aires:sea': 'We discovered a long-lost supply cache on the Falklands.',
+	'santiago:land':
+		"This is a town haunted by despair. A surge of refugees overwhelmed the city's resources. The locals have not done well. Plague is rampant. Must not stay.",
+	'lima:sea': 'We have learned the location of a lost haven. We have not yet accessed it.',
+	'bogota:land':
+		'Locals say the haven off the coast was abandoned decades ago. Haven staff fled to Bogotá but found no solace due to their appearance. We moved on without comment.',
+	'st-petersburg:sea': 'Smugglers work from here. They offer to help.',
+	'moscow:land':
+		'Locals still bitter their leaders left them decades ago for a "Utopia" in the east. A week after their train left, the sky to the east started glowing. They led us to Smolensk, an old Soviet military facility outside of town, to report our findings.',
+	'khartoum:land':
+		'Posters in abandoned broadcast facility talk of Utopia, which will keep mankind safe until the plague has passed. It was accepting petitions before its gates closed. Faded were not welcome. We broadcast this information back to the havens.',
+	'dar-es-salaam:land': 'We found a well-traveled path out of Dar es Salaam.',
+	'dar-es-salaam:sea': 'We have found a lost haven! We have not yet accessed it.',
+	'johannesburg:land':
+		'Found JADE laboratory, mostly abandoned. There is one holdout, who offered to join us. JADE was set up to be a production facility to create vast doses of a cure, if one had been found. The equipment is still functional. They would need a supply center and a sample to start production.',
+	'antananarivo:sea': 'We have found a lost haven! We have not yet accessed it.',
+	'baghdad:land':
+		'A group of Hollow Men are here, preparing hundreds of cages of rats to be delivered to an unsuspecting city.',
+	'tehran:land':
+		'Captured some Hollow Men and questioned them about their current plans. We used this information to remove some threats...',
+	'riyadh:land':
+		'Hollow Men have headquarters here. The whole city lives in fear of them. They come from Asia and new members appear every year in November. We must tread carefully. We are heading into darkness.',
+	'new-mumbai:land':
+		'Saw one of the Hollow Men down near the water. He was sketching, drawing pictures of a family. Mother. Kids. The father was clearly an image of him. He was crying silently. We kept our distance.',
+	'new-mumbai:sea': 'We have found a lost haven! We have not yet accessed it.',
+	'shanghai:land':
+		'We found the Haven leaders. Dead. Unburied. Shot outside the walls of Utopia where they petitioned to get in. There were no survivors. Utopia accepts no outsiders. Utopia leaves no survivors.',
+	'seoul:land': 'A group of rebels here is eager to throw off the shackles of Utopia.',
+};
+
+export const searchStory = (city: CityId, scope: 'land' | 'sea'): string | null =>
+	SEARCH_STORY[`${city}:${scope}`] ?? null;
+
 export type SearchRevealPrint = {
+	story?: string;
 	before: string;
 	doors?: string[];
 	after?: string;
 	plain: string;
 };
 
-/** Printed instructions revealed under a scratched search box (companions use the companion face instead). */
-export function searchResultPrint(result: SearchResult): SearchRevealPrint | null {
+/** Printed story and instructions revealed under a scratched search box (companions use the companion face instead). */
+export function searchResultPrint(
+	result: SearchResult,
+	city?: CityId,
+	scope?: 'land' | 'sea',
+): SearchRevealPrint | null {
+	const story = city && scope ? (searchStory(city, scope) ?? undefined) : undefined;
+	const wrap = (entry: Omit<SearchRevealPrint, 'story'>): SearchRevealPrint => ({
+		...(story ? { story } : {}),
+		...entry,
+		plain: story ? `${story} ${entry.plain}`.trim() : entry.plain,
+	});
 	switch (result.t) {
 		case 'companion':
 			return null;
 		case 'supplies': {
 			const text = `Put ${result.amount} Supply cubes here from the ${result.from}.`;
-			return { before: text, plain: text };
+			return wrap({ before: text, plain: text });
 		}
 		case 'stockpile': {
 			const text = `Add ${result.amount} Supply cubes from the reserve to the stockpile.`;
-			return { before: text, plain: text };
+			return wrap({ before: text, plain: text });
 		}
 		case 'actions': {
 			const text = `Gain ${result.amount} extra ${result.amount === 1 ? 'action' : 'actions'} this turn.`;
-			return { before: text, plain: text };
+			return wrap({ before: text, plain: text });
 		}
 		case 'retrieve': {
 			const text = 'Take 1 card from the Player discard pile.';
-			return { before: text, plain: text };
+			return wrap({ before: text, plain: text });
 		}
 		case 'quarantineCard': {
 			const text = 'Move 1 Infection card from discard to Game End.';
-			return { before: text, plain: text };
+			return wrap({ before: text, plain: text });
 		}
 		case 'removeHollow': {
 			const text = `Remove up to ${result.amount} Hollow Men from the board.`;
-			return { before: text, plain: text };
+			return wrap({ before: text, plain: text });
 		}
 		case 'freeEdge': {
 			const text = `Draw 1 ${result.kind === 'land' ? 'Supply line' : 'Sea lane'} from here for free.`;
-			return { before: text, plain: text };
+			return wrap({ before: text, plain: text });
 		}
 		case 'discover': {
 			const doors = result.seals.flatMap(seal => (seal.t === 'door' ? [seal.id] : []));
 			const lab = result.lab
 				? Object.entries(LABS)
-						.find(([, city]) => city === result.lab)?.[0]
+						.find(([, c]) => c === result.lab)?.[0]
 						?.toUpperCase()
 				: undefined;
 			const open = doors.length > 1 ? 'Open doors' : 'Open door';
-			const before = lab ? `Found ${lab} lab. ${open}` : open;
+			const before = lab && !story ? `Found ${lab} lab. ${open}` : open;
 			const after = result.orAction ? '(or +1 action if open).' : '.';
 			const plain = `${before} ${doors.join(', ')}${result.orAction ? ` ${after}` : after}`;
-			return { before, doors, after, plain };
+			return wrap({ before, doors, after, plain });
 		}
 		case 'infest': {
 			const doors = result.opens?.t === 'door' ? [result.opens.id] : [];
-			const before = doors.length ? 'Infest this city. Open door' : 'Infest this city.';
+			const before = doors.length ? 'Mark this city infested. Open door' : 'Mark this city infested.';
 			const after = doors.length ? '.' : undefined;
 			const plain = doors.length ? `${before} ${doors.join(', ')}.` : before;
-			return { before, ...(doors.length ? { doors, after } : {}), plain };
+			return wrap({ before, ...(doors.length ? { doors, after } : {}), plain });
 		}
 		case 'giveCard': {
 			const text = 'Give 1 Player card to another player.';
-			return { before: text, plain: text };
+			return wrap({ before: text, plain: text });
 		}
 		case 'nothing': {
-			const text = 'Nothing found.';
-			return { before: text, plain: text };
+			const text = story ? '' : 'No effect.';
+			return wrap({ before: text, plain: text });
 		}
 	}
 }

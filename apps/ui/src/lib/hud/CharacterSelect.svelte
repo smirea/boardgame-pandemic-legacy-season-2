@@ -941,8 +941,8 @@
 
 	.avatars {
 		display: grid;
-		grid-template-columns: repeat(5, minmax(0, 1fr));
-		gap: 0.2rem;
+		grid-template-columns: repeat(8, minmax(0, 1fr));
+		gap: 0.16rem;
 	}
 
 	.avatars legend {

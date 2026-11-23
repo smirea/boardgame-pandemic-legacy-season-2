@@ -5,6 +5,10 @@
 	import { backOut } from 'svelte/easing';
 	import { scale } from 'svelte/transition';
 	import { inkOn } from '#lib/color.ts';
+	import { searchStory } from '#lib/cards/playerPrint.ts';
+	import { sfxCardFlip, sfxScratchBox } from '#lib/audio/sfx.ts';
+	import { sceneForSearch } from '#lib/story/script.ts';
+	import StoryStage from '#lib/story/StoryStage.svelte';
 	import { onButton, typing } from '#lib/keys.ts';
 	import { cardName, cityName, seatName, SEAT_COLORS } from './labels.svelte.ts';
 	import PlayerCard from './PlayerCard.svelte';
@@ -43,7 +47,9 @@
 			box: pending.box,
 			city: cityName(card.city),
 			sea: box.scope === 'sea',
+			story: searchStory(card.city, box.scope),
 			found: searchFind(box.result),
+			nothing: box.result.t === 'nothing',
 		};
 	});
 
@@ -87,6 +93,21 @@
 	const waiting = $derived(
 		reveal && !done ? `Waiting for ${who} to turn over the next card` : `Waiting for ${who} to continue`,
 	);
+
+	const searchScene = $derived(searched ? sceneForSearch(searched.card.city, searched.sea ? 'sea' : 'land') : null);
+	let lastRevealCount = 0;
+	$effect(() => {
+		const count = reveal?.cards.length ?? 0;
+		if (reveal) {
+			if (count > lastRevealCount) sfxCardFlip();
+			lastRevealCount = count;
+		} else {
+			lastRevealCount = 0;
+		}
+	});
+	$effect(() => {
+		if (searched) sfxScratchBox();
+	});
 
 	// The click that turned the last card must not land on the button that now puts them away.
 	let busy = $state(false);
@@ -144,11 +165,18 @@
 		</ol>
 		{#if outcome}<p class="verdict" data-testid="reveal-verdict">{verdict}</p>{/if}
 	{:else if searched}
-		<div class="search">
+		<div class="search" class:grim={searched.nothing && Boolean(searched.story)}>
 			<span class="searched"><PlayerCard card={searched.card} revealing={searched.box} /></span>
 			<div class="found">
-				<span class="kicker">Found</span>
-				<strong data-testid="search-found">{searched.found}</strong>
+				<span class="kicker">{searched.nothing && searched.story ? 'Field report' : 'Found'}</span>
+				{#if searched.story}
+					<p class="story-quote" data-testid="search-story">{searched.story}</p>
+				{/if}
+				{#if !searched.nothing || !searched.story}
+					<strong data-testid="search-found">{searched.found}</strong>
+				{:else}
+					<span class="sr-only" data-testid="search-found">{searched.found}</span>
+				{/if}
 			</div>
 		</div>
 	{/if}
@@ -165,6 +193,10 @@
 		{/if}
 	</footer>
 </section>
+
+{#if searchScene}
+	<StoryStage scene={searchScene} overlay delivered={world.campaign.sampleDelivered} />
+{/if}
 
 <style>
 	.reveal {
@@ -320,8 +352,34 @@
 	.found {
 		display: flex;
 		flex-direction: column;
-		gap: 0.3rem;
-		max-width: 16rem;
+		gap: 0.45rem;
+		max-width: 24rem;
+	}
+
+	.story-quote {
+		margin: 0;
+		padding-left: 0.75rem;
+		border-left: 2px solid color-mix(in srgb, var(--seat) 70%, var(--paper));
+		color: var(--ink);
+		font-size: 0.96rem;
+		font-style: italic;
+		line-height: 1.45;
+		animation: arrive 500ms 550ms ease-out both;
+	}
+
+	.search.grim .story-quote {
+		border-left-color: #c84434;
+		color: #f4d6ce;
+	}
+
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		margin: -1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
 	}
 
 	.kicker {

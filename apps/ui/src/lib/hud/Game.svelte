@@ -24,11 +24,15 @@
 	import { inFeedback, onButton, typing } from '#lib/keys.ts';
 	import { DEBUG_ID, LS } from '#lib/storage.ts';
 	import { keepRecord } from '#lib/replay/library.ts';
-	import { setContext, tick, untrack } from 'svelte';
+	import { setContext, tick, untrack, onDestroy } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
 	import type { Snippet } from 'svelte';
 	import { backOut } from 'svelte/easing';
 	import { fade, fly, scale } from 'svelte/transition';
+	import { GameAudio } from '#lib/audio/gameAudio.svelte.ts';
+	import { STORY_SCENES } from '#lib/story/script.ts';
+	import type { StoryScene } from '#lib/story/script.ts';
+	import StoryArchive from '#lib/story/StoryArchive.svelte';
 	import ActionPanel from './ActionPanel.svelte';
 	import { createBoardView } from './boardView.svelte.ts';
 	import { createChoosing } from './choosing.svelte.ts';
@@ -140,7 +144,11 @@
 	let deckOpen = $state(false);
 	let hotkeysOpen = $state(false);
 	let scannerOpen = $state(false);
+	let storyOpen = $state(false);
+	let storyInitial = $state<StoryScene | null>(null);
 	let legacyDeckOut = $state(false);
+	const gameAudio = new GameAudio();
+	onDestroy(() => gameAudio.stop());
 	const monitorChoice = $derived(actionChoices.find(choice => choice.a === 'monitor') ?? null);
 	const canMonitor = $derived(live && Boolean(monitorChoice?.actions.length));
 	const monitorReason = $derived(
@@ -390,9 +398,13 @@
 			boxOpen ||
 			deckOpen ||
 			scannerOpen ||
+			storyOpen ||
 			revealing !== null ||
 			choosing.chooser?.action === 'monitor',
 	);
+	$effect(() => {
+		gameAudio.observe(world, snap.phase, !spectator || announce, briefingOpen || storyOpen || revealing !== null);
+	});
 	let peeking = $state(false);
 	$effect(() => {
 		if (!covered) peeking = false;
@@ -662,6 +674,7 @@
 		const inPlay = campaignCityCopies[city] ?? 0;
 		return { live: inPlay, discarded: 0, trashed: Math.max(0, total - inPlay) };
 	});
+	setContext('epidemic-wearing-off', () => campaign.rules.includes('epidemicFromStorage'));
 	const hoveredTargets = $derived.by(() => {
 		const targets = hoveredCards.map(card => cardTargets(world, snap.phase, card));
 		return {
@@ -1271,7 +1284,16 @@
 			</div>
 		{:else if snap.phase === 'lobby' || snap.phase === 'finished'}
 			<div class="scrim" role="dialog" aria-modal="true" aria-label="Lobby" transition:fade={{ duration: 200 }}>
-				<Lobby {snap} {send} player={session.player} rename={name => session.rename(name)} />
+				<Lobby
+					{snap}
+					{send}
+					player={session.player}
+					rename={name => session.rename(name)}
+					onintro={() => {
+						storyInitial = STORY_SCENES.prelude ?? null;
+						storyOpen = true;
+					}}
+				/>
 			</div>
 		{:else if snap.phase === 'upkeep'}
 			<div
@@ -1425,12 +1447,47 @@
 			</div>
 		{/if}
 
+		{#if storyOpen}
+			<div
+				class="scrim box-scrim"
+				role="dialog"
+				aria-modal="true"
+				aria-label="Campaign story log"
+				transition:fade={{ duration: 180 }}
+			>
+				<StoryArchive
+					{campaign}
+					initialScene={storyInitial}
+					onclose={() => {
+						storyOpen = false;
+						storyInitial = null;
+					}}
+				/>
+			</div>
+		{/if}
+
 		{#if menu}
 			<div
 				class="menu"
 				transition:scale={{ start: 0.92, duration: 180, opacity: 0 }}
 				{@attach feedback('Menu', () => undefined)}
 			>
+				<button
+					onclick={() => {
+						menu = false;
+						storyInitial = null;
+						storyOpen = true;
+					}}
+					data-testid="open-story-log">Story log</button
+				>
+				<button
+					onclick={() => {
+						menu = false;
+						storyInitial = STORY_SCENES.prelude ?? null;
+						storyOpen = true;
+					}}
+					data-testid="watch-prelude">Watch intro (71 Years Ago)</button
+				>
 				<button
 					onclick={() => {
 						menu = false;

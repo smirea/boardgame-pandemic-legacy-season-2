@@ -3,6 +3,7 @@
 	import type { LegacyPrint } from '#lib/cards/print.generated.ts';
 	import {
 		EPIDEMIC_STEPS,
+		EPIDEMIC_WEARING_OFF_STEP,
 		EVENT_PRINT,
 		OBJECTIVE_PRINT,
 		RECKONING_ROWS,
@@ -26,7 +27,11 @@
 	const eventPrint = $derived(eventId ? EVENT_PRINT[eventId] : null);
 	const eventFitKey = $derived(eventId ? eventPlainText(eventId) : card.text);
 
-	const epidemicFitKey = EPIDEMIC_STEPS.map(s => `${s.heading} ${s.text}`).join(' ');
+	const epidemicWearingOff = $derived(Boolean(campaign?.rules.includes('epidemicFromStorage')));
+	const epidemicSteps = $derived(
+		epidemicWearingOff ? [EPIDEMIC_STEPS[0], EPIDEMIC_WEARING_OFF_STEP, EPIDEMIC_STEPS[2]] : EPIDEMIC_STEPS,
+	);
+	const epidemicFitKey = $derived(epidemicSteps.map(s => `${s.heading} ${s.text}`).join(' '));
 
 	const PLAN_ROWS = [
 		{
@@ -284,8 +289,8 @@
 					/>
 				</svg>
 				<ol class="ep-steps">
-					{#each EPIDEMIC_STEPS as step (step.heading)}
-						<li>
+					{#each epidemicSteps as step, idx (step.heading)}
+						<li class:wearing-off={epidemicWearingOff && idx === 1}>
 							<strong>{step.heading}</strong>
 							<span><RichText text={step.text} /></span>
 						</li>
@@ -1076,5 +1081,29 @@
 
 	.ep-steps span {
 		color: #f6ea8e;
+	}
+
+	.ep-steps li.wearing-off {
+		position: relative;
+		margin: 0 -0.25em;
+		padding: 0.34em 0.45em;
+		border: 1px solid rgb(56 42 24 / 0.55);
+		border-radius: 0.14em;
+		background:
+			repeating-linear-gradient(-12deg, rgb(120 92 48 / 0.05) 0 4px, transparent 4px 9px),
+			linear-gradient(170deg, #ede1c0, #d8c69b);
+		box-shadow:
+			0 0.22em 0.55em rgb(0 0 0 / 0.55),
+			inset 0 0 0 1px rgb(255 250 234 / 0.35);
+		transform: rotate(-1.6deg);
+	}
+
+	.ep-steps li.wearing-off strong {
+		color: #9e2119;
+		font-style: normal;
+	}
+
+	.ep-steps li.wearing-off span {
+		color: #231a11;
 	}
 </style>

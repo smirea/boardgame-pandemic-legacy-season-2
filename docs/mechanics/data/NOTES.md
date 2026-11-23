@@ -1,6 +1,6 @@
 # Board and timeline data: sources and notes
 
-`board.json` and `legacy-timeline.json` are structured mechanics datasets (no story, flavor text, character names, or card wording). Havens use generic labels because players name them in play.
+`board.json` and `legacy-timeline.json` are structured mechanics datasets for the engine. Havens use placeholder labels because players name them in play.
 
 Every value, count, connection, population, card count, recon cost, and campaign unlock in both files is now **verified directly against the extracted physical game assets in [docs/assets/](../../assets/README.md)** (970 split images + 418 JSON sidecars from the English Tabletop Simulator Workshop mod `2236267539.json`), closing every `null` gap and resolving every conflict from the earlier community-log pass.
 

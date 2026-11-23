@@ -279,8 +279,8 @@ const box = (id: number): Seal => ({ t: 'package', id });
 
 /**
  * The words the map stickers print on the board, each while it still applies: which first arrival opens what, the
- * haven in ruins, the wall around Utopia, and the recon out of Kolkata nobody knows yet. Story is left out, and the
- * recon instructions are the recon boxes'.
+ * haven in ruins, the wall around Utopia, and the recon out of Kolkata nobody knows yet. Recon costs live on the
+ * recon boxes.
  */
 export function mapNotes(campaign: Campaign): MapNote[] {
 	const open = (seal: Seal) => isOpen(campaign, seal);
