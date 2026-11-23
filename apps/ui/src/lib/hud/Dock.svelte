@@ -6,6 +6,7 @@
 	import { flip } from 'svelte/animate';
 	import { cubicIn } from 'svelte/easing';
 	import { fade, fly } from 'svelte/transition';
+	import Beacon from '#lib/Beacon.svelte';
 	import ActionIcon from './ActionIcon.svelte';
 	import type { CardUse, DockChoice, HandPick } from './choosing.svelte.ts';
 	import { cityName, decideLabel, decisionTitle, seatName, SEAT_COLORS, cardName } from './labels.svelte.ts';
@@ -28,7 +29,16 @@
 		send: (command: Command) => void;
 		onview: (seat: SeatId) => void;
 		/** What waits for a click on the map, and what the slip asks for. */
-		aiming: { label: string; a: Action['a'] | null; prompt: string } | null;
+		aiming: {
+			label: string;
+			a: Action['a'] | null;
+			prompt: string;
+			/** A card that takes several places is sent once they are picked. */
+			confirm: { label: string; ready: boolean } | null;
+		} | null;
+		onaimconfirm?: () => void;
+		/** A word in the dock slip's choice, by its key. */
+		onchip?: (key: string) => void;
 		/** An action or Lockdown waiting for card(s) to be clicked directly in the hand. */
 		handPick?: HandPick | null;
 		/** An inline mode choice in the dock slip (such as Produce Supplies local vs system-wide). */
@@ -61,6 +71,8 @@
 		send,
 		onview,
 		aiming,
+		onaimconfirm,
+		onchip,
 		handPick = null,
 		dockChoice = null,
 		onhandcard,
@@ -508,19 +520,11 @@
 								tags.some(tag => tag.key.startsWith('produce:') && !tag.disabled)}
 							{@const searchReady =
 								!handSelectionMode && card.kind === 'city' && tags.some(tag => tag.key.startsWith('search:'))}
-							{@const cardTone = inHandPick
-								? pickEligible
-									? 'discard'
-									: null
-								: mustDiscard
-									? 'discard'
-									: pendingEligible
-										? pendingHandKind === 'giveCard'
-											? 'play'
-											: 'discard'
-										: playable.has(card.id) || produceReady || searchReady
-											? 'play'
-											: null}
+							{@const beckon = inHandPick
+								? pickEligible && !pickSelected
+								: (mustDiscard && owns(seat)) || (pendingEligible && !pendingSelected)}
+							{@const cardTone =
+								!beckon && !handSelectionMode && (playable.has(card.id) || produceReady || searchReady) ? 'play' : null}
 							{@const cardDimmed =
 								(inHandPick && !pickEligible) || (!inHandPick && !mustDiscard && pendingHandActive && !pendingEligible)}
 							{@const cardClick = inHandPick
@@ -578,6 +582,7 @@
 									{#if pickSelected || pendingSelected}
 										<span class="hand-check" aria-hidden="true">✓</span>
 									{/if}
+									{#if beckon}<Beacon />{/if}
 								</div>
 							</div>
 						{:else}
@@ -636,13 +641,35 @@
 						<div class="say">
 							<strong>{dockChoice.title}</strong>
 							<span>{dockChoice.prompt} Esc or a right click cancels.</span>
-							<div class="chips">
+							<div class="chips beckoning">
 								{#each dockChoice.options as option (option.key)}
-									<button type="button" data-use={option.key} onclick={option.run}>{option.label}</button>
+									<button type="button" data-use={option.key} onclick={() => onchip?.(option.key)}
+										>{option.label}<Beacon gap="0.12rem" /></button
+									>
 								{/each}
 							</div>
 						</div>
 						<button type="button" onclick={oncancel} data-testid="cancel-aim">Cancel</button>
+					</div>
+				{:else if aiming}
+					<div class="slip step aiming" data-testid="aiming">
+						{#if aiming.a}<ActionIcon action={aiming.a} size="2.4rem" />{/if}
+						<div class="say">
+							<strong>{aiming.label}</strong>
+							<span>{aiming.prompt} Esc or a right click cancels.</span>
+						</div>
+						<div class="step-actions">
+							{#if aiming.confirm}
+								<button
+									type="button"
+									class="primary"
+									disabled={!aiming.confirm.ready}
+									data-testid="aim-confirm"
+									onclick={onaimconfirm}>{aiming.confirm.label}</button
+								>
+							{/if}
+							<button onclick={oncancel} data-testid="cancel-aim">Cancel</button>
+						</div>
 					</div>
 				{:else if discarding.length}
 					<div class="slip">
@@ -719,15 +746,6 @@
 								{/if}
 							</div>
 						{/if}
-					</div>
-				{:else if snap.phase === 'playing.actions' && canAct && aiming}
-					<div class="slip step aiming" data-testid="aiming">
-						{#if aiming.a}<ActionIcon action={aiming.a} size="2.4rem" />{/if}
-						<div class="say">
-							<strong>{aiming.label}</strong>
-							<span>{aiming.prompt} Esc or a right click cancels.</span>
-						</div>
-						<button onclick={oncancel} data-testid="cancel-aim">Cancel</button>
 					</div>
 				{/if}
 				{#if !handPick && !dockChoice && lockableHere.length && onlockdown && (discarding.length || !pending)}
@@ -1366,6 +1384,8 @@
 
 	/* No bar behind the hand, so each card carries its own shadow onto the map. */
 	.lift {
+		position: relative;
+		border-radius: 0.4rem;
 		filter: drop-shadow(0 0.45rem 0.7rem rgb(0 0 0 / 0.5));
 		transform: translateY(var(--drop)) rotate(var(--angle));
 		transform-origin: 50% 140%;
@@ -1459,6 +1479,15 @@
 		max-height: 7.8rem;
 		overflow: auto;
 		scrollbar-width: thin;
+	}
+
+	.chips.beckoning {
+		gap: 0.55rem;
+		padding: 0.4rem;
+	}
+
+	.chips.beckoning button {
+		position: relative;
 	}
 
 	.chips button,

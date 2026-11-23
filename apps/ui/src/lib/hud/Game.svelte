@@ -40,6 +40,7 @@
 	import type { StoryScene } from '#lib/story/script.ts';
 	import StoryArchive from '#lib/story/StoryArchive.svelte';
 	import ActionPanel from './ActionPanel.svelte';
+	import CardPick from './CardPick.svelte';
 	import { createBoardView } from './boardView.svelte.ts';
 	import { createChoosing } from './choosing.svelte.ts';
 	import { MapTools } from './mapTools.svelte.ts';
@@ -78,7 +79,6 @@
 	import TopBar from './TopBar.svelte';
 	import UndoVote from './UndoVote.svelte';
 	import Upkeep from './Upkeep.svelte';
-	import RichText from './RichText.svelte';
 	import RevealShow from './RevealShow.svelte';
 	import type { CityCardCopies } from './PlayerCard.svelte';
 	import { provideViewState } from './viewState.ts';
@@ -301,7 +301,6 @@
 			hotkeys: hotkeysOpen,
 			scanner: scannerOpen,
 			steps: choosing.steps,
-			filter: choosing.filter,
 			toasts: toasts.map(({ text, tone }) => ({ text, tone })),
 			banner: banner && { title: banner.title, text: banner.text },
 			parts: view.read(),
@@ -331,7 +330,6 @@
 		view.write(next.parts);
 		board?.setCamera(next.camera);
 		for (const [index, entry] of next.steps.entries()) {
-			// The chooser clears its filter and ticks in an effect, which must run before the next click lands.
 			await tick();
 			if (choosing.step(entry)) continue;
 			problems.push(
@@ -339,8 +337,6 @@
 			);
 			break;
 		}
-		await tick();
-		choosing.filter = next.filter;
 		await tick();
 		return problems;
 	}
@@ -776,12 +772,11 @@
 		};
 	});
 
-	// A target being aimed at wins over a card the pointer happens to rest on.
 	const targetCities = $derived(
-		new Set<CityId>(
-			choosing.targeting ? choosing.targeting.cities.keys() : hoveredCards.length ? hoveredTargets.cities : [],
-		),
+		new Set<CityId>(choosing.targeting ? (choosing.targeting.lit ?? choosing.targeting.cities.keys()) : []),
 	);
+	// A target being aimed at wins over a card the pointer happens to rest on.
+	const hintCities = $derived(new Set<CityId>(!choosing.targeting && hoveredCards.length ? hoveredTargets.cities : []));
 	// The lines a player could draw show faintly while they pick where to draw one.
 	const ghostEdges = $derived.by((): EdgeDef[] => {
 		const aimed = choosing.targeting?.a;
@@ -794,6 +789,8 @@
 				: [],
 		);
 	});
+	const NONE_PICKED: ReadonlyMap<CityId, number> = new Map();
+	const NO_RECONS: ReadonlySet<string> = new Set();
 	const boardView = createBoardView({
 		get world() {
 			return lapse.world ?? world;
@@ -824,6 +821,15 @@
 		},
 		get targets() {
 			return targetCities;
+		},
+		get hints() {
+			return hintCities;
+		},
+		get picked() {
+			return choosing.targeting?.multi?.picked ?? NONE_PICKED;
+		},
+		get aimedRecons() {
+			return choosing.targeting?.recons ?? NO_RECONS;
 		},
 		get ghostEdges() {
 			return ghostEdges;
@@ -862,7 +868,6 @@
 
 	/** Space advances the turn, Z undoes, F draws, E toggles eraser, Tab pings the map, ? opens hotkeys, Escape closes. */
 	function onkey(event: KeyboardEvent) {
-		// Escape still closes the chooser from its own filter field.
 		if (inFeedback(event)) return;
 		if (event.key === 'Escape') {
 			if (lapse.playing) {
@@ -1055,7 +1060,7 @@
 				{live}
 				{canAct}
 				{owns}
-				aiming={choosing.targeting?.a ?? choosing.handPick?.a ?? choosing.dockChoice?.a ?? null}
+				aiming={choosing.targeting?.a ?? choosing.handPick?.a ?? choosing.dockChoice?.a ?? choosing.cardPick?.a ?? null}
 				onchoose={choice => choosing.step({ t: 'start', a: choice.a, via: 'panel' })}
 				{send}
 				onlockdown={card => choosing.step({ t: 'lockdown', card })}
@@ -1085,6 +1090,7 @@
 					<div class="seated" in:fly={{ x: place === 'tl' || place === 'bl' ? -32 : 32, duration: 360, delay: 120 }}>
 						<Corner
 							highlighted={hoveredTargets.seats.includes(seat)}
+							aimed={choosing.targeting?.pawns?.has(seat) ?? false}
 							{seat}
 							{place}
 							{world}
@@ -1096,7 +1102,8 @@
 							acting={snap.phase === 'playing.actions'}
 							action="Show this hand in the dock"
 							selectedTag="Hand shown"
-							onselect={() => (viewing = seat)}
+							onselect={() =>
+								choosing.targeting?.pawns?.has(seat) ? choosing.step({ t: 'pawn', seat }) : (viewing = seat)}
 						/>
 					</div>
 				{/key}
@@ -1225,49 +1232,14 @@
 			/>
 		{/if}
 
-		{#if choosing.chooser && choosing.chooser.action !== 'monitor'}
-			<div
-				class="chooser"
-				transition:fly={{ y: 16, duration: 180 }}
-				data-testid="chooser"
-				{@attach feedback('Chooser', () => ({
-					title: choosing.chooser?.title,
-					filter: choosing.filter,
-					picked: choosing.picked,
-				}))}
-			>
-				<header>
-					{choosing.chooser.title}<button onclick={() => choosing.step({ t: 'closeChooser' })} aria-label="Close"
-						>×</button
-					>
-				</header>
-				{#if choosing.chooser.options.length > 8}
-					<input bind:value={choosing.filter} placeholder="Type to filter" aria-label="Filter the list" />
-				{/if}
-				<div class="rows">
-					{#each choosing.shown as option, index (option)}
-						<button
-							style:--i={Math.min(index, 12)}
-							class:picked={choosing.picked.includes(option)}
-							onclick={() => choosing.step({ t: 'option', index: choosing.chooser!.options.indexOf(option) })}
-							><strong>{option.label}</strong><span><RichText text={option.detail} /></span></button
-						>
-					{:else}
-						<p>Nothing matches.</p>
-					{/each}
-				</div>
-				{#if choosing.chooser.multi}
-					{@const multi = choosing.chooser.multi}
-					<button
-						class="primary"
-						disabled={choosing.picked.length === 0}
-						onclick={() => multi.confirm(choosing.picked)}
-						data-testid="chooser-confirm"
-					>
-						{multi.verb}: {choosing.picked.length} of up to {multi.max}
-					</button>
-				{/if}
-			</div>
+		{#if choosing.cardPick}
+			<CardPick
+				pick={choosing.cardPick}
+				{world}
+				oncard={card => choosing.step({ t: 'card', card })}
+				onconfirm={() => choosing.step({ t: 'cardConfirm' })}
+				oncancel={cancel}
+			/>
 		{/if}
 
 		<div class="toasts">
@@ -1691,13 +1663,21 @@
 					? {
 							label: choosing.targeting.label,
 							a: choosing.targeting.a,
-							prompt: choosing.targeting.pawns
-								? `Click one of the ${choosing.targeting.pawns.size} lit pawns on the map.`
-								: choosing.targeting.cities.size === 1
+							prompt:
+								choosing.targeting.prompt ??
+								(choosing.targeting.cities.size === 1
 									? 'Click the lit city on the map.'
-									: `Click one of the ${choosing.targeting.cities.size} lit cities on the map.`,
+									: `Click one of the ${choosing.targeting.cities.size} lit cities on the map.`),
+							confirm: choosing.targeting.multi
+								? {
+										label: `${choosing.targeting.multi.verb}: ${choosing.targeting.multi.count} of up to ${choosing.targeting.multi.max}`,
+										ready: choosing.targeting.multi.ready,
+									}
+								: null,
 						}
 					: null}
+				onaimconfirm={() => choosing.step({ t: 'aimConfirm' })}
+				onchip={key => choosing.step({ t: 'chip', key })}
 				handPick={choosing.handPick}
 				dockChoice={choosing.dockChoice}
 				onhandcard={(seat, card) => choosing.step({ t: 'handCard', seat, card })}
@@ -1900,105 +1880,6 @@
 		50% {
 			box-shadow: 0 0 1.4rem color-mix(in srgb, var(--seat) 70%, transparent);
 		}
-	}
-
-	.chooser header button {
-		border: 0;
-		background: none;
-		color: var(--muted);
-		font: inherit;
-		cursor: pointer;
-	}
-
-	.chooser header button:hover {
-		color: var(--ink);
-	}
-
-	.chooser {
-		position: absolute;
-		left: 50%;
-		bottom: 0.8rem;
-		z-index: 40;
-		display: flex;
-		flex-direction: column;
-		gap: 0.4rem;
-		width: 22rem;
-		max-height: min(72vh, 28rem);
-		padding: 0.6rem;
-		border: 1px solid var(--line-strong);
-		border-radius: 3px;
-		background: var(--panel);
-		backdrop-filter: blur(12px);
-		box-shadow: 0 1rem 3rem rgb(0 0 0 / 0.55);
-		transform: translateX(-50%);
-	}
-
-	.chooser header {
-		display: flex;
-		justify-content: space-between;
-		padding: 0 0.15rem;
-		font-family: var(--font-display);
-		font-size: 1rem;
-	}
-
-	.chooser input {
-		padding: 0.35rem 0.55rem;
-		border: 1px solid var(--line);
-		border-radius: 2px;
-		background: var(--wash);
-		color: var(--ink);
-		font: inherit;
-		font-size: 0.82rem;
-	}
-
-	.rows {
-		display: flex;
-		flex-direction: column;
-		gap: 0.2rem;
-		min-height: 0;
-		overflow: auto;
-		scrollbar-width: thin;
-	}
-
-	.rows p {
-		margin: 0;
-		color: var(--muted);
-		font-size: 0.8rem;
-	}
-
-	.rows button {
-		display: flex;
-		flex: none;
-		align-items: baseline;
-		gap: 0.6rem;
-		padding: 0.35rem 0.6rem;
-		border: 1px solid var(--line);
-		border-radius: 2px;
-		background: var(--wash);
-		color: var(--ink);
-		font: inherit;
-		font-size: 0.85rem;
-		text-align: left;
-		cursor: pointer;
-		transition:
-			border-color 150ms ease,
-			background 150ms ease;
-	}
-
-	.rows button:hover {
-		border-color: var(--line-strong);
-	}
-
-	.rows button.picked {
-		border-color: var(--paper);
-		background: rgb(220 207 178 / 0.12);
-	}
-
-	.rows span {
-		margin-left: auto;
-		color: var(--muted);
-		font-size: 0.75rem;
-		text-align: right;
 	}
 
 	.toasts {
@@ -2312,10 +2193,6 @@
 			opacity: 0;
 			translate: 0 0.4rem;
 		}
-	}
-
-	.rows button {
-		animation: rise 240ms calc(var(--i, 0) * 25ms) both;
 	}
 
 	.menu button,

@@ -218,7 +218,7 @@ const cubeCount = (count: number): Rich => [
 
 /** Action heading aimed at a single city, e.g. "Drive / Ferry to Cairo" or "Sabotage in Cairo". */
 export const actionAt = (a: Action['a'], target: CityId) =>
-	`${ACTION_NAMES[a]} ${a === 'sabotage' ? 'in' : 'to'} ${cityName(target)}`;
+	`${ACTION_NAMES[a]} ${a === 'sabotage' ? 'in' : a === 'carry' ? 'from' : 'to'} ${cityName(target)}`;
 
 /** The city an action is aimed at, when clicking that city on the board should trigger it. */
 export function actionTarget(world: World, action: Action): CityId | null {
@@ -231,7 +231,10 @@ export function actionTarget(world: World, action: Action): CityId | null {
 		case 'chartLane':
 			return action.to;
 		case 'run':
+		case 'misinform':
 			return action.to;
+		case 'carry':
+			return action.from;
 		case 'sabotage':
 			return action.city;
 		case 'supply': {
@@ -243,7 +246,7 @@ export function actionTarget(world: World, action: Action): CityId | null {
 			return card?.kind === 'city' ? card.city : null;
 		}
 		case 'deliver':
-			return action.to ?? null;
+			return action.to ?? world.game?.players[world.game.active]?.location ?? null;
 		default:
 			return null;
 	}
@@ -283,7 +286,7 @@ export function actionDetail(world: World, action: Action): Rich {
 			];
 		}
 		case 'deliver':
-			return [...cubeCount(action.count), action.to ? ` to ${cityName(action.to)}` : ' here'];
+			return cubeCount(action.count);
 		case 'pickUp': {
 			const here = game.locations[game.players[game.active]!.location]!.supplies;
 			return ['Take ', ...cubeCount(action.count), ` of ${here} here`];

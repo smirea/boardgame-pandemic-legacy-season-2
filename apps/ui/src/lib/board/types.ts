@@ -4,7 +4,8 @@ import type { BoardPoint } from './projection';
 
 export type { CursorTool };
 
-export type CityHighlight = 'target' | 'selected' | null;
+/** `target` is lit for a click; `hint` shows where a card the pointer rests on could go. */
+export type CityHighlight = 'target' | 'hint' | 'selected' | null;
 
 /**
  * A panel lying over the board, in pixels from the stage's top left. The fitted view may slide the board a little
@@ -44,6 +45,8 @@ export type CityView = {
 	lab: boolean;
 	labInfo: LabInfo | null;
 	highlight: CityHighlight;
+	/** How many times a card that takes several places has picked this one so far. */
+	picks: number;
 	/** The city's Infection cards and its chance of being hit in the next Infect step, while a game is played. */
 	infection: { odds: number; hollow: number | null; inDeck: number; discarded: number } | null;
 	/** Where the city's player cards are, while a game is played. */
@@ -130,6 +133,8 @@ export type ReconBoxView = {
 	reveals: CityId[];
 	state: 'ready' | 'blocked' | 'idle';
 	reason: string | null;
+	/** Lit as one of the routes a Recon just started can take. */
+	aimed: boolean;
 };
 
 export type BoardView = {

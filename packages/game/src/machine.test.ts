@@ -2288,6 +2288,17 @@ test('cubes can be delivered, picked up and transferred in any number, not only 
 	).toEqual([1, 2]);
 });
 
+test('deliveries in a row to one place are one action, and any other action between them starts another', () => {
+	const actor = late((_, game) => void (game.players[A]!.supplies = 4));
+	const before = gameOf(actor).actionsLeft;
+	act(actor, { a: 'deliver', count: 1 });
+	act(actor, { a: 'deliver', count: 2 });
+	expect(gameOf(actor).actionsLeft).toBe(before - 1);
+	act(actor, { a: 'pickUp', count: 1 });
+	act(actor, { a: 'deliver', count: 1 });
+	expect(gameOf(actor).actionsLeft).toBe(before - 2);
+});
+
 test('a supply center build offers each set of cards that wastes none, so the player picks what to keep', () => {
 	const actor = late((world, game) => {
 		game.players[A]!.location = city('cairo');

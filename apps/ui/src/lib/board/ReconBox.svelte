@@ -12,6 +12,7 @@
 	import { T } from '@threlte/core';
 	import { HTML } from '@threlte/extras';
 	import { Tween } from 'svelte/motion';
+	import Beacon from '#lib/Beacon.svelte';
 	import { CITY_COLOR } from './CityMarker.svelte';
 	import { reconHint } from './hints';
 	import type { BoardPoint } from './projection';
@@ -108,6 +109,7 @@
 				{#if box.state !== 'idle' && text.status}
 					<span class="status">{text.status}</span>
 				{/if}
+				{#if box.aimed && box.state === 'ready' && shown}<Beacon />{/if}
 			</button>
 		</div>
 	</div>
@@ -132,6 +134,7 @@
 	}
 
 	button {
+		position: relative;
 		display: flex;
 		flex-direction: column;
 		gap: 0.2rem;

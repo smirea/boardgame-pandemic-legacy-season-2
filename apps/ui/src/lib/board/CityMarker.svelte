@@ -24,6 +24,7 @@
 	import { DISC_REACH, NAME_SIZE } from './labels';
 	import type { Placement } from './labels';
 	import { cubeGeometries, cubeMaterials, pieceMaterials, pieceModels, shelterGeometry } from './models.svelte';
+	import Beacon from '#lib/Beacon.svelte';
 	import Pop from './Pop.svelte';
 	import { fonts, printDisc, printDiscGlow, printName, printSticker } from './print.svelte';
 	import type { DiscTone, PrintedKind } from './print.svelte';
@@ -66,6 +67,8 @@
 	const FOOTPRINT = 3.4;
 	/** CSS pixels per board unit in an `HTML` with `transform` and the default distance factor of 10. */
 	const HTML_PX = 40;
+	/** The ring that lights a city to click runs round the disc and the cubes beside it. */
+	const AIM_RADIUS = CITY_RADIUS * 1.6;
 
 	const color = $derived(state.forsaken ? '#8d8476' : CITY_COLOR[city.color ?? 'haven']);
 	const { hovering, onPointerEnter, onPointerLeave } = useCursor();
@@ -287,14 +290,10 @@
 		{#if face}
 			<Printed print={face} position={[0, DISC + 0.03, 0]} opacity={state.onGrid ? 1 : 0.6} order={6} />
 		{/if}
-		{#if state.highlight}
+		{#if state.highlight === 'selected'}
 			<T.Mesh position.y={0.06} rotation.x={-Math.PI / 2}>
 				<T.RingGeometry args={[CITY_RADIUS * 1.25, CITY_RADIUS * 1.55, 48]} />
-				<T.MeshBasicMaterial
-					color={state.highlight === 'selected' ? '#2a2017' : '#b5521f'}
-					transparent
-					opacity={0.85}
-				/>
+				<T.MeshBasicMaterial color="#2a2017" transparent opacity={0.85} />
 			</T.Mesh>
 		{/if}
 	</T.Group>
@@ -310,9 +309,24 @@
 			data-city={city.id}
 			data-name={state.name}
 			data-highlight={state.highlight}
+			data-picks={state.picks || undefined}
 			aria-hidden="true"
 			{@attach feedback(state.name, () => ({ id: city.id, ...state }))}
-		></span>
+		>
+			<!-- Drawn on the page, not the board, so it runs round without the board drawing a frame. -->
+			{#if state.picks}
+				<span class="aim picked" style:--ring="{AIM_RADIUS * 2 * HTML_PX}px">
+					<b>{state.picks > 1 ? `×${state.picks}` : '✓'}</b>
+				</span>
+			{/if}
+			{#if state.highlight === 'hint'}
+				<span class="aim hint" style:--ring="{AIM_RADIUS * 2 * HTML_PX}px"></span>
+			{:else if state.highlight === 'target'}
+				<span class="aim lit" style:--ring="{AIM_RADIUS * 2 * HTML_PX}px">
+					<Beacon round gap="0px" width="{0.8 * HTML_PX}px" glow="{1.6 * HTML_PX}px" />
+				</span>
+			{/if}
+		</span>
 	</HTML>
 
 	{#each supplies as cube, index (index)}
@@ -453,9 +467,55 @@
 
 <style>
 	.anchor {
+		position: relative;
 		display: block;
 		width: var(--size);
 		height: var(--size);
 		pointer-events: none;
+	}
+
+	.aim {
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		width: var(--ring);
+		height: var(--ring);
+		border-radius: 50%;
+		translate: -50% -50%;
+	}
+
+	.lit {
+		background: radial-gradient(circle, transparent 52%, rgb(255 201 58 / 0.42) 100%);
+	}
+
+	/* Where a card under the pointer could go: the same gold, still, so it never reads as a call to click. */
+	.hint {
+		border: 18px solid rgb(255 201 58 / 0.75);
+		box-shadow:
+			0 0 0 3px rgb(28 16 4 / 0.45),
+			inset 0 0 0 3px rgb(28 16 4 / 0.45);
+	}
+
+	.picked {
+		border: 26px solid #3f9b6e;
+		box-shadow:
+			0 0 0 4px rgb(28 16 4 / 0.6),
+			inset 0 0 0 4px rgb(28 16 4 / 0.6);
+	}
+
+	.picked b {
+		position: absolute;
+		right: -30px;
+		top: -30px;
+		display: grid;
+		place-items: center;
+		min-width: 84px;
+		height: 84px;
+		padding: 0 14px;
+		border: 5px solid rgb(28 16 4 / 0.7);
+		border-radius: 42px;
+		background: #3f9b6e;
+		color: #fff;
+		font: 700 52px/1 var(--font-ui);
 	}
 </style>

@@ -37,6 +37,13 @@ button {
 	background: rgb(220 207 178 / 0.35);
 }
 
+/* Animated by `Beacon.svelte`, which runs its heads round any shape by turning its gradient. */
+@property --beacon-angle {
+	syntax: '<angle>';
+	inherits: false;
+	initial-value: 0turn;
+}
+
 @media (prefers-reduced-motion: reduce) {
 	*,
 	*::before,

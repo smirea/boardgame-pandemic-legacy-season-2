@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
+	import Beacon from '#lib/Beacon.svelte';
 	import { cubicIn, cubicOut } from 'svelte/easing';
 	import { fly } from 'svelte/transition';
 	import InfectionCard from '#lib/cards/InfectionCard.svelte';
@@ -167,6 +168,7 @@
 					{/if}
 					<span class="label">{deck === 'player' ? 'Player' : 'Infection'}</span>
 					<strong class="count">{count}</strong>
+					{#if ready}<Beacon turns={5} gap="0.3rem" />{/if}
 				</span>
 			</button>
 		{/key}
@@ -186,7 +188,8 @@
 				class="go"
 				disabled={action!.busy}
 				onclick={() => !action!.busy && action!.onclick()}
-				data-testid="turn-desk-go">{go}</button
+				data-testid="turn-desk-go"
+				>{go}{#if !action!.busy}<Beacon turns={5} />{/if}</button
 			>
 		{:else}
 			<span
@@ -237,6 +240,7 @@
 	}
 
 	.pile {
+		position: relative;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -443,6 +447,7 @@
 	}
 
 	.go {
+		position: relative;
 		padding: 0.34rem 1.1rem;
 		border: 0;
 		border-radius: 3px;

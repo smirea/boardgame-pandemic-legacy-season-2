@@ -40,6 +40,12 @@ export type BoardSource = {
 	readonly selected: CityId | null;
 	/** The cities lit as places an action or card can go. */
 	readonly targets: ReadonlySet<CityId>;
+	/** The cities a card under the pointer could go to. */
+	readonly hints: ReadonlySet<CityId>;
+	/** Cities a card that takes several places has picked so far, with how many times. */
+	readonly picked: ReadonlyMap<CityId, number>;
+	/** Recon boxes lit for a click, when Recon was started from somewhere that does not name the route. */
+	readonly aimedRecons: ReadonlySet<string>;
 	readonly ghostEdges: EdgeDef[];
 	readonly recons: ReconBox[];
 	readonly spectator: boolean;
@@ -79,7 +85,7 @@ export function createBoardView(source: BoardSource): BoardView {
 	const sameCities = reconciler<Record<CityId, CityView>>();
 	const cities = $derived.by(() => {
 		const info = source.playing ? source.info : null;
-		const { lag, mapLag, populationLag, onGrid, selected, targets } = source;
+		const { lag, mapLag, populationLag, onGrid, selected, targets, hints, picked } = source;
 		const stocks = inoculation(source.world);
 		const storageLeaks = campaign.rules.includes('epidemicFromStorage');
 		return sameCities(
@@ -133,7 +139,15 @@ export function createBoardView(source: BoardSource): BoardView {
 								!populationLag[city.id],
 							lab: record.lab,
 							labInfo,
-							highlight: selected === city.id ? 'selected' : targets.has(city.id) ? 'target' : null,
+							highlight:
+								selected === city.id
+									? 'selected'
+									: targets.has(city.id)
+										? 'target'
+										: hints.has(city.id)
+											? 'hint'
+											: null,
+							picks: picked.get(city.id) ?? 0,
 							infection:
 								info && city.kind !== 'haven'
 									? {
@@ -169,6 +183,7 @@ export function createBoardView(source: BoardSource): BoardView {
 					unique: box.route.unique,
 					needsCenter: box.route.needsCenter,
 					reveals: box.reveals,
+					aimed: source.aimedRecons.has(box.route.id),
 					...(source.spectator
 						? { state: 'idle' as const, reason: null }
 						: !source.canAct

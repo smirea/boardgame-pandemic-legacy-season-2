@@ -117,6 +117,12 @@ function cityCard(ctx: Ctx, id: CardId, where: 'hand' | 'discard' = 'hand') {
 	return pile.includes(id) && card?.kind === 'city' ? card : null;
 }
 
+/**
+ * Deliver Supplies moves any number of cubes for one action. The screen delivers a cube a click, so the deliveries
+ * that follow one to the same place, with no other action between, are that same action and cost nothing.
+ */
+const delivering = (to: CityId) => `delivering:${to}`;
+
 const distinct = (ids: CardId[]) => new Set(ids).size === ids.length;
 const useOnce = (ctx: Ctx, key: string) => ctx.me.used.push(key);
 const unused = (ctx: Ctx, key: string) => !ctx.me.used.includes(key);
@@ -377,7 +383,11 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 		},
 	},
 	deliver: {
-		cost: ctx => (trait(ctx, 'farmer') && ctx.me.used.at(-1) === 'farmerReady' && unused(ctx, 'farmer') ? 0 : 1),
+		cost: (ctx, { to }) =>
+			ctx.me.used.includes(delivering(to ?? ctx.here)) ||
+			(trait(ctx, 'farmer') && ctx.me.used.at(-1) === 'farmerReady' && unused(ctx, 'farmer'))
+				? 0
+				: 1,
 		check(ctx, { count, to }) {
 			if (!Number.isInteger(count) || count < 1 || count > ctx.me.supplies) return 'You do not hold that many cubes';
 			if (trait(ctx, 'grasping') && ctx.me.supplies - count < 2) return 'This character keeps its last 2 cubes';
@@ -390,6 +400,7 @@ const specs: { [K in Action['a']]: Spec<Extract<Action, { a: K }>> } = {
 			if (trait(ctx, 'farmer') && ctx.me.used.at(-1) === 'farmerReady' && unused(ctx, 'farmer')) useOnce(ctx, 'farmer');
 			ctx.me.supplies -= count;
 			ctx.game.locations[to ?? ctx.here]!.supplies += count;
+			if (unused(ctx, delivering(to ?? ctx.here))) useOnce(ctx, delivering(to ?? ctx.here));
 		},
 	},
 	share: {
@@ -1022,6 +1033,8 @@ export function applyAction(world: World, seat: SeatId, action: Action) {
 	const ctx = context(world, seat);
 	const cost = actionCost(world, seat, action);
 	ctx.game.actionsLeft -= cost;
+	const delivery = action.a === 'deliver' ? delivering(action.to ?? ctx.here) : null;
+	ctx.me.used = ctx.me.used.filter(key => !key.startsWith('delivering:') || key === delivery);
 	if (action.a !== 'makeSupplies')
 		ctx.me.used = ctx.me.used.filter(key => key !== 'farmerReady' || action.a === 'deliver');
 	specFor(action).apply(ctx, action);

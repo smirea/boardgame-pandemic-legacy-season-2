@@ -117,6 +117,7 @@ These remain this project's reading:
 ## UI simplifications
 
 - Actions that pay with cards (Build Supply Center, Recon) pick the cheapest legal payment for the player.
-- Pick Up and Transfer move one cube per click, and Undo puts one back. Deliver asks how many. With no cubes here but a player here holding some, Pick Up says to take theirs with Transfer.
+- Pick Up, Transfer and Deliver move one cube per click, and Undo puts one back. A Deliver that follows a Deliver to the same place, with no other action between, is the same action and costs nothing, so delivering several cubes still costs one action as printed. With no cubes here but a player here holding some, Pick Up says to take theirs with Transfer.
+- A choice is made on the game itself: a city, pawn, seat or recon box lit on the board, a card in hand, or the real cards of a discard pile or a hand laid out in front of the table. A few words in the dock's slip are left only for what the board cannot show (Produce Supplies' mode, how many cubes to carry, give or take with a player). Monitor's frequencies are picked on the Frequency Scanner's dial.
 - Every client holds the full state. The UI simply does not show deck order or unscratched boxes.
 - A prompt is offered only to whoever it belongs to. Shared prompts ("any player may discard") show each player their own cards, and the player whose turn it is may pass.

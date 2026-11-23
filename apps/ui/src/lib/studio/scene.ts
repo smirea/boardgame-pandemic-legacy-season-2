@@ -3,7 +3,7 @@ import type { Action, CardId, CityId, Save, SeatId } from '@repo/game';
 
 /**
  * One click on the way to a half-chosen action, in the order it was made. The half-chosen action itself (lit cities,
- * the chooser's rows) is closures over the rules, so a scene keeps the clicks and the game screen makes them again.
+ * the cards laid out) is closures over the rules, so a scene keeps the clicks and the game screen makes them again.
  */
 export type UiStep =
 	/** One kind of action started from the Actions panel, from the ring round the city clicked before, or from a hand card's tag. */
@@ -14,8 +14,15 @@ export type UiStep =
 	| { t: 'handCard'; seat: SeatId; card: CardId }
 	| { t: 'handConfirm' }
 	| { t: 'handToggle' }
-	/** A row of the open chooser, by its place in the unfiltered list. In a chooser that takes several, it ticks or unticks the row. */
+	/** A frequency on the Frequency Scanner's dial that Monitor offers, by its place in the list. */
 	| { t: 'option'; index: number }
+	/** A word in the dock slip, for what the board cannot show. */
+	| { t: 'chip'; key: string }
+	/** A card laid out in front of the table for a pick, and the pick confirmed. */
+	| { t: 'card'; card: CardId }
+	| { t: 'cardConfirm' }
+	/** The places a card that takes several has picked on the map, confirmed. */
+	| { t: 'aimConfirm' }
 	| { t: 'recon'; route: string }
 	| { t: 'play'; seat: SeatId; card: CardId }
 	| { t: 'lockdown'; card: CardId }
@@ -39,8 +46,6 @@ export type GameUi = {
 	scanner?: boolean;
 	/** The clicks that led to the half-chosen action on screen. */
 	steps: UiStep[];
-	/** What is typed in the chooser's filter. */
-	filter: string;
 	toasts: Announcement[];
 	banner: { title: string; text: string } | null;
 	/** State kept by the panels inside the screen, by the name each registers under `keep` (`hud/viewState.ts`). */
@@ -83,7 +88,6 @@ export const restingUi = (): SceneUi => ({
 	hotkeys: false,
 	scanner: false,
 	steps: [],
-	filter: '',
 	toasts: [],
 	banner: null,
 	parts: {},

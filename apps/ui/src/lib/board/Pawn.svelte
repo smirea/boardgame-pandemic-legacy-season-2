@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Beacon from '#lib/Beacon.svelte';
 	import { T } from '@threlte/core';
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { HTML } from '@threlte/extras';
@@ -146,8 +147,8 @@
 							city: pawn.city,
 							pickable: true,
 							carrier: pawn.carrier,
-						}))}
-					></button>
+						}))}><Beacon gap="0.15rem" /></button
+					>
 				{:else}
 					<span
 						class="anchor"
@@ -217,6 +218,7 @@
 	}
 
 	.pick {
+		position: relative;
 		width: 1.6rem;
 		height: 2.2rem;
 		padding: 0;

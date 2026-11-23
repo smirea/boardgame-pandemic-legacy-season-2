@@ -10,6 +10,7 @@
 	import { flip } from 'svelte/animate';
 	import { cubicIn, cubicOut } from 'svelte/easing';
 	import { fade, fly, scale } from 'svelte/transition';
+	import Beacon from '#lib/Beacon.svelte';
 	import CardIcon from '#lib/cards/CardIcon.svelte';
 	import { CUBE_FLIGHTS } from './cubeFlights.svelte.ts';
 	import type { CubeFlights } from './cubeFlights.svelte.ts';
@@ -29,6 +30,8 @@
 
 	type Props = {
 		highlighted?: boolean;
+		/** Lit for a click, as the player an action or card is aimed at. */
+		aimed?: boolean;
 		/** Who sits here: the player in a replay, the character at a live table. */
 		name: string;
 		seat: SeatId;
@@ -55,6 +58,7 @@
 
 	let {
 		highlighted = false,
+		aimed = false,
 		name,
 		seat,
 		color,
@@ -129,6 +133,7 @@
 
 {#snippet card()}
 	<div class="seat" style:--seat={color} style:--on={inkOn(color)} role="group" aria-label={name}>
+		{#if aimed}<Beacon gap="0.25rem" />{/if}
 		<button
 			class="slip"
 			class:highlighted
@@ -277,6 +282,7 @@
 	.seat {
 		position: relative;
 		width: 100%;
+		border-radius: 3px;
 	}
 
 	/* The character stands in the corner with no card behind it: the figure, the cut and its lines. */

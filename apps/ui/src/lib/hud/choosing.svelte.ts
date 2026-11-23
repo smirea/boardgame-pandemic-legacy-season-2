@@ -1,15 +1,4 @@
-import {
-	actionMenu,
-	checkAction,
-	grid,
-	has,
-	isFreeAction,
-	legalPlays,
-	pack,
-	playDetail,
-	reject,
-	sealDef,
-} from '@repo/game';
+import { actionMenu, checkAction, grid, isFreeAction, legalPlays, pack, reject } from '@repo/game';
 import type { Action, CardId, CityId, Command, EventId, Phase, Play, ReconBox, SeatId, World } from '@repo/game';
 import type { UiStep } from '#lib/studio/scene.ts';
 import { untrack } from 'svelte';
@@ -33,28 +22,50 @@ export type Option = {
 	label: string;
 	detail: Rich | string;
 	run: () => void;
-	city?: CityId;
-	item?: string;
 	frequency?: number;
 };
+/** Monitor's frequencies, which the Frequency Scanner's dial shows: the one list left that is not a click on the game. */
 export type Chooser = {
 	title: string;
 	action?: Action['a'];
 	options: Option[];
-	multi?: { max: number; verb: string; confirm: (picked: Option[]) => void };
 };
-const byLabel = (a: Option, b: Option) => a.label.localeCompare(b.label);
 /**
  * An action or card waiting for its target on the map: its targets are lit and a click on one finishes it. One
- * that moves a pawn first lights the pawns it can move, with the cities they stand in, and a click on either
- * picks the pawn; then `pawn` is the one picked.
+ * aimed at a player lights their pawns and seats, and a click on either picks them; one that moves a pawn first
+ * lights the pawns it can move, then `pawn` is the one picked. Recon lights the boxes of the routes it can take.
+ * A card that takes several places keeps them in `multi` until it is confirmed.
  */
 export type Targeting = {
 	label: string;
 	a: Action['a'] | null;
+	/** Every city a click does something on. */
 	cities: Map<CityId, () => void>;
+	/** The cities lit, when not every city a click acts on is lit (a city already picked is clicked to put back). */
+	lit?: ReadonlySet<CityId>;
 	pawns?: Map<SeatId, () => void>;
 	pawn?: SeatId;
+	recons?: ReadonlySet<string>;
+	prompt?: string;
+	multi?: { picked: ReadonlyMap<CityId, number>; verb: string; count: number; max: number; ready: boolean };
+};
+
+/**
+ * Real cards laid out in front of the table for a pick: the discard pile's cards a trade can take, another player's
+ * hand, the top of the Infection deck to put back in order. A pick that takes several is confirmed.
+ */
+export type CardPick = {
+	title: string;
+	prompt: string;
+	a: Action['a'] | null;
+	groups: { label: string; pile: 'player' | 'infection'; cards: CardId[] }[];
+	eligible: ReadonlySet<CardId>;
+	picked: readonly CardId[];
+	/** The order of the picks matters, so each shows its place. */
+	ordered: boolean;
+	confirm: { label: string; ready: boolean } | null;
+	onpick: (card: CardId) => void;
+	onconfirm?: () => void;
 };
 
 /**
@@ -79,7 +90,10 @@ export type HandPick = {
 	ontoggle?: () => void;
 };
 
-/** A compact inline choice in the dock slip (e.g. Produce Supplies local vs system-wide). */
+/**
+ * A few words to pick between in the dock slip, for what the board cannot show: Produce Supplies' two modes, how many
+ * cubes to carry over, give or take with a player.
+ */
 export type DockChoice = {
 	title: string;
 	prompt: string;
@@ -127,6 +141,13 @@ const HAND_CARD_ACTIONS = new Set<Action['a']>([
 	'produce',
 ]);
 
+/** The player an action is taken with: the one it gives to, takes from or moves. */
+function partnerOf(action: Action): SeatId | null {
+	if (action.a === 'share' || action.a === 'transfer' || action.a === 'facilitate') return action.with;
+	if (action.a === 'coordinate') return action.pawn;
+	return null;
+}
+
 /**
  * How a player gets from a click to a command: the action, card or city clicked, then whatever it still needs, a
  * city lit on the map, a pawn, cards in hand, or a row of a list. Every click that starts, aims or picks goes
@@ -155,35 +176,28 @@ export function createChoosing(source: ChoosingSource) {
 	/** The actions shown round a city that was clicked with nothing chosen. */
 	let ring = $state.raw<CityId | null>(null);
 	let chooser = $state.raw<Chooser | null>(null);
-	let filter = $state('');
-	let picked = $state.raw<Option[]>([]);
-	$effect(() => {
-		void chooser;
-		filter = '';
-		picked = [];
-	});
-	const shown = $derived(
-		chooser?.options.filter(option =>
-			`${option.label} ${plain(option.detail)}`.toLowerCase().includes(filter.trim().toLowerCase()),
-		) ?? [],
-	);
-	function pick(option: Option) {
-		if (!chooser?.multi) return option.run();
-		if (picked.includes(option)) picked = picked.filter(other => other !== option);
-		else if (picked.length < chooser.multi.max) picked = [...picked, option];
-	}
+	let cardPick = $state.raw<CardPick | null>(null);
+	/** What `aimConfirm` sends: the places a card that takes several has picked. */
+	let confirmAim: (() => void) | null = null;
 	function act(action: Action) {
 		send({ type: 'ACTION', seat: game!.active, action });
 		dismiss();
 	}
-	function dismiss() {
-		trail = [];
+	/** Puts down whatever is half-chosen, keeping the clicks that led here, before the next part of it shows. */
+	function only() {
 		targeting = null;
 		handPick = null;
 		dockChoice = null;
 		chooser = null;
 		ring = null;
+		cardPick = null;
+		confirmAim = null;
 	}
+	function dismiss() {
+		trail = [];
+		only();
+	}
+	const busy = () => Boolean(targeting || handPick || dockChoice || chooser || ring || cardPick);
 	// Whatever was half-chosen belongs to the game state it was chosen in, so UNDO, PLAY, DECIDE or remote changes clear it.
 	$effect(() => {
 		void live;
@@ -198,9 +212,86 @@ export function createChoosing(source: ChoosingSource) {
 		...(action.a === 'monitor' ? { frequency: action.frequency } : {}),
 	});
 
+	/** The last resort, for ways the board cannot tell apart: a few words each in the dock slip. */
 	function choose(title: string, options: Option[], action?: Action['a']) {
-		if (options.length === 1 && action !== 'monitor') options[0]!.run();
-		else if (options.length >= 1) chooser = { title, action, options };
+		if (action === 'monitor') {
+			only();
+			chooser = { title, action, options };
+			return;
+		}
+		chips(
+			title,
+			action ?? null,
+			'Choose one.',
+			options.map((option, index) => {
+				const detail = plain(option.detail);
+				return { key: String(index), label: detail ? `${option.label}: ${detail}` : option.label, run: option.run };
+			}),
+		);
+	}
+
+	function chips(title: string, a: Action['a'] | null, prompt: string, options: DockChoice['options']) {
+		if (options.length === 1) return options[0]!.run();
+		if (!options.length) return;
+		only();
+		dockChoice = { title, prompt, a, options };
+	}
+
+	/** Lights the given players' pawns and seats; a click on one runs what it was lit for. */
+	function aimSeats(label: string, a: Action['a'] | null, runs: Map<SeatId, () => void>, prompt?: string) {
+		if (runs.size === 1) return [...runs.values()][0]!();
+		if (!runs.size) return;
+		const byCity = new Map<CityId, SeatId[]>();
+		for (const seat of runs.keys()) {
+			const city = game!.players[seat]!.location;
+			byCity.set(city, [...(byCity.get(city) ?? []), seat]);
+		}
+		const cities = new Map<CityId, () => void>();
+		for (const [city, seats] of byCity)
+			cities.set(
+				city,
+				seats.length === 1
+					? runs.get(seats[0]!)!
+					: () =>
+							chips(
+								label,
+								a,
+								'Whose pawn?',
+								seats.map(seat => ({ key: seat, label: seatName(world, seat), run: runs.get(seat)! })),
+							),
+			);
+		only();
+		targeting = {
+			label,
+			a,
+			cities,
+			pawns: runs,
+			prompt: prompt ?? `Click one of the ${runs.size} lit pawns on the map, or their seat.`,
+		};
+	}
+
+	/** Lays real cards out to pick one from; a click on one runs what it was lit for. */
+	function pickCard(
+		title: string,
+		a: Action['a'] | null,
+		groups: CardPick['groups'],
+		runs: Map<CardId, () => void>,
+		prompt = 'Click one of the lit cards.',
+	) {
+		if (runs.size === 1) return [...runs.values()][0]!();
+		if (!runs.size) return;
+		only();
+		cardPick = {
+			title,
+			prompt,
+			a,
+			groups,
+			eligible: new Set(runs.keys()),
+			picked: [],
+			ordered: false,
+			confirm: null,
+			onpick: card => runs.get(card)?.(),
+		};
 	}
 
 	/** Supply cubes that Produce Supplies would place right now in the given mode. */
@@ -238,10 +329,7 @@ export function createChoosing(source: ChoosingSource) {
 
 	function openProduceModes(card: CardId, variants: Extract<Action, { a: 'produce' }>[]) {
 		if (variants.length === 1) return act(variants[0]!);
-		handPick = null;
-		targeting = null;
-		chooser = null;
-		ring = null;
+		only();
 		dockChoice = {
 			title: 'Produce Supplies',
 			prompt: 'Choose a production mode.',
@@ -249,7 +337,7 @@ export function createChoosing(source: ChoosingSource) {
 			options: variants.map(action => ({
 				key: `produce:${action.mode}`,
 				label: produceModeLabel(card, action.mode),
-				run: () => step({ t: 'start', a: 'produce', via: { card, mode: action.mode } }),
+				run: () => act(action),
 			})),
 		};
 	}
@@ -402,15 +490,18 @@ export function createChoosing(source: ChoosingSource) {
 						return;
 					}
 					const discarded = [...selected];
-					handPick = null;
-					choose(
-						name === 'salvage' ? 'Salvage: take a card from Player discard' : 'Rehab: take a stored City card',
-						readyTakes.map(take => ({
-							label: cardName(world, take),
-							detail: actionDetail(world, { a: name, discard: discarded, take }),
-							run: () => act({ a: name, discard: discarded, take }),
-						})),
+					pickCard(
+						name === 'salvage' ? 'Salvage: take a card from the discard pile' : 'Rehab: take a stored City card',
 						name,
+						[
+							{
+								label: name === 'salvage' ? 'Player discard pile' : 'Storage',
+								pile: 'player',
+								cards: readyTakes,
+							},
+						],
+						new Map(readyTakes.map(take => [take, () => act({ a: name, discard: discarded, take })])),
+						'Click the card to take.',
 					);
 				},
 			};
@@ -449,18 +540,7 @@ export function createChoosing(source: ChoosingSource) {
 				openProduceModes(onlyCard, next as Extract<Action, { a: 'produce' }>[]);
 				return true;
 			}
-			const offered = ways(world, next);
-			if (offered.length === 1) {
-				act(offered[0]!);
-				return true;
-			}
-			const nextTitle =
-				name === 'broker' || name === 'trade' || name === 'investigate'
-					? `${ACTION_NAMES[name]}: take a card for ${cardName(world, onlyCard)}`
-					: name === 'transmit'
-						? `Transmit ${cardName(world, onlyCard)} to …`
-						: title;
-			choose(nextTitle, offered.map(actionOption), name);
+			afterCard(title, name, onlyCard, next);
 			return true;
 		}
 		const eligibleIds = new Set(byCard.keys());
@@ -489,22 +569,85 @@ export function createChoosing(source: ChoosingSource) {
 					openProduceModes(card, next as Extract<Action, { a: 'produce' }>[]);
 					return;
 				}
-				const offered = ways(world, next);
-				if (offered.length === 1) {
-					act(offered[0]!);
-					return;
-				}
-				handPick = null;
-				const nextTitle =
-					name === 'broker' || name === 'trade' || name === 'investigate'
-						? `${ACTION_NAMES[name]}: take a card for ${cardName(world, card)}`
-						: name === 'transmit'
-							? `Transmit ${cardName(world, card)} to …`
-							: title;
-				choose(nextTitle, offered.map(actionOption), name);
+				afterCard(title, name, card, next);
 			},
 		};
 		return true;
+	}
+
+	/** What a card picked from the hand still needs: a player to send it to, a card to take for it. */
+	function afterCard(title: string, name: Action['a'], card: CardId, next: Action[]) {
+		const offered = ways(world, next);
+		if (offered.length === 1) return act(offered[0]!);
+		if (name === 'transmit')
+			return aimSeats(
+				`Transmit ${cardName(world, card)} to …`,
+				name,
+				new Map(offered.flatMap(action => (action.a === 'transmit' ? [[action.to, () => act(action)]] : []))),
+			);
+		if (name === 'broker' || name === 'trade' || name === 'investigate') {
+			const takes = offered.flatMap(action => ('take' in action ? [[action.take, () => act(action)] as const] : []));
+			return pickCard(
+				`${ACTION_NAMES[name]}: take a card for ${cardName(world, card)}`,
+				name,
+				[{ label: 'Player discard pile', pile: 'player', cards: takes.map(([take]) => take) }],
+				new Map(takes),
+				'Click the card to take.',
+			);
+		}
+		if (name === 'share') return aimPartners(name, offered);
+		choose(title, offered.map(actionOption), name);
+	}
+
+	/** Lights the players an action can be taken with; a click on one takes it with them, or asks what is left. */
+	function aimPartners(name: Action['a'], all: Action[]) {
+		const bySeat = new Map<SeatId, Action[]>();
+		for (const action of ways(world, all)) {
+			const seat = partnerOf(action);
+			if (seat) bySeat.set(seat, [...(bySeat.get(seat) ?? []), action]);
+		}
+		aimSeats(
+			ACTION_NAMES[name],
+			name,
+			new Map([...bySeat].map(([seat, subset]) => [seat, () => withPartner(name, seat, subset)])),
+		);
+	}
+
+	function withPartner(name: Action['a'], seat: SeatId, subset: Action[]) {
+		if (subset.length === 1) return act(subset[0]!);
+		const who = seatName(world, seat);
+		const gives = subset.filter(action => 'give' in action && action.give);
+		const takes = subset.filter(action => !('give' in action && action.give));
+		const theirCards = (actions: Action[]) =>
+			pickCard(
+				`${ACTION_NAMES[name]} with ${who}`,
+				name,
+				[
+					{
+						label: `${who}'s hand`,
+						pile: 'player',
+						cards: actions.flatMap(action => ('card' in action && action.card ? [action.card] : [])),
+					},
+				],
+				new Map(actions.flatMap(action => ('card' in action && action.card ? [[action.card, () => act(action)]] : []))),
+				'Click the card to take.',
+			);
+		const giveFromHand = () => {
+			if (!pickSingleHandCard(`Give a card to ${who}`, name, gives)) choose(who, gives.map(actionOption), name);
+		};
+		if (name === 'facilitate' || (name === 'share' && !gives.length)) return theirCards(takes);
+		if (name === 'share' && !takes.length) return giveFromHand();
+		if (name === 'share')
+			return chips(`${ACTION_NAMES[name]} with ${who}`, name, 'Give a card or take one?', [
+				{ key: 'give', label: `Give to ${who}`, run: giveFromHand },
+				{ key: 'take', label: `Take from ${who}`, run: () => theirCards(takes) },
+			]);
+		if (name === 'transfer')
+			return chips(`${ACTION_NAMES[name]} with ${who}`, name, 'Give a cube or take one?', [
+				...gives.map(action => ({ key: 'give', label: `Give ${who} a cube`, run: () => act(action) })),
+				...takes.map(action => ({ key: 'take', label: `Take a cube from ${who}`, run: () => act(action) })),
+			]);
+		choose(who, subset.map(actionOption), name);
 	}
 
 	/**
@@ -517,7 +660,79 @@ export function createChoosing(source: ChoosingSource) {
 		const offered = ways(world, all);
 		if (offered.length === 1 && name !== 'monitor') return act(offered[0]!);
 
-		if (name === 'buildShelter' || name === 'buildCenter') {
+		// Moving without spending a card does all that moving with one does.
+		if (name === 'drive' || name === 'shuttle') {
+			const free = offered.find(action => !('card' in action && action.card));
+			if (free) return act(free);
+		}
+
+		if (offered.every(action => partnerOf(action))) return aimPartners(name, offered);
+
+		if (name === 'broadcast') {
+			const froms = new Map<CityId, Action[]>();
+			for (const action of offered) {
+				if (action.a === 'broadcast') froms.set(action.from, [...(froms.get(action.from) ?? []), action]);
+			}
+			const aimTo = (from: CityId) => {
+				const cities = new Map(
+					froms.get(from)!.flatMap(action => (action.a === 'broadcast' ? [[action.to, () => act(action)]] : [])),
+				);
+				only();
+				targeting = { label: `Broadcast from ${cityName(from)} to …`, a: name, cities };
+			};
+			if (froms.size === 1) return aimTo([...froms.keys()][0]!);
+			only();
+			targeting = {
+				label: 'Broadcast: Hollow Men from …',
+				a: name,
+				cities: new Map([...froms.keys()].map(from => [from, () => aimTo(from)])),
+			};
+			return;
+		}
+
+		if (name === 'carry')
+			return chips(
+				title,
+				name,
+				'How many cubes?',
+				offered.flatMap(action =>
+					action.a === 'carry'
+						? [
+								{
+									key: String(action.count),
+									label: `${action.count} ${action.count === 1 ? 'cube' : 'cubes'}`,
+									run: () => act(action),
+								},
+							]
+						: [],
+				),
+			);
+
+		if (name === 'inoculate' || name === 'destroyInfection') {
+			const inPlayer = new Set(game!.playerDiscard);
+			const cards = offered.flatMap(action =>
+				action.a === 'inoculate' || action.a === 'destroyInfection' ? [action.card] : [],
+			);
+			const player = cards.filter(card => inPlayer.has(card));
+			const infection = cards.filter(card => !inPlayer.has(card));
+			return pickCard(
+				title,
+				name,
+				[
+					...(player.length ? [{ label: 'Player discard pile', pile: 'player' as const, cards: player }] : []),
+					...(infection.length
+						? [{ label: 'Infection discard pile', pile: 'infection' as const, cards: infection }]
+						: []),
+				],
+				new Map(
+					offered.flatMap(action =>
+						action.a === 'inoculate' || action.a === 'destroyInfection' ? [[action.card, () => act(action)]] : [],
+					),
+				),
+			);
+		}
+
+		if (name === 'buildShelter' || name === 'buildCenter' || name === 'buildTower') {
 			const moveFroms = [
 				...new Set(all.flatMap(action => ('moveFrom' in action && action.moveFrom ? [action.moveFrom] : []))),
 			];
@@ -527,8 +742,9 @@ export function createChoosing(source: ChoosingSource) {
 					const subset = all.filter(action => 'moveFrom' in action && action.moveFrom === from);
 					cities.set(from, () => resolveActionVariants(`${title} (from ${cityName(from)})`, name, subset));
 				}
+				only();
 				targeting = {
-					label: name === 'buildShelter' ? 'Move a shelter from …' : 'Move a supply center from …',
+					label: `Move a ${name === 'buildShelter' ? 'shelter' : name === 'buildTower' ? 'tower' : 'supply center'} from …`,
 					a: name,
 					cities,
 				};
@@ -575,28 +791,15 @@ export function createChoosing(source: ChoosingSource) {
 				});
 			};
 			if (routeIds.length === 1) return pickRoute(routeIds[0]!);
-			choose(
-				title,
-				routeIds.map(routeId => {
-					const route = pack.reconRoutes.find(candidate => candidate.id === routeId)!;
-					const planColor = `${route.color[0]!.toUpperCase()}${route.color.slice(1)}`;
-					const needed = Math.max(
-						1,
-						route.count +
-							(has(world, game!.active, 'reconExtraCard') ? 1 : 0) -
-							(has(world, game!.active, 'outrider') ? 1 : 0),
-					);
-					return {
-						label: route.opens ? sealDef(route.opens).name : `The Plan (${planColor})`,
-						detail: `${needed} ${route.unique ? 'unique ' : ''}${route.color} card${needed === 1 ? '' : 's'}`,
-						run: () => {
-							chooser = null;
-							pickRoute(routeId);
-						},
-					};
-				}),
-				'recon',
-			);
+			// Every route is printed on the board as a box that says what it costs and opens, so the boxes are the choice.
+			only();
+			targeting = {
+				label: 'Recon',
+				a: 'recon',
+				cities: new Map(),
+				recons: new Set(routeIds),
+				prompt: `Click one of the ${routeIds.length} lit recon boxes on the map.`,
+			};
 			return;
 		}
 
@@ -625,11 +828,7 @@ export function createChoosing(source: ChoosingSource) {
 	 * ways that aim at cities light those cities, card discards highlight the hand, and anything else opens a list.
 	 */
 	function start(name: Action['a'], all: Action[]) {
-		ring = null;
-		chooser = null;
-		targeting = null;
-		handPick = null;
-		dockChoice = null;
+		only();
 		const variants = ways(world, all);
 		if (variants.length === 1 && name !== 'monitor') return act(variants[0]!);
 		if (name === 'administratorMove') {
@@ -658,6 +857,7 @@ export function createChoosing(source: ChoosingSource) {
 			for (const [city, cityActions] of byCity) {
 				cities.set(city, () => resolveActionVariants(actionAt(name, city), name, cityActions));
 			}
+			only();
 			targeting = { label: ACTION_NAMES[name], a: name, cities };
 			return;
 		}
@@ -667,28 +867,10 @@ export function createChoosing(source: ChoosingSource) {
 	/** Lights the pawns that can be moved, then, once one is picked, where it can go. */
 	function aimPawns(label: string, a: Action['a'] | null, moves: Map<SeatId, Map<CityId, () => void>>) {
 		const pickPawn = (pawn: SeatId) => {
-			chooser = null;
-			const cities = new Map(moves.get(pawn)!);
-			targeting = { label: `Move ${seatName(world, pawn)} to …`, a, cities, pawn };
+			only();
+			targeting = { label: `Move ${seatName(world, pawn)} to …`, a, cities: new Map(moves.get(pawn)!), pawn };
 		};
-		const byCity = new Map<CityId, SeatId[]>();
-		for (const pawn of moves.keys()) {
-			const city = game!.players[pawn]!.location;
-			byCity.set(city, [...(byCity.get(city) ?? []), pawn]);
-		}
-		const cities = new Map<CityId, () => void>();
-		for (const [city, seats] of byCity) {
-			cities.set(city, () => {
-				if (seats.length === 1) pickPawn(seats[0]!);
-				else
-					choose(
-						label,
-						seats.map(pawn => ({ label: seatName(world, pawn), detail: '', run: () => pickPawn(pawn) })),
-					);
-			});
-		}
-		if (moves.size === 1) return pickPawn([...moves.keys()][0]!);
-		targeting = { label, a, cities, pawns: new Map([...moves.keys()].map(pawn => [pawn, () => pickPawn(pawn)])) };
+		aimSeats(label, a, new Map([...moves.keys()].map(pawn => [pawn, () => pickPawn(pawn)])));
 	}
 
 	/** One entry of a city's ring: a kind of action, with the ways to take it that the ring's click starts. */
@@ -702,12 +884,12 @@ export function createChoosing(source: ChoosingSource) {
 			const variants = there.length ? there : ring === here ? choice.actions : [];
 			if (!variants.length) return [];
 			const offered = ways(world, variants);
-			const only = offered.length === 1 ? offered[0]! : null;
+			const single = offered.length === 1 ? offered[0]! : null;
 			return [
 				{
 					a: choice.a,
 					label: ACTION_NAMES[choice.a],
-					detail: only ? actionDetail(world, only) : there.length ? `${offered.length} ways` : summary(choice.a),
+					detail: single ? actionDetail(world, single) : there.length ? `${offered.length} ways` : summary(choice.a),
 					variants,
 				},
 			];
@@ -725,10 +907,9 @@ export function createChoosing(source: ChoosingSource) {
 			targeting = null;
 			return run();
 		}
-		chooser = null;
-		handPick = null;
-		dockChoice = null;
-		ring = live && ring !== city ? city : null;
+		const open = live && ring !== city ? city : null;
+		only();
+		ring = open;
 	}
 
 	/** Ways the active player can use a card in hand right now, each a tag above the card. */
@@ -887,7 +1068,20 @@ export function createChoosing(source: ChoosingSource) {
 		} else if (click.t === 'option') {
 			const option = chooser?.options[click.index];
 			if (!option) return false;
-			pick(option);
+			option.run();
+		} else if (click.t === 'chip') {
+			const option = dockChoice?.options.find(entry => entry.key === click.key);
+			if (!option) return false;
+			option.run();
+		} else if (click.t === 'card') {
+			if (!cardPick?.eligible.has(click.card)) return false;
+			cardPick.onpick(click.card);
+		} else if (click.t === 'cardConfirm') {
+			if (!cardPick?.confirm?.ready || !cardPick.onconfirm) return false;
+			cardPick.onconfirm();
+		} else if (click.t === 'aimConfirm') {
+			if (!targeting?.multi?.ready || !confirmAim) return false;
+			confirmAim();
 		} else if (click.t === 'recon') clickRecon(click.route);
 		else if (click.t === 'play') playCard(click.seat, click.card);
 		else if (click.t === 'lockdown') lockdown(click.card);
@@ -896,7 +1090,7 @@ export function createChoosing(source: ChoosingSource) {
 	}
 	/** Every click that starts, aims or picks goes through here, so the trail is the whole way to what is on screen. */
 	function step(next: UiStep): boolean {
-		if (!targeting && !handPick && !dockChoice && !chooser && !ring) trail = [];
+		if (!busy()) trail = [];
 		const done = perform(next);
 		if (done) trail = [...trail, next];
 		return done;
@@ -904,13 +1098,13 @@ export function createChoosing(source: ChoosingSource) {
 
 	/** Puts down whatever was half-chosen. True when something was. */
 	function cancel() {
-		if (!targeting && !handPick && !dockChoice && !chooser && !ring) return false;
+		if (!busy()) return false;
 		dismiss();
 		return true;
 	}
 
 	type Several = { field: 'cities' | 'to' | 'cards' | 'order'; verb: string; max: number; repeat: number };
-	/** Events that take several targets at once: they are ticked off a list and confirmed together. */
+	/** Events that take several targets at once: they are picked on the map or from the cards, and confirmed together. */
 	const SEVERAL: Partial<Record<EventId, Several>> = {
 		safeHouses: { field: 'cities', verb: 'Place shelters', max: 3, repeat: 1 },
 		mobileShelters: { field: 'cities', verb: 'Place shelters', max: 2, repeat: 1 },
@@ -919,63 +1113,191 @@ export function createChoosing(source: ChoosingSource) {
 		spreadOut: { field: 'to', verb: 'Move cubes', max: 3, repeat: 3 },
 		massInoculation: { field: 'cards', verb: 'Store cards', max: 3, repeat: 1 },
 		exile: { field: 'cards', verb: 'Destroy cards', max: 3, repeat: 1 },
+		resilience: { field: 'cards', verb: 'Remove cards', max: 2, repeat: 1 },
 		// Cards not picked keep their order below the ones picked.
 		forecast: { field: 'order', verb: 'Put back, top first', max: 8, repeat: 1 },
 	};
 
-	function pickSeveral(seat: SeatId, card: CardId, variants: { play: Play }[], several: Several, encore?: CardId) {
-		const first = variants[0]!.play as Record<string, unknown>;
-		const items =
-			several.field === 'order'
-				? (first.order as string[])
-				: variants.map(option => ((option.play as Record<string, unknown>)[several.field] as string[])[0]!);
-		const isCard = several.field === 'cards' || several.field === 'order';
-		const name = (item: string) => (isCard ? cardName(world, item as CardId) : cityName(item as CityId));
-		const wrap = (play: Play): Play => (encore ? { e: 'encore', card: encore, played: play } : play);
-		// A second or third cube on one city is offered only where the engine would take that many there.
-		const takes = (item: string, count: number) =>
-			count === 1 ||
-			reject(world, snap.phase, {
-				type: 'PLAY',
-				seat,
-				card,
-				play: wrap({ ...first, [several.field]: Array<string>(count).fill(item) } as Play),
-			}) === null;
-		const ORDINAL = ['', 'second', 'third'];
-		const options: Option[] = items.flatMap(item =>
-			Array.from({ length: several.repeat }, (_, copy) => copy)
-				.filter(copy => takes(item, copy + 1))
-				.map(copy => ({
-					label: copy ? `${name(item)}, ${ORDINAL[copy]} cube` : name(item),
-					detail: '',
-					run: () => {},
-					item,
-					...(isCard ? {} : { city: item as CityId }),
-				})),
-		);
-		targeting = null;
-		chooser = {
-			title: encore ? `${cardName(world, card)}: ${cardName(world, encore)}` : cardName(world, card),
-			options: several.field === 'order' ? options : options.sort(byLabel),
-			multi: {
-				max: Math.min(several.max, options.length),
-				verb: several.verb,
-				confirm: chosen => {
-					const values = chosen.map(option => option.item!);
-					if (several.field === 'order') values.push(...items.filter(item => !values.includes(item)));
-					const command: Command = {
-						type: 'PLAY',
-						seat,
-						card,
-						play: wrap({ ...first, [several.field]: values } as Play),
-					};
-					const refused = reject(world, snap.phase, command);
-					if (refused) return toast(refused, 'bad');
-					send(command);
-					chooser = null;
+	/** How an event is sent once aimed: plainly, or as the event It Worked the First Time took from the discard pile. */
+	type Aim = { seat: SeatId; card: CardId; title: string; wrap: (play: Play) => Play };
+
+	function sendPlay(aim: Aim, play: Play) {
+		const command: Command = { type: 'PLAY', seat: aim.seat, card: aim.card, play: aim.wrap(play) };
+		const refused = reject(world, snap.phase, command);
+		if (refused) return toast(refused, 'bad');
+		send(command);
+		dismiss();
+	}
+	const refusal = (aim: Aim, play: Play) =>
+		reject(world, snap.phase, { type: 'PLAY', seat: aim.seat, card: aim.card, play: aim.wrap(play) });
+
+	/** Places on the map, a click each: a place that can take another is lit, and a click on one picked puts it back. */
+	function pickSeveralCities(aim: Aim, candidates: Play[], several: Several) {
+		const first = candidates[0] as Record<string, unknown>;
+		const field = several.field;
+		const items = [...new Set(candidates.map(play => ((play as Record<string, unknown>)[field] as CityId[])[0]!))];
+		const picks = new Map<CityId, number>();
+		const values = () => [...picks].flatMap(([city, count]) => Array<CityId>(count).fill(city));
+		const playOf = (cities: CityId[]) => ({ ...first, [field]: cities }) as Play;
+		const rebuild = () => {
+			const chosen = values();
+			const lit = new Set(
+				items.filter(
+					city =>
+						chosen.length < several.max &&
+						(picks.get(city) ?? 0) < several.repeat &&
+						refusal(aim, playOf([...chosen, city])) === null,
+				),
+			);
+			const toggle = (city: CityId) => {
+				if (lit.has(city)) picks.set(city, (picks.get(city) ?? 0) + 1);
+				else picks.delete(city);
+				rebuild();
+			};
+			only();
+			targeting = {
+				label: aim.title,
+				a: null,
+				cities: new Map(items.filter(city => lit.has(city) || picks.has(city)).map(city => [city, () => toggle(city)])),
+				lit,
+				prompt: chosen.length
+					? 'Click a lit city to add it, or a ticked one to take it back.'
+					: `Click up to ${several.max} of the lit cities.`,
+				multi: {
+					picked: new Map(picks),
+					verb: several.verb,
+					count: chosen.length,
+					max: several.max,
+					ready: chosen.length > 0 && refusal(aim, playOf(chosen)) === null,
 				},
-			},
+			};
+			confirmAim = () => sendPlay(aim, playOf(values()));
 		};
+		rebuild();
+	}
+
+	/** Cards laid out to pick several of: a card that could join the pick is lit, and a picked one is put back by a click. */
+	function pickSeveralCards(aim: Aim, candidates: Play[], several: Several) {
+		const first = candidates[0] as Record<string, unknown>;
+		const ordered = several.field === 'order';
+		const items = ordered
+			? (first.order as CardId[])
+			: [...new Set(candidates.flatMap(play => (play as Record<string, unknown>).cards as CardId[]))];
+		let picked: CardId[] = [];
+		const playOf = (cards: CardId[]) =>
+			({
+				...first,
+				[several.field]: ordered ? [...cards, ...items.filter(item => !cards.includes(item))] : cards,
+			}) as Play;
+		const rebuild = () => {
+			const eligible = new Set(
+				items.filter(
+					item =>
+						picked.includes(item) ||
+						(picked.length < several.max && (ordered || refusal(aim, playOf([...picked, item])) === null)),
+				),
+			);
+			const ready = (ordered || picked.length > 0) && refusal(aim, playOf(picked)) === null;
+			only();
+			cardPick = {
+				title: aim.title,
+				prompt: ordered
+					? 'Click the cards in the order they go back, top first. The rest keep their order below.'
+					: `Click up to ${several.max} of the lit cards.`,
+				a: null,
+				groups: [
+					{
+						label: ordered ? 'Top of the Infection deck' : 'Infection discard pile',
+						pile: 'infection',
+						cards: items,
+					},
+				],
+				eligible,
+				picked,
+				ordered,
+				confirm: { label: ordered ? several.verb : `${several.verb} (${picked.length})`, ready },
+				onpick: card => {
+					picked = picked.includes(card) ? picked.filter(other => other !== card) : [...picked, card];
+					rebuild();
+				},
+				onconfirm: () => sendPlay(aim, playOf(picked)),
+			};
+		};
+		rebuild();
+	}
+
+	/** One card from each of two hands. */
+	function pickSwap(aim: Aim, candidates: Extract<Play, { e: 'cardSwap' }>[]) {
+		const holders = new Map<CardId, SeatId>();
+		for (const play of candidates) {
+			holders.set(play.cardA, play.a);
+			holders.set(play.cardB, play.b);
+		}
+		const seats = [...new Set(holders.values())];
+		let picked: CardId[] = [];
+		const matching = (cards: CardId[]) =>
+			candidates.filter(play => cards.every(card => card === play.cardA || card === play.cardB));
+		const rebuild = () => {
+			const eligible = new Set(
+				[...holders.keys()].filter(
+					card => picked.includes(card) || (picked.length < 2 && matching([...picked, card]).length > 0),
+				),
+			);
+			const chosen = picked.length === 2 ? matching(picked)[0] : undefined;
+			only();
+			cardPick = {
+				title: aim.title,
+				prompt: 'Click a card in one hand, then a card in another.',
+				a: null,
+				groups: seats.map(seat => ({
+					label: `${seatName(world, seat)}'s hand`,
+					pile: 'player',
+					cards: [...holders].flatMap(([card, holder]) => (holder === seat ? [card] : [])),
+				})),
+				eligible,
+				picked,
+				ordered: false,
+				confirm: { label: 'Swap them', ready: Boolean(chosen) },
+				onpick: card => {
+					picked = picked.includes(card) ? picked.filter(other => other !== card) : [...picked, card];
+					rebuild();
+				},
+				onconfirm: () => chosen && sendPlay(aim, chosen),
+			};
+		};
+		rebuild();
+	}
+
+	/** A character on the table, then the ability, then the slot it covers. */
+	function pickMentor(aim: Aim, candidates: Extract<Play, { e: 'mentor' }>[]) {
+		const bySeat = new Map<SeatId, typeof candidates>();
+		for (const play of candidates) bySeat.set(play.seat, [...(bySeat.get(play.seat) ?? []), play]);
+		const slots = (subset: typeof candidates) =>
+			chips(
+				aim.title,
+				null,
+				'Which slot does it cover?',
+				subset.map(play => {
+					const slot = campaign.characters[game!.players[play.seat]!.character]!.slots[play.slot];
+					const covers = slot ? ` over ${slot.kind === 'scar' ? 'a scar' : 'an ability'}` : '';
+					return { key: `slot:${play.slot}`, label: `Slot ${play.slot + 1}${covers}`, run: () => sendPlay(aim, play) };
+				}),
+			);
+		const abilities = (subset: typeof candidates) => {
+			const byAbility = new Map<string, typeof candidates>();
+			for (const play of subset) byAbility.set(play.ability, [...(byAbility.get(play.ability) ?? []), play]);
+			chips(
+				aim.title,
+				null,
+				'Which ability?',
+				[...byAbility].map(([ability, inner]) => ({
+					key: `ability:${ability}`,
+					label: pack.abilities.find(entry => entry.id === ability)!.name,
+					run: () => slots(inner),
+				})),
+			);
+		};
+		aimSeats(aim.title, null, new Map([...bySeat].map(([seat, subset]) => [seat, () => abilities(subset)])));
 	}
 
 	function lockdown(card: CardId) {
@@ -1004,99 +1326,98 @@ export function createChoosing(source: ChoosingSource) {
 		};
 	}
 
-	/** Encore picks the event from the discard pile, then aims it the way that event is aimed. */
-	function encoreOf(seat: SeatId, card: CardId, variants: { play: Play }[]) {
-		const targets = [...new Set(variants.flatMap(option => (option.play.e === 'encore' ? [option.play.card] : [])))];
-		const aimTarget = (target: CardId) => {
-			const inner = variants.flatMap(option =>
-				option.play.e === 'encore' && option.play.card === target ? [{ play: option.play.played }] : [],
+	/** Aims an event at whatever its candidates differ in: places on the map, pawns, cards. */
+	function aimPlays(aim: Aim, candidates: Play[]) {
+		if (!candidates.length) return;
+		const event = candidates[0]!.e;
+		if (event === 'encore') return encoreOf(aim, candidates as Extract<Play, { e: 'encore' }>[]);
+		const several = SEVERAL[event as EventId];
+		if (several?.field === 'to') {
+			const froms = [...new Set(candidates.map(play => (play.e === 'spreadOut' ? play.from : null)))].filter(
+				(from): from is CityId => from !== null,
 			);
-			const held = world.campaign.playerCards[target];
-			const several = held?.kind === 'event' ? SEVERAL[held.event] : undefined;
-			if (several) return pickSeveral(seat, card, inner, several, target);
-			chooser = {
-				title: `${cardName(world, card)}: ${cardName(world, target)}`,
-				options: inner.map(({ play }) => ({
-					label: playDetail(world, play) || cardName(world, target),
-					detail: '',
-					run: () => {
-						send({ type: 'PLAY', seat, card, play: { e: 'encore', card: target, played: play } });
-						dismiss();
-					},
-				})),
+			const from = (city: CityId) =>
+				pickSeveralCities(
+					aim,
+					candidates.filter(play => play.e === 'spreadOut' && play.from === city),
+					several,
+				);
+			if (froms.length === 1) return from(froms[0]!);
+			only();
+			targeting = {
+				label: `${aim.title}: move cubes from …`,
+				a: null,
+				cities: new Map(froms.map(city => [city, () => from(city)])),
+			};
+			return;
+		}
+		if (several?.field === 'cities') return pickSeveralCities(aim, candidates, several);
+		if (several) return pickSeveralCards(aim, candidates, several);
+		if (candidates.length === 1) return sendPlay(aim, candidates[0]!);
+		if (event === 'cardSwap') return pickSwap(aim, candidates as Extract<Play, { e: 'cardSwap' }>[]);
+		if (event === 'mentor') return pickMentor(aim, candidates as Extract<Play, { e: 'mentor' }>[]);
+		if (event === 'airlift') {
+			const moves = new Map<SeatId, Map<CityId, () => void>>();
+			for (const play of candidates) {
+				if (play.e !== 'airlift') continue;
+				const byCity = moves.get(play.pawn) ?? new Map<CityId, () => void>();
+				byCity.set(play.to, () => sendPlay(aim, play));
+				moves.set(play.pawn, byCity);
+			}
+			return aimPawns(aim.title, null, moves);
+		}
+		const aimAt = (subset: Play[], label: string) => {
+			only();
+			targeting = {
+				label,
+				a: null,
+				cities: new Map(subset.map(play => [playTarget(play)!, () => sendPlay(aim, play)])),
 			};
 		};
-		if (targets.length === 1) return aimTarget(targets[0]!);
-		chooser = {
-			title: cardName(world, card),
-			options: targets.map(target => ({ label: cardName(world, target), detail: '', run: () => aimTarget(target) })),
-		};
+		const groups = [...new Set(candidates.map(play => playGroup(world, play)))];
+		const aimed = candidates.every(play => playTarget(play));
+		if (aimed && groups.length === 1) return aimAt(candidates, aim.title);
+		chips(
+			aim.title,
+			null,
+			'Choose one.',
+			groups.map(name => {
+				const subset = candidates.filter(play => playGroup(world, play) === name);
+				return {
+					key: name || aim.title,
+					label: name || aim.title,
+					run: aimed ? () => aimAt(subset, name) : () => sendPlay(aim, subset[0]!),
+				};
+			}),
+		);
+	}
+
+	/** It Worked the First Time takes an event from the discard pile, then aims it the way that event is aimed. */
+	function encoreOf(aim: Aim, candidates: Extract<Play, { e: 'encore' }>[]) {
+		const targets = [...new Set(candidates.map(play => play.card))];
+		const aimTarget = (target: CardId) =>
+			aimPlays(
+				{
+					...aim,
+					title: `${cardName(world, aim.card)}: ${cardName(world, target)}`,
+					wrap: played => aim.wrap({ e: 'encore', card: target, played }),
+				},
+				candidates.flatMap(play => (play.card === target ? [play.played] : [])),
+			);
+		pickCard(
+			cardName(world, aim.card),
+			null,
+			[{ label: 'Player discard pile', pile: 'player', cards: targets }],
+			new Map(targets.map(target => [target, () => aimTarget(target)])),
+			'Click the event to play again.',
+		);
 	}
 
 	function playCard(seat: SeatId, card: CardId) {
-		const variants = plays.filter(option => option.seat === seat && option.card === card);
-		const run = (play: Play) => () => {
-			send({ type: 'PLAY', seat, card, play });
-			dismiss();
-		};
-		const aim = (subset: typeof variants, label: string) => {
-			const cities = new Map<CityId, () => void>();
-			for (const option of subset) cities.set(playTarget(option.play)!, run(option.play));
-			chooser = null;
-			handPick = null;
-			dockChoice = null;
-			ring = null;
-			targeting = { label, a: null, cities };
-		};
-		const held = world.campaign.playerCards[card];
-		if (held?.kind === 'event' && held.event === 'encore' && variants.length) return encoreOf(seat, card, variants);
-		const several = held?.kind === 'event' ? SEVERAL[held.event] : undefined;
-		if (several && variants.length) {
-			const froms = [...new Set(variants.map(option => (option.play.e === 'spreadOut' ? option.play.from : '')))];
-			if (froms.length > 1) {
-				chooser = {
-					title: cardName(world, card),
-					options: froms.map(from => ({
-						label: cityName(from as CityId),
-						detail: '',
-						run: () =>
-							pickSeveral(
-								seat,
-								card,
-								variants.filter(option => 'from' in option.play && option.play.from === from),
-								several,
-							),
-					})),
-				};
-				return;
-			}
-			return pickSeveral(seat, card, variants, several);
-		}
-		if (variants.length === 1) return run(variants[0]!.play)();
-		if (variants.every(option => option.play.e === 'airlift')) {
-			const moves = new Map<SeatId, Map<CityId, () => void>>();
-			for (const { play } of variants) {
-				if (play.e !== 'airlift') continue;
-				const byCity = moves.get(play.pawn) ?? new Map<CityId, () => void>();
-				byCity.set(play.to, run(play));
-				moves.set(play.pawn, byCity);
-			}
-			return aimPawns(cardName(world, card), null, moves);
-		}
-		const groups = [...new Set(variants.map(option => playGroup(world, option.play)))];
-		const aimed = variants.every(option => playTarget(option.play));
-		if (aimed && groups.length === 1) return aim(variants, cardName(world, card));
-		chooser = {
-			title: cardName(world, card),
-			options: groups.map(name => {
-				const subset = variants.filter(option => playGroup(world, option.play) === name);
-				return {
-					label: name || cardName(world, card),
-					detail: '',
-					run: aimed ? () => aim(subset, name) : run(subset[0]!.play),
-				};
-			}),
-		};
+		aimPlays(
+			{ seat, card, title: cardName(world, card), wrap: play => play },
+			plays.filter(option => option.seat === seat && option.card === card).map(option => option.play),
+		);
 	}
 
 	return {
@@ -1115,17 +1436,8 @@ export function createChoosing(source: ChoosingSource) {
 		get chooser() {
 			return chooser;
 		},
-		get filter() {
-			return filter;
-		},
-		set filter(value: string) {
-			filter = value;
-		},
-		get picked() {
-			return picked;
-		},
-		get shown() {
-			return shown;
+		get cardPick() {
+			return cardPick;
 		},
 		get ringEntries() {
 			return ringEntries;
@@ -1136,7 +1448,7 @@ export function createChoosing(source: ChoosingSource) {
 		},
 		/** The clicks that led to whatever is half-chosen now, and none when nothing is. */
 		get steps(): UiStep[] {
-			return targeting || handPick || dockChoice || chooser || ring ? trail : [];
+			return busy() ? trail : [];
 		},
 		step,
 		cancel,
