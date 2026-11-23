@@ -17,7 +17,7 @@
 	import type { Placement } from './labels';
 	import type { BoardPoint } from './projection';
 	import Scene from './Scene.svelte';
-	import type { BoardView, Covered, CursorTool } from './types';
+	import type { BoardView, Covered, CursorTool, Handover } from './types';
 	import type { CameraPose } from '#lib/studio/scene.ts';
 
 	const createRenderer = (canvas: HTMLCanvasElement) =>
@@ -54,6 +54,8 @@
 		onmiss?: () => void;
 		/** A click on a pawn that can be picked. */
 		onpawn?: (id: string) => void;
+		/** Flies a supply cube that leaves or joins a character between its seat and the board. */
+		handover?: (flight: Handover) => Promise<void>;
 	};
 
 	let {
@@ -77,6 +79,7 @@
 		oncancel,
 		onmiss,
 		onpawn,
+		handover,
 	}: Props = $props();
 
 	let element = $state<HTMLElement>();
@@ -317,6 +320,7 @@
 			{resetView}
 			{covered}
 			{focus}
+			{handover}
 		/>
 	</Canvas>
 	{#if tool !== null}

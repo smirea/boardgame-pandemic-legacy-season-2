@@ -14,11 +14,14 @@
 		color: string;
 		/** The side of the screen the seat is on: the figure stands at the edge and looks in. */
 		side: 'left' | 'right';
+		/** Supply cubes on the card. */
 		supplies: number;
+		/** Cubes flying in, whose places stand empty until they land. */
+		coming?: number;
 		active?: boolean;
 	};
 
-	let { character, portrait, name, color, side, supplies, active = false }: Props = $props();
+	let { character, portrait, name, color, side, supplies, coming = 0, active = false }: Props = $props();
 
 	const key = $derived(
 		figureKey({
@@ -40,9 +43,11 @@
 		<path d="M-2 98 L50 88" vector-effect="non-scaling-stroke" />
 	</svg>
 	{#if active}<span class="turn" data-testid="current-turn">Current turn</span>{/if}
-	{#if supplies}
+	{#if supplies + coming}
 		<span class="cubes" role="img" aria-label={`${supplies} supply cubes carried`}>
-			{#each { length: supplies } as _, index (index)}<i></i>{/each}
+			{#each { length: supplies + coming } as _, index (index)}
+				<i class:coming={index >= supplies} data-cube={index >= supplies ? 'coming' : 'solid'}></i>
+			{/each}
 		</span>
 	{/if}
 	<span class="info">
@@ -184,21 +189,30 @@
 	}
 
 	/* Carried cubes ride the cut under the figure. */
+	/* Carried cubes stand on the cut line at its angle, from the screen's edge in. */
 	.cubes {
 		position: absolute;
-		bottom: 4cqh;
-		left: 2cqw;
+		bottom: calc(2.96cqh + 3px);
+		left: 3cqw;
 		display: flex;
 		flex-wrap: wrap-reverse;
 		gap: 2px;
-		width: calc(var(--bust) - 4cqw);
+		width: 40cqw;
+		transform-origin: 0 100%;
+		rotate: atan2(-10cqh, 52cqw);
 		filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.7));
 	}
 
 	.right .cubes {
-		right: 2cqw;
+		right: 3cqw;
 		left: auto;
-		justify-content: flex-end;
+		flex-direction: row-reverse;
+		transform-origin: 100% 100%;
+		rotate: atan2(10cqh, 52cqw);
+	}
+
+	.cubes i.coming {
+		visibility: hidden;
 	}
 
 	.cubes i {

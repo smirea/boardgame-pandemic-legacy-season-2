@@ -54,10 +54,10 @@
 	import { reconciler } from '#lib/reconcile.ts';
 	import { CITY_RADIUS, CITY_TOP } from './routes';
 	import Stockpile from './Stockpile.svelte';
-	import { PILE, STOCKPILE, STOCKPILE_REACH, supplyMoves } from './stockpile';
+	import { CUBE, PILE, STOCKPILE, STOCKPILE_REACH, supplyMoves } from './stockpile';
 	import type { Holder, SupplySnapshot } from './stockpile';
 	import Trail from './Trail.svelte';
-	import type { BoardView, Covered, CursorTool, ReconBoxView } from './types';
+	import type { BoardView, Covered, CursorTool, Handover, ReconBoxView, ScreenSpot } from './types';
 	import type { CameraPose } from '#lib/studio/scene.ts';
 
 	type Props = {
@@ -89,6 +89,8 @@
 		 * share of the whole board's view, which holds still while panels come and go, in place of a share of the fitted one.
 		 */
 		focus?: { city: CityId; x: number; y: number; glide?: number; zoom?: number } | null;
+		/** Flies a supply cube that leaves or joins a character between its seat and the board, over the screen. */
+		handover?: (flight: Handover) => Promise<void>;
 	};
 
 	let {
@@ -106,6 +108,7 @@
 		resetView = 0,
 		covered = [],
 		focus = null,
+		handover,
 	}: Props = $props();
 
 	onDestroy(restWhenStill(useThrelte().renderer));
@@ -764,8 +767,45 @@
 				}),
 			];
 			if (struckAt.size) losses = [...losses, ...struckAt.values()];
+			for (const flight of flights) if (handedOver(flight) && !sentOver.has(flight.id)) sendOver(flight);
 		});
 	});
+	// A cube a character gives or takes flies between the board and the character's seat, over the screen, not to
+	// the pawn: it stays in the flights here only so where it lands on the board waits for it.
+	const handedOver = (flight: Flight) =>
+		Boolean(handover) && (flight.from.kind === 'pawn' || flight.to.kind === 'pawn');
+	const sentOver = new Set<number>();
+	const projected = new Vector3();
+	function onScreen(point: { x: number; y: number; z: number }): ScreenSpot | null {
+		if (!camera) return null;
+		const box = renderer.domElement.getBoundingClientRect();
+		const toScreen = () => ({
+			x: box.left + ((projected.x + 1) / 2) * box.width,
+			y: box.top + ((1 - projected.y) / 2) * box.height,
+		});
+		projected.set(point.x, point.y, point.z).project(camera);
+		const at = toScreen();
+		projected.set(point.x + CUBE, point.y, point.z).project(camera);
+		return { ...at, size: Math.abs(toScreen().x - at.x) };
+	}
+	function sendOver(flight: Flight) {
+		sentOver.add(flight.id);
+		const end = (holder: Holder, index: number) => ({
+			seat: holder.kind === 'pawn' ? holder.pawn : undefined,
+			at: () => onScreen(spot(holder, index)),
+		});
+		void handover!({
+			from: end(flight.from, flight.fromIndex),
+			to: end(flight.to, flight.toIndex),
+			delay: flight.delay,
+			onlaunch: () => launched(flight),
+			onarrive: () => {
+				arrived(flight);
+				sentOver.delete(flight.id);
+				flights = flights.filter(other => other.id !== flight.id);
+			},
+		});
+	}
 	const landing = $derived.by(() => {
 		const counts = new Map<string, number>();
 		for (const flight of flights) {
@@ -917,7 +957,7 @@
 	/>
 {/if}
 
-{#each flights as flight (flight.id)}
+{#each flights.filter(flight => !handedOver(flight)) as flight (flight.id)}
 	<FlyingCube
 		from={spot(flight.from, flight.fromIndex)}
 		to={spot(flight.to, flight.toIndex)}

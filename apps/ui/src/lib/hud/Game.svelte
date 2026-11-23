@@ -52,6 +52,7 @@
 	import EpidemicSequence from './EpidemicSequence.svelte';
 	import CardFlights from './CardFlights.svelte';
 	import { createTurnAdmin } from './turnAdmin.svelte.ts';
+	import { CUBE_FLIGHTS, createCubeFlights } from './cubeFlights.svelte.ts';
 	import TurnDesk from './TurnDesk.svelte';
 	import TurnInterlude from './TurnInterlude.svelte';
 	import { TimeLapse as GameLapse } from './timeLapse.svelte.ts';
@@ -628,6 +629,9 @@
 		legacy.focus ? { city: legacy.focus, ...untrack(openMiddle), glide: 1000, zoom: 0.55 } : null,
 	);
 
+	const cubeFlights = createCubeFlights();
+	setContext(CUBE_FLIGHTS, cubeFlights);
+
 	// What follows a player's actions is wound up in one place, where the Actions panel stood, for everyone to see.
 	const admin = createTurnAdmin({
 		get world() {
@@ -1177,6 +1181,7 @@
 			{resetView}
 			covered={panels.covered}
 			focus={legacyFocus ?? showFocus ?? focus}
+			handover={cubeFlights.fly}
 		/>
 
 		{#if game && seatAt && snap.phase !== 'upkeep'}

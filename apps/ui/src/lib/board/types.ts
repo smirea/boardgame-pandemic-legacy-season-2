@@ -153,3 +153,21 @@ export type BoardView = {
 	skull: { key: number; city: CityId; at: number } | null;
 	marks?: BoardMarks;
 };
+
+/** A place on the screen over the board, and how wide a supply cube standing there looks, in pixels. */
+export type ScreenSpot = { x: number; y: number; size: number };
+
+/**
+ * One end of a supply cube's flight. A seat's end is the cube on its character's card; `at` is where the board would
+ * show it, used when the seat's card is not on screen.
+ */
+export type CubeEnd = { seat?: string; at: () => ScreenSpot | null };
+
+/** A supply cube that leaves or joins a character, flown over the screen by whoever shows the characters. */
+export type Handover = {
+	from: CubeEnd;
+	to: CubeEnd;
+	delay: number;
+	onlaunch?: () => void;
+	onarrive?: () => void;
+};

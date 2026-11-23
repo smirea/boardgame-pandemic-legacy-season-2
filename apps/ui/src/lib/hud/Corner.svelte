@@ -11,6 +11,8 @@
 	import { cubicIn, cubicOut } from 'svelte/easing';
 	import { fade, fly, scale } from 'svelte/transition';
 	import CardIcon from '#lib/cards/CardIcon.svelte';
+	import { CUBE_FLIGHTS } from './cubeFlights.svelte.ts';
+	import type { CubeFlights } from './cubeFlights.svelte.ts';
 	import { deal } from './deal.ts';
 	import { handGroups } from './handGroups.ts';
 	import { sortHand } from './handOrder.ts';
@@ -21,6 +23,8 @@
 	import type { Place } from './seats.ts';
 	import { turnSteps } from './turn.ts';
 
+	// Supply cubes flying off this seat's card and onto it, which it shows as they were until each one goes.
+	const cubeFlights = getContext<CubeFlights | undefined>(CUBE_FLIGHTS);
 	const hoverCard = getContext<((cards: CardId | CardId[] | null) => void) | undefined>('card-hover');
 
 	type Props = {
@@ -68,6 +72,7 @@
 		acting,
 	}: Props = $props();
 
+	const cubesFlying = $derived(cubeFlights?.of(seat) ?? { leaving: 0, arriving: 0 });
 	const game = $derived(world.game);
 	const player = $derived(game?.players[seat]);
 	const character = $derived(player ? world.campaign.characters[player.character] : undefined);
@@ -139,7 +144,8 @@
 				{name}
 				{color}
 				side={right ? 'right' : 'left'}
-				supplies={player?.supplies ?? 0}
+				supplies={(player?.supplies ?? 0) + cubesFlying.leaving - cubesFlying.arriving}
+				coming={cubesFlying.arriving}
 				{active}
 			/>
 		</button>
