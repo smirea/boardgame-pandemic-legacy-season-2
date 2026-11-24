@@ -10,7 +10,7 @@
 
 <script lang="ts">
 	import CardIcon from '#lib/cards/CardIcon.svelte';
-	import { SCAR_ICON } from '#lib/cards/icons.ts';
+	import { SCAR_ICON, SKULL_ICON } from '#lib/cards/icons.ts';
 
 	type Props = {
 		boxes: ShownBox[];
@@ -30,7 +30,10 @@
 			class:scratching={index === now && stage === 'scratching'}
 			class:opened={index === now && stage === 'open'}
 		>
-			{#if box === 'scar'}<CardIcon path={SCAR_ICON} size="78%" />{:else if box === 'skull'}☠{/if}
+			{#if box === 'scar'}<CardIcon path={SCAR_ICON} size="78%" />{:else if box === 'skull'}<CardIcon
+					path={SKULL_ICON}
+					size="82%"
+				/>{/if}
 		</i>
 	{/each}
 </span>
@@ -74,7 +77,6 @@
 	.skull {
 		border-color: #f4ead6;
 		background: #0c0a08;
-		font-size: 0.7em;
 	}
 
 	/* The box the table is watching grows out of the track. */

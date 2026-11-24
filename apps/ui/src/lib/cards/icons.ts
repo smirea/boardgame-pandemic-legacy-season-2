@@ -36,3 +36,5 @@ export const IMPROVEMENT_MARK: Record<CityImprovementId, { text?: string; icon?:
 
 /** A stitched cut, marking a scar on a character card. */
 export const SCAR_ICON = 'M2 12.5 14 3.5M4.2 8.6l2 2.6M7.2 6.4l2 2.6M10.2 4.2l2 2.6';
+export const SKULL_ICON =
+	'M8 2.2a5 5 0 0 0-5 5c0 1.7.8 3 2 3.7v2.6h6v-2.6c1.2-.7 2-2 2-3.7a5 5 0 0 0-5-5zM5.4 7.4a1 1 0 1 0 2 0 1 1 0 1 0-2 0M8.6 7.4a1 1 0 1 0 2 0 1 1 0 1 0-2 0M7 13.5v-1.6M9 13.5v-1.6';
