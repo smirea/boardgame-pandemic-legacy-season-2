@@ -3,7 +3,9 @@
 	import type { Campaign } from '@repo/game';
 	import { fly, scale } from 'svelte/transition';
 	import LegacyCard from '#lib/cards/LegacyCard.svelte';
+	import { jobFigure } from '#lib/characters/figures.ts';
 	import BriefPiece from './BriefPiece.svelte';
+	import JobFigure from './JobFigure.svelte';
 	import Crate from './Crate.svelte';
 	import DossierDoor from './DossierDoor.svelte';
 	import type { Piece, PieceGroup } from './unboxPieces.ts';
@@ -20,6 +22,9 @@
 	let { groups, campaign, side, ontip }: Props = $props();
 
 	const big = $derived(side === 'spotlight');
+	/** A character the box brings stands as its whole figure, which carries its own name. */
+	const figureOf = (piece: Piece) =>
+		piece.t === 'unlock' && piece.unlock.t === 'job' ? jobFigure(piece.unlock.job) : null;
 	const label = (piece: Piece) =>
 		piece.t === 'card' ? piece.card.title : piece.t === 'seal' ? piece.tip : (piece.name ?? piece.tip);
 </script>
@@ -39,6 +44,7 @@
 						type="button"
 						class="piece {piece.t}"
 						class:mechanic={piece.stow.cls === 'mechanic'}
+						class:figure={figureOf(piece) !== null}
 						data-stow-class={piece.stow.cls}
 						data-put={piece.stow.put}
 						aria-label={piece.tip}
@@ -58,10 +64,12 @@
 									<DossierDoor id={piece.seal.id} open={true} />
 								{/if}
 							</span>
+						{:else if figureOf(piece)}
+							<JobFigure figure={figureOf(piece)!} name={label(piece)} width={big ? '7.5rem' : '5.5rem'} />
 						{:else}
 							<BriefPiece unlock={piece.unlock} {campaign} size={big ? '2.8rem' : '2.2rem'} />
 						{/if}
-						{#if piece.t !== 'card' && (piece.t === 'seal' || piece.name)}
+						{#if piece.t !== 'card' && !figureOf(piece) && (piece.t === 'seal' || piece.name)}
 							<span class="name">{label(piece)}</span>
 						{/if}
 					</button>
@@ -154,7 +162,7 @@
 	}
 
 	/* A name wraps under its sticker; a card, landscape ones included, keeps its own width. */
-	.piece:not(.card) {
+	.piece:not(.card, .figure) {
 		max-width: 7.4rem;
 	}
 
