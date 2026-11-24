@@ -312,8 +312,12 @@ function courseOf(a: CityId, b: CityId, kind: EdgeKind): Course {
 	const known = courses.get(key);
 	if (known) return known;
 	const generated = pack.routeCourses[key];
-	if (!generated) throw new Error(`No course for ${key}: rerun gen-geometry.ts`);
-	const points = generated.map(([x, z]) => ({ x, z }));
+	// A line drawn before a rule change took its pair off the candidates keeps its place on the board, run straight.
+	// A pair still legal with no course means the geometry was not regenerated.
+	if (!generated && isCandidate(a, b, kind)) throw new Error(`No course for ${key}: rerun gen-geometry.ts`);
+	const points = generated
+		? generated.map(([x, z]) => ({ x, z }))
+		: (a < b ? [a, b] : [b, a]).map(id => pack.positions[id as keyof typeof pack.positions] as Point);
 	const course = {
 		points,
 		min: { x: Math.min(...points.map(point => point.x)), z: Math.min(...points.map(point => point.z)) },

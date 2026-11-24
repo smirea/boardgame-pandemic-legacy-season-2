@@ -40,3 +40,12 @@ test('no starting line runs over ground the fog hides at the start', () => {
 	);
 	expect(hidden).toEqual([]);
 });
+
+test('a line drawn before a rule change took its pair off the candidates still has a course, straight between its ends', () => {
+	const riyadh = 'riyadh' as EdgeDef['a'];
+	const dar = 'dar-es-salaam' as EdgeDef['a'];
+	expect(pack.candidateEdges.some(edge => name(edge) === `${dar}-${riyadh}` || name(edge) === `${riyadh}-${dar}`)).toBe(
+		false,
+	);
+	expect(routeCourse(riyadh, dar, 'land')).toEqual([pack.positions[riyadh], pack.positions[dar]]);
+});
