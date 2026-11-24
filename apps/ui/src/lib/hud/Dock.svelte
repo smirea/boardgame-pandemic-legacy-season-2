@@ -1,7 +1,18 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
-	import { handLimit, pack, reject } from '@repo/game';
-	import type { Action, CardId, CharacterId, Command, Decide, Play, PublicState, Purchase, SeatId } from '@repo/game';
+	import { handLimit, pack, reject, tablePlayers } from '@repo/game';
+	import type {
+		Action,
+		CardId,
+		CharacterId,
+		Command,
+		Decide,
+		Play,
+		PlayerId,
+		PublicState,
+		Purchase,
+		SeatId,
+	} from '@repo/game';
 	import { untrack } from 'svelte';
 	import { flip } from 'svelte/animate';
 	import { cubicIn } from 'svelte/easing';
@@ -12,6 +23,8 @@
 	import { cityName, decideLabel, decisionTitle, seatName, SEAT_COLORS, cardName } from './labels.svelte.ts';
 	import { deal } from './deal.ts';
 	import { sortHand } from './handOrder.ts';
+	import VoteButton from './VoteButton.svelte';
+	import { tableVoters, waitingOn } from './voters.ts';
 	import PlayerCard, { HAND_CARD_SIZE } from './PlayerCard.svelte';
 	import Portrait from './Portrait.svelte';
 	import { keep } from './viewState.ts';
@@ -58,6 +71,9 @@
 		opening?: number | null;
 		/** Cards drawn into a hand whose flight there has not landed: the hand keeps their place and hides them. */
 		arriving?: ReadonlySet<CardId>;
+		/** This browser's player, who votes to go on to game end. */
+		player: PlayerId;
+		spectator?: boolean;
 	};
 
 	let {
@@ -85,9 +101,16 @@
 		onlockdown,
 		opening = null,
 		arriving = new Set(),
+		player,
+		spectator = false,
 	}: Props = $props();
 
 	const world = $derived(snap.world);
+	// Everyone at the table agrees before the game-end step opens, as for every other step the table takes together.
+	const ended = $derived(world.game?.ended ?? []);
+	const endVoters = $derived(tableVoters(world.table, who => ended.includes(who)));
+	const endWaiting = $derived(waitingOn(endVoters, player));
+	const seatedHere = $derived(tablePlayers(world.table).length === 0 || tablePlayers(world.table).includes(player));
 	const game = $derived(world.game!);
 	/**
 	 * Abilities the group may take during setup with units a Legacy card gave it for nothing, as a table of abilities by
@@ -485,8 +508,18 @@
 				<div class:lost={!game.outcome?.won}>
 					<strong>{game.outcome?.won ? 'Victory' : 'Defeat'}</strong>: {game.outcome?.reason}
 				</div>
-				<button class="primary" onclick={() => send({ type: 'CONTINUE' })} data-testid="continue">Go to game end</button
-				>
+				<div class="end-vote">
+					<VoteButton
+						label="Go to game end"
+						tally="ready"
+						voters={endVoters}
+						on={ended.includes(player)}
+						disabled={spectator || !seatedHere}
+						onclick={() => send({ type: 'CONTINUE', player, done: !ended.includes(player) })}
+						testid="continue"
+					/>
+					{#if endWaiting.length && ended.length}<small>Waiting for {endWaiting.join(', ')}</small>{/if}
+				</div>
 			</div>
 		{:else}
 			<div class="held">
@@ -1050,6 +1083,18 @@
 		justify-content: center;
 		gap: 1.2rem;
 		font-size: 0.95rem;
+	}
+
+	.end-vote {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.3rem;
+	}
+
+	.end-vote small {
+		color: var(--muted);
+		font-size: 0.78rem;
 	}
 
 	.setup strong {

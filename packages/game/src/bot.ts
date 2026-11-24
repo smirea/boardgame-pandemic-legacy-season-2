@@ -86,8 +86,10 @@ export function botCommand(world: World, phase: Phase, rng: RngState, seats = 2)
 			const pool = nextFloat(rng) < 0.85 && paid.length ? paid : actions;
 			return { type: 'ACTION', seat: game!.active, action: pick(rng, pool) };
 		}
-		case 'over':
-			return { type: 'CONTINUE' };
+		case 'over': {
+			const waiting = tablePlayers(world.table).find(player => !game!.ended.includes(player));
+			return { type: 'CONTINUE', player: waiting ?? ('bot' as PlayerId), done: true };
+		}
 		case 'upkeep': {
 			const options = legalPurchases(world);
 			const upkeep = game!.upkeep!;

@@ -87,7 +87,6 @@ export function optionsFor(state: PublicState, who: Who, seating: (CharacterId |
 		if (phase === 'setup.infect')
 			add('infect', 'setup', 'flip one of the Infection cards that open the game', { type: 'INFECT' });
 		add('confirm-events', 'setup', 'deal hands and begin', { type: 'CONFIRM_EVENTS' });
-		add('continue', 'flow', 'go to the game-end step', { type: 'CONTINUE' });
 		if (phase === 'upkeep')
 			for (const [index, entry] of (game?.upkeep?.bought ?? []).entries())
 				add(
@@ -106,6 +105,19 @@ export function optionsFor(state: PublicState, who: Who, seating: (CharacterId |
 					purchaseCost(purchase),
 				);
 		}
+	}
+
+	if (phase === 'over') {
+		const player = (world.table.seats.find(entry => entry.name === who.name)?.player ?? who.id) as PlayerId;
+		const done = game?.ended.includes(player) ?? false;
+		add(
+			'continue',
+			'flow',
+			done
+				? 'take back your vote to go to game end'
+				: 'vote to go on to the game-end step; it opens once everyone at the table has',
+			{ type: 'CONTINUE', player, done: !done },
+		);
 	}
 
 	if (phase === 'upkeep') {

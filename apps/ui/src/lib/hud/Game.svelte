@@ -1652,6 +1652,8 @@
 			<Dock
 				{snap}
 				{canAct}
+				player={session.player}
+				{spectator}
 				{owns}
 				seat={dockSeat!}
 				home={home!}

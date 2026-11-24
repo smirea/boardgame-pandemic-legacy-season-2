@@ -81,7 +81,7 @@ export type Command =
 	/** The group's call that an objective cannot be completed any more, so the rest decide the game. */
 	| { type: 'WAIVE_OBJECTIVE'; objective: ObjectiveId }
 	| { type: 'UNDO'; by?: PlayerId }
-	| { type: 'CONTINUE' }
+	| { type: 'CONTINUE'; player: PlayerId; done: boolean }
 	| { type: 'PURCHASE'; purchase: Purchase }
 	/** Gives back the purchase at this place in the spending step's list. */
 	| { type: 'REFUND'; index: number }
@@ -278,6 +278,7 @@ export function reject(world: World, phase: Phase, command: Command): string | n
 		case 'UNDO':
 			return world.table.undoVote ? 'An undo vote is already open' : inPhase('playing.actions');
 		case 'CONTINUE':
+			if (world.table.seats.length > 0 && !tablePlayers(world.table).includes(command.player)) return 'Sit down first';
 			return inPhase('over');
 		case 'PURCHASE':
 			return inPhase('upkeep', 'setup.supply') ?? checkPurchase(world, command.purchase);
@@ -392,6 +393,15 @@ export const gameMachine = setup({
 			// With nobody seated (the bot, the tests) a single vote decides.
 			if (players.length === 0) return vote.done;
 			return players.every(player => (player === vote.player ? vote.done : done.includes(player)));
+		},
+		gameEndAgreed: ({ context, event }: Args) => {
+			if (reject(context.world, 'over', event) !== null) return false;
+			const vote = event as Of<'CONTINUE'>;
+			const ended = context.world.game!.ended;
+			const players = tablePlayers(context.world.table);
+			// With nobody seated (the bot, the tests) a single vote decides.
+			if (players.length === 0) return vote.done;
+			return players.every(player => (player === vote.player ? vote.done : ended.includes(player)));
 		},
 		campaignEnding: ({ context }: Args) => {
 			const { campaign, game } = context.world;
@@ -597,6 +607,15 @@ export const gameMachine = setup({
 		resolveGameEnd: assign(change(resolveGameEnd)),
 		purchase: assign(change((world, event) => applyPurchase(world, (event as Of<'PURCHASE'>).purchase))),
 		refund: assign(change((world, event) => refundPurchase(world, (event as Of<'REFUND'>).index))),
+		voteGameEnd: assign(
+			change((world, event) => {
+				const vote = event as Of<'CONTINUE'>;
+				const game = world.game!;
+				game.ended = vote.done
+					? [...new Set([...game.ended, vote.player])]
+					: game.ended.filter(player => player !== vote.player);
+			}),
+		),
 		voteUpkeep: assign(
 			change((world, event) => {
 				const vote = event as Of<'FINISH_UPKEEP'>;
@@ -723,7 +742,15 @@ export const gameMachine = setup({
 				},
 			},
 		},
-		over: { on: { ...seatEvents('over'), CONTINUE: { target: 'upkeep', actions: 'resolveGameEnd' } } },
+		over: {
+			on: {
+				...seatEvents('over'),
+				CONTINUE: [
+					{ guard: 'gameEndAgreed', target: 'upkeep', actions: 'resolveGameEnd' },
+					{ guard: { type: 'legal', params: 'over' }, actions: 'voteGameEnd' },
+				],
+			},
+		},
 		upkeep: {
 			on: {
 				...seatEvents('upkeep'),

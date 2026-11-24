@@ -25,7 +25,7 @@ import type { Command, GameActor, Phase, Save } from './machine';
 import { legalActions, legalDecides, legalPlays } from './options';
 import { applyUnlock, closeGame, newCampaign, openSeal, readLegacy, score } from './legacy';
 import type { Purchase } from './legacy';
-import { newTable } from './table';
+import { newTable, tablePlayers } from './table';
 import { campaignAt, canonicalSave } from './scenarios';
 import { violations } from './invariants';
 import type { Character, Game, World } from './state';
@@ -559,7 +559,7 @@ describe('Hollow Men and forsaken cities', () => {
 		act(actor, { a: 'broadcast', from: city('tripoli'), to: city('haven-mediterranean') });
 		expect(gameOf(actor).outcome).toMatchObject({ won: true });
 		expect(worldOf(actor).campaign.opened).not.toContain('door:17');
-		send(actor, { type: 'CONTINUE' });
+		send(actor, { type: 'CONTINUE', player: 'host' as PlayerId, done: true });
 		expect(worldOf(actor).campaign.opened).toEqual(expect.arrayContaining(['door:17', 'door:58']));
 		expect(worldOf(actor).campaign.turningPoints).not.toContain('defection');
 	});
@@ -848,7 +848,7 @@ describe('exposure and the carrier', () => {
 		act(arriving, { a: 'drive', to: city('johannesburg'), card: gameOf(arriving).players[A]!.hand[0]! });
 		expect(gameOf(arriving).outcome).toMatchObject({ won: true });
 		expect(worldOf(arriving).campaign.sampleDelivered).toBe(true);
-		send(arriving, { type: 'CONTINUE' });
+		send(arriving, { type: 'CONTINUE', player: 'host' as PlayerId, done: true });
 		expect(character(worldOf(arriving), A).dead).toBe(true);
 	});
 });
@@ -1129,9 +1129,36 @@ describe('game end and the campaign', () => {
 			world.game!.outcome = { won, reason: 'test' };
 			edit?.(world);
 		}, 'over');
-		send(actor, { type: 'CONTINUE' });
+		const players = tablePlayers(worldOf(actor).table);
+		for (const player of players.length ? players : ['host' as PlayerId])
+			send(actor, { type: 'CONTINUE', player, done: true });
 		return actor;
 	};
+
+	test('game end opens only once everyone at the table has voted to go on, and a vote can be taken back', () => {
+		const ann = 'ann' as PlayerId;
+		const ben = 'ben' as PlayerId;
+		const actor = late(world => {
+			world.campaign.month = 10;
+			world.game!.outcome = { won: true, reason: 'test' };
+			world.table.seats = [
+				{ seat: A, player: ann, name: 'Ann' },
+				{ seat: B, player: ben, name: 'Ben' },
+			];
+		}, 'over');
+		const vote = (player: PlayerId, done: boolean) => send(actor, { type: 'CONTINUE', player, done });
+		expect(reject(worldOf(actor), 'over', { type: 'CONTINUE', player: 'cat' as PlayerId, done: true })).toBe(
+			'Sit down first',
+		);
+		vote(ann, true);
+		expect(phase(actor)).toBe('over');
+		expect(gameOf(actor).ended).toEqual([ann]);
+		vote(ann, false);
+		vote(ben, true);
+		expect(phase(actor)).toBe('over');
+		vote(ann, true);
+		expect(phase(actor)).toBe('upkeep');
+	});
 
 	test('a completed lost-haven objective leaves play, and a recon of a region carries into the second attempt', () => {
 		const actor = ended(false, world => {
@@ -3134,7 +3161,7 @@ describe('between games', () => {
 			game.outcome = { won: false, reason: 'test' };
 			edit?.(world, game);
 		}, 'over');
-		send(actor, { type: 'CONTINUE' });
+		send(actor, { type: 'CONTINUE', player: 'host' as PlayerId, done: true });
 		return actor;
 	}
 
@@ -3176,7 +3203,7 @@ describe('between games', () => {
 		const second = structuredClone(worldOf(actor));
 		second.game!.outcome = { won: false, reason: 'test' };
 		const next = createGameActor({ seed: 1, save: { v: 1, phase: 'over', world: second } }).start();
-		send(next, { type: 'CONTINUE' });
+		send(next, { type: 'CONTINUE', player: 'host' as PlayerId, done: true });
 		send(next, { type: 'FINISH_UPKEEP', player: 'host' as PlayerId, done: true });
 		expect(worldOf(next).campaign.month).toBe(2);
 		send(next, { type: 'START_GAME', seating });
@@ -3232,7 +3259,7 @@ test('a prologue game leaves no permanent mark on the campaign', () => {
 	world.game!.outcome = { won: false, reason: 'test' };
 	Object.values(world.campaign.characters)[0]!.exposure = 3;
 	const ended = createGameActor({ seed: 1, save: { v: 1, phase: 'over', world } }).start();
-	send(ended, { type: 'CONTINUE' });
+	send(ended, { type: 'CONTINUE', player: 'host' as PlayerId, done: true });
 	expect(gameOf(ended).upkeep).toEqual({ units: 0, populationChanges: [], bought: [], done: [] });
 	send(ended, { type: 'FINISH_UPKEEP', player: 'host' as PlayerId, done: true });
 	const after = worldOf(ended).campaign;
@@ -3368,7 +3395,7 @@ describe('scars and the sticker pool', () => {
 			world.game!.outcome = { won: true, reason: 'test' };
 			world.campaign.abilitiesForSale = ['architect', 'scout'];
 		}, 'over');
-		send(shop, { type: 'CONTINUE' });
+		send(shop, { type: 'CONTINUE', player: 'host' as PlayerId, done: true });
 		const buyer = Object.values(worldOf(shop).campaign.characters)[0]!.id;
 		const purchase = { t: 'ability', ability: 'architect', character: buyer, slot: 1 } as const;
 		send(shop, { type: 'PURCHASE', purchase });
@@ -3500,7 +3527,7 @@ describe('card states, improvements and companion audit', () => {
 			world.campaign.cityImprovementsForSale = ['double', 'wild'];
 			world.campaign.infectionImprovementsForSale = ['wellStocked'];
 		}, 'over');
-		send(shop, { type: 'CONTINUE' });
+		send(shop, { type: 'CONTINUE', player: 'host' as PlayerId, done: true });
 		const world = worldOf(shop);
 		const denverCards = Object.values(world.campaign.playerCards).filter(
 			card => card.kind === 'city' && card.city === city('denver'),

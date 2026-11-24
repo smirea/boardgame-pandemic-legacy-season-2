@@ -304,6 +304,8 @@ export type Game = {
 	/** Supply cubes a package brought into the game after setup. */
 	cubesAdded: number;
 	outcome: { won: boolean; reason: string } | null;
+	/** Who at the table has voted, once the game is over, to go on to game end. */
+	ended: PlayerId[];
 	log: LogEntry[];
 	nextSeq: number;
 	/** Game-end bookkeeping the upkeep screen works through. */

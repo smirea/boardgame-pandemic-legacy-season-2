@@ -168,6 +168,7 @@ export function createGame(world: World, seating: { seat: SeatId; character: Cha
 		connectedThisGame: [],
 		cubesAdded: 0,
 		outcome: null,
+		ended: [],
 		log: [],
 		nextSeq: 1,
 		upkeep: null,

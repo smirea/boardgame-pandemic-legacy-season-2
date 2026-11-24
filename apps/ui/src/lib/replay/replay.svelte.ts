@@ -191,7 +191,7 @@ export function commandLabel(world: World, command: Command | null): { who: stri
 		case 'UNDO':
 			return { who: world.game ? seatName(world, world.game.active) : null, text: 'Takes back the last action' };
 		case 'CONTINUE':
-			return { who: null, text: 'Game end: population and production' };
+			return { who: null, text: command.done ? 'Ready for game end' : 'Not ready for game end' };
 		case 'PURCHASE': {
 			const purchase = command.purchase;
 			const what =
