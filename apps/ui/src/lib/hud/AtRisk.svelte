@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
-	import { cityDef } from '@repo/game';
 	import type { CityId, Insights } from '@repo/game';
 	import type { CitySpot, SpotTone } from '#lib/board/types.ts';
-	import { fade, fly } from 'svelte/transition';
-	import { CITY_COLOR } from '#lib/board/CityMarker.svelte';
+	import { fly } from 'svelte/transition';
+	import { cityColor } from '#lib/board/CityMarker.svelte';
 	import Glyph from '#lib/board/Glyph.svelte';
 	import { cityName } from './labels.svelte.ts';
+	import TopTip from './TopTip.svelte';
 
 	type Props = {
 		infection: Insights['infection'];
@@ -82,54 +82,47 @@
 	});
 </script>
 
-<div class="risk-wrap" {@attach feedback('Problematic cities', () => ({ cities, chances }))}>
-	<div
-		class="risk"
-		class:none={!cities.length}
-		class:danger={incidents > 0}
-		role="button"
-		tabindex="0"
-		data-testid="at-risk"
-		aria-label={`${cities.length} problematic cities: no supply cubes and a chance to be infected`}
-		aria-expanded={open}
-		onpointerenter={() => (open = true)}
-		onpointerleave={() => (open = false)}
-		onfocus={() => (open = true)}
-		onblur={() => (open = false)}
-	>
-		<svg class="icon" viewBox="0 0 16 16" aria-hidden="true">
-			<path d="M8 1.6 15 14H1Z" />
-			<path class="mark" d="M8 6v3.6M8 11.4v.4" />
-		</svg>
-		{#key cities.length}<strong data-testid="at-risk-count" in:fly={{ y: -8, duration: 260 }}>{cities.length}</strong
-			>{/key}
-	</div>
-
-	{#if open}
-		<div class="tip" class:wide role="tooltip" data-testid="at-risk-tip" transition:fade={{ duration: 140 }}>
-			<section>
-				<header>
-					<strong>Problematic cities</strong>
-					<p class="note">No supply cubes, and a chance to be infected in the next Infect step.</p>
-				</header>
-				{#if problems.length}
-					{@render list(problems)}
-				{:else}
-					<p>None: every city that could be hit holds a supply cube.</p>
-				{/if}
-			</section>
-			{#if chances.length}
-				<section class="chances" data-testid="at-risk-chances">
-					<header>
-						<strong>Could come up</strong>
-						<p class="note">Cards nobody can name yet: each city's chance to be infected in the next Infect step.</p>
-					</header>
-					{@render list(chances)}
-				</section>
+<TopTip
+	name="at-risk"
+	testid="at-risk"
+	label={`${cities.length} problematic cities: no supply cubes and a chance to be infected`}
+	width={wide ? '31rem' : '20rem'}
+	bind:open
+	{@attach feedback('Problematic cities', () => ({ cities, chances }))}
+>
+	{#snippet counter()}
+		<span class="risk" class:none={!cities.length} class:danger={incidents > 0}>
+			<svg class="icon" viewBox="0 0 16 16" aria-hidden="true">
+				<path d="M8 1.6 15 14H1Z" />
+				<path class="mark" d="M8 6v3.6M8 11.4v.4" />
+			</svg>
+			{#key cities.length}<strong data-testid="at-risk-count" in:fly={{ y: -8, duration: 260 }}>{cities.length}</strong
+				>{/key}
+		</span>
+	{/snippet}
+	<div class="parts">
+		<section>
+			<header>
+				<strong>Problematic cities</strong>
+				<p class="note">No supply cubes, and a chance to be infected in the next Infect step.</p>
+			</header>
+			{#if problems.length}
+				{@render list(problems)}
+			{:else}
+				<p>None: every city that could be hit holds a supply cube.</p>
 			{/if}
-		</div>
-	{/if}
-</div>
+		</section>
+		{#if chances.length}
+			<section class="chances" data-testid="at-risk-chances">
+				<header>
+					<strong>Could come up</strong>
+					<p class="note">Cards nobody can name yet: each city's chance to be infected in the next Infect step.</p>
+				</header>
+				{@render list(chances)}
+			</section>
+		{/if}
+	</div>
+</TopTip>
 
 {#snippet list(groups: Group[])}
 	<ul>
@@ -139,7 +132,7 @@
 				<span class="names">
 					{#each group.cities as city, index (city)}
 						<span class="name" data-city={city}
-							><Glyph glyph="infection" color={CITY_COLOR[cityDef(city).color ?? 'haven']} /><span
+							><Glyph glyph="infection" color={cityColor(city)} /><span
 								>{cityName(city)}{#if outbreaks.has(city)}<em>incident</em>{/if}{index < group.cities.length - 1
 									? ','
 									: ''}</span
@@ -153,42 +146,23 @@
 {/snippet}
 
 <style>
-	.risk-wrap {
-		position: relative;
-		display: inline-flex;
-		align-items: center;
-		flex: none;
-	}
-
+	/* The counter's own parts lie straight in it; the class carries how much is at stake. */
 	.risk {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.35rem;
-		padding: 0.15rem 0.3rem;
-		border-radius: 4px;
-		color: var(--warn);
-		cursor: default;
-		outline: none;
+		display: contents;
 	}
 
-	.risk:focus-visible {
-		outline: 1px solid var(--line-strong);
-		outline-offset: 2px;
+	.parts {
+		display: flex;
+		flex-direction: column;
+		gap: 0.7rem;
 	}
 
-	.risk.none {
+	.risk.none .icon {
 		color: var(--muted);
 	}
 
-	.risk.danger {
+	.risk.danger .icon {
 		color: var(--danger);
-	}
-
-	.risk strong {
-		color: var(--ink);
-		font-size: 1.02rem;
-		font-weight: 600;
-		font-variant-numeric: tabular-nums;
 	}
 
 	.risk.danger strong {
@@ -198,6 +172,7 @@
 	.icon {
 		width: 1.15rem;
 		height: 1.15rem;
+		color: var(--warn);
 		fill: currentColor;
 	}
 
@@ -206,32 +181,6 @@
 		stroke: #1c140a;
 		stroke-width: 1.7;
 		stroke-linecap: round;
-	}
-
-	.tip {
-		position: absolute;
-		top: calc(100% + 0.55rem);
-		right: 0;
-		z-index: 65;
-		display: flex;
-		flex-direction: column;
-		gap: 0.7rem;
-		width: 20rem;
-		max-height: 70vh;
-		overflow: hidden;
-		padding: 0.5rem 0.72rem 0.6rem;
-		border-radius: 2px;
-		background: var(--slip);
-		box-shadow: var(--slip-shadow);
-		color: var(--slip-ink);
-		font-size: 0.78rem;
-		line-height: 1.32;
-		white-space: normal;
-		pointer-events: none;
-	}
-
-	.wide {
-		width: 31rem;
 	}
 
 	section {
@@ -246,10 +195,6 @@
 		font-size: 1.1rem;
 		font-weight: 400;
 		line-height: 1.1;
-	}
-
-	p {
-		margin: 0;
 	}
 
 	.note {

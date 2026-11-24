@@ -2,12 +2,13 @@
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { pack } from '@repo/game';
 	import type { CityId, World } from '@repo/game';
-	import { fade, fly } from 'svelte/transition';
+	import { fly } from 'svelte/transition';
 	import type { CitySpot } from '#lib/board/types.ts';
 	import { cityName } from './labels.svelte.ts';
 	import { HOLLOW_COLOR } from './rich.ts';
 	import type { Rich } from './rich.ts';
 	import RichText from './RichText.svelte';
+	import TopTip from './TopTip.svelte';
 
 	type Props = {
 		world: World;
@@ -56,76 +57,42 @@
 	});
 </script>
 
-<div class="hollow-wrap" {@attach feedback('Hollow Men supply', () => ({ left, placed, lethal }))}>
-	<div
-		class="hollow"
-		class:low
-		class:danger
-		role="button"
-		tabindex="0"
-		data-testid="hollow-supply"
-		data-dest="hollow"
-		aria-label={`Hollow Men supply: ${left} of ${total} figures left`}
-		aria-expanded={open}
-		onpointerenter={() => (open = true)}
-		onpointerleave={() => (open = false)}
-		onfocus={() => (open = true)}
-		onblur={() => (open = false)}
-	>
-		<span class="figure-icon" aria-hidden="true">
-			<svg viewBox="0 0 16 18">
-				<circle cx="8" cy="4.2" r="2.7" />
-				<path d="M2.6 16.5 5.4 8.2h5.2l2.8 8.3Z" />
-			</svg>
+<TopTip
+	name="hollow-supply"
+	testid="hollow-supply"
+	dest="hollow"
+	label={`Hollow Men supply: ${left} of ${total} figures left`}
+	title={`Hollow Men, ${left} of ${total} left`}
+	bind:open
+	{@attach feedback('Hollow Men supply', () => ({ left, placed, lethal }))}
+>
+	{#snippet counter()}
+		<span class="hollow" class:low class:danger>
+			<span class="figure-icon" aria-hidden="true">
+				<svg viewBox="0 0 16 18">
+					<circle cx="8" cy="4.2" r="2.7" />
+					<path d="M2.6 16.5 5.4 8.2h5.2l2.8 8.3Z" />
+				</svg>
+			</span>
+			{#key left}<strong data-testid="hollow-supply-count" in:fly={{ y: -8, duration: 260 }}>{left}</strong>{/key}
 		</span>
-		{#key left}<strong data-testid="hollow-supply-count" in:fly={{ y: -8, duration: 260 }}>{left}</strong>{/key}
-	</div>
-
-	{#if open}
-		<div class="tip" role="tooltip" data-testid="hollow-supply-tip" transition:fade={{ duration: 140 }}>
-			<strong>Hollow Men, {left} of {total} left</strong>
-			{#if lethal}
-				<p class="warn">Running out of Hollow Men figures loses the game.</p>
-			{/if}
-			<section>
-				<h4>On the board <b>{placed}</b></h4>
-				<p>
-					{#if onBoard.length}<RichText text={onBoard} />{:else}none{/if}
-				</p>
-			</section>
-			<p class="note">Leaving a location holding Hollow Men exposes your character.</p>
-		</div>
+	{/snippet}
+	{#if lethal}
+		<p class="warn">Running out of Hollow Men figures loses the game.</p>
 	{/if}
-</div>
+	<section>
+		<h4>On the board <b>{placed}</b></h4>
+		<p>
+			{#if onBoard.length}<RichText text={onBoard} />{:else}none{/if}
+		</p>
+	</section>
+	<p class="note">Leaving a location holding Hollow Men exposes your character.</p>
+</TopTip>
 
 <style>
-	.hollow-wrap {
-		position: relative;
-		display: inline-flex;
-		align-items: center;
-		flex: none;
-	}
-
+	/* The counter's own parts lie straight in it; the class carries how few figures are left. */
 	.hollow {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.35rem;
-		padding: 0.15rem 0.3rem;
-		border-radius: 4px;
-		color: var(--ink);
-		cursor: default;
-		outline: none;
-	}
-
-	.hollow:focus-visible {
-		outline: 1px solid var(--line-strong);
-		outline-offset: 2px;
-	}
-
-	.hollow strong {
-		font-size: 1.02rem;
-		font-weight: 600;
-		font-variant-numeric: tabular-nums;
+		display: contents;
 	}
 
 	.hollow.low strong {
@@ -159,34 +126,7 @@
 		fill: currentColor;
 	}
 
-	.tip {
-		position: absolute;
-		top: calc(100% + 0.55rem);
-		right: 0;
-		z-index: 65;
-		display: flex;
-		flex-direction: column;
-		gap: 0.38rem;
-		width: 19.5rem;
-		padding: 0.5rem 0.72rem 0.6rem;
-		border-radius: 2px;
-		background: var(--slip);
-		box-shadow: var(--slip-shadow);
-		color: var(--slip-ink);
-		font-size: 0.78rem;
-		line-height: 1.32;
-		white-space: normal;
-		pointer-events: none;
-	}
-
-	.tip > strong {
-		font-family: var(--font-display);
-		font-size: 1.1rem;
-		font-weight: 400;
-	}
-
 	.warn {
-		margin: 0;
 		color: var(--ink-danger);
 		font-weight: 600;
 	}
@@ -204,10 +144,6 @@
 		font-weight: 600;
 		letter-spacing: 0.04em;
 		text-transform: uppercase;
-	}
-
-	p {
-		margin: 0;
 	}
 
 	.note {
