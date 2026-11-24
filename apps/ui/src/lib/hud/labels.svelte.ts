@@ -11,7 +11,7 @@ import {
 	suppliesMade,
 } from '@repo/game';
 import type { Action, CardId, CityId, Decide, Decision, LogEntry, Play, Purchase, SeatId, World } from '@repo/game';
-import { CITY_COLOR } from '#lib/board/CityMarker.svelte';
+import { cityColor } from '#lib/board/CityMarker.svelte';
 import { cardColor } from './PlayerCard.svelte';
 import { HOLLOW_COLOR } from './rich.ts';
 import type { GlyphPart, Rich } from './rich.ts';
@@ -221,7 +221,7 @@ export function cardRef(world: World, id: CardId): GlyphPart {
 	const card = world.campaign.playerCards[id];
 	if (card) return { glyph: 'card', color: cardColor(card), text: cardName(world, id) };
 	const infection = world.campaign.infectionCards[id];
-	const color = infection?.kind === 'city' ? CITY_COLOR[cityDef(infection.city).color ?? 'haven'] : HOLLOW_COLOR;
+	const color = infection?.kind === 'city' ? cityColor(infection.city) : HOLLOW_COLOR;
 	return { glyph: 'infection', color, text: cardName(world, id) };
 }
 const cardList = (world: World, ids: CardId[]): Rich =>

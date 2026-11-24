@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
-	import { cityDef, reject, tablePlayers } from '@repo/game';
+	import { reject, tablePlayers } from '@repo/game';
 	import type { CharacterId, Command, PlayerId, PublicState } from '@repo/game';
-	import { CITY_COLOR } from '#lib/board/CityMarker.svelte';
+	import { cityColor } from '#lib/board/CityMarker.svelte';
 	import { characterVoice } from '#lib/characters/voice.svelte.ts';
 	import { flip } from 'svelte/animate';
 	import { fly } from 'svelte/transition';
@@ -198,7 +198,7 @@
 													/></span
 												>
 											{:else if target.city}
-												<i class="dot" style:background={CITY_COLOR[cityDef(target.city).color ?? 'haven']}></i>
+												<i class="dot" style:background={cityColor(target.city)}></i>
 											{/if}
 											{target.label}
 											{#if target.purchase.t === 'population'}

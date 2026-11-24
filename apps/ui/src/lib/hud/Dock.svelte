@@ -22,6 +22,7 @@
 	import ActionIcon from './ActionIcon.svelte';
 	import type { CardUse, DockChoice, HandPick } from './choosing.svelte.ts';
 	import { cityName, decideLabel, decisionTitle, seatColor, seatName, cardName } from './labels.svelte.ts';
+	import { lockdownOffers } from './ways.ts';
 	import { deal } from './deal.ts';
 	import { sortHand } from './handOrder.ts';
 	import VoteButton from './VoteButton.svelte';
@@ -162,18 +163,10 @@
 	const epidemicStep = $derived(
 		pending?.t === 'epidemicDrawn' || pending?.t === 'epidemicInfect' || pending?.t === 'intensify',
 	);
-	const lockable = $derived(
-		game.infectionDiscard.flatMap(id => {
-			const card = world.campaign.infectionCards[id];
-			return card?.kind === 'city' && card.improvement === 'lockdown' ? [{ id, city: card.city }] : [];
-		}),
-	);
-	const myLockPay = $derived(
-		game.seats.filter(owns).flatMap(other => game.players[other]!.hand.map(pay => ({ seat: other, pay })))[0] ?? null,
-	);
+	// In the action step of this browser's own turn, the Actions panel offers Lockdown.
 	const lockableHere = $derived(
-		onlockdown && myLockPay && snap.phase.startsWith('playing') && !(canAct && snap.phase === 'playing.actions')
-			? lockable.filter(card => reject(world, snap.phase, { type: 'LOCKDOWN', card: card.id, ...myLockPay }) === null)
+		onlockdown && snap.phase.startsWith('playing') && !(canAct && snap.phase === 'playing.actions')
+			? lockdownOffers(world, snap.phase, owns).filter(card => card.ready)
 			: [],
 	);
 	const cardsOf = (other: SeatId) =>
@@ -1498,27 +1491,6 @@
 		margin: 0;
 		color: var(--muted);
 		font-size: 0.82rem;
-	}
-
-	.flipcard {
-		flex: none;
-		animation: turn-over 520ms cubic-bezier(0.2, 0.9, 0.3, 1.15) backwards;
-		transform-origin: left center;
-	}
-
-	@keyframes turn-over {
-		from {
-			opacity: 0;
-			transform: perspective(40rem) rotateY(-95deg) translateX(1.5rem);
-		}
-		to {
-			opacity: 1;
-			transform: perspective(40rem) rotateY(0) translateX(0);
-		}
-	}
-
-	.cards.flipped {
-		--card-size: 0.5rem;
 	}
 
 	.chips {

@@ -1,10 +1,11 @@
 #!/usr/bin/env bun
-import { botCommand, campaignAt, createGameActor, phaseOf } from '@repo/game';
+import { botCommand } from '@repo/game';
 import type { Save } from '@repo/game';
 import { createHash } from 'node:crypto';
 import { parseArgs } from 'node:util';
 import { chromium } from 'playwright';
 import type { BrowserContext, Page } from 'playwright';
+import { actionSave, sleep, WINDOW_ARGS } from './bench.ts';
 
 /*
  * A table of real browsers over real WebRTC: one hosts, the rest join, everyone moves a pointer over the board, and
@@ -31,21 +32,6 @@ const { values: flags } = parseArgs({
 });
 const PEERS = Number(flags.peers);
 const STEPS = Number(flags.steps);
-
-function actionSave(month: number): Save {
-	const rng = { seed: 7 };
-	const actor = createGameActor({ seed: 12, save: campaignAt(month) });
-	actor.start();
-	for (let step = 0; step < 400; step++) {
-		const snapshot = actor.getSnapshot();
-		const phase = phaseOf(snapshot);
-		const world = snapshot.context.world;
-		const idle = phase === 'playing.actions' && world.game!.pending.length === 0;
-		if (idle && world.campaign.briefing.length === 0) return { v: 1, phase, world };
-		actor.send(idle ? { type: 'ACK_BRIEFING' } : botCommand(world, phase, rng, 4));
-	}
-	throw new Error(`month ${month} never reached an action step`);
-}
 
 type Traffic = {
 	sent: Record<string, { n: number; bytes: number }>;
@@ -121,18 +107,11 @@ const INSTRUMENT = (relayOnly: boolean) => {
 	requestAnimationFrame(tick);
 };
 
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 const hash = (text: string) => createHash('sha1').update(text).digest('hex').slice(0, 10);
 
 const browser = await chromium.launch({
 	headless: false,
-	args: [
-		'--ignore-gpu-blocklist',
-		'--disable-backgrounding-occluded-windows',
-		'--disable-renderer-backgrounding',
-		'--disable-background-timer-throttling',
-		'--disable-features=CalculateNativeWinOcclusion',
-	],
+	args: [...WINDOW_ARGS, '--disable-background-timer-throttling'],
 });
 
 type Tab = { name: string; context: BrowserContext; page: Page; errors: string[] };

@@ -8,10 +8,6 @@ export function debugIdFromUrl(url: URL): string | null {
 	return debugIdFromParams(url.searchParams);
 }
 
-export function hasDebugId(url: URL): boolean {
-	return debugIdParamNames.some(name => url.searchParams.has(name));
-}
-
 function debugIdFromParams(params: URLSearchParams): string | null {
 	for (const name of debugIdParamNames) {
 		const value = params.get(name);

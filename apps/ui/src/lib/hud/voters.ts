@@ -1,4 +1,4 @@
-import { SEAT_IDS, tablePlayers } from '@repo/game';
+import { tablePlayers } from '@repo/game';
 import type { PlayerId, Table } from '@repo/game';
 import { seatColor } from './labels.svelte.ts';
 

@@ -4,7 +4,7 @@
 	import type { Campaign, CardId } from '@repo/game';
 	import { untrack } from 'svelte';
 	import { fade, fly } from 'svelte/transition';
-	import { CITY_COLOR } from '#lib/board/CityMarker.svelte';
+	import { cityColor } from '#lib/board/CityMarker.svelte';
 	import CardSpread from './CardSpread.svelte';
 	import { sortHand, sortInfection } from './handOrder.ts';
 	import { HoverTip } from './hoverTip.svelte.ts';
@@ -75,7 +75,7 @@
 			const card = campaign.infectionCards[id];
 			if (!card) continue;
 			const key = card.kind === 'city' ? `city:${card.city}` : card.kind;
-			const color = card.kind === 'city' ? CITY_COLOR[cityDef(card.city).color ?? 'haven'] : HOLLOW_COLOR;
+			const color = card.kind === 'city' ? cityColor(card.city) : HOLLOW_COLOR;
 			const name = cardLabel(id);
 			const hit = counts.get(key);
 			if (hit) hit.count += 1;

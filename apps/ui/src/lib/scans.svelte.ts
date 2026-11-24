@@ -24,8 +24,6 @@ export const scanUrl = (src: string) => `/api/scans/${src}`;
 export const sealScans = (seal: Seal): Scan[] =>
 	(seal.t === 'package' ? packageScans[seal.id] : doorScans[seal.id]) ?? [];
 
-export const eventScan = (id: EventId): Scan[] => (eventScans[id] ? [eventScans[id]] : []);
-
 const companionCity: Partial<Record<CompanionId, CityId>> = {};
 for (const [city, boxes] of Object.entries(pack.searches)) {
 	for (const box of boxes) {
@@ -34,7 +32,6 @@ for (const [city, boxes] of Object.entries(pack.searches)) {
 }
 
 export type CardScan = { card: Scan; sticker?: Scan };
-export type PlayerCardScan = CardScan;
 
 /** Printed scan for any player card (cities, events, epidemics, produce supplies, searches, companions, improvements). */
 export function playerCardScan(card: PlayerCard): CardScan | null {

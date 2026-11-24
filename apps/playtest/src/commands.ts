@@ -404,8 +404,6 @@ export function mayRaw(state: PublicState, who: Who, command: Command): string |
 	}
 }
 
-export const starterJobs = () => pack.jobs.filter(job => job.starting);
-
 /** Event and companion cards in hand that cannot be played right now, with the engine's reason where there is one. */
 export function heldUnplayable(state: PublicState, seat: SeatId): string[] {
 	const { world, phase } = state;

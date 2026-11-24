@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
-	import { ending, score, SEAT_IDS, tablePlayers } from '@repo/game';
-	import type { Command, PlayerId, PublicState, SeatId, Start } from '@repo/game';
+	import { ending, score, SEAT_IDS } from '@repo/game';
+	import type { Command, PlayerId, PublicState, Start } from '@repo/game';
 	import { LS } from '#lib/storage.ts';
 	import { ENDING_TIERS } from '#lib/story/script.ts';
 	import { MONTHS, seatColor } from './labels.svelte.ts';
 	import Ready from './Ready.svelte';
+	import { tableVoters, waitingOn } from './voters.ts';
 
 	type Props = {
 		snap: PublicState;
@@ -26,9 +27,6 @@
 		ENDING_TIERS[campaign.sampleDelivered ? 'delivered' : 'failed'].find(tier => total.total >= tier.min) ??
 			ENDING_TIERS.failed.at(-1)!,
 	);
-	const players = $derived(tablePlayers(table));
-	const colorOf = (seat: SeatId) => seatColor(seat);
-	const firstSeat = (who: PlayerId) => table.seats.find(entry => entry.player === who)!;
 	const mine = $derived(table.seats.filter(entry => entry.player === player));
 
 	const starts: { start: Start; label: string }[] = $derived(
@@ -39,7 +37,12 @@
 				]
 			: [{ start: 'month', label: MONTHS[campaign.month]! }],
 	);
-	const waitingOn = $derived(players.filter(who => !table.ready[who]).map(who => firstSeat(who).name));
+	const waiting = $derived(
+		waitingOn(
+			tableVoters(table, who => Boolean(table.ready[who])),
+			player,
+		),
+	);
 	const split = $derived(new Set(Object.values(table.ready)).size > 1);
 
 	let name = $state(LS.get('name', ''));
@@ -96,7 +99,7 @@
 		<ol class="seats" aria-label="Seats">
 			{#each SEAT_IDS as seat (seat)}
 				{@const entry = table.seats.find(candidate => candidate.seat === seat)}
-				<li class:open={!entry} class:you={entry?.player === player} style:--seat={colorOf(seat)}>
+				<li class:open={!entry} class:you={entry?.player === player} style:--seat={seatColor(seat)}>
 					<i></i>
 					{#if entry}
 						<strong>{entry.name}</strong>
@@ -135,8 +138,8 @@
 				A game needs two seats. Others join with your passphrase, or play another seat here.
 			{:else if split}
 				Everyone has to pick the same game.
-			{:else if waitingOn.length}
-				Waiting for {waitingOn.join(', ')}.
+			{:else if waiting.length}
+				Waiting for {waiting.join(', ')}.
 			{:else}
 				Choosing characters.
 			{/if}

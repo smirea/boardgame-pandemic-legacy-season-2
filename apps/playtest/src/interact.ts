@@ -5,6 +5,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { parseArgs } from 'node:util';
 import { chromium } from 'playwright';
 import type { CDPSession, Page } from 'playwright';
+import { actionSave, sleep, WINDOW_ARGS } from './bench.ts';
 
 /*
  * What the game costs while it is being played. A real, GPU-backed Chromium window stands on a game at an action
@@ -40,22 +41,6 @@ const { values: flags } = parseArgs({
 		uncapped: { type: 'boolean', default: false },
 	},
 });
-
-/** A game standing at a player's action step with its briefing read. */
-function actionSave(month: number): Save {
-	const rng = { seed: 7 };
-	const actor = createGameActor({ seed: 12, save: campaignAt(month) });
-	actor.start();
-	for (let step = 0; step < 400; step++) {
-		const snapshot = actor.getSnapshot();
-		const phase = phaseOf(snapshot);
-		const world = snapshot.context.world;
-		const idle = phase === 'playing.actions' && world.game!.pending.length === 0;
-		if (idle && world.campaign.briefing.length === 0) return { v: 1, phase, world };
-		actor.send(idle ? { type: 'ACK_BRIEFING' } : botCommand(world, phase, rng, 4));
-	}
-	throw new Error(`month ${month} never reached an action step`);
-}
 
 type Moment = { save: Save; command: Command };
 /**
@@ -149,8 +134,6 @@ const PROBE = () => {
 	}).observe({ type: 'event', durationThreshold: 16 } as PerformanceObserverInit);
 };
 
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
 type TraceEvent = { name: string; ph: string; ts: number; dur?: number; tid: number; pid: number; args?: unknown };
 /**
  * What a CPU profile cannot show: the work the browser does around the page's script. Lists the single longest pieces
@@ -176,13 +159,7 @@ function slowest(trace: Buffer, floor = 12): string[] {
 
 const browser = await chromium.launch({
 	headless: false,
-	args: [
-		'--ignore-gpu-blocklist',
-		'--disable-backgrounding-occluded-windows',
-		'--disable-renderer-backgrounding',
-		'--disable-features=CalculateNativeWinOcclusion',
-		...(flags.uncapped ? ['--disable-frame-rate-limit', '--disable-gpu-vsync'] : []),
-	],
+	args: [...WINDOW_ARGS, ...(flags.uncapped ? ['--disable-frame-rate-limit', '--disable-gpu-vsync'] : [])],
 });
 const context = await browser.newContext({
 	viewport: { width: Number(flags.width), height: Number(flags.height) },
@@ -613,6 +590,10 @@ try {
 			window.__probe.on = false;
 			return window.__probe;
 		});
+		// The game catches an error thrown while drawing and shows it in place of the table, which no `pageerror`
+		// reports. A scenario that ended there measured an empty screen.
+		if (await page.getByRole('heading', { name: 'The screen broke' }).count())
+			throw new Error(`${scenario.id} broke the screen:\n${await page.locator('pre').first().innerText()}`);
 		const seconds = (performance.now() - started) / 1000;
 		const after = await metrics(client);
 		if (flags.profile) {

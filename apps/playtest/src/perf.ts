@@ -1,11 +1,11 @@
 #!/usr/bin/env bun
-import { botCommand, campaignAt, createGameActor, phaseOf } from '@repo/game';
 import type { Save } from '@repo/game';
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { parseArgs } from 'node:util';
 import { chromium } from 'playwright';
 import type { CDPSession, Page } from 'playwright';
+import { actionSave, sleep, WINDOW_ARGS } from './bench.ts';
 
 /*
  * What the game costs while nobody touches it. A real, GPU-backed Chromium window sits on each screen for a
@@ -36,30 +36,14 @@ const RUNS = Number(flags.runs);
 const SECONDS = Number(flags.seconds);
 const SETTLE = Number(flags.settle);
 
-/** A game standing at a player's action step, which is where a table spends its idle time. */
-function idleSave(month: number): Save {
-	const rng = { seed: 7 };
-	const actor = createGameActor({ seed: 12, save: campaignAt(month) });
-	actor.start();
-	for (let step = 0; step < 400; step++) {
-		const snapshot = actor.getSnapshot();
-		const phase = phaseOf(snapshot);
-		const world = snapshot.context.world;
-		const idle = phase === 'playing.actions' && world.game!.pending.length === 0;
-		if (idle && world.campaign.briefing.length === 0) return { v: 1, phase, world };
-		actor.send(idle ? { type: 'ACK_BRIEFING' } : botCommand(world, phase, rng, 4));
-	}
-	throw new Error(`month ${month} never reached an action step`);
-}
-
 type Scenario = { id: string; path: string; save?: Save; settle?: number };
 const scenarios: Scenario[] = [
 	{ id: 'blank', path: 'about:blank' },
 	{ id: 'landing', path: '/?DEBUG_ID=perf-landing' },
 	// A page loaded once keeps compiling in the background for most of a minute, which reads as renderer CPU.
 	{ id: 'lobby', path: '/debug/game?DEBUG_ID=perf-lobby', settle: 50 },
-	{ id: 'january', path: '/debug/game?DEBUG_ID=perf-january', save: idleSave(1) },
-	{ id: 'july', path: '/debug/game?DEBUG_ID=perf-july', save: idleSave(7) },
+	{ id: 'january', path: '/debug/game?DEBUG_ID=perf-january', save: actionSave(1) },
+	{ id: 'july', path: '/debug/game?DEBUG_ID=perf-july', save: actionSave(7) },
 ].filter(scenario => !flags.only || flags.only.split(',').includes(scenario.id));
 
 declare const window: Window & {
@@ -176,8 +160,6 @@ const otherCpu = () =>
 		.filter(match => match && Number(match[1]) !== process.pid && !/Google Chrome for Testing|\/ps$/.test(match[3]!))
 		.reduce((total, match) => total + Number(match![2]), 0) / 100;
 
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
 async function measure(page: Page, client: CDPSession, browser: CDPSession, scenario: string): Promise<Sample> {
 	const read = async () => ({
 		at: performance.now(),
@@ -219,13 +201,7 @@ async function measure(page: Page, client: CDPSession, browser: CDPSession, scen
 
 const browser = await chromium.launch({
 	headless: false,
-	args: [
-		'--ignore-gpu-blocklist',
-		// A window that another one covers stops drawing, which would read as an idle game.
-		'--disable-backgrounding-occluded-windows',
-		'--disable-renderer-backgrounding',
-		'--disable-features=CalculateNativeWinOcclusion',
-	],
+	args: WINDOW_ARGS,
 });
 const context = await browser.newContext({
 	viewport: { width: Number(flags.width), height: Number(flags.height) },

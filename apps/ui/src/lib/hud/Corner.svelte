@@ -328,17 +328,6 @@
 		outline-offset: 3px;
 	}
 
-	.sr-only {
-		position: absolute;
-		width: 1px;
-		height: 1px;
-		margin: -1px;
-		padding: 0;
-		overflow: hidden;
-		clip-path: inset(50%);
-		white-space: nowrap;
-	}
-
 	/* Grown from the seat's outer corner toward the board, over everything near it. */
 	.big {
 		position: absolute;

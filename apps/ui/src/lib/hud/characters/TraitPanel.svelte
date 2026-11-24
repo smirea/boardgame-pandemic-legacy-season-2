@@ -187,13 +187,4 @@
 		text-decoration-color: #d9573f;
 		opacity: 0.55;
 	}
-
-	.sr-only {
-		position: absolute;
-		width: 1px;
-		height: 1px;
-		overflow: hidden;
-		clip-path: inset(50%);
-		white-space: nowrap;
-	}
 </style>

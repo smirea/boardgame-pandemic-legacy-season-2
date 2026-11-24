@@ -1,16 +1,15 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
-	import { cityDef } from '@repo/game';
 	import type { CityId } from '@repo/game';
 	import { Canvas } from '@threlte/core';
 	import { untrack } from 'svelte';
-	import { NoToneMapping, WebGLRenderer } from 'three';
+	import { NoToneMapping, PCFShadowMap, WebGLRenderer } from 'three';
 	import { inkOn } from '#lib/color.ts';
 	import ActionIcon from '#lib/hud/ActionIcon.svelte';
 	import type { Rich } from '#lib/hud/rich.ts';
 	import RichText from '#lib/hud/RichText.svelte';
 	import type { Action } from '@repo/game';
-	import { CITY_COLOR } from './CityMarker.svelte';
+	import { cityColor } from './CityMarker.svelte';
 	import Glyph from './Glyph.svelte';
 	import { partHint, partKey, stockpileHint } from './hints';
 	import type { Part } from './hints';
@@ -234,16 +233,22 @@
 		node.addEventListener('pointerdown', stop);
 		return () => node.removeEventListener('pointerdown', stop);
 	};
+	// The slip says the same thing wherever the pointer is over one part of a city, so only which part that is decides
+	// its text and colour. The pointer's place only moves the slip.
+	const over = $derived(hovered ? `${hovered.city ?? ''}/${partKey(hovered.part)}` : null);
 	const hint = $derived.by(() => {
-		if (!hovered) return null;
-		if (!hovered.city) return view.stockpile === null ? null : stockpileHint(view.stockpile, view.reserve);
-		return view.cities[hovered.city] ? partHint(hovered.part, view.cities[hovered.city]!) : null;
+		if (over === null) return null;
+		const { city, part } = untrack(() => hovered)!;
+		if (!city) return view.stockpile === null ? null : stockpileHint(view.stockpile, view.reserve);
+		return view.cities[city] ? partHint(part, view.cities[city]!) : null;
 	});
 	// The slip takes the colour of the city it describes, as the city's player card does, and the stockpile's is
 	// plain paper and ink.
-	const tint = $derived(
-		hovered ? (hovered.city ? CITY_COLOR[cityDef(hovered.city).color ?? 'haven'] : '#5a4a36') : null,
-	);
+	const tint = $derived.by(() => {
+		if (over === null) return null;
+		const city = untrack(() => hovered)!.city;
+		return city ? cityColor(city) : '#5a4a36';
+	});
 
 	function onhint(city: CityId, part: Part, event: PointerEvent | null, name?: Placement) {
 		if (!event) {
@@ -303,7 +308,8 @@
 		hovered = null;
 	}}
 >
-	<Canvas toneMapping={NoToneMapping} {createRenderer}>
+	<!-- Threlte's own default is a shadow map three no longer has, which it says in the console on every load. -->
+	<Canvas toneMapping={NoToneMapping} shadows={PCFShadowMap} {createRenderer}>
 		<!--
 			Svelte keeps a comment node in the page for every piece of the scene, and Threlte puts them straight under
 			the <canvas>, where the browser takes about forty times as long to add or remove a node as anywhere else. A

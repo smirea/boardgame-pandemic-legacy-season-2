@@ -701,7 +701,6 @@
 		color: var(--muted);
 	}
 
-	.sfx-board,
 	.piece-buttons {
 		display: flex;
 		flex-wrap: wrap;

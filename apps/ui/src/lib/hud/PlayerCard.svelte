@@ -1,7 +1,7 @@
 <script lang="ts" module>
 	import { cityDef } from '@repo/game';
 	import type { PlayerCard } from '@repo/game';
-	import { CITY_COLOR } from '#lib/board/CityMarker.svelte';
+	import { cityColor } from '#lib/board/CityMarker.svelte';
 	import { EVENT_PRINT } from '#lib/cards/playerPrint.ts';
 
 	/** The top of each face's gradient, which the face, its pile on a seat and its glyphs all wear. */
@@ -29,7 +29,7 @@
 	export function cardColor(card: PlayerCard): string {
 		switch (card.kind) {
 			case 'city':
-				return CITY_COLOR[cityDef(card.city).color ?? 'haven'];
+				return cityColor(card.city);
 			case 'event':
 				return FACE_COLOR[EVENT_PRINT[card.event].mode];
 			default:

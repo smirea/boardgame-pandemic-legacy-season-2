@@ -35,6 +35,13 @@ export class TimeLapse {
 		const run = ++this.run;
 		this.world = null;
 		this.ready = false;
+		// Reading a whole game back takes tens of milliseconds, and the board is still showing how the game ended.
+		await new Promise<void>(done =>
+			typeof requestIdleCallback === 'function'
+				? requestIdleCallback(() => done(), { timeout: 1500 })
+				: setTimeout(done, 300),
+		);
+		if (run !== this.run) return false;
 		const raw = await this.fetch().catch(() => null);
 		if (run !== this.run || !raw) return false;
 		const inGame = framesOf(parseRecord(JSON.parse(raw))).filter(

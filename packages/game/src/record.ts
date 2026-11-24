@@ -74,11 +74,18 @@ function walk(before: unknown, after: unknown, path: (string | number)[], out: P
 		const next = after as unknown[];
 		const dropped = shifted(before, next);
 		const base = dropped ? before.slice(dropped) : before;
-		if (dropped) out.push({ p: path, shift: dropped });
+		const changes: Patch[] = [];
+		if (dropped) changes.push({ p: path, shift: dropped });
 		const shared = Math.min(base.length, next.length);
-		for (let index = 0; index < shared; index++) walk(base[index], next[index], [...path, index], out);
-		for (let index = shared; index < next.length; index++) out.push({ p: [...path, index], v: next[index] });
-		if (next.length < base.length) out.push({ p: path, len: next.length });
+		for (let index = 0; index < shared; index++) walk(base[index], next[index], [...path, index], changes);
+		for (let index = shared; index < next.length; index++) changes.push({ p: [...path, index], v: next[index] });
+		if (next.length < base.length) changes.push({ p: path, len: next.length });
+		// A card taken out of the middle of a sorted pile moves every card after it, one patch each. A list of plain
+		// values is then shorter sent whole.
+		const whole: Patch = { p: path, v: next };
+		const plain = changes.length > 1 && next.every(item => typeof item !== 'object' || item === null);
+		if (plain && JSON.stringify(whole).length < JSON.stringify(changes).length) out.push(whole);
+		else out.push(...changes);
 		return;
 	}
 	const left = before as Record<string, unknown>;

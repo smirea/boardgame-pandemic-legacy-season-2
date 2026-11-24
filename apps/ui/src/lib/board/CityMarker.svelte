@@ -1,5 +1,6 @@
 <script lang="ts" module>
-	import type { Color } from '@repo/game';
+	import { cityDef } from '@repo/game';
+	import type { CityId, Color } from '@repo/game';
 
 	export const CITY_COLOR: Record<Color | 'haven', string> = {
 		blue: '#2f64a3',
@@ -8,6 +9,9 @@
 		red: '#bc3f27',
 		haven: '#2f8f74',
 	};
+
+	/** The colour a location is known by wherever it shows: its region's, or the havens' green. */
+	export const cityColor = (city: CityId): string => CITY_COLOR[cityDef(city).color ?? 'haven'];
 </script>
 
 <script lang="ts">

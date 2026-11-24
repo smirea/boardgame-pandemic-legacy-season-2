@@ -81,7 +81,8 @@
 		return () => {
 			clearTimeout(timer);
 			// An interlude cut short by what the turn's first move set off has still been shown: it does not play again.
-			done();
+			// Said once the card is gone. Saying it here would change what the card is drawn from while it is taken down.
+			queueMicrotask(done);
 		};
 	}
 </script>

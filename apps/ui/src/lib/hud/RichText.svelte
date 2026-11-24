@@ -19,7 +19,7 @@
 			class="glyphed"
 			><span class="glyph-glue"><Glyph glyph={part.glyph} color={part.color} />&#8239;{first}</span>{rest}</span
 		>{:else}<span class="glyphed"
-			><Glyph glyph={part.glyph} color={part.color} />{#if part.alt}<span class="alt">{part.alt}</span>{/if}</span
+			><Glyph glyph={part.glyph} color={part.color} />{#if part.alt}<span class="sr-only">{part.alt}</span>{/if}</span
 		>{/if}
 {/each}
 
@@ -29,16 +29,6 @@
 	}
 
 	.glyph-glue {
-		white-space: nowrap;
-	}
-
-	/* Read aloud and copied, never seen: the glyph already shows it. */
-	.alt {
-		position: absolute;
-		width: 1px;
-		height: 1px;
-		overflow: hidden;
-		clip-path: inset(50%);
 		white-space: nowrap;
 	}
 

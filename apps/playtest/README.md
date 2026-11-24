@@ -65,6 +65,8 @@ Memory files live in `memory/` and are tracked, so a later run starts with what 
 
 ## Idle cost
 
+The three measuring scripts below share `src/bench.ts`: the game they stand a browser on (`actionSave`) and the flags of the window they open it in.
+
 `./apps/playtest/src/perf.ts` measures what the game costs while nobody touches it. It opens a real, GPU-backed Chromium window on a blank page, the landing page, a new campaign's lobby, and a January and a July game standing at an action step, lets each settle, and reads for 15 seconds: animation frames run, frames WebGL drew, draw calls, the CPU time of the renderer and GPU processes, and the machine's GPU load. It needs `bun run dev` running.
 
 ```sh

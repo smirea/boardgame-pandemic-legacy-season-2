@@ -63,11 +63,6 @@ export function projectPolygons(geometry: GeoPermissibleObjects): Ring[][] {
 
 const MIN_CITY_SPACING = 7.5;
 
-export function unproject(point: BoardPoint): { lat: number; lon: number } {
-	const [lon, lat] = projection.invert!([point.x, point.z])!;
-	return { lat, lon };
-}
-
 /**
  * Real coordinates put dense areas on top of each other at board scale, so cities are nudged apart
  * while staying anchored to where they really are.

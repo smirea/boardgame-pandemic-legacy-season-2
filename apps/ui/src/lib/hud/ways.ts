@@ -1,5 +1,5 @@
-import { isFreeAction } from '@repo/game';
-import type { Action, CardId, World } from '@repo/game';
+import { isFreeAction, reject } from '@repo/game';
+import type { Action, CardId, CityId, Phase, SeatId, World } from '@repo/game';
 
 /** What a card is, apart from which copy it is: two cards that read the same are one choice. */
 export function cardTwin(world: World, id: CardId): string {
@@ -36,5 +36,25 @@ export function ways(world: World, variants: Action[]): Action[] {
 		if (seen.has(key)) return false;
 		seen.add(key);
 		return true;
+	});
+}
+
+/**
+ * The Lockdown cards in the infection discard pile, each with whether this browser could destroy it now: any card
+ * in a hand it holds pays for one, and the engine says whether the moment allows it.
+ */
+export function lockdownOffers(
+	world: World,
+	phase: Phase,
+	owns: (seat: SeatId) => boolean,
+): { id: CardId; city: CityId; ready: boolean }[] {
+	const game = world.game;
+	if (!game) return [];
+	const pay = game.seats.filter(owns).flatMap(seat => game.players[seat]!.hand.map(card => ({ seat, pay: card })))[0];
+	return game.infectionDiscard.flatMap(id => {
+		const card = world.campaign.infectionCards[id];
+		if (card?.kind !== 'city' || card.improvement !== 'lockdown') return [];
+		const ready = pay !== undefined && reject(world, phase, { type: 'LOCKDOWN', card: id, ...pay }) === null;
+		return [{ id, city: card.city, ready }];
 	});
 }

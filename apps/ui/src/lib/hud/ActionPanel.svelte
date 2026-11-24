@@ -15,7 +15,7 @@
 	} from './labels.svelte.ts';
 	import RichText from './RichText.svelte';
 	import { keep } from './viewState.ts';
-	import { ways } from './ways.ts';
+	import { lockdownOffers, ways } from './ways.ts';
 
 	type Props = {
 		snap: PublicState;
@@ -50,9 +50,6 @@
 
 	const world = $derived(snap.world);
 	const game = $derived(world.game!);
-	const myPay = $derived(
-		game.seats.filter(owns).flatMap(other => game.players[other]!.hand.map(pay => ({ seat: other, pay })))[0] ?? null,
-	);
 	const refused = (command: Command) => !canAct || reject(world, snap.phase, command) !== null;
 
 	const rows = $derived(
@@ -83,12 +80,7 @@
 
 	// A Lockdown card in the infection discard can be destroyed at any point of a turn, so it waits here with the
 	// controls that move the turn on.
-	const lockable = $derived(
-		game.infectionDiscard.flatMap(id => {
-			const card = world.campaign.infectionCards[id];
-			return card?.kind === 'city' && card.improvement === 'lockdown' ? [{ id, city: card.city }] : [];
-		}),
-	);
+	const lockable = $derived(lockdownOffers(world, snap.phase, owns));
 </script>
 
 {#snippet actionRow(row: (typeof rows)[number], index: number)}
@@ -191,11 +183,8 @@
 			>
 		{/if}
 		{#each lockable as card (card.id)}
-			<button
-				class="lockdown"
-				disabled={!myPay || reject(world, snap.phase, { type: 'LOCKDOWN', card: card.id, ...myPay }) !== null}
-				onclick={() => onlockdown(card.id)}
-				data-testid="lockdown">Lockdown: destroy {cityName(card.city)}</button
+			<button class="lockdown" disabled={!card.ready} onclick={() => onlockdown(card.id)} data-testid="lockdown"
+				>Lockdown: destroy {cityName(card.city)}</button
 			>
 		{/each}
 	</footer>

@@ -1,7 +1,7 @@
-import { cityDef } from '@repo/game';
 import type { CardId, World } from '@repo/game';
-import { CITY_COLOR } from '#lib/board/CityMarker.svelte';
+import { cityColor } from '#lib/board/CityMarker.svelte';
 import { cardName, cityName } from './labels.svelte.ts';
+import { HOLLOW_COLOR } from './rich.ts';
 
 /** More cards than this stored at once is a jump, such as a save being loaded, and nothing anyone watched. */
 const MOST = 6;
@@ -22,9 +22,9 @@ export function flyToStorage(world: World, added: { id: CardId; pile: 'player' |
 		if (!sourceEl) return;
 		const from = sourceEl.getBoundingClientRect();
 		const card = pile === 'player' ? world.campaign.playerCards[id] : world.campaign.infectionCards[id];
-		const city = card && 'city' in card ? cityDef(card.city) : null;
-		const band = city ? CITY_COLOR[city.color ?? 'haven'] : '#4e3b63';
-		const label = city ? cityName(city.id) : cardName(world, id);
+		const city = card && 'city' in card ? card.city : null;
+		const band = city ? cityColor(city) : HOLLOW_COLOR;
+		const label = city ? cityName(city) : cardName(world, id);
 		const ghost = document.createElement('div');
 		ghost.dataset.testid = 'inoculate-flight';
 		Object.assign(ghost.style, {

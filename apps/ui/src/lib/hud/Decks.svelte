@@ -3,7 +3,7 @@
 	import { cityDef, pack } from '@repo/game';
 	import type { CardId, CityId, InfectionCard, Insights, PlayerCard, PlayerDeckKind, World } from '@repo/game';
 	import { fade, fly } from 'svelte/transition';
-	import { CITY_COLOR } from '#lib/board/CityMarker.svelte';
+	import { CITY_COLOR, cityColor } from '#lib/board/CityMarker.svelte';
 	import { inkOn } from '#lib/color.ts';
 	import CardSpread from './CardSpread.svelte';
 	import { sortHand, sortInfection } from './handOrder.ts';
@@ -53,7 +53,7 @@
 				...(index ? [', '] : []),
 				{
 					glyph: 'infection' as const,
-					color: city === 'hollow' ? HOLLOW_COLOR : CITY_COLOR[cityDef(city).color ?? 'haven'],
+					color: city === 'hollow' ? HOLLOW_COLOR : cityColor(city),
 					text: `${city === 'hollow' ? 'Hollow Men' : cityName(city)}${count > 1 ? ` ×${count}` : ''}`,
 				},
 			]);

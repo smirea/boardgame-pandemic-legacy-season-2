@@ -81,7 +81,7 @@
 	<svg class="house" viewBox="0 0 16 16" aria-hidden="true">
 		<path d="M8 1.5 1 7.6h2v6.9h4v-4.5h2v4.5h4V7.6h2z" />
 	</svg>
-	<span class="label">Home:</span>
+	<span class="sr-only">Home:</span>
 	{#if home && naming === home}
 		{@render field(home)}
 	{:else if options}
@@ -158,16 +158,6 @@
 		align-items: baseline;
 		gap: 0.4em;
 		min-width: 0;
-	}
-
-	/* The house says it; the word is for screen readers. */
-	.label {
-		position: absolute;
-		width: 1px;
-		height: 1px;
-		overflow: hidden;
-		clip-path: inset(50%);
-		white-space: nowrap;
 	}
 
 	.value {
