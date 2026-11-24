@@ -192,8 +192,4 @@
 		font-size: 1.1rem;
 		font-weight: 400;
 	}
-
-	.tip :global(p) {
-		margin: 0;
-	}
 </style>

@@ -263,4 +263,8 @@
 		letter-spacing: 0.04em;
 		text-transform: uppercase;
 	}
+
+	p {
+		margin: 0;
+	}
 </style>

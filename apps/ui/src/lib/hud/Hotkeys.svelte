@@ -1,4 +1,5 @@
 <script lang="ts">
+	import CloseButton from './CloseButton.svelte';
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 
 	let { onclose }: { onclose: () => void } = $props();
@@ -38,7 +39,7 @@
 <section class="sheet" data-testid="hotkeys-dialog" {@attach feedback('Keyboard shortcuts', () => undefined)}>
 	<header>
 		<h2>Keyboard shortcuts</h2>
-		<button type="button" class="close" onclick={onclose} aria-label="Close keyboard shortcuts">×</button>
+		<CloseButton label="Close keyboard shortcuts" onclick={onclose} />
 	</header>
 
 	<div class="sections">
@@ -93,30 +94,6 @@
 		font-size: 1.4rem;
 		font-weight: 400;
 		line-height: 1.1;
-	}
-
-	.close {
-		display: grid;
-		place-items: center;
-		width: 1.8rem;
-		height: 1.8rem;
-		padding: 0;
-		border: 1px solid var(--line);
-		border-radius: 2px;
-		background: transparent;
-		color: var(--muted);
-		font: inherit;
-		font-size: 1.15rem;
-		line-height: 1;
-		cursor: pointer;
-		transition:
-			border-color 140ms ease,
-			color 140ms ease;
-	}
-
-	.close:hover {
-		border-color: var(--line-strong);
-		color: var(--ink);
 	}
 
 	.sections {

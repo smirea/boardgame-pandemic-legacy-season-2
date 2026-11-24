@@ -1,7 +1,8 @@
 <script lang="ts">
+	import CloseButton from '#lib/hud/CloseButton.svelte';
+	import { useCovers } from '#lib/hud/covers.ts';
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import type { Campaign } from '@repo/game';
-	import { typing } from '#lib/keys.ts';
 	import { CAST } from './cast.ts';
 	import { unlockedStoryScenes } from './script.ts';
 	import type { StoryScene } from './script.ts';
@@ -18,17 +19,13 @@
 	const scenes = $derived(unlockedStoryScenes(campaign));
 	let picked = $state<StoryScene | null>(null);
 	const active = $derived(picked ?? initialScene);
-</script>
 
-<svelte:window
-	onkeydown={event => {
-		if (typing(event)) return;
-		if (event.key === 'Escape') {
-			if (picked) picked = null;
-			else onclose();
-		}
-	}}
-/>
+	// A scene picked from the log goes back to the log on Escape, before the log itself closes.
+	const covers = useCovers();
+	$effect(() => {
+		if (picked) return covers?.add(() => (picked = null));
+	});
+</script>
 
 {#if active}
 	<StoryStage
@@ -56,7 +53,7 @@
 				<h2>Story Log</h2>
 			</div>
 			<p class="count">{scenes.length} narrative scenes unlocked</p>
-			<button type="button" class="close" onclick={onclose} aria-label="Close story log">×</button>
+			<CloseButton label="Close story log" onclick={onclose} />
 		</header>
 
 		<div class="list">
@@ -122,19 +119,6 @@
 		margin: 0;
 		color: var(--muted);
 		font-size: 0.84rem;
-	}
-
-	.close {
-		margin-left: auto;
-		width: 2rem;
-		height: 2rem;
-		border: 1px solid var(--line-strong);
-		border-radius: 50%;
-		background: none;
-		color: var(--ink);
-		font-size: 1.3rem;
-		line-height: 1;
-		cursor: pointer;
 	}
 
 	.list {

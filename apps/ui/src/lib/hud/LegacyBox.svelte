@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { typing } from '#lib/keys.ts';
+	import CloseButton from './CloseButton.svelte';
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { dossierView, stickerStock } from '@repo/game';
 	import type { Campaign, DossierSlot } from '@repo/game';
@@ -61,8 +61,6 @@
 	});
 </script>
 
-<svelte:window onkeydown={event => event.key === 'Escape' && !typing(event) && onclose()} />
-
 <section
 	class="box"
 	aria-label="The box"
@@ -73,7 +71,7 @@
 		<p class="tally">
 			{openPackages} of {view.packages.length} packages opened, {openDoors} of {doors.length} dossier doors torn open
 		</p>
-		<button class="close" onclick={onclose} aria-label="Close the box">×</button>
+		<CloseButton label="Close the box" onclick={onclose} />
 	</header>
 
 	<div class="tabs" role="tablist" aria-label="What to look at">
@@ -235,19 +233,6 @@
 	.tally {
 		margin: 0;
 		color: var(--paper-muted);
-	}
-
-	.close {
-		margin-left: auto;
-		width: 2rem;
-		height: 2rem;
-		border: 1px solid rgb(60 44 28 / 0.35);
-		border-radius: 50%;
-		background: transparent;
-		color: var(--paper-ink);
-		font-size: 1.2rem;
-		line-height: 1;
-		cursor: pointer;
 	}
 
 	ol {

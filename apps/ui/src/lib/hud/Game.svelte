@@ -19,7 +19,7 @@
 	import type { BoardMarks, CitySpot, Fx, FxKind } from '#lib/board/types.ts';
 	import type { SessionView } from '#lib/session/session.svelte.ts';
 	import { inkOn } from '#lib/color.ts';
-	import { inFeedback, onButton, typing } from '#lib/keys.ts';
+	import { inFeedback, modalOpen, onButton, typing } from '#lib/keys.ts';
 	import { LS } from '#lib/storage.ts';
 	import { setContext, tick, untrack, onDestroy } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
@@ -75,6 +75,8 @@
 	import Hotkeys from './Hotkeys.svelte';
 	import Objectives from './Objectives.svelte';
 	import ScannerDialog from './ScannerDialog.svelte';
+	import Scrim from './Scrim.svelte';
+	import { provideCovers } from './covers.ts';
 	import ScarChoice from './ScarChoice.svelte';
 	import ScarVote from './ScarVote.svelte';
 	import Replacement from './Replacement.svelte';
@@ -165,6 +167,10 @@
 	let scannerOpen = $state(false);
 	let storyOpen = $state(false);
 	let storyInitial = $state<StoryScene | null>(null);
+	function closeStory() {
+		storyOpen = false;
+		storyInitial = null;
+	}
 	let legacyDeckOut = $state(false);
 	const gameAudio = new GameAudio();
 	const chatter = new CharacterChatter();
@@ -307,6 +313,7 @@
 	});
 
 	const view = provideViewState();
+	const covers = provideCovers();
 	let board = $state<Board>();
 	// Announcements put back by `applyUi` stay up until the game moves on, where live ones time out.
 	let heldAnnouncements = false;
@@ -945,18 +952,8 @@
 				peeking = false;
 				return;
 			}
-			if (hotkeysOpen) {
-				hotkeysOpen = false;
-				return;
-			}
-			if (recap) {
-				recap = null;
-				return;
-			}
-			if (scannerOpen) {
-				scannerOpen = false;
-				return;
-			}
+			// A dialog that Escape closes, the last one opened first. A key typed into one of its fields is the field's.
+			if (!typing(event) && covers.closeTop()) return;
 			if (world.table.undoVote && (!world.table.undoVote.by || world.table.undoVote.by === session.player)) {
 				send({ type: 'CANCEL_UNDO_VOTE', player: session.player });
 				return;
@@ -974,7 +971,6 @@
 			hotkeysOpen = !hotkeysOpen;
 			return;
 		}
-		const modalOpen = () => Boolean(document.querySelector('[aria-modal="true"], .tabletop-unboxing'));
 		if (event.key === 'Tab' && !spectator && !modalOpen()) {
 			event.preventDefault();
 			if (!event.repeat) tools.ping();
@@ -1329,20 +1325,15 @@
 
 		{#if briefingOpen}
 			<!-- A spectator reads the briefing beside the board instead of in front of it, so what was just revealed stays in view. -->
-			<div
-				class="scrim"
-				class:passive={spectator}
-				class:tabletop={!spectator}
-				class:aside={legacy.aside}
-				role="dialog"
-				aria-modal={!spectator}
-				aria-label="New this game"
-				transition:fade={{ duration: 200 }}
+			<Scrim
+				label="New this game"
+				kind={spectator ? 'beside' : 'table'}
+				modal={!spectator}
+				aside={legacy.aside}
+				rise={spectator}
 			>
 				{#if spectator}
-					<div in:fly={{ y: 24, duration: 300 }}>
-						<Briefing briefing={shownBriefing} {campaign} passive oncontinue={() => (briefingRead = briefingKey)} />
-					</div>
+					<Briefing briefing={shownBriefing} {campaign} passive oncontinue={() => (briefingRead = briefingKey)} />
 				{:else}
 					<!-- Each new briefing is unpacked interactively over the map. -->
 					{#key briefingKey}
@@ -1358,28 +1349,13 @@
 						/>
 					{/key}
 				{/if}
-			</div>
+			</Scrim>
 		{:else if recap}
-			<div
-				class="scrim"
-				role="dialog"
-				aria-modal="true"
-				aria-label="What the reading changed"
-				transition:fade={{ duration: 200 }}
-			>
-				<div in:fly={{ y: 24, duration: 300 }}>
-					<Briefing briefing={recap} {campaign} passive={false} recap oncontinue={() => (recap = null)} />
-				</div>
-			</div>
+			<Scrim label="What the reading changed" rise onclose={() => (recap = null)}>
+				<Briefing briefing={recap} {campaign} passive={false} recap oncontinue={() => (recap = null)} />
+			</Scrim>
 		{:else if choosingCharacters}
-			<div
-				class="scrim open"
-				role="dialog"
-				aria-modal="true"
-				aria-label="Choose characters"
-				in:fade={{ duration: 200 }}
-				out:fly={{ y: 120, duration: 360, opacity: 0 }}
-			>
+			<Scrim label="Choose characters" kind="open" drops>
 				<CharacterSelect
 					{snap}
 					{send}
@@ -1393,9 +1369,9 @@
 								: null;
 					}}
 				/>
-			</div>
+			</Scrim>
 		{:else if snap.phase === 'lobby' || snap.phase === 'finished'}
-			<div class="scrim" role="dialog" aria-modal="true" aria-label="Lobby" transition:fade={{ duration: 200 }}>
+			<Scrim label="Lobby">
 				<Lobby
 					{snap}
 					{send}
@@ -1406,17 +1382,9 @@
 						storyOpen = true;
 					}}
 				/>
-			</div>
+			</Scrim>
 		{:else if snap.phase === 'upkeep'}
-			<div
-				class="scrim upkeep-scrim"
-				class:aside={upkeepAside}
-				role="dialog"
-				aria-modal={!upkeepAside}
-				aria-label="Between games"
-				bind:this={upkeepScrim}
-				transition:fade={{ duration: 200 }}
-			>
+			<Scrim label="Between games" kind="upkeep" aside={upkeepAside} modal={!upkeepAside} bind:element={upkeepScrim}>
 				<Upkeep
 					{snap}
 					{send}
@@ -1427,29 +1395,17 @@
 					onaside={aside => (upkeepAsideChosen = aside)}
 					onskip={() => population.stop()}
 				/>
-			</div>
+			</Scrim>
 		{/if}
 
 		{#if revealing && game}
-			<div
-				class="scrim tabletop reveal-scrim"
-				role="dialog"
-				aria-modal="true"
-				aria-label="Cards turned over"
-				transition:fade={{ duration: 220 }}
-			>
+			<Scrim label="Cards turned over" kind="reveal">
 				<RevealShow {world} pending={revealing} mine={!spectator && owns(revealing.seat)} {send} />
-			</div>
+			</Scrim>
 		{/if}
 
 		{#if scarOwed && game && !fate.playing}
-			<div
-				class="scrim scar-scrim"
-				role="dialog"
-				aria-modal="true"
-				aria-label="Choose a scar"
-				transition:fade={{ duration: 200 }}
-			>
+			<Scrim label="Choose a scar" kind="scar">
 				<ScarChoice
 					{world}
 					seat={scarOwed.seat}
@@ -1458,61 +1414,33 @@
 					canChoose={owns(scarOwed.chooser)}
 					{send}
 				/>
-			</div>
+			</Scrim>
 		{/if}
 
 		{#if replacing && game && !fate.playing}
-			<div
-				class="scrim scar-scrim"
-				role="dialog"
-				aria-modal="true"
-				aria-label="Choose who steps in"
-				transition:fade={{ duration: 200 }}
-			>
+			<Scrim label="Choose who steps in" kind="scar">
 				<Replacement {world} seat={replacing} {decides} canChoose={owns(replacing)} {send} />
-			</div>
+			</Scrim>
 		{/if}
 
 		{#if scarVoting && game && !fate.playing}
-			<div
-				class="scrim scar-scrim"
-				role="dialog"
-				aria-modal="true"
-				aria-label="Vote for who takes the scar"
-				transition:fade={{ duration: 200 }}
-			>
+			<Scrim label="Vote for who takes the scar" kind="scar">
 				<ScarVote {world} vote={scarVoting} player={session.player} {spectator} {send} />
-			</div>
+			</Scrim>
 		{/if}
 
 		{@render children?.()}
 
 		{#if boxOpen}
-			<div
-				class="scrim box-scrim"
-				role="dialog"
-				aria-modal="true"
-				aria-label="The box"
-				transition:fade={{ duration: 180 }}
-			>
-				<div in:fly={{ y: 24, duration: 300 }}>
-					<LegacyBox {campaign} onclose={() => (boxOpen = false)} />
-				</div>
-			</div>
+			<Scrim label="The box" kind="box" rise clickaway onclose={() => (boxOpen = false)}>
+				<LegacyBox {campaign} onclose={() => (boxOpen = false)} />
+			</Scrim>
 		{/if}
 
 		{#if deckOpen}
-			<div
-				class="scrim box-scrim"
-				role="dialog"
-				aria-modal="true"
-				aria-label="The Legacy deck"
-				transition:fade={{ duration: 180 }}
-			>
-				<div in:fly={{ y: 24, duration: 300 }}>
-					<LegacyDeck {campaign} onclose={() => (deckOpen = false)} />
-				</div>
-			</div>
+			<Scrim label="The Legacy deck" kind="box" rise clickaway onclose={() => (deckOpen = false)}>
+				<LegacyDeck {campaign} onclose={() => (deckOpen = false)} />
+			</Scrim>
 		{/if}
 
 		{#if choosing.chooser?.action === 'monitor' || scannerOpen}
@@ -1520,86 +1448,40 @@
 			{@const legalFrequencies = monitorOptions
 				? new Set(monitorOptions.flatMap(option => (option.frequency !== undefined ? [option.frequency] : [])))
 				: undefined}
-			<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_noninteractive_element_interactions -->
-			<div
-				class="scrim box-scrim"
-				role="dialog"
-				aria-modal="true"
-				aria-label="Frequency Scanner"
-				tabindex="-1"
-				transition:fade={{ duration: 180 }}
-				onclick={event => {
-					if (event.target !== event.currentTarget) return;
-					if (monitorOptions) choosing.step({ t: 'closeChooser' });
-					else scannerOpen = false;
-				}}
-			>
-				<div in:fly={{ y: 24, duration: 280 }}>
-					<ScannerDialog
-						{campaign}
-						legal={legalFrequencies}
-						reason={monitorOptions ? null : monitorReason}
-						onpick={monitorOptions
-							? frequency => {
-									const index = monitorOptions.findIndex(option => option.frequency === frequency);
-									if (index >= 0) choosing.step({ t: 'option', index });
-								}
-							: undefined}
-						onclose={() => {
-							if (monitorOptions) choosing.step({ t: 'closeChooser' });
-							else scannerOpen = false;
-						}}
-					/>
-				</div>
-			</div>
+			{@const closeScanner = () =>
+				monitorOptions ? void choosing.step({ t: 'closeChooser' }) : void (scannerOpen = false)}
+			<Scrim label="Frequency Scanner" kind="box" rise clickaway onclose={closeScanner}>
+				<ScannerDialog
+					{campaign}
+					legal={legalFrequencies}
+					reason={monitorOptions ? null : monitorReason}
+					onpick={monitorOptions
+						? frequency => {
+								const index = monitorOptions.findIndex(option => option.frequency === frequency);
+								if (index >= 0) choosing.step({ t: 'option', index });
+							}
+						: undefined}
+					onclose={closeScanner}
+				/>
+			</Scrim>
 		{/if}
 
 		{#if world.table.undoVote && game && !spectator}
-			<div
-				class="scrim undo-scrim"
-				role="dialog"
-				aria-modal="true"
-				aria-label="Shameful undo vote"
-				transition:fade={{ duration: 180 }}
-			>
+			<Scrim label="Shameful undo vote" kind="undo">
 				<UndoVote {world} vote={world.table.undoVote} player={session.player} {send} />
-			</div>
+			</Scrim>
 		{/if}
 
 		{#if hotkeysOpen}
-			<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_noninteractive_element_interactions -->
-			<div
-				class="scrim box-scrim"
-				role="dialog"
-				aria-modal="true"
-				aria-label="Keyboard shortcuts"
-				tabindex="-1"
-				transition:fade={{ duration: 160 }}
-				onclick={event => event.target === event.currentTarget && (hotkeysOpen = false)}
-			>
-				<div in:fly={{ y: 18, duration: 240 }}>
-					<Hotkeys onclose={() => (hotkeysOpen = false)} />
-				</div>
-			</div>
+			<Scrim label="Keyboard shortcuts" kind="box" rise clickaway onclose={() => (hotkeysOpen = false)}>
+				<Hotkeys onclose={() => (hotkeysOpen = false)} />
+			</Scrim>
 		{/if}
 
 		{#if storyOpen}
-			<div
-				class="scrim box-scrim"
-				role="dialog"
-				aria-modal="true"
-				aria-label="Campaign story log"
-				transition:fade={{ duration: 180 }}
-			>
-				<StoryArchive
-					{campaign}
-					initialScene={storyInitial}
-					onclose={() => {
-						storyOpen = false;
-						storyInitial = null;
-					}}
-				/>
-			</div>
+			<Scrim label="Campaign story log" kind="box" clickaway onclose={closeStory}>
+				<StoryArchive {campaign} initialScene={storyInitial} onclose={closeStory} />
+			</Scrim>
 		{/if}
 
 		{#if menu}
@@ -2021,93 +1903,5 @@
 		z-index: 55;
 		grid-row: 1;
 		grid-column: 1;
-	}
-
-	.scrim {
-		position: absolute;
-		inset: 0;
-		z-index: 60;
-		display: grid;
-		place-items: center;
-		padding: 1rem;
-		overflow: hidden;
-		background: rgb(12 10 8 / 0.62);
-	}
-
-	.scrim > div {
-		display: flex;
-		max-width: 100%;
-		max-height: 100%;
-		min-height: 0;
-	}
-
-	.scrim.tabletop {
-		display: block;
-		padding: 0;
-		background: radial-gradient(ellipse at 50% 45%, rgb(12 10 8 / 0.3), rgb(10 8 6 / 0.68));
-	}
-
-	.scrim.box-scrim {
-		z-index: 70;
-	}
-
-	.scrim.scar-scrim {
-		z-index: 65;
-	}
-
-	.scrim.reveal-scrim {
-		display: grid;
-		place-items: center;
-		padding: 1rem;
-		z-index: 64;
-	}
-
-	.scrim.undo-scrim {
-		z-index: 75;
-		background: rgb(14 9 8 / 0.84);
-	}
-
-	/* Show board: every cover steps off the table and lets the board be panned and read, until Back. */
-	.scrim {
-		transition: opacity 200ms ease;
-	}
-
-	/* A Legacy reading steps off the table while what it changed comes onto the map. */
-	.peeking .scrim,
-	.scrim.aside {
-		opacity: 0;
-		visibility: hidden;
-		pointer-events: none;
-		transition:
-			opacity 200ms ease,
-			visibility 0s 200ms;
-	}
-
-	.scrim.open {
-		padding: 0;
-		background: none;
-	}
-
-	/* Stepped aside, the spending sheet stands in the right column and leaves the board free to pan and read. */
-	.scrim.upkeep-scrim.aside {
-		inset: 0.7rem 0.7rem 0.7rem auto;
-		z-index: 30;
-		display: flex;
-		align-items: flex-start;
-		padding: 0;
-		overflow: visible;
-		background: none;
-		pointer-events: none;
-	}
-
-	.scrim.upkeep-scrim.aside > :global(*) {
-		pointer-events: auto;
-	}
-
-	.scrim.passive {
-		place-items: start center;
-		padding-top: 3.2rem;
-		background: none;
-		pointer-events: none;
 	}
 </style>

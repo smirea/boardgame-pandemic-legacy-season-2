@@ -203,4 +203,8 @@
 	.where {
 		color: var(--slip-muted);
 	}
+
+	p {
+		margin: 0;
+	}
 </style>

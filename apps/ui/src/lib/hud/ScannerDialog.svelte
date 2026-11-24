@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { typing } from '#lib/keys.ts';
+	import CloseButton from './CloseButton.svelte';
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { pack } from '@repo/game';
 	import type { Campaign } from '@repo/game';
@@ -32,8 +32,6 @@
 	const originalSrc = legacyScans['08-04']?.src ? scanUrl(legacyScans['08-04'].src) : null;
 </script>
 
-<svelte:window onkeydown={event => event.key === 'Escape' && !typing(event) && onclose()} />
-
 <section
 	class="scanner-dialog"
 	aria-label="Frequency Scanner"
@@ -59,7 +57,7 @@
 				{/if}
 			</p>
 		</div>
-		<button class="close" onclick={onclose} aria-label="Close Frequency Scanner">×</button>
+		<CloseButton label="Close Frequency Scanner" onclick={onclose} />
 	</header>
 
 	{#if originals.held && originalSrc}
@@ -223,24 +221,6 @@
 
 	.scanner-dialog[data-mode='monitor'] .subtitle {
 		color: #9be0e6;
-	}
-
-	.close {
-		flex: none;
-		width: 2rem;
-		height: 2rem;
-		border: 1px solid var(--line-strong);
-		border-radius: 50%;
-		background: transparent;
-		color: var(--ink);
-		font-size: 1.25rem;
-		line-height: 1;
-		cursor: pointer;
-	}
-
-	.close:hover {
-		border-color: var(--paper);
-		background: var(--wash);
 	}
 
 	.original-frame {

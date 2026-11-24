@@ -152,4 +152,8 @@
 		color: var(--slip-muted);
 		font-style: italic;
 	}
+
+	p {
+		margin: 0;
+	}
 </style>

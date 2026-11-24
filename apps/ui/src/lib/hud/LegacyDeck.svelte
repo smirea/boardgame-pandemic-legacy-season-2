@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { typing } from '#lib/keys.ts';
+	import CloseButton from './CloseButton.svelte';
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { pack, sealKey } from '@repo/game';
 	import type { Campaign, LegacyCardDef } from '@repo/game';
@@ -77,8 +77,6 @@
 	const PLAN = ['red', 'black', 'yellow', 'blue'] as const;
 </script>
 
-<svelte:window onkeydown={event => event.key === 'Escape' && !typing(event) && onclose()} />
-
 <section
 	class="deck"
 	aria-label="The Legacy deck"
@@ -87,7 +85,7 @@
 	<header>
 		<h2>Legacy deck</h2>
 		<p class="tally">{read.length} read, {left} still in the deck</p>
-		<button class="close" onclick={onclose} aria-label="Close the Legacy deck">×</button>
+		<CloseButton label="Close the Legacy deck" onclick={onclose} />
 	</header>
 
 	<div class="top">
@@ -181,15 +179,6 @@
 	.hint {
 		margin: 0;
 		color: var(--paper-muted);
-	}
-
-	.close {
-		margin-left: auto;
-		border: 0;
-		background: none;
-		color: inherit;
-		font-size: 1.6rem;
-		cursor: pointer;
 	}
 
 	.top {

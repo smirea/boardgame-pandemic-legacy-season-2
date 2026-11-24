@@ -22,3 +22,6 @@ export const inFeedback = (event: KeyboardEvent) =>
 
 /** Whether a key lands on a focused button, which Space and Enter already press. */
 export const onButton = (event: KeyboardEvent) => event.composedPath()[0] instanceof HTMLButtonElement;
+
+/** Whether something stands in front of the table that takes the keyboard: a dialog, or a Legacy reading. */
+export const modalOpen = () => Boolean(document.querySelector('[aria-modal="true"], .tabletop-unboxing'));

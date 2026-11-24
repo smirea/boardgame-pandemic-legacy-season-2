@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { modalOpen } from '#lib/keys.ts';
 	import { edgeKey, groundCity, nearestGround, pack } from '@repo/game';
 	import type { CityId } from '@repo/game';
 	import { T, useThrelte } from '@threlte/core';
@@ -383,7 +384,7 @@
 			if (event.metaKey || event.ctrlKey || event.altKey || typing(event)) return;
 			const dir = PAN_KEYS[event.key.toLowerCase()];
 			if (!dir) return;
-			if (document.querySelector('[aria-modal="true"], .tabletop-unboxing')) return;
+			if (modalOpen()) return;
 			if (event.key.startsWith('Arrow')) event.preventDefault();
 			panHeld.add(dir);
 			if (!panFrame) {
