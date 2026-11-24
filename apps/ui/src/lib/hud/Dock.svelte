@@ -721,7 +721,7 @@
 							is finished.
 						</p>
 					</div>
-				{:else if pending && pending.t !== 'scar' && pending.t !== 'scarVote' && pending.t !== 'reveal' && pending.t !== 'search' && (!epidemicStep || elsewhere.length || lockableHere.length)}
+				{:else if pending && pending.t !== 'scar' && pending.t !== 'scarVote' && pending.t !== 'replace' && pending.t !== 'reveal' && pending.t !== 'search' && (!epidemicStep || elsewhere.length || lockableHere.length)}
 					<div class="slip">
 						<p class="prompt">
 							{decisionTitle(world, pending)}

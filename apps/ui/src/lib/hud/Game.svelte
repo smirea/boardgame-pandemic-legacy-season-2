@@ -76,6 +76,7 @@
 	import ScannerDialog from './ScannerDialog.svelte';
 	import ScarChoice from './ScarChoice.svelte';
 	import ScarVote from './ScarVote.svelte';
+	import Replacement from './Replacement.svelte';
 	import SeatPicker from './SeatPicker.svelte';
 	import TopBar from './TopBar.svelte';
 	import UndoVote from './UndoVote.svelte';
@@ -181,6 +182,11 @@
 	const scarOwed = $derived.by(() => {
 		const pending = playing ? game?.pending[0] : undefined;
 		return pending?.t === 'scar' ? { seat: pending.seat, chooser: pending.seat ?? game!.active } : null;
+	});
+	/** A character who died is replaced on a screen of its own, once the table has seen the death. */
+	const replacing = $derived.by(() => {
+		const pending = playing ? game?.pending[0] : undefined;
+		return pending?.t === 'replace' ? pending.seat : null;
 	});
 	/** A scar the Legacy deck owes is put to the table first: everyone votes for the character who takes it. */
 	const scarVoting = $derived.by(() => {
@@ -410,6 +416,7 @@
 			(snap.phase === 'upkeep' && !upkeepAside) ||
 			scarOwed !== null ||
 			scarVoting !== null ||
+			replacing !== null ||
 			boxOpen ||
 			deckOpen ||
 			scannerOpen ||
@@ -1451,6 +1458,18 @@
 					canChoose={owns(scarOwed.chooser)}
 					{send}
 				/>
+			</div>
+		{/if}
+
+		{#if replacing && game && !fate.playing}
+			<div
+				class="scrim scar-scrim"
+				role="dialog"
+				aria-modal="true"
+				aria-label="Choose who steps in"
+				transition:fade={{ duration: 200 }}
+			>
+				<Replacement {world} seat={replacing} {decides} canChoose={owns(replacing)} {send} />
 			</div>
 		{/if}
 
