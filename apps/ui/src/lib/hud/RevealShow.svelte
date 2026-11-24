@@ -1,14 +1,18 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { pack, revealDone, revealOutcome, searchFind, REVEAL_COUNT } from '@repo/game';
-	import type { CardId, Command, Decision, World } from '@repo/game';
+	import type { CardId, Command, Decision, SeatId, World } from '@repo/game';
+	import { untrack } from 'svelte';
 	import { backOut } from 'svelte/easing';
-	import { scale } from 'svelte/transition';
+	import { fade, scale } from 'svelte/transition';
 	import { inkOn } from '#lib/color.ts';
 	import { searchStory } from '#lib/cards/playerPrint.ts';
-	import { sfxCardFlip, sfxScratchBox } from '#lib/audio/sfx.ts';
+	import { sfxCardDraw, sfxCardFlip, sfxScratchBox } from '#lib/audio/sfx.ts';
+	import { audioSettings } from '#lib/audio/settings.svelte.ts';
+	import { CAST } from '#lib/story/cast.ts';
 	import { sceneForSearch } from '#lib/story/script.ts';
 	import StoryStage from '#lib/story/StoryStage.svelte';
+	import { voicePlayer } from '#lib/story/voice.svelte.ts';
 	import { onButton, typing } from '#lib/keys.ts';
 	import { cardName, cityName, seatName, SEAT_COLORS } from './labels.svelte.ts';
 	import PlayerCard from './PlayerCard.svelte';
@@ -20,6 +24,12 @@
 		mine: boolean;
 		send: (command: Command) => void;
 	};
+
+	type SearchStage = 'flying' | 'shaking' | 'scratching' | 'revealed';
+
+	const FLY_MS = 520;
+	const SHAKE_MS = 480;
+	const SCRATCH_MS = 900;
 
 	let { world, pending, mine, send }: Props = $props();
 
@@ -43,13 +53,14 @@
 		if (card?.kind !== 'city') return null;
 		const box = card.search[pending.box]!;
 		return {
+			key: `${pending.card}:${pending.box}`,
 			card,
 			box: pending.box,
 			city: cityName(card.city),
 			sea: box.scope === 'sea',
 			story: searchStory(card.city, box.scope),
 			found: searchFind(box.result),
-			nothing: box.result.t === 'nothing',
+			companion: box.result.t === 'companion',
 		};
 	});
 
@@ -95,6 +106,31 @@
 	);
 
 	const searchScene = $derived(searched ? sceneForSearch(searched.card.city, searched.sea ? 'sea' : 'land') : null);
+	const searchBeat = $derived(searchScene?.beats[0] ?? null);
+	const searchSpeaker = $derived(searchBeat ? CAST[searchBeat.speaker] : null);
+	const hasFlavorText = $derived(Boolean(searched?.story));
+
+	let searchStage = $state<SearchStage>('flying');
+	let cardNode = $state<HTMLElement>();
+	let storyStage = $state<StoryStage>();
+	let activeAnim: Animation | null = null;
+	let playedScratch = false;
+	let lastSearchKey = '';
+
+	const cardScratch = $derived(
+		searched
+			? {
+					box: searched.box,
+					stage:
+						searchStage === 'revealed'
+							? ('open' as const)
+							: searchStage === 'scratching'
+								? ('scratching' as const)
+								: ('sealed' as const),
+				}
+			: undefined,
+	);
+
 	let lastRevealCount = 0;
 	$effect(() => {
 		const count = reveal?.cards.length ?? 0;
@@ -105,23 +141,161 @@
 			lastRevealCount = 0;
 		}
 	});
+
 	$effect(() => {
-		if (searched) sfxScratchBox();
+		const key = searched?.key ?? '';
+		if (key === lastSearchKey) return;
+		lastSearchKey = key;
+		playedScratch = false;
+		searchStage = 'flying';
 	});
 
-	// The click that turned the last card must not land on the button that now puts them away.
+	function findSourceRect(card: CardId, seat: SeatId): DOMRect | null {
+		const node =
+			document.querySelector(`[data-testid="hand"] [data-card="${card}"]`) ??
+			document.querySelector(`.place[data-seat="${seat}"] [data-testid="corner-hand"]`) ??
+			document.querySelector(`.place[data-seat="${seat}"]`);
+		return node?.getBoundingClientRect() ?? null;
+	}
+
+	/** Drives the search sequence via Web Animations so Studio's `settle({ hurry: true })` advances every stage cleanly. */
+	$effect(() => {
+		const target = searched;
+		const node = cardNode;
+		const stage = searchStage;
+		if (!target || !node || stage === 'revealed') return;
+
+		return untrack(() => {
+			if (activeAnim) {
+				activeAnim.onfinish = null;
+				activeAnim.cancel();
+				activeAnim = null;
+			}
+
+			let anim: Animation;
+			if (stage === 'flying') {
+				sfxCardDraw();
+				const end = node.getBoundingClientRect();
+				const start = findSourceRect(target.card.id, pending.seat);
+				const dx = start ? start.left + start.width / 2 - (end.left + end.width / 2) : 0;
+				const dy = start ? start.top + start.height / 2 - (end.top + end.height / 2) : 90;
+				const scaleFrom = start && end.width > 0 ? Math.max(0.24, Math.min(0.95, start.width / end.width)) : 0.72;
+				const arc = Math.min(72, Math.hypot(dx, dy) * 0.16);
+				const tilt = dx > 12 ? -6 : dx < -12 ? 6 : -4;
+				anim = node.animate(
+					[
+						{
+							transform: `translate(${dx}px, ${dy}px) scale(${scaleFrom}) rotate(${tilt}deg)`,
+							opacity: start ? 0.96 : 0,
+						},
+						{
+							transform: `translate(${dx * 0.42}px, ${dy * 0.42 - arc}px) scale(${(scaleFrom + 1.05) / 2}) rotate(${-tilt * 0.45}deg)`,
+							opacity: 1,
+							offset: 0.56,
+						},
+						{ transform: 'translate(0, 0) scale(1) rotate(0deg)', opacity: 1 },
+					],
+					{ duration: FLY_MS, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' },
+				);
+				anim.onfinish = () => {
+					if (activeAnim !== anim) return;
+					activeAnim = null;
+					searchStage = 'shaking';
+				};
+			} else if (stage === 'shaking') {
+				anim = node.animate(
+					[
+						{ transform: 'translate(0, 0) rotate(0deg)' },
+						{ transform: 'translate(-6px, -2px) rotate(-2.4deg)', offset: 0.14 },
+						{ transform: 'translate(7px, 2px) rotate(2.6deg)', offset: 0.28 },
+						{ transform: 'translate(-7px, 1px) rotate(-2.5deg)', offset: 0.44 },
+						{ transform: 'translate(6px, -2px) rotate(2.1deg)', offset: 0.6 },
+						{ transform: 'translate(-4px, 1px) rotate(-1.3deg)', offset: 0.76 },
+						{ transform: 'translate(3px, 0px) rotate(0.8deg)', offset: 0.9 },
+						{ transform: 'translate(0, 0) rotate(0deg)' },
+					],
+					{ duration: SHAKE_MS, easing: 'ease-in-out' },
+				);
+				anim.onfinish = () => {
+					if (activeAnim !== anim) return;
+					activeAnim = null;
+					searchStage = 'scratching';
+				};
+			} else {
+				if (!playedScratch) {
+					playedScratch = true;
+					sfxScratchBox();
+				}
+				anim = node.animate(
+					[
+						{ transform: 'translate(0, 0) rotate(0deg)' },
+						{ transform: 'translate(-2px, 1px) rotate(-0.6deg)', offset: 0.15 },
+						{ transform: 'translate(2px, -1px) rotate(0.5deg)', offset: 0.32 },
+						{ transform: 'translate(-2px, 0px) rotate(-0.5deg)', offset: 0.5 },
+						{ transform: 'translate(2px, 1px) rotate(0.5deg)', offset: 0.68 },
+						{ transform: 'translate(-1px, -1px) rotate(-0.3deg)', offset: 0.84 },
+						{ transform: 'translate(0, 0) rotate(0deg)' },
+					],
+					{ duration: SCRATCH_MS, easing: 'linear' },
+				);
+				anim.onfinish = () => {
+					if (activeAnim !== anim) return;
+					activeAnim = null;
+					searchStage = 'revealed';
+				};
+			}
+			activeAnim = anim;
+
+			return () => {
+				anim.onfinish = null;
+				anim.cancel();
+				if (activeAnim === anim) activeAnim = null;
+			};
+		});
+	});
+
+	// The click that turned the last card or hurried the scratch must not land on Continue right away.
 	let busy = $state(false);
-	function advance() {
-		if (!mine || busy) return;
+	function lockBriefly(ms = 350) {
 		busy = true;
+		setTimeout(() => (busy = false), ms);
+	}
+
+	function hurrySearch() {
+		if (!searched || searchStage === 'revealed') return;
+		if (activeAnim) {
+			activeAnim.onfinish = null;
+			activeAnim.cancel();
+			activeAnim = null;
+		}
+		if (!playedScratch) {
+			playedScratch = true;
+			sfxScratchBox();
+		}
+		searchStage = 'revealed';
+		lockBriefly(250);
+	}
+
+	function advance() {
+		if (searched && searchStage !== 'revealed') {
+			hurrySearch();
+			return;
+		}
+		if (!mine || busy) return;
+		lockBriefly(350);
 		send({ type: 'DECIDE', decide: { d: pending.t } });
-		setTimeout(() => (busy = false), 350);
 	}
 </script>
 
 <svelte:window
 	onkeydown={event => {
-		if (!mine || event.key !== ' ' || typing(event) || onButton(event)) return;
+		if (event.key !== ' ' || typing(event) || onButton(event)) return;
+		if (searched && searchStage !== 'revealed') {
+			event.preventDefault();
+			if (!event.repeat) hurrySearch();
+			return;
+		}
+		if (!mine) return;
 		event.preventDefault();
 		if (!event.repeat) advance();
 	}}
@@ -131,20 +305,20 @@
 	What a Monitor, a Cautious Approach or a search turns over is hidden until that moment, so the whole table watches
 	it happen in front of the board. Each card is turned by a command, and only the player it belongs to moves it on.
 -->
-<section
-	class="reveal"
-	style:--seat={color}
-	style:--on={inkOn(color)}
-	aria-label={`${who}: ${title}`}
-	in:scale={{ start: 0.85, duration: 380, easing: backOut }}
-	{@attach feedback('Reveal', () => ({ who, kind: pending.t, cards: reveal?.cards, done }))}
->
-	<header>
-		<span class="who">{who}</span>
-		<h2>{title}</h2>
-	</header>
+{#if reveal}
+	<section
+		class="reveal"
+		style:--seat={color}
+		style:--on={inkOn(color)}
+		aria-label={`${who}: ${title}`}
+		in:scale={{ start: 0.85, duration: 380, easing: backOut }}
+		{@attach feedback('Reveal', () => ({ who, kind: pending.t, cards: reveal?.cards, done }))}
+	>
+		<header>
+			<span class="who">{who}</span>
+			<h2>{title}</h2>
+		</header>
 
-	{#if reveal}
 		<p class="rule">{rule}</p>
 		<ol class="cards" data-testid="reveal-cards">
 			{#each slots as id, index (index)}
@@ -164,42 +338,113 @@
 			{/each}
 		</ol>
 		{#if outcome}<p class="verdict" data-testid="reveal-verdict">{verdict}</p>{/if}
-	{:else if searched}
-		<div class="search" class:grim={searched.nothing && Boolean(searched.story)}>
-			<span class="searched"><PlayerCard card={searched.card} revealing={searched.box} /></span>
-			<div class="found">
-				<span class="kicker">{searched.nothing && searched.story ? 'Field report' : 'Found'}</span>
-				{#if searched.story}
-					<p class="story-quote" data-testid="search-story">{searched.story}</p>
-				{/if}
-				{#if !searched.nothing || !searched.story}
-					<strong data-testid="search-found">{searched.found}</strong>
-				{:else}
-					<span class="sr-only" data-testid="search-found">{searched.found}</span>
-				{/if}
+
+		<footer>
+			{#if mine}
+				<!-- svelte-ignore a11y_autofocus -->
+				<button type="button" class="go" data-testid="reveal-next" autofocus disabled={busy} onclick={advance}>
+					{next}
+				</button>
+				<span class="key">Space</span>
+			{:else}
+				<p class="waiting">{waiting}.</p>
+			{/if}
+		</footer>
+	</section>
+{:else if searched}
+	<section
+		class="search-stage"
+		class:with-bubble={!hasFlavorText && searchStage === 'revealed'}
+		style:--seat={color}
+		style:--on={inkOn(color)}
+		style:--story-dock-bottom="1.15rem"
+		aria-label={`${who}: ${title}`}
+		data-testid="search-stage"
+		data-search-stage={searchStage}
+		{@attach feedback('Search reveal', () => ({
+			who,
+			city: searched.city,
+			scope: searched.sea ? 'sea' : 'land',
+			stage: searchStage,
+			found: searched.found,
+		}))}
+	>
+		<header class="search-head" class:shown={searchStage !== 'flying'}>
+			<span class="who">{who}</span>
+			<h2>{title}</h2>
+		</header>
+
+		{#key searched.key}
+			<div
+				class="spotlight-card"
+				class:compact-card={!hasFlavorText}
+				bind:this={cardNode}
+				{@attach feedback('Searched card', () => ({ city: searched.city, stage: searchStage, found: searched.found }))}
+			>
+				<PlayerCard
+					card={searched.card}
+					scratch={cardScratch}
+					onclick={searchStage !== 'revealed' ? hurrySearch : undefined}
+				/>
 			</div>
+		{/key}
+
+		<footer class="search-foot" class:ready={searchStage === 'revealed'}>
+			{#if searchStage === 'revealed'}
+				{#if mine}
+					<!-- svelte-ignore a11y_autofocus -->
+					<button type="button" class="go" data-testid="reveal-next" autofocus disabled={busy} onclick={advance}>
+						{next}
+					</button>
+					<span class="key">Space</span>
+				{:else}
+					<p class="waiting">{waiting}.</p>
+				{/if}
+				{#if hasFlavorText && searchBeat && searchSpeaker}
+					<div class="voice-controls" in:fade={{ duration: 220 }}>
+						{#if voicePlayer.hasAudio(searchBeat.id)}
+							<button
+								type="button"
+								class="voice-btn"
+								class:speaking={voicePlayer.playingId === searchBeat.id}
+								onclick={() => storyStage?.replayVoice()}
+								aria-label={`Replay ${searchSpeaker.name}'s narration`}
+							>
+								{voicePlayer.playingId === searchBeat.id ? 'Speaking…' : 'Replay'}
+							</button>
+						{/if}
+						<button
+							type="button"
+							class="voice-btn"
+							class:muted={!audioSettings.voiceEnabled}
+							onclick={() => audioSettings.toggleVoice()}
+						>
+							{audioSettings.voiceEnabled ? 'Voice on' : 'Voice off'}
+						</button>
+					</div>
+				{/if}
+			{/if}
+		</footer>
+	</section>
+
+	{#if searchScene && searchStage === 'revealed'}
+		<div class="search-story-layer" style:--story-dock-bottom="1.15rem">
+			<StoryStage
+				bind:this={storyStage}
+				scene={searchScene}
+				overlay
+				solo
+				bare={hasFlavorText}
+				delivered={world.campaign.sampleDelivered}
+			/>
 		</div>
 	{/if}
-
-	<footer>
-		{#if mine}
-			<!-- svelte-ignore a11y_autofocus -->
-			<button type="button" class="go" data-testid="reveal-next" autofocus disabled={busy} onclick={advance}>
-				{next}
-			</button>
-			<span class="key">Space</span>
-		{:else}
-			<p class="waiting">{waiting}.</p>
-		{/if}
-	</footer>
-</section>
-
-{#if searchScene}
-	<StoryStage scene={searchScene} overlay delivered={world.campaign.sampleDelivered} />
 {/if}
 
 <style>
 	.reveal {
+		position: relative;
+		z-index: 15;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -338,69 +583,115 @@
 		color: var(--good, #8fc77a);
 	}
 
-	.search {
-		display: flex;
-		align-items: center;
-		gap: 1.2rem;
-	}
-
-	.searched {
-		--card-size: 1.25rem;
-		pointer-events: none;
-	}
-
-	.found {
+	/* === Search Spotlight Sequence (card floats directly over the dimmed tabletop) === */
+	.search-stage {
+		position: relative;
+		z-index: 15;
 		display: flex;
 		flex-direction: column;
-		gap: 0.45rem;
-		max-width: 24rem;
+		align-items: center;
+		justify-content: center;
+		gap: 0.9rem;
+		height: 100%;
+		box-sizing: border-box;
+		padding: 0.5rem 1rem;
+		transition: padding-bottom 300ms ease;
 	}
 
-	.story-quote {
-		margin: 0;
-		padding-left: 0.75rem;
-		border-left: 2px solid color-mix(in srgb, var(--seat) 70%, var(--paper));
-		color: var(--ink);
-		font-size: 0.96rem;
-		font-style: italic;
-		line-height: 1.45;
-		animation: arrive 500ms 550ms ease-out both;
+	.search-stage.with-bubble {
+		gap: 0.65rem;
+		padding-bottom: 11.6rem;
 	}
 
-	.search.grim .story-quote {
-		border-left-color: #c84434;
-		color: #f4d6ce;
+	.search-head {
+		opacity: 0;
+		transform: translateY(-0.4rem);
+		text-shadow: 0 2px 14px rgb(0 0 0 / 0.85);
+		transition:
+			opacity 260ms ease,
+			transform 260ms ease;
 	}
 
-	.sr-only {
+	.search-head.shown {
+		opacity: 1;
+		transform: none;
+	}
+
+	.search-head h2 {
+		color: #f6ebd4;
+		font-family: var(--font-display);
+		font-size: 1.55rem;
+		font-weight: 400;
+		letter-spacing: 0.02em;
+	}
+
+	.spotlight-card {
+		--card-size: clamp(1.75rem, 4.1vh, 2.5rem);
+		filter: drop-shadow(0 1.4rem 3.2rem rgb(0 0 0 / 0.72));
+		will-change: transform;
+	}
+
+	.spotlight-card.compact-card {
+		--card-size: clamp(1.25rem, calc((100vh - 23.5rem) / 10.6), 2.05rem);
+	}
+
+	.search-story-layer {
 		position: absolute;
-		width: 1px;
-		height: 1px;
-		margin: -1px;
-		overflow: hidden;
-		clip-path: inset(50%);
-		white-space: nowrap;
-	}
-
-	.kicker {
-		font-size: 0.72rem;
-		font-weight: 800;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
-		opacity: 0.7;
-	}
-
-	.found strong {
-		font-size: 1.35rem;
-		line-height: 1.25;
-		animation: arrive 500ms 900ms ease-out both;
+		inset: 0;
+		z-index: 12;
+		pointer-events: none;
 	}
 
 	footer {
 		display: flex;
 		align-items: center;
 		gap: 0.6rem;
-		min-height: 2.2rem;
+		min-height: 2.3rem;
+	}
+
+	.search-foot {
+		opacity: 0;
+		transform: translateY(0.35rem);
+		transition:
+			opacity 240ms ease,
+			transform 240ms ease;
+	}
+
+	.search-foot.ready {
+		opacity: 1;
+		transform: none;
+	}
+
+	.voice-controls {
+		display: flex;
+		align-items: center;
+		gap: 0.35rem;
+		margin-left: 0.35rem;
+	}
+
+	.voice-btn {
+		padding: 0.32rem 0.65rem;
+		border: 1px solid rgb(231 220 198 / 0.3);
+		border-radius: 0.3rem;
+		background: rgb(18 15 12 / 0.8);
+		color: #e6dac2;
+		font: inherit;
+		font-size: 0.76rem;
+		font-weight: 600;
+		cursor: pointer;
+	}
+
+	.voice-btn:hover {
+		border-color: rgb(231 220 198 / 0.7);
+	}
+
+	.voice-btn.speaking {
+		border-color: color-mix(in srgb, var(--seat) 75%, #f4e8cd);
+		color: #f6ebd4;
+	}
+
+	.voice-btn.muted {
+		opacity: 0.65;
 	}
 
 	.go {
@@ -412,6 +703,7 @@
 		font: inherit;
 		font-weight: 800;
 		cursor: pointer;
+		box-shadow: 0 0.5rem 1.4rem rgb(0 0 0 / 0.5);
 	}
 
 	.go:disabled {
@@ -423,6 +715,7 @@
 		padding: 0.05rem 0.4rem;
 		border: 1px solid var(--line);
 		border-radius: 0.2rem;
+		background: rgb(16 13 10 / 0.72);
 		color: var(--muted);
 		font-size: 0.72rem;
 	}

@@ -1,3 +1,4 @@
+import { pack } from '@repo/game';
 import type { Campaign, CityId, Opening, SealKey } from '@repo/game';
 import { BARK_SCENE } from './barks.ts';
 import type { SpeakerId } from './cast.ts';
@@ -1712,7 +1713,6 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				{
 					listener: 'mara',
 					verbatim: true,
-					cue: 'scratch',
 					direction: "hushed, haunted awe standing in the blasted ashes of the old world's fatal mistake",
 				},
 			),
@@ -1753,7 +1753,6 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 				{
 					listener: 'mara',
 					verbatim: true,
-					cue: 'scratch',
 					direction: 'eerie, conspiratorial intrigue; creeping chill on "the sky to the east started glowing"',
 				},
 			),
@@ -1880,6 +1879,508 @@ export const STORY_SCENES: Record<string, StoryScene> = {
 			),
 		],
 	},
+
+	'search:chicago:land': {
+		id: 'search:chicago:land',
+		act: 'Chicago Search',
+		title: 'Silent Haven in the Pacific',
+		subtitle: 'Field Discovery · Chicago',
+		beats: [
+			beat(
+				'search_chicago_01',
+				'mara',
+				'Survivors here are holding on despite supplies being gone for years. They told us how their haven in the Pacific stopped supply runs for unknown reasons.',
+				{
+					listener: 'tomas',
+					verbatim: true,
+					direction:
+						'weathered, troubled commander; quiet admiration for the survivors turning into uneasy suspicion on "stopped supply runs for unknown reasons"',
+				},
+			),
+		],
+	},
+
+	'search:los-angeles:land': {
+		id: 'search:los-angeles:land',
+		act: 'Los Angeles Search',
+		title: 'Old Shipping Containers',
+		subtitle: 'Field Discovery · Los Angeles',
+		beats: [
+			beat(
+				'search_la_01',
+				'mara',
+				'Found old shipping containers. They contained old but surprisingly effective supplies.',
+				{
+					listener: 'kai',
+					verbatim: true,
+					direction: 'pragmatic, pleased sea-captain relief discovering intact cargo still fit for the line',
+				},
+			),
+		],
+	},
+
+	'search:los-angeles:sea': {
+		id: 'search:los-angeles:sea',
+		act: 'Eastern Pacific Search',
+		title: 'Lost Haven Coordinates',
+		subtitle: 'Maritime Discovery · Los Angeles',
+		beats: [
+			beat(
+				'search_la_sea_01',
+				'archive',
+				'We have learned the location of a lost haven. We have not yet accessed it.',
+				{
+					listener: 'mara',
+					style: 'radio',
+					verbatim: true,
+					direction: 'crisp, measured maritime transponder log; cool clinical precision reporting an unreached haven',
+				},
+			),
+		],
+	},
+
+	'search:san-francisco:land': {
+		id: 'search:san-francisco:land',
+		act: 'San Francisco Search',
+		title: 'Long-Lost Supply Cache',
+		subtitle: 'Field Discovery · San Francisco',
+		beats: [
+			beat('search_sf_01', 'kai', 'We discovered a long-lost supply cache.', {
+				listener: 'mara',
+				verbatim: true,
+				direction: 'bright, upbeat scout discovery; quick triumphant grin breaking through exhaustion',
+			}),
+		],
+	},
+
+	'search:san-francisco:sea': {
+		id: 'search:san-francisco:sea',
+		act: 'Eastern Pacific Search',
+		title: 'Lost Haven Bearing',
+		subtitle: 'Maritime Discovery · San Francisco',
+		beats: [
+			beat('search_sf_sea_01', 'kai', 'We have learned the location of a lost haven. We have not yet accessed it.', {
+				listener: 'tomas',
+				verbatim: true,
+				direction: 'eager, hushed radio scout locking onto a distant bearing across open water',
+			}),
+		],
+	},
+
+	'search:lima:sea': {
+		id: 'search:lima:sea',
+		act: 'Eastern Pacific Search',
+		title: 'Lost Haven Charted',
+		subtitle: 'Maritime Discovery · Lima',
+		beats: [
+			beat(
+				'search_lima_sea_01',
+				'tomas',
+				'We have learned the location of a lost haven. We have not yet accessed it.',
+				{
+					listener: 'mara',
+					verbatim: true,
+					direction: 'thoughtful, quietly astonished archivist confirming a missing station out in the Pacific',
+				},
+			),
+		],
+	},
+
+	'search:buenos-aires:sea': {
+		id: 'search:buenos-aires:sea',
+		act: 'South Atlantic Search',
+		title: 'Cache on the Falklands',
+		subtitle: 'Maritime Discovery · Buenos Aires',
+		beats: [
+			beat('search_ba_sea_01', 'mara', 'We discovered a long-lost supply cache on the Falklands.', {
+				listener: 'kai',
+				verbatim: true,
+				direction: 'brisk, satisfied sea captain logging a hard-won salvage haul from rough southern waters',
+			}),
+		],
+	},
+
+	'search:st-petersburg:sea': {
+		id: 'search:st-petersburg:sea',
+		act: 'Baltic Search',
+		title: 'Baltic Smugglers',
+		subtitle: 'Maritime Discovery · St. Petersburg',
+		beats: [
+			beat('search_stpete_sea_01', 'kai', 'Smugglers work from here. They offer to help.', {
+				listener: 'mara',
+				verbatim: true,
+				direction: 'wry, street-smart scout amusement; conspiratorial half-grin striking a useful deal',
+			}),
+		],
+	},
+
+	'search:dar-es-salaam:land': {
+		id: 'search:dar-es-salaam:land',
+		act: 'Dar es Salaam Search',
+		title: 'A Well-Traveled Path',
+		subtitle: 'Field Discovery · Dar es Salaam',
+		beats: [
+			beat('search_dar_01', 'kai', 'We found a well-traveled path out of Dar es Salaam.', {
+				listener: 'mara',
+				verbatim: true,
+				direction: 'energetic field scout reporting an open overland route ready to connect',
+			}),
+		],
+	},
+
+	'search:dar-es-salaam:sea': {
+		id: 'search:dar-es-salaam:sea',
+		act: 'Indian Ocean Search',
+		title: 'Indian Ocean Haven Sighted',
+		subtitle: 'Maritime Discovery · Dar es Salaam',
+		beats: [
+			beat('search_dar_sea_01', 'mara', 'We have found a lost haven! We have not yet accessed it.', {
+				listener: 'kai',
+				verbatim: true,
+				direction: 'surge of fierce hope on "found a lost haven!", then steady captain caution on the second sentence',
+			}),
+		],
+	},
+
+	'search:antananarivo:sea': {
+		id: 'search:antananarivo:sea',
+		act: 'Indian Ocean Search',
+		title: 'Lost Haven Off Madagascar',
+		subtitle: 'Maritime Discovery · Antananarivo',
+		beats: [
+			beat('search_anta_sea_01', 'tomas', 'We have found a lost haven! We have not yet accessed it.', {
+				listener: 'mara',
+				verbatim: true,
+				direction: 'breathless wonder and guarded hope from an older historian sighting a long-vanished station',
+			}),
+		],
+	},
+
+	'search:new-mumbai:sea': {
+		id: 'search:new-mumbai:sea',
+		act: 'Indian Ocean Search',
+		title: 'Station Beacon Locked',
+		subtitle: 'Maritime Discovery · New Mumbai',
+		beats: [
+			beat('search_mumbai_sea_01', 'archive', 'We have found a lost haven! We have not yet accessed it.', {
+				listener: 'kai',
+				style: 'radio',
+				verbatim: true,
+				direction: 'crisp archival dispatch announcing a confirmed haven signal still awaiting contact',
+			}),
+		],
+	},
+
+	'search:baghdad:land': {
+		id: 'search:baghdad:land',
+		act: 'Baghdad Search',
+		title: 'Cages of Rats',
+		subtitle: 'Field Discovery · Baghdad',
+		beats: [
+			beat(
+				'search_baghdad_01',
+				'tomas',
+				'A group of Hollow Men are here, preparing hundreds of cages of rats to be delivered to an unsuspecting city.',
+				{
+					listener: 'mara',
+					verbatim: true,
+					swing: 'setback',
+					direction:
+						'appalled, trembling physician staring at deliberate biological warfare; horrified disbelief on "hundreds of cages of rats"',
+				},
+			),
+		],
+	},
+
+	'search:tehran:land': {
+		id: 'search:tehran:land',
+		act: 'Tehran Search',
+		title: 'Captured Hollow Men',
+		subtitle: 'Field Discovery · Tehran',
+		beats: [
+			beat(
+				'search_tehran_01',
+				'mara',
+				'Captured some Hollow Men and questioned them about their current plans. We used this information to remove some threats...',
+				{
+					listener: 'kai',
+					verbatim: true,
+					direction:
+						'hard, clipped operational debrief; cold unsentimental resolve trailing into a dark pause on "remove some threats"',
+				},
+			),
+		],
+	},
+
+	'search:seoul:land': {
+		id: 'search:seoul:land',
+		act: 'Seoul Search',
+		title: 'Rebels of Seoul',
+		subtitle: 'Field Discovery · Seoul',
+		beats: [
+			beat('search_seoul_01', 'kai', 'A group of rebels here is eager to throw off the shackles of Utopia.', {
+				listener: 'mara',
+				verbatim: true,
+				direction: 'fired-up, defiant youthful spark; thrilled to find allies ready to fight back',
+			}),
+		],
+	},
+
+	'search:denver:land': {
+		id: 'search:denver:land',
+		act: 'Denver Search',
+		title: 'Logistics Expert',
+		subtitle: 'Companion Recruited · Denver',
+		beats: [
+			beat(
+				'search_denver_01',
+				'mara',
+				"Met an old convoy boss out of the high plains—been keeping trucks running across dead highways since his father's day. With him mapping the routes, it takes fewer supplies to lay down a new line.",
+				{
+					listener: 'kai',
+					direction:
+						'respectful, grounded admiration from one seasoned commander to another; confident operational relief',
+				},
+			),
+		],
+	},
+
+	'search:mexico-city:land': {
+		id: 'search:mexico-city:land',
+		act: 'Mexico City Search',
+		title: 'Scout',
+		subtitle: 'Companion Recruited · Mexico City',
+		beats: [
+			beat(
+				'search_mexico_01',
+				'kai',
+				"She runs the salvage markets through the old arches—knows every courier, every rumor, and what's left behind in a city. Trade her a lead, and she'll pull a matching route right back out of the scrap heap.",
+				{
+					listener: 'mara',
+					direction: 'impressed, lively street-smart admiration; energetic grin welcoming a kindred scout',
+				},
+			),
+		],
+	},
+
+	'search:lima:land': {
+		id: 'search:lima:land',
+		act: 'Lima Search',
+		title: 'Herbalist',
+		subtitle: 'Companion Recruited · Lima',
+		beats: [
+			beat(
+				'search_lima_01',
+				'tomas',
+				"An Andean herbalist came down from the misty ridges with pockets full of tinctures and bitter root. His remedies won't cure the plague, not yet—but he can beat back an active flare-up right where we stand.",
+				{
+					listener: 'mara',
+					direction: 'warm, humble gratitude of a physician recognizing hard-earned folk medicine that saves lives',
+				},
+			),
+		],
+	},
+
+	'search:paris:land': {
+		id: 'search:paris:land',
+		act: 'Paris Search',
+		title: 'Engineer',
+		subtitle: 'Companion Recruited · Paris',
+		beats: [
+			beat(
+				'search_paris_01',
+				'mara',
+				'Found a master machinist rebuilding turbines inside an old Parisian stone archway. Put her on a crew and we can stand up a full supply center with a fraction of the usual materials.',
+				{
+					listener: 'tomas',
+					direction: 'fierce, impressed operational pride; crisp admiration for someone who gets impossible work done',
+				},
+			),
+		],
+	},
+
+	'search:frankfurt:land': {
+		id: 'search:frankfurt:land',
+		act: 'Frankfurt Search',
+		title: 'Messenger',
+		subtitle: 'Companion Recruited · Frankfurt',
+		beats: [
+			beat(
+				'search_frankfurt_01',
+				'kai',
+				"Quiet guy in glasses who knows every alley and rain-slicked shortcut between towns. Keep him close and he'll haul crates in from a neighboring city without costing us a single step.",
+				{
+					listener: 'tomas',
+					direction: 'warm, appreciative scout camaraderie; quick energetic pacing highlighting his quiet speed',
+				},
+			),
+		],
+	},
+
+	'search:st-petersburg:land': {
+		id: 'search:st-petersburg:land',
+		act: 'St. Petersburg Search',
+		title: 'Operative',
+		subtitle: 'Companion Recruited · St. Petersburg',
+		beats: [
+			beat(
+				'search_stpete_01',
+				'kai',
+				"Pulled a hardened tracker off the frozen docks—guy spots hidden caches and buried tracks in a blizzard. With his eyes on the ground, searching a city won't even slow us down.",
+				{
+					listener: 'mara',
+					direction: 'sharp, exhilarated recon respect; brisk confident delivery on a cold-weather specialist',
+				},
+			),
+		],
+	},
+
+	'search:kinshasa:land': {
+		id: 'search:kinshasa:land',
+		act: 'Kinshasa Search',
+		title: 'Technician',
+		subtitle: 'Companion Recruited · Kinshasa',
+		beats: [
+			beat(
+				'search_kinshasa_01',
+				'kai',
+				"Now that's my kind of guy—climbs rusted cliffside masts with a hundred pounds of cable on his back! With him rigging the dishes, raising a satellite tower takes one less crate of gear.",
+				{
+					listener: 'mara',
+					direction: 'delighted, enthusiastic radio-geek energy; bright laughter and awe at a fearless tower climber',
+				},
+			),
+		],
+	},
+
+	'search:antananarivo:land': {
+		id: 'search:antananarivo:land',
+		act: 'Antananarivo Search',
+		title: 'Containment Specialist',
+		subtitle: 'Companion Recruited · Antananarivo',
+		beats: [
+			beat(
+				'search_anta_01',
+				'tomas',
+				"She kept an entire island port clean for twenty years with nothing but a respirator, bleach, and iron nerve. Call her into any hot zone on the map, and she'll scrub every last trace of plague clean.",
+				{
+					listener: 'mara',
+					direction:
+						'deep, reverent medical awe and relief; steady conviction on "scrub every last trace of plague clean"',
+				},
+			),
+		],
+	},
+
+	'search:delhi:land': {
+		id: 'search:delhi:land',
+		act: 'Delhi Search',
+		title: 'Vector Control Technician',
+		subtitle: 'Companion Recruited · Delhi',
+		beats: [
+			beat(
+				'search_delhi_01',
+				'tomas',
+				"A field doctor here has mapped every air current, rat run, and safe corridor in the dead zones. As long as she's briefing us, we can walk straight through an infested city without taking an exposure.",
+				{
+					listener: 'mara',
+					direction:
+						'grateful, admiring collegial warmth; relieved medical precision welcoming a lifesaving specialist',
+				},
+			),
+		],
+	},
+
+	'search:jakarta:land': {
+		id: 'search:jakarta:land',
+		act: 'Jakarta Search',
+		title: 'Builder',
+		subtitle: 'Companion Recruited · Jakarta',
+		beats: [
+			beat(
+				'search_jakarta_01',
+				'mara',
+				"This dockyard foreman can throw up reinforced walls faster than the tide comes in. Give him the word and he'll raise a shelter anywhere on the grid, no questions asked.",
+				{
+					listener: 'kai',
+					direction: 'hearty, weathered sea-captain approval; decisive warmth for a dependable dockyard builder',
+				},
+			),
+		],
+	},
+
+	'search:hong-kong:land': {
+		id: 'search:hong-kong:land',
+		act: 'Hong Kong Search',
+		title: 'Structural Engineer',
+		subtitle: 'Companion Recruited · Hong Kong',
+		beats: [
+			beat(
+				'search_hk_01',
+				'mara',
+				"She kept Hong Kong's cranes and sea walls standing long after the blueprints rotted away. With her eye for salvage, she doesn't care where the materials come from—she can turn any city's scrap into a shelter.",
+				{
+					listener: 'tomas',
+					direction: 'firm, admiring respect for resourcefulness under impossible conditions',
+				},
+			),
+		],
+	},
+
+	'search:osaka:land': {
+		id: 'search:osaka:land',
+		act: 'Osaka Search',
+		title: 'Local Resistance',
+		subtitle: 'Companion Recruited · Osaka',
+		beats: [
+			beat(
+				'search_osaka_01',
+				'kai',
+				"The people of Osaka aren't hiding anymore—they've formed a resistance cell right under the Hollow Men's noses. Give the signal, and they'll drive a squad of them clean off the grid.",
+				{
+					listener: 'mara',
+					direction: 'electric, triumphant defiance; passionate pride rallying behind people fighting back',
+				},
+			),
+		],
+	},
+
+	'search:tokyo:land': {
+		id: 'search:tokyo:land',
+		act: 'Tokyo Search',
+		title: 'Spies',
+		subtitle: 'Companion Recruited · Tokyo',
+		beats: [
+			beat(
+				'search_tokyo_01',
+				'mara',
+				'Two informants slipped out of the fog with forged transit papers and hand-drawn maps of the eastern borders. Their intel alone is worth two whole red sectors when we push a recon.',
+				{
+					listener: 'kai',
+					direction: 'low, sharp, calculating tactical satisfaction; hushed urgency sizing up priceless intelligence',
+				},
+			),
+		],
+	},
+
+	'search:utopia:land': {
+		id: 'search:utopia:land',
+		act: 'Utopia Search',
+		title: 'Informant',
+		subtitle: 'Companion Recruited · Utopia',
+		beats: [
+			beat(
+				'search_utopia_01',
+				'vey',
+				"He used to run dispatches inside the walls before he saw what they really did to outsiders. Signal him in time, and he'll bury Utopia's patrol logs before they can send another wave after us.",
+				{
+					listener: 'mara',
+					direction:
+						'raspy, quiet, shadowed solidarity between two disillusioned insiders; grim satisfaction turning Utopia against itself',
+				},
+			),
+		],
+	},
 };
 
 const RAID_CARDS: Record<string, { seal: SealKey }> = {
@@ -1925,6 +2426,17 @@ export function sceneForOpening(opening: Opening, campaign?: Campaign): StorySce
 
 export function sceneForSearch(city: CityId, scope: 'land' | 'sea'): StoryScene | null {
 	return STORY_SCENES[`search:${city}:${scope}`] ?? null;
+}
+
+for (const [city, boxes] of Object.entries(pack.searches)) {
+	for (const box of boxes) {
+		const key = `search:${city}:${box.scope}`;
+		const scene = STORY_SCENES[key];
+		if (!scene || !scene.beats.length) throw new Error(`Missing voiced search scene for ${key}`);
+		if (box.result.t === 'companion' && scene.beats.some(entry => entry.speaker === 'archive')) {
+			throw new Error(`Companion search ${key} must not be voiced by archive`);
+		}
+	}
 }
 
 /** Lists every unlocked story scene so players can replay any past moment from the Story Log. */

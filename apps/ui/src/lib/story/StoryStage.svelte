@@ -27,8 +27,12 @@
 
 	type Props = {
 		scene: StoryScene;
-		/** True when rendered over Unboxing (leaves center free for cards/seals unless a set-piece runs). */
+		/** True when rendered over Unboxing or Search (leaves center free for cards/seals unless a set-piece runs). */
 		overlay?: boolean;
+		/** True when the card itself carries the text: keeps character cutouts and voice without a dialogue box or set-piece. */
+		bare?: boolean;
+		/** True to show only the speaking character cutout without a listening silhouette on the opposite flank. */
+		solo?: boolean;
 		/** Optional campaign flag for Final Reckoning visuals. */
 		delivered?: boolean;
 		/** Called when the player finishes or skips past the last beat. */
@@ -37,7 +41,7 @@
 		onclose?: () => void;
 	};
 
-	let { scene, overlay = false, delivered = true, ondone, onclose }: Props = $props();
+	let { scene, overlay = false, bare = false, solo = false, delivered = true, ondone, onclose }: Props = $props();
 
 	let index = $state(0);
 	let autoAdvance = $state(true);
@@ -46,7 +50,7 @@
 
 	const beat = $derived(scene.beats[index] ?? scene.beats[0]!);
 	const speaker = $derived(CAST[beat.speaker]);
-	const listener = $derived(beat.listener ? CAST[beat.listener] : null);
+	const listener = $derived(solo || !beat.listener ? null : CAST[beat.listener]);
 	const styleKind = $derived(beat.style ?? speaker.defaultStyle);
 	const isLast = $derived(index >= scene.beats.length - 1);
 
@@ -204,12 +208,13 @@
 <section
 	class="story-stage"
 	class:overlay
-	class:has-setpiece={Boolean(activeSetPiece)}
+	class:bare
+	class:has-setpiece={!bare && Boolean(activeSetPiece)}
 	aria-label={`Story scene: ${scene.title}`}
 	data-testid="story-stage"
 	data-scene={scene.id}
 	data-speaker={speaker.id}
-	{@attach feedback('Story stage', () => ({ scene: scene.id, beat: beat.id, speaker: speaker.id }))}
+	{@attach feedback('Story stage', () => ({ scene: scene.id, beat: beat.id, speaker: speaker.id, bare }))}
 >
 	{#if !overlay}
 		<div class="stage-backdrop" transition:fade={{ duration: 280 }}></div>
@@ -263,88 +268,96 @@
 	</div>
 
 	<!-- Center stage set-piece (e.g. September 5 Epidemic Cards Masking-Tape Swap) -->
-	{#if activeSetPiece}
+	{#if !bare && activeSetPiece}
 		<div class="setpiece-anchor">
 			<SetPieceLayer piece={activeSetPiece} {delivered} compact={overlay} />
 		</div>
 	{/if}
 
 	<!-- Floating dialogue / thought / radio / chronicler narrator bubble -->
-	<div class="dialogue-dock side-{speaker.side}" style:--accent={speaker.accent} data-testid="story-bubble">
-		{#key beat.id}
-			<article class="bubble kind-{styleKind}" in:fly={{ y: 14, duration: 280, easing: cubicOut }}>
-				{#if styleKind === 'thought'}
-					<span class="thought-dots" aria-hidden="true"><i></i><i></i><i></i></span>
-				{/if}
-
-				<div class="speaker-row">
-					{#if styleKind === 'narrator'}
-						<svg class="compass" viewBox="0 0 24 24" aria-hidden="true">
-							<circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="1.4" />
-							<path d="M12 3.5 14 10l6.5 2-6.5 2-2 6.5L10 14l-6.5-2L10 10Z" fill="currentColor" />
-						</svg>
-					{:else if styleKind === 'radio'}
-						<span class="radio-wave" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+	{#if !bare}
+		<div class="dialogue-dock side-{speaker.side}" style:--accent={speaker.accent} data-testid="story-bubble">
+			{#key beat.id}
+				<article
+					class="bubble kind-{styleKind}"
+					in:fly={{ y: 14, duration: 280, easing: cubicOut }}
+					{@attach feedback('Dialogue', () => ({ speaker: speaker.name, beat: beat.id }))}
+				>
+					{#if styleKind === 'thought'}
+						<span class="thought-dots" aria-hidden="true"><i></i><i></i><i></i></span>
 					{/if}
-					<strong class="speaker-name">{speaker.name}</strong>
-					<span class="speaker-role">{speaker.title}</span>
-					{#if voicePlayer.playingId === beat.id}
-						<span class="speaking-tag" aria-label="Voice playing">LIVE</span>
-					{/if}
-				</div>
 
-				<p class="line" data-testid="story-line">{beat.text}</p>
-
-				<footer class="bubble-controls">
-					<div class="pips" role="tablist" aria-label="Story lines">
-						{#each scene.beats as entry, idx (entry.id)}
-							<button
-								type="button"
-								class="pip"
-								class:on={idx === index}
-								class:done={idx < index}
-								aria-label={`Line ${idx + 1} of ${scene.beats.length}`}
-								onclick={() => {
-									clearTimer();
-									voicePlayer.stop();
-									index = idx;
-								}}
-							></button>
-						{/each}
+					<div class="speaker-row">
+						{#if styleKind === 'narrator'}
+							<svg class="compass" viewBox="0 0 24 24" aria-hidden="true">
+								<circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="1.4" />
+								<path d="M12 3.5 14 10l6.5 2-6.5 2-2 6.5L10 14l-6.5-2L10 10Z" fill="currentColor" />
+							</svg>
+						{:else if styleKind === 'radio'}
+							<span class="radio-wave" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+						{/if}
+						<strong class="speaker-name">{speaker.name}</strong>
+						<span class="speaker-role">{speaker.title}</span>
+						{#if voicePlayer.playingId === beat.id}
+							<span class="speaking-tag" aria-label="Voice playing">LIVE</span>
+						{/if}
 					</div>
 
-					<div class="actions">
-						{#if voicePlayer.hasAudio(beat.id)}
-							<button type="button" class="ctrl" onclick={replayVoice} aria-label="Replay voice line"> Replay </button>
-						{/if}
-						<button
-							type="button"
-							class="ctrl"
-							class:on={audioSettings.voiceEnabled}
-							onclick={() => audioSettings.toggleVoice()}
-						>
-							{audioSettings.voiceEnabled ? 'Voice on' : 'Voice off'}
-						</button>
-						{#if index > 0}
-							<button type="button" class="ctrl" onclick={prev}>Back</button>
-						{/if}
-						{#if !isLast}
-							<button type="button" class="ctrl primary" onclick={next} data-testid="story-next"> Next › </button>
-						{:else if ondone || onclose}
+					<p class="line" data-testid="story-line">{beat.text}</p>
+
+					<footer class="bubble-controls">
+						<div class="pips" role="tablist" aria-label="Story lines">
+							{#each scene.beats as entry, idx (entry.id)}
+								<button
+									type="button"
+									class="pip"
+									class:on={idx === index}
+									class:done={idx < index}
+									aria-label={`Line ${idx + 1} of ${scene.beats.length}`}
+									onclick={() => {
+										clearTimer();
+										voicePlayer.stop();
+										index = idx;
+									}}
+								></button>
+							{/each}
+						</div>
+
+						<div class="actions">
+							{#if voicePlayer.hasAudio(beat.id)}
+								<button type="button" class="ctrl" onclick={replayVoice} aria-label="Replay voice line">
+									Replay
+								</button>
+							{/if}
 							<button
 								type="button"
-								class="ctrl primary"
-								onclick={() => (ondone ? ondone() : onclose?.())}
-								data-testid="story-finish"
+								class="ctrl"
+								class:on={audioSettings.voiceEnabled}
+								onclick={() => audioSettings.toggleVoice()}
 							>
-								{overlay ? 'Continue' : 'Close'}
+								{audioSettings.voiceEnabled ? 'Voice on' : 'Voice off'}
 							</button>
-						{/if}
-					</div>
-				</footer>
-			</article>
-		{/key}
-	</div>
+							{#if index > 0}
+								<button type="button" class="ctrl" onclick={prev}>Back</button>
+							{/if}
+							{#if !isLast}
+								<button type="button" class="ctrl primary" onclick={next} data-testid="story-next"> Next › </button>
+							{:else if ondone || onclose}
+								<button
+									type="button"
+									class="ctrl primary"
+									onclick={() => (ondone ? ondone() : onclose?.())}
+									data-testid="story-finish"
+								>
+									{overlay ? 'Continue' : 'Close'}
+								</button>
+							{/if}
+						</div>
+					</footer>
+				</article>
+			{/key}
+		</div>
+	{/if}
 </section>
 
 <style>
@@ -517,7 +530,7 @@
 	}
 
 	.story-stage.overlay .dialogue-dock {
-		bottom: 4.55rem;
+		bottom: var(--story-dock-bottom, 4.55rem);
 		width: min(37rem, calc(100vw - 26rem));
 	}
 

@@ -661,6 +661,10 @@
 			setTimeout(() => banner?.id === id && (banner = null), 2600);
 		});
 	});
+	/** Cards hidden from hand/corner while in flight from the deck or spotlighted for a search. */
+	const hiddenCards = $derived(
+		revealing?.t === 'search' ? new Set([...admin.turn.arriving, revealing.card]) : admin.turn.arriving,
+	);
 	/** Where a drawn card ends up on this screen: its place in the hand held up here, or the seat of whoever drew it. */
 	const flightDest = (card: CardId, seat: SeatId) =>
 		document.querySelector(`[data-testid="hand"] [data-card="${card}"]`) ??
@@ -1098,7 +1102,7 @@
 							color={SEAT_COLORS[game.seats.indexOf(seat)]!}
 							selected={viewing === seat}
 							showHand={seat !== dockSeat}
-							arriving={admin.turn.arriving}
+							arriving={hiddenCards}
 							acting={snap.phase === 'playing.actions'}
 							action="Show this hand in the dock"
 							selectedTag="Hand shown"
@@ -1696,7 +1700,7 @@
 					else produceUses[0]?.run();
 				}}
 				onlockdown={card => choosing.step({ t: 'lockdown', card })}
-				arriving={admin.turn.arriving}
+				arriving={hiddenCards}
 				opening={admin.opening || (snap.phase === 'setup.events' && show.playing) ? game.infectionsLeft : null}
 			/>
 		</div>

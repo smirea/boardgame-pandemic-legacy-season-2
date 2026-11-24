@@ -948,6 +948,20 @@ export const voiceManifest: Record<string, VoiceEntry> = {
 		"hash": "2e7b0aa9ea1272b9",
 		"bytes": 265292
 	},
+	"search_anta_01": {
+		"src": "/voices/search_anta_01.mp3",
+		"speaker": "tomas",
+		"voiceId": "voice_ezdju9l8nges",
+		"hash": "d0e30ff3a8e7ed85",
+		"bytes": 177164
+	},
+	"search_anta_sea_01": {
+		"src": "/voices/search_anta_sea_01.mp3",
+		"speaker": "tomas",
+		"voiceId": "voice_ezdju9l8nges",
+		"hash": "423900e35cb204ff",
+		"bytes": 54188
+	},
 	"search_atlanta_01": {
 		"src": "/voices/search_atlanta_01.mp3",
 		"speaker": "tomas",
@@ -962,12 +976,82 @@ export const voiceManifest: Record<string, VoiceEntry> = {
 		"hash": "320c09f39e76a19a",
 		"bytes": 114668
 	},
+	"search_ba_sea_01": {
+		"src": "/voices/search_ba_sea_01.mp3",
+		"speaker": "mara",
+		"voiceId": "voice_jujh8gxz6iif",
+		"hash": "281bfe60c14217aa",
+		"bytes": 45548
+	},
+	"search_baghdad_01": {
+		"src": "/voices/search_baghdad_01.mp3",
+		"speaker": "tomas",
+		"voiceId": "voice_ezdju9l8nges",
+		"hash": "88dc8c8536f1cbe8",
+		"bytes": 101132
+	},
 	"search_bogota_01": {
 		"src": "/voices/search_bogota_01.mp3",
 		"speaker": "mara",
 		"voiceId": "voice_jujh8gxz6iif",
 		"hash": "e58be496a4793b91",
 		"bytes": 145772
+	},
+	"search_chicago_01": {
+		"src": "/voices/search_chicago_01.mp3",
+		"speaker": "mara",
+		"voiceId": "voice_jujh8gxz6iif",
+		"hash": "75d4d1cdc2b65299",
+		"bytes": 131948
+	},
+	"search_dar_01": {
+		"src": "/voices/search_dar_01.mp3",
+		"speaker": "kai",
+		"voiceId": "voice_mlv0fgmm505j",
+		"hash": "a284f9283a510298",
+		"bytes": 34028
+	},
+	"search_dar_sea_01": {
+		"src": "/voices/search_dar_sea_01.mp3",
+		"speaker": "mara",
+		"voiceId": "voice_jujh8gxz6iif",
+		"hash": "9ac65f1694a8a7cd",
+		"bytes": 59948
+	},
+	"search_delhi_01": {
+		"src": "/voices/search_delhi_01.mp3",
+		"speaker": "tomas",
+		"voiceId": "voice_ezdju9l8nges",
+		"hash": "f4993078f8ce038d",
+		"bytes": 156428
+	},
+	"search_denver_01": {
+		"src": "/voices/search_denver_01.mp3",
+		"speaker": "mara",
+		"voiceId": "voice_jujh8gxz6iif",
+		"hash": "a0b35006a02d8d3c",
+		"bytes": 140588
+	},
+	"search_frankfurt_01": {
+		"src": "/voices/search_frankfurt_01.mp3",
+		"speaker": "kai",
+		"voiceId": "voice_mlv0fgmm505j",
+		"hash": "e1544c6b0f377859",
+		"bytes": 114668
+	},
+	"search_hk_01": {
+		"src": "/voices/search_hk_01.mp3",
+		"speaker": "mara",
+		"voiceId": "voice_jujh8gxz6iif",
+		"hash": "dd3c5b6a91281be2",
+		"bytes": 165068
+	},
+	"search_jakarta_01": {
+		"src": "/voices/search_jakarta_01.mp3",
+		"speaker": "mara",
+		"voiceId": "voice_jujh8gxz6iif",
+		"hash": "a16c9718a99d2f7a",
+		"bytes": 131372
 	},
 	"search_jhb_01": {
 		"src": "/voices/search_jhb_01.mp3",
@@ -983,6 +1067,48 @@ export const voiceManifest: Record<string, VoiceEntry> = {
 		"hash": "2203b8b874a50320",
 		"bytes": 200492
 	},
+	"search_kinshasa_01": {
+		"src": "/voices/search_kinshasa_01.mp3",
+		"speaker": "kai",
+		"voiceId": "voice_mlv0fgmm505j",
+		"hash": "3f7a8dee4fa293f2",
+		"bytes": 131948
+	},
+	"search_la_01": {
+		"src": "/voices/search_la_01.mp3",
+		"speaker": "mara",
+		"voiceId": "voice_jujh8gxz6iif",
+		"hash": "4ae471ed31d16586",
+		"bytes": 91628
+	},
+	"search_la_sea_01": {
+		"src": "/voices/search_la_sea_01.mp3",
+		"speaker": "archive",
+		"voiceId": "voice_jhu2r73cmzri",
+		"hash": "614942f8eef842ec",
+		"bytes": 83564
+	},
+	"search_lima_01": {
+		"src": "/voices/search_lima_01.mp3",
+		"speaker": "tomas",
+		"voiceId": "voice_ezdju9l8nges",
+		"hash": "8a1c0a0b9c43a6ee",
+		"bytes": 174284
+	},
+	"search_lima_sea_01": {
+		"src": "/voices/search_lima_sea_01.mp3",
+		"speaker": "tomas",
+		"voiceId": "voice_ezdju9l8nges",
+		"hash": "16774c4e3f964d4a",
+		"bytes": 67724
+	},
+	"search_mexico_01": {
+		"src": "/voices/search_mexico_01.mp3",
+		"speaker": "kai",
+		"voiceId": "voice_mlv0fgmm505j",
+		"hash": "54a35a10d4b7a549",
+		"bytes": 121292
+	},
 	"search_moscow_01": {
 		"src": "/voices/search_moscow_01.mp3",
 		"speaker": "kai",
@@ -996,6 +1122,27 @@ export const voiceManifest: Record<string, VoiceEntry> = {
 		"voiceId": "voice_mlv0fgmm505j",
 		"hash": "611f53a15f4bd137",
 		"bytes": 204524
+	},
+	"search_mumbai_sea_01": {
+		"src": "/voices/search_mumbai_sea_01.mp3",
+		"speaker": "archive",
+		"voiceId": "voice_jhu2r73cmzri",
+		"hash": "7662b69e15ff1ac5",
+		"bytes": 61964
+	},
+	"search_osaka_01": {
+		"src": "/voices/search_osaka_01.mp3",
+		"speaker": "kai",
+		"voiceId": "voice_mlv0fgmm505j",
+		"hash": "a08969799fae1d5f",
+		"bytes": 99404
+	},
+	"search_paris_01": {
+		"src": "/voices/search_paris_01.mp3",
+		"speaker": "mara",
+		"voiceId": "voice_jujh8gxz6iif",
+		"hash": "864af65f162f6635",
+		"bytes": 138572
 	},
 	"search_riyadh_01": {
 		"src": "/voices/search_riyadh_01.mp3",
@@ -1011,11 +1158,67 @@ export const voiceManifest: Record<string, VoiceEntry> = {
 		"hash": "6dcbe31c9948db1c",
 		"bytes": 125324
 	},
+	"search_seoul_01": {
+		"src": "/voices/search_seoul_01.mp3",
+		"speaker": "kai",
+		"voiceId": "voice_mlv0fgmm505j",
+		"hash": "99728fcc44c1f756",
+		"bytes": 49292
+	},
+	"search_sf_01": {
+		"src": "/voices/search_sf_01.mp3",
+		"speaker": "kai",
+		"voiceId": "voice_mlv0fgmm505j",
+		"hash": "26f4c94d9a38ec07",
+		"bytes": 44108
+	},
+	"search_sf_sea_01": {
+		"src": "/voices/search_sf_sea_01.mp3",
+		"speaker": "kai",
+		"voiceId": "voice_mlv0fgmm505j",
+		"hash": "facf250b19abfdd5",
+		"bytes": 53324
+	},
 	"search_shanghai_01": {
 		"src": "/voices/search_shanghai_01.mp3",
 		"speaker": "kai",
 		"voiceId": "voice_mlv0fgmm505j",
 		"hash": "368b3df0c7bfb343",
 		"bytes": 185228
+	},
+	"search_stpete_01": {
+		"src": "/voices/search_stpete_01.mp3",
+		"speaker": "kai",
+		"voiceId": "voice_mlv0fgmm505j",
+		"hash": "f04efb1c3506fa5c",
+		"bytes": 99404
+	},
+	"search_stpete_sea_01": {
+		"src": "/voices/search_stpete_sea_01.mp3",
+		"speaker": "kai",
+		"voiceId": "voice_mlv0fgmm505j",
+		"hash": "9f98b1f3f2ee872b",
+		"bytes": 36044
+	},
+	"search_tehran_01": {
+		"src": "/voices/search_tehran_01.mp3",
+		"speaker": "mara",
+		"voiceId": "voice_jujh8gxz6iif",
+		"hash": "30959322b89f7c57",
+		"bytes": 98252
+	},
+	"search_tokyo_01": {
+		"src": "/voices/search_tokyo_01.mp3",
+		"speaker": "mara",
+		"voiceId": "voice_jujh8gxz6iif",
+		"hash": "7b2454c50f91dc6b",
+		"bytes": 152108
+	},
+	"search_utopia_01": {
+		"src": "/voices/search_utopia_01.mp3",
+		"speaker": "vey",
+		"voiceId": "voice_fsptkefv5l5x",
+		"hash": "71d7f59b2c94f5fc",
+		"bytes": 190124
 	}
 };

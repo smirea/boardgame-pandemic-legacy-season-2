@@ -75,8 +75,8 @@
 		copies?: CityCardCopies;
 		/** Overrides Door R / 55 "2-It's wearing off" sticker on Epidemic cards. */
 		wearingOff?: boolean;
-		/** The search box just scratched, which wipes open to show what it found. */
-		revealing?: number;
+		/** Search-box reveal choreography for the search spotlight. */
+		scratch?: { box: number; stage: 'sealed' | 'scratching' | 'open' };
 	};
 
 	let {
@@ -89,7 +89,7 @@
 		small = false,
 		copies,
 		wearingOff,
-		revealing,
+		scratch,
 	}: Props = $props();
 
 	const epidemicWearingOff = $derived(wearingOff ?? wearingOffFromGame?.() ?? false);
@@ -112,15 +112,21 @@
 					return { name, ...print, plain: `${name}: ${print.text}` };
 				})()
 			: null;
-		const companion = card.companion
+		const scratchBox = scratch ? card.search[scratch.box] : undefined;
+		const scratchCompanion = scratchBox?.result.t === 'companion' ? scratchBox.result.companion : null;
+		const companionId = card.companion ?? (scratch && scratch.stage !== 'sealed' ? scratchCompanion : null);
+		const companion = companionId
 			? (() => {
-					const name = pack.companions.find(item => item.id === card.companion)!.name;
-					const print = COMPANION_PRINT[card.companion];
-					return { id: card.companion, name, ...print, plain: `${name}: ${print.text}` };
+					const name = pack.companions.find(item => item.id === companionId)!.name;
+					const print = COMPANION_PRINT[companionId];
+					return { id: companionId, name, ...print, plain: `${name}: ${print.text}` };
 				})()
 			: null;
+		const scratchingCompanion = Boolean(scratch?.stage === 'scratching' && scratchCompanion && !card.companion);
+		const preloadCompanion = scratch?.stage === 'sealed' && !card.companion ? scratchCompanion : null;
 		const searchEntries: SearchDisplay[] = card.search.flatMap<SearchDisplay>((box, index) => {
-			if (!box.scratched) {
+			const heldSealed = scratch?.box === index && scratch.stage === 'sealed';
+			if (!box.scratched || heldSealed) {
 				return [
 					{
 						kind: 'sealed' as const,
@@ -142,10 +148,46 @@
 				},
 			];
 		});
+		const preScratchEntries: SearchDisplay[] = scratchingCompanion
+			? card.search.flatMap<SearchDisplay>((box, index) => {
+					if (!box.scratched || scratch?.box === index) {
+						return [
+							{
+								kind: 'sealed' as const,
+								index,
+								scope: box.scope,
+								label: box.scope === 'sea' ? 'Search the sea' : 'Search the land',
+							},
+						];
+					}
+					const info = searchResultPrint(box.result, card.city, box.scope);
+					if (!info) return [];
+					return [
+						{
+							kind: 'revealed' as const,
+							index,
+							scope: box.scope,
+							heading: box.scope === 'sea' ? 'Sea' : 'Land',
+							info,
+						},
+					];
+				})
+			: [];
 		const hasRevealed = searchEntries.some(entry => entry.kind === 'revealed');
-		const floatingUpgrade = Boolean(improvement && companion);
-		const diagonalUpgrade = Boolean(improvement && !companion);
-		return { city, improvement, companion, searchEntries, hasRevealed, floatingUpgrade, diagonalUpgrade };
+		const floatingUpgrade = Boolean(improvement && companion && !scratchingCompanion);
+		const diagonalUpgrade = Boolean(improvement && (!companion || scratchingCompanion));
+		return {
+			city,
+			improvement,
+			companion,
+			scratchingCompanion,
+			preloadCompanion,
+			searchEntries,
+			preScratchEntries,
+			hasRevealed,
+			floatingUpgrade,
+			diagonalUpgrade,
+		};
 	});
 
 	const cityCopies = $derived.by(() => {
@@ -254,9 +296,10 @@
 	{:else}
 		{@const maxSize =
 			layout.compact && layout.two ? 0.46 : layout.compact || layout.top ? 0.5 : layout.two ? 0.52 : 0.54}
+		{@const isScratching = scratch?.box === entry.index && scratch.stage === 'scratching'}
 		<span
 			class="search-revealed"
-			class:revealing={revealing === entry.index}
+			class:scratching={isScratching}
 			role="note"
 			data-search-revealed={entry.scope}
 			aria-label={`${entry.heading}: ${entry.info.plain}`}
@@ -276,8 +319,32 @@
 					</span>
 				{/if}
 			</span>
+			{#if isScratching}
+				<span class="scratch-foil" aria-hidden="true">
+					<span>{entry.scope === 'sea' ? 'Search the sea' : 'Search the land'}</span>
+				</span>
+				<span class="scrape-edge" aria-hidden="true"></span>
+			{/if}
 		</span>
 	{/if}
+{/snippet}
+
+{#snippet companionFace(companion: NonNullable<NonNullable<typeof cityDetails>['companion']>)}
+	<img class="companion-art" src={companionArtUrl(companion.id)} alt="" aria-hidden="true" />
+	<span class="companion-scrim">
+		<span class="overlay-kicker">Companion</span>
+		<span class="companion-fit" {@attach fitText(companion.plain, { max: 0.74, min: 0.44 })}>
+			<span class="slip-head">
+				<strong>{companion.name}:</strong>
+				{#if companion.cards}
+					{#each companion.cards as letter (letter)}
+						<i class="mini-red-card">{letter}</i>
+					{/each}
+				{/if}
+			</span>
+			<RichText text={companion.text} />
+		</span>
+	</span>
 {/snippet}
 
 {#snippet cardBody()}
@@ -308,8 +375,11 @@
 				{#if cityDetails.city.port}{@render portAnchor()}{/if}
 			</span>
 			<span class="art">
-				{#if cityDetails.companion}
-					<img class="companion-art" src={companionArtUrl(cityDetails.companion.id)} alt="" aria-hidden="true" />
+				{#if cityDetails.preloadCompanion}
+					<img class="preload-art" src={companionArtUrl(cityDetails.preloadCompanion)} alt="" aria-hidden="true" />
+				{/if}
+				{#if cityDetails.companion && !cityDetails.scratchingCompanion}
+					{@render companionFace(cityDetails.companion)}
 					{#if cityDetails.searchEntries.length > 0}
 						<span class="search-stack top" class:two={cityDetails.searchEntries.length >= 2}>
 							{#each cityDetails.searchEntries as search (search.index)}
@@ -321,20 +391,6 @@
 							{/each}
 						</span>
 					{/if}
-					<span class="companion-scrim">
-						<span class="overlay-kicker">Companion</span>
-						<span class="companion-fit" {@attach fitText(cityDetails.companion.plain, { max: 0.74, min: 0.44 })}>
-							<span class="slip-head">
-								<strong>{cityDetails.companion.name}:</strong>
-								{#if cityDetails.companion.cards}
-									{#each cityDetails.companion.cards as letter (letter)}
-										<i class="mini-red-card">{letter}</i>
-									{/each}
-								{/if}
-							</span>
-							<RichText text={cityDetails.companion.text} />
-						</span>
-					</span>
 				{:else}
 					<MapArt city={card.city} accent={face.color} />
 					{#if cityDetails.diagonalUpgrade && cityDetails.improvement}
@@ -355,20 +411,40 @@
 							</span>
 						</span>
 					{/if}
-					{#if cityDetails.searchEntries.length > 0}
+					{@const visibleEntries = cityDetails.scratchingCompanion
+						? cityDetails.preScratchEntries
+						: cityDetails.searchEntries}
+					{#if visibleEntries.length > 0}
 						<span
 							class="search-stack"
 							class:compact={cityDetails.diagonalUpgrade}
-							class:two={cityDetails.searchEntries.length >= 2}
+							class:two={visibleEntries.length >= 2}
 						>
-							{#each cityDetails.searchEntries as search (search.index)}
+							{#each visibleEntries as search (search.index)}
 								{@render searchChip(search, {
 									compact: cityDetails.diagonalUpgrade,
-									two: cityDetails.searchEntries.length >= 2,
+									two: visibleEntries.length >= 2,
 									top: false,
 								})}
 							{/each}
 						</span>
+					{/if}
+					{#if cityDetails.scratchingCompanion && cityDetails.companion}
+						<span class="companion-wipe" aria-hidden="true">
+							{@render companionFace(cityDetails.companion)}
+						</span>
+						<span class="scrape-edge full" aria-hidden="true"></span>
+						{#if cityDetails.searchEntries.length > 0}
+							<span class="search-stack top above-wipe" class:two={cityDetails.searchEntries.length >= 2}>
+								{#each cityDetails.searchEntries as search (search.index)}
+									{@render searchChip(search, {
+										compact: false,
+										two: cityDetails.searchEntries.length >= 2,
+										top: true,
+									})}
+								{/each}
+							</span>
+						{/if}
 					{/if}
 				{/if}
 			</span>
@@ -772,17 +848,107 @@
 		text-align: center;
 	}
 
-	/* A box just scratched wipes open left to right, the way a coin takes the silver off. */
-	.search-revealed.revealing {
-		animation: scratch-open 900ms 250ms cubic-bezier(0.3, 0.7, 0.3, 1) both;
+	/* A box just scratched peels its metallic foil left to right, the way a coin takes the silver off. */
+	.preload-art {
+		position: absolute;
+		width: 0;
+		height: 0;
+		opacity: 0;
+		pointer-events: none;
 	}
 
-	@keyframes scratch-open {
+	.search-stack.top.above-wipe {
+		z-index: 6;
+	}
+
+	.companion-wipe {
+		position: absolute;
+		inset: 0;
+		z-index: 4;
+		animation: companion-scratch 900ms cubic-bezier(0.28, 0.72, 0.35, 1) both;
+	}
+
+	.scratch-foil {
+		position: absolute;
+		inset: 0;
+		z-index: 3;
+		display: grid;
+		place-items: center;
+		border-radius: inherit;
+		background:
+			repeating-linear-gradient(-35deg, rgb(255 255 255 / 0.28) 0 0.22em, rgb(172 184 192 / 0.22) 0.22em 0.48em),
+			linear-gradient(162deg, #dde6ea, #b6c3cb);
+		box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.35);
+		animation: foil-peel 900ms cubic-bezier(0.28, 0.72, 0.35, 1) both;
+	}
+
+	.scratch-foil span {
+		color: #161d22;
+		font-size: 0.56em;
+		font-weight: 850;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		opacity: 0.82;
+	}
+
+	.scrape-edge {
+		position: absolute;
+		top: -0.1em;
+		bottom: -0.1em;
+		left: 0;
+		z-index: 5;
+		width: 0.42em;
+		border-radius: 999px;
+		background: linear-gradient(
+			90deg,
+			transparent,
+			rgb(255 247 214 / 0.92) 45%,
+			rgb(225 236 244 / 0.95) 68%,
+			transparent
+		);
+		box-shadow: 0 0 0.5em rgb(255 234 170 / 0.7);
+		pointer-events: none;
+		animation: scrape-sweep 900ms cubic-bezier(0.28, 0.72, 0.35, 1) both;
+	}
+
+	.scrape-edge.full {
+		top: 0;
+		bottom: 0;
+		width: 0.55em;
+	}
+
+	@keyframes foil-peel {
+		from {
+			clip-path: inset(0 0 0 0);
+		}
+		to {
+			clip-path: inset(0 0 0 100%);
+		}
+	}
+
+	@keyframes companion-scratch {
 		from {
 			clip-path: inset(0 100% 0 0);
 		}
 		to {
 			clip-path: inset(0 0 0 0);
+		}
+	}
+
+	@keyframes scrape-sweep {
+		0% {
+			left: -0.25em;
+			opacity: 0;
+		}
+		6% {
+			opacity: 1;
+		}
+		92% {
+			opacity: 1;
+		}
+		100% {
+			left: calc(100% - 0.15em);
+			opacity: 0;
 		}
 	}
 
@@ -793,6 +959,7 @@
 	}
 
 	.search-revealed {
+		position: relative;
 		display: flex;
 		flex-direction: column;
 		gap: 0.08em;

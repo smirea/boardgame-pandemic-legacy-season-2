@@ -172,7 +172,7 @@ export class GameAudio {
 				break;
 			}
 			case 'action':
-				sfxAction(entry.action, this.again(entry.action));
+				if (entry.action !== 'search') sfxAction(entry.action, this.again(entry.action));
 				break;
 			case 'draw':
 				sfxCardDraw();
