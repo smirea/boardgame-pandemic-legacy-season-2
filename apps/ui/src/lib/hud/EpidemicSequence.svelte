@@ -48,7 +48,8 @@
 	// The first step as it is shown: the track opens under it with the marker where it stood, the marker moves on a
 	// space, and the track closes again before the card stands aside for the second step.
 	let track = $state<'shut' | 'open' | 'moved' | 'closing'>('shut');
-	const markerAt = $derived(track === 'open' ? earlierAt : currentAt);
+	// Until it moves, the marker stands where it stood before, from the very first frame: it never steps back to get there.
+	const markerAt = $derived(increasing && (track === 'shut' || track === 'open') ? earlierAt : currentAt);
 	$effect(() => {
 		if (!increasing) {
 			track = 'shut';
@@ -521,6 +522,9 @@
 		color: #d9c8b4;
 		font-size: 0.72rem;
 		font-weight: 700;
+	}
+
+	.rate-track.moved .space {
 		transition:
 			background 300ms ease 380ms,
 			color 300ms ease 380ms;
@@ -544,11 +548,11 @@
 		font-size: 1rem;
 		line-height: 1;
 		text-shadow: 0 0 0.5em rgb(255 120 60 / 0.9);
-		transition: left 460ms cubic-bezier(0.45, 0, 0.25, 1);
 	}
 
-	/* The marker is picked up, carried over and set down, once. */
+	/* The marker is picked up, carried over and set down, once: it travels only then. */
 	.rate-track.moved .marker {
+		transition: left 460ms cubic-bezier(0.45, 0, 0.25, 1);
 		animation: marker-hop 460ms ease-out 1;
 	}
 
