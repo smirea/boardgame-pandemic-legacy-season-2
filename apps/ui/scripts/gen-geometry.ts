@@ -22,9 +22,11 @@ const MAX_LAND_LENGTH = 46;
 const MAX_SEA_LENGTH = 66;
 // A lane that has to sail far around a coast to reach its port is not a lane anyone would chart.
 const MAX_DETOUR = 1.45;
-// A supply line may not cross water. The tolerance covers lakes, rivers and the coarseness of the coastline data.
-const MAX_WATER_SHARE = 0.08;
-const MAX_WATER_RUN = 1;
+// A supply line may not cross water. The only big lake the coastline data holds is the Caspian, a sea to anyone drawing
+// a line, so no water is tolerated: the coarse coast at either end is left out by `COAST_MARGIN`, and a line that
+// still clips the coast takes another arch.
+const MAX_WATER_SHARE = 0;
+const MAX_WATER_RUN = 0;
 // Cities are nudged apart for legibility, which can leave a coastal city just offshore.
 const COAST_MARGIN = 2;
 const CLEARANCE = 3.2;
