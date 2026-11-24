@@ -99,6 +99,8 @@ export type Box = { x: number; z: number; width: number; depth: number };
 const NOTE_GAP = 0.6;
 /** The directions a note tries, in degrees with south (below) at 90: below and above first, fanning out to the sides. */
 const NOTE_ANGLES = [90, 270, 67.5, 112.5, 292.5, 247.5, 45, 135, 315, 225, 22.5, 157.5, 337.5, 202.5, 0, 180];
+/** West first: a note on a red line stands to its left, over the sea it governs, as players look for it. */
+export const WEST_ANGLES = [180, 157.5, 202.5, 135, 225, 112.5, 247.5, 90, 270, 67.5, 292.5, 45, 315, 22.5, 337.5, 0];
 
 /**
  * Where each map note is centred: beside its location, as close as it can stand while covering no disc, name or
@@ -108,7 +110,15 @@ const NOTE_ANGLES = [90, 270, 67.5, 112.5, 292.5, 247.5, 45, 135, 315, 225, 22.5
  * players can see (`seen`) keeps to ground `revealed` says they can see, off the fog.
  */
 export function layoutNotes(
-	notes: { id: string; at: BoardPoint; width: number; depth: number; hidden: boolean; seen?: boolean }[],
+	notes: {
+		id: string;
+		at: BoardPoint;
+		width: number;
+		depth: number;
+		hidden: boolean;
+		seen?: boolean;
+		angles?: number[];
+	}[],
 	taken: Box[],
 	revealed: (point: BoardPoint) => boolean = () => true,
 ): Map<string, BoardPoint> {
@@ -124,7 +134,7 @@ export function layoutNotes(
 		const size = { width: note.width, depth: note.depth };
 		const candidates: BoardPoint[] = note.hidden ? [note.at] : [];
 		for (let reach = DISC_REACH; reach <= DISC_REACH + (note.seen ? 30 : 16); reach += 1.5)
-			for (const degrees of NOTE_ANGLES) {
+			for (const degrees of note.angles ?? NOTE_ANGLES) {
 				const ux = Math.cos((degrees * Math.PI) / 180);
 				const uz = Math.sin((degrees * Math.PI) / 180);
 				const span = reach + (Math.abs(ux) * note.width) / 2 + (Math.abs(uz) * note.depth) / 2;

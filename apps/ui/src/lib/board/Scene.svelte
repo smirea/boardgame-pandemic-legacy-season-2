@@ -31,7 +31,7 @@
 	import { restWhenStill } from './frameLoop';
 	import Fog from './Fog.svelte';
 	import type { Part } from './hints';
-	import { DISC_REACH, layoutLabels, layoutNotes, NAME_SIZE } from './labels';
+	import { DISC_REACH, layoutLabels, layoutNotes, NAME_SIZE, WEST_ANGLES } from './labels';
 	import type { Placement } from './labels';
 	import { buildLandGeometry, mapToSheet } from './land';
 	import { FRAME, LAND_HEIGHT } from './projection';
@@ -585,7 +585,7 @@
 				const size = noteSize(note.text, NOTE.size, NOTE.width);
 				if (!note.line) return [{ id: note.id, at: layout[note.city]!, ...size, hidden: !shown.has(note.city) }];
 				const at = lineAnchor(note.line);
-				return at ? [{ id: note.id, at, ...size, hidden: false, seen: true }] : [];
+				return at ? [{ id: note.id, at, ...size, hidden: false, seen: true, angles: WEST_ANGLES }] : [];
 			}),
 			taken,
 			inSight,

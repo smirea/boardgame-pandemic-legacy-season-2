@@ -230,11 +230,19 @@ export const documentedEdges: EdgeDef[] = [
  * cross at most one. Each starts on the coast or just inland, as printed. Where the printed line stops at ocean the board leaves
  * dark, it runs on into the uncharted ground (`uncharted`) to the edge of the chart, so no course slips round its end.
  * The southern ones run well past the frame, because a course rounding a cape may bow a little beyond it.
- * Longitudes run past 180 where the chart does (it is centred on 11°E). Listed in the order players come upon them
- * (100°W beside Mexico City in North America, then the Drake Passage, then the rest), so the board's note on what they
- * mean stands by the first one found.
+ * Longitudes run past 180 where the chart does (it is centred on 11°E). The board's note on what they mean stands by
+ * the first one in sight: the Cape line south of Johannesburg, where the table looks for it, and before Africa is
+ * revealed the others in the order players come upon them (100°W beside Mexico City, then the Drake Passage).
  */
 export const redLines: { printed: string; corners: [lat: number, lon: number][] }[] = [
+	// South from the Cape of Good Hope, below Johannesburg.
+	{
+		printed: 'door 57',
+		corners: [
+			[-34.3, 20],
+			[-75, 20],
+		],
+	},
 	// From the Mexican coast, as printed beneath it, so none of it runs over Mexico City's ground.
 	{
 		printed: 'door 60',
@@ -249,13 +257,6 @@ export const redLines: { printed: string; corners: [lat: number, lon: number][] 
 		corners: [
 			[-52, -68.4],
 			[-75, -68.4],
-		],
-	},
-	{
-		printed: 'door 57',
-		corners: [
-			[-34.3, 20],
-			[-75, 20],
 		],
 	},
 	// Down the Somali coast to the northern tip of Madagascar, west of the Indian Ocean haven.
