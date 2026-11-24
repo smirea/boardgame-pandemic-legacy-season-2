@@ -99,11 +99,16 @@
 		scale: -1 1;
 	}
 
+	/* The head takes two thirds of the bust's width and its centre a third of the way down it. A drawing with little
+	   body under the head is drawn larger, as much as it takes for its foot to reach the bottom, so every figure stands
+	   on the cut rather than floating above it. */
 	img {
+		--head-y: calc(3cqh + var(--bust) * 0.33);
+		--w: max(var(--bust) * 0.66 / var(--hs), (100cqh - var(--head-y)) * var(--ha) / (1 - var(--hy)));
 		position: absolute;
-		left: calc(var(--bust) * (0.5 - 0.66 * var(--hx) / var(--hs)));
-		top: calc(3cqh - var(--bust) * (0.66 * var(--hy) / (var(--hs) * var(--ha)) - 0.33));
-		width: calc(var(--bust) * 0.66 / var(--hs));
+		left: calc(var(--bust) * 0.5 - var(--w) * var(--hx));
+		top: calc(var(--head-y) - var(--w) * var(--hy) / var(--ha));
+		width: var(--w);
 		max-width: none;
 		height: auto;
 		filter: drop-shadow(0 0.4rem 0.8rem rgb(0 0 0 / 0.7));
