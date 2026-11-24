@@ -1704,7 +1704,6 @@
 			reveals={admin.turn.reveals}
 			epidemic={admin.epidemic}
 			canStart={canAct && !spectator}
-			who={seatName(world, game.active)}
 			onstart={admin.start}
 			onlanded={key => {
 				sfxMoment('cardLand');

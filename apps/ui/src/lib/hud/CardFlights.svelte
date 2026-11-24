@@ -15,15 +15,13 @@
 		epidemic: Card | null;
 		/** This browser's player is the one who starts the Epidemic. */
 		canStart: boolean;
-		/** Who everyone else is waiting for. */
-		who: string;
 		onstart: () => void;
 		onlanded: (key: number) => void;
 		/** Where a card ends up on this screen: its place in the hand shown, or the seat of whoever drew it. */
 		dest: (card: CardId, seat: SeatId) => Element | null;
 	};
 
-	let { reveals, epidemic, canStart, who, onstart, onlanded, dest }: Props = $props();
+	let { reveals, epidemic, canStart, onstart, onlanded, dest }: Props = $props();
 
 	const FLIGHT_MS = 560;
 	const box = (selector: string) => document.querySelector(selector)?.getBoundingClientRect() ?? null;
@@ -112,9 +110,6 @@
 				</div>
 				<div class="back" aria-hidden="true"><span>✦</span></div>
 			</div>
-			<p class="prompt" data-testid="epidemic-prompt">
-				{canStart ? 'Click the card to start the Epidemic' : `Waiting for ${who} to start the Epidemic`}
-			</p>
 		</div>
 	{/if}
 </div>
@@ -193,23 +188,5 @@
 				0 0 0 0.3rem rgb(255 110 84 / 0.95),
 				0 0 3.2rem rgb(255 90 64 / 0.9);
 		}
-	}
-
-	.prompt {
-		position: absolute;
-		top: calc(100% + 0.55rem);
-		left: 50%;
-		width: max-content;
-		max-width: 16rem;
-		margin: 0;
-		padding: 0.25rem 0.7rem;
-		border-radius: 2px;
-		background: #a8261c;
-		color: #fff3e6;
-		font-size: 0.86rem;
-		font-weight: 600;
-		text-align: center;
-		translate: -50% 0;
-		box-shadow: 0 0.5rem 1.2rem rgb(0 0 0 / 0.5);
 	}
 </style>

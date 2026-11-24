@@ -45,9 +45,10 @@
 	const fromPile = $derived(task === 'draw' || task === 'flip' || task === 'bottom');
 	const ready = $derived(fromPile && action !== null && !action.busy);
 	const go = $derived(action && task === 'intensify' ? 'Intensify' : action && task === 'done' ? 'Done' : null);
+	// An Epidemic beside the deck says what it is itself, so the desk adds nothing while it waits.
 	const badge = $derived(
 		epidemic
-			? 'Epidemic drawn'
+			? null
 			: task === 'bottom'
 				? action
 					? 'Draw the bottom card'
@@ -191,10 +192,10 @@
 				data-testid="turn-desk-go"
 				>{go}{#if !action!.busy}<Beacon turns={5} />{/if}</button
 			>
-		{:else}
+		{:else if badge}
 			<span
 				class="badge"
-				class:alarm={epidemic || task === 'bottom' || (task === 'flip' && gathering)}
+				class:alarm={task === 'bottom' || (task === 'flip' && gathering)}
 				data-testid="turn-desk-badge">{badge}</span
 			>
 		{/if}
