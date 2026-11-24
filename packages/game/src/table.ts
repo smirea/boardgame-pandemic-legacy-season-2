@@ -226,6 +226,7 @@ export function applyTable(world: World, command: TableCommand) {
 			const character = game?.players[command.seat]?.character;
 			if (character && campaign.characters[character] && !campaign.characters[character]!.worker)
 				campaign.characters[character]!.player = command.player;
+			if (table.undoVote?.by && !tablePlayers(table).includes(table.undoVote.by)) table.undoVote.by = null;
 			break;
 		}
 		case 'LEAVE':
@@ -241,8 +242,15 @@ export function applyTable(world: World, command: TableCommand) {
 			)
 				table.briefing.stowing = true;
 			if (table.undoVote) {
-				delete table.undoVote.votes[command.player];
-				if (tablePlayers(table).length === 0) table.undoVote = null;
+				const vote = table.undoVote;
+				const players = tablePlayers(table);
+				if (!players.includes(command.player)) {
+					delete vote.votes[command.player];
+					// Whoever asked is gone, so anyone still here may withdraw it.
+					if (vote.by === command.player) vote.by = null;
+				}
+				// With everyone left having voted, a vote that was all Yes has already undone the move: this one failed.
+				if (players.every(player => vote.votes[player] !== undefined)) table.undoVote = null;
 			}
 			break;
 		case 'READY':

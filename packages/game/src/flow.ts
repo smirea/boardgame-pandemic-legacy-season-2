@@ -317,7 +317,11 @@ export function settleCarried(world: World) {
 /** The characters of this game a scar the Legacy deck owes may go to. */
 export function scarCandidates(world: World, vote: { not: SeatId[] }): SeatId[] {
 	const game = world.game!;
-	return game.seats.filter(seat => !vote.not.includes(seat) && canTakeScar(world, characterOf(world, seat)));
+	return game.seats.filter(seat => {
+		const character = characterOf(world, seat);
+		// A scar on someone already dead, or on a haven worker who is gone after the game, would be wasted.
+		return !vote.not.includes(seat) && !character.dead && !character.worker && canTakeScar(world, character);
+	});
 }
 
 export const hasScar = (character: Character, scar: ScarId) =>
@@ -683,7 +687,7 @@ export function endTurn(world: World) {
 }
 
 /** Cities that just gained a path to a haven get their cards: City cards to the discard pile, Infection cards to the Game End area. */
-export function settleGrid(world: World, before: Set<CityId>, countsForObjective: boolean) {
+export function settleGrid(world: World, before: ReadonlySet<CityId>, countsForObjective: boolean) {
 	const { campaign, game } = world as { campaign: World['campaign']; game: Game | null };
 	if (!game) return;
 	for (const city of grid(campaign)) {

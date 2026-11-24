@@ -112,4 +112,4 @@ export type {
 	ReplayIndex,
 	RunSummary,
 } from './record';
-export { applyPatches, diff, framesOf, gameIndexOf, parseRecord, recordStep, startRecord } from './record';
+export { applyPatches, diff, framesOf, frozen, gameIndexOf, parseRecord, recordStep, startRecord } from './record';

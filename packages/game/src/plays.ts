@@ -36,7 +36,7 @@ import type { Phase } from './machine';
 import { startReveal, stepReveal } from './reveal';
 import type { Decision, Game, World } from './state';
 
-const isGridCity = (onGrid: Set<CityId>, city: CityId) => onGrid.has(city) && cityDef(city).kind === 'city';
+const isGridCity = (onGrid: ReadonlySet<CityId>, city: CityId) => onGrid.has(city) && cityDef(city).kind === 'city';
 
 /** Event and companion cards, playable by anyone at any time during a game. */
 export type Play =

@@ -36,7 +36,7 @@ import {
 } from './legacy';
 import type { Decide, Play } from './plays';
 import { applyDecide, applyPlay, autoResolve, checkDecide, checkPlay, playReveals } from './plays';
-import type { Decision, UndoSubject, World } from './state';
+import type { Decision, Game, UndoSubject, World } from './state';
 import type { TableCommand } from './table';
 import {
 	applyTable,
@@ -338,6 +338,56 @@ function autoSupply(world: World) {
 	}
 }
 
+/**
+ * Whether a move showed the table something it cannot unsee, whatever kind of move it was: a package or door opened
+ * (a first arrival, an objective's reward) or an exposure box scratched (leaving Hollow Men). Taking it back is then
+ * the table's to agree to.
+ */
+const revealed = (before: World, after: World) =>
+	after.campaign.opened.length > before.campaign.opened.length ||
+	Object.entries(after.campaign.characters).some(
+		([id, character]) => character.exposure > (before.campaign.characters[id as CharacterId]?.exposure ?? 0),
+	);
+
+/**
+ * The world a move taken back returns to. Who sits where and who plays whom are not part of a move, so both stay as
+ * they are now. The table's place in a reading stays too, unless the move is what brought the reading.
+ */
+function taken(restored: World, now: World, table: World['table']): World {
+	const campaign = produce(restored.campaign, draft => {
+		for (const [id, character] of Object.entries(draft.characters)) {
+			const today = now.campaign.characters[id as CharacterId];
+			if (today && today.player !== character.player) character.player = today.player;
+		}
+	});
+	const sameReading = restored.campaign.briefing === now.campaign.briefing;
+	return {
+		...restored,
+		campaign,
+		table: { ...table, undoVote: null, briefing: sameReading ? table.briefing : newTableBriefing() },
+	};
+}
+
+/** The people still at the table once a seat command is applied. */
+const playersAfter = (world: World, command: TableCommand) =>
+	tablePlayers(produce(world, draft => applyTable(draft, command)).table);
+
+/** A scar the Legacy deck owes goes to the character everyone at the table names. `lone` decides with nobody seated. */
+function settleScarVote(world: World, lone: SeatId | null = null) {
+	const game = world.game;
+	const vote = game?.pending[0];
+	if (!game || vote?.t !== 'scarVote') return;
+	const players = tablePlayers(world.table);
+	for (const voter of Object.keys(vote.votes) as PlayerId[]) if (!players.includes(voter)) delete vote.votes[voter];
+	// With nobody seated (the bot, the tests) a single vote decides.
+	const picks = players.length ? players.map(who => vote.votes[who]) : [lone];
+	const chosen = picks[0];
+	if (!chosen || picks.some(pick => pick !== chosen)) return;
+	game.pending.shift();
+	for (const later of game.pending) if (later.t === 'scarVote') later.not.push(chosen);
+	game.pending.unshift({ t: 'scar', seat: chosen, at: null });
+}
+
 /** Commands open in every step of a turn. Each step passes its own phase, because a few of them depend on it. */
 const anyStep = (phase: Phase) =>
 	({
@@ -415,6 +465,18 @@ export const gameMachine = setup({
 			if (players.length === 0) return vote.done;
 			return players.every(player => (player === vote.player ? vote.done : ended.includes(player)));
 		},
+		// Someone getting up can leave only people who have already agreed, and the table then moves on without a
+		// second vote from any of them.
+		leaveAgreesGameEnd: ({ context, event }: Args) => {
+			if (reject(context.world, 'over', event) !== null) return false;
+			const players = playersAfter(context.world, event as TableCommand);
+			return players.length > 0 && players.every(player => context.world.game!.ended.includes(player));
+		},
+		leaveAgreesUpkeep: ({ context, event }: Args) => {
+			if (reject(context.world, 'upkeep', event) !== null) return false;
+			const players = playersAfter(context.world, event as TableCommand);
+			return players.length > 0 && players.every(player => context.world.game!.upkeep!.done.includes(player));
+		},
 		campaignEnding: ({ context }: Args) => {
 			const { campaign, game } = context.world;
 			return campaign.month === 12 && (campaign.attempt === 2 || game?.outcome?.won === true);
@@ -454,7 +516,14 @@ export const gameMachine = setup({
 				world.campaign.names[city] = name.trim();
 			}),
 		),
-		beginCampaign: assign(change(world => void (world.campaign.month = 1))),
+		beginCampaign: assign(
+			change(world => {
+				world.campaign.month = 1;
+				// A table that had agreed on the prologue chooses again: that game is no longer there to start.
+				world.table.start = null;
+				world.table.ready = {};
+			}),
+		),
 		claim: assign(
 			change((world, event) => {
 				const { player, character } = event as Of<'CLAIM'>;
@@ -468,7 +537,11 @@ export const gameMachine = setup({
 			}),
 		})),
 		table: assign(({ context, event }: Args) => ({
-			world: produce(context.world, draft => applyTable(draft, event as TableCommand)),
+			world: produce(context.world, draft => {
+				applyTable(draft, event as TableCommand);
+				// Whoever got up may have been the last one a scar vote was waiting for.
+				if (event.type === 'LEAVE') settleScarVote(draft);
+			}),
 		})),
 		startTable: assign(
 			change((world, event) => {
@@ -486,6 +559,12 @@ export const gameMachine = setup({
 				draft.campaign.briefing = [];
 				draft.table.briefing = newTableBriefing();
 			}),
+			// A reading the table has put away stays put away, whichever move is taken back after it.
+			undo: context.undo.map(entry =>
+				entry.world.campaign.briefing.length === 0
+					? entry
+					: { ...entry, world: produce(entry.world, draft => void (draft.campaign.briefing = [])) },
+			),
 		})),
 		startGame: assign(
 			change((world, event) => {
@@ -520,15 +599,14 @@ export const gameMachine = setup({
 		confirmEvents: assign(change(setupPlayerDeck)),
 		act: assign(({ context, event }: Args) => {
 			const { seat, action } = event as Of<'ACTION'>;
+			const world = produce(context.world, draft => {
+				applyAction(draft, seat, action);
+				autoResolve(draft);
+			});
+			const reveals = actionReveals(action) || revealed(context.world, world);
 			return {
-				world: produce(context.world, draft => {
-					applyAction(draft, seat, action);
-					autoResolve(draft);
-				}),
-				undo: [
-					...context.undo,
-					{ world: context.world, seat, subject: { kind: 'action', action: action.a }, reveals: actionReveals(action) },
-				],
+				world,
+				undo: [...context.undo, { world: context.world, seat, subject: { kind: 'action', action: action.a }, reveals }],
 			};
 		}),
 		startUndoVote: assign(({ context, event }: Args) => {
@@ -540,15 +618,14 @@ export const gameMachine = setup({
 				}),
 			};
 		}),
-		// Who sits where is not part of a move, so taking one back leaves the table as it is.
 		undo: assign(({ context }: Args) => ({
-			world: { ...context.undo.at(-1)!.world, table: { ...context.world.table, undoVote: null } },
+			world: taken(context.undo.at(-1)!.world, context.world, context.world.table),
 			undo: context.undo.slice(0, -1),
 		})),
 		leaveAndUndo: assign(({ context, event }: Args) => {
 			const updated = produce(context.world, draft => applyTable(draft, event as TableCommand));
 			return {
-				world: { ...context.undo.at(-1)!.world, table: { ...updated.table, undoVote: null } },
+				world: taken(context.undo.at(-1)!.world, updated, updated.table),
 				undo: context.undo.slice(0, -1),
 			};
 		}),
@@ -560,42 +637,36 @@ export const gameMachine = setup({
 		endTurn: assign(change(endTurn)),
 		play: assign(({ context, event }: Args, phase: Phase) => {
 			const { seat, card, play } = event as Of<'PLAY'>;
+			const world = produce(context.world, draft => {
+				applyPlay(draft, seat, card, play);
+				autoResolve(draft);
+			});
+			const reveals = playReveals(play) || revealed(context.world, world);
 			return {
-				world: produce(context.world, draft => {
-					applyPlay(draft, seat, card, play);
-					autoResolve(draft);
-				}),
+				world,
 				undo:
 					phase === 'playing.actions'
-						? [
-								...context.undo,
-								{ world: context.world, seat, subject: { kind: 'play', play: play.e }, reveals: playReveals(play) },
-							]
+						? [...context.undo, { world: context.world, seat, subject: { kind: 'play', play: play.e }, reveals }]
 						: [],
 			};
 		}),
-		decide: assign(({ context, event }: Args) => ({
-			world: produce(context.world, draft => {
+		decide: assign(({ context, event }: Args) => {
+			const world = produce(context.world, draft => {
 				applyDecide(draft, (event as Of<'DECIDE'>).decide);
 				autoResolve(draft);
-			}),
-			undo: context.undo,
-		})),
+			});
+			// A choice a move asked for is part of that move: what it shows counts as the move's.
+			const top = context.undo.at(-1);
+			const shown = top && !top.reveals && revealed(context.world, world);
+			return { world, undo: shown ? [...context.undo.slice(0, -1), { ...top, reveals: true }] : context.undo };
+		}),
 		voteScar: assign(
 			change((world, event) => {
 				const { player, seat } = event as Of<'SCAR_VOTE'>;
-				const game = world.game!;
-				const vote = game.pending[0] as Extract<Decision, { t: 'scarVote' }>;
+				const vote = world.game!.pending[0] as Extract<Decision, { t: 'scarVote' }>;
 				if (seat) vote.votes[player] = seat;
 				else delete vote.votes[player];
-				// With nobody seated (the bot, the tests) a single vote decides.
-				const players = tablePlayers(world.table);
-				const picks = players.length ? players.map(who => vote.votes[who]) : [seat];
-				const chosen = picks[0];
-				if (!chosen || picks.some(pick => pick !== chosen)) return;
-				game.pending.shift();
-				for (const later of game.pending) if (later.t === 'scarVote') later.not.push(chosen);
-				game.pending.unshift({ t: 'scar', seat: chosen, at: null });
+				settleScarVote(world, seat);
 			}),
 		),
 		lockdown: assign(({ context, event }: Args, phase: Phase) => {
@@ -774,6 +845,10 @@ export const gameMachine = setup({
 		over: {
 			on: {
 				...seatEvents('over'),
+				LEAVE: [
+					{ guard: 'leaveAgreesGameEnd', target: 'upkeep', actions: ['table', 'resolveGameEnd'] },
+					{ guard: { type: 'legal', params: 'over' }, actions: 'table' },
+				],
 				CONTINUE: [
 					{ guard: 'gameEndAgreed', target: 'upkeep', actions: 'resolveGameEnd' },
 					{ guard: { type: 'legal', params: 'over' }, actions: 'voteGameEnd' },
@@ -783,6 +858,11 @@ export const gameMachine = setup({
 		upkeep: {
 			on: {
 				...seatEvents('upkeep'),
+				LEAVE: [
+					{ guard: and(['leaveAgreesUpkeep', 'campaignEnding']), target: 'finished', actions: ['table', 'closeGame'] },
+					{ guard: 'leaveAgreesUpkeep', target: 'lobby', actions: ['table', 'closeGame'] },
+					{ guard: { type: 'legal', params: 'upkeep' }, actions: 'table' },
+				],
 				PURCHASE: { guard: { type: 'legal', params: 'upkeep' }, actions: 'purchase' },
 				REFUND: { guard: { type: 'legal', params: 'upkeep' }, actions: 'refund' },
 				FINISH_UPKEEP: [
@@ -830,6 +910,20 @@ export type GameActor = ReturnType<typeof createGameActor>;
  * lacks a field today's has, is refused rather than upgraded.
  */
 const freshCharacter = createCharacter(newCampaign(0), { name: '', job: null, home: '' as CityId });
+const freshUpkeep: NonNullable<Game['upkeep']> = { units: 0, populationChanges: [], bought: [], done: [] };
+let blankGame: Game | null = null;
+/** A game as this build deals one, to tell a save made mid-game before a field was added. */
+function freshGame(): Game {
+	if (blankGame) return blankGame;
+	const world: World = { campaign: newCampaign(0), game: null, table: newTable() };
+	const home = pack.cities.find(city => city.kind === 'haven' && !city.lost)!.id;
+	const seat = (id: SeatId) => ({
+		seat: id,
+		character: createCharacter(world.campaign, { name: '', job: null, home, worker: true }).id,
+	});
+	createGame(world, [seat('seat-1' as SeatId), seat('seat-2' as SeatId)]);
+	return (blankGame = world.game!);
+}
 
 export function parseSave(raw: unknown): Save {
 	const save = raw as Partial<Save> | null;
@@ -844,6 +938,19 @@ export function parseSave(raw: unknown): Save {
 		Object.values(save.world!.campaign.characters ?? {}).some(character => lacks(character, freshCharacter))
 	)
 		throw new Error('That is not a campaign save from this build');
+	// A game under way is checked the same way: one dealt by an older build would stop the machine at the first
+	// command that reads what it lacks, with every later command still accepted and none of them doing anything.
+	const game = save.world!.game;
+	if (game) {
+		const fresh = freshGame();
+		const freshPlayer = Object.values(fresh.players)[0]!;
+		if (
+			lacks(game, fresh) ||
+			Object.values(game.players ?? {}).some(player => lacks(player, freshPlayer)) ||
+			(game.upkeep !== null && lacks(game.upkeep, freshUpkeep))
+		)
+			throw new Error('That is not a campaign save from this build');
+	}
 	return save as Save;
 }
 

@@ -95,12 +95,21 @@ function reach(campaign: Campaign, from: CityId[], kind?: EdgeKind): Set<CityId>
 	return seen;
 }
 
-/** Every location with a path of supply lines and sea lanes back to a starting haven. */
-export function grid(campaign: Campaign): Set<CityId> {
-	return reach(
-		campaign,
-		pack.cities.filter(city => city.kind === 'haven' && !city.lost).map(city => city.id),
-	);
+const HAVENS = pack.cities.filter(city => city.kind === 'haven' && !city.lost).map(city => city.id);
+const grids = new WeakMap<Campaign['edges'], ReadonlySet<CityId>>();
+
+/**
+ * Every location with a path of supply lines and sea lanes back to a starting haven. The answer depends only on the
+ * lines drawn, and listing a turn's options asks for it dozens of times, so it is kept for a list of lines that can no
+ * longer change: the frozen one of a state the machine produced. A draft or a campaign still being built is searched
+ * every time.
+ */
+export function grid(campaign: Campaign): ReadonlySet<CityId> {
+	const edges = campaign.edges;
+	if (!Object.isFrozen(edges)) return reach(campaign, HAVENS);
+	let found = grids.get(edges);
+	if (!found) grids.set(edges, (found = reach(campaign, HAVENS)));
+	return found;
 }
 
 /** Ports joined to `from` by a chain of sea lanes. */
@@ -264,9 +273,15 @@ export function cardLabel(campaign: Campaign, id: CardId): string {
 	}
 }
 
+const LOG_LIMIT = 400;
+/** What the logbook is written from when the game closes: these stay in the log however long the game runs. */
+const CHRONICLED = new Set<LogInput['t']>(['death', 'scar', 'unlock', 'structure', 'connected', 'reveal']);
+
 export function log(game: Game, entry: LogInput) {
 	game.log.push({ ...entry, seq: game.nextSeq++ } as Game['log'][number]);
-	if (game.log.length > 400) game.log.splice(0, game.log.length - 400);
+	if (game.log.length <= LOG_LIMIT) return;
+	const oldest = game.log.findIndex(kept => !CHRONICLED.has(kept.t));
+	game.log.splice(Math.max(oldest, 0), 1);
 }
 
 export function removeFromHand(game: Game, seat: SeatId, card: CardId) {

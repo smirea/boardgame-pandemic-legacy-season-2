@@ -123,6 +123,17 @@ export function applyPatches<T>(state: T, patches: Patch[]): T {
 	return next as T;
 }
 
+/**
+ * `value` with every object in it frozen, as the machine's own states are. A branch already frozen is taken as frozen
+ * all the way down, so freezing a state built from one before it costs only what changed. What reads a state may then
+ * keep answers by the identity of its parts, on a peer as on the host.
+ */
+export function frozen<T>(value: T): T {
+	if (typeof value !== 'object' || value === null || Object.isFrozen(value)) return value;
+	for (const child of Object.values(value)) frozen(child);
+	return Object.freeze(value);
+}
+
 const recordId = (state: PublicState) => {
 	const { campaign } = state.world;
 	return `g${String(campaign.results.length).padStart(2, '0')}-m${String(campaign.month).padStart(2, '0')}a${campaign.attempt}`;
