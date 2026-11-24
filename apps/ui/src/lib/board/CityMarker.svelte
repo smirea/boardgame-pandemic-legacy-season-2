@@ -273,7 +273,7 @@
 			<!-- A ring's corners start on its x axis and a cylinder's on its z axis, so a haven's ring turns a quarter to match its hex. -->
 			<T.RingGeometry args={[CITY_RADIUS * 0.8, CITY_RADIUS * 0.88, city.kind === 'haven' ? 6 : 32, 1, Math.PI / 2]} />
 			<T.MeshBasicMaterial
-				color={state.infested ? '#b79ad6' : '#efe6d2'}
+				color={state.infested ? '#9ce022' : '#efe6d2'}
 				transparent
 				opacity={state.onGrid ? 0.9 : 0.45}
 			/>
