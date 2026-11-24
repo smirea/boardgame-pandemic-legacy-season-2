@@ -19,7 +19,7 @@ export const plain = (rich: Rich | string): string =>
         .join("");
 
 /** The colour of the Hollow Men, their pieces and their Infection cards. */
-export const HOLLOW_COLOR = "#4e3b63";
+export const HOLLOW_COLOR = "#93b236";
 
 const COLORS = new Set<string>(["blue", "yellow", "black", "red"]);
 

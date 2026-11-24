@@ -72,8 +72,8 @@
   }
 
   .hollow {
-    --edge: #4e3b63;
-    color: #3b2b4d;
+    --edge: #5d7a14;
+    color: #3b5210;
   }
 
   @keyframes pin {

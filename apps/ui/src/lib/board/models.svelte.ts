@@ -93,11 +93,11 @@ export const pieceMaterials = {
   shelter: new MeshStandardMaterial({ color: "#6b5335", roughness: 0.72, metalness: 0.08 }),
   tower: new MeshStandardMaterial({ color: "#b06522", roughness: 0.46, metalness: 0.34 }),
   hollow: new MeshStandardMaterial({
-    color: "#2b4222",
-    emissive: "#0e1d0a",
-    emissiveIntensity: 0.28,
-    roughness: 0.68,
-    metalness: 0.05,
+    color: "#93b236",
+    emissive: "#3b5210",
+    emissiveIntensity: 0.55,
+    roughness: 0.46,
+    metalness: 0.06,
   }),
 };
 

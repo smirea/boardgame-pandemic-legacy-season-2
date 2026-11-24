@@ -294,7 +294,7 @@ export type Loaded = {
 
 const NEUTRAL = "#8a9aa8";
 const DANGER = "#cf5b3e";
-const HOLLOW = "#a68bc0";
+const HOLLOW = "#93b236";
 
 /**
  * Who played which seat. A step names the player who sent it and its command names the seat, so the

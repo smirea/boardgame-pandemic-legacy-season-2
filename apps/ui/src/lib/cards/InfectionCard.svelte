@@ -217,7 +217,7 @@
     inset: 0;
     gap: 0.28em;
     padding: 0.52em 0.64em 0.56em;
-    background: repeating-linear-gradient(135deg, #1f1a24 0 0.5em, #261f2d 0.5em 1em);
+    background: repeating-linear-gradient(135deg, #1b2213 0 0.5em, #222b18 0.5em 1em);
   }
 
   .hollow-rule {

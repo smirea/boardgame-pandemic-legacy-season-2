@@ -8,7 +8,7 @@
     epidemic: { color: "#8c1c12", size: 22, duration: 2200 },
     connected: { color: "#2f6e5c", size: 9, duration: 1500 },
     build: { color: "#2a2017", size: 6, duration: 1000 },
-    hollow: { color: "#4e3b63", size: 7, duration: 1300 },
+    hollow: { color: "#5d7a14", size: 7, duration: 1300 },
   };
 </script>
 

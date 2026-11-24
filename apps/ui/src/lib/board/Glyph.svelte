@@ -80,7 +80,7 @@
   .hollow {
     width: 0.62rem;
     height: 0.8rem;
-    background: #4e3b63;
+    background: #93b236;
     clip-path: polygon(50% 0, 100% 100%, 0 100%);
   }
 

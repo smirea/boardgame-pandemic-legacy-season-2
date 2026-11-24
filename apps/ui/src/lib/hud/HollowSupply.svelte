@@ -112,10 +112,10 @@
     place-items: center;
     width: 1.25rem;
     height: 1.25rem;
-    border: 1px solid color-mix(in srgb, var(--hollow) 55%, #000);
+    border: 1px solid #3b5210;
     border-radius: 2px;
-    background: linear-gradient(170deg, #4b3963, #2b203a);
-    color: #d8c6ed;
+    background: linear-gradient(170deg, #4b6518, #27360b);
+    color: #c7e074;
     box-shadow: 0 1px 2px rgb(0 0 0 / 0.45);
   }
 
