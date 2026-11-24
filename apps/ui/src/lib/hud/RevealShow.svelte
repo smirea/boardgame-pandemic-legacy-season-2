@@ -8,11 +8,8 @@
 	import { inkOn } from '#lib/color.ts';
 	import { searchStory } from '#lib/cards/playerPrint.ts';
 	import { sfxCardDraw, sfxCardFlip, sfxScratchBox } from '#lib/audio/sfx.ts';
-	import { audioSettings } from '#lib/audio/settings.svelte.ts';
-	import { CAST } from '#lib/story/cast.ts';
 	import { sceneForSearch } from '#lib/story/script.ts';
 	import StoryStage from '#lib/story/StoryStage.svelte';
-	import { voicePlayer } from '#lib/story/voice.svelte.ts';
 	import { onButton, typing } from '#lib/keys.ts';
 	import { cardName, cityName, seatName, SEAT_COLORS } from './labels.svelte.ts';
 	import PlayerCard from './PlayerCard.svelte';
@@ -106,13 +103,10 @@
 	);
 
 	const searchScene = $derived(searched ? sceneForSearch(searched.card.city, searched.sea ? 'sea' : 'land') : null);
-	const searchBeat = $derived(searchScene?.beats[0] ?? null);
-	const searchSpeaker = $derived(searchBeat ? CAST[searchBeat.speaker] : null);
 	const hasFlavorText = $derived(Boolean(searched?.story));
 
 	let searchStage = $state<SearchStage>('flying');
 	let cardNode = $state<HTMLElement>();
-	let storyStage = $state<StoryStage>();
 	let activeAnim: Animation | null = null;
 	let playedScratch = false;
 	let lastSearchKey = '';
@@ -396,32 +390,8 @@
 					<button type="button" class="go" data-testid="reveal-next" autofocus disabled={busy} onclick={advance}>
 						{next}
 					</button>
-					<span class="key">Space</span>
 				{:else}
 					<p class="waiting">{waiting}.</p>
-				{/if}
-				{#if hasFlavorText && searchBeat && searchSpeaker}
-					<div class="voice-controls" in:fade={{ duration: 220 }}>
-						{#if voicePlayer.hasAudio(searchBeat.id)}
-							<button
-								type="button"
-								class="voice-btn"
-								class:speaking={voicePlayer.playingId === searchBeat.id}
-								onclick={() => storyStage?.replayVoice()}
-								aria-label={`Replay ${searchSpeaker.name}'s narration`}
-							>
-								{voicePlayer.playingId === searchBeat.id ? 'Speaking…' : 'Replay'}
-							</button>
-						{/if}
-						<button
-							type="button"
-							class="voice-btn"
-							class:muted={!audioSettings.voiceEnabled}
-							onclick={() => audioSettings.toggleVoice()}
-						>
-							{audioSettings.voiceEnabled ? 'Voice on' : 'Voice off'}
-						</button>
-					</div>
 				{/if}
 			{/if}
 		</footer>
@@ -429,14 +399,7 @@
 
 	{#if searchScene && searchStage === 'revealed'}
 		<div class="search-story-layer" style:--story-dock-bottom="1.15rem">
-			<StoryStage
-				bind:this={storyStage}
-				scene={searchScene}
-				overlay
-				solo
-				bare={hasFlavorText}
-				delivered={world.campaign.sampleDelivered}
-			/>
+			<StoryStage scene={searchScene} overlay solo bare={hasFlavorText} delivered={world.campaign.sampleDelivered} />
 		</div>
 	{/if}
 {/if}
@@ -660,38 +623,6 @@
 	.search-foot.ready {
 		opacity: 1;
 		transform: none;
-	}
-
-	.voice-controls {
-		display: flex;
-		align-items: center;
-		gap: 0.35rem;
-		margin-left: 0.35rem;
-	}
-
-	.voice-btn {
-		padding: 0.32rem 0.65rem;
-		border: 1px solid rgb(231 220 198 / 0.3);
-		border-radius: 0.3rem;
-		background: rgb(18 15 12 / 0.8);
-		color: #e6dac2;
-		font: inherit;
-		font-size: 0.76rem;
-		font-weight: 600;
-		cursor: pointer;
-	}
-
-	.voice-btn:hover {
-		border-color: rgb(231 220 198 / 0.7);
-	}
-
-	.voice-btn.speaking {
-		border-color: color-mix(in srgb, var(--seat) 75%, #f4e8cd);
-		color: #f6ebd4;
-	}
-
-	.voice-btn.muted {
-		opacity: 0.65;
 	}
 
 	.go {
