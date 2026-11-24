@@ -2,6 +2,7 @@
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import {
 		cityDef,
+		createCharacter,
 		createGameActor,
 		hasCityImprovementSlot,
 		hasInfectionImprovementSlot,
@@ -10,19 +11,20 @@
 		searchCardCompanion,
 	} from '@repo/game';
 	import type {
+		Character,
 		CityImprovementId,
 		ExposureBox,
 		InfectionCard as InfectionCardData,
 		InfectionImprovementId,
 		PlayerCard as PlayerCardData,
 	} from '@repo/game';
-	import CharacterCardFace from '#lib/cards/CharacterCardFace.svelte';
 	import InfectionCard from '#lib/cards/InfectionCard.svelte';
 	import LegacyCard from '#lib/cards/LegacyCard.svelte';
 	import { EVENT_PRINT } from '#lib/cards/playerPrint.ts';
 	import { legacyScans } from '#lib/scans.generated.ts';
 	import { characterCardScan, infectionCardScan, playerCardScan, scanUrl } from '#lib/scans.svelte.ts';
 	import type { CardScan } from '#lib/scans.svelte.ts';
+	import CharacterSheet from '#lib/hud/characters/CharacterSheet.svelte';
 	import PlayerCard, { HAND_CARD_SIZE } from '#lib/hud/PlayerCard.svelte';
 	import DebugCardStage from './DebugCardStage.svelte';
 	import type { CardControl, UpgradeControl } from './DebugCardStage.svelte';
@@ -247,6 +249,22 @@
 		];
 	}
 
+	// The game has one drawing of a character, its sheet, so the printed Character cards are shown as that: a
+	// character nobody has made yet, on the exposure track the card prints.
+	const blank = createCharacter(structuredClone(baseCampaign), {
+		name: '',
+		job: null,
+		home: pack.cities.find(city => city.kind === 'haven' && !city.lost)!.id,
+	});
+	const characterOf = (entry: CharacterCardEntry, index: number): Character => ({
+		...blank,
+		name: entry.label,
+		portrait: index,
+		exposureTrack: [...entry.track],
+		exposure: entry.exposure,
+		dead: entry.track.slice(0, entry.exposure).includes('skull'),
+	});
+
 	function characterScanOf(entry: CharacterCardEntry): CardScan | null {
 		const scan = characterCardScan(entry.track, entry.exposure);
 		return scan ? { card: scan } : null;
@@ -343,7 +361,10 @@
 				controlsLabel="Exposure"
 				controls={characterControls(entry)}
 			>
-				<CharacterCardFace exposureTrack={entry.track} exposure={entry.exposure} label={entry.label} />
+				{@const character = characterOf(entry, characterCards.indexOf(entry))}
+				<div class="sheet" data-character-card={entry.id} data-exposure={entry.exposure}>
+					<CharacterSheet {character} tone={character.dead ? 'dead' : 'free'} color={null} />
+				</div>
 			</DebugCardStage>
 		{/each}
 	</section>
@@ -364,6 +385,13 @@
 </main>
 
 <style>
+	/* A character's sheet takes its size from where it stands. Here that is the scan's height, at the lobby's shape. */
+	.sheet {
+		flex: none;
+		width: calc(var(--card-size) * 13.1 * 1.2);
+		height: calc(var(--card-size) * 13.1);
+	}
+
 	main {
 		min-height: 100vh;
 		padding: 1.5rem 2rem 3rem;

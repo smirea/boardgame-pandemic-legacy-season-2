@@ -568,10 +568,6 @@ export const RECKONING_ROWS: readonly ReckoningRow[] = [
 export const eventArtUrl = (id: EventId): string => `/events/${id}.webp`;
 export const companionArtUrl = (id: CompanionId): string => `/companions/${id}.webp`;
 
-export function eventPlainText(id: EventId): string {
-	return EVENT_PRINT[id].rules.join(' ');
-}
-
 for (const event of pack.events)
 	if (!EVENT_PRINT[event.id]) throw new Error(`Missing printed rules text for event ${event.id}`);
 for (const improvement of pack.cityImprovements)

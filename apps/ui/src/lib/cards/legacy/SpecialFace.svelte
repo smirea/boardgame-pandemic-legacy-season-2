@@ -1,16 +1,9 @@
 <script lang="ts">
 	import type { Campaign, EventId, LegacyCardDef } from '@repo/game';
 	import type { LegacyPrint } from '#lib/cards/print.generated.ts';
-	import {
-		EPIDEMIC_STEPS,
-		EPIDEMIC_WEARING_OFF_STEP,
-		EVENT_PRINT,
-		OBJECTIVE_PRINT,
-		RECKONING_ROWS,
-		SCANNER_SLOTS,
-		eventArtUrl,
-		eventPlainText,
-	} from '#lib/cards/playerPrint.ts';
+	import { EVENT_PRINT, OBJECTIVE_PRINT, RECKONING_ROWS, SCANNER_SLOTS } from '#lib/cards/playerPrint.ts';
+	import EpidemicFace from '#lib/cards/EpidemicFace.svelte';
+	import EventFace from '#lib/cards/EventFace.svelte';
 	import { fitText } from '#lib/cards/fit.ts';
 	import RichText from '#lib/hud/RichText.svelte';
 
@@ -25,13 +18,8 @@
 		return unlock?.t === 'event' ? unlock.event : null;
 	});
 	const eventPrint = $derived(eventId ? EVENT_PRINT[eventId] : null);
-	const eventFitKey = $derived(eventId ? eventPlainText(eventId) : card.text);
 
 	const epidemicWearingOff = $derived(Boolean(campaign?.rules.includes('epidemicFromStorage')));
-	const epidemicSteps = $derived(
-		epidemicWearingOff ? [EPIDEMIC_STEPS[0], EPIDEMIC_WEARING_OFF_STEP, EPIDEMIC_STEPS[2]] : EPIDEMIC_STEPS,
-	);
-	const epidemicFitKey = $derived(epidemicSteps.map(s => `${s.heading} ${s.text}`).join(' '));
 
 	const PLAN_ROWS = [
 		{
@@ -144,21 +132,7 @@
 		</div>
 	{:else if card.kind === 'event' && eventPrint && eventId}
 		<div class="inner event-face">
-			<header class="ev-top">
-				<span class="ev-kicker">{eventPrint.banner}</span>
-				<h3 {@attach fitText(card.title, { max: 1.4, min: 0.8, across: true })}>{card.title}</h3>
-			</header>
-			<div class="ev-body" class:has-leaf={Boolean(eventPrint.timing)}>
-				<img class="ev-art" src={eventArtUrl(eventId)} alt="" aria-hidden="true" />
-				<div class="ev-rules" {@attach fitText(eventFitKey, { max: 1.12, min: 0.56 })}>
-					{#each eventPrint.rules as line, idx (idx)}
-						<p><RichText text={line} /></p>
-					{/each}
-				</div>
-				{#if eventPrint.timing}
-					<span class="ev-leaf">{eventPrint.timing}</span>
-				{/if}
-			</div>
+			<EventFace event={eventId} name={card.title} print={eventPrint} roomy />
 			<span class="code">{code}</span>
 		</div>
 	{:else if card.kind === 'scanner'}
@@ -276,27 +250,7 @@
 		</div>
 	{:else if card.kind === 'epidemic'}
 		<div class="inner epidemic-face">
-			<div class="ep-head">
-				<h3>EPIDEMIC</h3>
-				<div class="ep-scale" aria-hidden="true"></div>
-			</div>
-			<div class="ep-body" {@attach fitText(epidemicFitKey, { max: 1.02, min: 0.58 })}>
-				<svg class="ep-art" viewBox="0 0 24 24" aria-hidden="true">
-					<circle cx="12" cy="12" r="2.2" fill="currentColor" />
-					<path
-						d="M12 4.2a4.3 4.3 0 0 0-3.7 6.5l1.5-.9a2.6 2.6 0 1 1 4.4 0l1.5.9A4.3 4.3 0 0 0 12 4.2Zm-6.8 11.7a4.3 4.3 0 0 0 7.4-.1l-1.5-.9a2.6 2.6 0 1 1-2.2-3.8V9.4a4.3 4.3 0 0 0-3.7 6.5Zm13.6 0a4.3 4.3 0 0 0-3.7-6.5v1.7a2.6 2.6 0 1 1-2.2 3.8l-1.5.9a4.3 4.3 0 0 0 7.4.1Z"
-						fill="currentColor"
-					/>
-				</svg>
-				<ol class="ep-steps">
-					{#each epidemicSteps as step, idx (step.heading)}
-						<li class:wearing-off={epidemicWearingOff && idx === 1}>
-							<strong>{step.heading}</strong>
-							<span><RichText text={step.text} /></span>
-						</li>
-					{/each}
-				</ol>
-			</div>
+			<EpidemicFace wearingOff={epidemicWearingOff} roomy />
 			<span class="code">{code}</span>
 		</div>
 	{/if}
@@ -567,98 +521,6 @@
 			linear-gradient(170deg, #e2ba46, #bc8e1d);
 		color: #181209;
 		border: 2px solid #8a630d;
-	}
-
-	.ev-top {
-		display: flex;
-		flex-direction: column;
-		gap: 0.14em;
-		padding: 0.62em 0.85em 0.6em;
-		background: linear-gradient(165deg, #1b221c, #101511);
-		color: #a6e39d;
-		flex: none;
-	}
-
-	.ev-kicker {
-		font-size: 0.72em;
-		font-weight: 800;
-		font-style: italic;
-		letter-spacing: 0.06em;
-		text-transform: uppercase;
-		color: #f4d678;
-	}
-
-	.ev-top h3 {
-		margin: 0;
-		width: 100%;
-		font-family: var(--font-display);
-		font-weight: 400;
-		letter-spacing: 0.03em;
-		text-transform: uppercase;
-		line-height: 1.02;
-		color: #a6e39d;
-	}
-
-	.ev-body {
-		position: relative;
-		flex: 1;
-		min-height: 0;
-		display: flex;
-		flex-direction: column;
-		overflow: hidden;
-	}
-
-	.ev-art {
-		position: absolute;
-		right: -11%;
-		bottom: -11%;
-		z-index: 0;
-		width: 82%;
-		height: 82%;
-		object-fit: contain;
-		object-position: right bottom;
-		opacity: 0.21;
-		mix-blend-mode: multiply;
-		pointer-events: none;
-		user-select: none;
-	}
-
-	.ev-rules {
-		position: relative;
-		z-index: 1;
-		flex: 1;
-		min-height: 0;
-		display: flex;
-		flex-direction: column;
-		gap: 0.55em;
-		padding: 0.85em 0.9em 0.9em;
-		overflow: hidden;
-		font-weight: 500;
-		line-height: 1.32;
-	}
-
-	.ev-body.has-leaf .ev-rules {
-		padding-bottom: 2.3em;
-	}
-
-	.ev-rules p {
-		margin: 0;
-	}
-
-	.ev-leaf {
-		position: absolute;
-		left: 0;
-		bottom: 0;
-		z-index: 2;
-		padding: 0.34em 0.9em 0.3em 0.75em;
-		border-radius: 0 0.95em 0 0;
-		background: #171d18;
-		color: #f3e6c2;
-		font-size: 0.74em;
-		font-weight: 700;
-		letter-spacing: 0.02em;
-		line-height: 1.1;
-		white-space: nowrap;
 	}
 
 	/* === Side B: Frequency Scanner (Landscape) === */
@@ -1001,109 +863,5 @@
 			linear-gradient(168deg, #215729, #123318);
 		color: #f4eecc;
 		border: 2px solid #162317;
-	}
-
-	.ep-head {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		padding: 0.52em 0.6em 0.36em;
-		border-bottom: 1.5px solid rgb(244 238 204 / 0.45);
-		background: linear-gradient(180deg, #d86d24, #ecc63b);
-		color: #8f1d14;
-		flex: none;
-	}
-
-	.ep-head h3 {
-		margin: 0;
-		font-family: var(--font-display);
-		font-size: 1.82em;
-		font-weight: 700;
-		letter-spacing: 0.06em;
-		line-height: 1;
-	}
-
-	.ep-scale {
-		width: 92%;
-		height: 0.32em;
-		margin-top: 0.14em;
-		border-bottom: 1.5px solid #6b2212;
-		background: repeating-linear-gradient(90deg, #6b2212 0 1px, transparent 1px 0.45em);
-		opacity: 0.65;
-	}
-
-	.ep-body {
-		position: relative;
-		flex: 1;
-		min-height: 0;
-		padding: 0.8em 0.9em 1.35em;
-		overflow: hidden;
-		display: flex;
-		flex-direction: column;
-	}
-
-	.ep-art {
-		position: absolute;
-		right: -14%;
-		bottom: -14%;
-		z-index: 0;
-		width: 72%;
-		height: 72%;
-		color: #0a1f0d;
-		opacity: 0.32;
-		pointer-events: none;
-	}
-
-	.ep-steps {
-		position: relative;
-		z-index: 1;
-		display: flex;
-		flex-direction: column;
-		gap: 0.72em;
-		margin: 0;
-		padding: 0;
-		list-style: none;
-		line-height: 1.32;
-	}
-
-	.ep-steps li {
-		display: flex;
-		flex-direction: column;
-		gap: 0.12em;
-	}
-
-	.ep-steps strong {
-		color: #ffffff;
-		font-style: italic;
-		font-size: 1.05em;
-		letter-spacing: 0.03em;
-	}
-
-	.ep-steps span {
-		color: #f6ea8e;
-	}
-
-	.ep-steps li.wearing-off {
-		position: relative;
-		margin: 0 -0.25em;
-		padding: 0.34em 0.45em;
-		border: 1px solid rgb(56 42 24 / 0.55);
-		border-radius: 0.14em;
-		background:
-			repeating-linear-gradient(-12deg, rgb(120 92 48 / 0.05) 0 4px, transparent 4px 9px),
-			linear-gradient(170deg, #ede1c0, #d8c69b);
-		box-shadow:
-			0 0.22em 0.55em rgb(0 0 0 / 0.55),
-			inset 0 0 0 1px rgb(255 250 234 / 0.35);
-		transform: rotate(-1.6deg);
-	}
-
-	.ep-steps li.wearing-off strong {
-		color: #9e2119;
-		font-style: normal;
-	}
-
-	.ep-steps li.wearing-off span {
-		color: #231a11;
 	}
 </style>

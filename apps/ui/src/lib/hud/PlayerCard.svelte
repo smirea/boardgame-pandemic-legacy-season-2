@@ -42,15 +42,14 @@
 	import { getContext } from 'svelte';
 	import type { CardId, CityId } from '@repo/game';
 	import { pack } from '@repo/game';
+	import EpidemicFace from '#lib/cards/EpidemicFace.svelte';
+	import EventFace from '#lib/cards/EventFace.svelte';
 	import { fitText } from '#lib/cards/fit.ts';
 	import MapArt from '#lib/cards/MapArt.svelte';
 	import {
 		COMPANION_PRINT,
-		EPIDEMIC_STEPS,
-		EPIDEMIC_WEARING_OFF_STEP,
 		IMPROVEMENT_PRINT,
 		companionArtUrl,
-		eventArtUrl,
 		producePrint,
 		searchResultPrint,
 	} from '#lib/cards/playerPrint.ts';
@@ -93,10 +92,6 @@
 	}: Props = $props();
 
 	const epidemicWearingOff = $derived(wearingOff ?? wearingOffFromGame?.() ?? false);
-	const epidemicSteps = $derived(
-		epidemicWearingOff ? [EPIDEMIC_STEPS[0], EPIDEMIC_WEARING_OFF_STEP, EPIDEMIC_STEPS[2]] : EPIDEMIC_STEPS,
-	);
-	const epidemicPlain = $derived(epidemicSteps.map(step => `${step.heading}: ${step.text}`).join(' '));
 
 	type SearchDisplay =
 		| { kind: 'sealed'; index: number; scope: 'land' | 'sea'; label: string }
@@ -479,31 +474,7 @@
 			</span>
 		{/if}
 	{:else if card.kind === 'event' && eventInfo}
-		<span class="ev-top">
-			<span class="ev-kicker-row">
-				<span class="ev-kicker">{eventInfo.print.banner}</span>
-				{#if eventInfo.print.destroy}
-					<span class="ev-once">Destroy</span>
-				{/if}
-			</span>
-			<span class="ev-title" {@attach fitText(eventInfo.name, { max: 1.08, min: 0.54, across: true })}
-				>{eventInfo.name}</span
-			>
-		</span>
-		{#if eventInfo.print.mode === 'unrationed'}
-			<span class="ev-hazard" aria-hidden="true"></span>
-		{/if}
-		<span class="ev-body" class:has-leaf={Boolean(eventInfo.print.timing)}>
-			<img class="ev-art" src={eventArtUrl(card.event)} alt="" aria-hidden="true" />
-			<span class="ev-rules" {@attach fitText(eventInfo.print.rules.join(' '), { max: 0.94, min: 0.5 })}>
-				{#each eventInfo.print.rules as line, idx (idx)}
-					<span class="rule-line"><RichText text={line} /></span>
-				{/each}
-			</span>
-			{#if eventInfo.print.timing}
-				<span class="ev-leaf">{eventInfo.print.timing}</span>
-			{/if}
-		</span>
+		<EventFace event={card.event} name={eventInfo.name} print={eventInfo.print} />
 	{:else if card.kind === 'produce' && produceInfo}
 		<span class="prod-top">
 			<span class="prod-head" {@attach fitText('PRODUCE SUPPLIES', { max: 1.04, min: 0.62, across: true })}
@@ -525,24 +496,7 @@
 			</span>
 		</span>
 	{:else if card.kind === 'epidemic'}
-		<span class="ep-top">
-			<span class="ep-title">EPIDEMIC</span>
-		</span>
-		<span class="ep-body" {@attach fitText(epidemicPlain, { max: 0.76, min: 0.44 })}>
-			<svg class="ep-art" viewBox="0 0 24 24" aria-hidden="true">
-				<circle cx="12" cy="12" r="2.2" fill="currentColor" />
-				<path
-					d="M12 4.2a4.3 4.3 0 0 0-3.7 6.5l1.5-.9a2.6 2.6 0 1 1 4.4 0l1.5.9A4.3 4.3 0 0 0 12 4.2Zm-6.8 11.7a4.3 4.3 0 0 0 7.4-.1l-1.5-.9a2.6 2.6 0 1 1-2.2-3.8V9.4a4.3 4.3 0 0 0-3.7 6.5Zm13.6 0a4.3 4.3 0 0 0-3.7-6.5v1.7a2.6 2.6 0 1 1-2.2 3.8l-1.5.9a4.3 4.3 0 0 0 7.4.1Z"
-					fill="currentColor"
-				/>
-			</svg>
-			{#each epidemicSteps as step, idx (step.heading)}
-				<span class="ep-step" class:wearing-off={epidemicWearingOff && idx === 1}>
-					<strong>{step.heading}</strong>
-					<span><RichText text={step.text} /></span>
-				</span>
-			{/each}
-		</span>
+		<EpidemicFace wearingOff={epidemicWearingOff} />
 	{/if}
 {/snippet}
 
@@ -1267,145 +1221,6 @@
 		color: #f0f5ff;
 	}
 
-	.ev-top {
-		display: flex;
-		flex-direction: column;
-		gap: 0.08em;
-		padding: 0.34em 0.5em 0.34em;
-		background: linear-gradient(165deg, #1b221c, #101511);
-		color: #a6e39d;
-		flex: none;
-	}
-
-	.card.event.unrationed .ev-top {
-		color: #ffd89b;
-	}
-
-	.card.event.permanent .ev-top {
-		background: #eef3fb;
-		color: #193263;
-	}
-
-	.ev-kicker-row {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 0.35em;
-	}
-
-	.ev-kicker {
-		font-size: 0.54em;
-		font-weight: 800;
-		font-style: italic;
-		letter-spacing: 0.05em;
-		text-transform: uppercase;
-		color: #f4d678;
-	}
-
-	.card.event.unrationed .ev-kicker {
-		color: #f6a962;
-	}
-
-	.card.event.permanent .ev-kicker {
-		color: #466196;
-	}
-
-	.ev-once {
-		font-size: 0.5em;
-		font-weight: 800;
-		letter-spacing: 0.06em;
-		text-transform: uppercase;
-		color: #ff8e7b;
-		line-height: 1;
-	}
-
-	.ev-title {
-		font-family: var(--font-display);
-		line-height: 0.98;
-		text-transform: uppercase;
-		letter-spacing: 0.02em;
-	}
-
-	.ev-hazard {
-		display: block;
-		flex: none;
-		height: 0.22em;
-		background: repeating-linear-gradient(-45deg, #c24b1c 0 0.34em, #18110c 0.34em 0.68em);
-	}
-
-	.ev-body {
-		position: relative;
-		flex: 1;
-		min-height: 0;
-		display: flex;
-		flex-direction: column;
-		overflow: hidden;
-	}
-
-	.ev-art {
-		position: absolute;
-		right: -11%;
-		bottom: -11%;
-		z-index: 0;
-		width: 82%;
-		height: 82%;
-		object-fit: contain;
-		object-position: right bottom;
-		opacity: 0.21;
-		mix-blend-mode: multiply;
-		pointer-events: none;
-		user-select: none;
-	}
-
-	.card.event.permanent .ev-art {
-		filter: invert(1);
-		opacity: 0.22;
-		mix-blend-mode: screen;
-	}
-
-	.ev-rules {
-		position: relative;
-		z-index: 1;
-		flex: 1;
-		min-height: 0;
-		display: flex;
-		flex-direction: column;
-		justify-content: flex-start;
-		gap: 0.35em;
-		padding: 0.48em 0.52em 0.52em;
-		overflow: hidden;
-		font-weight: 500;
-		line-height: 1.24;
-	}
-
-	.ev-body.has-leaf .ev-rules {
-		padding-bottom: 1.55em;
-	}
-
-	.rule-line {
-		display: block;
-	}
-
-	.ev-leaf {
-		position: absolute;
-		left: 0;
-		bottom: 0;
-		z-index: 2;
-		padding: 0.22em 0.62em 0.2em 0.48em;
-		border-radius: 0 0.65em 0 0;
-		background: #171d18;
-		color: #f3e6c2;
-		font-size: 0.54em;
-		font-weight: 700;
-		letter-spacing: 0.02em;
-		line-height: 1.1;
-		white-space: nowrap;
-	}
-
-	.card.event.unrationed .ev-leaf {
-		color: #ffd89b;
-	}
-
 	/* === Produce Supplies === */
 	.card.produce:not(.small) {
 		padding: 0;
@@ -1522,80 +1337,5 @@
 		box-shadow:
 			0 0.15em 0.3em rgb(0 0 0 / 0.35),
 			0 0.6em 1.4em rgb(0 0 0 / 0.25);
-	}
-
-	.ep-top {
-		padding: 0.34em 0.4em 0.3em;
-		border-bottom: 1.5px solid rgb(244 238 204 / 0.42);
-		background: linear-gradient(180deg, #d86d24, #ecc63b);
-		text-align: center;
-		flex: none;
-	}
-
-	.ep-title {
-		font-family: var(--font-display);
-		font-size: 1.06em;
-		font-weight: 700;
-		letter-spacing: 0.06em;
-		color: #8f1d14;
-		line-height: 1;
-	}
-
-	.ep-body {
-		position: relative;
-		flex: 1;
-		min-height: 0;
-		display: flex;
-		flex-direction: column;
-		gap: 0.34em;
-		padding: 0.46em 0.52em 0.5em;
-		overflow: hidden;
-		line-height: 1.22;
-	}
-
-	.ep-art {
-		position: absolute;
-		right: -14%;
-		bottom: -14%;
-		z-index: 0;
-		width: 72%;
-		height: 72%;
-		color: #0a1f0d;
-		opacity: 0.32;
-		pointer-events: none;
-	}
-
-	.ep-step {
-		position: relative;
-		z-index: 1;
-		display: flex;
-		flex-direction: column;
-		gap: 0.04em;
-	}
-
-	.ep-step strong {
-		color: #ffffff;
-		font-style: italic;
-		letter-spacing: 0.02em;
-	}
-
-	.ep-step.wearing-off {
-		margin: 0 -0.22em;
-		padding: 0.24em 0.34em;
-		border: 1px solid rgb(56 42 24 / 0.55);
-		border-radius: 0.14em;
-		background:
-			repeating-linear-gradient(-12deg, rgb(120 92 48 / 0.05) 0 4px, transparent 4px 9px),
-			linear-gradient(170deg, #ede1c0, #d8c69b);
-		color: #231a11;
-		box-shadow:
-			0 0.18em 0.45em rgb(0 0 0 / 0.52),
-			inset 0 0 0 1px rgb(255 250 234 / 0.35);
-		transform: rotate(-1.8deg);
-	}
-
-	.ep-step.wearing-off strong {
-		color: #9e2119;
-		font-style: normal;
 	}
 </style>

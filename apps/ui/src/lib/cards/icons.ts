@@ -35,6 +35,9 @@ export const IMPROVEMENT_MARK: Record<CityImprovementId, { text?: string; icon?:
 };
 
 /** A stitched cut, marking a scar on a character card. */
+/** The biohazard mark on a 24-unit square, drawn round a dot of radius 2.2 at its centre. */
+export const BIOHAZARD =
+	'M12 4.2a4.3 4.3 0 0 0-3.7 6.5l1.5-.9a2.6 2.6 0 1 1 4.4 0l1.5.9A4.3 4.3 0 0 0 12 4.2Zm-6.8 11.7a4.3 4.3 0 0 0 7.4-.1l-1.5-.9a2.6 2.6 0 1 1-2.2-3.8V9.4a4.3 4.3 0 0 0-3.7 6.5Zm13.6 0a4.3 4.3 0 0 0-3.7-6.5v1.7a2.6 2.6 0 1 1-2.2 3.8l-1.5.9a4.3 4.3 0 0 0 7.4.1Z';
 export const SCAR_ICON = 'M2 12.5 14 3.5M4.2 8.6l2 2.6M7.2 6.4l2 2.6M10.2 4.2l2 2.6';
 export const SKULL_ICON =
 	'M8 2.2a5 5 0 0 0-5 5c0 1.7.8 3 2 3.7v2.6h6v-2.6c1.2-.7 2-2 2-3.7a5 5 0 0 0-5-5zM5.4 7.4a1 1 0 1 0 2 0 1 1 0 1 0-2 0M8.6 7.4a1 1 0 1 0 2 0 1 1 0 1 0-2 0M7 13.5v-1.6M9 13.5v-1.6';
