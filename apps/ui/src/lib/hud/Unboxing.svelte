@@ -2,7 +2,7 @@
   import { feedback } from "@stefan.inc/feedback-engine/svelte";
   import { changesMap, openings, pack, tablePlayers } from "@repo/game";
   import type { BriefingEntry, Campaign, Command, Opening, PlayerId, Table } from "@repo/game";
-  import { onDestroy, onMount, tick } from "svelte";
+  import { onDestroy, onMount, tick, untrack } from "svelte";
   import { cubicOut } from "svelte/easing";
   import { fade, fly, scale } from "svelte/transition";
   import Beacon from "#lib/Beacon.svelte";
@@ -12,9 +12,13 @@
   import { sceneForOpening } from "#lib/story/script.ts";
   import StoryStage from "#lib/story/StoryStage.svelte";
   import Briefing from "./Briefing.svelte";
+  import { jobFigure } from "#lib/characters/figures.ts";
+  import type { FigureKey } from "#lib/characters/personas.ts";
+  import { characterVoice } from "#lib/characters/voice.svelte.ts";
   import Crate from "./Crate.svelte";
   import DossierDoor from "./DossierDoor.svelte";
   import { destination, flyTo } from "./flight.ts";
+  import JobFigure, { madeWith } from "./JobFigure.svelte";
   import ObjectiveTag from "./ObjectiveTag.svelte";
   import PieceGroups from "./PieceGroups.svelte";
   import RichText from "./RichText.svelte";
@@ -72,8 +76,12 @@
   const allDrawn = $derived(steps.length > 0 && drawn >= steps.length && flipped && !needsChart);
 
   let dismissedStep = $state<number | null>(null);
+  // A character the box brings first stands over the whole table, then steps down into its place among the pieces.
+  type Newcomer = { key: string; figure: string; occupation: string; name: string | null };
+  let newcomers = $state.raw<Newcomer[]>([]);
+  const newcomer = $derived(newcomers[0] ?? null);
   const activeStory = $derived(
-    current && flipped && !progress.stowing && !paused && dismissedStep !== drawn
+    current && flipped && !progress.stowing && !paused && !newcomer && dismissedStep !== drawn
       ? sceneForOpening(current, campaign)
       : null,
   );
@@ -91,6 +99,7 @@
     if (d > prevDrawn) {
       sfxCardDraw();
     } else if (d === prevDrawn && f && !prevFlipped && cur) {
+      untrack(() => (newcomers = newcomersOf(cur, d - 1)));
       if (cur.from.t === "seal") {
         if (cur.from.seal.t === "package") sfxCrateOpen();
         else sfxDoorTear();
@@ -103,6 +112,47 @@
     prevDrawn = d;
     prevFlipped = f;
   });
+  function newcomersOf(opening: Opening, at: number): Newcomer[] {
+    return piecesOf(opening, at).flatMap(({ piece }) => {
+      if (piece.t !== "unlock" || piece.unlock.t !== "job") return [];
+      const figure = jobFigure(piece.unlock.job);
+      if (!figure) return [];
+      return [
+        {
+          key: piece.key,
+          figure,
+          occupation: piece.name ?? "",
+          name: madeWith(campaign, piece.unlock.job),
+        },
+      ];
+    });
+  }
+
+  let newcomerEl = $state<HTMLElement>();
+  let landing = $state(false);
+  $effect(() => {
+    const now = newcomer;
+    if (!now) return;
+    untrack(() => characterVoice.play(now.figure as FigureKey, "punchline", { priority: "ui" }));
+    const timer = setTimeout(() => void land(), still ? 900 : 3400);
+    return () => clearTimeout(timer);
+  });
+
+  /** The character steps down from the table into its piece, and the reading goes on. */
+  async function land() {
+    const now = newcomer;
+    if (!now || landing) return;
+    landing = true;
+    const from = newcomerEl?.querySelector<HTMLElement>(".figure");
+    const to = root?.querySelector(`[data-piece="${now.key}"]`);
+    if (from && to && !still) {
+      newcomerEl!.style.visibility = "hidden";
+      await flyTo(from, to, { duration: 950 });
+    }
+    landing = false;
+    if (!destroyed) newcomers = newcomers.slice(1);
+  }
+
   const laid = $derived(wings(steps.slice(0, Math.max(0, drawn - 1))));
   const spotlit = $derived(current ? piecesOf(current, drawn - 1) : []);
   const spotCard = $derived(spotlit.find((placed) => placed.piece.t === "card")?.piece ?? null);
@@ -364,6 +414,7 @@
     // Space on a focused button already presses it.
     if (event.key === " " && !progress.stowing && !paused && !onButton(event)) {
       event.preventDefault();
+      if (newcomer) return void land();
       if (activeStory && storyStage?.advance()) return;
       if (allDrawn) toggleReady();
       else step();
@@ -380,6 +431,7 @@
     class="tabletop-unboxing"
     class:stowing={progress.stowing}
     class:narrating={Boolean(activeStory)}
+    class:revealing={newcomer !== null && !landing}
     bind:this={root}
     data-drawn={drawn}
     data-total={steps.length}
@@ -545,7 +597,13 @@
                       <h2>{current.title}</h2>
                       {#if current.text && !cardDef}<p><RichText text={current.text} /></p>{/if}
                     </div>
-                    <PieceGroups groups={spotGroups} {campaign} side="spotlight" ontip={showTip} />
+                    <PieceGroups
+                      groups={spotGroups}
+                      {campaign}
+                      side="spotlight"
+                      ontip={showTip}
+                      waiting={new Set(newcomers.map((entry) => entry.key))}
+                    />
                   {/if}
                 </div>
               </div>
@@ -573,6 +631,26 @@
       <div class="piece-tip" role="tooltip" style={tip.style} transition:fade={{ duration: 120 }}>
         <RichText text={tip.text} />
       </div>
+    {/if}
+
+    {#if newcomer}
+      {#key newcomer.key}
+        <button
+          class="newcomer"
+          bind:this={newcomerEl}
+          onclick={() => void land()}
+          aria-label={`${newcomer.occupation} joins the roster. Click to go on.`}
+          data-testid="newcomer"
+          in:scale={{ start: 0.82, duration: 520, easing: cubicOut }}
+        >
+          <JobFigure
+            figure={newcomer.figure}
+            occupation={newcomer.occupation}
+            name={newcomer.name}
+            width="min(46vh, 36vw)"
+          />
+        </button>
+      {/key}
     {/if}
 
     {#if activeStory}
@@ -642,6 +720,29 @@
 {/if}
 
 <style>
+  /* A new character stands over the whole table, on nothing, as the characters stand in the lobby: the reading's
+	   pieces step back while it does and come back as it steps down into its place among them. */
+  .spread {
+    transition: opacity 320ms ease;
+  }
+
+  .revealing .spread {
+    opacity: 0;
+  }
+
+  .newcomer {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    display: grid;
+    place-items: center;
+    padding: 0 0 12vh;
+    border: 0;
+    background: none;
+    font: inherit;
+    cursor: pointer;
+  }
+
   .summary-wrap {
     display: grid;
     place-items: center;

@@ -5,7 +5,7 @@
   import LegacyCard from "#lib/cards/LegacyCard.svelte";
   import { jobFigure } from "#lib/characters/figures.ts";
   import BriefPiece from "./BriefPiece.svelte";
-  import JobFigure from "./JobFigure.svelte";
+  import JobFigure, { madeWith } from "./JobFigure.svelte";
   import MapPlace from "./MapPlace.svelte";
   import RichText from "./RichText.svelte";
   import Crate from "./Crate.svelte";
@@ -19,9 +19,11 @@
     side: "left" | "right" | "spotlight";
     /** The piece under the pointer or focus, whose meaning the Unboxing shows beside it. */
     ontip: (piece: Piece | null, at?: HTMLElement) => void;
+    /** Pieces still shown elsewhere, such as a new character standing over the whole table, whose place waits. */
+    waiting?: ReadonlySet<string>;
   };
 
-  let { groups, campaign, side, ontip }: Props = $props();
+  let { groups, campaign, side, ontip, waiting }: Props = $props();
 
   const big = $derived(side === "spotlight");
   /** A character the box brings stands as its whole figure, which carries its own name. */
@@ -65,6 +67,8 @@
             class:mechanic={piece.stow.cls === "mechanic"}
             class:figure={figureOf(piece) !== null}
             class:whole={placeOf(piece) !== null || isRule(piece)}
+            style:visibility={waiting?.has(piece.key) ? "hidden" : null}
+            data-piece={piece.key}
             data-stow-class={piece.stow.cls}
             data-put={piece.stow.put}
             aria-label={piece.tip}
@@ -100,7 +104,10 @@
             {:else if figureOf(piece)}
               <JobFigure
                 figure={figureOf(piece)!}
-                name={label(piece)}
+                occupation={label(piece)}
+                name={piece.t === "unlock" && piece.unlock.t === "job"
+                  ? madeWith(campaign, piece.unlock.job)
+                  : null}
                 width={big ? "7.5rem" : "5.5rem"}
               />
             {:else}
