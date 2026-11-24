@@ -3,10 +3,13 @@ import { pack } from './content/pack';
 import type { AbilityId, Color, ScarId } from './content/types';
 import { restackTop } from './decks';
 import {
+	arrive,
 	canTakeScar,
 	epidemicIncrease,
+	expose,
 	epidemicInfect,
 	freeCharacters,
+	guardCards,
 	hasScar,
 	intensify,
 	movePawn,
@@ -141,6 +144,7 @@ export function checkPlay(world: World, seat: SeatId, card: CardId, play: Play, 
 	// An Epidemic that has been started is the table's exception: any Event may be played between its steps.
 	const unresolved = game.pending[0]?.t;
 	if (unresolved === 'shield' || unresolved === 'cordon') return 'Resolve the card that was just drawn first';
+	if (unresolved === 'guard') return 'Choose how the Soldier gets past the Hollow Men first';
 	if (unresolved === 'reveal' || unresolved === 'search') return 'Let the table see what was turned over first';
 	// A designer ruling: a Gather card and the city it gathers in are one draw, with no Event window between them.
 	if (game.gathering) return 'Flip the card the Hollow Men gather in first';
@@ -538,6 +542,8 @@ export type Decide =
 	| { d: 'giveCard'; card: CardId; to: SeatId }
 	| { d: 'shield'; seat: SeatId; card: CardId }
 	| { d: 'cordon'; seat: SeatId; card: CardId }
+	/** The City card a Soldier discards to leave Hollow Men. Skipping the choice is being exposed instead. */
+	| { d: 'guard'; seat: SeatId; card: CardId }
 	/** Turns over the next card of a reveal, or puts them all away once every one is face up. */
 	| { d: 'reveal' }
 	/** The table has seen the search: what it found happens. */
@@ -561,6 +567,7 @@ const OPTIONAL = new Set([
 	'giveCard',
 	'shield',
 	'cordon',
+	'guard',
 	'intensify',
 	'epidemicInfect',
 	'epidemicDrawn',
@@ -630,6 +637,10 @@ export function checkDecide(world: World, decide: Decide): string | null {
 		}
 		case 'cordon':
 			return game.players[decide.seat]?.hand.includes(decide.card) ? ok : 'Discard a card from a hand';
+		case 'guard':
+			return decide.seat === (pending as { seat: SeatId }).seat && guardCards(world, decide.seat).includes(decide.card)
+				? ok
+				: "Discard a City card of your location's colour";
 		case 'reveal':
 		case 'search':
 			return ok;
@@ -682,8 +693,17 @@ export function applyDecide(world: World, decide: Decide) {
 			text:
 				pending.t === 'shield'
 					? `Nobody discarded a card to keep the cube in ${cityDef(pending.city).name}`
-					: `The choice was passed: ${PASSED[pending.t] ?? pending.t}`,
+					: pending.t === 'guard'
+						? `${characterOf(world, pending.seat).name} kept their cards and faced the Hollow Men`
+						: `The choice was passed: ${PASSED[pending.t] ?? pending.t}`,
 		});
+	if (decide.d === 'skip' && pending?.t === 'guard') {
+		const from = player(game, pending.seat).location;
+		expose(world, pending.seat);
+		if (!characterOf(world, pending.seat).dead && player(game, pending.seat).location === from)
+			arrive(world, pending.seat, pending.to, pending.by);
+		return;
+	}
 	if (decide.d === 'skip' && pending?.t === 'intensify') intensify(world);
 	if (decide.d === 'skip' && pending?.t === 'epidemicInfect') epidemicInfect(world);
 	if (decide.d === 'skip' && pending?.t === 'epidemicDrawn') epidemicIncrease(world);
@@ -755,6 +775,16 @@ export function applyDecide(world: World, decide: Decide) {
 		case 'search': {
 			const { card, box } = pending as Extract<Decision, { t: 'search' }>;
 			return finishSearch(world, seat, card, box);
+		}
+		case 'guard': {
+			const { to, by } = pending as Extract<Decision, { t: 'guard' }>;
+			discardFromHand(game, decide.seat, decide.card);
+			log(game, {
+				t: 'note',
+				text: `${characterOf(world, decide.seat).name} discarded ${cardLabel(campaign, decide.card)} to slip past the Hollow Men`,
+			});
+			arrive(world, decide.seat, to, by);
+			return;
 		}
 		case 'shield': {
 			const city = (pending as { city: CityId }).city;

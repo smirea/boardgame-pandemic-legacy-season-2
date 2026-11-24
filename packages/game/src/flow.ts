@@ -351,31 +351,45 @@ export function freeCharacters(world: World): Character[] {
 	);
 }
 
+/** The City cards a Soldier may discard to leave where they stand without being exposed. */
+export function guardCards(world: World, seat: SeatId): CardId[] {
+	if (!has(world, seat, 'soldier')) return [];
+	const current = player(world.game!, seat);
+	const color = cityDef(current.location).color;
+	return current.hand.filter(id => {
+		const card = world.campaign.playerCards[id];
+		return card?.kind === 'city' && isColor(card, color);
+	});
+}
+
 /**
  * Moves a pawn. Leaving a location that holds Hollow Men costs an exposure, and a pawn that dies of
- * it never arrives. Returns whether the pawn reached `to`.
+ * it never arrives. A Soldier who could pay instead waits for their player's choice (`guard`). Returns whether the
+ * pawn reached `to`.
  */
 export function movePawn(world: World, seat: SeatId, to: CityId, by: string): boolean {
-	const { campaign, game } = world as { campaign: World['campaign']; game: Game };
+	const { game } = world as { game: Game };
 	const current = player(game, seat);
 	const from = current.location;
 	const leaving = game.locations[from]!;
 	if (leaving.hollow > 0 && !leaving.shelter) {
-		const guard = has(world, seat, 'soldier')
-			? current.hand.find(id => {
-					const card = campaign.playerCards[id];
-					return card?.kind === 'city' && isColor(card, cityDef(from).color);
-				})
-			: undefined;
-		if (guard) {
-			current.hand = current.hand.filter(id => id !== guard);
-			game.playerDiscard.push(guard);
-			log(game, { t: 'note', text: `${characterOf(world, seat).name} discarded a card to slip past the Hollow Men` });
-		} else {
-			expose(world, seat);
-			if (characterOf(world, seat).dead || current.location !== from) return false;
+		// First in the queue, so an Event played between an Epidemic's steps that moves a Soldier is settled at once.
+		if (guardCards(world, seat).length) {
+			game.pending.unshift({ t: 'guard', seat, to, by });
+			return false;
 		}
+		expose(world, seat);
+		if (characterOf(world, seat).dead || current.location !== from) return false;
 	}
+	return arrive(world, seat, to, by);
+}
+
+/** The rest of a move, once the pawn has got away from where it stood. */
+export function arrive(world: World, seat: SeatId, to: CityId, by: string): boolean {
+	const { game } = world as { game: Game };
+	const current = player(game, seat);
+	const from = current.location;
+	const leaving = game.locations[from]!;
 	current.location = to;
 	log(game, { t: 'move', seat, from, to, by });
 	if (has(world, seat, 'haunted') && cityDef(from).kind === 'city' && leaving.supplies === 0 && current.hand.length > 0)

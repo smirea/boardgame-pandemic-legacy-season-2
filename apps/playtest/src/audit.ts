@@ -323,6 +323,7 @@ export function universe(world: World): { key: string; live: boolean }[] {
 			'giveCard',
 			'shield',
 			'cordon',
+			'guard',
 			'reveal',
 			'search',
 			'skip',

@@ -222,6 +222,11 @@ export type Decision =
 	| { t: 'intensify' }
 	/** Any player may discard a card of this colour to stop the pending cube removal. */
 	| { t: 'shield'; city: CityId; color: Color }
+	/**
+	 * A Soldier is leaving Hollow Men holding a City card of their location's colour. The pawn waits there until its
+	 * player picks the card to discard, or skips and is exposed. Either way the move to `to` then goes on.
+	 */
+	| { t: 'guard'; seat: SeatId; to: CityId; by: string }
 	/** Cards turned over from the top of the Player deck, one command each, in front of the whole table. */
 	| { t: 'reveal'; seat: SeatId; by: RevealSource; cards: CardId[] }
 	/** A search box was scratched open. Its result happens once its player has shown it to the table. */

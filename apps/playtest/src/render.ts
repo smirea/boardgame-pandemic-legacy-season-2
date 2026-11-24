@@ -72,6 +72,8 @@ function pendingLine(world: World, pending: Decision): string {
 			return 'Epidemic Step 1 (Increase) is done. Advance Step 2 (draw the bottom Infection card) with `do decide:skip`';
 		case 'cordon':
 			return 'Cordon: any player may discard a card to end this Infect step now, or the active player skips';
+		case 'guard':
+			return `${who} is a Soldier leaving Hollow Men: discard a ${cityDef(world.game!.players[pending.seat]!.location).color} City card to slip past them with \`do decide:guard\`, or skip to be exposed. The move goes on either way`;
 		case 'shield':
 			return `Shield: any player may discard a ${pending.color} City card to save the cubes in ${cityName(world, pending.city)}, or skip`;
 		case 'reveal': {

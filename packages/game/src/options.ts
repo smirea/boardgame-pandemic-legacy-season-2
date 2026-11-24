@@ -496,6 +496,9 @@ export function legalDecides(world: World): Decide[] {
 				for (const seat of game.seats)
 					for (const card of player(game, seat).hand) candidates.push({ d: 'cordon', seat, card });
 				break;
+			case 'guard':
+				for (const card of player(game, pending.seat).hand) candidates.push({ d: 'guard', seat: pending.seat, card });
+				break;
 			case 'reveal':
 				candidates.push({ d: 'reveal' });
 				break;

@@ -1800,20 +1800,40 @@ describe('the remaining abilities and the Jade lab', () => {
 		expect(gameOf(actor).players[A]!.supplies).toBe(0);
 	});
 
-	test('the Soldier discards a card of the colour to leave Hollow Men unexposed, and is exposed without one', () => {
-		const leaving = (card: boolean) =>
+	test('the Soldier leaving Hollow Men picks which card of the colour to discard, or keeps them and is exposed, and moves on either way', () => {
+		const leaving = (cards: string[]) =>
 			withAbility('soldier', world => {
 				world.game!.players[A]!.location = city('cairo');
 				world.game!.locations[city('cairo')]!.hollow = 2;
-				give(world, A, card ? cityCards(world, 'baghdad') : cityCards(world, 'london'));
+				give(
+					world,
+					A,
+					cards.flatMap(name => cityCards(world, name)),
+				);
 			});
-		const guarded = leaving(true);
+		const at = (actor: Parameters<typeof worldOf>[0]) => gameOf(actor).players[A]!.location;
+
+		const guarded = leaving(['baghdad', 'riyadh', 'london']);
 		act(guarded, { a: 'drive', to: city('tripoli') });
+		expect(at(guarded)).toBe(city('cairo'));
+		const [, riyadh] = gameOf(guarded).players[A]!.hand;
+		send(guarded, { type: 'DECIDE', decide: { d: 'guard', seat: A, card: riyadh! } });
 		expect(character(worldOf(guarded), A).exposure).toBe(0);
-		expect(gameOf(guarded).players[A]!.hand).toEqual([]);
-		const caught = leaving(false);
+		expect(gameOf(guarded).players[A]!.hand).not.toContain(riyadh);
+		expect(gameOf(guarded).players[A]!.hand).toHaveLength(2);
+		expect(at(guarded)).toBe(city('tripoli'));
+
+		const brave = leaving(['baghdad']);
+		act(brave, { a: 'drive', to: city('tripoli') });
+		send(brave, { type: 'DECIDE', decide: { d: 'skip' } });
+		expect(character(worldOf(brave), A).exposure).toBe(1);
+		expect(gameOf(brave).players[A]!.hand).toHaveLength(1);
+		expect(at(brave)).toBe(city('tripoli'));
+
+		const caught = leaving(['london']);
 		act(caught, { a: 'drive', to: city('tripoli') });
 		expect(character(worldOf(caught), A).exposure).toBe(1);
+		expect(at(caught)).toBe(city('tripoli'));
 	});
 
 	test("door 48's scars: Susceptible is exposed twice in an infested city, Fear of Needles may not Inoculate, Fear of Flying pays a card to shuttle", () => {

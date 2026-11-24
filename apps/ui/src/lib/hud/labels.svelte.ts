@@ -465,6 +465,7 @@ export function decideLabel(world: World, decide: Decide): string {
 		case 'giveCard':
 			return `Give ${cardName(world, decide.card)} to ${seatName(world, decide.to)}`;
 		case 'shield':
+		case 'guard':
 			return `${seatName(world, decide.seat)} discards ${cardName(world, decide.card)}`;
 		case 'reveal': {
 			const pending = world.game?.pending[0];
@@ -480,6 +481,7 @@ export function decideLabel(world: World, decide: Decide): string {
 			if (pending === 'epidemicInfect') return 'Draw bottom card';
 			if (pending === 'intensify') return 'Intensify';
 			if (pending === 'removeHollow') return 'Remove no more';
+			if (pending === 'guard') return 'Keep them and be exposed';
 			return 'Skip';
 		}
 	}
@@ -496,6 +498,7 @@ const DECISION_TITLES: Record<Decision['t'], string> = {
 	giveCard: 'Give a card to another player',
 	shield: 'Discard a matching card to keep the cube?',
 	cordon: 'Discard any card to stop the rest of this Infect step?',
+	guard: 'Discard a matching card to slip past the Hollow Men?',
 	epidemicDrawn: 'Epidemic drawn — play TOPAZ Experimental Vaccine to cancel, or start the Epidemic.',
 	epidemicInfect: 'Epidemic Step 2: Infect — draw the bottom Infection card.',
 	intensify:
@@ -508,6 +511,10 @@ const DECISION_TITLES: Record<Decision['t'], string> = {
 export function decisionTitle(world: World, pending: Decision): string {
 	if (pending.t === 'shield')
 		return `${cityName(pending.city)} just lost a cube. Discard a ${pending.color} City card to put it back?`;
+	if (pending.t === 'guard') {
+		const here = world.game!.players[pending.seat]!.location;
+		return `${seatName(world, pending.seat)}: Hollow Men stand in ${cityName(here)}. Discard a ${cityDef(here).color} City card to slip past them, or be exposed?`;
+	}
 	if (pending.t === 'removeHollow')
 		return `${seatName(world, pending.seat)}: Remove up to ${pending.amount} Hollow ${pending.amount === 1 ? 'Man' : 'Men'}, one at a time`;
 	if (pending.t === 'scar' && !pending.seat)

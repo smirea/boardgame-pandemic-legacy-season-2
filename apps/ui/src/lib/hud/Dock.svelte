@@ -189,9 +189,11 @@
 	const fanAngle = (index: number) => (index - (handCards.length - 1) / 2) * Math.min(4.5, 22 / handCards.length);
 	const mustDiscard = $derived(owns(seat) && decides.some(decide => decide.d === 'discard' && decide.seat === seat));
 	const playable = $derived(new Set(plays.filter(option => option.seat === seat).map(option => option.card)));
-	// Pending decisions where the player picks a card directly from hand (cordon, shield, giveCard).
+	// Pending decisions where the player picks a card directly from hand (cordon, shield, guard, giveCard).
 	const pendingHandKind = $derived(
-		pending && (pending.t === 'cordon' || pending.t === 'shield' || pending.t === 'giveCard') ? pending.t : null,
+		pending && (pending.t === 'cordon' || pending.t === 'shield' || pending.t === 'guard' || pending.t === 'giveCard')
+			? pending.t
+			: null,
 	);
 	let pickedGiveCard = $state<CardId | null>(null);
 	let lastPending = untrack(() => pending);
@@ -209,7 +211,7 @@
 			...new Set(
 				decides
 					.filter(
-						(decide): decide is Extract<Decide, { d: 'cordon' | 'shield' }> =>
+						(decide): decide is Extract<Decide, { d: 'cordon' | 'shield' | 'guard' }> =>
 							decide.d === pendingHandKind && owns(decide.seat),
 					)
 					.map(decide => decide.seat),
@@ -220,7 +222,7 @@
 		const map = new Map<CardId, Decide[]>();
 		if (!pendingHandKind || !owns(seat)) return map;
 		for (const decide of decides) {
-			if (decide.d === 'cordon' || decide.d === 'shield') {
+			if (decide.d === 'cordon' || decide.d === 'shield' || decide.d === 'guard') {
 				if (decide.d === pendingHandKind && decide.seat === seat)
 					map.set(decide.card, [...(map.get(decide.card) ?? []), decide]);
 			} else if (decide.d === 'giveCard' && pending?.t === 'giveCard' && pending.seat === seat) {
@@ -252,7 +254,8 @@
 	const choices = $derived(
 		decides.filter(decide => {
 			if (decide.d === 'discard') return false;
-			if (decide.d === 'shield' || decide.d === 'cordon' || decide.d === 'giveCard') return false;
+			if (decide.d === 'shield' || decide.d === 'cordon' || decide.d === 'guard' || decide.d === 'giveCard')
+				return false;
 			if (epidemicStep && decide.d === 'skip') return false;
 			return owns(decider);
 		}),
@@ -691,7 +694,7 @@
 							{decisionTitle(world, pending)}
 							{#if pendingHandActive && pendingHandKind === 'giveCard' && !pickedGiveCard}
 								Click a card in your hand to give{playable.size ? ', or play an event' : ''}.
-							{:else if pendingHandActive && (pendingHandKind === 'cordon' || pendingHandKind === 'shield')}
+							{:else if pendingHandActive && pendingHandKind !== 'giveCard'}
 								Click a highlighted card in hand to discard.
 							{/if}
 						</p>
