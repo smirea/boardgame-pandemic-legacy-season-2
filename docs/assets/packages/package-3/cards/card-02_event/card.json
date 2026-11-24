@@ -1,41 +1,41 @@
 {
-	"package": 3,
-	"index": 2,
-	"cardId": 10701,
-	"printedCodes": {
-		"sideA": null,
-		"sideB": "P3-02b"
-	},
-	"title": "Biodome Prototype",
-	"category": "unrationed-event",
-	"city": null,
-	"color": null,
-	"coordinates": null,
-	"port": null,
-	"copies": 1,
-	"hasImprovementSlot": false,
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideASummary": "Player deck back. Dark blue sunburst around a haven on the water. No text and no printed code.",
-	"sideBSummary": "Unrationed Event, Biodome Prototype. Place up to 3 shelters on any cities on the grid. Destroy this card after use. Play at any time. Not an action. Printed code P3-02b.",
-	"searchBoxes": [],
-	"states": [],
-	"mechanics": {
-		"opensDoors": [],
-		"destroys": true,
-		"rules": [
-			"Unrationed Event. Play at any time. It is not an action.",
-			"Place up to 3 shelter figures on any cities that are on the grid. The cities do not have to match a card, and they do not have to be the city you are in.",
-			"Destroy this card after use. It does not go to the discard pile.",
-			"When the package is opened, give this card to a player to add to their hand."
-		],
-		"notes": [
-			"Card id 10701. One copy.",
-			"Side A is the Player deck back and has no printed code. Side B is P3-02b.",
-			"The card does not say what to do if fewer than the number you want are left in the Shelters bag. Rule N's move-a-shelter line is printed on the Build Shelter action, not on this event.",
-			"The picture is a cracked screen showing a green dome."
-		]
-	}
+  "package": 3,
+  "index": 2,
+  "cardId": 10701,
+  "printedCodes": {
+    "sideA": null,
+    "sideB": "P3-02b"
+  },
+  "title": "Biodome Prototype",
+  "category": "unrationed-event",
+  "city": null,
+  "color": null,
+  "coordinates": null,
+  "port": null,
+  "copies": 1,
+  "hasImprovementSlot": false,
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideASummary": "Player deck back. Dark blue sunburst around a haven on the water. No text and no printed code.",
+  "sideBSummary": "Unrationed Event, Biodome Prototype. Place up to 3 shelters on any cities on the grid. Destroy this card after use. Play at any time. Not an action. Printed code P3-02b.",
+  "searchBoxes": [],
+  "states": [],
+  "mechanics": {
+    "opensDoors": [],
+    "destroys": true,
+    "rules": [
+      "Unrationed Event. Play at any time. It is not an action.",
+      "Place up to 3 shelter figures on any cities that are on the grid. The cities do not have to match a card, and they do not have to be the city you are in.",
+      "Destroy this card after use. It does not go to the discard pile.",
+      "When the package is opened, give this card to a player to add to their hand."
+    ],
+    "notes": [
+      "Card id 10701. One copy.",
+      "Side A is the Player deck back and has no printed code. Side B is P3-02b.",
+      "The card does not say what to do if fewer than the number you want are left in the Shelters bag. Rule N's move-a-shelter line is printed on the Build Shelter action, not on this event.",
+      "The picture is a cracked screen showing a green dome."
+    ]
+  }
 }

@@ -1,125 +1,125 @@
 {
-	"door": "62",
-	"folder": 6,
-	"id": "door-62",
-	"guid": "ad4192",
-	"frontImage": "dossiers/folder-6/door-62/front.jpg",
-	"frontText": "Navy 62 centered on a yellow door card. Dashed cut-line border. No other printed text.",
-	"items": [
-		{
-			"id": "item-01",
-			"image": "dossiers/folder-6/door-62/item-01.jpg",
-			"count": 1,
-			"printedCode": null,
-			"category": "map-sticker",
-			"title": "Middle East and South Asia",
-			"placementTarget": "Board, from the eastern Mediterranean and Arabia across to India. Graticule shows 40°N, 20°N, 40°E, 60°E, and 80°E.",
-			"text": null,
-			"mapDetails": {
-				"cities": [
-					{
-						"name": "Tehran",
-						"color": "black",
-						"population": 1,
-						"port": false,
-						"infested": false,
-						"lab": null,
-						"marker": "inland-x",
-						"lat": 35.7,
-						"lon": 51.4,
-						"graticule": "Just south of the printed 40°N line and west of the central meridian (60°E is printed further east). No rat."
-					},
-					{
-						"name": "Baghdad",
-						"color": "black",
-						"population": 2,
-						"port": false,
-						"infested": true,
-						"lab": null,
-						"marker": "inland-x",
-						"lat": 33.3,
-						"lon": 44.4,
-						"graticule": "West of Tehran, near the printed 40°E label. Population 2 square is west of the disc. Rat icon southwest of the disc."
-					},
-					{
-						"name": "Riyadh",
-						"color": "black",
-						"population": 2,
-						"port": false,
-						"infested": false,
-						"lab": null,
-						"marker": "inland-x",
-						"lat": 24.7,
-						"lon": 46.7,
-						"graticule": "South of Baghdad, north of the printed 20°N line. Population 2 square is east of the disc. No rat."
-					},
-					{
-						"name": "Delhi",
-						"color": "black",
-						"population": 1,
-						"port": false,
-						"infested": true,
-						"lab": null,
-						"marker": "inland-x",
-						"lat": 28.6,
-						"lon": 77.2,
-						"graticule": "South of 40°N and west of the printed 80°E label. Population 1 square is east of the disc. Rat icon southwest of the disc."
-					},
-					{
-						"name": "New Mumbai",
-						"color": "black",
-						"population": 2,
-						"port": true,
-						"infested": true,
-						"lab": null,
-						"marker": "anchor",
-						"lat": 19.1,
-						"lon": 72.9,
-						"graticule": "West coast of India, on the printed 20°N line, west of 80°E. Rat icon southeast of the disc."
-					},
-					{
-						"name": "Kolkata",
-						"color": "black",
-						"population": 1,
-						"port": true,
-						"infested": true,
-						"lab": null,
-						"marker": "anchor",
-						"lat": 22.6,
-						"lon": 88.4,
-						"graticule": "East coast, at the right edge of the sticker, slightly north of 20°N and east of 80°E. Population 1 square is below the disc. Rat icon southwest of the disc."
-					}
-				],
-				"havens": [],
-				"printedRoutes": [
-					{
-						"from": "off-sticker west (Cairo)",
-						"to": "Baghdad",
-						"type": "supply_line",
-						"notes": "A black land line enters from the west edge and ends in the Baghdad disc. Cairo is the starting-board city in that direction; its name is not printed here."
-					},
-					{
-						"from": "Kolkata",
-						"to": "off-sticker south (Jakarta sea lane on door 63)",
-						"type": "sea_lane",
-						"notes": "A blue sea lane leaves the coast just south of the Kolkata disc and exits the bottom edge. It continues as the lane that runs down the west side of door 63 into Jakarta."
-					}
-				],
-				"reconRoutes": [],
-				"redRegionLines": [],
-				"specialAreas": [
-					{
-						"name": "southern ocean tint",
-						"kind": "region-tint",
-						"notes": "The sea along the bottom edge, south of the Arabian Peninsula and India, is washed pink. That is a region tint, not a red region line."
-					}
-				]
-			},
-			"mechanics": {
-				"addsCities": ["Tehran", "Baghdad", "Riyadh", "Delhi", "New Mumbai", "Kolkata"],
-				"notes": "All six cities are black. Baghdad, Delhi, New Mumbai, and Kolkata are printed infested. Only New Mumbai and Kolkata are ports. Baghdad is population 2, as are Riyadh and New Mumbai. Tehran, Delhi, and Kolkata are population 1. No recon box."
-			}
-		}
-	],
-	"summary": "Middle East and India. Six black cities: Tehran 1 inland; Baghdad 2 inland and infested, with a supply line from the west edge; Riyadh 2 inland; Delhi 1 inland and infested; New Mumbai 2 port and infested; Kolkata 1 port and infested, with a sea lane leaving south toward Jakarta. No red region line and no recon box."
+  "door": "62",
+  "folder": 6,
+  "id": "door-62",
+  "guid": "ad4192",
+  "frontImage": "dossiers/folder-6/door-62/front.jpg",
+  "frontText": "Navy 62 centered on a yellow door card. Dashed cut-line border. No other printed text.",
+  "items": [
+    {
+      "id": "item-01",
+      "image": "dossiers/folder-6/door-62/item-01.jpg",
+      "count": 1,
+      "printedCode": null,
+      "category": "map-sticker",
+      "title": "Middle East and South Asia",
+      "placementTarget": "Board, from the eastern Mediterranean and Arabia across to India. Graticule shows 40°N, 20°N, 40°E, 60°E, and 80°E.",
+      "text": null,
+      "mapDetails": {
+        "cities": [
+          {
+            "name": "Tehran",
+            "color": "black",
+            "population": 1,
+            "port": false,
+            "infested": false,
+            "lab": null,
+            "marker": "inland-x",
+            "lat": 35.7,
+            "lon": 51.4,
+            "graticule": "Just south of the printed 40°N line and west of the central meridian (60°E is printed further east). No rat."
+          },
+          {
+            "name": "Baghdad",
+            "color": "black",
+            "population": 2,
+            "port": false,
+            "infested": true,
+            "lab": null,
+            "marker": "inland-x",
+            "lat": 33.3,
+            "lon": 44.4,
+            "graticule": "West of Tehran, near the printed 40°E label. Population 2 square is west of the disc. Rat icon southwest of the disc."
+          },
+          {
+            "name": "Riyadh",
+            "color": "black",
+            "population": 2,
+            "port": false,
+            "infested": false,
+            "lab": null,
+            "marker": "inland-x",
+            "lat": 24.7,
+            "lon": 46.7,
+            "graticule": "South of Baghdad, north of the printed 20°N line. Population 2 square is east of the disc. No rat."
+          },
+          {
+            "name": "Delhi",
+            "color": "black",
+            "population": 1,
+            "port": false,
+            "infested": true,
+            "lab": null,
+            "marker": "inland-x",
+            "lat": 28.6,
+            "lon": 77.2,
+            "graticule": "South of 40°N and west of the printed 80°E label. Population 1 square is east of the disc. Rat icon southwest of the disc."
+          },
+          {
+            "name": "New Mumbai",
+            "color": "black",
+            "population": 2,
+            "port": true,
+            "infested": true,
+            "lab": null,
+            "marker": "anchor",
+            "lat": 19.1,
+            "lon": 72.9,
+            "graticule": "West coast of India, on the printed 20°N line, west of 80°E. Rat icon southeast of the disc."
+          },
+          {
+            "name": "Kolkata",
+            "color": "black",
+            "population": 1,
+            "port": true,
+            "infested": true,
+            "lab": null,
+            "marker": "anchor",
+            "lat": 22.6,
+            "lon": 88.4,
+            "graticule": "East coast, at the right edge of the sticker, slightly north of 20°N and east of 80°E. Population 1 square is below the disc. Rat icon southwest of the disc."
+          }
+        ],
+        "havens": [],
+        "printedRoutes": [
+          {
+            "from": "off-sticker west (Cairo)",
+            "to": "Baghdad",
+            "type": "supply_line",
+            "notes": "A black land line enters from the west edge and ends in the Baghdad disc. Cairo is the starting-board city in that direction; its name is not printed here."
+          },
+          {
+            "from": "Kolkata",
+            "to": "off-sticker south (Jakarta sea lane on door 63)",
+            "type": "sea_lane",
+            "notes": "A blue sea lane leaves the coast just south of the Kolkata disc and exits the bottom edge. It continues as the lane that runs down the west side of door 63 into Jakarta."
+          }
+        ],
+        "reconRoutes": [],
+        "redRegionLines": [],
+        "specialAreas": [
+          {
+            "name": "southern ocean tint",
+            "kind": "region-tint",
+            "notes": "The sea along the bottom edge, south of the Arabian Peninsula and India, is washed pink. That is a region tint, not a red region line."
+          }
+        ]
+      },
+      "mechanics": {
+        "addsCities": ["Tehran", "Baghdad", "Riyadh", "Delhi", "New Mumbai", "Kolkata"],
+        "notes": "All six cities are black. Baghdad, Delhi, New Mumbai, and Kolkata are printed infested. Only New Mumbai and Kolkata are ports. Baghdad is population 2, as are Riyadh and New Mumbai. Tehran, Delhi, and Kolkata are population 1. No recon box."
+      }
+    }
+  ],
+  "summary": "Middle East and India. Six black cities: Tehran 1 inland; Baghdad 2 inland and infested, with a supply line from the west edge; Riyadh 2 inland; Delhi 1 inland and infested; New Mumbai 2 port and infested; Kolkata 1 port and infested, with a sea lane leaving south toward Jakarta. No red region line and no recon box."
 }

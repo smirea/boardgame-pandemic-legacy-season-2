@@ -1,9 +1,9 @@
 {
-	"folder": 4,
-	"id": "folder-4",
-	"guid": "ff22f8",
-	"coverImage": "dossiers/folder-4/cover.jpg",
-	"coverText": null,
-	"doors": ["41", "42", "43", "44", "45", "46", "47", "48", "49", "50", "51", "52", "53", "54"],
-	"summary": "Folder 4 cover is the perforated door sheet for doors 41 through 54. The readable printing is those navy door numerals. Doors 41–50 are upright. Doors 51–54 are turned the same way as folder 3 doors 37–40: the first digit sits above the second, so 51 reads top to bottom."
+  "folder": 4,
+  "id": "folder-4",
+  "guid": "ff22f8",
+  "coverImage": "dossiers/folder-4/cover.jpg",
+  "coverText": null,
+  "doors": ["41", "42", "43", "44", "45", "46", "47", "48", "49", "50", "51", "52", "53", "54"],
+  "summary": "Folder 4 cover is the perforated door sheet for doors 41 through 54. The readable printing is those navy door numerals. Doors 41–50 are upright. Doors 51–54 are turned the same way as folder 3 doors 37–40: the first digit sits above the second, so 51 reads top to bottom."
 }

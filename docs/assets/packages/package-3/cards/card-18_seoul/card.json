@@ -1,59 +1,59 @@
 {
-	"package": 3,
-	"index": 18,
-	"cardId": 10717,
-	"printedCodes": {
-		"sideA": null,
-		"sideB": "P3-18b"
-	},
-	"title": "Seoul",
-	"category": "player-card",
-	"city": "Seoul",
-	"color": "red",
-	"coordinates": "37°33'57\"N 126°58'41\"E",
-	"port": true,
-	"copies": 1,
-	"hasImprovementSlot": false,
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideASummary": "Player deck back. Dark blue sunburst around a haven on the water. No text and no printed code.",
-	"sideBSummary": "Seoul, red Player card. Coordinates 37°33'57\"N 126°58'41\"E. The compass has an anchor, so the city is a port. One covered SEARCH box fills the map. The city name and coordinates repeat upside down along the bottom. Printed code P3-18b.",
-	"searchBoxes": [
-		{
-			"type": "search",
-			"stateRevealed": 2,
-			"isCompanion": false,
-			"companionName": null,
-			"opensDoors": [],
-			"effectSummary": "Rebels in Seoul want to throw off Utopia. Immediately draw a free sea lane from Seoul to another city."
-		}
-	],
-	"states": [
-		{
-			"state": 2,
-			"cardId": 10729,
-			"images": {
-				"sideA": "state-2-side-a.jpg",
-				"sideB": "state-2-side-b.jpg"
-			},
-			"summary": "Same Player back. The SEARCH box is scratched. Rebels in Seoul want to throw off Utopia. Immediately draw a free sea lane from Seoul to another city."
-		}
-	],
-	"mechanics": {
-		"opensDoors": [],
-		"destroys": false,
-		"rules": [
-			"Red Player card for Seoul. Port: the compass has an anchor.",
-			"One SEARCH box. State 2 is that box scratched. Side A stays the Player deck back.",
-			"When the box is scratched, immediately draw a free sea lane from Seoul to another city. The rebels line is the story. There is no named companion."
-		],
-		"notes": [
-			"Card id 10717. State 2 card id 10729. One copy.",
-			"Coordinates 37°33'57\"N 126°58'41\"E. Printed code P3-18b stays on the scratched face.",
-			"Goes to the reserve when the package is opened.",
-			"No door number is printed in the box."
-		]
-	}
+  "package": 3,
+  "index": 18,
+  "cardId": 10717,
+  "printedCodes": {
+    "sideA": null,
+    "sideB": "P3-18b"
+  },
+  "title": "Seoul",
+  "category": "player-card",
+  "city": "Seoul",
+  "color": "red",
+  "coordinates": "37°33'57\"N 126°58'41\"E",
+  "port": true,
+  "copies": 1,
+  "hasImprovementSlot": false,
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideASummary": "Player deck back. Dark blue sunburst around a haven on the water. No text and no printed code.",
+  "sideBSummary": "Seoul, red Player card. Coordinates 37°33'57\"N 126°58'41\"E. The compass has an anchor, so the city is a port. One covered SEARCH box fills the map. The city name and coordinates repeat upside down along the bottom. Printed code P3-18b.",
+  "searchBoxes": [
+    {
+      "type": "search",
+      "stateRevealed": 2,
+      "isCompanion": false,
+      "companionName": null,
+      "opensDoors": [],
+      "effectSummary": "Rebels in Seoul want to throw off Utopia. Immediately draw a free sea lane from Seoul to another city."
+    }
+  ],
+  "states": [
+    {
+      "state": 2,
+      "cardId": 10729,
+      "images": {
+        "sideA": "state-2-side-a.jpg",
+        "sideB": "state-2-side-b.jpg"
+      },
+      "summary": "Same Player back. The SEARCH box is scratched. Rebels in Seoul want to throw off Utopia. Immediately draw a free sea lane from Seoul to another city."
+    }
+  ],
+  "mechanics": {
+    "opensDoors": [],
+    "destroys": false,
+    "rules": [
+      "Red Player card for Seoul. Port: the compass has an anchor.",
+      "One SEARCH box. State 2 is that box scratched. Side A stays the Player deck back.",
+      "When the box is scratched, immediately draw a free sea lane from Seoul to another city. The rebels line is the story. There is no named companion."
+    ],
+    "notes": [
+      "Card id 10717. State 2 card id 10729. One copy.",
+      "Coordinates 37°33'57\"N 126°58'41\"E. Printed code P3-18b stays on the scratched face.",
+      "Goes to the reserve when the package is opened.",
+      "No door number is printed in the box."
+    ]
+  }
 }

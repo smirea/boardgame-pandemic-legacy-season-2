@@ -1,40 +1,40 @@
 {
-	"package": 3,
-	"index": 8,
-	"cardId": 10707,
-	"printedCodes": {
-		"sideA": null,
-		"sideB": "P3-08b"
-	},
-	"title": "Ho Chi Minh City",
-	"category": "player-card",
-	"city": "Ho Chi Minh City",
-	"color": "red",
-	"coordinates": "10°49'23\"N 106°37'47\"E",
-	"port": true,
-	"copies": 1,
-	"hasImprovementSlot": true,
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideASummary": "Player deck back. Dark blue sunburst around a haven on the water. No text and no printed code.",
-	"sideBSummary": "Ho Chi Minh City, red Player card. Coordinates 10°49'23\"N 106°37'47\"E. The compass has an anchor, so the city is a port. The map has a target marker and no scratch-off box. The city name and coordinates repeat upside down along the bottom. Printed code P3-08b.",
-	"searchBoxes": [],
-	"states": [],
-	"mechanics": {
-		"opensDoors": [],
-		"destroys": false,
-		"rules": [
-			"Red Player card for Ho Chi Minh City.",
-			"Port city: the compass is marked with an anchor.",
-			"No search box. Nothing on this card is scratched.",
-			"A dashed improvement slot is printed across the map."
-		],
-		"notes": [
-			"Card id 10707. One copy.",
-			"Printed code P3-08b is on side B only.",
-			"Goes to the reserve when Package 3 is opened. Jakarta is the only city this report places immediately."
-		]
-	}
+  "package": 3,
+  "index": 8,
+  "cardId": 10707,
+  "printedCodes": {
+    "sideA": null,
+    "sideB": "P3-08b"
+  },
+  "title": "Ho Chi Minh City",
+  "category": "player-card",
+  "city": "Ho Chi Minh City",
+  "color": "red",
+  "coordinates": "10°49'23\"N 106°37'47\"E",
+  "port": true,
+  "copies": 1,
+  "hasImprovementSlot": true,
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideASummary": "Player deck back. Dark blue sunburst around a haven on the water. No text and no printed code.",
+  "sideBSummary": "Ho Chi Minh City, red Player card. Coordinates 10°49'23\"N 106°37'47\"E. The compass has an anchor, so the city is a port. The map has a target marker and no scratch-off box. The city name and coordinates repeat upside down along the bottom. Printed code P3-08b.",
+  "searchBoxes": [],
+  "states": [],
+  "mechanics": {
+    "opensDoors": [],
+    "destroys": false,
+    "rules": [
+      "Red Player card for Ho Chi Minh City.",
+      "Port city: the compass is marked with an anchor.",
+      "No search box. Nothing on this card is scratched.",
+      "A dashed improvement slot is printed across the map."
+    ],
+    "notes": [
+      "Card id 10707. One copy.",
+      "Printed code P3-08b is on side B only.",
+      "Goes to the reserve when Package 3 is opened. Jakarta is the only city this report places immediately."
+    ]
+  }
 }

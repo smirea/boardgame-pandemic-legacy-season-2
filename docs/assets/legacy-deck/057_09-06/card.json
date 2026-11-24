@@ -1,46 +1,46 @@
 {
-	"sequence": 57,
-	"folder": "057_09-06",
-	"cardCode": "09-06",
-	"printedCodes": {
-		"sideA": null,
-		"sideB": "09-06b"
-	},
-	"title": "Cautious Approach",
-	"category": "rationed_event",
-	"month": "september",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "NONE",
-		"header": "",
-		"trigger": "",
-		"text": "",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "RATIONED EVENT",
-		"text": "CAUTIOUS APPROACH\n\nThe current player draws the next 4 Player cards, adding any City cards to their hand. Discard any other cards to the Player discard pile without effect.\n\nPlay at any time. Not an action.",
-		"footer": "Play at any time. Not an action.",
-		"scratchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"whenRead": "Drawn while continuing the Legacy deck at the end of the first September game, after the 09-05 pause. It is a Rationed Event, so it enters the reserve. It is not played when it comes off the Legacy deck.",
-		"triggers": ["Play at any time. Not an action."],
-		"opensDoors": [],
-		"opensPackages": [],
-		"destroys": [],
-		"addsToPool": ["Rationed Event: Cautious Approach (this card), to the reserve"],
-		"rules": [
-			"The current player draws the next 4 Player cards.",
-			"Add any City cards among them to their hand.",
-			"Discard any other cards to the Player discard pile without effect.",
-			"Play at any time. Not an action.",
-			"Discard after use. It counts toward the rationing-level pick."
-		],
-		"notes": "Side A is the shared rationed-event back and has no printed code. The screen title is CAUTIOUS APPROACH, with three gas-mask graphics. The draw is 4 Player cards."
-	}
+  "sequence": 57,
+  "folder": "057_09-06",
+  "cardCode": "09-06",
+  "printedCodes": {
+    "sideA": null,
+    "sideB": "09-06b"
+  },
+  "title": "Cautious Approach",
+  "category": "rationed_event",
+  "month": "september",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "NONE",
+    "header": "",
+    "trigger": "",
+    "text": "",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "RATIONED EVENT",
+    "text": "CAUTIOUS APPROACH\n\nThe current player draws the next 4 Player cards, adding any City cards to their hand. Discard any other cards to the Player discard pile without effect.\n\nPlay at any time. Not an action.",
+    "footer": "Play at any time. Not an action.",
+    "scratchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "whenRead": "Drawn while continuing the Legacy deck at the end of the first September game, after the 09-05 pause. It is a Rationed Event, so it enters the reserve. It is not played when it comes off the Legacy deck.",
+    "triggers": ["Play at any time. Not an action."],
+    "opensDoors": [],
+    "opensPackages": [],
+    "destroys": [],
+    "addsToPool": ["Rationed Event: Cautious Approach (this card), to the reserve"],
+    "rules": [
+      "The current player draws the next 4 Player cards.",
+      "Add any City cards among them to their hand.",
+      "Discard any other cards to the Player discard pile without effect.",
+      "Play at any time. Not an action.",
+      "Discard after use. It counts toward the rationing-level pick."
+    ],
+    "notes": "Side A is the shared rationed-event back and has no printed code. The screen title is CAUTIOUS APPROACH, with three gas-mask graphics. The draw is 4 Player cards."
+  }
 }

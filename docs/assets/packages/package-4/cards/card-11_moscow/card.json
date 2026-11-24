@@ -1,60 +1,60 @@
 {
-	"package": 4,
-	"index": 11,
-	"cardId": 10810,
-	"printedCodes": {
-		"sideA": null,
-		"sideB": "P4-13b"
-	},
-	"title": "Moscow",
-	"category": "player-card",
-	"city": "Moscow",
-	"color": "black",
-	"coordinates": "55°45'21\"N 37°37'2\"E",
-	"port": false,
-	"copies": 1,
-	"hasImprovementSlot": false,
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideASummary": "Player deck back. No printed text. State 2 side A is the same back.",
-	"sideBSummary": "Moscow, black, 55°45'21\"N 37°37'2\"E. Compass with no anchor. One covered SEARCH box. The name and coordinates repeat upside down along the bottom. P4-13b.",
-	"searchBoxes": [
-		{
-			"type": "search",
-			"stateRevealed": 2,
-			"isCompanion": false,
-			"companionName": null,
-			"opensDoors": [],
-			"effectSummary": "You may give 1 Player card in your hand to another player. The scratched story says locals still resent leaders who left decades ago for a Utopia in the east, and that a glow in that sky led the searchers to an old Soviet military facility at Smolensk. No door. The card does not say the other player must share your city, does not say this costs an action, and does not say to discard Moscow."
-		}
-	],
-	"states": [
-		{
-			"state": 2,
-			"cardId": 10717,
-			"images": {
-				"sideA": "state-2-side-a.jpg",
-				"sideB": "state-2-side-b.jpg"
-			},
-			"summary": "SEARCH reveals a story about leaders who left for a Utopia in the east and a lead to Smolensk, then the rule: you may give 1 Player card in your hand to another player. No companion name and no door. P4-13b stays on the scratched face. Side A is still the Player deck back."
-		}
-	],
-	"mechanics": {
-		"opensDoors": [],
-		"destroys": [],
-		"rules": [
-			"Black Player card for Moscow. Not a port. The frame is black and the compass has no anchor.",
-			"One SEARCH box. State 2 is the scratched face.",
-			"You may give 1 Player card in your hand to another player. The card names no range, no action cost, and no once-per-turn limit."
-		],
-		"notes": [
-			"Card id 10810. Scratch state card id 10717.",
-			"Coordinates are printed 55°45'21\"N 37°37'2\"E.",
-			"No improvement bullseye is printed. The scratch box covers the center.",
-			"The Utopia and Smolensk sentences are flavor. They do not open a door.",
-			"This is the only Moscow Player card. It goes to the reserve when the package is opened."
-		]
-	}
+  "package": 4,
+  "index": 11,
+  "cardId": 10810,
+  "printedCodes": {
+    "sideA": null,
+    "sideB": "P4-13b"
+  },
+  "title": "Moscow",
+  "category": "player-card",
+  "city": "Moscow",
+  "color": "black",
+  "coordinates": "55°45'21\"N 37°37'2\"E",
+  "port": false,
+  "copies": 1,
+  "hasImprovementSlot": false,
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideASummary": "Player deck back. No printed text. State 2 side A is the same back.",
+  "sideBSummary": "Moscow, black, 55°45'21\"N 37°37'2\"E. Compass with no anchor. One covered SEARCH box. The name and coordinates repeat upside down along the bottom. P4-13b.",
+  "searchBoxes": [
+    {
+      "type": "search",
+      "stateRevealed": 2,
+      "isCompanion": false,
+      "companionName": null,
+      "opensDoors": [],
+      "effectSummary": "You may give 1 Player card in your hand to another player. The scratched story says locals still resent leaders who left decades ago for a Utopia in the east, and that a glow in that sky led the searchers to an old Soviet military facility at Smolensk. No door. The card does not say the other player must share your city, does not say this costs an action, and does not say to discard Moscow."
+    }
+  ],
+  "states": [
+    {
+      "state": 2,
+      "cardId": 10717,
+      "images": {
+        "sideA": "state-2-side-a.jpg",
+        "sideB": "state-2-side-b.jpg"
+      },
+      "summary": "SEARCH reveals a story about leaders who left for a Utopia in the east and a lead to Smolensk, then the rule: you may give 1 Player card in your hand to another player. No companion name and no door. P4-13b stays on the scratched face. Side A is still the Player deck back."
+    }
+  ],
+  "mechanics": {
+    "opensDoors": [],
+    "destroys": [],
+    "rules": [
+      "Black Player card for Moscow. Not a port. The frame is black and the compass has no anchor.",
+      "One SEARCH box. State 2 is the scratched face.",
+      "You may give 1 Player card in your hand to another player. The card names no range, no action cost, and no once-per-turn limit."
+    ],
+    "notes": [
+      "Card id 10810. Scratch state card id 10717.",
+      "Coordinates are printed 55°45'21\"N 37°37'2\"E.",
+      "No improvement bullseye is printed. The scratch box covers the center.",
+      "The Utopia and Smolensk sentences are flavor. They do not open a door.",
+      "This is the only Moscow Player card. It goes to the reserve when the package is opened."
+    ]
+  }
 }

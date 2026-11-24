@@ -1,45 +1,45 @@
 {
-	"run": "tour-october",
-	"seed": 7,
-	"start": {
-		"scenario": "tour-october",
-		"stage": "tour-october"
-	},
-	"lastMonth": 10,
-	"passphrase": "playtest",
-	"port": 6230,
-	"signalPort": 8787,
-	"headed": false,
-	"players": [
-		{
-			"id": "vex",
-			"name": "Vex",
-			"persona": "personas/vex.md",
-			"memory": "memory/vex.md",
-			"harness": "api",
-			"provider": "grok",
-			"model": "grok-4.7-build-fast",
-			"effort": "medium"
-		},
-		{
-			"id": "sol",
-			"name": "Sol",
-			"persona": "personas/sol.md",
-			"memory": "memory/sol.md",
-			"harness": "api",
-			"provider": "grok",
-			"model": "grok-4.7-build-fast",
-			"effort": "medium"
-		},
-		{
-			"id": "kit",
-			"name": "Kit",
-			"persona": "personas/kit.md",
-			"memory": "memory/kit.md",
-			"harness": "api",
-			"provider": "grok",
-			"model": "grok-4.7-build-fast",
-			"effort": "medium"
-		}
-	]
+  "run": "tour-october",
+  "seed": 7,
+  "start": {
+    "scenario": "tour-october",
+    "stage": "tour-october"
+  },
+  "lastMonth": 10,
+  "passphrase": "playtest",
+  "port": 6230,
+  "signalPort": 8787,
+  "headed": false,
+  "players": [
+    {
+      "id": "vex",
+      "name": "Vex",
+      "persona": "personas/vex.md",
+      "memory": "memory/vex.md",
+      "harness": "api",
+      "provider": "grok",
+      "model": "grok-4.7-build-fast",
+      "effort": "medium"
+    },
+    {
+      "id": "sol",
+      "name": "Sol",
+      "persona": "personas/sol.md",
+      "memory": "memory/sol.md",
+      "harness": "api",
+      "provider": "grok",
+      "model": "grok-4.7-build-fast",
+      "effort": "medium"
+    },
+    {
+      "id": "kit",
+      "name": "Kit",
+      "persona": "personas/kit.md",
+      "memory": "memory/kit.md",
+      "harness": "api",
+      "provider": "grok",
+      "model": "grok-4.7-build-fast",
+      "effort": "medium"
+    }
+  ]
 }

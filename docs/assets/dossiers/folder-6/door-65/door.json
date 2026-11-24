@@ -1,56 +1,56 @@
 {
-	"door": "65",
-	"folder": 6,
-	"id": "door-65",
-	"guid": "0ac413",
-	"frontImage": "dossiers/folder-6/door-65/front.jpg",
-	"frontText": "Navy 65 centered on a yellow door card. Dashed cut-line border. No other printed text.",
-	"items": [
-		{
-			"id": "item-01",
-			"image": "dossiers/folder-6/door-65/item-01.jpg",
-			"count": 1,
-			"printedCode": null,
-			"category": "map-sticker",
-			"title": "Indian Ocean haven",
-			"placementTarget": "Board, in the Indian Ocean east of Africa, on the printed intersection of 0° and 60°E.",
-			"text": "Name and access\nthis haven and\nopen 11 the first\ntime you move\nhere.",
-			"mapDetails": {
-				"cities": [],
-				"havens": [
-					{
-						"name": "",
-						"population": 3,
-						"port": true,
-						"marker": "anchor",
-						"arrival": "Name and access\nthis haven and\nopen 11 the first\ntime you move\nhere.",
-						"lat": 0.0,
-						"lon": 60.0,
-						"graticule": "The anchor sits on the printed 0° parallel and on the printed 60°E meridian, which passes through the disc. The 60°E label is printed below the name plate.",
-						"nameState": "blank",
-						"namePlate": "Blank white name plate directly below the anchor, with a pointer up to the disc.",
-						"opens": "door 11"
-					}
-				],
-				"printedRoutes": [],
-				"reconRoutes": [],
-				"redRegionLines": [
-					"A vertical red line runs the full height of the ocean along the left side of the sticker, just east of the yellow African coast and west of the haven."
-				],
-				"specialAreas": [
-					{
-						"name": "eastern tint",
-						"kind": "region-tint",
-						"notes": "The right side of the ocean is washed pink where the sticker meets the Middle East sheet. Not a red region line. No sea lane is printed."
-					}
-				]
-			},
-			"mechanics": {
-				"onFirstMove": "Name and access this haven and open door 11.",
-				"opens": "door 11",
-				"notes": "Population 3. Port. Blank name. No printed sea lane and no recon box. The 11 is in a yellow door box."
-			}
-		}
-	],
-	"summary": "Indian Ocean haven on the equator at 60°E, population 3, blank name. The first move names it and opens door 11. A red region line runs north-south along the African coast, west of the haven. No sea lane and no recon box."
+  "door": "65",
+  "folder": 6,
+  "id": "door-65",
+  "guid": "0ac413",
+  "frontImage": "dossiers/folder-6/door-65/front.jpg",
+  "frontText": "Navy 65 centered on a yellow door card. Dashed cut-line border. No other printed text.",
+  "items": [
+    {
+      "id": "item-01",
+      "image": "dossiers/folder-6/door-65/item-01.jpg",
+      "count": 1,
+      "printedCode": null,
+      "category": "map-sticker",
+      "title": "Indian Ocean haven",
+      "placementTarget": "Board, in the Indian Ocean east of Africa, on the printed intersection of 0° and 60°E.",
+      "text": "Name and access\nthis haven and\nopen 11 the first\ntime you move\nhere.",
+      "mapDetails": {
+        "cities": [],
+        "havens": [
+          {
+            "name": "",
+            "population": 3,
+            "port": true,
+            "marker": "anchor",
+            "arrival": "Name and access\nthis haven and\nopen 11 the first\ntime you move\nhere.",
+            "lat": 0.0,
+            "lon": 60.0,
+            "graticule": "The anchor sits on the printed 0° parallel and on the printed 60°E meridian, which passes through the disc. The 60°E label is printed below the name plate.",
+            "nameState": "blank",
+            "namePlate": "Blank white name plate directly below the anchor, with a pointer up to the disc.",
+            "opens": "door 11"
+          }
+        ],
+        "printedRoutes": [],
+        "reconRoutes": [],
+        "redRegionLines": [
+          "A vertical red line runs the full height of the ocean along the left side of the sticker, just east of the yellow African coast and west of the haven."
+        ],
+        "specialAreas": [
+          {
+            "name": "eastern tint",
+            "kind": "region-tint",
+            "notes": "The right side of the ocean is washed pink where the sticker meets the Middle East sheet. Not a red region line. No sea lane is printed."
+          }
+        ]
+      },
+      "mechanics": {
+        "onFirstMove": "Name and access this haven and open door 11.",
+        "opens": "door 11",
+        "notes": "Population 3. Port. Blank name. No printed sea lane and no recon box. The 11 is in a yellow door box."
+      }
+    }
+  ],
+  "summary": "Indian Ocean haven on the equator at 60°E, population 3, blank name. The first move names it and opens door 11. A red region line runs north-south along the African coast, west of the haven. No sea lane and no recon box."
 }

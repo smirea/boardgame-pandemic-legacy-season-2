@@ -1,40 +1,40 @@
 {
-	"sequence": 38,
-	"folder": "038_05-03",
-	"cardCode": "05-03",
-	"printedCodes": {
-		"sideA": "05-03a",
-		"sideB": "05-03b"
-	},
-	"title": "RIGHT NOW!",
-	"category": "legacy_pause",
-	"month": "may",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "PAUSE",
-		"header": "PAUSE",
-		"trigger": "Draw this card and read the other side during step 2 at the end of your first game in May.",
-		"text": "PAUSE\nDRAW THIS CARD AND READ THE OTHER SIDE DURING STEP 2 AT THE END OF YOUR FIRST GAME IN MAY.",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "RIGHT NOW!",
-		"text": "Open the following doors:\n31    36",
-		"footer": "",
-		"scratchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"whenRead": "PAUSE. Drawn during step 2 of May setup, which stops on this card. Read side B during step 2 at the end of the first May game, then continue the Legacy deck.",
-		"triggers": [],
-		"opensDoors": ["31", "36"],
-		"opensPackages": [],
-		"destroys": [],
-		"addsToPool": [],
-		"rules": ["Open doors 31 and 36 immediately."],
-		"notes": "Both ids are in white boxes with red type. What is inside them is not printed on this card."
-	}
+  "sequence": 38,
+  "folder": "038_05-03",
+  "cardCode": "05-03",
+  "printedCodes": {
+    "sideA": "05-03a",
+    "sideB": "05-03b"
+  },
+  "title": "RIGHT NOW!",
+  "category": "legacy_pause",
+  "month": "may",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "PAUSE",
+    "header": "PAUSE",
+    "trigger": "Draw this card and read the other side during step 2 at the end of your first game in May.",
+    "text": "PAUSE\nDRAW THIS CARD AND READ THE OTHER SIDE DURING STEP 2 AT THE END OF YOUR FIRST GAME IN MAY.",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "RIGHT NOW!",
+    "text": "Open the following doors:\n31    36",
+    "footer": "",
+    "scratchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "whenRead": "PAUSE. Drawn during step 2 of May setup, which stops on this card. Read side B during step 2 at the end of the first May game, then continue the Legacy deck.",
+    "triggers": [],
+    "opensDoors": ["31", "36"],
+    "opensPackages": [],
+    "destroys": [],
+    "addsToPool": [],
+    "rules": ["Open doors 31 and 36 immediately."],
+    "notes": "Both ids are in white boxes with red type. What is inside them is not printed on this card."
+  }
 }

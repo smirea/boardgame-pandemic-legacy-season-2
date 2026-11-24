@@ -1,66 +1,66 @@
 {
-	"sequence": 47,
-	"folder": "047_08-01",
-	"cardCode": "08-01",
-	"printedCodes": {
-		"sideA": "08-01a",
-		"sideB": "08-01b"
-	},
-	"title": "PERIMETER REPORT",
-	"category": "legacy_stop",
-	"month": "august",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "STOP",
-		"header": "STOP",
-		"trigger": "Draw this card and read the other side during step 2 of the setup of your first game in August.",
-		"text": "STOP\nDRAW THIS CARD AND READ THE OTHER SIDE DURING STEP 2 OF THE SETUP OF YOUR FIRST GAME IN AUGUST.",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "PERIMETER REPORT",
-		"text": "If you have not opened 62 (the Middle East), scratch the box below.",
-		"footer": "Destroy this card after resolving it.",
-		"scratchBoxes": [
-			{
-				"index": 1,
-				"instruction": "Scratch if 62 (the Middle East) has not been opened.",
-				"coveredOnBase": true,
-				"revealedInState": 2
-			}
-		]
-	},
-	"states": [
-		{
-			"state": 2,
-			"images": {
-				"sideA": "state-2-side-a.jpg",
-				"sideB": "state-2-side-b.jpg"
-			},
-			"revealedCondition": "Box scratched because 62 (the Middle East) was still sealed.",
-			"revealedText": "Our scouts report that the Hollow Men have raided the Middle East. We quickly mobilized... but too late.\n\nOpen Package 2 and follow the instructions inside. (This does not complete any objectives.)\n\nDestroy the \"Renewal\" Unrationed Event card inside."
-		}
-	],
-	"mechanics": {
-		"whenRead": "STOP. Draw and read during step 2 of the setup of the first game in August.",
-		"triggers": ["62 (the Middle East) has not been opened: scratch the box."],
-		"opensDoors": [],
-		"opensPackages": ["2, only if 62 is still sealed"],
-		"destroys": [
-			"The \"Renewal\" Unrationed Event inside Package 2, if the box is scratched.",
-			"This card, after resolving it."
-		],
-		"addsToPool": [],
-		"rules": [
-			"If 62 is already open, scratch nothing.",
-			"If 62 is sealed, open Package 2 and follow the instructions inside.",
-			"Opening Package 2 this way does not complete any objectives.",
-			"Destroy the Unrationed Event named Renewal that is inside the package.",
-			"Destroy this card after resolving it."
-		],
-		"notes": "\"Open Package 2\" and \"Destroy the \\\"Renewal\\\" Unrationed Event card inside.\" are bold. 62 is in a red box. Side A is the same Stop face in state 2. The card does not itself say to open 62."
-	}
+  "sequence": 47,
+  "folder": "047_08-01",
+  "cardCode": "08-01",
+  "printedCodes": {
+    "sideA": "08-01a",
+    "sideB": "08-01b"
+  },
+  "title": "PERIMETER REPORT",
+  "category": "legacy_stop",
+  "month": "august",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "STOP",
+    "header": "STOP",
+    "trigger": "Draw this card and read the other side during step 2 of the setup of your first game in August.",
+    "text": "STOP\nDRAW THIS CARD AND READ THE OTHER SIDE DURING STEP 2 OF THE SETUP OF YOUR FIRST GAME IN AUGUST.",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "PERIMETER REPORT",
+    "text": "If you have not opened 62 (the Middle East), scratch the box below.",
+    "footer": "Destroy this card after resolving it.",
+    "scratchBoxes": [
+      {
+        "index": 1,
+        "instruction": "Scratch if 62 (the Middle East) has not been opened.",
+        "coveredOnBase": true,
+        "revealedInState": 2
+      }
+    ]
+  },
+  "states": [
+    {
+      "state": 2,
+      "images": {
+        "sideA": "state-2-side-a.jpg",
+        "sideB": "state-2-side-b.jpg"
+      },
+      "revealedCondition": "Box scratched because 62 (the Middle East) was still sealed.",
+      "revealedText": "Our scouts report that the Hollow Men have raided the Middle East. We quickly mobilized... but too late.\n\nOpen Package 2 and follow the instructions inside. (This does not complete any objectives.)\n\nDestroy the \"Renewal\" Unrationed Event card inside."
+    }
+  ],
+  "mechanics": {
+    "whenRead": "STOP. Draw and read during step 2 of the setup of the first game in August.",
+    "triggers": ["62 (the Middle East) has not been opened: scratch the box."],
+    "opensDoors": [],
+    "opensPackages": ["2, only if 62 is still sealed"],
+    "destroys": [
+      "The \"Renewal\" Unrationed Event inside Package 2, if the box is scratched.",
+      "This card, after resolving it."
+    ],
+    "addsToPool": [],
+    "rules": [
+      "If 62 is already open, scratch nothing.",
+      "If 62 is sealed, open Package 2 and follow the instructions inside.",
+      "Opening Package 2 this way does not complete any objectives.",
+      "Destroy the Unrationed Event named Renewal that is inside the package.",
+      "Destroy this card after resolving it."
+    ],
+    "notes": "\"Open Package 2\" and \"Destroy the \\\"Renewal\\\" Unrationed Event card inside.\" are bold. 62 is in a red box. Side A is the same Stop face in state 2. The card does not itself say to open 62."
+  }
 }

@@ -1,21 +1,21 @@
 {
-	"id": "sticker-03",
-	"package": 7,
-	"printedCode": null,
-	"name": "Build Satellite Tower",
-	"category": "player-reference-action",
-	"placementTarget": "Back of each player reference card, with the Transmit strip. The instruction sticker says to place it there.",
-	"costProductionUnits": null,
-	"copies": 1,
-	"image": "sticker-03.jpg",
-	"text": "BUILD SATELLITE TOWER\nSpend 2 Supply cubes to build a satellite tower in your city.\n\n[satellite-dish icon]",
-	"mechanics": {
-		"timing": "Action, on your turn, in a city.",
-		"effect": "Spend 2 Supply cubes to build a satellite tower in your city.",
-		"restrictions": [
-			"This strip is the short action reminder. The full rule, including paying from your Character card and moving an existing tower when none are left, is Rule O.",
-			"The Kinshasa Technician search reduces this cost by 1 Supply cube while that card is in hand."
-		],
-		"opensDoors": []
-	}
+  "id": "sticker-03",
+  "package": 7,
+  "printedCode": null,
+  "name": "Build Satellite Tower",
+  "category": "player-reference-action",
+  "placementTarget": "Back of each player reference card, with the Transmit strip. The instruction sticker says to place it there.",
+  "costProductionUnits": null,
+  "copies": 1,
+  "image": "sticker-03.jpg",
+  "text": "BUILD SATELLITE TOWER\nSpend 2 Supply cubes to build a satellite tower in your city.\n\n[satellite-dish icon]",
+  "mechanics": {
+    "timing": "Action, on your turn, in a city.",
+    "effect": "Spend 2 Supply cubes to build a satellite tower in your city.",
+    "restrictions": [
+      "This strip is the short action reminder. The full rule, including paying from your Character card and moving an existing tower when none are left, is Rule O.",
+      "The Kinshasa Technician search reduces this cost by 1 Supply cube while that card is in hand."
+    ],
+    "opensDoors": []
+  }
 }

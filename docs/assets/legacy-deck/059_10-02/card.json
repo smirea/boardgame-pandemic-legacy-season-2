@@ -1,42 +1,42 @@
 {
-	"sequence": 59,
-	"folder": "059_10-02",
-	"cardCode": "10-02",
-	"printedCodes": {
-		"sideA": "10-02a",
-		"sideB": "10-02b"
-	},
-	"title": "Journal Entry",
-	"category": "legacy_journal",
-	"month": "october",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "NONE",
-		"header": "Journal Entry",
-		"trigger": "",
-		"text": "So far from our homes. So much chaos. So much hatred toward us. Even still. Not sure how much longer we can do this. Not sure humanity is worth it.\n\nStill, we have found a way to use the satellite towers against the Hollow Men. By broadcasting on their frequencies, we can lead them astray, which should help us move around more freely.\n\nIf we get them onto our havens, we think we can persuade some of them to join our cause.",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "FROM THE ARCHIVES",
-		"text": "OCTOBER, YEAR 1\n\nFive months on these \"havens.\" I understand why, but I still miss home. We hear stories of a plague on the mainland. If the world collapses, can we leave? I hope my children will soon return to the home we left.\n\nI left a note there for them to read when we return. For now, they cry every night, but soon all will feel normal... as normal as it can be.",
-		"footer": "Keep papers like this in the reserve.",
-		"scratchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"whenRead": "Continue the October setup Legacy-deck reading, immediately after 10-01.",
-		"triggers": [],
-		"opensDoors": [],
-		"opensPackages": [],
-		"destroys": [],
-		"addsToPool": [],
-		"rules": [
-			"Keep the card in the reserve. No rules change. The broadcast-and-defect idea is flavor here; the defect rules are on 10-04 and 10-05."
-		],
-		"notes": "A handwritten signature under the Year 1 note is not transcribed. The journal's \"havens\" in the archive is in quotation marks: these \"havens.\""
-	}
+  "sequence": 59,
+  "folder": "059_10-02",
+  "cardCode": "10-02",
+  "printedCodes": {
+    "sideA": "10-02a",
+    "sideB": "10-02b"
+  },
+  "title": "Journal Entry",
+  "category": "legacy_journal",
+  "month": "october",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "NONE",
+    "header": "Journal Entry",
+    "trigger": "",
+    "text": "So far from our homes. So much chaos. So much hatred toward us. Even still. Not sure how much longer we can do this. Not sure humanity is worth it.\n\nStill, we have found a way to use the satellite towers against the Hollow Men. By broadcasting on their frequencies, we can lead them astray, which should help us move around more freely.\n\nIf we get them onto our havens, we think we can persuade some of them to join our cause.",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "FROM THE ARCHIVES",
+    "text": "OCTOBER, YEAR 1\n\nFive months on these \"havens.\" I understand why, but I still miss home. We hear stories of a plague on the mainland. If the world collapses, can we leave? I hope my children will soon return to the home we left.\n\nI left a note there for them to read when we return. For now, they cry every night, but soon all will feel normal... as normal as it can be.",
+    "footer": "Keep papers like this in the reserve.",
+    "scratchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "whenRead": "Continue the October setup Legacy-deck reading, immediately after 10-01.",
+    "triggers": [],
+    "opensDoors": [],
+    "opensPackages": [],
+    "destroys": [],
+    "addsToPool": [],
+    "rules": [
+      "Keep the card in the reserve. No rules change. The broadcast-and-defect idea is flavor here; the defect rules are on 10-04 and 10-05."
+    ],
+    "notes": "A handwritten signature under the Year 1 note is not transcribed. The journal's \"havens\" in the archive is in quotation marks: these \"havens.\""
+  }
 }

@@ -1,19 +1,22 @@
 {
-	"id": "sticker-07",
-	"package": 3,
-	"guid": "e8045e",
-	"printedCode": null,
-	"name": "Player reference instruction",
-	"category": "placement-instruction",
-	"placementTarget": "Instruction for sticker-06. It is not itself a rule or a board sticker.",
-	"costProductionUnits": null,
-	"copies": 1,
-	"image": "sticker-07.jpg",
-	"summary": "Place this sticker on the back of each player reference card. That sticker is the Build Shelter aid, sticker-06. No title and no printed code.",
-	"mechanics": {
-		"timing": "When the package's stickers are applied.",
-		"effect": "Mount the Build Shelter player-aid sticker on the back of every player reference card.",
-		"restrictions": ["This image is only the mounting line.", "No door, no cost, and no printed code."],
-		"opensDoors": []
-	}
+  "id": "sticker-07",
+  "package": 3,
+  "guid": "e8045e",
+  "printedCode": null,
+  "name": "Player reference instruction",
+  "category": "placement-instruction",
+  "placementTarget": "Instruction for sticker-06. It is not itself a rule or a board sticker.",
+  "costProductionUnits": null,
+  "copies": 1,
+  "image": "sticker-07.jpg",
+  "summary": "Place this sticker on the back of each player reference card. That sticker is the Build Shelter aid, sticker-06. No title and no printed code.",
+  "mechanics": {
+    "timing": "When the package's stickers are applied.",
+    "effect": "Mount the Build Shelter player-aid sticker on the back of every player reference card.",
+    "restrictions": [
+      "This image is only the mounting line.",
+      "No door, no cost, and no printed code."
+    ],
+    "opensDoors": []
+  }
 }

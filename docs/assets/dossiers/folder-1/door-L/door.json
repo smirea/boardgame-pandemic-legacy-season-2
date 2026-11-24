@@ -1,32 +1,32 @@
 {
-	"door": "L",
-	"folder": 1,
-	"frontImage": "front.jpg",
-	"frontText": "L",
-	"items": [
-		{
-			"id": "item-01_rule-l",
-			"image": "item-01_rule-l.jpg",
-			"count": 1,
-			"printedCode": "L",
-			"category": "action_sticker",
-			"title": "Search",
-			"placementTarget": "Rulebook page 12, slot L (New Actions, left column, third)",
-			"text": "SEARCH\nScratch off one box on a City card in your hand and read its instructions. (Keep the card in your hand.)\nYou must be in the city matching the card you scratch off to do this action.\nIf you reveal a companion, their power works for this and future games. Otherwise, do the effect shown by the search immediately. It has no further effect in this or any future game.",
-			"tables": [],
-			"mechanics": {
-				"opensDoors": [],
-				"opensPackages": [],
-				"rules": [
-					"Scratch exactly one box on a City card you are holding.",
-					"You must be standing in the city named on that card.",
-					"The card stays in your hand.",
-					"A revealed companion keeps its power for this game and later games.",
-					"Any other revealed effect is resolved immediately and does not persist."
-				],
-				"effect": "One-shot city-card search, except companions, which are permanent."
-			}
-		}
-	],
-	"summary": "Action: in the matching city, scratch one box on a City card in your hand and keep the card. A companion's power lasts for future games. Any other search result happens once, immediately."
+  "door": "L",
+  "folder": 1,
+  "frontImage": "front.jpg",
+  "frontText": "L",
+  "items": [
+    {
+      "id": "item-01_rule-l",
+      "image": "item-01_rule-l.jpg",
+      "count": 1,
+      "printedCode": "L",
+      "category": "action_sticker",
+      "title": "Search",
+      "placementTarget": "Rulebook page 12, slot L (New Actions, left column, third)",
+      "text": "SEARCH\nScratch off one box on a City card in your hand and read its instructions. (Keep the card in your hand.)\nYou must be in the city matching the card you scratch off to do this action.\nIf you reveal a companion, their power works for this and future games. Otherwise, do the effect shown by the search immediately. It has no further effect in this or any future game.",
+      "tables": [],
+      "mechanics": {
+        "opensDoors": [],
+        "opensPackages": [],
+        "rules": [
+          "Scratch exactly one box on a City card you are holding.",
+          "You must be standing in the city named on that card.",
+          "The card stays in your hand.",
+          "A revealed companion keeps its power for this game and later games.",
+          "Any other revealed effect is resolved immediately and does not persist."
+        ],
+        "effect": "One-shot city-card search, except companions, which are permanent."
+      }
+    }
+  ],
+  "summary": "Action: in the matching city, scratch one box on a City card in your hand and keep the card. A companion's power lasts for future games. Any other search result happens once, immediately."
 }

@@ -1,44 +1,44 @@
 {
-	"sequence": 16,
-	"folder": "016_02-05",
-	"cardCode": "02-05",
-	"printedCodes": {
-		"sideA": "02-05a",
-		"sideB": "02-05b"
-	},
-	"title": "Connect 2 new cities to the grid",
-	"category": "objective",
-	"month": "february",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "NONE",
-		"header": "",
-		"trigger": "",
-		"text": "",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "OBJECTIVE",
-		"text": "Connect 2 new cities to the grid.\n\n0\n1\n2\n\nAdd this card to your pool of objectives.",
-		"footer": "",
-		"scratchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"whenRead": "The second new February objective, drawn with 02-04.",
-		"triggers": [],
-		"opensDoors": [],
-		"opensPackages": [],
-		"destroys": [],
-		"addsToPool": ["Connect 2 new cities to the grid"],
-		"rules": [
-			"Objective: connect 2 new cities to the grid.",
-			"Vertical progress track of three circles, numbered 0, 1, 2 from bottom to top.",
-			"Add this card to the pool of objectives."
-		],
-		"notes": "Yellow OBJECTIVE label and yellow star. Not labeled mandatory. Side A is the objective-card back."
-	}
+  "sequence": 16,
+  "folder": "016_02-05",
+  "cardCode": "02-05",
+  "printedCodes": {
+    "sideA": "02-05a",
+    "sideB": "02-05b"
+  },
+  "title": "Connect 2 new cities to the grid",
+  "category": "objective",
+  "month": "february",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "NONE",
+    "header": "",
+    "trigger": "",
+    "text": "",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "OBJECTIVE",
+    "text": "Connect 2 new cities to the grid.\n\n0\n1\n2\n\nAdd this card to your pool of objectives.",
+    "footer": "",
+    "scratchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "whenRead": "The second new February objective, drawn with 02-04.",
+    "triggers": [],
+    "opensDoors": [],
+    "opensPackages": [],
+    "destroys": [],
+    "addsToPool": ["Connect 2 new cities to the grid"],
+    "rules": [
+      "Objective: connect 2 new cities to the grid.",
+      "Vertical progress track of three circles, numbered 0, 1, 2 from bottom to top.",
+      "Add this card to the pool of objectives."
+    ],
+    "notes": "Yellow OBJECTIVE label and yellow star. Not labeled mandatory. Side A is the objective-card back."
+  }
 }

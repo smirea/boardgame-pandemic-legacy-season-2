@@ -1,45 +1,45 @@
 {
-	"sequence": 14,
-	"folder": "014_02-03",
-	"cardCode": "02-03",
-	"printedCodes": {
-		"sideA": "02-03a",
-		"sideB": "02-03b"
-	},
-	"title": "NEW PRIORITIES",
-	"category": "legacy_instruction",
-	"month": "february",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "CONTINUE",
-		"header": "KEEP DRAWING",
-		"trigger": "",
-		"text": "Draw and read the other side of this card.",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "NEW PRIORITIES",
-		"text": "DESTROY THE FOLLOWING OBJECTIVE:\n• RECON NORTH AMERICA\nNew objectives follow.\nWe still need to complete 2 objectives.\nRemember to place Supply cubes in the stockpile as shown on the projection calendar on the board (33 for February).\nAlso, as you complete months, you can cross them off the projected supplies calendar (on the board) to help you keep track of where you are in the campaign.",
-		"footer": "",
-		"scratchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"whenRead": "During the first February setup draw, after the journal/archive card 02-02.",
-		"triggers": [],
-		"opensDoors": [],
-		"opensPackages": [],
-		"destroys": ["RECON NORTH AMERICA objective (01-05)"],
-		"addsToPool": [],
-		"rules": [
-			"Destroy the RECON NORTH AMERICA objective.",
-			"New objectives follow (02-04 and 02-05). February still requires 2 objectives to win.",
-			"Place Supply cubes in the stockpile from the projection calendar: 33 for February.",
-			"Players may cross completed months off the projected supplies calendar on the board."
-		],
-		"notes": ""
-	}
+  "sequence": 14,
+  "folder": "014_02-03",
+  "cardCode": "02-03",
+  "printedCodes": {
+    "sideA": "02-03a",
+    "sideB": "02-03b"
+  },
+  "title": "NEW PRIORITIES",
+  "category": "legacy_instruction",
+  "month": "february",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "CONTINUE",
+    "header": "KEEP DRAWING",
+    "trigger": "",
+    "text": "Draw and read the other side of this card.",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "NEW PRIORITIES",
+    "text": "DESTROY THE FOLLOWING OBJECTIVE:\n• RECON NORTH AMERICA\nNew objectives follow.\nWe still need to complete 2 objectives.\nRemember to place Supply cubes in the stockpile as shown on the projection calendar on the board (33 for February).\nAlso, as you complete months, you can cross them off the projected supplies calendar (on the board) to help you keep track of where you are in the campaign.",
+    "footer": "",
+    "scratchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "whenRead": "During the first February setup draw, after the journal/archive card 02-02.",
+    "triggers": [],
+    "opensDoors": [],
+    "opensPackages": [],
+    "destroys": ["RECON NORTH AMERICA objective (01-05)"],
+    "addsToPool": [],
+    "rules": [
+      "Destroy the RECON NORTH AMERICA objective.",
+      "New objectives follow (02-04 and 02-05). February still requires 2 objectives to win.",
+      "Place Supply cubes in the stockpile from the projection calendar: 33 for February.",
+      "Players may cross completed months off the projected supplies calendar on the board."
+    ],
+    "notes": ""
+  }
 }

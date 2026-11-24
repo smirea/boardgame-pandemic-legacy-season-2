@@ -1,13 +1,13 @@
 {
-	"name": "@repo/game",
-	"private": true,
-	"type": "module",
-	"exports": {
-		".": "./src/index.ts",
-		"./package.json": "./package.json"
-	},
-	"dependencies": {
-		"immer": "^11.2.10",
-		"xstate": "^5.33.4"
-	}
+  "name": "@repo/game",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "immer": "^11.2.10",
+    "xstate": "^5.33.4"
+  }
 }

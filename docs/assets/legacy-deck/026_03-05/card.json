@@ -1,44 +1,44 @@
 {
-	"sequence": 26,
-	"folder": "026_03-05",
-	"cardCode": "03-05",
-	"printedCodes": {
-		"sideA": "03-05a",
-		"sideB": "03-05b"
-	},
-	"title": "Access a lost haven",
-	"category": "objective",
-	"month": "march",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "NONE",
-		"header": "",
-		"trigger": "",
-		"text": "",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "OBJECTIVE",
-		"text": "Access a lost haven.",
-		"footer": "Add this card to your pool of objectives. Destroy it at the end of the game in which you complete the objective.",
-		"scratchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"whenRead": "Continue the March setup Legacy-deck reading, after 03-04.",
-		"triggers": [],
-		"opensDoors": [],
-		"opensPackages": [],
-		"destroys": ["This objective, at the end of the game in which it is completed."],
-		"addsToPool": ["Objective: Access a lost haven"],
-		"rules": [
-			"Add this card to the objective pool.",
-			"Complete it by accessing a lost haven.",
-			"Destroy it at the end of the game in which you complete the objective."
-		],
-		"notes": "Side A is the objective-card back and carries 03-05a. The face text is printed sideways relative to that code."
-	}
+  "sequence": 26,
+  "folder": "026_03-05",
+  "cardCode": "03-05",
+  "printedCodes": {
+    "sideA": "03-05a",
+    "sideB": "03-05b"
+  },
+  "title": "Access a lost haven",
+  "category": "objective",
+  "month": "march",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "NONE",
+    "header": "",
+    "trigger": "",
+    "text": "",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "OBJECTIVE",
+    "text": "Access a lost haven.",
+    "footer": "Add this card to your pool of objectives. Destroy it at the end of the game in which you complete the objective.",
+    "scratchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "whenRead": "Continue the March setup Legacy-deck reading, after 03-04.",
+    "triggers": [],
+    "opensDoors": [],
+    "opensPackages": [],
+    "destroys": ["This objective, at the end of the game in which it is completed."],
+    "addsToPool": ["Objective: Access a lost haven"],
+    "rules": [
+      "Add this card to the objective pool.",
+      "Complete it by accessing a lost haven.",
+      "Destroy it at the end of the game in which you complete the objective."
+    ],
+    "notes": "Side A is the objective-card back and carries 03-05a. The face text is printed sideways relative to that code."
+  }
 }

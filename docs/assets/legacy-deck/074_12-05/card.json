@@ -1,49 +1,49 @@
 {
-	"sequence": 74,
-	"folder": "074_12-05",
-	"cardCode": "12-05",
-	"printedCodes": {
-		"sideA": "12-05a",
-		"sideB": "12-05b"
-	},
-	"title": "At Last",
-	"category": "legacy_stop",
-	"month": "december",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "STOP",
-		"header": "STOP",
-		"trigger": "DRAW THIS CARD AFTER STEP 4 OF THE GAME END IF YOU WIN IN DECEMBER OR LOSE YOUR SECOND GAME IN DECEMBER.",
-		"summary": "Stop. Draw this card after step 4 of Game End if you win in December or lose your second game in December.",
-		"text": "STOP\n\nDRAW THIS CARD AFTER STEP 4 OF THE GAME END IF YOU WIN IN DECEMBER OR LOSE YOUR SECOND GAME IN DECEMBER.",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "AT LAST",
-		"summary": "The campaign is over, and humanity's fate was in the players' hands. Look at the next two cards, then calculate the score to see what happens to the world.",
-		"text": "It's over. The fate of humanity was in your hands.\n\nLook at the following two cards to see what happens next, then calculate your score to determine the ultimate fate of your world.",
-		"footer": "",
-		"scratchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"whenRead": "Leave this face undrawn during December setup. Draw it after step 4 of Game End when December is won, or when the second December game is lost. Do not read it after a first December loss.",
-		"triggers": [
-			"After step 4 of Game End if you win in December",
-			"After step 4 of Game End if you lose your second game in December"
-		],
-		"opensDoors": [],
-		"opensPackages": [],
-		"destroys": [],
-		"addsToPool": [],
-		"rules": [
-			"Do not draw this card after a first December loss.",
-			"Look at the next two cards, 12-06 (failed to deliver) and 12-07 (delivered the sample), and read the one that matches the outcome.",
-			"Then calculate the campaign score on 12-08 and read the matching ending tier on 12-09 through 12-12."
-		],
-		"notes": "Side B does not name 12-06 and 12-07. They are the next two cards in the deck. Scoring is 12-08. The tier cards split by whether the sample was delivered."
-	}
+  "sequence": 74,
+  "folder": "074_12-05",
+  "cardCode": "12-05",
+  "printedCodes": {
+    "sideA": "12-05a",
+    "sideB": "12-05b"
+  },
+  "title": "At Last",
+  "category": "legacy_stop",
+  "month": "december",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "STOP",
+    "header": "STOP",
+    "trigger": "DRAW THIS CARD AFTER STEP 4 OF THE GAME END IF YOU WIN IN DECEMBER OR LOSE YOUR SECOND GAME IN DECEMBER.",
+    "summary": "Stop. Draw this card after step 4 of Game End if you win in December or lose your second game in December.",
+    "text": "STOP\n\nDRAW THIS CARD AFTER STEP 4 OF THE GAME END IF YOU WIN IN DECEMBER OR LOSE YOUR SECOND GAME IN DECEMBER.",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "AT LAST",
+    "summary": "The campaign is over, and humanity's fate was in the players' hands. Look at the next two cards, then calculate the score to see what happens to the world.",
+    "text": "It's over. The fate of humanity was in your hands.\n\nLook at the following two cards to see what happens next, then calculate your score to determine the ultimate fate of your world.",
+    "footer": "",
+    "scratchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "whenRead": "Leave this face undrawn during December setup. Draw it after step 4 of Game End when December is won, or when the second December game is lost. Do not read it after a first December loss.",
+    "triggers": [
+      "After step 4 of Game End if you win in December",
+      "After step 4 of Game End if you lose your second game in December"
+    ],
+    "opensDoors": [],
+    "opensPackages": [],
+    "destroys": [],
+    "addsToPool": [],
+    "rules": [
+      "Do not draw this card after a first December loss.",
+      "Look at the next two cards, 12-06 (failed to deliver) and 12-07 (delivered the sample), and read the one that matches the outcome.",
+      "Then calculate the campaign score on 12-08 and read the matching ending tier on 12-09 through 12-12."
+    ],
+    "notes": "Side B does not name 12-06 and 12-07. They are the next two cards in the deck. Scoring is 12-08. The tier cards split by whether the sample was delivered."
+  }
 }

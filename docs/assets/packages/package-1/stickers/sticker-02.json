@@ -1,24 +1,24 @@
 {
-	"id": "sticker-02",
-	"package": 1,
-	"guid": "0fd52e",
-	"printedCode": null,
-	"name": "Impatient",
-	"category": "scar",
-	"placementTarget": "Character card",
-	"costProductionUnits": null,
-	"copies": 1,
-	"image": "sticker-02.jpg",
-	"summary": "Impatient: after you do the Search action, you must discard the card you just searched.",
-	"mechanics": {
-		"timing": "After the Search action. Permanent while the sticker is on the character. The sticker does not print when it is gained.",
-		"effect": "After you Search, discard the City card you just scratched.",
-		"restrictions": [
-			"The discard is mandatory",
-			"It happens after the Search action, so the scratched box is still resolved",
-			"Only the card just searched is discarded",
-			"No production cost is printed"
-		],
-		"opensDoors": []
-	}
+  "id": "sticker-02",
+  "package": 1,
+  "guid": "0fd52e",
+  "printedCode": null,
+  "name": "Impatient",
+  "category": "scar",
+  "placementTarget": "Character card",
+  "costProductionUnits": null,
+  "copies": 1,
+  "image": "sticker-02.jpg",
+  "summary": "Impatient: after you do the Search action, you must discard the card you just searched.",
+  "mechanics": {
+    "timing": "After the Search action. Permanent while the sticker is on the character. The sticker does not print when it is gained.",
+    "effect": "After you Search, discard the City card you just scratched.",
+    "restrictions": [
+      "The discard is mandatory",
+      "It happens after the Search action, so the scratched box is still resolved",
+      "Only the card just searched is discarded",
+      "No production cost is printed"
+    ],
+    "opensDoors": []
+  }
 }

@@ -1,89 +1,92 @@
 {
-	"file": "page-09.jpg",
-	"printedPageNumber": 9,
-	"headings": [
-		"5. Setup step 5 (missing)",
-		"6b. Deal Cards",
-		"7. Add Epidemics to the Player Deck",
-		"8. Select Characters",
-		"9. Begin Play",
-		"On Your Turn"
-	],
-	"ruleStickerSlots": [
-		{
-			"slot": "E",
-			"context": "Large dashed box at the top left, numbered setup step 5. The printed note says rule sticker E will provide step 5 and to skip the step for now. It sits before 6b (the deal) and beside steps 7–9."
-		}
-	],
-	"sections": [
-		{
-			"heading": "5. Setup step 5 (missing)",
-			"mechanicsSummary": ["No rule is printed. Skip step 5 until rule sticker E is applied."]
-		},
-		{
-			"heading": "6b. Deal Cards",
-			"mechanicsSummary": [
-				"Shuffle the chosen Event cards, all Produce Supplies cards, and the City cards together.",
-				"Deal by player count: 4 cards at 2 players, 3 cards at 3 players, 2 cards at 4 players.",
-				"Hands stay face up for the whole game.",
-				"Epidemics are not in this shuffle. They are added in step 7 to the deck that remains after the deal."
-			]
-		},
-		{
-			"heading": "7. Add Epidemics to the Player Deck",
-			"mechanicsSummary": [
-				"Split the remaining Player deck into 5 face-down piles, as equal as possible.",
-				"Shuffle 1 Epidemic into each pile.",
-				"Stack the piles into the Player deck with the smaller piles on the bottom."
-			]
-		},
-		{
-			"heading": "8. Select Characters",
-			"mechanicsSummary": [
-				"Each player picks a character and a color, and takes the matching pawn and Reference cards.",
-				"Each pawn starts at that character's home.",
-				"If there are fewer characters than players, the extra players use haven workers."
-			]
-		},
-		{
-			"heading": "9. Begin Play",
-			"mechanicsSummary": ["Randomly choose one pawn. That player is first.", "Play continues clockwise."]
-		},
-		{
-			"heading": "On Your Turn",
-			"mechanicsSummary": [
-				"Four steps, in order: check for exposure; take 4 actions; draw 2 Player cards; infect cities.",
-				"After the infect step, the turn passes to the player on the left.",
-				"Anyone may advise. The player whose turn it is decides.",
-				"A hand holds City cards, Produce Supplies cards, and Event cards.",
-				"City cards are spent on some actions. Produce Supplies cards move cubes from the stockpile onto havens and supply centers. Event cards may be played at any time."
-			]
-		}
-	],
-	"tables": [
-		{
-			"name": "Opening hand size",
-			"rows": [
-				{ "players": 2, "cards": 4 },
-				{ "players": 3, "cards": 3 },
-				{ "players": 4, "cards": 2 }
-			]
-		},
-		{
-			"name": "Turn structure",
-			"rows": [
-				{ "step": 1, "do": "Check for exposure" },
-				{ "step": 2, "do": "Do 4 actions" },
-				{ "step": 3, "do": "Draw 2 Player cards" },
-				{ "step": 4, "do": "Infect cities" }
-			]
-		}
-	],
-	"diagramsAndCallouts": [
-		"Board diagram labels Game End cards, Infection Rate marker, Infection Rate track, Infection deck, Infection discard, Player deck, and Player discard.",
-		"City panels in that diagram show lettered boxes (groups reading A–D and A–E). Those are board search boxes, not manual rule-sticker slots.",
-		"The board's own turn reminder repeats the four steps and, unlike the blue rules box, mentions resolving epidemics as part of the draw.",
-		"Five-pile diagram: one Epidemic shuffled into each pile, then stacked.",
-		"Sample pawn, two-sided actions reference, and a character card (home Asgard, age 28) whose pictured job mentions a Transfer Supplies free action that can move supply cubes to or from a player at any location."
-	]
+  "file": "page-09.jpg",
+  "printedPageNumber": 9,
+  "headings": [
+    "5. Setup step 5 (missing)",
+    "6b. Deal Cards",
+    "7. Add Epidemics to the Player Deck",
+    "8. Select Characters",
+    "9. Begin Play",
+    "On Your Turn"
+  ],
+  "ruleStickerSlots": [
+    {
+      "slot": "E",
+      "context": "Large dashed box at the top left, numbered setup step 5. The printed note says rule sticker E will provide step 5 and to skip the step for now. It sits before 6b (the deal) and beside steps 7–9."
+    }
+  ],
+  "sections": [
+    {
+      "heading": "5. Setup step 5 (missing)",
+      "mechanicsSummary": ["No rule is printed. Skip step 5 until rule sticker E is applied."]
+    },
+    {
+      "heading": "6b. Deal Cards",
+      "mechanicsSummary": [
+        "Shuffle the chosen Event cards, all Produce Supplies cards, and the City cards together.",
+        "Deal by player count: 4 cards at 2 players, 3 cards at 3 players, 2 cards at 4 players.",
+        "Hands stay face up for the whole game.",
+        "Epidemics are not in this shuffle. They are added in step 7 to the deck that remains after the deal."
+      ]
+    },
+    {
+      "heading": "7. Add Epidemics to the Player Deck",
+      "mechanicsSummary": [
+        "Split the remaining Player deck into 5 face-down piles, as equal as possible.",
+        "Shuffle 1 Epidemic into each pile.",
+        "Stack the piles into the Player deck with the smaller piles on the bottom."
+      ]
+    },
+    {
+      "heading": "8. Select Characters",
+      "mechanicsSummary": [
+        "Each player picks a character and a color, and takes the matching pawn and Reference cards.",
+        "Each pawn starts at that character's home.",
+        "If there are fewer characters than players, the extra players use haven workers."
+      ]
+    },
+    {
+      "heading": "9. Begin Play",
+      "mechanicsSummary": [
+        "Randomly choose one pawn. That player is first.",
+        "Play continues clockwise."
+      ]
+    },
+    {
+      "heading": "On Your Turn",
+      "mechanicsSummary": [
+        "Four steps, in order: check for exposure; take 4 actions; draw 2 Player cards; infect cities.",
+        "After the infect step, the turn passes to the player on the left.",
+        "Anyone may advise. The player whose turn it is decides.",
+        "A hand holds City cards, Produce Supplies cards, and Event cards.",
+        "City cards are spent on some actions. Produce Supplies cards move cubes from the stockpile onto havens and supply centers. Event cards may be played at any time."
+      ]
+    }
+  ],
+  "tables": [
+    {
+      "name": "Opening hand size",
+      "rows": [
+        { "players": 2, "cards": 4 },
+        { "players": 3, "cards": 3 },
+        { "players": 4, "cards": 2 }
+      ]
+    },
+    {
+      "name": "Turn structure",
+      "rows": [
+        { "step": 1, "do": "Check for exposure" },
+        { "step": 2, "do": "Do 4 actions" },
+        { "step": 3, "do": "Draw 2 Player cards" },
+        { "step": 4, "do": "Infect cities" }
+      ]
+    }
+  ],
+  "diagramsAndCallouts": [
+    "Board diagram labels Game End cards, Infection Rate marker, Infection Rate track, Infection deck, Infection discard, Player deck, and Player discard.",
+    "City panels in that diagram show lettered boxes (groups reading A–D and A–E). Those are board search boxes, not manual rule-sticker slots.",
+    "The board's own turn reminder repeats the four steps and, unlike the blue rules box, mentions resolving epidemics as part of the draw.",
+    "Five-pile diagram: one Epidemic shuffled into each pile, then stacked.",
+    "Sample pawn, two-sided actions reference, and a character card (home Asgard, age 28) whose pictured job mentions a Transfer Supplies free action that can move supply cubes to or from a player at any location."
+  ]
 }

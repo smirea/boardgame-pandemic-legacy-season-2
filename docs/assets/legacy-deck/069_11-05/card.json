@@ -1,55 +1,58 @@
 {
-	"sequence": 69,
-	"folder": "069_11-05",
-	"cardCode": "11-05",
-	"printedCodes": {
-		"sideA": "11-05a",
-		"sideB": "11-05b"
-	},
-	"title": "The Plan",
-	"category": "plan",
-	"month": "november",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "NONE",
-		"header": "THE PLAN",
-		"trigger": "",
-		"summary": "The Hollow Men supplied inside information for reaching Utopia, and the plan is final. Destroy An Incomplete Plan. The other side has four steps, in any order; checked boxes carry to later games. When every box is checked, open Package 8. Keep this card in the reserve between games.",
-		"text": "The Hollow Men gave us inside information to help us access Utopia. We’ve finalized our plan.\n\nDestroy the An Incomplete Plan card. The Plan is on the other side of this card and contains four steps that may be done in any order. When a step is complete, check its box. Any boxes checked carry over to future games.\n\nWhen all boxes are checked, open Package 8 (you have completed the plan). Keep this card in the reserve between games.",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "The Plan",
-		"summary": "Recon in Shanghai with the cards listed to check a step. A supply center is not required. Locate hidden entrance: red A B C D E. Decode access key: black A B C D. Devise distraction: yellow A B C. Prepare containment units: blue A B C. When every box is checked, open Package 8 and destroy this card.",
-		"text": "Do the Recon action in Shanghai with the cards indicated below to check off a part of the plan.\nA supply center is not required to do this.\n\n• Locate hidden entrance — red A, B, C, D, E\n• Decode access key — black A, B, C, D\n• Devise distraction — yellow A, B, C\n• Prepare containment units — blue A, B, C\n\nWhen everything is checked, you have completed the plan.\nOpen Package 8 and destroy this card.",
-		"footer": "",
-		"scratchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"whenRead": "Read during the first November setup draw, immediately after objective 11-04. It replaces An Incomplete Plan and stays in the reserve until every box is checked or a later card destroys it.",
-		"triggers": [
-			"Each checked step is a Recon action in Shanghai, paying that step's cards",
-			"When the fourth box is checked, open Package 8 and destroy this card"
-		],
-		"opensDoors": [],
-		"opensPackages": ["8"],
-		"destroys": ["An Incomplete Plan card, when this card is read", "this card, when every box is checked"],
-		"addsToPool": [],
-		"rules": [
-			"Destroy the An Incomplete Plan card.",
-			"Four steps, any order. Check the box when that step is done. Checked boxes carry over to future games.",
-			"Do the Recon action in Shanghai with the indicated cards. A supply center is not required.",
-			"Locate hidden entrance: red cards A, B, C, D, and E.",
-			"Decode access key: black cards A, B, C, and D.",
-			"Devise distraction: yellow cards A, B, and C.",
-			"Prepare containment units: blue cards A, B, and C.",
-			"When everything is checked, the plan is complete: open Package 8 and destroy this card.",
-			"Keep this card in the reserve between games until then."
-		],
-		"notes": "Side B is a ledger turned sideways in the scan. Each cost is a row of separate colored card icons with one white letter each, not a count of identical cards. Totals: 5 red, 4 black, 3 yellow, 3 blue. Package 8 opens when the last box is checked during play. December's 12-01 opens that package instead if the plan is still unfinished, and 12-03 destroys this card at December setup if it is still in the reserve."
-	}
+  "sequence": 69,
+  "folder": "069_11-05",
+  "cardCode": "11-05",
+  "printedCodes": {
+    "sideA": "11-05a",
+    "sideB": "11-05b"
+  },
+  "title": "The Plan",
+  "category": "plan",
+  "month": "november",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "NONE",
+    "header": "THE PLAN",
+    "trigger": "",
+    "summary": "The Hollow Men supplied inside information for reaching Utopia, and the plan is final. Destroy An Incomplete Plan. The other side has four steps, in any order; checked boxes carry to later games. When every box is checked, open Package 8. Keep this card in the reserve between games.",
+    "text": "The Hollow Men gave us inside information to help us access Utopia. We’ve finalized our plan.\n\nDestroy the An Incomplete Plan card. The Plan is on the other side of this card and contains four steps that may be done in any order. When a step is complete, check its box. Any boxes checked carry over to future games.\n\nWhen all boxes are checked, open Package 8 (you have completed the plan). Keep this card in the reserve between games.",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "The Plan",
+    "summary": "Recon in Shanghai with the cards listed to check a step. A supply center is not required. Locate hidden entrance: red A B C D E. Decode access key: black A B C D. Devise distraction: yellow A B C. Prepare containment units: blue A B C. When every box is checked, open Package 8 and destroy this card.",
+    "text": "Do the Recon action in Shanghai with the cards indicated below to check off a part of the plan.\nA supply center is not required to do this.\n\n• Locate hidden entrance — red A, B, C, D, E\n• Decode access key — black A, B, C, D\n• Devise distraction — yellow A, B, C\n• Prepare containment units — blue A, B, C\n\nWhen everything is checked, you have completed the plan.\nOpen Package 8 and destroy this card.",
+    "footer": "",
+    "scratchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "whenRead": "Read during the first November setup draw, immediately after objective 11-04. It replaces An Incomplete Plan and stays in the reserve until every box is checked or a later card destroys it.",
+    "triggers": [
+      "Each checked step is a Recon action in Shanghai, paying that step's cards",
+      "When the fourth box is checked, open Package 8 and destroy this card"
+    ],
+    "opensDoors": [],
+    "opensPackages": ["8"],
+    "destroys": [
+      "An Incomplete Plan card, when this card is read",
+      "this card, when every box is checked"
+    ],
+    "addsToPool": [],
+    "rules": [
+      "Destroy the An Incomplete Plan card.",
+      "Four steps, any order. Check the box when that step is done. Checked boxes carry over to future games.",
+      "Do the Recon action in Shanghai with the indicated cards. A supply center is not required.",
+      "Locate hidden entrance: red cards A, B, C, D, and E.",
+      "Decode access key: black cards A, B, C, and D.",
+      "Devise distraction: yellow cards A, B, and C.",
+      "Prepare containment units: blue cards A, B, and C.",
+      "When everything is checked, the plan is complete: open Package 8 and destroy this card.",
+      "Keep this card in the reserve between games until then."
+    ],
+    "notes": "Side B is a ledger turned sideways in the scan. Each cost is a row of separate colored card icons with one white letter each, not a count of identical cards. Totals: 5 red, 4 black, 3 yellow, 3 blue. Package 8 opens when the last box is checked during play. December's 12-01 opens that package instead if the plan is still unfinished, and 12-03 destroys this card at December setup if it is still in the reserve."
+  }
 }

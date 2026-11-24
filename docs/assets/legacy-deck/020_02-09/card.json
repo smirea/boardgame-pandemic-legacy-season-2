@@ -1,44 +1,44 @@
 {
-	"sequence": 20,
-	"folder": "020_02-09",
-	"cardCode": "02-09",
-	"printedCodes": {
-		"sideA": "",
-		"sideB": "02-09b"
-	},
-	"title": "It Worked the First Time",
-	"category": "rationed_event",
-	"month": "february",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "NONE",
-		"header": "",
-		"trigger": "",
-		"text": "",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "RATIONED EVENT",
-		"text": "IT WORKED THE FIRST TIME\n\nTake 1 Rationed Event card from the discard pile and play it immediately.\n\nPlay at any time. Not an action.",
-		"footer": "Play at any time. Not an action.",
-		"scratchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"whenRead": "The next Rationed Event in the deck after the February pause (02-07). Add it to the Rationed Event pool when drawing reaches it. 02-07 itself does not say that events follow.",
-		"triggers": [],
-		"opensDoors": [],
-		"opensPackages": [],
-		"destroys": [],
-		"addsToPool": ["It Worked the First Time (Rationed Event)"],
-		"rules": [
-			"Take 1 Rationed Event card from the discard pile and play it immediately.",
-			"Play at any time. Not an action.",
-			"Take 1 Rationed Event from the discard pile and play it immediately. Playing it is still not an action."
-		],
-		"notes": "Side A is the shared rationed-event back (haven in a signal ring, yellow bars, red arc). No printed card code and no rules text. The screen title is IT WORKED THE FIRST TIME."
-	}
+  "sequence": 20,
+  "folder": "020_02-09",
+  "cardCode": "02-09",
+  "printedCodes": {
+    "sideA": "",
+    "sideB": "02-09b"
+  },
+  "title": "It Worked the First Time",
+  "category": "rationed_event",
+  "month": "february",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "NONE",
+    "header": "",
+    "trigger": "",
+    "text": "",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "RATIONED EVENT",
+    "text": "IT WORKED THE FIRST TIME\n\nTake 1 Rationed Event card from the discard pile and play it immediately.\n\nPlay at any time. Not an action.",
+    "footer": "Play at any time. Not an action.",
+    "scratchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "whenRead": "The next Rationed Event in the deck after the February pause (02-07). Add it to the Rationed Event pool when drawing reaches it. 02-07 itself does not say that events follow.",
+    "triggers": [],
+    "opensDoors": [],
+    "opensPackages": [],
+    "destroys": [],
+    "addsToPool": ["It Worked the First Time (Rationed Event)"],
+    "rules": [
+      "Take 1 Rationed Event card from the discard pile and play it immediately.",
+      "Play at any time. Not an action.",
+      "Take 1 Rationed Event from the discard pile and play it immediately. Playing it is still not an action."
+    ],
+    "notes": "Side A is the shared rationed-event back (haven in a signal ring, yellow bars, red arc). No printed card code and no rules text. The screen title is IT WORKED THE FIRST TIME."
+  }
 }

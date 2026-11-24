@@ -1,21 +1,21 @@
 {
-	"id": "sticker-05_rule-t",
-	"package": 2,
-	"printedCode": "T",
-	"name": "Hollow Men Gather draws",
-	"category": "rule",
-	"placementTarget": "Rulebook page 14, Infections, rule sticker T, the second empty box directly under rule sticker S.",
-	"costProductionUnits": null,
-	"copies": 1,
-	"image": "sticker-05_rule-t.jpg",
-	"summary": "No title is printed. Hollow Men Gather cards do not count toward the number of Infection cards you must draw during the Infect step of your turn. In the rare event that you draw a Hollow Men Gather card during step 2 of an epidemic, discard the card without effect and continue to step 3. The letter T is the rulebook slot. It is not printed on the sticker.",
-	"mechanics": {
-		"timing": "Infect step of a turn, and epidemic step 2.",
-		"effect": "Gather cards do not count toward the infection rate's draw count. A Gather card drawn while resolving the Infect step of an epidemic is discarded with no effect, and the epidemic continues to Intensify.",
-		"restrictions": [
-			"The epidemic exception is step 2 only. The sticker says to continue to step 3.",
-			"A Gather card drawn in the normal Infect step still uses Rule S. It is not discarded with no effect there. It simply does not count as one of the cards the infection rate required."
-		],
-		"opensDoors": []
-	}
+  "id": "sticker-05_rule-t",
+  "package": 2,
+  "printedCode": "T",
+  "name": "Hollow Men Gather draws",
+  "category": "rule",
+  "placementTarget": "Rulebook page 14, Infections, rule sticker T, the second empty box directly under rule sticker S.",
+  "costProductionUnits": null,
+  "copies": 1,
+  "image": "sticker-05_rule-t.jpg",
+  "summary": "No title is printed. Hollow Men Gather cards do not count toward the number of Infection cards you must draw during the Infect step of your turn. In the rare event that you draw a Hollow Men Gather card during step 2 of an epidemic, discard the card without effect and continue to step 3. The letter T is the rulebook slot. It is not printed on the sticker.",
+  "mechanics": {
+    "timing": "Infect step of a turn, and epidemic step 2.",
+    "effect": "Gather cards do not count toward the infection rate's draw count. A Gather card drawn while resolving the Infect step of an epidemic is discarded with no effect, and the epidemic continues to Intensify.",
+    "restrictions": [
+      "The epidemic exception is step 2 only. The sticker says to continue to step 3.",
+      "A Gather card drawn in the normal Infect step still uses Rule S. It is not discarded with no effect there. It simply does not count as one of the cards the infection rate required."
+    ],
+    "opensDoors": []
+  }
 }

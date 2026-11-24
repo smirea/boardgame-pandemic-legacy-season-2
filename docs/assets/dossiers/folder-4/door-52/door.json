@@ -1,65 +1,65 @@
 {
-	"door": "52",
-	"folder": 4,
-	"frontImage": "dossiers/folder-4/door-52/front.jpg",
-	"frontText": "52",
-	"items": [
-		{
-			"id": "item-01",
-			"image": "dossiers/folder-4/door-52/item-01.jpg",
-			"count": 1,
-			"printedCode": null,
-			"category": "map-sticker",
-			"title": "Recon Kolkata to East Asia (Package 3)",
-			"placementTarget": "Board map at 20° N, 100° E (over Door 53's Kolkata recon placeholder sticker)",
-			"costProductionUnits": null,
-			"text": "A B C D E (5 black cards)\nRecon with 5 unique black cards from a supply center here to open Package 3.",
-			"mapDetails": {
-				"gridLines": ["20° N", "100° E"],
-				"cities": [],
-				"seaLanes": [],
-				"supplyLines": [],
-				"redRegionLines": [],
-				"reconBoxes": [
-					{
-						"from": "Kolkata",
-						"cardsRequired": 5,
-						"color": "black",
-						"unique": true,
-						"requiresSupplyCenter": true,
-						"opensPackage": 3
-					}
-				]
-			},
-			"mechanics": {
-				"timing": "immediate",
-				"trigger": "Opened when monitoring frequency 9.2 on the Frequency Scanner (08-04)",
-				"effect": "Place this map sticker over the Kolkata recon area (20° N, 100° E) if East Asia has not yet been reconned. Enables Recon out of Kolkata (requires a supply center and 5 unique black cards) to open Package 3 (East Asia).",
-				"restrictions": ["Only add to the board if East Asia has not yet been Reconned."],
-				"opensDoors": [],
-				"opensPackages": ["3 (via Recon action)"]
-			}
-		},
-		{
-			"id": "item-02",
-			"image": "dossiers/folder-4/door-52/item-02.jpg",
-			"count": 1,
-			"printedCode": "52",
-			"category": "sticker-card",
-			"title": "TRANSMISSIONS DECODED",
-			"placementTarget": "Board map at 20° N, 100° E",
-			"costProductionUnits": null,
-			"text": "TRANSMISSIONS DECODED\nWe have decoded the Hollow Men's transmissions. We now know their patrol routes and can sneak by them into Asia.\n[Sticker: A B C D E black — Recon with 5 unique black cards from a supply center here to open Package 3.]\nAdd this sticker to the board if you have not Reconned East Asia.",
-			"mapDetails": null,
-			"mechanics": {
-				"timing": "immediate",
-				"trigger": null,
-				"effect": "Full sticker carrier card containing item-01 (the Kolkata-to-East-Asia Recon sticker).",
-				"restrictions": ["Only add to the board if East Asia has not yet been Reconned."],
-				"opensDoors": []
-			}
-		}
-	],
-	"bags": [],
-	"summary": "TRANSMISSIONS DECODED (opened by Frequency Scanner 9.2): provides the Kolkata Recon map sticker (20° N, 100° E) allowing Recon with 5 unique black cards from a supply center in Kolkata to open Package 3 (East Asia), if East Asia has not yet been reconned."
+  "door": "52",
+  "folder": 4,
+  "frontImage": "dossiers/folder-4/door-52/front.jpg",
+  "frontText": "52",
+  "items": [
+    {
+      "id": "item-01",
+      "image": "dossiers/folder-4/door-52/item-01.jpg",
+      "count": 1,
+      "printedCode": null,
+      "category": "map-sticker",
+      "title": "Recon Kolkata to East Asia (Package 3)",
+      "placementTarget": "Board map at 20° N, 100° E (over Door 53's Kolkata recon placeholder sticker)",
+      "costProductionUnits": null,
+      "text": "A B C D E (5 black cards)\nRecon with 5 unique black cards from a supply center here to open Package 3.",
+      "mapDetails": {
+        "gridLines": ["20° N", "100° E"],
+        "cities": [],
+        "seaLanes": [],
+        "supplyLines": [],
+        "redRegionLines": [],
+        "reconBoxes": [
+          {
+            "from": "Kolkata",
+            "cardsRequired": 5,
+            "color": "black",
+            "unique": true,
+            "requiresSupplyCenter": true,
+            "opensPackage": 3
+          }
+        ]
+      },
+      "mechanics": {
+        "timing": "immediate",
+        "trigger": "Opened when monitoring frequency 9.2 on the Frequency Scanner (08-04)",
+        "effect": "Place this map sticker over the Kolkata recon area (20° N, 100° E) if East Asia has not yet been reconned. Enables Recon out of Kolkata (requires a supply center and 5 unique black cards) to open Package 3 (East Asia).",
+        "restrictions": ["Only add to the board if East Asia has not yet been Reconned."],
+        "opensDoors": [],
+        "opensPackages": ["3 (via Recon action)"]
+      }
+    },
+    {
+      "id": "item-02",
+      "image": "dossiers/folder-4/door-52/item-02.jpg",
+      "count": 1,
+      "printedCode": "52",
+      "category": "sticker-card",
+      "title": "TRANSMISSIONS DECODED",
+      "placementTarget": "Board map at 20° N, 100° E",
+      "costProductionUnits": null,
+      "text": "TRANSMISSIONS DECODED\nWe have decoded the Hollow Men's transmissions. We now know their patrol routes and can sneak by them into Asia.\n[Sticker: A B C D E black — Recon with 5 unique black cards from a supply center here to open Package 3.]\nAdd this sticker to the board if you have not Reconned East Asia.",
+      "mapDetails": null,
+      "mechanics": {
+        "timing": "immediate",
+        "trigger": null,
+        "effect": "Full sticker carrier card containing item-01 (the Kolkata-to-East-Asia Recon sticker).",
+        "restrictions": ["Only add to the board if East Asia has not yet been Reconned."],
+        "opensDoors": []
+      }
+    }
+  ],
+  "bags": [],
+  "summary": "TRANSMISSIONS DECODED (opened by Frequency Scanner 9.2): provides the Kolkata Recon map sticker (20° N, 100° E) allowing Recon with 5 unique black cards from a supply center in Kolkata to open Package 3 (East Asia), if East Asia has not yet been reconned."
 }

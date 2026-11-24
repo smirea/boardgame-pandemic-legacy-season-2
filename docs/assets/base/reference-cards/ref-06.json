@@ -1,31 +1,31 @@
 {
-	"id": "ref-06",
-	"guid": "19d318",
-	"printedCode": null,
-	"title": "ACTIONS",
-	"category": "reference",
-	"color": null,
-	"pawnColor": "pink",
-	"copies": 1,
-	"images": {
-		"front": "ref-06.jpg",
-		"back": "back.jpg"
-	},
-	"hasImprovementSlot": true,
-	"frontText": "ACTIONS\nDRIVE / FERRY\nMove to an adjacent location connected by a line.\nSAIL\nDiscard a card to move to the city named on the card, provided you can trace a sea route to it.\nCHARTER BOAT\nDiscard the card that matches your current city to move to any location, provided you can trace a sea route to it.\nSHARE KNOWLEDGE\nEither: give a card that matches the city you are in to another player, or take that card from another player.\nBoth of you must be in the city matching the card.\nBUILD SUPPLY CENTER\nDiscard 5 cards matching your city's color to build a supply center there.",
-	"backText": "NEW ACTIONS",
-	"states": [],
-	"mechanics": {
-		"timing": "The action list for a player's turn.",
-		"effect": "pink pawn. Actions.",
-		"rules": [
-			"DRIVE / FERRY: Move to an adjacent location connected by a line. The word adjacent is italic.",
-			"SAIL: Discard a card to move to the city named on the card, provided you can trace a sea route to it. An anchor icon follows the title.",
-			"CHARTER BOAT: Discard the card that matches your current city to move to any location, provided you can trace a sea route to it. The words matches and any are italic. An anchor icon follows the title.",
-			"SHARE KNOWLEDGE: Either give a card that matches the city you are in to another player, or take that card from another player. Both of you must be in the city matching the card. The words give, matches, and take are italic.",
-			"BUILD SUPPLY CENTER: Discard 5 cards matching your city's color to build a supply center there.",
-			"The shared back is titled NEW ACTIONS.",
-			"Under the title are 6 empty horizontal sticker slots and no other text."
-		]
-	}
+  "id": "ref-06",
+  "guid": "19d318",
+  "printedCode": null,
+  "title": "ACTIONS",
+  "category": "reference",
+  "color": null,
+  "pawnColor": "pink",
+  "copies": 1,
+  "images": {
+    "front": "ref-06.jpg",
+    "back": "back.jpg"
+  },
+  "hasImprovementSlot": true,
+  "frontText": "ACTIONS\nDRIVE / FERRY\nMove to an adjacent location connected by a line.\nSAIL\nDiscard a card to move to the city named on the card, provided you can trace a sea route to it.\nCHARTER BOAT\nDiscard the card that matches your current city to move to any location, provided you can trace a sea route to it.\nSHARE KNOWLEDGE\nEither: give a card that matches the city you are in to another player, or take that card from another player.\nBoth of you must be in the city matching the card.\nBUILD SUPPLY CENTER\nDiscard 5 cards matching your city's color to build a supply center there.",
+  "backText": "NEW ACTIONS",
+  "states": [],
+  "mechanics": {
+    "timing": "The action list for a player's turn.",
+    "effect": "pink pawn. Actions.",
+    "rules": [
+      "DRIVE / FERRY: Move to an adjacent location connected by a line. The word adjacent is italic.",
+      "SAIL: Discard a card to move to the city named on the card, provided you can trace a sea route to it. An anchor icon follows the title.",
+      "CHARTER BOAT: Discard the card that matches your current city to move to any location, provided you can trace a sea route to it. The words matches and any are italic. An anchor icon follows the title.",
+      "SHARE KNOWLEDGE: Either give a card that matches the city you are in to another player, or take that card from another player. Both of you must be in the city matching the card. The words give, matches, and take are italic.",
+      "BUILD SUPPLY CENTER: Discard 5 cards matching your city's color to build a supply center there.",
+      "The shared back is titled NEW ACTIONS.",
+      "Under the title are 6 empty horizontal sticker slots and no other text."
+    ]
+  }
 }

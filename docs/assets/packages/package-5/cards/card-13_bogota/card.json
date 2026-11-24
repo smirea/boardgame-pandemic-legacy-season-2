@@ -1,36 +1,36 @@
 {
-	"package": 5,
-	"index": 13,
-	"cardId": 10712,
-	"printedCodes": {
-		"sideA": null,
-		"sideB": "P5-14b"
-	},
-	"title": "Bogotá",
-	"category": "infection",
-	"city": "Bogotá",
-	"color": "yellow",
-	"coordinates": null,
-	"copies": 1,
-	"hasImprovementSlot": true,
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"text": "Infection deck back. No printed text."
-	},
-	"sideB": {
-		"text": "Bogotá\nP5-14b",
-		"searchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"opensDoors": [],
-		"rules": [
-			"Yellow Infection card. The city name is printed vertically.",
-			"One improvement sticker may be placed on this card. No empty sticker box is printed on the face."
-		],
-		"notes": "The printed code on this scan reads P5-14b, the same code printed on card 14. The two files are not byte-identical. The city name is printed BOGOTÁ."
-	}
+  "package": 5,
+  "index": 13,
+  "cardId": 10712,
+  "printedCodes": {
+    "sideA": null,
+    "sideB": "P5-14b"
+  },
+  "title": "Bogotá",
+  "category": "infection",
+  "city": "Bogotá",
+  "color": "yellow",
+  "coordinates": null,
+  "copies": 1,
+  "hasImprovementSlot": true,
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "text": "Infection deck back. No printed text."
+  },
+  "sideB": {
+    "text": "Bogotá\nP5-14b",
+    "searchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "opensDoors": [],
+    "rules": [
+      "Yellow Infection card. The city name is printed vertically.",
+      "One improvement sticker may be placed on this card. No empty sticker box is printed on the face."
+    ],
+    "notes": "The printed code on this scan reads P5-14b, the same code printed on card 14. The two files are not byte-identical. The city name is printed BOGOTÁ."
+  }
 }

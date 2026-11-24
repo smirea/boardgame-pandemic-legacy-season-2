@@ -1,52 +1,52 @@
 {
-	"file": "page-12.jpg",
-	"printedPageNumber": 12,
-	"headings": ["MANUAL", "NEW ACTIONS"],
-	"ruleStickerSlots": [
-		{
-			"slot": "J",
-			"context": "NEW ACTIONS, left column, top box: RULE STICKER J"
-		},
-		{
-			"slot": "K",
-			"context": "NEW ACTIONS, left column, second box: RULE STICKER K"
-		},
-		{
-			"slot": "L",
-			"context": "NEW ACTIONS, left column, third box: RULE STICKER L"
-		},
-		{
-			"slot": "M",
-			"context": "NEW ACTIONS, left column, bottom box: RULE STICKER M"
-		},
-		{
-			"slot": "N",
-			"context": "NEW ACTIONS, right column, top box: RULE STICKER N"
-		},
-		{
-			"slot": "O",
-			"context": "NEW ACTIONS, right column, second box: RULE STICKER O"
-		},
-		{
-			"slot": "P",
-			"context": "NEW ACTIONS, right column, third box: RULE STICKER P"
-		},
-		{
-			"slot": "Q",
-			"context": "NEW ACTIONS, right column, bottom box: RULE STICKER Q"
-		}
-	],
-	"sections": [
-		{
-			"heading": "NEW ACTIONS",
-			"text": "Eight empty dashed boxes, read down the left column and then down the right column.\n\nRULE STICKER J\nRULE STICKER K\nRULE STICKER L\nRULE STICKER M\nRULE STICKER N\nRULE STICKER O\nRULE STICKER P\nRULE STICKER Q"
-		}
-	],
-	"tables": [],
-	"diagramsAndCallouts": [
-		"Running header: MANUAL.",
-		"No other rules text. Each slot is an empty dotted rectangle with only its RULE STICKER letter centered in it.",
-		"Printed page number 12, bottom left."
-	],
-	"fullText": "MANUAL\n\nNEW ACTIONS\n\nEight empty dashed boxes, read down the left column and then down the right column.\n\nRULE STICKER J\nRULE STICKER K\nRULE STICKER L\nRULE STICKER M\nRULE STICKER N\nRULE STICKER O\nRULE STICKER P\nRULE STICKER Q"
+  "file": "page-12.jpg",
+  "printedPageNumber": 12,
+  "headings": ["MANUAL", "NEW ACTIONS"],
+  "ruleStickerSlots": [
+    {
+      "slot": "J",
+      "context": "NEW ACTIONS, left column, top box: RULE STICKER J"
+    },
+    {
+      "slot": "K",
+      "context": "NEW ACTIONS, left column, second box: RULE STICKER K"
+    },
+    {
+      "slot": "L",
+      "context": "NEW ACTIONS, left column, third box: RULE STICKER L"
+    },
+    {
+      "slot": "M",
+      "context": "NEW ACTIONS, left column, bottom box: RULE STICKER M"
+    },
+    {
+      "slot": "N",
+      "context": "NEW ACTIONS, right column, top box: RULE STICKER N"
+    },
+    {
+      "slot": "O",
+      "context": "NEW ACTIONS, right column, second box: RULE STICKER O"
+    },
+    {
+      "slot": "P",
+      "context": "NEW ACTIONS, right column, third box: RULE STICKER P"
+    },
+    {
+      "slot": "Q",
+      "context": "NEW ACTIONS, right column, bottom box: RULE STICKER Q"
+    }
+  ],
+  "sections": [
+    {
+      "heading": "NEW ACTIONS",
+      "text": "Eight empty dashed boxes, read down the left column and then down the right column.\n\nRULE STICKER J\nRULE STICKER K\nRULE STICKER L\nRULE STICKER M\nRULE STICKER N\nRULE STICKER O\nRULE STICKER P\nRULE STICKER Q"
+    }
+  ],
+  "tables": [],
+  "diagramsAndCallouts": [
+    "Running header: MANUAL.",
+    "No other rules text. Each slot is an empty dotted rectangle with only its RULE STICKER letter centered in it.",
+    "Printed page number 12, bottom left."
+  ],
+  "fullText": "MANUAL\n\nNEW ACTIONS\n\nEight empty dashed boxes, read down the left column and then down the right column.\n\nRULE STICKER J\nRULE STICKER K\nRULE STICKER L\nRULE STICKER M\nRULE STICKER N\nRULE STICKER O\nRULE STICKER P\nRULE STICKER Q"
 }

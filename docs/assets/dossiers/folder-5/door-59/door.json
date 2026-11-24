@@ -1,81 +1,81 @@
 {
-	"door": "59",
-	"folder": 5,
-	"id": "door-59",
-	"guid": "a5775c",
-	"frontImage": "dossiers/folder-5/door-59/front.jpg",
-	"frontText": "Navy 59 centered on a yellow door card. Dashed cut-line border. No other printed text.",
-	"items": [
-		{
-			"id": "item-01",
-			"image": "dossiers/folder-5/door-59/item-01.jpg",
-			"count": 1,
-			"printedCode": null,
-			"category": "map-sticker",
-			"title": "Coral Sea haven",
-			"placementTarget": "Board, east of Australia, between about 140°E and 160°E and 20°S to 40°S.",
-			"text": "This haven\nis in ruins.\nName it the\nfirst time you\nmove here.\n\nRecon with 2 red\ncards (no supply\ncenter needed) here\nto open 19.",
-			"mapDetails": {
-				"cities": [],
-				"havens": [
-					{
-						"name": "",
-						"population": 1,
-						"port": true,
-						"marker": "anchor",
-						"arrival": "This haven\nis in ruins.\nName it the\nfirst time you\nmove here.",
-						"lat": -28.0,
-						"lon": 157.0,
-						"graticule": "In the sea east of Australia, between the printed 20°S and 40°S lines and west of the printed 160°E meridian. The population 1 square sits just west of 160°E; the anchor is southwest of that square.",
-						"nameState": "blank",
-						"ruined": true,
-						"namePlate": "A blank white name plate is printed on the Australian continent, west of the anchor, with no pointer. The ruins text is on that yellow land."
-					}
-				],
-				"printedRoutes": [
-					{
-						"from": "off-sticker west (Jakarta sea lane on door 63)",
-						"to": "this haven",
-						"type": "sea_lane",
-						"notes": "A blue sea lane enters from the west edge north of Australia, crosses the printed 140°E meridian south of New Guinea, and reaches the haven anchor."
-					},
-					{
-						"from": "this haven",
-						"to": "off-sticker southeast",
-						"type": "sea_lane",
-						"notes": "The same blue line continues past the anchor toward the southeast and leaves the sticker. No second city or haven is printed on this sticker."
-					}
-				],
-				"reconRoutes": [
-					{
-						"text": "Recon with 2 red\ncards (no supply\ncenter needed) here\nto open 19.",
-						"location": "this haven",
-						"cardCount": 2,
-						"color": "red",
-						"duplicatesAllowed": true,
-						"symbol": "asterisk on each card (any city of that color; duplicates allowed)",
-						"supplyCenterRequired": false,
-						"opens": "door 19",
-						"cardIcons": "Two red cards, each with a white asterisk."
-					}
-				],
-				"redRegionLines": [
-					"A horizontal red line runs east along the printed 20°S parallel, from the east coast of Australia (Queensland) out to the edge of the shallow sea. It crosses the blue sea lane north of the haven."
-				],
-				"specialAreas": [
-					{
-						"name": "compass rose",
-						"kind": "decoration",
-						"notes": "A compass rose is printed in the dark ocean at the northeast. No rules text."
-					}
-				]
-			},
-			"mechanics": {
-				"onFirstMove": "Name the ruined haven.",
-				"recon": "2 red cards, asterisks (duplicates allowed), no supply center, opens door 19.",
-				"notes": "Population 1. The haven is a port. No supply cache is printed."
-			}
-		}
-	],
-	"summary": "Ruined haven east of Australia, population 1, unnamed until the first move. A sea lane arrives from the west (the Jakarta lane) and continues southeast off the sticker. Recon here with 2 red cards, duplicates allowed, and no supply center, opens door 19. A red region line runs east along 20°S."
+  "door": "59",
+  "folder": 5,
+  "id": "door-59",
+  "guid": "a5775c",
+  "frontImage": "dossiers/folder-5/door-59/front.jpg",
+  "frontText": "Navy 59 centered on a yellow door card. Dashed cut-line border. No other printed text.",
+  "items": [
+    {
+      "id": "item-01",
+      "image": "dossiers/folder-5/door-59/item-01.jpg",
+      "count": 1,
+      "printedCode": null,
+      "category": "map-sticker",
+      "title": "Coral Sea haven",
+      "placementTarget": "Board, east of Australia, between about 140°E and 160°E and 20°S to 40°S.",
+      "text": "This haven\nis in ruins.\nName it the\nfirst time you\nmove here.\n\nRecon with 2 red\ncards (no supply\ncenter needed) here\nto open 19.",
+      "mapDetails": {
+        "cities": [],
+        "havens": [
+          {
+            "name": "",
+            "population": 1,
+            "port": true,
+            "marker": "anchor",
+            "arrival": "This haven\nis in ruins.\nName it the\nfirst time you\nmove here.",
+            "lat": -28.0,
+            "lon": 157.0,
+            "graticule": "In the sea east of Australia, between the printed 20°S and 40°S lines and west of the printed 160°E meridian. The population 1 square sits just west of 160°E; the anchor is southwest of that square.",
+            "nameState": "blank",
+            "ruined": true,
+            "namePlate": "A blank white name plate is printed on the Australian continent, west of the anchor, with no pointer. The ruins text is on that yellow land."
+          }
+        ],
+        "printedRoutes": [
+          {
+            "from": "off-sticker west (Jakarta sea lane on door 63)",
+            "to": "this haven",
+            "type": "sea_lane",
+            "notes": "A blue sea lane enters from the west edge north of Australia, crosses the printed 140°E meridian south of New Guinea, and reaches the haven anchor."
+          },
+          {
+            "from": "this haven",
+            "to": "off-sticker southeast",
+            "type": "sea_lane",
+            "notes": "The same blue line continues past the anchor toward the southeast and leaves the sticker. No second city or haven is printed on this sticker."
+          }
+        ],
+        "reconRoutes": [
+          {
+            "text": "Recon with 2 red\ncards (no supply\ncenter needed) here\nto open 19.",
+            "location": "this haven",
+            "cardCount": 2,
+            "color": "red",
+            "duplicatesAllowed": true,
+            "symbol": "asterisk on each card (any city of that color; duplicates allowed)",
+            "supplyCenterRequired": false,
+            "opens": "door 19",
+            "cardIcons": "Two red cards, each with a white asterisk."
+          }
+        ],
+        "redRegionLines": [
+          "A horizontal red line runs east along the printed 20°S parallel, from the east coast of Australia (Queensland) out to the edge of the shallow sea. It crosses the blue sea lane north of the haven."
+        ],
+        "specialAreas": [
+          {
+            "name": "compass rose",
+            "kind": "decoration",
+            "notes": "A compass rose is printed in the dark ocean at the northeast. No rules text."
+          }
+        ]
+      },
+      "mechanics": {
+        "onFirstMove": "Name the ruined haven.",
+        "recon": "2 red cards, asterisks (duplicates allowed), no supply center, opens door 19.",
+        "notes": "Population 1. The haven is a port. No supply cache is printed."
+      }
+    }
+  ],
+  "summary": "Ruined haven east of Australia, population 1, unnamed until the first move. A sea lane arrives from the west (the Jakarta lane) and continues southeast off the sticker. Recon here with 2 red cards, duplicates allowed, and no supply center, opens door 19. A red region line runs east along 20°S."
 }

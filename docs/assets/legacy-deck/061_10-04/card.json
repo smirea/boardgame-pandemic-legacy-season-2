@@ -1,44 +1,44 @@
 {
-	"sequence": 61,
-	"folder": "061_10-04",
-	"cardCode": "10-04",
-	"printedCodes": {
-		"sideA": "10-04a",
-		"sideB": "10-04b"
-	},
-	"title": "Get Hollow Men to defect.",
-	"category": "objective",
-	"month": "october",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "NONE",
-		"header": "",
-		"trigger": "",
-		"text": "",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "MANDATORY OBJECTIVE",
-		"text": "Get Hollow Men to defect.\n\nThis objective is completed when there is at least 1 Hollow Men figure on 3 different havens.\n\nAdd this card to your pool of objectives. If you complete it, but lose the first game in October, it counts as complete during your second game in October!",
-		"footer": "Add this card to your pool of objectives. If you complete it, but lose the first game in October, it counts as complete during your second game in October!",
-		"scratchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"whenRead": "Continue the October setup Legacy-deck reading, after 10-03, which calls this the enclosed mandatory objective.",
-		"triggers": ["Completed when at least 1 Hollow Men figure is on 3 different havens."],
-		"opensDoors": [],
-		"opensPackages": [],
-		"destroys": ["This objective, at the end of the game in which it is completed."],
-		"addsToPool": ["Mandatory objective: Get Hollow Men to defect"],
-		"rules": [
-			"Add this card to the objective pool.",
-			"Complete it when there is at least 1 Hollow Men figure on 3 different havens.",
-			"If you complete it but lose the first game in October, it still counts as complete during the second October game."
-		],
-		"notes": "Side A is the objective-card back and carries 10-04a. The face text is printed sideways. The header MANDATORY OBJECTIVE is red. The same haven count is checked again at game end by Turning Point 10-05, which opens door 17. This objective card does not itself open a door."
-	}
+  "sequence": 61,
+  "folder": "061_10-04",
+  "cardCode": "10-04",
+  "printedCodes": {
+    "sideA": "10-04a",
+    "sideB": "10-04b"
+  },
+  "title": "Get Hollow Men to defect.",
+  "category": "objective",
+  "month": "october",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "NONE",
+    "header": "",
+    "trigger": "",
+    "text": "",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "MANDATORY OBJECTIVE",
+    "text": "Get Hollow Men to defect.\n\nThis objective is completed when there is at least 1 Hollow Men figure on 3 different havens.\n\nAdd this card to your pool of objectives. If you complete it, but lose the first game in October, it counts as complete during your second game in October!",
+    "footer": "Add this card to your pool of objectives. If you complete it, but lose the first game in October, it counts as complete during your second game in October!",
+    "scratchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "whenRead": "Continue the October setup Legacy-deck reading, after 10-03, which calls this the enclosed mandatory objective.",
+    "triggers": ["Completed when at least 1 Hollow Men figure is on 3 different havens."],
+    "opensDoors": [],
+    "opensPackages": [],
+    "destroys": ["This objective, at the end of the game in which it is completed."],
+    "addsToPool": ["Mandatory objective: Get Hollow Men to defect"],
+    "rules": [
+      "Add this card to the objective pool.",
+      "Complete it when there is at least 1 Hollow Men figure on 3 different havens.",
+      "If you complete it but lose the first game in October, it still counts as complete during the second October game."
+    ],
+    "notes": "Side A is the objective-card back and carries 10-04a. The face text is printed sideways. The header MANDATORY OBJECTIVE is red. The same haven count is checked again at game end by Turning Point 10-05, which opens door 17. This objective card does not itself open a door."
+  }
 }

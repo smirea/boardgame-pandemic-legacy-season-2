@@ -1,35 +1,38 @@
 {
-	"package": 2,
-	"index": 17,
-	"cardId": 10716,
-	"printedCodes": {
-		"sideA": null,
-		"sideB": "P2-18b"
-	},
-	"title": "New Mumbai",
-	"category": "infection-card",
-	"city": "New Mumbai",
-	"color": "black",
-	"coordinates": null,
-	"port": true,
-	"copies": 1,
-	"hasImprovementSlot": true,
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideASummary": "Infection deck back. Red biohazard on a dark field. No printed text.",
-	"sideBSummary": "NEW MUMBAI printed vertically, code P2-18b. Map fragment, green ring, and a dashed white panel. No coordinates and no anchor on this face.",
-	"searchBoxes": [],
-	"states": [],
-	"mechanics": {
-		"opensDoors": [],
-		"destroys": [],
-		"rules": ["Black Infection card for New Mumbai.", "The dashed white panel is the infection-card upgrade slot."],
-		"notes": [
-			"This copy prints P2-18b, the same code as the other New Mumbai Infection card (index 18). No P2-17b is printed on the face.",
-			"The port anchor is on the Player cards, not on this Infection face.",
-			"Goes to the reserve when the package is opened."
-		]
-	}
+  "package": 2,
+  "index": 17,
+  "cardId": 10716,
+  "printedCodes": {
+    "sideA": null,
+    "sideB": "P2-18b"
+  },
+  "title": "New Mumbai",
+  "category": "infection-card",
+  "city": "New Mumbai",
+  "color": "black",
+  "coordinates": null,
+  "port": true,
+  "copies": 1,
+  "hasImprovementSlot": true,
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideASummary": "Infection deck back. Red biohazard on a dark field. No printed text.",
+  "sideBSummary": "NEW MUMBAI printed vertically, code P2-18b. Map fragment, green ring, and a dashed white panel. No coordinates and no anchor on this face.",
+  "searchBoxes": [],
+  "states": [],
+  "mechanics": {
+    "opensDoors": [],
+    "destroys": [],
+    "rules": [
+      "Black Infection card for New Mumbai.",
+      "The dashed white panel is the infection-card upgrade slot."
+    ],
+    "notes": [
+      "This copy prints P2-18b, the same code as the other New Mumbai Infection card (index 18). No P2-17b is printed on the face.",
+      "The port anchor is on the Player cards, not on this Infection face.",
+      "Goes to the reserve when the package is opened."
+    ]
+  }
 }

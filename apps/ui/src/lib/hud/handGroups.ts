@@ -1,23 +1,29 @@
-import { pack } from '@repo/game';
-import type { PlayerCard } from '@repo/game';
-import { COMPANION_ICON, EPIDEMIC_ICON, IMPROVEMENT_MARK, PRODUCE_ICON, SEARCH_ICON } from '#lib/cards/icons.ts';
-import { eventArtUrl } from '#lib/cards/playerPrint.ts';
-import { regionOf, sortHand } from './handOrder.ts';
-import { cardColor } from './PlayerCard.svelte';
+import { pack } from "@repo/game";
+import type { PlayerCard } from "@repo/game";
+import {
+  COMPANION_ICON,
+  EPIDEMIC_ICON,
+  IMPROVEMENT_MARK,
+  PRODUCE_ICON,
+  SEARCH_ICON,
+} from "#lib/cards/icons.ts";
+import { eventArtUrl } from "#lib/cards/playerPrint.ts";
+import { regionOf, sortHand } from "./handOrder.ts";
+import { cardColor } from "./PlayerCard.svelte";
 
 export type HandGroup = {
-	/** Stable while the group exists, so a card joining or leaving animates within it. */
-	key: string;
-	cards: PlayerCard[];
-	/** The colour its cards' faces wear (`cardColor`), so a pile never disagrees with the cards in it. */
-	color: string;
-	icon?: string;
-	/** The card's own emblem, as its face prints it, shown in place of an icon. */
-	art?: string;
-	/** A short mark printed instead of an icon, such as an improvement's card value. */
-	mark?: string;
-	/** What is in the group, card by card, for the tooltip. */
-	title: string;
+  /** Stable while the group exists, so a card joining or leaving animates within it. */
+  key: string;
+  cards: PlayerCard[];
+  /** The colour its cards' faces wear (`cardColor`), so a pile never disagrees with the cards in it. */
+  color: string;
+  icon?: string;
+  /** The card's own emblem, as its face prints it, shown in place of an icon. */
+  art?: string;
+  /** A short mark printed instead of an icon, such as an improvement's card value. */
+  mark?: string;
+  /** What is in the group, card by card, for the tooltip. */
+  title: string;
 };
 
 /**
@@ -28,92 +34,95 @@ export type HandGroup = {
  * (`sortHand`), each where its first card falls.
  */
 export function handGroups(hand: PlayerCard[], name: (card: PlayerCard) => string): HandGroup[] {
-	const groups = new Map<string, PlayerCard[]>();
-	for (const card of sortHand(hand, name)) {
-		const key = keyOf(card);
-		groups.set(key, [...(groups.get(key) ?? []), card]);
-	}
-	return [...groups].map(([key, cards]) => describe(key, cards, name));
+  const groups = new Map<string, PlayerCard[]>();
+  for (const card of sortHand(hand, name)) {
+    const key = keyOf(card);
+    groups.set(key, [...(groups.get(key) ?? []), card]);
+  }
+  return [...groups].map(([key, cards]) => describe(key, cards, name));
 }
 
 /** A spent search box leaves nothing to do, so the card is as plain as any other of its colour. */
-const openSearches = (card: Extract<PlayerCard, { kind: 'city' }>) => card.search.filter(box => !box.scratched).length;
+const openSearches = (card: Extract<PlayerCard, { kind: "city" }>) =>
+  card.search.filter((box) => !box.scratched).length;
 
 function keyOf(card: PlayerCard): string {
-	switch (card.kind) {
-		case 'city':
-			return card.improvement || openSearches(card) || card.companion
-				? `card:${card.id}`
-				: `color:${regionOf(card.city)}`;
-		case 'event':
-			return `event:${card.event}:${card.mode}`;
-		case 'produce':
-			return `produce:${card.boxesLeft}`;
-		case 'epidemic':
-			return 'epidemic';
-	}
+  switch (card.kind) {
+    case "city":
+      return card.improvement || openSearches(card) || card.companion
+        ? `card:${card.id}`
+        : `color:${regionOf(card.city)}`;
+    case "event":
+      return `event:${card.event}:${card.mode}`;
+    case "produce":
+      return `produce:${card.boxesLeft}`;
+    case "epidemic":
+      return "epidemic";
+  }
 }
 
 function describe(key: string, cards: PlayerCard[], name: (card: PlayerCard) => string): HandGroup {
-	const card = cards[0]!;
-	const listed = tally(cards.map(name));
-	switch (card.kind) {
-		case 'city': {
-			const region = regionOf(card.city);
-			const open = openSearches(card);
-			if (cards.length === 1 && (card.improvement || open || card.companion)) {
-				const improvement = pack.cityImprovements.find(item => item.id === card.improvement);
-				const companion = pack.companions.find(item => item.id === card.companion);
-				const mark = card.improvement ? IMPROVEMENT_MARK[card.improvement] : undefined;
-				const extras = [
-					improvement && `${improvement.name}: ${improvement.text}`,
-					companion && `${companion.name}: ${companion.text}`,
-					open && `${open} search box${open === 1 ? '' : 'es'}`,
-				].filter(Boolean);
-				return {
-					key,
-					cards,
-					color: cardColor(card),
-					icon: mark?.icon ?? (mark ? undefined : card.companion ? COMPANION_ICON[card.companion] : SEARCH_ICON),
-					mark: mark?.text,
-					title: `${name(card)} (${extras.join('; ')})`,
-				};
-			}
-			const what = region === 'haven' ? 'haven' : `${region} city`;
-			return {
-				key,
-				cards,
-				color: cardColor(card),
-				title: `${cards.length} ${what} card${cards.length === 1 ? '' : 's'}: ${listed}`,
-			};
-		}
-		case 'event': {
-			const event = pack.events.find(item => item.id === card.event)!;
-			const mode = card.mode === 'unrationed' ? ', one use' : '';
-			return {
-				key,
-				cards,
-				color: cardColor(card),
-				art: eventArtUrl(card.event),
-				title: `${listed} (event${mode}): ${event.text}`,
-			};
-		}
-		case 'produce':
-			return {
-				key,
-				cards,
-				color: cardColor(card),
-				icon: PRODUCE_ICON,
-				title: `${listed} (${card.boxesLeft} ${card.boxesLeft === 1 ? 'use' : 'uses'} left)`,
-			};
-		case 'epidemic':
-			return { key, cards, color: cardColor(card), icon: EPIDEMIC_ICON, title: listed };
-	}
+  const card = cards[0]!;
+  const listed = tally(cards.map(name));
+  switch (card.kind) {
+    case "city": {
+      const region = regionOf(card.city);
+      const open = openSearches(card);
+      if (cards.length === 1 && (card.improvement || open || card.companion)) {
+        const improvement = pack.cityImprovements.find((item) => item.id === card.improvement);
+        const companion = pack.companions.find((item) => item.id === card.companion);
+        const mark = card.improvement ? IMPROVEMENT_MARK[card.improvement] : undefined;
+        const extras = [
+          improvement && `${improvement.name}: ${improvement.text}`,
+          companion && `${companion.name}: ${companion.text}`,
+          open && `${open} search box${open === 1 ? "" : "es"}`,
+        ].filter(Boolean);
+        return {
+          key,
+          cards,
+          color: cardColor(card),
+          icon:
+            mark?.icon ??
+            (mark ? undefined : card.companion ? COMPANION_ICON[card.companion] : SEARCH_ICON),
+          mark: mark?.text,
+          title: `${name(card)} (${extras.join("; ")})`,
+        };
+      }
+      const what = region === "haven" ? "haven" : `${region} city`;
+      return {
+        key,
+        cards,
+        color: cardColor(card),
+        title: `${cards.length} ${what} card${cards.length === 1 ? "" : "s"}: ${listed}`,
+      };
+    }
+    case "event": {
+      const event = pack.events.find((item) => item.id === card.event)!;
+      const mode = card.mode === "unrationed" ? ", one use" : "";
+      return {
+        key,
+        cards,
+        color: cardColor(card),
+        art: eventArtUrl(card.event),
+        title: `${listed} (event${mode}): ${event.text}`,
+      };
+    }
+    case "produce":
+      return {
+        key,
+        cards,
+        color: cardColor(card),
+        icon: PRODUCE_ICON,
+        title: `${listed} (${card.boxesLeft} ${card.boxesLeft === 1 ? "use" : "uses"} left)`,
+      };
+    case "epidemic":
+      return { key, cards, color: cardColor(card), icon: EPIDEMIC_ICON, title: listed };
+  }
 }
 
 /** Names in hand order, a repeated name once with its count: "Washington ×2, New York". */
 function tally(names: string[]): string {
-	const counts = new Map<string, number>();
-	for (const name of names) counts.set(name, (counts.get(name) ?? 0) + 1);
-	return [...counts].map(([name, count]) => (count > 1 ? `${name} ×${count}` : name)).join(', ');
+  const counts = new Map<string, number>();
+  for (const name of names) counts.set(name, (counts.get(name) ?? 0) + 1);
+  return [...counts].map(([name, count]) => (count > 1 ? `${name} ×${count}` : name)).join(", ");
 }

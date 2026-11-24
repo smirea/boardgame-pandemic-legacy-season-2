@@ -1,59 +1,59 @@
 {
-	"package": 4,
-	"index": 6,
-	"cardId": 10805,
-	"printedCodes": {
-		"sideA": null,
-		"sideB": "P4-07b"
-	},
-	"title": "Frankfurt",
-	"category": "player-card",
-	"city": "Frankfurt",
-	"color": "blue",
-	"coordinates": "50°6'39\"N 8°40'56\"E",
-	"port": false,
-	"copies": 1,
-	"hasImprovementSlot": false,
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideASummary": "Player deck back. No printed text. State 2 side A is the same back.",
-	"sideBSummary": "Frankfurt, blue, 50°6'39\"N 8°40'56\"E. Compass with no anchor. One covered SEARCH box. The name and coordinates repeat upside down along the bottom. P4-07b.",
-	"searchBoxes": [
-		{
-			"type": "search",
-			"stateRevealed": 2,
-			"isCompanion": true,
-			"companionName": "Messenger",
-			"opensDoors": [],
-			"effectSummary": "As a free action, while this card is in your hand, take Supply cubes from an adjacent location and place them into your location. The card does not say to discard it."
-		}
-	],
-	"states": [
-		{
-			"state": 2,
-			"cardId": 10713,
-			"images": {
-				"sideA": "state-2-side-a.jpg",
-				"sideB": "state-2-side-b.jpg"
-			},
-			"summary": "SEARCH reveals Companion Messenger. As a free action, you may take Supply cubes from an adjacent location and place them into your location if this card is in your hand. P4-07b stays on the scratched face. Side A is still the Player deck back."
-		}
-	],
-	"mechanics": {
-		"opensDoors": [],
-		"destroys": [],
-		"rules": [
-			"Blue Player card for Frankfurt. Not a port. The compass has no anchor.",
-			"One SEARCH box. State 2 is the scratched face.",
-			"Companion Messenger: a free action, while this card is in your hand, moves Supply cubes from an adjacent location into your location. The printed word is location, not city."
-		],
-		"notes": [
-			"Card id 10805. Scratch state card id 10713.",
-			"Coordinates are printed 50°6'39\"N 8°40'56\"E.",
-			"No improvement bullseye is printed. The scratch box covers the center.",
-			"Goes to the reserve when the package is opened."
-		]
-	}
+  "package": 4,
+  "index": 6,
+  "cardId": 10805,
+  "printedCodes": {
+    "sideA": null,
+    "sideB": "P4-07b"
+  },
+  "title": "Frankfurt",
+  "category": "player-card",
+  "city": "Frankfurt",
+  "color": "blue",
+  "coordinates": "50°6'39\"N 8°40'56\"E",
+  "port": false,
+  "copies": 1,
+  "hasImprovementSlot": false,
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideASummary": "Player deck back. No printed text. State 2 side A is the same back.",
+  "sideBSummary": "Frankfurt, blue, 50°6'39\"N 8°40'56\"E. Compass with no anchor. One covered SEARCH box. The name and coordinates repeat upside down along the bottom. P4-07b.",
+  "searchBoxes": [
+    {
+      "type": "search",
+      "stateRevealed": 2,
+      "isCompanion": true,
+      "companionName": "Messenger",
+      "opensDoors": [],
+      "effectSummary": "As a free action, while this card is in your hand, take Supply cubes from an adjacent location and place them into your location. The card does not say to discard it."
+    }
+  ],
+  "states": [
+    {
+      "state": 2,
+      "cardId": 10713,
+      "images": {
+        "sideA": "state-2-side-a.jpg",
+        "sideB": "state-2-side-b.jpg"
+      },
+      "summary": "SEARCH reveals Companion Messenger. As a free action, you may take Supply cubes from an adjacent location and place them into your location if this card is in your hand. P4-07b stays on the scratched face. Side A is still the Player deck back."
+    }
+  ],
+  "mechanics": {
+    "opensDoors": [],
+    "destroys": [],
+    "rules": [
+      "Blue Player card for Frankfurt. Not a port. The compass has no anchor.",
+      "One SEARCH box. State 2 is the scratched face.",
+      "Companion Messenger: a free action, while this card is in your hand, moves Supply cubes from an adjacent location into your location. The printed word is location, not city."
+    ],
+    "notes": [
+      "Card id 10805. Scratch state card id 10713.",
+      "Coordinates are printed 50°6'39\"N 8°40'56\"E.",
+      "No improvement bullseye is printed. The scratch box covers the center.",
+      "Goes to the reserve when the package is opened."
+    ]
+  }
 }

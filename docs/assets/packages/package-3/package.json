@@ -1,314 +1,314 @@
 {
-	"name": "East Asia",
-	"bags": [
-		{
-			"name": "Shelters",
-			"description": "Six shelter figures. Rule N builds with them and moves one when none remain. Biodome Prototype places up to three of them.",
-			"guid": "1e877f",
-			"totalItems": 6,
-			"contents": {
-				"Shelter": 6
-			}
-		}
-	],
-	"boxImage": "box.jpg",
-	"cards": [
-		{
-			"index": 1,
-			"title": "Recon Report",
-			"category": "recon-report",
-			"copies": 1,
-			"json": "cards/card-01/card.json"
-		},
-		{
-			"index": 2,
-			"title": "Biodome Prototype",
-			"category": "unrationed-event",
-			"copies": 1,
-			"json": "cards/card-02_event/card.json"
-		},
-		{
-			"index": 3,
-			"title": "An Incomplete Plan",
-			"category": "plan",
-			"copies": 1,
-			"json": "cards/card-03/card.json"
-		},
-		{
-			"index": 4,
-			"title": "Jakarta",
-			"category": "player-card",
-			"color": "red",
-			"port": true,
-			"search": "Builder",
-			"copies": 1,
-			"json": "cards/card-04_jakarta/card.json"
-		},
-		{
-			"index": 5,
-			"title": "Jakarta",
-			"category": "infection-card",
-			"color": "red",
-			"printedCode": "P3-05b",
-			"copies": 1,
-			"json": "cards/card-05_jakarta/card.json"
-		},
-		{
-			"index": 6,
-			"title": "Bangkok",
-			"category": "player-card",
-			"color": "red",
-			"port": true,
-			"copies": 1,
-			"json": "cards/card-06_bangkok/card.json"
-		},
-		{
-			"index": 7,
-			"title": "Bangkok",
-			"category": "infection-card",
-			"color": "red",
-			"printedCode": "P3-07b",
-			"copies": 1,
-			"json": "cards/card-07_bangkok/card.json"
-		},
-		{
-			"index": 8,
-			"title": "Ho Chi Minh City",
-			"category": "player-card",
-			"color": "red",
-			"port": true,
-			"copies": 1,
-			"json": "cards/card-08_ho-chi-minh-city/card.json"
-		},
-		{
-			"index": 9,
-			"title": "Ho Chi Minh City",
-			"category": "infection-card",
-			"color": "red",
-			"printedCode": "P3-09b",
-			"copies": 1,
-			"json": "cards/card-09_ho-chi-minh-city/card.json"
-		},
-		{
-			"index": 10,
-			"title": "Manila",
-			"category": "player-card",
-			"color": "red",
-			"port": true,
-			"copies": 1,
-			"json": "cards/card-10_manila/card.json"
-		},
-		{
-			"index": 11,
-			"title": "Manila",
-			"category": "infection-card",
-			"color": "red",
-			"printedCode": "P3-11b",
-			"copies": 1,
-			"json": "cards/card-11_manila/card.json"
-		},
-		{
-			"index": 12,
-			"title": "Hong Kong",
-			"category": "player-card",
-			"color": "red",
-			"port": true,
-			"cardCompassMisprint": "no-anchor (board map sticker Door 56 shows a port anchor; board is authoritative)",
-			"search": "Structural Engineer",
-			"copies": 1,
-			"json": "cards/card-12_hong-kong/card.json"
-		},
-		{
-			"index": 13,
-			"title": "Hong Kong",
-			"category": "infection-card",
-			"color": "red",
-			"printedCode": "P3-13b",
-			"copies": 1,
-			"json": "cards/card-13_hong-kong/card.json"
-		},
-		{
-			"index": 14,
-			"title": "Shanghai",
-			"category": "player-card",
-			"color": "red",
-			"port": true,
-			"cardCompassMisprint": "no-anchor (board map sticker Door 56 shows a port anchor; board is authoritative)",
-			"search": "story only",
-			"copies": 1,
-			"json": "cards/card-14_shanghai/card.json"
-		},
-		{
-			"index": 15,
-			"title": "Shanghai",
-			"category": "infection-card",
-			"color": "red",
-			"printedCode": "P3-15b",
-			"copies": 1,
-			"json": "cards/card-15_shanghai/card.json"
-		},
-		{
-			"index": 16,
-			"title": "Osaka",
-			"category": "player-card",
-			"color": "red",
-			"port": true,
-			"search": "Local Resistance",
-			"copies": 1,
-			"json": "cards/card-16_osaka/card.json"
-		},
-		{
-			"index": 17,
-			"title": "Osaka",
-			"category": "infection-card",
-			"color": "red",
-			"printedCode": "P3-17b",
-			"copies": 1,
-			"json": "cards/card-17_osaka/card.json"
-		},
-		{
-			"index": 18,
-			"title": "Seoul",
-			"category": "player-card",
-			"color": "red",
-			"port": true,
-			"search": "free sea lane",
-			"copies": 1,
-			"json": "cards/card-18_seoul/card.json"
-		},
-		{
-			"index": 19,
-			"title": "Seoul",
-			"category": "infection-card",
-			"color": "red",
-			"printedCode": "P3-19b",
-			"copies": 1,
-			"json": "cards/card-19_seoul/card.json"
-		},
-		{
-			"index": 20,
-			"title": "Tokyo",
-			"category": "player-card",
-			"color": "red",
-			"port": true,
-			"search": "Spies",
-			"copies": 1,
-			"json": "cards/card-20_tokyo/card.json"
-		},
-		{
-			"index": 21,
-			"title": "Tokyo",
-			"category": "infection-card",
-			"color": "red",
-			"printedCode": "P3-21b",
-			"copies": 1,
-			"json": "cards/card-21_tokyo/card.json"
-		},
-		{
-			"index": 22,
-			"title": "Hollow Men Gather",
-			"category": "hollow-men-gather",
-			"printedCode": "P2-21b",
-			"copies": 1,
-			"json": "cards/card-22_hollow-men-gather/card.json"
-		},
-		{
-			"index": 23,
-			"title": "Hollow Men Gather",
-			"category": "hollow-men-gather",
-			"printedCode": "P2-21b",
-			"copies": 1,
-			"json": "cards/card-23_hollow-men-gather/card.json"
-		},
-		{
-			"index": 24,
-			"title": "Hollow Men Gather",
-			"category": "hollow-men-gather",
-			"printedCode": "P2-21b",
-			"copies": 2,
-			"json": "cards/card-24_hollow-men-gather/card.json"
-		}
-	],
-	"guid": "ded405",
-	"id": "package-3",
-	"number": 3,
-	"printedContents": {
-		"cards": 25,
-		"stickerCards": 5,
-		"shelterMiniatures": 6
-	},
-	"searchResults": {
-		"Jakarta": "Companion Builder. Play the card at any time to place a shelter on one grid city.",
-		"Hong Kong": "Companion Structural Engineer. While the card is in hand, Build Shelter may discard a City card of any color.",
-		"Shanghai": "Story only. Haven leaders were killed outside Utopia. No door and no instruction.",
-		"Osaka": "Companion Local Resistance. Play the card at any time to remove 1 Hollow Men figure from anywhere on the grid.",
-		"Seoul": "Immediately draw a free sea lane from Seoul to another city.",
-		"Tokyo": "Companion Spies. The card counts as 2 unique red cards for Recon. The A and B marks are those two counts, not doors."
-	},
-	"setup": {
-		"source": "P3-01b",
-		"opensDoors": [
-			"56",
-			"63"
-		],
-		"cityAddedToGrid": "Jakarta",
-		"playerDiscard": [
-			"Jakarta player card (P3-04b)"
-		],
-		"gameEnd": [
-			"Jakarta infection card (P3-05b)"
-		],
-		"infectionDiscard": [
-			"4 Hollow Men Gather cards (face printed P2-21b)"
-		],
-		"reserve": "Every other Player card and Infection card: Bangkok, Ho Chi Minh City, Manila, Hong Kong, Shanghai, Osaka, Seoul, and Tokyo. Also keep the recon report and An Incomplete Plan in the reserve.",
-		"toAPlayersHand": "Biodome Prototype (P3-02b)"
-	},
-	"stickers": [
-		{
-			"id": "sticker-01_rebirth",
-			"name": "Rebirth",
-			"copies": 2,
-			"costProductionUnits": 1,
-			"json": "stickers/sticker-01_rebirth.json"
-		},
-		{
-			"id": "sticker-02_permenant-shelter",
-			"name": "Permanent Shelter",
-			"copies": 5,
-			"costProductionUnits": 2,
-			"json": "stickers/sticker-02_permenant-shelter.json"
-		},
-		{
-			"id": "sticker-03",
-			"name": "Game End Upgrades",
-			"printedCode": "P3-29a",
-			"copies": 1,
-			"json": "stickers/sticker-03.json"
-		},
-		{
-			"id": "sticker-04_rule-v",
-			"name": "Rule V",
-			"copies": 1,
-			"json": "stickers/sticker-04_rule-v.json"
-		},
-		{
-			"id": "sticker-05_rule-n",
-			"name": "Rule N",
-			"copies": 1,
-			"json": "stickers/sticker-05_rule-n.json"
-		},
-		{
-			"id": "sticker-06",
-			"name": "Build Shelter",
-			"copies": 1,
-			"json": "stickers/sticker-06.json"
-		},
-		{
-			"id": "sticker-07",
-			"name": "Player reference instruction",
-			"copies": 1,
-			"json": "stickers/sticker-07.json"
-		}
-	]
+  "name": "East Asia",
+  "bags": [
+    {
+      "name": "Shelters",
+      "description": "Six shelter figures. Rule N builds with them and moves one when none remain. Biodome Prototype places up to three of them.",
+      "guid": "1e877f",
+      "totalItems": 6,
+      "contents": {
+        "Shelter": 6
+      }
+    }
+  ],
+  "boxImage": "box.jpg",
+  "cards": [
+    {
+      "index": 1,
+      "title": "Recon Report",
+      "category": "recon-report",
+      "copies": 1,
+      "json": "cards/card-01/card.json"
+    },
+    {
+      "index": 2,
+      "title": "Biodome Prototype",
+      "category": "unrationed-event",
+      "copies": 1,
+      "json": "cards/card-02_event/card.json"
+    },
+    {
+      "index": 3,
+      "title": "An Incomplete Plan",
+      "category": "plan",
+      "copies": 1,
+      "json": "cards/card-03/card.json"
+    },
+    {
+      "index": 4,
+      "title": "Jakarta",
+      "category": "player-card",
+      "color": "red",
+      "port": true,
+      "search": "Builder",
+      "copies": 1,
+      "json": "cards/card-04_jakarta/card.json"
+    },
+    {
+      "index": 5,
+      "title": "Jakarta",
+      "category": "infection-card",
+      "color": "red",
+      "printedCode": "P3-05b",
+      "copies": 1,
+      "json": "cards/card-05_jakarta/card.json"
+    },
+    {
+      "index": 6,
+      "title": "Bangkok",
+      "category": "player-card",
+      "color": "red",
+      "port": true,
+      "copies": 1,
+      "json": "cards/card-06_bangkok/card.json"
+    },
+    {
+      "index": 7,
+      "title": "Bangkok",
+      "category": "infection-card",
+      "color": "red",
+      "printedCode": "P3-07b",
+      "copies": 1,
+      "json": "cards/card-07_bangkok/card.json"
+    },
+    {
+      "index": 8,
+      "title": "Ho Chi Minh City",
+      "category": "player-card",
+      "color": "red",
+      "port": true,
+      "copies": 1,
+      "json": "cards/card-08_ho-chi-minh-city/card.json"
+    },
+    {
+      "index": 9,
+      "title": "Ho Chi Minh City",
+      "category": "infection-card",
+      "color": "red",
+      "printedCode": "P3-09b",
+      "copies": 1,
+      "json": "cards/card-09_ho-chi-minh-city/card.json"
+    },
+    {
+      "index": 10,
+      "title": "Manila",
+      "category": "player-card",
+      "color": "red",
+      "port": true,
+      "copies": 1,
+      "json": "cards/card-10_manila/card.json"
+    },
+    {
+      "index": 11,
+      "title": "Manila",
+      "category": "infection-card",
+      "color": "red",
+      "printedCode": "P3-11b",
+      "copies": 1,
+      "json": "cards/card-11_manila/card.json"
+    },
+    {
+      "index": 12,
+      "title": "Hong Kong",
+      "category": "player-card",
+      "color": "red",
+      "port": true,
+      "cardCompassMisprint": "no-anchor (board map sticker Door 56 shows a port anchor; board is authoritative)",
+      "search": "Structural Engineer",
+      "copies": 1,
+      "json": "cards/card-12_hong-kong/card.json"
+    },
+    {
+      "index": 13,
+      "title": "Hong Kong",
+      "category": "infection-card",
+      "color": "red",
+      "printedCode": "P3-13b",
+      "copies": 1,
+      "json": "cards/card-13_hong-kong/card.json"
+    },
+    {
+      "index": 14,
+      "title": "Shanghai",
+      "category": "player-card",
+      "color": "red",
+      "port": true,
+      "cardCompassMisprint": "no-anchor (board map sticker Door 56 shows a port anchor; board is authoritative)",
+      "search": "story only",
+      "copies": 1,
+      "json": "cards/card-14_shanghai/card.json"
+    },
+    {
+      "index": 15,
+      "title": "Shanghai",
+      "category": "infection-card",
+      "color": "red",
+      "printedCode": "P3-15b",
+      "copies": 1,
+      "json": "cards/card-15_shanghai/card.json"
+    },
+    {
+      "index": 16,
+      "title": "Osaka",
+      "category": "player-card",
+      "color": "red",
+      "port": true,
+      "search": "Local Resistance",
+      "copies": 1,
+      "json": "cards/card-16_osaka/card.json"
+    },
+    {
+      "index": 17,
+      "title": "Osaka",
+      "category": "infection-card",
+      "color": "red",
+      "printedCode": "P3-17b",
+      "copies": 1,
+      "json": "cards/card-17_osaka/card.json"
+    },
+    {
+      "index": 18,
+      "title": "Seoul",
+      "category": "player-card",
+      "color": "red",
+      "port": true,
+      "search": "free sea lane",
+      "copies": 1,
+      "json": "cards/card-18_seoul/card.json"
+    },
+    {
+      "index": 19,
+      "title": "Seoul",
+      "category": "infection-card",
+      "color": "red",
+      "printedCode": "P3-19b",
+      "copies": 1,
+      "json": "cards/card-19_seoul/card.json"
+    },
+    {
+      "index": 20,
+      "title": "Tokyo",
+      "category": "player-card",
+      "color": "red",
+      "port": true,
+      "search": "Spies",
+      "copies": 1,
+      "json": "cards/card-20_tokyo/card.json"
+    },
+    {
+      "index": 21,
+      "title": "Tokyo",
+      "category": "infection-card",
+      "color": "red",
+      "printedCode": "P3-21b",
+      "copies": 1,
+      "json": "cards/card-21_tokyo/card.json"
+    },
+    {
+      "index": 22,
+      "title": "Hollow Men Gather",
+      "category": "hollow-men-gather",
+      "printedCode": "P2-21b",
+      "copies": 1,
+      "json": "cards/card-22_hollow-men-gather/card.json"
+    },
+    {
+      "index": 23,
+      "title": "Hollow Men Gather",
+      "category": "hollow-men-gather",
+      "printedCode": "P2-21b",
+      "copies": 1,
+      "json": "cards/card-23_hollow-men-gather/card.json"
+    },
+    {
+      "index": 24,
+      "title": "Hollow Men Gather",
+      "category": "hollow-men-gather",
+      "printedCode": "P2-21b",
+      "copies": 2,
+      "json": "cards/card-24_hollow-men-gather/card.json"
+    }
+  ],
+  "guid": "ded405",
+  "id": "package-3",
+  "number": 3,
+  "printedContents": {
+    "cards": 25,
+    "stickerCards": 5,
+    "shelterMiniatures": 6
+  },
+  "searchResults": {
+    "Jakarta": "Companion Builder. Play the card at any time to place a shelter on one grid city.",
+    "Hong Kong": "Companion Structural Engineer. While the card is in hand, Build Shelter may discard a City card of any color.",
+    "Shanghai": "Story only. Haven leaders were killed outside Utopia. No door and no instruction.",
+    "Osaka": "Companion Local Resistance. Play the card at any time to remove 1 Hollow Men figure from anywhere on the grid.",
+    "Seoul": "Immediately draw a free sea lane from Seoul to another city.",
+    "Tokyo": "Companion Spies. The card counts as 2 unique red cards for Recon. The A and B marks are those two counts, not doors."
+  },
+  "setup": {
+    "source": "P3-01b",
+    "opensDoors": [
+      "56",
+      "63"
+    ],
+    "cityAddedToGrid": "Jakarta",
+    "playerDiscard": [
+      "Jakarta player card (P3-04b)"
+    ],
+    "gameEnd": [
+      "Jakarta infection card (P3-05b)"
+    ],
+    "infectionDiscard": [
+      "4 Hollow Men Gather cards (face printed P2-21b)"
+    ],
+    "reserve": "Every other Player card and Infection card: Bangkok, Ho Chi Minh City, Manila, Hong Kong, Shanghai, Osaka, Seoul, and Tokyo. Also keep the recon report and An Incomplete Plan in the reserve.",
+    "toAPlayersHand": "Biodome Prototype (P3-02b)"
+  },
+  "stickers": [
+    {
+      "id": "sticker-01_rebirth",
+      "name": "Rebirth",
+      "copies": 2,
+      "costProductionUnits": 1,
+      "json": "stickers/sticker-01_rebirth.json"
+    },
+    {
+      "id": "sticker-02_permenant-shelter",
+      "name": "Permanent Shelter",
+      "copies": 5,
+      "costProductionUnits": 2,
+      "json": "stickers/sticker-02_permenant-shelter.json"
+    },
+    {
+      "id": "sticker-03",
+      "name": "Game End Upgrades",
+      "printedCode": "P3-29a",
+      "copies": 1,
+      "json": "stickers/sticker-03.json"
+    },
+    {
+      "id": "sticker-04_rule-v",
+      "name": "Rule V",
+      "copies": 1,
+      "json": "stickers/sticker-04_rule-v.json"
+    },
+    {
+      "id": "sticker-05_rule-n",
+      "name": "Rule N",
+      "copies": 1,
+      "json": "stickers/sticker-05_rule-n.json"
+    },
+    {
+      "id": "sticker-06",
+      "name": "Build Shelter",
+      "copies": 1,
+      "json": "stickers/sticker-06.json"
+    },
+    {
+      "id": "sticker-07",
+      "name": "Player reference instruction",
+      "copies": 1,
+      "json": "stickers/sticker-07.json"
+    }
+  ]
 }

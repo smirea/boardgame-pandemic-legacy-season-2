@@ -1,22 +1,22 @@
 {
-	"id": "sticker-03_rule-s",
-	"package": 2,
-	"printedCode": "S",
-	"name": "Hollow Men Gather",
-	"category": "rule",
-	"placementTarget": "Rulebook page 14, Infections, rule sticker S, the first empty box under the infect-a-city paragraph.",
-	"costProductionUnits": null,
-	"copies": 1,
-	"image": "sticker-03_rule-s.jpg",
-	"summary": "Title HOLLOW MEN GATHER. If you draw a Hollow Men Gather card, keep drawing until you draw an Infection card with a city on it, and discard any other Hollow Men Gather cards drawn. Add exactly 1 Hollow Men figure to the first Infection card with a city on it. Do not remove a Supply cube or add a Plague cube to that city. If the city already has 3 Hollow Men figures, do not place a 4th figure. Instead, immediately reduce the population of that city by 1. The letter S is the rulebook slot. It is not printed on the sticker.",
-	"mechanics": {
-		"timing": "When a Hollow Men Gather card is drawn.",
-		"effect": "Keep drawing until an Infection card with a city on it appears. Discard the extra Gather cards. Put exactly 1 Hollow Men figure in that city and do not perform the normal infect (no Supply cube removed, no Plague cube added). A city that already has 3 figures does not receive a 4th. It immediately loses 1 population instead.",
-		"restrictions": [
-			"Exactly 1 figure, on the first city card drawn.",
-			"The population loss for a 4th figure is immediate. It is not saved for Game End.",
-			"The Gather card's own text is the short form of this procedure. This sticker adds the supply, plague, and 3-figure cap."
-		],
-		"opensDoors": []
-	}
+  "id": "sticker-03_rule-s",
+  "package": 2,
+  "printedCode": "S",
+  "name": "Hollow Men Gather",
+  "category": "rule",
+  "placementTarget": "Rulebook page 14, Infections, rule sticker S, the first empty box under the infect-a-city paragraph.",
+  "costProductionUnits": null,
+  "copies": 1,
+  "image": "sticker-03_rule-s.jpg",
+  "summary": "Title HOLLOW MEN GATHER. If you draw a Hollow Men Gather card, keep drawing until you draw an Infection card with a city on it, and discard any other Hollow Men Gather cards drawn. Add exactly 1 Hollow Men figure to the first Infection card with a city on it. Do not remove a Supply cube or add a Plague cube to that city. If the city already has 3 Hollow Men figures, do not place a 4th figure. Instead, immediately reduce the population of that city by 1. The letter S is the rulebook slot. It is not printed on the sticker.",
+  "mechanics": {
+    "timing": "When a Hollow Men Gather card is drawn.",
+    "effect": "Keep drawing until an Infection card with a city on it appears. Discard the extra Gather cards. Put exactly 1 Hollow Men figure in that city and do not perform the normal infect (no Supply cube removed, no Plague cube added). A city that already has 3 figures does not receive a 4th. It immediately loses 1 population instead.",
+    "restrictions": [
+      "Exactly 1 figure, on the first city card drawn.",
+      "The population loss for a 4th figure is immediate. It is not saved for Game End.",
+      "The Gather card's own text is the short form of this procedure. This sticker adds the supply, plague, and 3-figure cap."
+    ],
+    "opensDoors": []
+  }
 }

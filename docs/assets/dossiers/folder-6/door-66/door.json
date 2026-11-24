@@ -1,113 +1,120 @@
 {
-	"door": "66",
-	"folder": 6,
-	"id": "door-66",
-	"guid": "9e3cb0",
-	"frontImage": "dossiers/folder-6/door-66/front.jpg",
-	"frontText": "Navy 66 centered on a yellow door card. Dashed cut-line border. No other printed text.",
-	"items": [
-		{
-			"id": "item-01",
-			"image": "dossiers/folder-6/door-66/item-01.jpg",
-			"count": 1,
-			"printedCode": null,
-			"category": "map-sticker",
-			"title": "North America",
-			"placementTarget": "Board, over North America west of the Atlantic cities. Graticule shows 40°N, 20°N, 120°W, and 100°W.",
-			"text": null,
-			"mapDetails": {
-				"cities": [
-					{
-						"name": "San Francisco",
-						"color": "blue",
-						"population": 2,
-						"port": true,
-						"infested": false,
-						"lab": null,
-						"marker": "anchor",
-						"lat": 37.8,
-						"lon": -122.4,
-						"graticule": "Just south of the printed 40°N label and west of the printed 120°W meridian. Population 2 square is south of the disc."
-					},
-					{
-						"name": "Los Angeles",
-						"color": "yellow",
-						"population": 1,
-						"port": true,
-						"infested": false,
-						"lab": null,
-						"marker": "anchor",
-						"lat": 34.1,
-						"lon": -118.2,
-						"graticule": "South of San Francisco and north of the printed 20°N line, on the coast. Population 1 square is east of the disc."
-					},
-					{
-						"name": "Denver",
-						"color": "blue",
-						"population": 2,
-						"port": false,
-						"infested": false,
-						"lab": null,
-						"marker": "inland-x",
-						"lat": 39.7,
-						"lon": -105.0,
-						"graticule": "Inland, near 40°N, between the 120°W and 100°W meridians. Population 2 square is east of the disc."
-					},
-					{
-						"name": "Chicago",
-						"color": "blue",
-						"population": 2,
-						"port": false,
-						"infested": false,
-						"lab": null,
-						"marker": "inland-x",
-						"lat": 41.9,
-						"lon": -87.6,
-						"graticule": "Northeast corner. Population 2 square is above and right of the name. East of the 100°W meridian."
-					},
-					{
-						"name": "Atlanta",
-						"color": "blue",
-						"population": 1,
-						"port": false,
-						"infested": false,
-						"lab": null,
-						"marker": "inland-x",
-						"lat": 33.7,
-						"lon": -84.4,
-						"graticule": "Southeast of Denver, north of 20°N. The name is west of the disc. Population 1 square is west of the disc."
-					},
-					{
-						"name": "Mexico City",
-						"color": "yellow",
-						"population": 1,
-						"port": false,
-						"infested": false,
-						"lab": null,
-						"marker": "inland-x",
-						"lat": 19.4,
-						"lon": -99.1,
-						"graticule": "Just north of the printed 20°N line and just west of the printed 100°W meridian. Population 1 square is east of the disc."
-					}
-				],
-				"havens": [],
-				"printedRoutes": [
-					{
-						"from": "Chicago",
-						"to": "off-sticker east (Washington)",
-						"type": "supply_line",
-						"notes": "A black land line leaves the Chicago disc toward the east and exits the right edge. Washington is the starting-board city in that direction; its name is not printed here."
-					}
-				],
-				"reconRoutes": [],
-				"redRegionLines": [],
-				"specialAreas": []
-			},
-			"mechanics": {
-				"addsCities": ["San Francisco", "Los Angeles", "Denver", "Chicago", "Atlanta", "Mexico City"],
-				"notes": "San Francisco, Denver, Chicago, and Atlanta are blue. Los Angeles and Mexico City are yellow. San Francisco and Los Angeles are the only ports. San Francisco, Denver, and Chicago are population 2; Atlanta, Los Angeles, and Mexico City are population 1. None are infested. No recon box and no red region line."
-			}
-		}
-	],
-	"summary": "North America. Blue: San Francisco port 2, Denver inland 2, Chicago inland 2, Atlanta inland 1. Yellow: Los Angeles port 1, Mexico City inland 1. A supply line runs from Chicago off the east edge toward Washington. No infestation, recon, or red region line."
+  "door": "66",
+  "folder": 6,
+  "id": "door-66",
+  "guid": "9e3cb0",
+  "frontImage": "dossiers/folder-6/door-66/front.jpg",
+  "frontText": "Navy 66 centered on a yellow door card. Dashed cut-line border. No other printed text.",
+  "items": [
+    {
+      "id": "item-01",
+      "image": "dossiers/folder-6/door-66/item-01.jpg",
+      "count": 1,
+      "printedCode": null,
+      "category": "map-sticker",
+      "title": "North America",
+      "placementTarget": "Board, over North America west of the Atlantic cities. Graticule shows 40°N, 20°N, 120°W, and 100°W.",
+      "text": null,
+      "mapDetails": {
+        "cities": [
+          {
+            "name": "San Francisco",
+            "color": "blue",
+            "population": 2,
+            "port": true,
+            "infested": false,
+            "lab": null,
+            "marker": "anchor",
+            "lat": 37.8,
+            "lon": -122.4,
+            "graticule": "Just south of the printed 40°N label and west of the printed 120°W meridian. Population 2 square is south of the disc."
+          },
+          {
+            "name": "Los Angeles",
+            "color": "yellow",
+            "population": 1,
+            "port": true,
+            "infested": false,
+            "lab": null,
+            "marker": "anchor",
+            "lat": 34.1,
+            "lon": -118.2,
+            "graticule": "South of San Francisco and north of the printed 20°N line, on the coast. Population 1 square is east of the disc."
+          },
+          {
+            "name": "Denver",
+            "color": "blue",
+            "population": 2,
+            "port": false,
+            "infested": false,
+            "lab": null,
+            "marker": "inland-x",
+            "lat": 39.7,
+            "lon": -105.0,
+            "graticule": "Inland, near 40°N, between the 120°W and 100°W meridians. Population 2 square is east of the disc."
+          },
+          {
+            "name": "Chicago",
+            "color": "blue",
+            "population": 2,
+            "port": false,
+            "infested": false,
+            "lab": null,
+            "marker": "inland-x",
+            "lat": 41.9,
+            "lon": -87.6,
+            "graticule": "Northeast corner. Population 2 square is above and right of the name. East of the 100°W meridian."
+          },
+          {
+            "name": "Atlanta",
+            "color": "blue",
+            "population": 1,
+            "port": false,
+            "infested": false,
+            "lab": null,
+            "marker": "inland-x",
+            "lat": 33.7,
+            "lon": -84.4,
+            "graticule": "Southeast of Denver, north of 20°N. The name is west of the disc. Population 1 square is west of the disc."
+          },
+          {
+            "name": "Mexico City",
+            "color": "yellow",
+            "population": 1,
+            "port": false,
+            "infested": false,
+            "lab": null,
+            "marker": "inland-x",
+            "lat": 19.4,
+            "lon": -99.1,
+            "graticule": "Just north of the printed 20°N line and just west of the printed 100°W meridian. Population 1 square is east of the disc."
+          }
+        ],
+        "havens": [],
+        "printedRoutes": [
+          {
+            "from": "Chicago",
+            "to": "off-sticker east (Washington)",
+            "type": "supply_line",
+            "notes": "A black land line leaves the Chicago disc toward the east and exits the right edge. Washington is the starting-board city in that direction; its name is not printed here."
+          }
+        ],
+        "reconRoutes": [],
+        "redRegionLines": [],
+        "specialAreas": []
+      },
+      "mechanics": {
+        "addsCities": [
+          "San Francisco",
+          "Los Angeles",
+          "Denver",
+          "Chicago",
+          "Atlanta",
+          "Mexico City"
+        ],
+        "notes": "San Francisco, Denver, Chicago, and Atlanta are blue. Los Angeles and Mexico City are yellow. San Francisco and Los Angeles are the only ports. San Francisco, Denver, and Chicago are population 2; Atlanta, Los Angeles, and Mexico City are population 1. None are infested. No recon box and no red region line."
+      }
+    }
+  ],
+  "summary": "North America. Blue: San Francisco port 2, Denver inland 2, Chicago inland 2, Atlanta inland 1. Yellow: Los Angeles port 1, Mexico City inland 1. A supply line runs from Chicago off the east edge toward Washington. No infestation, recon, or red region line."
 }

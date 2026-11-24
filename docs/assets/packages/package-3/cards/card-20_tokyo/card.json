@@ -1,60 +1,60 @@
 {
-	"package": 3,
-	"index": 20,
-	"cardId": 10719,
-	"printedCodes": {
-		"sideA": null,
-		"sideB": "P3-20b"
-	},
-	"title": "Tokyo",
-	"category": "player-card",
-	"city": "Tokyo",
-	"color": "red",
-	"coordinates": "35°41'22\"N 139°41'30\"E",
-	"port": true,
-	"copies": 1,
-	"hasImprovementSlot": false,
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideASummary": "Player deck back. Dark blue sunburst around a haven on the water. No text and no printed code.",
-	"sideBSummary": "Tokyo, red Player card. Coordinates 35°41'22\"N 139°41'30\"E. The compass has an anchor, so the city is a port. One covered SEARCH box fills the map. The city name and coordinates repeat upside down along the bottom. Printed code P3-20b.",
-	"searchBoxes": [
-		{
-			"type": "search",
-			"stateRevealed": 2,
-			"isCompanion": true,
-			"companionName": "Spies",
-			"opensDoors": [],
-			"effectSummary": "Companion Spies. This card counts as 2 unique red cards for the Recon action. Two red squares marked A and B show the two counts. They are not doors."
-		}
-	],
-	"states": [
-		{
-			"state": 2,
-			"cardId": 10730,
-			"images": {
-				"sideA": "state-2-side-a.jpg",
-				"sideB": "state-2-side-b.jpg"
-			},
-			"summary": "Same Player back. The SEARCH box is scratched. Companion Spies. This card counts as 2 unique red cards for the Recon action. Two red squares marked A and B show the two counts. They are not doors."
-		}
-	],
-	"mechanics": {
-		"opensDoors": [],
-		"destroys": false,
-		"rules": [
-			"Red Player card for Tokyo. Port: the compass has an anchor.",
-			"One SEARCH box. State 2 is that box scratched. Side A stays the Player deck back.",
-			"The scratch reveals Companion Spies. For the Recon action, this one card counts as 2 unique red cards.",
-			"The red squares labeled A and B are the two counts. They are not door codes, and this search opens nothing."
-		],
-		"notes": [
-			"Card id 10719. State 2 card id 10730. One copy.",
-			"Coordinates 35°41'22\"N 139°41'30\"E. Printed code P3-20b stays on the scratched face.",
-			"Goes to the reserve when the package is opened.",
-			"The picture is two masked figures."
-		]
-	}
+  "package": 3,
+  "index": 20,
+  "cardId": 10719,
+  "printedCodes": {
+    "sideA": null,
+    "sideB": "P3-20b"
+  },
+  "title": "Tokyo",
+  "category": "player-card",
+  "city": "Tokyo",
+  "color": "red",
+  "coordinates": "35°41'22\"N 139°41'30\"E",
+  "port": true,
+  "copies": 1,
+  "hasImprovementSlot": false,
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideASummary": "Player deck back. Dark blue sunburst around a haven on the water. No text and no printed code.",
+  "sideBSummary": "Tokyo, red Player card. Coordinates 35°41'22\"N 139°41'30\"E. The compass has an anchor, so the city is a port. One covered SEARCH box fills the map. The city name and coordinates repeat upside down along the bottom. Printed code P3-20b.",
+  "searchBoxes": [
+    {
+      "type": "search",
+      "stateRevealed": 2,
+      "isCompanion": true,
+      "companionName": "Spies",
+      "opensDoors": [],
+      "effectSummary": "Companion Spies. This card counts as 2 unique red cards for the Recon action. Two red squares marked A and B show the two counts. They are not doors."
+    }
+  ],
+  "states": [
+    {
+      "state": 2,
+      "cardId": 10730,
+      "images": {
+        "sideA": "state-2-side-a.jpg",
+        "sideB": "state-2-side-b.jpg"
+      },
+      "summary": "Same Player back. The SEARCH box is scratched. Companion Spies. This card counts as 2 unique red cards for the Recon action. Two red squares marked A and B show the two counts. They are not doors."
+    }
+  ],
+  "mechanics": {
+    "opensDoors": [],
+    "destroys": false,
+    "rules": [
+      "Red Player card for Tokyo. Port: the compass has an anchor.",
+      "One SEARCH box. State 2 is that box scratched. Side A stays the Player deck back.",
+      "The scratch reveals Companion Spies. For the Recon action, this one card counts as 2 unique red cards.",
+      "The red squares labeled A and B are the two counts. They are not door codes, and this search opens nothing."
+    ],
+    "notes": [
+      "Card id 10719. State 2 card id 10730. One copy.",
+      "Coordinates 35°41'22\"N 139°41'30\"E. Printed code P3-20b stays on the scratched face.",
+      "Goes to the reserve when the package is opened.",
+      "The picture is two masked figures."
+    ]
+  }
 }

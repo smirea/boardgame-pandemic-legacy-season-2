@@ -1,23 +1,23 @@
 {
-	"id": "sticker-04_rule-v",
-	"package": 3,
-	"guid": "66402c",
-	"printedCode": null,
-	"name": "Rule V",
-	"category": "rule",
-	"placementTarget": "Rulebook Game End, step 1 Adjust Population, as step a. The manual's last page says Rule Sticker V gives step a and to skip it until this sticker is placed.",
-	"costProductionUnits": null,
-	"copies": 1,
-	"image": "sticker-04_rule-v.jpg",
-	"summary": "Step a. Do not decrease the population of cities that contain a shelter. Skip steps b and c below for those cities. No P3 code is printed on the sticker. The rule letter V is the manual's name for this slot.",
-	"mechanics": {
-		"timing": "Game end, step 1 Adjust Population, step a. It is in force once the sticker is in the rulebook.",
-		"effect": "A city that contains a shelter does not lose population in this step. Skip step b (the plague-cube decrease) and step c for that city. Step c is the slot the manual reserves for Rule Sticker W.",
-		"restrictions": [
-			"Only cities that contain a shelter.",
-			"The sticker names steps b and c. It does not say to skip step d, the supply-center increase.",
-			"No door and no production cost."
-		],
-		"opensDoors": []
-	}
+  "id": "sticker-04_rule-v",
+  "package": 3,
+  "guid": "66402c",
+  "printedCode": null,
+  "name": "Rule V",
+  "category": "rule",
+  "placementTarget": "Rulebook Game End, step 1 Adjust Population, as step a. The manual's last page says Rule Sticker V gives step a and to skip it until this sticker is placed.",
+  "costProductionUnits": null,
+  "copies": 1,
+  "image": "sticker-04_rule-v.jpg",
+  "summary": "Step a. Do not decrease the population of cities that contain a shelter. Skip steps b and c below for those cities. No P3 code is printed on the sticker. The rule letter V is the manual's name for this slot.",
+  "mechanics": {
+    "timing": "Game end, step 1 Adjust Population, step a. It is in force once the sticker is in the rulebook.",
+    "effect": "A city that contains a shelter does not lose population in this step. Skip step b (the plague-cube decrease) and step c for that city. Step c is the slot the manual reserves for Rule Sticker W.",
+    "restrictions": [
+      "Only cities that contain a shelter.",
+      "The sticker names steps b and c. It does not say to skip step d, the supply-center increase.",
+      "No door and no production cost."
+    ],
+    "opensDoors": []
+  }
 }

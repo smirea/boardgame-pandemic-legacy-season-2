@@ -1,59 +1,59 @@
 {
-	"package": 3,
-	"index": 14,
-	"cardId": 10713,
-	"printedCodes": {
-		"sideA": null,
-		"sideB": "P3-14b"
-	},
-	"title": "Shanghai",
-	"category": "player-card",
-	"city": "Shanghai",
-	"color": "red",
-	"coordinates": "31°13'50\"N 121°28'25\"E",
-	"port": true,
-	"cardCompassMisprint": "no-anchor (board map sticker Door 56 shows a port anchor; board is authoritative)",
-	"copies": 1,
-	"hasImprovementSlot": false,
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideASummary": "Player deck back. Dark blue sunburst around a haven on the water. No text and no printed code.",
-	"sideBSummary": "Shanghai, red Player card. Coordinates 31°13'50\"N 121°28'25\"E. The compass has no anchor, so the city is not a port. One covered SEARCH box fills the map. The city name and coordinates repeat upside down along the bottom. Printed code P3-14b.",
-	"searchBoxes": [
-		{
-			"type": "search",
-			"stateRevealed": 2,
-			"isCompanion": false,
-			"companionName": null,
-			"opensDoors": [],
-			"effectSummary": "Story only. Haven leaders were found dead outside Utopia's walls, shot where they had asked to be let in. Utopia accepts no outsiders and leaves no survivors. No game instruction and no door."
-		}
-	],
-	"states": [
-		{
-			"state": 2,
-			"cardId": 10727,
-			"images": {
-				"sideA": "state-2-side-a.jpg",
-				"sideB": "state-2-side-b.jpg"
-			},
-			"summary": "Same Player back. The SEARCH box is scratched. Story only. Haven leaders were found dead outside Utopia's walls, shot where they had asked to be let in. Utopia accepts no outsiders and leaves no survivors. No game instruction and no door."
-		}
-	],
-	"mechanics": {
-		"opensDoors": [],
-		"destroys": false,
-		"rules": [
-			"Red Player card for Shanghai. Not a port: the compass has no anchor.",
-			"One SEARCH box. State 2 is that box scratched. Side A stays the Player deck back.",
-			"The revealed text is a report, not a companion and not an instruction. It opens no door and changes no rule."
-		],
-		"notes": [
-			"Card id 10713. State 2 card id 10727. One copy.",
-			"Coordinates 31°13'50\"N 121°28'25\"E. Printed code P3-14b stays on the scratched face.",
-			"Goes to the reserve when the package is opened."
-		]
-	}
+  "package": 3,
+  "index": 14,
+  "cardId": 10713,
+  "printedCodes": {
+    "sideA": null,
+    "sideB": "P3-14b"
+  },
+  "title": "Shanghai",
+  "category": "player-card",
+  "city": "Shanghai",
+  "color": "red",
+  "coordinates": "31°13'50\"N 121°28'25\"E",
+  "port": true,
+  "cardCompassMisprint": "no-anchor (board map sticker Door 56 shows a port anchor; board is authoritative)",
+  "copies": 1,
+  "hasImprovementSlot": false,
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideASummary": "Player deck back. Dark blue sunburst around a haven on the water. No text and no printed code.",
+  "sideBSummary": "Shanghai, red Player card. Coordinates 31°13'50\"N 121°28'25\"E. The compass has no anchor, so the city is not a port. One covered SEARCH box fills the map. The city name and coordinates repeat upside down along the bottom. Printed code P3-14b.",
+  "searchBoxes": [
+    {
+      "type": "search",
+      "stateRevealed": 2,
+      "isCompanion": false,
+      "companionName": null,
+      "opensDoors": [],
+      "effectSummary": "Story only. Haven leaders were found dead outside Utopia's walls, shot where they had asked to be let in. Utopia accepts no outsiders and leaves no survivors. No game instruction and no door."
+    }
+  ],
+  "states": [
+    {
+      "state": 2,
+      "cardId": 10727,
+      "images": {
+        "sideA": "state-2-side-a.jpg",
+        "sideB": "state-2-side-b.jpg"
+      },
+      "summary": "Same Player back. The SEARCH box is scratched. Story only. Haven leaders were found dead outside Utopia's walls, shot where they had asked to be let in. Utopia accepts no outsiders and leaves no survivors. No game instruction and no door."
+    }
+  ],
+  "mechanics": {
+    "opensDoors": [],
+    "destroys": false,
+    "rules": [
+      "Red Player card for Shanghai. Not a port: the compass has no anchor.",
+      "One SEARCH box. State 2 is that box scratched. Side A stays the Player deck back.",
+      "The revealed text is a report, not a companion and not an instruction. It opens no door and changes no rule."
+    ],
+    "notes": [
+      "Card id 10713. State 2 card id 10727. One copy.",
+      "Coordinates 31°13'50\"N 121°28'25\"E. Printed code P3-14b stays on the scratched face.",
+      "Goes to the reserve when the package is opened."
+    ]
+  }
 }

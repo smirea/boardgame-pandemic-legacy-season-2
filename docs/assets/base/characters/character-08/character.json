@@ -1,86 +1,86 @@
 {
-	"id": "character-08",
-	"guid": "3b8f6f",
-	"cardCode": null,
-	"images": {
-		"blankFront": "../blank-front.jpg",
-		"back": "../back.jpg",
-		"states": [
-			{
-				"state": 2,
-				"image": "state-2.jpg"
-			},
-			{
-				"state": 3,
-				"image": "state-3.jpg"
-			},
-			{
-				"state": 4,
-				"image": "state-4.jpg"
-			},
-			{
-				"state": 5,
-				"image": "state-5.jpg"
-			},
-			{
-				"state": 6,
-				"image": "state-6.jpg"
-			},
-			{
-				"state": 7,
-				"image": "state-7.jpg",
-				"identicalToState": 6
-			},
-			{
-				"state": 8,
-				"image": "state-8.jpg",
-				"identicalToState": 6
-			}
-		]
-	},
-	"exposureTrack": [
-		{
-			"box": 1,
-			"result": "safe",
-			"revealedInState": 2,
-			"notes": "Scratched blank. The foil is gone and the cream card shows through, with no symbol."
-		},
-		{
-			"box": 2,
-			"result": "scar",
-			"revealedInState": 3,
-			"notes": "Red scratch mark, the scar symbol."
-		},
-		{
-			"box": 3,
-			"result": "scar",
-			"revealedInState": 4,
-			"notes": "Red scratch mark, the scar symbol."
-		},
-		{
-			"box": 4,
-			"result": "safe",
-			"revealedInState": 5,
-			"notes": "Scratched blank. The foil is gone and the cream card shows through, with no symbol."
-		},
-		{
-			"box": 5,
-			"result": "skull",
-			"revealedInState": 6,
-			"notes": "Red skull. This exposure kills the character. state-6.jpg through state-8.jpg are the same image."
-		},
-		{
-			"box": 6,
-			"result": null,
-			"revealedInState": null,
-			"notes": "Gray scratch-off foil still intact. The box was never scratched; the character is already dead."
-		},
-		{
-			"box": 7,
-			"result": null,
-			"revealedInState": null,
-			"notes": "Gray scratch-off foil still intact. The box was never scratched; the character is already dead."
-		}
-	],
-	"summary": "7 boxes: safe, scar, scar, safe, skull, unrevealed, unrevealed. The 5th exposure is a skull (2 scars before death)."
+  "id": "character-08",
+  "guid": "3b8f6f",
+  "cardCode": null,
+  "images": {
+    "blankFront": "../blank-front.jpg",
+    "back": "../back.jpg",
+    "states": [
+      {
+        "state": 2,
+        "image": "state-2.jpg"
+      },
+      {
+        "state": 3,
+        "image": "state-3.jpg"
+      },
+      {
+        "state": 4,
+        "image": "state-4.jpg"
+      },
+      {
+        "state": 5,
+        "image": "state-5.jpg"
+      },
+      {
+        "state": 6,
+        "image": "state-6.jpg"
+      },
+      {
+        "state": 7,
+        "image": "state-7.jpg",
+        "identicalToState": 6
+      },
+      {
+        "state": 8,
+        "image": "state-8.jpg",
+        "identicalToState": 6
+      }
+    ]
+  },
+  "exposureTrack": [
+    {
+      "box": 1,
+      "result": "safe",
+      "revealedInState": 2,
+      "notes": "Scratched blank. The foil is gone and the cream card shows through, with no symbol."
+    },
+    {
+      "box": 2,
+      "result": "scar",
+      "revealedInState": 3,
+      "notes": "Red scratch mark, the scar symbol."
+    },
+    {
+      "box": 3,
+      "result": "scar",
+      "revealedInState": 4,
+      "notes": "Red scratch mark, the scar symbol."
+    },
+    {
+      "box": 4,
+      "result": "safe",
+      "revealedInState": 5,
+      "notes": "Scratched blank. The foil is gone and the cream card shows through, with no symbol."
+    },
+    {
+      "box": 5,
+      "result": "skull",
+      "revealedInState": 6,
+      "notes": "Red skull. This exposure kills the character. state-6.jpg through state-8.jpg are the same image."
+    },
+    {
+      "box": 6,
+      "result": null,
+      "revealedInState": null,
+      "notes": "Gray scratch-off foil still intact. The box was never scratched; the character is already dead."
+    },
+    {
+      "box": 7,
+      "result": null,
+      "revealedInState": null,
+      "notes": "Gray scratch-off foil still intact. The box was never scratched; the character is already dead."
+    }
+  ],
+  "summary": "7 boxes: safe, scar, scar, safe, skull, unrevealed, unrevealed. The 5th exposure is a skull (2 scars before death)."
 }

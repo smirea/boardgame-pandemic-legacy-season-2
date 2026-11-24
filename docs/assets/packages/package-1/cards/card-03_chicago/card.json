@@ -1,58 +1,58 @@
 {
-	"package": 1,
-	"index": 3,
-	"cardId": 902,
-	"printedCodes": {
-		"sideA": null,
-		"sideB": "P1-03b"
-	},
-	"title": "Chicago",
-	"category": "player-card",
-	"city": "Chicago",
-	"color": "blue",
-	"coordinates": "41°52'41\"N 87°37'47\"W",
-	"copies": 1,
-	"hasImprovementSlot": false,
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideASummary": "Player deck back. No text and no printed code.",
-	"sideBSummary": "Blue Chicago Player card, 41°52'41\"N 87°37'47\"W. One covered SEARCH box. Not a port. Code P1-03b. The city name and coordinates repeat upside down along the bottom.",
-	"searchBoxes": [
-		{
-			"type": "land",
-			"stateRevealed": 2,
-			"isCompanion": false,
-			"companionName": null,
-			"opensDoors": [],
-			"effectSummary": "You may put up to 2 Supply cubes into Chicago from the stockpile. Resolved once, when the box is scratched."
-		}
-	],
-	"states": [
-		{
-			"state": 2,
-			"cardId": 1009,
-			"images": {
-				"sideB": "state-2-side-b.jpg"
-			},
-			"summary": "Survivors in Chicago say their Pacific haven stopped supply runs. You may put up to 2 Supply cubes into Chicago from the stockpile."
-		}
-	],
-	"mechanics": {
-		"opensDoors": [],
-		"destroys": [],
-		"rules": [
-			"Blue Player card for Chicago. One land search box, labeled SEARCH. No anchor, so it is not a port.",
-			"Scratching the box lets you put up to 2 Supply cubes into Chicago from the stockpile.",
-			"The result is immediate. It is not a companion, and it has no further effect.",
-			"P1-01b puts this card in the Player discard when the package is opened."
-		],
-		"notes": [
-			"Card id 902. Scratched face card id 1009. Printed code P1-03b stays on the scratched face.",
-			"Coordinates are printed 41°52'41\"N 87°37'47\"W.",
-			"No state side A. The player back does not change.",
-			"The second Chicago Player card is card 04, which has no search box."
-		]
-	}
+  "package": 1,
+  "index": 3,
+  "cardId": 902,
+  "printedCodes": {
+    "sideA": null,
+    "sideB": "P1-03b"
+  },
+  "title": "Chicago",
+  "category": "player-card",
+  "city": "Chicago",
+  "color": "blue",
+  "coordinates": "41°52'41\"N 87°37'47\"W",
+  "copies": 1,
+  "hasImprovementSlot": false,
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideASummary": "Player deck back. No text and no printed code.",
+  "sideBSummary": "Blue Chicago Player card, 41°52'41\"N 87°37'47\"W. One covered SEARCH box. Not a port. Code P1-03b. The city name and coordinates repeat upside down along the bottom.",
+  "searchBoxes": [
+    {
+      "type": "land",
+      "stateRevealed": 2,
+      "isCompanion": false,
+      "companionName": null,
+      "opensDoors": [],
+      "effectSummary": "You may put up to 2 Supply cubes into Chicago from the stockpile. Resolved once, when the box is scratched."
+    }
+  ],
+  "states": [
+    {
+      "state": 2,
+      "cardId": 1009,
+      "images": {
+        "sideB": "state-2-side-b.jpg"
+      },
+      "summary": "Survivors in Chicago say their Pacific haven stopped supply runs. You may put up to 2 Supply cubes into Chicago from the stockpile."
+    }
+  ],
+  "mechanics": {
+    "opensDoors": [],
+    "destroys": [],
+    "rules": [
+      "Blue Player card for Chicago. One land search box, labeled SEARCH. No anchor, so it is not a port.",
+      "Scratching the box lets you put up to 2 Supply cubes into Chicago from the stockpile.",
+      "The result is immediate. It is not a companion, and it has no further effect.",
+      "P1-01b puts this card in the Player discard when the package is opened."
+    ],
+    "notes": [
+      "Card id 902. Scratched face card id 1009. Printed code P1-03b stays on the scratched face.",
+      "Coordinates are printed 41°52'41\"N 87°37'47\"W.",
+      "No state side A. The player back does not change.",
+      "The second Chicago Player card is card 04, which has no search box."
+    ]
+  }
 }

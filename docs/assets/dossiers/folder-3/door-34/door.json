@@ -1,66 +1,66 @@
 {
-	"door": "34",
-	"folder": 3,
-	"frontImage": "dossiers/folder-3/door-34/front.jpg",
-	"frontText": "34",
-	"items": [
-		{
-			"id": "item-01_permanent-supply-center",
-			"image": "dossiers/folder-3/door-34/item-01_permanent-supply-center.jpg",
-			"count": 3,
-			"printedCode": null,
-			"category": "game-end-upgrade",
-			"title": "Permanent Supply Center",
-			"placementTarget": "Board, next to a city that had a supply center in the just-played game",
-			"costProductionUnits": 3,
-			"text": null,
-			"mechanics": {
-				"timing": "game end",
-				"trigger": "The city had a supply center in the just-played game",
-				"effect": "Put this sticker next to that city. During later setup, add a supply center to each city with this sticker. Permanent supply centers do not count toward objectives to build new supply centers.",
-				"restrictions": [
-					"Only a city that had a supply center in the just-played game",
-					"Does not count toward objectives to build new supply centers"
-				],
-				"icon": "Dark circle with a supply-center building (three windows) on a yellow field",
-				"costPrintedOn": "dossiers/folder-3/door-34/item-02.jpg",
-				"sourceGuids": ["6b7f1c", "fdd3f2", "9e93ee"]
-			}
-		},
-		{
-			"id": "item-02",
-			"image": "dossiers/folder-3/door-34/item-02.jpg",
-			"count": 1,
-			"printedCode": "34",
-			"category": "game-end-upgrade-card",
-			"title": "PERMANENT SUPPLY CENTERS",
-			"placementTarget": null,
-			"costProductionUnits": null,
-			"text": "GAME END UPGRADES\n\nPERMANENT SUPPLY CENTERS\nPut a Permanent Supply Center sticker next to a city that had a supply center in the just-played game.\n\nDuring setup, add a supply center to each city with a Permanent Supply Center sticker.\n\nPermanent supply centers do not count toward objectives to build new supply centers.",
-			"mechanics": {
-				"timing": "game end",
-				"trigger": null,
-				"effect": "Place up to three Permanent Supply Center stickers, each costing 3 production units.",
-				"restrictions": [
-					"The city had a supply center in the just-played game",
-					"During setup, add a supply center to each city with a Permanent Supply Center sticker",
-					"Permanent supply centers do not count toward objectives to build new supply centers"
-				],
-				"stickerCountShown": 3,
-				"costEach": 3,
-				"italicPhrases": ["just-played", "new"],
-				"sourceGuids": ["ed9e65"]
-			}
-		}
-	],
-	"bags": [
-		{
-			"name": "Permanent Structure Markers",
-			"description": "Game End Upgrade",
-			"guid": "b8fc6d",
-			"totalItems": 0,
-			"images": []
-		}
-	],
-	"summary": "Three Permanent Supply Center stickers at 3 production units each, the game-end instruction card (corner badge 34), and the Permanent Structure Markers bag (Game End Upgrade, guid b8fc6d, totalItems 0). The card shows three sticker icons, each with an orange 3. Guid fdd3f2 is also listed on door 36, and the instruction image is byte-identical to door 36 item-02 (same guid ed9e65)."
+  "door": "34",
+  "folder": 3,
+  "frontImage": "dossiers/folder-3/door-34/front.jpg",
+  "frontText": "34",
+  "items": [
+    {
+      "id": "item-01_permanent-supply-center",
+      "image": "dossiers/folder-3/door-34/item-01_permanent-supply-center.jpg",
+      "count": 3,
+      "printedCode": null,
+      "category": "game-end-upgrade",
+      "title": "Permanent Supply Center",
+      "placementTarget": "Board, next to a city that had a supply center in the just-played game",
+      "costProductionUnits": 3,
+      "text": null,
+      "mechanics": {
+        "timing": "game end",
+        "trigger": "The city had a supply center in the just-played game",
+        "effect": "Put this sticker next to that city. During later setup, add a supply center to each city with this sticker. Permanent supply centers do not count toward objectives to build new supply centers.",
+        "restrictions": [
+          "Only a city that had a supply center in the just-played game",
+          "Does not count toward objectives to build new supply centers"
+        ],
+        "icon": "Dark circle with a supply-center building (three windows) on a yellow field",
+        "costPrintedOn": "dossiers/folder-3/door-34/item-02.jpg",
+        "sourceGuids": ["6b7f1c", "fdd3f2", "9e93ee"]
+      }
+    },
+    {
+      "id": "item-02",
+      "image": "dossiers/folder-3/door-34/item-02.jpg",
+      "count": 1,
+      "printedCode": "34",
+      "category": "game-end-upgrade-card",
+      "title": "PERMANENT SUPPLY CENTERS",
+      "placementTarget": null,
+      "costProductionUnits": null,
+      "text": "GAME END UPGRADES\n\nPERMANENT SUPPLY CENTERS\nPut a Permanent Supply Center sticker next to a city that had a supply center in the just-played game.\n\nDuring setup, add a supply center to each city with a Permanent Supply Center sticker.\n\nPermanent supply centers do not count toward objectives to build new supply centers.",
+      "mechanics": {
+        "timing": "game end",
+        "trigger": null,
+        "effect": "Place up to three Permanent Supply Center stickers, each costing 3 production units.",
+        "restrictions": [
+          "The city had a supply center in the just-played game",
+          "During setup, add a supply center to each city with a Permanent Supply Center sticker",
+          "Permanent supply centers do not count toward objectives to build new supply centers"
+        ],
+        "stickerCountShown": 3,
+        "costEach": 3,
+        "italicPhrases": ["just-played", "new"],
+        "sourceGuids": ["ed9e65"]
+      }
+    }
+  ],
+  "bags": [
+    {
+      "name": "Permanent Structure Markers",
+      "description": "Game End Upgrade",
+      "guid": "b8fc6d",
+      "totalItems": 0,
+      "images": []
+    }
+  ],
+  "summary": "Three Permanent Supply Center stickers at 3 production units each, the game-end instruction card (corner badge 34), and the Permanent Structure Markers bag (Game End Upgrade, guid b8fc6d, totalItems 0). The card shows three sticker icons, each with an orange 3. Guid fdd3f2 is also listed on door 36, and the instruction image is byte-identical to door 36 item-02 (same guid ed9e65)."
 }

@@ -1,15 +1,18 @@
 {
-	"id": "lockdown",
-	"name": "Lockdown",
-	"category": "infection_card_upgrade",
-	"costProductionUnits": 1,
-	"copies": 2,
-	"image": "lockdown.jpg",
-	"text": "Lockdown:\nIf this card is in the Infection discard pile, any player\nmay discard a Player card to destroy this card at\nany time.",
-	"mechanics": {
-		"timing": "anytime",
-		"trigger": "If this card is in the Infection discard pile",
-		"effect": "Any player may discard a Player card to destroy this card.",
-		"restrictions": ["This card must be in the Infection discard pile", "Requires discarding a Player card"]
-	}
+  "id": "lockdown",
+  "name": "Lockdown",
+  "category": "infection_card_upgrade",
+  "costProductionUnits": 1,
+  "copies": 2,
+  "image": "lockdown.jpg",
+  "text": "Lockdown:\nIf this card is in the Infection discard pile, any player\nmay discard a Player card to destroy this card at\nany time.",
+  "mechanics": {
+    "timing": "anytime",
+    "trigger": "If this card is in the Infection discard pile",
+    "effect": "Any player may discard a Player card to destroy this card.",
+    "restrictions": [
+      "This card must be in the Infection discard pile",
+      "Requires discarding a Player card"
+    ]
+  }
 }

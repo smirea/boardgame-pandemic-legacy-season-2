@@ -1,42 +1,45 @@
 {
-	"sequence": 64,
-	"folder": "064_10-07",
-	"cardCode": "10-07",
-	"printedCodes": {
-		"sideA": "",
-		"sideB": "10-07b"
-	},
-	"title": "Mobile Shelters",
-	"category": "rationed_event",
-	"month": "october",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "NONE",
-		"header": "",
-		"trigger": "",
-		"summary": "Rationed Event back. No card code and no rules.",
-		"text": "",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "RATIONED EVENT",
-		"summary": "Mobile Shelters: build 2 shelters anywhere on the grid for free. Play at any time. Not an action.",
-		"text": "MOBILE SHELTERS\n\nBuild 2 shelters anywhere on the grid for free.\n\nPlay at any time. Not an action.",
-		"footer": "Play at any time. Not an action.",
-		"scratchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"whenRead": "The card immediately after the October Pause (10-06). Add it to the Rationed Event pool when that Game End draw reaches it.",
-		"triggers": [],
-		"opensDoors": [],
-		"opensPackages": [],
-		"destroys": [],
-		"addsToPool": ["Mobile Shelters (Rationed Event)"],
-		"rules": ["Build 2 shelters anywhere on the grid for free.", "Play at any time. Not an action."],
-		"notes": "Side A is the shared rationed-event back (haven in a signal ring). The screen title is MOBILE SHELTERS. Footer is red italic, with no comma after Play."
-	}
+  "sequence": 64,
+  "folder": "064_10-07",
+  "cardCode": "10-07",
+  "printedCodes": {
+    "sideA": "",
+    "sideB": "10-07b"
+  },
+  "title": "Mobile Shelters",
+  "category": "rationed_event",
+  "month": "october",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "NONE",
+    "header": "",
+    "trigger": "",
+    "summary": "Rationed Event back. No card code and no rules.",
+    "text": "",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "RATIONED EVENT",
+    "summary": "Mobile Shelters: build 2 shelters anywhere on the grid for free. Play at any time. Not an action.",
+    "text": "MOBILE SHELTERS\n\nBuild 2 shelters anywhere on the grid for free.\n\nPlay at any time. Not an action.",
+    "footer": "Play at any time. Not an action.",
+    "scratchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "whenRead": "The card immediately after the October Pause (10-06). Add it to the Rationed Event pool when that Game End draw reaches it.",
+    "triggers": [],
+    "opensDoors": [],
+    "opensPackages": [],
+    "destroys": [],
+    "addsToPool": ["Mobile Shelters (Rationed Event)"],
+    "rules": [
+      "Build 2 shelters anywhere on the grid for free.",
+      "Play at any time. Not an action."
+    ],
+    "notes": "Side A is the shared rationed-event back (haven in a signal ring). The screen title is MOBILE SHELTERS. Footer is red italic, with no comma after Play."
+  }
 }

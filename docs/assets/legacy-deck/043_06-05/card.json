@@ -1,46 +1,46 @@
 {
-	"sequence": 43,
-	"folder": "043_06-05",
-	"cardCode": "06-05",
-	"printedCodes": {
-		"sideA": null,
-		"sideB": "06-05b"
-	},
-	"title": "Expeditionary Voyage",
-	"category": "rationed_event",
-	"month": "june",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "NONE",
-		"header": "",
-		"trigger": "",
-		"text": "",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "RATIONED EVENT",
-		"text": "EXPEDITIONARY VOYAGE\n\nThe current player may do the Chart Sea Lane action for free. (Do not spend an action or any Supply cubes.)\n\nThe sea lane may cross any number of red region lines.\n\nPlay at any time. Not an action.",
-		"footer": "Play at any time. Not an action.",
-		"scratchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"whenRead": "Drawn while continuing the Legacy deck at the end of the first June game, after 06-04. It is a Rationed Event, so it enters the reserve. It is not played when it comes off the Legacy deck.",
-		"triggers": ["Play at any time. Not an action."],
-		"opensDoors": [],
-		"opensPackages": [],
-		"destroys": [],
-		"addsToPool": ["Rationed Event: Expeditionary Voyage (this card), to the reserve"],
-		"rules": [
-			"The current player may do the Chart Sea Lane action for free.",
-			"Do not spend an action or any Supply cubes.",
-			"The sea lane may cross any number of red region lines.",
-			"Play at any time. Not an action.",
-			"Discard after use. It counts toward the rationing-level pick."
-		],
-		"notes": "Side A is the shared rationed-event back (haven in a signal ring) and has no printed code. The screen title is EXPEDITIONARY VOYAGE, with a ship graphic."
-	}
+  "sequence": 43,
+  "folder": "043_06-05",
+  "cardCode": "06-05",
+  "printedCodes": {
+    "sideA": null,
+    "sideB": "06-05b"
+  },
+  "title": "Expeditionary Voyage",
+  "category": "rationed_event",
+  "month": "june",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "NONE",
+    "header": "",
+    "trigger": "",
+    "text": "",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "RATIONED EVENT",
+    "text": "EXPEDITIONARY VOYAGE\n\nThe current player may do the Chart Sea Lane action for free. (Do not spend an action or any Supply cubes.)\n\nThe sea lane may cross any number of red region lines.\n\nPlay at any time. Not an action.",
+    "footer": "Play at any time. Not an action.",
+    "scratchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "whenRead": "Drawn while continuing the Legacy deck at the end of the first June game, after 06-04. It is a Rationed Event, so it enters the reserve. It is not played when it comes off the Legacy deck.",
+    "triggers": ["Play at any time. Not an action."],
+    "opensDoors": [],
+    "opensPackages": [],
+    "destroys": [],
+    "addsToPool": ["Rationed Event: Expeditionary Voyage (this card), to the reserve"],
+    "rules": [
+      "The current player may do the Chart Sea Lane action for free.",
+      "Do not spend an action or any Supply cubes.",
+      "The sea lane may cross any number of red region lines.",
+      "Play at any time. Not an action.",
+      "Discard after use. It counts toward the rationing-level pick."
+    ],
+    "notes": "Side A is the shared rationed-event back (haven in a signal ring) and has no printed code. The screen title is EXPEDITIONARY VOYAGE, with a ship graphic."
+  }
 }

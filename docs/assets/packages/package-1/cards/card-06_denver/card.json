@@ -1,59 +1,59 @@
 {
-	"package": 1,
-	"index": 6,
-	"cardId": 905,
-	"printedCodes": {
-		"sideA": null,
-		"sideB": "P1-07b"
-	},
-	"title": "Denver",
-	"category": "player-card",
-	"city": "Denver",
-	"color": "blue",
-	"coordinates": "39°44'21\"N 104°59'25\"W",
-	"copies": 1,
-	"hasImprovementSlot": false,
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideASummary": "Player deck back. No text and no printed code.",
-	"sideBSummary": "Blue Denver Player card, 39°44'21\"N 104°59'25\"W. One covered SEARCH box. Not a port. Code P1-07b.",
-	"searchBoxes": [
-		{
-			"type": "land",
-			"stateRevealed": 2,
-			"isCompanion": true,
-			"companionName": "Logistics Expert",
-			"opensDoors": [],
-			"effectSummary": "While this card is in your hand, the Establish Supply Lines action costs 1 fewer Supply cube."
-		}
-	],
-	"states": [
-		{
-			"state": 2,
-			"cardId": 1008,
-			"images": {
-				"sideB": "state-2-side-b.jpg"
-			},
-			"summary": "Companion: Logistics Expert. You may do the Establish Supply Lines action with 1 fewer Supply cube if you have this card in your hand."
-		}
-	],
-	"mechanics": {
-		"opensDoors": [],
-		"destroys": [],
-		"rules": [
-			"Blue Player card for Denver. One land search box, labeled SEARCH. No anchor.",
-			"The scratch reveals the Logistics Expert companion.",
-			"While the card is in your hand, Establish Supply Lines costs 1 fewer Supply cube.",
-			"The discount does not discard the card. It lasts for later games as long as the card is held.",
-			"This card goes to the reserve when the package is opened. Denver is not on the grid yet."
-		],
-		"notes": [
-			"Card id 905. Scratched face card id 1008. Printed code P1-07b.",
-			"The card prints the action as Establish Supply Lines, plural. The Exhausted scar and the supply-line rule print Establish Supply Line, singular.",
-			"Coordinates are printed 39°44'21\"N 104°59'25\"W.",
-			"No state side A."
-		]
-	}
+  "package": 1,
+  "index": 6,
+  "cardId": 905,
+  "printedCodes": {
+    "sideA": null,
+    "sideB": "P1-07b"
+  },
+  "title": "Denver",
+  "category": "player-card",
+  "city": "Denver",
+  "color": "blue",
+  "coordinates": "39°44'21\"N 104°59'25\"W",
+  "copies": 1,
+  "hasImprovementSlot": false,
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideASummary": "Player deck back. No text and no printed code.",
+  "sideBSummary": "Blue Denver Player card, 39°44'21\"N 104°59'25\"W. One covered SEARCH box. Not a port. Code P1-07b.",
+  "searchBoxes": [
+    {
+      "type": "land",
+      "stateRevealed": 2,
+      "isCompanion": true,
+      "companionName": "Logistics Expert",
+      "opensDoors": [],
+      "effectSummary": "While this card is in your hand, the Establish Supply Lines action costs 1 fewer Supply cube."
+    }
+  ],
+  "states": [
+    {
+      "state": 2,
+      "cardId": 1008,
+      "images": {
+        "sideB": "state-2-side-b.jpg"
+      },
+      "summary": "Companion: Logistics Expert. You may do the Establish Supply Lines action with 1 fewer Supply cube if you have this card in your hand."
+    }
+  ],
+  "mechanics": {
+    "opensDoors": [],
+    "destroys": [],
+    "rules": [
+      "Blue Player card for Denver. One land search box, labeled SEARCH. No anchor.",
+      "The scratch reveals the Logistics Expert companion.",
+      "While the card is in your hand, Establish Supply Lines costs 1 fewer Supply cube.",
+      "The discount does not discard the card. It lasts for later games as long as the card is held.",
+      "This card goes to the reserve when the package is opened. Denver is not on the grid yet."
+    ],
+    "notes": [
+      "Card id 905. Scratched face card id 1008. Printed code P1-07b.",
+      "The card prints the action as Establish Supply Lines, plural. The Exhausted scar and the supply-line rule print Establish Supply Line, singular.",
+      "Coordinates are printed 39°44'21\"N 104°59'25\"W.",
+      "No state side A."
+    ]
+  }
 }

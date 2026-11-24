@@ -1,24 +1,24 @@
 {
-	"id": "sticker-01_rules-h",
-	"package": 4,
-	"guid": "7cedf4",
-	"printedCode": null,
-	"name": "Shuttle Flight",
-	"category": "rule",
-	"placementTarget": "Rulebook slot H, the blank box at the top of the right column, above Other Actions.",
-	"costProductionUnits": null,
-	"copies": 1,
-	"image": "sticker-01_rules-h.jpg",
-	"summary": "Shuttle Flight. Move from any haven or supply center to any other haven or supply center on the grid. The letter H is the rulebook slot named in the manifest. It is not printed on the sticker.",
-	"mechanics": {
-		"timing": "Action. Rule slot H sits with the actions, above Other Actions. The sticker does not say it is free.",
-		"effect": "Move from any haven or supply center to any other haven or supply center on the grid.",
-		"restrictions": [
-			"The origin must be a haven or a supply center.",
-			"The destination must be a different haven or supply center on the grid.",
-			"No card discard and no supply-cube cost is printed.",
-			"The recon report's landing-strip and runway story is the reason for this action. It adds no separate build step on this sticker."
-		],
-		"opensDoors": []
-	}
+  "id": "sticker-01_rules-h",
+  "package": 4,
+  "guid": "7cedf4",
+  "printedCode": null,
+  "name": "Shuttle Flight",
+  "category": "rule",
+  "placementTarget": "Rulebook slot H, the blank box at the top of the right column, above Other Actions.",
+  "costProductionUnits": null,
+  "copies": 1,
+  "image": "sticker-01_rules-h.jpg",
+  "summary": "Shuttle Flight. Move from any haven or supply center to any other haven or supply center on the grid. The letter H is the rulebook slot named in the manifest. It is not printed on the sticker.",
+  "mechanics": {
+    "timing": "Action. Rule slot H sits with the actions, above Other Actions. The sticker does not say it is free.",
+    "effect": "Move from any haven or supply center to any other haven or supply center on the grid.",
+    "restrictions": [
+      "The origin must be a haven or a supply center.",
+      "The destination must be a different haven or supply center on the grid.",
+      "No card discard and no supply-cube cost is printed.",
+      "The recon report's landing-strip and runway story is the reason for this action. It adds no separate build step on this sticker."
+    ],
+    "opensDoors": []
+  }
 }

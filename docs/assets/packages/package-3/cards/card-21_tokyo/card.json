@@ -1,40 +1,40 @@
 {
-	"package": 3,
-	"index": 21,
-	"cardId": 10720,
-	"printedCodes": {
-		"sideA": null,
-		"sideB": "P3-21b"
-	},
-	"title": "Tokyo",
-	"category": "infection-card",
-	"city": "Tokyo",
-	"color": "red",
-	"coordinates": null,
-	"port": null,
-	"copies": 1,
-	"hasImprovementSlot": true,
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideASummary": "Infection deck back. Red biohazard on black, with a yellow caution stripe. No text and no printed code.",
-	"sideBSummary": "Tokyo Infection card, red. The name runs down the left edge. A blank white panel in the middle takes one improvement sticker. A green plague ring sits on a faded map. No search box and no coordinates. Printed code P3-21b.",
-	"searchBoxes": [],
-	"states": [],
-	"mechanics": {
-		"opensDoors": [],
-		"destroys": false,
-		"rules": [
-			"Red Infection card for Tokyo. One copy.",
-			"The white panel is the one improvement slot. Rebirth, from this package, is the sticker that fits a slot like this.",
-			"No scratch-off box.",
-			"Goes to the reserve when the package is opened."
-		],
-		"notes": [
-			"Card id 10720.",
-			"Printed code P3-21b is on side B only. Side A is the Infection deck back.",
-			"The city's coordinates and port marking are on its Player card, not on this Infection card."
-		]
-	}
+  "package": 3,
+  "index": 21,
+  "cardId": 10720,
+  "printedCodes": {
+    "sideA": null,
+    "sideB": "P3-21b"
+  },
+  "title": "Tokyo",
+  "category": "infection-card",
+  "city": "Tokyo",
+  "color": "red",
+  "coordinates": null,
+  "port": null,
+  "copies": 1,
+  "hasImprovementSlot": true,
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideASummary": "Infection deck back. Red biohazard on black, with a yellow caution stripe. No text and no printed code.",
+  "sideBSummary": "Tokyo Infection card, red. The name runs down the left edge. A blank white panel in the middle takes one improvement sticker. A green plague ring sits on a faded map. No search box and no coordinates. Printed code P3-21b.",
+  "searchBoxes": [],
+  "states": [],
+  "mechanics": {
+    "opensDoors": [],
+    "destroys": false,
+    "rules": [
+      "Red Infection card for Tokyo. One copy.",
+      "The white panel is the one improvement slot. Rebirth, from this package, is the sticker that fits a slot like this.",
+      "No scratch-off box.",
+      "Goes to the reserve when the package is opened."
+    ],
+    "notes": [
+      "Card id 10720.",
+      "Printed code P3-21b is on side B only. Side A is the Infection deck back.",
+      "The city's coordinates and port marking are on its Player card, not on this Infection card."
+    ]
+  }
 }

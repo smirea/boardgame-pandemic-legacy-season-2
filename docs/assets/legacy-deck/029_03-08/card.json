@@ -1,45 +1,45 @@
 {
-	"sequence": 29,
-	"folder": "029_03-08",
-	"cardCode": "03-08",
-	"printedCodes": {
-		"sideA": null,
-		"sideB": "03-08b"
-	},
-	"title": "EPIDEMIC",
-	"category": "epidemic",
-	"month": "march",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "NONE",
-		"header": "",
-		"trigger": "",
-		"text": "",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "EPIDEMIC",
-		"text": "1-INCREASE\nMove the Infection Rate marker forward 1 space.\n\n2-INFECT\nDraw the bottom card from the Infection deck and remove all the Supply cubes (if any) from that city. Discard that card.\n\n3-INTENSIFY\nShuffle the cards in the Infection discard pile and put them on top of the Infection deck.",
-		"footer": "",
-		"scratchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"whenRead": "Drawn while continuing the Legacy deck at Game End step 2 of the first March game, after 03-06 (RIGHT NOW!) and before the April STOP 04-01. It is a Player card found in the Legacy deck, so set it aside for later Player-deck setup. Do not resolve the Epidemic when it comes off the Legacy deck.",
-		"triggers": [],
-		"opensDoors": [],
-		"opensPackages": [],
-		"destroys": [],
-		"addsToPool": ["Epidemic 03-08 (additional Epidemic 2 of 5), set aside for Player-deck setup"],
-		"rules": [
-			"When this card is drawn from the Player deck, resolve the three steps in order. It does not enter a hand.",
-			"1-INCREASE: move the Infection Rate marker forward 1 space.",
-			"2-INFECT: draw the bottom Infection card, remove every Supply cube from that city (remove none if it has none), and discard that Infection card. This early Epidemic does not place plague cubes.",
-			"3-INTENSIFY: shuffle the Infection discard pile and put it on top of the Infection deck."
-		],
-		"notes": "Side A is the Player-card back and has no printed code. The dial panel carries the mark H-4B-Y12. The printed id is on side B only."
-	}
+  "sequence": 29,
+  "folder": "029_03-08",
+  "cardCode": "03-08",
+  "printedCodes": {
+    "sideA": null,
+    "sideB": "03-08b"
+  },
+  "title": "EPIDEMIC",
+  "category": "epidemic",
+  "month": "march",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "NONE",
+    "header": "",
+    "trigger": "",
+    "text": "",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "EPIDEMIC",
+    "text": "1-INCREASE\nMove the Infection Rate marker forward 1 space.\n\n2-INFECT\nDraw the bottom card from the Infection deck and remove all the Supply cubes (if any) from that city. Discard that card.\n\n3-INTENSIFY\nShuffle the cards in the Infection discard pile and put them on top of the Infection deck.",
+    "footer": "",
+    "scratchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "whenRead": "Drawn while continuing the Legacy deck at Game End step 2 of the first March game, after 03-06 (RIGHT NOW!) and before the April STOP 04-01. It is a Player card found in the Legacy deck, so set it aside for later Player-deck setup. Do not resolve the Epidemic when it comes off the Legacy deck.",
+    "triggers": [],
+    "opensDoors": [],
+    "opensPackages": [],
+    "destroys": [],
+    "addsToPool": ["Epidemic 03-08 (additional Epidemic 2 of 5), set aside for Player-deck setup"],
+    "rules": [
+      "When this card is drawn from the Player deck, resolve the three steps in order. It does not enter a hand.",
+      "1-INCREASE: move the Infection Rate marker forward 1 space.",
+      "2-INFECT: draw the bottom Infection card, remove every Supply cube from that city (remove none if it has none), and discard that Infection card. This early Epidemic does not place plague cubes.",
+      "3-INTENSIFY: shuffle the Infection discard pile and put it on top of the Infection deck."
+    ],
+    "notes": "Side A is the Player-card back and has no printed code. The dial panel carries the mark H-4B-Y12. The printed id is on side B only."
+  }
 }

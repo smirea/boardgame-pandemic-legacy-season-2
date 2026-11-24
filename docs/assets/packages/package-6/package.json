@@ -1,130 +1,130 @@
 {
-	"name": "Package 6",
-	"bags": [
-		{
-			"name": "Supply Cubes",
-			"guid": "6bb1a9",
-			"totalItems": 15,
-			"contents": {
-				"Supply Cube": 15
-			},
-			"rules": [
-				"The package contains 15 Supply cubes. P6-01b says to take those 15 cubes and add them to the stockpile when the package is opened.",
-				"They are new cubes. The report does not take them from the reserve.",
-				"After that, the cube bag is empty. It is not the card-storage container.",
-				"Each later setup also adds 15 cubes because the +15 marker goes on Area 10 and Rule B adds every amount shown to the right of the stockpile chart, on top of the month's cubes."
-			]
-		}
-	],
-	"boxImage": "box.jpg",
-	"boxText": "6",
-	"cards": [
-		{
-			"index": 1,
-			"folder": "card-01",
-			"title": "Recon Report",
-			"category": "report",
-			"printedCode": "P6-01b",
-			"json": "cards/card-01/card.json"
-		},
-		{
-			"index": 2,
-			"folder": "card-02_portable-antiviral-lab",
-			"title": "Portable Antiviral Lab",
-			"category": "player-card",
-			"printedCode": "P6-02b",
-			"json": "cards/card-02_portable-antiviral-lab/card.json"
-		},
-		{
-			"index": 3,
-			"folder": "card-03_portable-antiviral-lab",
-			"title": "Portable Antiviral Lab",
-			"category": "player-card",
-			"printedCode": "P6-02b",
-			"json": "cards/card-03_portable-antiviral-lab/card.json"
-		},
-		{
-			"index": 4,
-			"folder": "card-04_portable-antiviral-lab",
-			"title": "Portable Antiviral Lab",
-			"category": "player-card",
-			"printedCode": "P6-02b",
-			"json": "cards/card-04_portable-antiviral-lab/card.json"
-		}
-	],
-	"guid": "d78d10",
-	"id": "package-6",
-	"inventory": {
-		"asPrintedOnReport": "4 cards • 3 sticker cards • 15 Supply cubes",
-		"cards": 4,
-		"stickerCards": 3,
-		"stickers": 6,
-		"supplyCubes": 15
-	},
-	"package": 6,
-	"rules": [
-		"Portable Antiviral Lab: when doing Make Supplies, discard the card to put 3 more Supply cubes on your Character card.",
-		"Inoculate (free action) and the Package 6 storage limits are on Rule I. The shorter overlay goes on the back of each player reference card.",
-		"Hidden Supply Cache (Rule B): at setup, add the cubes indicated to the right of the stockpile chart in addition to the current month.",
-		"Area 10: place +15 on the board as the reminder to add 15 more Supply cubes at setup each month."
-	],
-	"setupOnOpen": {
-		"source": "P6-01b",
-		"nameTheHaven": true,
-		"portableAntiviralLabs": {
-			"toArrivingPlayerHand": 1,
-			"toPlayerDiscard": 2
-		},
-		"supplyCubesToStockpile": 15,
-		"keepReportIn": "reserve"
-	},
-	"stickers": [
-		{
-			"id": "sticker-01",
-			"name": "Inoculate",
-			"category": "reference-overlay",
-			"json": "stickers/sticker-01.json"
-		},
-		{
-			"id": "sticker-02",
-			"name": "Inoculate mounting instruction",
-			"category": "instruction",
-			"json": "stickers/sticker-02.json"
-		},
-		{
-			"id": "sticker-03_rule-i",
-			"name": "Inoculate",
-			"category": "rule",
-			"json": "stickers/sticker-03_rule-i.json"
-		},
-		{
-			"id": "sticker-04_rule-b",
-			"name": "Hidden Supply Cache",
-			"category": "rule",
-			"json": "stickers/sticker-04_rule-b.json"
-		},
-		{
-			"id": "sticker-05_area-10",
-			"name": "Area 10 +15",
-			"category": "board-marker",
-			"json": "stickers/sticker-05_area-10.json"
-		},
-		{
-			"id": "sticker-06",
-			"name": "Area 10 mounting instruction",
-			"category": "instruction",
-			"json": "stickers/sticker-06.json"
-		}
-	],
-	"storage": {
-		"container": "The Package 6 box",
-		"holds": "Player cards and Infection cards put there by Inoculate",
-		"rules": [
-			"Inoculate is a free action. Take a Player card or an Infection card that matches your current city out of its discard pile and put it into Package 6. This takes it out of play.",
-			"Cards in Package 6 stay there from game to game. Do not take them out unless instructed to do so.",
-			"You may look at these cards at any time, but may not add stickers to them.",
-			"Limited supply: Package 6 may contain up to 30 Player cards and 30 Infection cards.",
-			"The box is the container. The Supply Cubes bag is only the 15 cubes, and those cubes leave it for the stockpile when the package is opened."
-		]
-	}
+  "name": "Package 6",
+  "bags": [
+    {
+      "name": "Supply Cubes",
+      "guid": "6bb1a9",
+      "totalItems": 15,
+      "contents": {
+        "Supply Cube": 15
+      },
+      "rules": [
+        "The package contains 15 Supply cubes. P6-01b says to take those 15 cubes and add them to the stockpile when the package is opened.",
+        "They are new cubes. The report does not take them from the reserve.",
+        "After that, the cube bag is empty. It is not the card-storage container.",
+        "Each later setup also adds 15 cubes because the +15 marker goes on Area 10 and Rule B adds every amount shown to the right of the stockpile chart, on top of the month's cubes."
+      ]
+    }
+  ],
+  "boxImage": "box.jpg",
+  "boxText": "6",
+  "cards": [
+    {
+      "index": 1,
+      "folder": "card-01",
+      "title": "Recon Report",
+      "category": "report",
+      "printedCode": "P6-01b",
+      "json": "cards/card-01/card.json"
+    },
+    {
+      "index": 2,
+      "folder": "card-02_portable-antiviral-lab",
+      "title": "Portable Antiviral Lab",
+      "category": "player-card",
+      "printedCode": "P6-02b",
+      "json": "cards/card-02_portable-antiviral-lab/card.json"
+    },
+    {
+      "index": 3,
+      "folder": "card-03_portable-antiviral-lab",
+      "title": "Portable Antiviral Lab",
+      "category": "player-card",
+      "printedCode": "P6-02b",
+      "json": "cards/card-03_portable-antiviral-lab/card.json"
+    },
+    {
+      "index": 4,
+      "folder": "card-04_portable-antiviral-lab",
+      "title": "Portable Antiviral Lab",
+      "category": "player-card",
+      "printedCode": "P6-02b",
+      "json": "cards/card-04_portable-antiviral-lab/card.json"
+    }
+  ],
+  "guid": "d78d10",
+  "id": "package-6",
+  "inventory": {
+    "asPrintedOnReport": "4 cards • 3 sticker cards • 15 Supply cubes",
+    "cards": 4,
+    "stickerCards": 3,
+    "stickers": 6,
+    "supplyCubes": 15
+  },
+  "package": 6,
+  "rules": [
+    "Portable Antiviral Lab: when doing Make Supplies, discard the card to put 3 more Supply cubes on your Character card.",
+    "Inoculate (free action) and the Package 6 storage limits are on Rule I. The shorter overlay goes on the back of each player reference card.",
+    "Hidden Supply Cache (Rule B): at setup, add the cubes indicated to the right of the stockpile chart in addition to the current month.",
+    "Area 10: place +15 on the board as the reminder to add 15 more Supply cubes at setup each month."
+  ],
+  "setupOnOpen": {
+    "source": "P6-01b",
+    "nameTheHaven": true,
+    "portableAntiviralLabs": {
+      "toArrivingPlayerHand": 1,
+      "toPlayerDiscard": 2
+    },
+    "supplyCubesToStockpile": 15,
+    "keepReportIn": "reserve"
+  },
+  "stickers": [
+    {
+      "id": "sticker-01",
+      "name": "Inoculate",
+      "category": "reference-overlay",
+      "json": "stickers/sticker-01.json"
+    },
+    {
+      "id": "sticker-02",
+      "name": "Inoculate mounting instruction",
+      "category": "instruction",
+      "json": "stickers/sticker-02.json"
+    },
+    {
+      "id": "sticker-03_rule-i",
+      "name": "Inoculate",
+      "category": "rule",
+      "json": "stickers/sticker-03_rule-i.json"
+    },
+    {
+      "id": "sticker-04_rule-b",
+      "name": "Hidden Supply Cache",
+      "category": "rule",
+      "json": "stickers/sticker-04_rule-b.json"
+    },
+    {
+      "id": "sticker-05_area-10",
+      "name": "Area 10 +15",
+      "category": "board-marker",
+      "json": "stickers/sticker-05_area-10.json"
+    },
+    {
+      "id": "sticker-06",
+      "name": "Area 10 mounting instruction",
+      "category": "instruction",
+      "json": "stickers/sticker-06.json"
+    }
+  ],
+  "storage": {
+    "container": "The Package 6 box",
+    "holds": "Player cards and Infection cards put there by Inoculate",
+    "rules": [
+      "Inoculate is a free action. Take a Player card or an Infection card that matches your current city out of its discard pile and put it into Package 6. This takes it out of play.",
+      "Cards in Package 6 stay there from game to game. Do not take them out unless instructed to do so.",
+      "You may look at these cards at any time, but may not add stickers to them.",
+      "Limited supply: Package 6 may contain up to 30 Player cards and 30 Infection cards.",
+      "The box is the container. The Supply Cubes bag is only the 15 cubes, and those cubes leave it for the stockpile when the package is opened."
+    ]
+  }
 }

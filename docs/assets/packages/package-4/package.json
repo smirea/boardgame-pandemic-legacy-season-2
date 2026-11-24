@@ -1,171 +1,171 @@
 {
-	"name": "Europe",
-	"bags": [],
-	"boxImage": "box.jpg",
-	"boxText": "4",
-	"cards": [
-		{
-			"index": 1,
-			"title": "Recon Report",
-			"category": "recon-report",
-			"copies": 1,
-			"json": "cards/card-01/card.json"
-		},
-		{
-			"index": 2,
-			"title": "Relocation",
-			"category": "unrationed-event",
-			"copies": 1,
-			"json": "cards/card-02_event/card.json"
-		},
-		{
-			"index": 3,
-			"title": "Paris",
-			"category": "player-card",
-			"color": "blue",
-			"search": true,
-			"copies": 1,
-			"json": "cards/card-03_paris/card.json"
-		},
-		{
-			"index": 4,
-			"title": "Paris",
-			"category": "player-card",
-			"color": "blue",
-			"copies": 1,
-			"json": "cards/card-04_paris/card.json"
-		},
-		{
-			"index": 5,
-			"title": "Paris",
-			"category": "infection-card",
-			"color": "blue",
-			"printedCode": "P4-06b",
-			"copies": 2,
-			"json": "cards/card-05_paris/card.json"
-		},
-		{
-			"index": 6,
-			"title": "Frankfurt",
-			"category": "player-card",
-			"color": "blue",
-			"search": true,
-			"copies": 1,
-			"json": "cards/card-06_frankfurt/card.json"
-		},
-		{
-			"index": 7,
-			"title": "Frankfurt",
-			"category": "player-card",
-			"color": "blue",
-			"copies": 1,
-			"json": "cards/card-07_frankfurt/card.json"
-		},
-		{
-			"index": 8,
-			"title": "Frankfurt",
-			"category": "infection-card",
-			"color": "blue",
-			"printedCode": "P4-09b",
-			"copies": 2,
-			"json": "cards/card-08_frankfurt/card.json"
-		},
-		{
-			"index": 9,
-			"title": "St. Petersburg",
-			"category": "player-card",
-			"color": "blue",
-			"port": true,
-			"search": [
-				"land",
-				"sea"
-			],
-			"copies": 1,
-			"json": "cards/card-09_st-petersburg/card.json"
-		},
-		{
-			"index": 10,
-			"title": "St. Petersburg",
-			"category": "infection-card",
-			"color": "blue",
-			"printedCode": "P4-12b",
-			"copies": 1,
-			"json": "cards/card-10_st-petersburg/card.json"
-		},
-		{
-			"index": 11,
-			"title": "Moscow",
-			"category": "player-card",
-			"color": "black",
-			"search": true,
-			"copies": 1,
-			"json": "cards/card-11_moscow/card.json"
-		},
-		{
-			"index": 12,
-			"title": "Moscow",
-			"category": "infection-card",
-			"color": "black",
-			"printedCode": "P4-14b",
-			"copies": 1,
-			"json": "cards/card-12_moscow/card.json"
-		}
-	],
-	"guid": "6327f2",
-	"id": "package-4",
-	"number": 4,
-	"printedContents": {
-		"cards": 14,
-		"stickerCards": 2
-	},
-	"rules": [
-		"Shuttle Flight, rule H and the player-reference strip: move from any haven or supply center to any other haven or supply center on the grid.",
-		"Relocation: destroy up to 3 Infection cards of one city from the Infection discard. Play at any time, including between epidemic steps 2 and 3. Not an action. Destroy the event after use."
-	],
-	"searchResults": {
-		"Paris": "Companion Engineer. Build Supply Center costs 1 fewer card while the card is in hand, and this card may be one of the cards spent.",
-		"Frankfurt": "Companion Messenger. As a free action, move Supply cubes from an adjacent location into yours while the card is in hand.",
-		"St. Petersburg land": "Companion Operative. The Search action is free while the card is in hand.",
-		"St. Petersburg sea": "Immediately draw a free sea lane from St. Petersburg to another city.",
-		"Moscow": "You may give 1 Player card from your hand to another player. The story names Utopia and Smolensk. No door."
-	},
-	"setup": {
-		"source": "P4-01b",
-		"opensDoors": [
-			"64"
-		],
-		"cityAddedToGrid": "Paris",
-		"playerDiscard": [
-			"Paris player card with SEARCH (P4-03b)",
-			"Paris player card (P4-04b)"
-		],
-		"gameEnd": [
-			"Paris infection cards (P4-06b, 2 copies)"
-		],
-		"reserve": "Frankfurt, St. Petersburg, and Moscow Player cards and Infection cards, plus this report after it is read.",
-		"toAPlayersHand": "Relocation (P4-02b)"
-	},
-	"stickers": [
-		{
-			"id": "sticker-01_rules-h",
-			"name": "Shuttle Flight",
-			"category": "rule",
-			"copies": 1,
-			"json": "stickers/sticker-01_rules-h.json"
-		},
-		{
-			"id": "sticker-02",
-			"name": "Shuttle Flight",
-			"category": "player-reference-action",
-			"copies": 1,
-			"json": "stickers/sticker-02.json"
-		},
-		{
-			"id": "sticker-03",
-			"name": "Player reference instruction",
-			"category": "instruction",
-			"copies": 1,
-			"json": "stickers/sticker-03.json"
-		}
-	]
+  "name": "Europe",
+  "bags": [],
+  "boxImage": "box.jpg",
+  "boxText": "4",
+  "cards": [
+    {
+      "index": 1,
+      "title": "Recon Report",
+      "category": "recon-report",
+      "copies": 1,
+      "json": "cards/card-01/card.json"
+    },
+    {
+      "index": 2,
+      "title": "Relocation",
+      "category": "unrationed-event",
+      "copies": 1,
+      "json": "cards/card-02_event/card.json"
+    },
+    {
+      "index": 3,
+      "title": "Paris",
+      "category": "player-card",
+      "color": "blue",
+      "search": true,
+      "copies": 1,
+      "json": "cards/card-03_paris/card.json"
+    },
+    {
+      "index": 4,
+      "title": "Paris",
+      "category": "player-card",
+      "color": "blue",
+      "copies": 1,
+      "json": "cards/card-04_paris/card.json"
+    },
+    {
+      "index": 5,
+      "title": "Paris",
+      "category": "infection-card",
+      "color": "blue",
+      "printedCode": "P4-06b",
+      "copies": 2,
+      "json": "cards/card-05_paris/card.json"
+    },
+    {
+      "index": 6,
+      "title": "Frankfurt",
+      "category": "player-card",
+      "color": "blue",
+      "search": true,
+      "copies": 1,
+      "json": "cards/card-06_frankfurt/card.json"
+    },
+    {
+      "index": 7,
+      "title": "Frankfurt",
+      "category": "player-card",
+      "color": "blue",
+      "copies": 1,
+      "json": "cards/card-07_frankfurt/card.json"
+    },
+    {
+      "index": 8,
+      "title": "Frankfurt",
+      "category": "infection-card",
+      "color": "blue",
+      "printedCode": "P4-09b",
+      "copies": 2,
+      "json": "cards/card-08_frankfurt/card.json"
+    },
+    {
+      "index": 9,
+      "title": "St. Petersburg",
+      "category": "player-card",
+      "color": "blue",
+      "port": true,
+      "search": [
+        "land",
+        "sea"
+      ],
+      "copies": 1,
+      "json": "cards/card-09_st-petersburg/card.json"
+    },
+    {
+      "index": 10,
+      "title": "St. Petersburg",
+      "category": "infection-card",
+      "color": "blue",
+      "printedCode": "P4-12b",
+      "copies": 1,
+      "json": "cards/card-10_st-petersburg/card.json"
+    },
+    {
+      "index": 11,
+      "title": "Moscow",
+      "category": "player-card",
+      "color": "black",
+      "search": true,
+      "copies": 1,
+      "json": "cards/card-11_moscow/card.json"
+    },
+    {
+      "index": 12,
+      "title": "Moscow",
+      "category": "infection-card",
+      "color": "black",
+      "printedCode": "P4-14b",
+      "copies": 1,
+      "json": "cards/card-12_moscow/card.json"
+    }
+  ],
+  "guid": "6327f2",
+  "id": "package-4",
+  "number": 4,
+  "printedContents": {
+    "cards": 14,
+    "stickerCards": 2
+  },
+  "rules": [
+    "Shuttle Flight, rule H and the player-reference strip: move from any haven or supply center to any other haven or supply center on the grid.",
+    "Relocation: destroy up to 3 Infection cards of one city from the Infection discard. Play at any time, including between epidemic steps 2 and 3. Not an action. Destroy the event after use."
+  ],
+  "searchResults": {
+    "Paris": "Companion Engineer. Build Supply Center costs 1 fewer card while the card is in hand, and this card may be one of the cards spent.",
+    "Frankfurt": "Companion Messenger. As a free action, move Supply cubes from an adjacent location into yours while the card is in hand.",
+    "St. Petersburg land": "Companion Operative. The Search action is free while the card is in hand.",
+    "St. Petersburg sea": "Immediately draw a free sea lane from St. Petersburg to another city.",
+    "Moscow": "You may give 1 Player card from your hand to another player. The story names Utopia and Smolensk. No door."
+  },
+  "setup": {
+    "source": "P4-01b",
+    "opensDoors": [
+      "64"
+    ],
+    "cityAddedToGrid": "Paris",
+    "playerDiscard": [
+      "Paris player card with SEARCH (P4-03b)",
+      "Paris player card (P4-04b)"
+    ],
+    "gameEnd": [
+      "Paris infection cards (P4-06b, 2 copies)"
+    ],
+    "reserve": "Frankfurt, St. Petersburg, and Moscow Player cards and Infection cards, plus this report after it is read.",
+    "toAPlayersHand": "Relocation (P4-02b)"
+  },
+  "stickers": [
+    {
+      "id": "sticker-01_rules-h",
+      "name": "Shuttle Flight",
+      "category": "rule",
+      "copies": 1,
+      "json": "stickers/sticker-01_rules-h.json"
+    },
+    {
+      "id": "sticker-02",
+      "name": "Shuttle Flight",
+      "category": "player-reference-action",
+      "copies": 1,
+      "json": "stickers/sticker-02.json"
+    },
+    {
+      "id": "sticker-03",
+      "name": "Player reference instruction",
+      "category": "instruction",
+      "copies": 1,
+      "json": "stickers/sticker-03.json"
+    }
+  ]
 }

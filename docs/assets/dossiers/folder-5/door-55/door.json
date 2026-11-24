@@ -1,45 +1,45 @@
 {
-	"door": "55",
-	"folder": 5,
-	"id": "door-55",
-	"guid": "090bdb",
-	"frontImage": "dossiers/folder-5/door-55/front.jpg",
-	"frontText": "Navy 55 centered on a yellow door card. Dashed cut-line border. No other printed text.",
-	"items": [
-		{
-			"id": "item-01",
-			"image": "dossiers/folder-5/door-55/item-01.jpg",
-			"count": 1,
-			"printedCode": null,
-			"category": "epidemic-step",
-			"title": "2-It's wearing off",
-			"placementTarget": "Each Epidemic card, over printed step 2 \"Infect.\"",
-			"text": "2-It's wearing off\nDraw a random Infection card\nfrom Package 6. Remove all the\nSupply cubes (if any) in that city.\nThen, discard that card.",
-			"mapDetails": null,
-			"mechanics": {
-				"replaces": "Epidemic step 2 \"Infect.\"",
-				"effect": [
-					"Draw a random Infection card from Package 6.",
-					"Remove all the Supply cubes (if any) in that city.",
-					"Discard that card."
-				],
-				"notes": "The instruction card says to put one of these on each Epidemic card. The scan is a single sticker. The sticker does not mention Plague cubes."
-			}
-		},
-		{
-			"id": "item-02",
-			"image": "dossiers/folder-5/door-55/item-02.jpg",
-			"count": 1,
-			"printedCode": "55",
-			"category": "instruction",
-			"title": "IT'S WEARING OFF",
-			"placementTarget": "Instruction kept with the Epidemic stickers. A faint red 55 is printed at the right edge.",
-			"text": "IT'S WEARING OFF\nPut these stickers on each Epidemic card\nto replace step 2 \"Infect.\"",
-			"mapDetails": null,
-			"mechanics": {
-				"effect": "Apply the step-2 stickers to each Epidemic card, replacing step 2 \"Infect.\""
-			}
-		}
-	],
-	"summary": "Epidemic step-2 replacement titled \"It's wearing off.\" Each Epidemic draws a random Infection card from Package 6, strips that city's Supply cubes, and discards the card."
+  "door": "55",
+  "folder": 5,
+  "id": "door-55",
+  "guid": "090bdb",
+  "frontImage": "dossiers/folder-5/door-55/front.jpg",
+  "frontText": "Navy 55 centered on a yellow door card. Dashed cut-line border. No other printed text.",
+  "items": [
+    {
+      "id": "item-01",
+      "image": "dossiers/folder-5/door-55/item-01.jpg",
+      "count": 1,
+      "printedCode": null,
+      "category": "epidemic-step",
+      "title": "2-It's wearing off",
+      "placementTarget": "Each Epidemic card, over printed step 2 \"Infect.\"",
+      "text": "2-It's wearing off\nDraw a random Infection card\nfrom Package 6. Remove all the\nSupply cubes (if any) in that city.\nThen, discard that card.",
+      "mapDetails": null,
+      "mechanics": {
+        "replaces": "Epidemic step 2 \"Infect.\"",
+        "effect": [
+          "Draw a random Infection card from Package 6.",
+          "Remove all the Supply cubes (if any) in that city.",
+          "Discard that card."
+        ],
+        "notes": "The instruction card says to put one of these on each Epidemic card. The scan is a single sticker. The sticker does not mention Plague cubes."
+      }
+    },
+    {
+      "id": "item-02",
+      "image": "dossiers/folder-5/door-55/item-02.jpg",
+      "count": 1,
+      "printedCode": "55",
+      "category": "instruction",
+      "title": "IT'S WEARING OFF",
+      "placementTarget": "Instruction kept with the Epidemic stickers. A faint red 55 is printed at the right edge.",
+      "text": "IT'S WEARING OFF\nPut these stickers on each Epidemic card\nto replace step 2 \"Infect.\"",
+      "mapDetails": null,
+      "mechanics": {
+        "effect": "Apply the step-2 stickers to each Epidemic card, replacing step 2 \"Infect.\""
+      }
+    }
+  ],
+  "summary": "Epidemic step-2 replacement titled \"It's wearing off.\" Each Epidemic draws a random Infection card from Package 6, strips that city's Supply cubes, and discards the card."
 }

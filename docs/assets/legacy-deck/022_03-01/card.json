@@ -1,77 +1,77 @@
 {
-	"sequence": 22,
-	"folder": "022_03-01",
-	"cardCode": "03-01",
-	"printedCodes": {
-		"sideA": "03-01a",
-		"sideB": "03-01b"
-	},
-	"title": "PERIMETER REPORT",
-	"category": "legacy_stop",
-	"month": "march",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "STOP",
-		"header": "STOP",
-		"trigger": "Draw this card and read the other side during step 2 of the setup of your first game in March.",
-		"text": "STOP\nDRAW THIS CARD AND READ THE OTHER SIDE DURING STEP 2 OF THE SETUP OF YOUR FIRST GAME IN MARCH.",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "PERIMETER REPORT",
-		"text": "If you have not opened 67, scratch the first box below.",
-		"footer": "Destroy this card after resolving it.",
-		"scratchBoxes": [
-			{
-				"index": 1,
-				"instruction": "Scratch this box only if 67 has not been opened.",
-				"coveredOnBase": true,
-				"revealedInState": 2
-			},
-			{
-				"index": 2,
-				"instruction": "The card does not tell you to scratch this box.",
-				"coveredOnBase": true,
-				"revealedInState": 3
-			}
-		]
-	},
-	"states": [
-		{
-			"state": 2,
-			"images": {
-				"sideA": "state-2-side-a.jpg",
-				"sideB": "state-2-side-b.jpg"
-			},
-			"revealedCondition": "First box scratched because 67 was still sealed. Second box still covered.",
-			"revealedText": "It's critical that we Recon South America soon–before the Hollow Men sabotage anything important."
-		},
-		{
-			"state": 3,
-			"images": {
-				"sideA": "state-3-side-a.jpg",
-				"sideB": "state-3-side-b.jpg"
-			},
-			"revealedCondition": "Both boxes scratched. The second box was not part of the instruction.",
-			"revealedText": "It's critical that we Recon South America soon–before the Hollow Men sabotage anything important.\n\nWe didn't tell you to scratch this box."
-		}
-	],
-	"mechanics": {
-		"whenRead": "STOP. Draw and read during step 2 of the setup of the first game in March. Legacy-deck reading stops on this card.",
-		"triggers": ["67 has not been opened: scratch only the first box."],
-		"opensDoors": [],
-		"opensPackages": [],
-		"destroys": ["This card, after resolving it."],
-		"addsToPool": [],
-		"rules": [
-			"If 67 is already open, scratch nothing.",
-			"If 67 is sealed, scratch the first box only. The revealed text tells the group to Recon South America. It does not itself open a package or complete an objective.",
-			"The second box is a decoy. Scratching it reveals only: We didn't tell you to scratch this box.",
-			"Destroy this card after resolving it."
-		],
-		"notes": "\"Recon South America\" is bold in the first box. The dash in \"soon–before\" is an en dash. Side A is unchanged in state 2 and state 3."
-	}
+  "sequence": 22,
+  "folder": "022_03-01",
+  "cardCode": "03-01",
+  "printedCodes": {
+    "sideA": "03-01a",
+    "sideB": "03-01b"
+  },
+  "title": "PERIMETER REPORT",
+  "category": "legacy_stop",
+  "month": "march",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "STOP",
+    "header": "STOP",
+    "trigger": "Draw this card and read the other side during step 2 of the setup of your first game in March.",
+    "text": "STOP\nDRAW THIS CARD AND READ THE OTHER SIDE DURING STEP 2 OF THE SETUP OF YOUR FIRST GAME IN MARCH.",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "PERIMETER REPORT",
+    "text": "If you have not opened 67, scratch the first box below.",
+    "footer": "Destroy this card after resolving it.",
+    "scratchBoxes": [
+      {
+        "index": 1,
+        "instruction": "Scratch this box only if 67 has not been opened.",
+        "coveredOnBase": true,
+        "revealedInState": 2
+      },
+      {
+        "index": 2,
+        "instruction": "The card does not tell you to scratch this box.",
+        "coveredOnBase": true,
+        "revealedInState": 3
+      }
+    ]
+  },
+  "states": [
+    {
+      "state": 2,
+      "images": {
+        "sideA": "state-2-side-a.jpg",
+        "sideB": "state-2-side-b.jpg"
+      },
+      "revealedCondition": "First box scratched because 67 was still sealed. Second box still covered.",
+      "revealedText": "It's critical that we Recon South America soon–before the Hollow Men sabotage anything important."
+    },
+    {
+      "state": 3,
+      "images": {
+        "sideA": "state-3-side-a.jpg",
+        "sideB": "state-3-side-b.jpg"
+      },
+      "revealedCondition": "Both boxes scratched. The second box was not part of the instruction.",
+      "revealedText": "It's critical that we Recon South America soon–before the Hollow Men sabotage anything important.\n\nWe didn't tell you to scratch this box."
+    }
+  ],
+  "mechanics": {
+    "whenRead": "STOP. Draw and read during step 2 of the setup of the first game in March. Legacy-deck reading stops on this card.",
+    "triggers": ["67 has not been opened: scratch only the first box."],
+    "opensDoors": [],
+    "opensPackages": [],
+    "destroys": ["This card, after resolving it."],
+    "addsToPool": [],
+    "rules": [
+      "If 67 is already open, scratch nothing.",
+      "If 67 is sealed, scratch the first box only. The revealed text tells the group to Recon South America. It does not itself open a package or complete an objective.",
+      "The second box is a decoy. Scratching it reveals only: We didn't tell you to scratch this box.",
+      "Destroy this card after resolving it."
+    ],
+    "notes": "\"Recon South America\" is bold in the first box. The dash in \"soon–before\" is an en dash. Side A is unchanged in state 2 and state 3."
+  }
 }

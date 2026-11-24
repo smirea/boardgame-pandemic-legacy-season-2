@@ -1,33 +1,33 @@
 {
-	"door": "R",
-	"folder": 1,
-	"frontImage": "front.jpg",
-	"frontText": "R",
-	"items": [
-		{
-			"id": "item-01_rule-r",
-			"image": "item-01_rule-r.jpg",
-			"count": 1,
-			"printedCode": "R",
-			"category": "rule_sticker",
-			"title": "2. Infect",
-			"placementTarget": "Rulebook page 13, slot R (replaces Epidemic step 2, Infect)",
-			"text": "2. Infect: Draw a random Infection card from Package 6. (If there are no Infection cards in Package 6, draw the bottom card from the Infection deck.)\nRemove all the Supply cubes from that city and put them in the stockpile. (Do not add Plague cubes if the city has no Supply cubes.)\nDiscard this card to the Infection discard pile.\nIf the card came from Package 6, it is back in play!",
-			"tables": [],
-			"mechanics": {
-				"opensDoors": [],
-				"opensPackages": ["6"],
-				"rules": [
-					"Epidemic step 2 draws a random Infection card from Package 6.",
-					"If Package 6 has no Infection cards, draw the bottom card of the Infection deck instead.",
-					"Remove every supply cube from that city and return them to the stockpile.",
-					"Do not place plague cubes when the city has no supply cubes.",
-					"Discard the drawn card to the Infection discard.",
-					"A card drawn from Package 6 re-enters the game by that discard."
-				],
-				"effect": "Epidemic infection comes from Package 6 when that package still has Infection cards, and it only strips supply cubes."
-			}
-		}
-	],
-	"summary": "Replaces Epidemic step 2. Infect by drawing a random Infection card from Package 6, or the bottom of the Infection deck if Package 6 is empty. Strip every supply cube to the stockpile and do not add plague. The card is discarded, and a Package 6 card is back in play."
+  "door": "R",
+  "folder": 1,
+  "frontImage": "front.jpg",
+  "frontText": "R",
+  "items": [
+    {
+      "id": "item-01_rule-r",
+      "image": "item-01_rule-r.jpg",
+      "count": 1,
+      "printedCode": "R",
+      "category": "rule_sticker",
+      "title": "2. Infect",
+      "placementTarget": "Rulebook page 13, slot R (replaces Epidemic step 2, Infect)",
+      "text": "2. Infect: Draw a random Infection card from Package 6. (If there are no Infection cards in Package 6, draw the bottom card from the Infection deck.)\nRemove all the Supply cubes from that city and put them in the stockpile. (Do not add Plague cubes if the city has no Supply cubes.)\nDiscard this card to the Infection discard pile.\nIf the card came from Package 6, it is back in play!",
+      "tables": [],
+      "mechanics": {
+        "opensDoors": [],
+        "opensPackages": ["6"],
+        "rules": [
+          "Epidemic step 2 draws a random Infection card from Package 6.",
+          "If Package 6 has no Infection cards, draw the bottom card of the Infection deck instead.",
+          "Remove every supply cube from that city and return them to the stockpile.",
+          "Do not place plague cubes when the city has no supply cubes.",
+          "Discard the drawn card to the Infection discard.",
+          "A card drawn from Package 6 re-enters the game by that discard."
+        ],
+        "effect": "Epidemic infection comes from Package 6 when that package still has Infection cards, and it only strips supply cubes."
+      }
+    }
+  ],
+  "summary": "Replaces Epidemic step 2. Infect by drawing a random Infection card from Package 6, or the bottom of the Infection deck if Package 6 is empty. Strip every supply cube to the stockpile and do not add plague. The card is discarded, and a Package 6 card is back in play."
 }

@@ -3,54 +3,54 @@
  * object. Everything around it stays dark and quiet so the map carries the screen.
  */
 html[data-theme] {
-	color-scheme: dark;
+  color-scheme: dark;
 
-	--table: #14120e;
-	--chrome: #1c1915;
-	--panel: rgb(28 25 21 / 0.9);
-	--panel-solid: #1c1915;
-	--ink: #e7dcc6;
-	--muted: #978c79;
-	--line: rgb(231 220 198 / 0.13);
-	--line-strong: rgb(231 220 198 / 0.28);
-	--wash: rgb(231 220 198 / 0.05);
+  --table: #14120e;
+  --chrome: #1c1915;
+  --panel: rgb(28 25 21 / 0.9);
+  --panel-solid: #1c1915;
+  --ink: #e7dcc6;
+  --muted: #978c79;
+  --line: rgb(231 220 198 / 0.13);
+  --line-strong: rgb(231 220 198 / 0.28);
+  --wash: rgb(231 220 198 / 0.05);
 
-	/* The chart's own materials. Primary actions are vellum tags printed in its ink. */
-	--paper: #dccfb2;
-	--paper-ink: #2a2017;
-	--paper-muted: #6f604c;
+  /* The chart's own materials. Primary actions are vellum tags printed in its ink. */
+  --paper: #dccfb2;
+  --paper-ink: #2a2017;
+  --paper-muted: #6f604c;
 
-	/* Paper laid on the chart: character slips, notes, tags. Ink colours are darker so they read on it. */
-	--slip: #ece3cf;
-	--slip-ink: #2a2017;
-	--slip-muted: #6f604c;
-	--slip-line: rgb(60 44 28 / 0.18);
-	--slip-shadow: 0 1px 1px rgb(40 26 12 / 0.35), 0 0.5rem 1.2rem rgb(20 12 4 / 0.35);
-	/* A loose sheet of the same stock as the chart, for the lobby, the briefing and the game-end shop. */
-	--document:
-		radial-gradient(ellipse at 20% 10%, rgb(255 250 236 / 0.5), transparent 60%),
-		radial-gradient(ellipse at 90% 100%, rgb(150 110 60 / 0.16), transparent 55%), #e4d9c0;
-	--document-shadow: 0 2rem 5rem rgb(0 0 0 / 0.6), inset 0 0 4rem rgb(120 86 48 / 0.2);
-	--ink-danger: #a3301c;
-	--ink-good: #3d6b55;
-	--ink-warn: #8b5a12;
+  /* Paper laid on the chart: character slips, notes, tags. Ink colours are darker so they read on it. */
+  --slip: #ece3cf;
+  --slip-ink: #2a2017;
+  --slip-muted: #6f604c;
+  --slip-line: rgb(60 44 28 / 0.18);
+  --slip-shadow: 0 1px 1px rgb(40 26 12 / 0.35), 0 0.5rem 1.2rem rgb(20 12 4 / 0.35);
+  /* A loose sheet of the same stock as the chart, for the lobby, the briefing and the game-end shop. */
+  --document:
+    radial-gradient(ellipse at 20% 10%, rgb(255 250 236 / 0.5), transparent 60%),
+    radial-gradient(ellipse at 90% 100%, rgb(150 110 60 / 0.16), transparent 55%), #e4d9c0;
+  --document-shadow: 0 2rem 5rem rgb(0 0 0 / 0.6), inset 0 0 4rem rgb(120 86 48 / 0.2);
+  --ink-danger: #a3301c;
+  --ink-good: #3d6b55;
+  --ink-warn: #8b5a12;
 
-	--good: #8db59c;
-	--warn: #d6a549;
-	--danger: #cf5b3e;
-	--hollow: #a68bc0;
-	--accent: var(--good);
+  --good: #8db59c;
+  --warn: #d6a549;
+  --danger: #cf5b3e;
+  --hollow: #a68bc0;
+  --accent: var(--good);
 
-	--font-display: 'IM Fell English', 'Iowan Old Style', Georgia, serif;
-	--font-ui: 'Barlow Semi Condensed', 'Avenir Next Condensed', 'Arial Narrow', sans-serif;
+  --font-display: "IM Fell English", "Iowan Old Style", Georgia, serif;
+  --font-ui: "Barlow Semi Condensed", "Avenir Next Condensed", "Arial Narrow", sans-serif;
 
-	--app-bg: var(--table);
-	--app-text: var(--ink);
-	--app-muted: var(--muted);
-	--app-panel: var(--chrome);
-	--app-panel-text: var(--ink);
-	--app-border: var(--line);
-	--app-accent: var(--paper);
-	--app-accent-ink: var(--paper-ink);
-	--app-error: var(--danger);
+  --app-bg: var(--table);
+  --app-text: var(--ink);
+  --app-muted: var(--muted);
+  --app-panel: var(--chrome);
+  --app-panel-text: var(--ink);
+  --app-border: var(--line);
+  --app-accent: var(--paper);
+  --app-accent-ink: var(--paper-ink);
+  --app-error: var(--danger);
 }

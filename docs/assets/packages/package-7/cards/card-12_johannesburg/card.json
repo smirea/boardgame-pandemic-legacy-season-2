@@ -1,38 +1,38 @@
 {
-	"package": 7,
-	"index": 12,
-	"printedCodes": {
-		"sideA": null,
-		"sideB": "P7-12b"
-	},
-	"title": "Johannesburg",
-	"category": "player-card",
-	"city": "Johannesburg",
-	"color": "blue",
-	"copies": 1,
-	"hasImprovementSlot": true,
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"text": "Player card back. No text."
-	},
-	"sideB": {
-		"text": "JOHANNESBURG\n26°12'15\"S 28°2'50\"E\n\nInland map art with a bullseye sticker circle in the center. No anchor. No search box.\n\nThe bottom edge repeats JOHANNESBURG and the coordinates upside down.",
-		"searchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"opensDoors": [],
-		"rules": [
-			"Second blue Player card for Johannesburg. Not a port. No search.",
-			"The bullseye in the map art is the player-card upgrade slot."
-		],
-		"notes": [
-			"Card id 10711.",
-			"Same coordinates as the search card: 26°12'15\"S 28°2'50\"E.",
-			"Goes to the reserve when the package is opened."
-		]
-	}
+  "package": 7,
+  "index": 12,
+  "printedCodes": {
+    "sideA": null,
+    "sideB": "P7-12b"
+  },
+  "title": "Johannesburg",
+  "category": "player-card",
+  "city": "Johannesburg",
+  "color": "blue",
+  "copies": 1,
+  "hasImprovementSlot": true,
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "text": "Player card back. No text."
+  },
+  "sideB": {
+    "text": "JOHANNESBURG\n26°12'15\"S 28°2'50\"E\n\nInland map art with a bullseye sticker circle in the center. No anchor. No search box.\n\nThe bottom edge repeats JOHANNESBURG and the coordinates upside down.",
+    "searchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "opensDoors": [],
+    "rules": [
+      "Second blue Player card for Johannesburg. Not a port. No search.",
+      "The bullseye in the map art is the player-card upgrade slot."
+    ],
+    "notes": [
+      "Card id 10711.",
+      "Same coordinates as the search card: 26°12'15\"S 28°2'50\"E.",
+      "Goes to the reserve when the package is opened."
+    ]
+  }
 }

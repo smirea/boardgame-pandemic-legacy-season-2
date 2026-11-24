@@ -1,47 +1,47 @@
 {
-	"door": "50",
-	"folder": 4,
-	"frontImage": "dossiers/folder-4/door-50/front.jpg",
-	"frontText": "50",
-	"items": [
-		{
-			"id": "item-01",
-			"image": "dossiers/folder-4/door-50/item-01.jpg",
-			"count": 1,
-			"printedCode": "50",
-			"category": "sticker-sheet",
-			"title": "INFESTED CITIES",
-			"placementTarget": "Infested cities on the board",
-			"costProductionUnits": null,
-			"text": "INFESTED CITIES\nIf you have not already done so, open F 14\n\nUse these stickers to mark infested cities.\n(If you run out of stickers, no new cities will become infested.)",
-			"mapDetails": null,
-			"mechanics": {
-				"timing": "immediate",
-				"trigger": null,
-				"effect": "Open doors F and 14 if they are still sealed. Use the rat stickers to mark infested cities. When the stickers run out, no new city becomes infested.",
-				"restrictions": ["No new city becomes infested after the stickers run out"],
-				"opensDoors": ["F", "14"],
-				"openIsBold": true,
-				"stickerCountOnSheet": 21,
-				"stickerLayout": "3 rows of 7",
-				"stickerArt": "Green circle with a lighter green rat silhouette.",
-				"sourceGuids": ["26fbf0"]
-			}
-		}
-	],
-	"bags": [
-		{
-			"name": "Infected City Stickers",
-			"description": "(unused)",
-			"guid": "91f498",
-			"totalItems": 21,
-			"images": [
-				{
-					"count": 21,
-					"image": "dossiers/folder-4/door-50/bag-infected-city-stickers-1.png"
-				}
-			]
-		}
-	],
-	"summary": "Infested-cities sheet and a bag of 21 identical green rat stickers. The card says INFESTED CITIES, tells you to open F and 14 if you have not, and says to mark infested cities with the stickers. If the stickers run out, no new city becomes infested. The sheet shows 3 rows of 7 rats. Corner badge is 50. The bag name in the manifest is Infected City Stickers."
+  "door": "50",
+  "folder": 4,
+  "frontImage": "dossiers/folder-4/door-50/front.jpg",
+  "frontText": "50",
+  "items": [
+    {
+      "id": "item-01",
+      "image": "dossiers/folder-4/door-50/item-01.jpg",
+      "count": 1,
+      "printedCode": "50",
+      "category": "sticker-sheet",
+      "title": "INFESTED CITIES",
+      "placementTarget": "Infested cities on the board",
+      "costProductionUnits": null,
+      "text": "INFESTED CITIES\nIf you have not already done so, open F 14\n\nUse these stickers to mark infested cities.\n(If you run out of stickers, no new cities will become infested.)",
+      "mapDetails": null,
+      "mechanics": {
+        "timing": "immediate",
+        "trigger": null,
+        "effect": "Open doors F and 14 if they are still sealed. Use the rat stickers to mark infested cities. When the stickers run out, no new city becomes infested.",
+        "restrictions": ["No new city becomes infested after the stickers run out"],
+        "opensDoors": ["F", "14"],
+        "openIsBold": true,
+        "stickerCountOnSheet": 21,
+        "stickerLayout": "3 rows of 7",
+        "stickerArt": "Green circle with a lighter green rat silhouette.",
+        "sourceGuids": ["26fbf0"]
+      }
+    }
+  ],
+  "bags": [
+    {
+      "name": "Infected City Stickers",
+      "description": "(unused)",
+      "guid": "91f498",
+      "totalItems": 21,
+      "images": [
+        {
+          "count": 21,
+          "image": "dossiers/folder-4/door-50/bag-infected-city-stickers-1.png"
+        }
+      ]
+    }
+  ],
+  "summary": "Infested-cities sheet and a bag of 21 identical green rat stickers. The card says INFESTED CITIES, tells you to open F and 14 if you have not, and says to mark infested cities with the stickers. If the stickers run out, no new city becomes infested. The sheet shows 3 rows of 7 rats. Corner badge is 50. The bag name in the manifest is Infected City Stickers."
 }

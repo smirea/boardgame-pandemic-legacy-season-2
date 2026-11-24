@@ -1,64 +1,70 @@
 {
-	"sequence": 70,
-	"folder": "070_12-01",
-	"cardCode": "12-01",
-	"printedCodes": {
-		"sideA": "12-01a",
-		"sideB": "12-01b"
-	},
-	"title": "Perimeter Report",
-	"category": "legacy_stop",
-	"month": "december",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "STOP",
-		"header": "STOP",
-		"trigger": "DRAW THIS CARD AND READ THE OTHER SIDE DURING STEP 2 OF THE SETUP OF YOUR FIRST GAME IN DECEMBER.",
-		"summary": "Stop. Draw this card and read the other side during step 2 of setup of your first game in December.",
-		"text": "STOP\n\nDRAW THIS CARD AND READ THE OTHER SIDE DURING STEP 2 OF THE SETUP OF YOUR FIRST GAME IN DECEMBER.",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "PERIMETER REPORT",
-		"summary": "If the plan is not complete, scratch the box. Destroy this card after resolving it.",
-		"text": "If you have not completed the plan, scratch the box below.\n\nDestroy this card after resolving it.",
-		"footer": "Destroy this card after resolving it.",
-		"scratchBoxes": [
-			{
-				"condition": "If you have not completed the plan, scratch the box below.",
-				"revealedInState": 2
-			}
-		]
-	},
-	"states": [
-		{
-			"state": 2,
-			"images": {
-				"sideA": "state-2-side-a.jpg",
-				"sideB": "state-2-side-b.jpg"
-			},
-			"revealedCondition": "If you have not completed the plan, scratch the box below.",
-			"revealedSummary": "The new Hollow Men turned on Utopia and came to help. Open Package 8 and follow what is inside. That does not complete any objectives. Destroy the Riot Control Unrationed Event that is inside the package.",
-			"revealedText": "The new Hollow Men turned on Utopia, rising up to aid our cause!\nOpen Package 8 and follow the instructions inside. (This does not complete any objectives.)\nDestroy the \"Riot Control\" Unrationed Event card inside."
-		}
-	],
-	"mechanics": {
-		"whenRead": "Draw during step 2 of setup of the first game in December. Scratch only if the plan is still incomplete, then continue the setup draw.",
-		"triggers": ["Step 2 of setup of the first game in December", "Scratch only if the plan has not been completed"],
-		"opensDoors": [],
-		"opensPackages": ["8"],
-		"destroys": ["the \"Riot Control\" Unrationed Event card inside Package 8", "this card, after resolving it"],
-		"addsToPool": [],
-		"rules": [
-			"If you have not completed the plan, scratch the box.",
-			"Revealed: open Package 8 and follow the instructions inside. Doing so does not complete any objectives.",
-			"Destroy the \"Riot Control\" Unrationed Event card inside Package 8.",
-			"Destroy this card after resolving it.",
-			"If the plan is already complete, do not scratch and do not open Package 8 from this card. Still destroy this card after resolving it."
-		],
-		"notes": "state-2-side-a.jpg is the same Stop face as side-a.jpg. The scratch text is only on state-2-side-b.jpg. Package 8 is the same package 11-05 opens when the plan is finished on time. This forced opening is the late path, and it explicitly discards Riot Control. The footer is red italic."
-	}
+  "sequence": 70,
+  "folder": "070_12-01",
+  "cardCode": "12-01",
+  "printedCodes": {
+    "sideA": "12-01a",
+    "sideB": "12-01b"
+  },
+  "title": "Perimeter Report",
+  "category": "legacy_stop",
+  "month": "december",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "STOP",
+    "header": "STOP",
+    "trigger": "DRAW THIS CARD AND READ THE OTHER SIDE DURING STEP 2 OF THE SETUP OF YOUR FIRST GAME IN DECEMBER.",
+    "summary": "Stop. Draw this card and read the other side during step 2 of setup of your first game in December.",
+    "text": "STOP\n\nDRAW THIS CARD AND READ THE OTHER SIDE DURING STEP 2 OF THE SETUP OF YOUR FIRST GAME IN DECEMBER.",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "PERIMETER REPORT",
+    "summary": "If the plan is not complete, scratch the box. Destroy this card after resolving it.",
+    "text": "If you have not completed the plan, scratch the box below.\n\nDestroy this card after resolving it.",
+    "footer": "Destroy this card after resolving it.",
+    "scratchBoxes": [
+      {
+        "condition": "If you have not completed the plan, scratch the box below.",
+        "revealedInState": 2
+      }
+    ]
+  },
+  "states": [
+    {
+      "state": 2,
+      "images": {
+        "sideA": "state-2-side-a.jpg",
+        "sideB": "state-2-side-b.jpg"
+      },
+      "revealedCondition": "If you have not completed the plan, scratch the box below.",
+      "revealedSummary": "The new Hollow Men turned on Utopia and came to help. Open Package 8 and follow what is inside. That does not complete any objectives. Destroy the Riot Control Unrationed Event that is inside the package.",
+      "revealedText": "The new Hollow Men turned on Utopia, rising up to aid our cause!\nOpen Package 8 and follow the instructions inside. (This does not complete any objectives.)\nDestroy the \"Riot Control\" Unrationed Event card inside."
+    }
+  ],
+  "mechanics": {
+    "whenRead": "Draw during step 2 of setup of the first game in December. Scratch only if the plan is still incomplete, then continue the setup draw.",
+    "triggers": [
+      "Step 2 of setup of the first game in December",
+      "Scratch only if the plan has not been completed"
+    ],
+    "opensDoors": [],
+    "opensPackages": ["8"],
+    "destroys": [
+      "the \"Riot Control\" Unrationed Event card inside Package 8",
+      "this card, after resolving it"
+    ],
+    "addsToPool": [],
+    "rules": [
+      "If you have not completed the plan, scratch the box.",
+      "Revealed: open Package 8 and follow the instructions inside. Doing so does not complete any objectives.",
+      "Destroy the \"Riot Control\" Unrationed Event card inside Package 8.",
+      "Destroy this card after resolving it.",
+      "If the plan is already complete, do not scratch and do not open Package 8 from this card. Still destroy this card after resolving it."
+    ],
+    "notes": "state-2-side-a.jpg is the same Stop face as side-a.jpg. The scratch text is only on state-2-side-b.jpg. Package 8 is the same package 11-05 opens when the plan is finished on time. This forced opening is the late path, and it explicitly discards Riot Control. The footer is red italic."
+  }
 }

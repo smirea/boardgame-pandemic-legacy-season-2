@@ -1,37 +1,37 @@
 {
-	"package": 1,
-	"index": 2,
-	"cardId": 901,
-	"printedCodes": {
-		"sideA": null,
-		"sideB": "P1-02b"
-	},
-	"title": "Decontamination Kit",
-	"category": "unrationed-event",
-	"city": null,
-	"color": null,
-	"copies": 1,
-	"hasImprovementSlot": false,
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideASummary": "Player deck back. No text and no printed code.",
-	"sideBSummary": "Unrationed Event, Decontamination Kit. Remove all Plague cubes from 1 location on the grid. Destroy this card after use. Play at any time. Not an action. Code P1-02b.",
-	"searchBoxes": [],
-	"states": [],
-	"mechanics": {
-		"opensDoors": [],
-		"destroys": ["Decontamination Kit"],
-		"rules": [
-			"Play at any time. It is not an action.",
-			"Remove all Plague cubes from 1 location on the grid.",
-			"Destroy this card after use. It does not return to the deck or the reserve."
-		],
-		"notes": [
-			"Card id 901. Printed code P1-02b. Side A has no code.",
-			"P1-01b gives this card to a player when the package is opened voluntarily.",
-			"The screen title reads DECONTAMINATION KIT under the UNRATIONED EVENT banner."
-		]
-	}
+  "package": 1,
+  "index": 2,
+  "cardId": 901,
+  "printedCodes": {
+    "sideA": null,
+    "sideB": "P1-02b"
+  },
+  "title": "Decontamination Kit",
+  "category": "unrationed-event",
+  "city": null,
+  "color": null,
+  "copies": 1,
+  "hasImprovementSlot": false,
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideASummary": "Player deck back. No text and no printed code.",
+  "sideBSummary": "Unrationed Event, Decontamination Kit. Remove all Plague cubes from 1 location on the grid. Destroy this card after use. Play at any time. Not an action. Code P1-02b.",
+  "searchBoxes": [],
+  "states": [],
+  "mechanics": {
+    "opensDoors": [],
+    "destroys": ["Decontamination Kit"],
+    "rules": [
+      "Play at any time. It is not an action.",
+      "Remove all Plague cubes from 1 location on the grid.",
+      "Destroy this card after use. It does not return to the deck or the reserve."
+    ],
+    "notes": [
+      "Card id 901. Printed code P1-02b. Side A has no code.",
+      "P1-01b gives this card to a player when the package is opened voluntarily.",
+      "The screen title reads DECONTAMINATION KIT under the UNRATIONED EVENT banner."
+    ]
+  }
 }

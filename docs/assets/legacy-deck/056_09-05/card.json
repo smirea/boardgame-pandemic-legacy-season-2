@@ -1,40 +1,40 @@
 {
-	"sequence": 56,
-	"folder": "056_09-05",
-	"cardCode": "09-05",
-	"printedCodes": {
-		"sideA": "09-05a",
-		"sideB": "09-05b"
-	},
-	"title": "RIGHT NOW!",
-	"category": "legacy_pause",
-	"month": "september",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "PAUSE",
-		"header": "PAUSE",
-		"trigger": "Draw this card and read the other side during step 2 at the end of your first game in September.",
-		"text": "PAUSE\nDRAW THIS CARD AND READ THE OTHER SIDE DURING STEP 2 AT THE END OF YOUR FIRST GAME IN SEPTEMBER.",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "RIGHT NOW!",
-		"text": "Open the following door:\n33",
-		"footer": "",
-		"scratchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"whenRead": "PAUSE. Drawn during the September setup Legacy-deck reading, after 09-04, which stops on this card. Read side B during step 2 at the end of the first September game, then continue the Legacy deck.",
-		"triggers": [],
-		"opensDoors": ["33"],
-		"opensPackages": [],
-		"destroys": [],
-		"addsToPool": [],
-		"rules": ["Open door 33 immediately when this side is read."],
-		"notes": "The instruction is singular: \"Open the following door:\" 33 is in a white box with red type. What is inside it is not printed on this card."
-	}
+  "sequence": 56,
+  "folder": "056_09-05",
+  "cardCode": "09-05",
+  "printedCodes": {
+    "sideA": "09-05a",
+    "sideB": "09-05b"
+  },
+  "title": "RIGHT NOW!",
+  "category": "legacy_pause",
+  "month": "september",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "PAUSE",
+    "header": "PAUSE",
+    "trigger": "Draw this card and read the other side during step 2 at the end of your first game in September.",
+    "text": "PAUSE\nDRAW THIS CARD AND READ THE OTHER SIDE DURING STEP 2 AT THE END OF YOUR FIRST GAME IN SEPTEMBER.",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "RIGHT NOW!",
+    "text": "Open the following door:\n33",
+    "footer": "",
+    "scratchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "whenRead": "PAUSE. Drawn during the September setup Legacy-deck reading, after 09-04, which stops on this card. Read side B during step 2 at the end of the first September game, then continue the Legacy deck.",
+    "triggers": [],
+    "opensDoors": ["33"],
+    "opensPackages": [],
+    "destroys": [],
+    "addsToPool": [],
+    "rules": ["Open door 33 immediately when this side is read."],
+    "notes": "The instruction is singular: \"Open the following door:\" 33 is in a white box with red type. What is inside it is not printed on this card."
+  }
 }

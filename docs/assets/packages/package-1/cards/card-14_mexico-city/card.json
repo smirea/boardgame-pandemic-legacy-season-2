@@ -1,32 +1,32 @@
 {
-	"package": 1,
-	"index": 14,
-	"cardId": 913,
-	"printedCodes": {
-		"sideA": null,
-		"sideB": "P1-16b"
-	},
-	"title": "Mexico City",
-	"category": "infection-card",
-	"city": "Mexico City",
-	"color": "yellow",
-	"copies": 1,
-	"hasImprovementSlot": false,
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideASummary": "Infection deck back. Biohazard symbol. No text and no printed code.",
-	"sideBSummary": "Yellow Mexico City Infection card. City name down the left edge, yellow map, green infection mark. No rules text. Code P1-16b.",
-	"searchBoxes": [],
-	"states": [],
-	"mechanics": {
-		"opensDoors": [],
-		"destroys": [],
-		"rules": [
-			"Yellow Infection card for Mexico City. One copy.",
-			"Goes to the reserve when the package is opened, and to the Game End area when Mexico City joins the grid."
-		],
-		"notes": ["Card id 913. Printed code P1-16b."]
-	}
+  "package": 1,
+  "index": 14,
+  "cardId": 913,
+  "printedCodes": {
+    "sideA": null,
+    "sideB": "P1-16b"
+  },
+  "title": "Mexico City",
+  "category": "infection-card",
+  "city": "Mexico City",
+  "color": "yellow",
+  "copies": 1,
+  "hasImprovementSlot": false,
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideASummary": "Infection deck back. Biohazard symbol. No text and no printed code.",
+  "sideBSummary": "Yellow Mexico City Infection card. City name down the left edge, yellow map, green infection mark. No rules text. Code P1-16b.",
+  "searchBoxes": [],
+  "states": [],
+  "mechanics": {
+    "opensDoors": [],
+    "destroys": [],
+    "rules": [
+      "Yellow Infection card for Mexico City. One copy.",
+      "Goes to the reserve when the package is opened, and to the Game End area when Mexico City joins the grid."
+    ],
+    "notes": ["Card id 913. Printed code P1-16b."]
+  }
 }

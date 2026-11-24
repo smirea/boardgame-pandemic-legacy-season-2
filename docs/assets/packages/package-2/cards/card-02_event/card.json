@@ -1,37 +1,37 @@
 {
-	"package": 2,
-	"index": 2,
-	"cardId": 10701,
-	"printedCodes": {
-		"sideA": null,
-		"sideB": "P2-02b"
-	},
-	"title": "Renewal",
-	"category": "unrationed-event",
-	"city": null,
-	"color": null,
-	"copies": 1,
-	"hasImprovementSlot": false,
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideASummary": "Player deck back. No printed text or code.",
-	"sideBSummary": "Unrationed Event named RENEWAL, code P2-02b. Place a character ability worth 2 or less on a Character card currently in play. The ability may be placed over a scar. Destroy this card after use. Play at any time. Not an action.",
-	"searchBoxes": [],
-	"states": [],
-	"mechanics": {
-		"opensDoors": [],
-		"destroys": ["this card"],
-		"rules": [
-			"Play at any time. Not an action.",
-			"Place one character ability whose cost is 2 or less onto a Character card that is currently in play.",
-			"That ability may cover a scar.",
-			"Destroy this card after use. It does not go to the Player discard pile."
-		],
-		"notes": [
-			"The recon report gives this card to a player to add to their hand when the package is opened.",
-			"Worth 2 or less is the ability's printed cost."
-		]
-	}
+  "package": 2,
+  "index": 2,
+  "cardId": 10701,
+  "printedCodes": {
+    "sideA": null,
+    "sideB": "P2-02b"
+  },
+  "title": "Renewal",
+  "category": "unrationed-event",
+  "city": null,
+  "color": null,
+  "copies": 1,
+  "hasImprovementSlot": false,
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideASummary": "Player deck back. No printed text or code.",
+  "sideBSummary": "Unrationed Event named RENEWAL, code P2-02b. Place a character ability worth 2 or less on a Character card currently in play. The ability may be placed over a scar. Destroy this card after use. Play at any time. Not an action.",
+  "searchBoxes": [],
+  "states": [],
+  "mechanics": {
+    "opensDoors": [],
+    "destroys": ["this card"],
+    "rules": [
+      "Play at any time. Not an action.",
+      "Place one character ability whose cost is 2 or less onto a Character card that is currently in play.",
+      "That ability may cover a scar.",
+      "Destroy this card after use. It does not go to the Player discard pile."
+    ],
+    "notes": [
+      "The recon report gives this card to a player to add to their hand when the package is opened.",
+      "Worth 2 or less is the ability's printed cost."
+    ]
+  }
 }

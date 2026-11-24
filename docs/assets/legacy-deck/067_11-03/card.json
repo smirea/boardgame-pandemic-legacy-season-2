@@ -1,47 +1,47 @@
 {
-	"sequence": 67,
-	"folder": "067_11-03",
-	"cardCode": "11-03",
-	"printedCodes": {
-		"sideA": "11-03a",
-		"sideB": "11-03b"
-	},
-	"title": "New Priorities",
-	"category": "legacy_instruction",
-	"month": "november",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "CONTINUE",
-		"header": "KEEP DRAWING",
-		"trigger": "",
-		"summary": "Draw and read the other side of this card.",
-		"text": "Draw and read the other side of this card.",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "NEW PRIORITIES",
-		"summary": "Destroy the Build 3 New Supply Centers and Get Hollow Men to Defect objectives. One new mandatory objective is enclosed, and November needs only that 1 objective. The calendar shows October with 2 stars and 8, November with 1 star and 4, and December with 1 star and 0.",
-		"text": "DESTROY THE FOLLOWING OBJECTIVES:\n• BUILD 3 NEW SUPPLY CENTERS\n• GET HOLLOW MEN TO DEFECT\n\nA new mandatory objective is enclosed.\nWe only need to complete this 1 objective in November.\n\nCalendar: OCTOBER 2 stars, 8. NOVEMBER 1 star, 4. DECEMBER 1 star, 0.",
-		"footer": "",
-		"scratchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"whenRead": "During the first November setup draw, after the journal 11-02. The enclosed mandatory objective is the next card, 11-04.",
-		"triggers": [],
-		"opensDoors": [],
-		"opensPackages": [],
-		"destroys": ["BUILD 3 NEW SUPPLY CENTERS objective", "GET HOLLOW MEN TO DEFECT objective"],
-		"addsToPool": [],
-		"rules": [
-			"Destroy the Build 3 New Supply Centers objective.",
-			"Destroy the Get Hollow Men to Defect objective.",
-			"November requires 1 objective, the mandatory objective enclosed with this card.",
-			"Printed calendar: October, 2 stars and 8. November, 1 star and 4. December, 1 star and 0."
-		],
-		"notes": "The inset is the same objective calendar as 01-03: stars are how many objectives the month requires, and the number is that month's projected stockpile. This card does not repeat the earlier 'place Supply cubes' sentence. November's column is outlined."
-	}
+  "sequence": 67,
+  "folder": "067_11-03",
+  "cardCode": "11-03",
+  "printedCodes": {
+    "sideA": "11-03a",
+    "sideB": "11-03b"
+  },
+  "title": "New Priorities",
+  "category": "legacy_instruction",
+  "month": "november",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "CONTINUE",
+    "header": "KEEP DRAWING",
+    "trigger": "",
+    "summary": "Draw and read the other side of this card.",
+    "text": "Draw and read the other side of this card.",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "NEW PRIORITIES",
+    "summary": "Destroy the Build 3 New Supply Centers and Get Hollow Men to Defect objectives. One new mandatory objective is enclosed, and November needs only that 1 objective. The calendar shows October with 2 stars and 8, November with 1 star and 4, and December with 1 star and 0.",
+    "text": "DESTROY THE FOLLOWING OBJECTIVES:\n• BUILD 3 NEW SUPPLY CENTERS\n• GET HOLLOW MEN TO DEFECT\n\nA new mandatory objective is enclosed.\nWe only need to complete this 1 objective in November.\n\nCalendar: OCTOBER 2 stars, 8. NOVEMBER 1 star, 4. DECEMBER 1 star, 0.",
+    "footer": "",
+    "scratchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "whenRead": "During the first November setup draw, after the journal 11-02. The enclosed mandatory objective is the next card, 11-04.",
+    "triggers": [],
+    "opensDoors": [],
+    "opensPackages": [],
+    "destroys": ["BUILD 3 NEW SUPPLY CENTERS objective", "GET HOLLOW MEN TO DEFECT objective"],
+    "addsToPool": [],
+    "rules": [
+      "Destroy the Build 3 New Supply Centers objective.",
+      "Destroy the Get Hollow Men to Defect objective.",
+      "November requires 1 objective, the mandatory objective enclosed with this card.",
+      "Printed calendar: October, 2 stars and 8. November, 1 star and 4. December, 1 star and 0."
+    ],
+    "notes": "The inset is the same objective calendar as 01-03: stars are how many objectives the month requires, and the number is that month's projected stockpile. This card does not repeat the earlier 'place Supply cubes' sentence. November's column is outlined."
+  }
 }

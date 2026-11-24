@@ -1,30 +1,30 @@
 {
-	"id": "city-new-york",
-	"cardId": 108,
-	"printedCode": null,
-	"title": "NEW YORK",
-	"category": "city_player",
-	"color": "blue",
-	"copies": 4,
-	"images": {
-		"front": "city-new-york.jpg",
-		"back": "back.jpg"
-	},
-	"hasImprovementSlot": true,
-	"coordinates": "40°45′32″N 73°59′4″W",
-	"frontText": "NEW YORK\n40°45′32″N 73°59′4″W",
-	"backText": null,
-	"states": [],
-	"mechanics": {
-		"timing": "A player city card. It is drawn and played with the other player cards.",
-		"effect": "NEW YORK (blue). Coordinates 40°45′32″N 73°59′4″W.",
-		"rules": [
-			"No effect text is printed on the card.",
-			"The city name and coordinates are printed again, rotated 180 degrees, along the bottom edge.",
-			"A compass rose in the top right shows N and an anchor.",
-			"The map has a crosshair over the city.",
-			"A small unlabelled schematic sits in the bottom-left corner. It is not a sticker slot.",
-			"A dashed improvement slot is printed across the center of the map."
-		]
-	}
+  "id": "city-new-york",
+  "cardId": 108,
+  "printedCode": null,
+  "title": "NEW YORK",
+  "category": "city_player",
+  "color": "blue",
+  "copies": 4,
+  "images": {
+    "front": "city-new-york.jpg",
+    "back": "back.jpg"
+  },
+  "hasImprovementSlot": true,
+  "coordinates": "40°45′32″N 73°59′4″W",
+  "frontText": "NEW YORK\n40°45′32″N 73°59′4″W",
+  "backText": null,
+  "states": [],
+  "mechanics": {
+    "timing": "A player city card. It is drawn and played with the other player cards.",
+    "effect": "NEW YORK (blue). Coordinates 40°45′32″N 73°59′4″W.",
+    "rules": [
+      "No effect text is printed on the card.",
+      "The city name and coordinates are printed again, rotated 180 degrees, along the bottom edge.",
+      "A compass rose in the top right shows N and an anchor.",
+      "The map has a crosshair over the city.",
+      "A small unlabelled schematic sits in the bottom-left corner. It is not a sticker slot.",
+      "A dashed improvement slot is printed across the center of the map."
+    ]
+  }
 }

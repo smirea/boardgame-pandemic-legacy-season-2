@@ -1,40 +1,40 @@
 {
-	"sequence": 53,
-	"folder": "053_09-02",
-	"cardCode": "09-02",
-	"printedCodes": {
-		"sideA": "09-02a",
-		"sideB": "09-02b"
-	},
-	"title": "Journal Entry",
-	"category": "legacy_journal",
-	"month": "september",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "NONE",
-		"header": "Journal Entry",
-		"trigger": "",
-		"text": "PEARL and its possible cure is all we have left. We need this. The year is drawing to a close and this is our last chance. We need to find it. We need to get it. We need to start making a cure. What are Utopia’s motives? Are they holding PEARL hostage?",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "FROM THE ARCHIVES",
-		"text": "APRIL 15, YEAR 44\n\nTwo of our havens are gone. Without their supplies, our ability to continue has been severely compromised. I feel the first real tendrils of despair entering my heart.\n\nIs someone so depraved that they would let us all die? We were condemned to these havens, but we have made every effort to help the whole world. If we were gone, then what?",
-		"footer": "Keep papers like this in the reserve.",
-		"scratchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"whenRead": "Continue the September setup Legacy-deck reading, immediately after 09-01.",
-		"triggers": [],
-		"opensDoors": [],
-		"opensPackages": [],
-		"destroys": [],
-		"addsToPool": [],
-		"rules": ["Keep the card in the reserve. No rules change."],
-		"notes": "A handwritten signature under the Year 44 note is not transcribed."
-	}
+  "sequence": 53,
+  "folder": "053_09-02",
+  "cardCode": "09-02",
+  "printedCodes": {
+    "sideA": "09-02a",
+    "sideB": "09-02b"
+  },
+  "title": "Journal Entry",
+  "category": "legacy_journal",
+  "month": "september",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "NONE",
+    "header": "Journal Entry",
+    "trigger": "",
+    "text": "PEARL and its possible cure is all we have left. We need this. The year is drawing to a close and this is our last chance. We need to find it. We need to get it. We need to start making a cure. What are Utopia’s motives? Are they holding PEARL hostage?",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "FROM THE ARCHIVES",
+    "text": "APRIL 15, YEAR 44\n\nTwo of our havens are gone. Without their supplies, our ability to continue has been severely compromised. I feel the first real tendrils of despair entering my heart.\n\nIs someone so depraved that they would let us all die? We were condemned to these havens, but we have made every effort to help the whole world. If we were gone, then what?",
+    "footer": "Keep papers like this in the reserve.",
+    "scratchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "whenRead": "Continue the September setup Legacy-deck reading, immediately after 09-01.",
+    "triggers": [],
+    "opensDoors": [],
+    "opensPackages": [],
+    "destroys": [],
+    "addsToPool": [],
+    "rules": ["Keep the card in the reserve. No rules change."],
+    "notes": "A handwritten signature under the Year 44 note is not transcribed."
+  }
 }

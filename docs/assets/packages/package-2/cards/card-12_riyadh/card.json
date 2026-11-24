@@ -1,37 +1,37 @@
 {
-	"package": 2,
-	"index": 12,
-	"cardId": 10711,
-	"printedCodes": {
-		"sideA": null,
-		"sideB": "P2-12b"
-	},
-	"title": "Riyadh",
-	"category": "infection-card",
-	"city": "Riyadh",
-	"color": "black",
-	"coordinates": null,
-	"port": false,
-	"copies": 1,
-	"hasImprovementSlot": true,
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideASummary": "Infection deck back. Red biohazard on a dark field. No printed text.",
-	"sideBSummary": "RIYADH printed vertically, code P2-12b. Map fragment, green ring, and a dashed white panel. Same face as index 11.",
-	"searchBoxes": [],
-	"states": [],
-	"mechanics": {
-		"opensDoors": [],
-		"destroys": [],
-		"rules": [
-			"Second black Infection card for Riyadh. Same printed code as index 11.",
-			"The dashed white panel is the infection-card upgrade slot."
-		],
-		"notes": [
-			"Separate scan from index 11. Both faces print P2-12b.",
-			"Goes to the reserve when the package is opened."
-		]
-	}
+  "package": 2,
+  "index": 12,
+  "cardId": 10711,
+  "printedCodes": {
+    "sideA": null,
+    "sideB": "P2-12b"
+  },
+  "title": "Riyadh",
+  "category": "infection-card",
+  "city": "Riyadh",
+  "color": "black",
+  "coordinates": null,
+  "port": false,
+  "copies": 1,
+  "hasImprovementSlot": true,
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideASummary": "Infection deck back. Red biohazard on a dark field. No printed text.",
+  "sideBSummary": "RIYADH printed vertically, code P2-12b. Map fragment, green ring, and a dashed white panel. Same face as index 11.",
+  "searchBoxes": [],
+  "states": [],
+  "mechanics": {
+    "opensDoors": [],
+    "destroys": [],
+    "rules": [
+      "Second black Infection card for Riyadh. Same printed code as index 11.",
+      "The dashed white panel is the infection-card upgrade slot."
+    ],
+    "notes": [
+      "Separate scan from index 11. Both faces print P2-12b.",
+      "Goes to the reserve when the package is opened."
+    ]
+  }
 }

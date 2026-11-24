@@ -1,31 +1,31 @@
 {
-	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "net-signal",
-	"main": "src/index.ts",
-	"compatibility_date": "2026-11-15",
-	"secrets": { "required": ["SIGNAL_SECRET"] },
-	"durable_objects": {
-		"bindings": [{ "name": "SIGNAL_ROOM", "class_name": "SignalRoom" }],
-	},
-	"migrations": [{ "tag": "v1", "new_sqlite_classes": ["SignalRoom"] }],
-	"observability": { "enabled": true, "traces": { "enabled": true } },
-	"env": {
-		// The public site: the built UI and the scans as static assets (`scripts/site.ts`), and signaling on `/signal`.
-		// CI deploys it on every push to master; `bun run deploy` does the same from a Mac with env-manager prod.
-		"production": {
-			"name": "pandemic-legacy-s2",
-			"routes": [{ "pattern": "pandemic-legacy-s2.stf.lol", "custom_domain": true }],
-			"secrets": { "required": ["SIGNAL_SECRET"] },
-			"workers_dev": false,
-			"preview_urls": false,
-			"assets": {
-				"directory": "site",
-				"not_found_handling": "single-page-application",
-				"run_worker_first": ["/signal"],
-			},
-			"durable_objects": {
-				"bindings": [{ "name": "SIGNAL_ROOM", "class_name": "SignalRoom" }],
-			},
-		},
-	},
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "net-signal",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-15",
+  "secrets": { "required": ["SIGNAL_SECRET"] },
+  "durable_objects": {
+    "bindings": [{ "name": "SIGNAL_ROOM", "class_name": "SignalRoom" }],
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["SignalRoom"] }],
+  "observability": { "enabled": true, "traces": { "enabled": true } },
+  "env": {
+    // The public site: the built UI and the scans as static assets (`scripts/site.ts`), and signaling on `/signal`.
+    // CI deploys it on every push to master; `bun run deploy` does the same from a Mac with env-manager prod.
+    "production": {
+      "name": "pandemic-legacy-s2",
+      "routes": [{ "pattern": "pandemic-legacy-s2.stf.lol", "custom_domain": true }],
+      "secrets": { "required": ["SIGNAL_SECRET"] },
+      "workers_dev": false,
+      "preview_urls": false,
+      "assets": {
+        "directory": "site",
+        "not_found_handling": "single-page-application",
+        "run_worker_first": ["/signal"],
+      },
+      "durable_objects": {
+        "bindings": [{ "name": "SIGNAL_ROOM", "class_name": "SignalRoom" }],
+      },
+    },
+  },
 }

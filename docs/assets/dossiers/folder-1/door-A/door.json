@@ -1,33 +1,33 @@
 {
-	"door": "A",
-	"folder": 1,
-	"frontImage": "front.jpg",
-	"frontText": "A",
-	"items": [
-		{
-			"id": "item-01_rule-a",
-			"image": "item-01_rule-a.jpg",
-			"count": 1,
-			"printedCode": "A",
-			"category": "rule_sticker",
-			"title": "Forsaken Cities",
-			"placementTarget": "Rulebook page 6, slot A (under the population ladder, before Supply Lines)",
-			"text": "FORSAKEN CITIES\nCities with a population of zero ([0 in a red square]) have the following effects:\n• While in a forsaken city, you may do only the Drive/Ferry action and may not do any free actions.\n• When you draw an Infection card for a forsaken city for any reason, place it into the Game End area (ignoring it completely) and draw a replacement card.\n• Forsaken cities do not count as cities on the grid when determining Game End Production.\n• You may increase the population of a forsaken city. The cost to restore it to a population of 1 is [2 in a yellow circle].\n• Forsaken cities are immediately infested. Open Door [50 in a red box] if you have not done so and immediately mark all forsaken cities with an Infested sticker.",
-			"tables": [],
-			"mechanics": {
-				"opensDoors": ["50"],
-				"opensPackages": [],
-				"rules": [
-					"A forsaken city is a city at population 0.",
-					"In a forsaken city the only legal action is Drive/Ferry. Free actions are illegal there.",
-					"An Infection card drawn for a forsaken city, for any reason, goes to the Game End area and is ignored. Draw a replacement.",
-					"Forsaken cities are not cities on the grid for Game End Production.",
-					"Restoring a forsaken city to population 1 costs 2, printed as a numeral 2 in a yellow circle. The sticker does not name the resource.",
-					"A city becomes infested the moment it is forsaken. Stick an Infested sticker on every forsaken city."
-				],
-				"effect": "Defines population-0 cities and instructs you to open Door 50 if it is still closed."
-			}
-		}
-	],
-	"summary": "Forsaken cities (population 0) restrict actions, skip infection, drop out of Game End Production, cost 2 to restore, and are immediately infested. Opens Door 50."
+  "door": "A",
+  "folder": 1,
+  "frontImage": "front.jpg",
+  "frontText": "A",
+  "items": [
+    {
+      "id": "item-01_rule-a",
+      "image": "item-01_rule-a.jpg",
+      "count": 1,
+      "printedCode": "A",
+      "category": "rule_sticker",
+      "title": "Forsaken Cities",
+      "placementTarget": "Rulebook page 6, slot A (under the population ladder, before Supply Lines)",
+      "text": "FORSAKEN CITIES\nCities with a population of zero ([0 in a red square]) have the following effects:\n• While in a forsaken city, you may do only the Drive/Ferry action and may not do any free actions.\n• When you draw an Infection card for a forsaken city for any reason, place it into the Game End area (ignoring it completely) and draw a replacement card.\n• Forsaken cities do not count as cities on the grid when determining Game End Production.\n• You may increase the population of a forsaken city. The cost to restore it to a population of 1 is [2 in a yellow circle].\n• Forsaken cities are immediately infested. Open Door [50 in a red box] if you have not done so and immediately mark all forsaken cities with an Infested sticker.",
+      "tables": [],
+      "mechanics": {
+        "opensDoors": ["50"],
+        "opensPackages": [],
+        "rules": [
+          "A forsaken city is a city at population 0.",
+          "In a forsaken city the only legal action is Drive/Ferry. Free actions are illegal there.",
+          "An Infection card drawn for a forsaken city, for any reason, goes to the Game End area and is ignored. Draw a replacement.",
+          "Forsaken cities are not cities on the grid for Game End Production.",
+          "Restoring a forsaken city to population 1 costs 2, printed as a numeral 2 in a yellow circle. The sticker does not name the resource.",
+          "A city becomes infested the moment it is forsaken. Stick an Infested sticker on every forsaken city."
+        ],
+        "effect": "Defines population-0 cities and instructs you to open Door 50 if it is still closed."
+      }
+    }
+  ],
+  "summary": "Forsaken cities (population 0) restrict actions, skip infection, drop out of Game End Production, cost 2 to restore, and are immediately infested. Opens Door 50."
 }

@@ -1,61 +1,61 @@
 {
-	"package": 3,
-	"index": 12,
-	"cardId": 10711,
-	"printedCodes": {
-		"sideA": null,
-		"sideB": "P3-12b"
-	},
-	"title": "Hong Kong",
-	"category": "player-card",
-	"city": "Hong Kong",
-	"color": "red",
-	"coordinates": "22°16'32\"N 114°8'38\"E",
-	"port": true,
-	"cardCompassMisprint": "no-anchor (board map sticker Door 56 shows a port anchor; board is authoritative)",
-	"copies": 1,
-	"hasImprovementSlot": false,
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideASummary": "Player deck back. Dark blue sunburst around a haven on the water. No text and no printed code.",
-	"sideBSummary": "Hong Kong, red Player card. Coordinates 22°16'32\"N 114°8'38\"E. The compass has no anchor, so the city is not a port. One covered SEARCH box fills the map. The city name and coordinates repeat upside down along the bottom. Printed code P3-12b.",
-	"searchBoxes": [
-		{
-			"type": "search",
-			"stateRevealed": 2,
-			"isCompanion": true,
-			"companionName": "Structural Engineer",
-			"opensDoors": [],
-			"effectSummary": "Companion Structural Engineer. While this card is in your hand, Build Shelter may discard a City card of any color, including this one."
-		}
-	],
-	"states": [
-		{
-			"state": 2,
-			"cardId": 10726,
-			"images": {
-				"sideA": "state-2-side-a.jpg",
-				"sideB": "state-2-side-b.jpg"
-			},
-			"summary": "Same Player back. The SEARCH box is scratched. Companion Structural Engineer. While this card is in your hand, Build Shelter may discard a City card of any color, including this one."
-		}
-	],
-	"mechanics": {
-		"opensDoors": [],
-		"destroys": false,
-		"rules": [
-			"Red Player card for Hong Kong. Not a port: the compass has no anchor.",
-			"One SEARCH box. State 2 is that box scratched. Side A stays the Player deck back.",
-			"The scratch reveals Companion Structural Engineer. When you take the Build Shelter action, you may discard a City card of any color, including this card, if this card is in your hand.",
-			"The companion is not played and removed. It works while the card stays in hand. The word is \"may,\" so a matching-color discard is still allowed."
-		],
-		"notes": [
-			"Card id 10711. State 2 card id 10726. One copy.",
-			"Coordinates 22°16'32\"N 114°8'38\"E. Printed code P3-12b stays on the scratched face.",
-			"Goes to the reserve when the package is opened.",
-			"No door number is printed in the box."
-		]
-	}
+  "package": 3,
+  "index": 12,
+  "cardId": 10711,
+  "printedCodes": {
+    "sideA": null,
+    "sideB": "P3-12b"
+  },
+  "title": "Hong Kong",
+  "category": "player-card",
+  "city": "Hong Kong",
+  "color": "red",
+  "coordinates": "22°16'32\"N 114°8'38\"E",
+  "port": true,
+  "cardCompassMisprint": "no-anchor (board map sticker Door 56 shows a port anchor; board is authoritative)",
+  "copies": 1,
+  "hasImprovementSlot": false,
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideASummary": "Player deck back. Dark blue sunburst around a haven on the water. No text and no printed code.",
+  "sideBSummary": "Hong Kong, red Player card. Coordinates 22°16'32\"N 114°8'38\"E. The compass has no anchor, so the city is not a port. One covered SEARCH box fills the map. The city name and coordinates repeat upside down along the bottom. Printed code P3-12b.",
+  "searchBoxes": [
+    {
+      "type": "search",
+      "stateRevealed": 2,
+      "isCompanion": true,
+      "companionName": "Structural Engineer",
+      "opensDoors": [],
+      "effectSummary": "Companion Structural Engineer. While this card is in your hand, Build Shelter may discard a City card of any color, including this one."
+    }
+  ],
+  "states": [
+    {
+      "state": 2,
+      "cardId": 10726,
+      "images": {
+        "sideA": "state-2-side-a.jpg",
+        "sideB": "state-2-side-b.jpg"
+      },
+      "summary": "Same Player back. The SEARCH box is scratched. Companion Structural Engineer. While this card is in your hand, Build Shelter may discard a City card of any color, including this one."
+    }
+  ],
+  "mechanics": {
+    "opensDoors": [],
+    "destroys": false,
+    "rules": [
+      "Red Player card for Hong Kong. Not a port: the compass has no anchor.",
+      "One SEARCH box. State 2 is that box scratched. Side A stays the Player deck back.",
+      "The scratch reveals Companion Structural Engineer. When you take the Build Shelter action, you may discard a City card of any color, including this card, if this card is in your hand.",
+      "The companion is not played and removed. It works while the card stays in hand. The word is \"may,\" so a matching-color discard is still allowed."
+    ],
+    "notes": [
+      "Card id 10711. State 2 card id 10726. One copy.",
+      "Coordinates 22°16'32\"N 114°8'38\"E. Printed code P3-12b stays on the scratched face.",
+      "Goes to the reserve when the package is opened.",
+      "No door number is printed in the box."
+    ]
+  }
 }

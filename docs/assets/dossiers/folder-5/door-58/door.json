@@ -1,47 +1,47 @@
 {
-	"door": "58",
-	"folder": 5,
-	"id": "door-58",
-	"guid": "3ab262",
-	"frontImage": "dossiers/folder-5/door-58/front.jpg",
-	"frontText": "Navy 58 centered on a yellow door card. Dashed cut-line border. No other printed text.",
-	"items": [
-		{
-			"id": "item-01",
-			"image": "dossiers/folder-5/door-58/item-01.jpg",
-			"count": 1,
-			"printedCode": null,
-			"category": "map-sticker",
-			"title": "Utopia",
-			"placementTarget": "Overlay on the Utopia land of the door 56 sticker, covering the Hollow Men text.",
-			"text": "Utopia\nIf you are able to\nexecute the plan,\nopen Package 8.",
-			"mapDetails": {
-				"cities": [],
-				"havens": [],
-				"printedRoutes": [],
-				"reconRoutes": [],
-				"redRegionLines": [],
-				"specialAreas": [
-					{
-						"name": "Utopia",
-						"kind": "overlay",
-						"text": "Utopia\nIf you are able to\nexecute the plan,\nopen Package 8.",
-						"lat": 40,
-						"lon": 100,
-						"graticule": "Printed 40°N at the top of the landmass. Printed 100°E meridian runs vertically through the yellow land.",
-						"wall": "The same black jagged wall remains along the eastern edge of the yellow land.",
-						"cityDisc": false,
-						"package": 8,
-						"notes": "This sticker covers the door 56 Utopia text. Package 8 is printed in red. The southeast corner clips the edge of a red anchor disc and a green rat; on door 56 that pairing is Shanghai, whose name is not printed here."
-					}
-				]
-			},
-			"mechanics": {
-				"trigger": "If you are able to execute the plan, open Package 8.",
-				"opens": "Package 8",
-				"notes": "No new city disc, population, haven, route, or recon box. The wall stays."
-			}
-		}
-	],
-	"summary": "Utopia overlay. Replaces the door 56 block with: if you are able to execute the plan, open Package 8. The wall and the 40°N / 100°E graticule stay. No city disc on the land."
+  "door": "58",
+  "folder": 5,
+  "id": "door-58",
+  "guid": "3ab262",
+  "frontImage": "dossiers/folder-5/door-58/front.jpg",
+  "frontText": "Navy 58 centered on a yellow door card. Dashed cut-line border. No other printed text.",
+  "items": [
+    {
+      "id": "item-01",
+      "image": "dossiers/folder-5/door-58/item-01.jpg",
+      "count": 1,
+      "printedCode": null,
+      "category": "map-sticker",
+      "title": "Utopia",
+      "placementTarget": "Overlay on the Utopia land of the door 56 sticker, covering the Hollow Men text.",
+      "text": "Utopia\nIf you are able to\nexecute the plan,\nopen Package 8.",
+      "mapDetails": {
+        "cities": [],
+        "havens": [],
+        "printedRoutes": [],
+        "reconRoutes": [],
+        "redRegionLines": [],
+        "specialAreas": [
+          {
+            "name": "Utopia",
+            "kind": "overlay",
+            "text": "Utopia\nIf you are able to\nexecute the plan,\nopen Package 8.",
+            "lat": 40,
+            "lon": 100,
+            "graticule": "Printed 40°N at the top of the landmass. Printed 100°E meridian runs vertically through the yellow land.",
+            "wall": "The same black jagged wall remains along the eastern edge of the yellow land.",
+            "cityDisc": false,
+            "package": 8,
+            "notes": "This sticker covers the door 56 Utopia text. Package 8 is printed in red. The southeast corner clips the edge of a red anchor disc and a green rat; on door 56 that pairing is Shanghai, whose name is not printed here."
+          }
+        ]
+      },
+      "mechanics": {
+        "trigger": "If you are able to execute the plan, open Package 8.",
+        "opens": "Package 8",
+        "notes": "No new city disc, population, haven, route, or recon box. The wall stays."
+      }
+    }
+  ],
+  "summary": "Utopia overlay. Replaces the door 56 block with: if you are able to execute the plan, open Package 8. The wall and the 40°N / 100°E graticule stay. No city disc on the land."
 }

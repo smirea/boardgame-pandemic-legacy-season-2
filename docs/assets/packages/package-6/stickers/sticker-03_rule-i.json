@@ -1,26 +1,26 @@
 {
-	"id": "sticker-03_rule-i",
-	"package": 6,
-	"guid": "434ec6",
-	"printedCode": "I",
-	"name": "Inoculate",
-	"category": "rule",
-	"placementTarget": "Rulebook, rule I",
-	"costProductionUnits": null,
-	"copies": 1,
-	"image": "sticker-03_rule-i.jpg",
-	"text": "INOCULATE\n\nTake a Player card or an Infection card that matches your current city out of its discard pile. Put it into Package 6. This takes it out of play.\n\nCards in Package 6 stay there from game to game.\n(Do not take them out unless instructed to do so.)\nYou may look at these cards at any time, but may not add stickers to them.\n\nLimited supply: Package 6 may contain up to 30 Player cards and 30 Infection cards.",
-	"mechanics": {
-		"timing": "free_action",
-		"effect": "Take a matching Player card or Infection card from its discard pile and put it into Package 6, out of play. Stored cards remain from game to game. Players may look at them. Package 6 holds at most 30 Player cards and 30 Infection cards.",
-		"restrictions": [
-			"The card must match your current city",
-			"Do not take stored cards out unless a later rule says to",
-			"Do not add stickers to cards stored in Package 6",
-			"At most 30 Player cards",
-			"At most 30 Infection cards"
-		],
-		"opensDoors": [],
-		"notes": "The letter I is the rulebook slot named in the manifest. It is not printed on the sticker. The Package 6 box is the storage container the cards are put into."
-	}
+  "id": "sticker-03_rule-i",
+  "package": 6,
+  "guid": "434ec6",
+  "printedCode": "I",
+  "name": "Inoculate",
+  "category": "rule",
+  "placementTarget": "Rulebook, rule I",
+  "costProductionUnits": null,
+  "copies": 1,
+  "image": "sticker-03_rule-i.jpg",
+  "text": "INOCULATE\n\nTake a Player card or an Infection card that matches your current city out of its discard pile. Put it into Package 6. This takes it out of play.\n\nCards in Package 6 stay there from game to game.\n(Do not take them out unless instructed to do so.)\nYou may look at these cards at any time, but may not add stickers to them.\n\nLimited supply: Package 6 may contain up to 30 Player cards and 30 Infection cards.",
+  "mechanics": {
+    "timing": "free_action",
+    "effect": "Take a matching Player card or Infection card from its discard pile and put it into Package 6, out of play. Stored cards remain from game to game. Players may look at them. Package 6 holds at most 30 Player cards and 30 Infection cards.",
+    "restrictions": [
+      "The card must match your current city",
+      "Do not take stored cards out unless a later rule says to",
+      "Do not add stickers to cards stored in Package 6",
+      "At most 30 Player cards",
+      "At most 30 Infection cards"
+    ],
+    "opensDoors": [],
+    "notes": "The letter I is the rulebook slot named in the manifest. It is not printed on the sticker. The Package 6 box is the storage container the cards are put into."
+  }
 }

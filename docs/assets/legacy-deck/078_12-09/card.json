@@ -1,46 +1,49 @@
 {
-	"sequence": 78,
-	"folder": "078_12-09",
-	"cardCode": "12-09",
-	"printedCodes": {
-		"sideA": "12-09a",
-		"sideB": "12-09b"
-	},
-	"title": "Did Not Deliver: 851 and Above",
-	"category": "ending",
-	"month": "december",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "NONE",
-		"header": "",
-		"trigger": "",
-		"summary": "If you failed to deliver the sample, check your score to determine the fate of the world.",
-		"text": "If you failed to deliver the sample, check your score to determine the fate of the world...",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "DID NOT DELIVER: 851 AND ABOVE",
-		"summary": "DID NOT DELIVER: 851 AND ABOVE. The world is saved, but not the Faded. Utopia has the cure at JADE, will produce it, and will not give it to them. The Hollow Men are free. The Faded will not see the new world and hope to be remembered as its saviors. DID NOT DELIVER: 701-850. Some cities are saved and civilization is rekindled, while Utopia and the Hollow Men are at war. One of them may take the sample to JADE and start a cure, and neither is expected to share it. The Faded kept the world going after everyone else quit.",
-		"text": "DID NOT DELIVER: 851 AND ABOVE\nWe saved the world, just not ourselves. The 21st century will be remembered as a time of darkness but there is now light ahead. Utopia has the cure and will now produce it at JADE. They just won’t give it to us. The Hollow Men have been freed. The Faded won’t be here to see this new world but we hope that history will remember us as its saviors.\n\nDID NOT DELIVER: 701-850\nWe have persevered. Some cities were saved. Civilization has been rekindled. Utopia and the Hollow Men are at war with each other. One of them will bring the sample to JADE and start producing a cure. We don’t expect either to share it with us. All we know is that we kept the world going when everyone else had given up.",
-		"footer": "",
-		"scratchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"whenRead": "After scoring on 12-08, if the sample was not delivered and the grand total is 701 or higher. 851 and above is the first blurb. 701-850 is the second. Lower failed scores continue on 12-10.",
-		"triggers": ["Failed delivery and grand total 851 or above", "Failed delivery and grand total 701-850"],
-		"opensDoors": [],
-		"opensPackages": [],
-		"destroys": [],
-		"addsToPool": [],
-		"rules": [
-			"Read this card only if the sample was not delivered.",
-			"Score bracket DID NOT DELIVER: 851 AND ABOVE.",
-			"Score bracket DID NOT DELIVER: 701-850."
-		],
-		"notes": "Red border. 'failed to deliver the sample' is printed in red on side A. Flavor above is paraphrased. The brackets are exact."
-	}
+  "sequence": 78,
+  "folder": "078_12-09",
+  "cardCode": "12-09",
+  "printedCodes": {
+    "sideA": "12-09a",
+    "sideB": "12-09b"
+  },
+  "title": "Did Not Deliver: 851 and Above",
+  "category": "ending",
+  "month": "december",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "NONE",
+    "header": "",
+    "trigger": "",
+    "summary": "If you failed to deliver the sample, check your score to determine the fate of the world.",
+    "text": "If you failed to deliver the sample, check your score to determine the fate of the world...",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "DID NOT DELIVER: 851 AND ABOVE",
+    "summary": "DID NOT DELIVER: 851 AND ABOVE. The world is saved, but not the Faded. Utopia has the cure at JADE, will produce it, and will not give it to them. The Hollow Men are free. The Faded will not see the new world and hope to be remembered as its saviors. DID NOT DELIVER: 701-850. Some cities are saved and civilization is rekindled, while Utopia and the Hollow Men are at war. One of them may take the sample to JADE and start a cure, and neither is expected to share it. The Faded kept the world going after everyone else quit.",
+    "text": "DID NOT DELIVER: 851 AND ABOVE\nWe saved the world, just not ourselves. The 21st century will be remembered as a time of darkness but there is now light ahead. Utopia has the cure and will now produce it at JADE. They just won’t give it to us. The Hollow Men have been freed. The Faded won’t be here to see this new world but we hope that history will remember us as its saviors.\n\nDID NOT DELIVER: 701-850\nWe have persevered. Some cities were saved. Civilization has been rekindled. Utopia and the Hollow Men are at war with each other. One of them will bring the sample to JADE and start producing a cure. We don’t expect either to share it with us. All we know is that we kept the world going when everyone else had given up.",
+    "footer": "",
+    "scratchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "whenRead": "After scoring on 12-08, if the sample was not delivered and the grand total is 701 or higher. 851 and above is the first blurb. 701-850 is the second. Lower failed scores continue on 12-10.",
+    "triggers": [
+      "Failed delivery and grand total 851 or above",
+      "Failed delivery and grand total 701-850"
+    ],
+    "opensDoors": [],
+    "opensPackages": [],
+    "destroys": [],
+    "addsToPool": [],
+    "rules": [
+      "Read this card only if the sample was not delivered.",
+      "Score bracket DID NOT DELIVER: 851 AND ABOVE.",
+      "Score bracket DID NOT DELIVER: 701-850."
+    ],
+    "notes": "Red border. 'failed to deliver the sample' is printed in red on side A. Flavor above is paraphrased. The brackets are exact."
+  }
 }

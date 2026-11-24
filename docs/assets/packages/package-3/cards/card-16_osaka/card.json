@@ -1,60 +1,60 @@
 {
-	"package": 3,
-	"index": 16,
-	"cardId": 10715,
-	"printedCodes": {
-		"sideA": null,
-		"sideB": "P3-16b"
-	},
-	"title": "Osaka",
-	"category": "player-card",
-	"city": "Osaka",
-	"color": "red",
-	"coordinates": "34°41'38\"N 135°30'8\"E",
-	"port": true,
-	"copies": 1,
-	"hasImprovementSlot": false,
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideASummary": "Player deck back. Dark blue sunburst around a haven on the water. No text and no printed code.",
-	"sideBSummary": "Osaka, red Player card. Coordinates 34°41'38\"N 135°30'8\"E. The compass has an anchor, so the city is a port. One covered SEARCH box fills the map. The city name and coordinates repeat upside down along the bottom. Printed code P3-16b.",
-	"searchBoxes": [
-		{
-			"type": "search",
-			"stateRevealed": 2,
-			"isCompanion": true,
-			"companionName": "Local Resistance",
-			"opensDoors": [],
-			"effectSummary": "Companion Local Resistance. Play this card at any time to remove 1 Hollow Men figure from anywhere on the grid."
-		}
-	],
-	"states": [
-		{
-			"state": 2,
-			"cardId": 10728,
-			"images": {
-				"sideA": "state-2-side-a.jpg",
-				"sideB": "state-2-side-b.jpg"
-			},
-			"summary": "Same Player back. The SEARCH box is scratched. Companion Local Resistance. Play this card at any time to remove 1 Hollow Men figure from anywhere on the grid."
-		}
-	],
-	"mechanics": {
-		"opensDoors": [],
-		"destroys": false,
-		"rules": [
-			"Red Player card for Osaka. Port: the compass has an anchor.",
-			"One SEARCH box. State 2 is that box scratched. Side A stays the Player deck back.",
-			"The scratch reveals Companion Local Resistance. Play this card at any time to remove 1 Hollow Men figure from any city on the grid.",
-			"Playing the card spends it. The text does not say to destroy it, and it does not say the figure has to be in Osaka."
-		],
-		"notes": [
-			"Card id 10715. State 2 card id 10728. One copy.",
-			"Coordinates 34°41'38\"N 135°30'8\"E. Printed code P3-16b stays on the scratched face.",
-			"Goes to the reserve when the package is opened.",
-			"The picture is a crowd with raised arms. No door number is printed in the box."
-		]
-	}
+  "package": 3,
+  "index": 16,
+  "cardId": 10715,
+  "printedCodes": {
+    "sideA": null,
+    "sideB": "P3-16b"
+  },
+  "title": "Osaka",
+  "category": "player-card",
+  "city": "Osaka",
+  "color": "red",
+  "coordinates": "34°41'38\"N 135°30'8\"E",
+  "port": true,
+  "copies": 1,
+  "hasImprovementSlot": false,
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideASummary": "Player deck back. Dark blue sunburst around a haven on the water. No text and no printed code.",
+  "sideBSummary": "Osaka, red Player card. Coordinates 34°41'38\"N 135°30'8\"E. The compass has an anchor, so the city is a port. One covered SEARCH box fills the map. The city name and coordinates repeat upside down along the bottom. Printed code P3-16b.",
+  "searchBoxes": [
+    {
+      "type": "search",
+      "stateRevealed": 2,
+      "isCompanion": true,
+      "companionName": "Local Resistance",
+      "opensDoors": [],
+      "effectSummary": "Companion Local Resistance. Play this card at any time to remove 1 Hollow Men figure from anywhere on the grid."
+    }
+  ],
+  "states": [
+    {
+      "state": 2,
+      "cardId": 10728,
+      "images": {
+        "sideA": "state-2-side-a.jpg",
+        "sideB": "state-2-side-b.jpg"
+      },
+      "summary": "Same Player back. The SEARCH box is scratched. Companion Local Resistance. Play this card at any time to remove 1 Hollow Men figure from anywhere on the grid."
+    }
+  ],
+  "mechanics": {
+    "opensDoors": [],
+    "destroys": false,
+    "rules": [
+      "Red Player card for Osaka. Port: the compass has an anchor.",
+      "One SEARCH box. State 2 is that box scratched. Side A stays the Player deck back.",
+      "The scratch reveals Companion Local Resistance. Play this card at any time to remove 1 Hollow Men figure from any city on the grid.",
+      "Playing the card spends it. The text does not say to destroy it, and it does not say the figure has to be in Osaka."
+    ],
+    "notes": [
+      "Card id 10715. State 2 card id 10728. One copy.",
+      "Coordinates 34°41'38\"N 135°30'8\"E. Printed code P3-16b stays on the scratched face.",
+      "Goes to the reserve when the package is opened.",
+      "The picture is a crowd with raised arms. No door number is printed in the box."
+    ]
+  }
 }

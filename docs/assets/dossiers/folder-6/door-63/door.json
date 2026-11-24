@@ -1,116 +1,116 @@
 {
-	"door": "63",
-	"folder": 6,
-	"id": "door-63",
-	"guid": "4670ec",
-	"frontImage": "dossiers/folder-6/door-63/front.jpg",
-	"frontText": "Navy 63 centered on a yellow door card. Dashed cut-line border. No other printed text.",
-	"items": [
-		{
-			"id": "item-01",
-			"image": "dossiers/folder-6/door-63/item-01.jpg",
-			"count": 1,
-			"printedCode": null,
-			"category": "map-sticker",
-			"title": "Southeast Asia",
-			"placementTarget": "Board, over Southeast Asia and Indonesia. Graticule shows 0° twice, 100°E, and 120°E.",
-			"text": "Recon with 2 red cards\nat a supply center\nhere to open 59.",
-			"mapDetails": {
-				"cities": [
-					{
-						"name": "Bangkok",
-						"color": "red",
-						"population": 1,
-						"port": true,
-						"infested": false,
-						"lab": null,
-						"marker": "anchor",
-						"lat": 13.8,
-						"lon": 100.5,
-						"graticule": "North of the printed 0° line, on the gulf. Population 1 square is west of the name. No rat."
-					},
-					{
-						"name": "Ho Chi Minh City",
-						"color": "red",
-						"population": 1,
-						"port": true,
-						"infested": false,
-						"lab": null,
-						"marker": "anchor",
-						"lat": 10.8,
-						"lon": 106.6,
-						"graticule": "East of Bangkok, north of the equator. Population 1 square is east of the disc. No rat."
-					},
-					{
-						"name": "Manila",
-						"color": "red",
-						"population": 1,
-						"port": true,
-						"infested": true,
-						"lab": null,
-						"marker": "anchor",
-						"lat": 14.6,
-						"lon": 121.0,
-						"graticule": "Northeast, north of the equator. Population 1 square is below the name. Rat icon above the disc."
-					},
-					{
-						"name": "Jakarta",
-						"color": "red",
-						"population": 1,
-						"port": true,
-						"infested": false,
-						"lab": null,
-						"marker": "anchor",
-						"lat": -6.2,
-						"lon": 106.8,
-						"graticule": "South of the printed 0° line and just east of the printed 100°E meridian. Population 1 square is north of the disc, on Sumatra. No rat."
-					}
-				],
-				"havens": [],
-				"printedRoutes": [
-					{
-						"from": "off-sticker north (Kolkata on door 62)",
-						"to": "Jakarta",
-						"type": "sea_lane",
-						"notes": "The blue lane enters from the northwest edge, west of Bangkok, runs south along the west side of Sumatra past the printed 0° label, and passes through the Jakarta disc. It does not touch Bangkok, Ho Chi Minh City, or Manila."
-					},
-					{
-						"from": "Jakarta",
-						"to": "off-sticker east (Coral Sea haven on door 59)",
-						"type": "sea_lane",
-						"notes": "The same blue lane continues east from Jakarta, crosses the red diagonal region line, and leaves the right edge. Door 59 shows that lane entering from the west and reaching the haven."
-					}
-				],
-				"reconRoutes": [
-					{
-						"text": "Recon with 2 red cards\nat a supply center\nhere to open 59.",
-						"location": "Jakarta",
-						"cardCount": 2,
-						"color": "red",
-						"duplicatesAllowed": true,
-						"symbol": "asterisk on each card (any city of that color; duplicates allowed)",
-						"supplyCenterRequired": true,
-						"opens": "door 59",
-						"cardIcons": "Two red cards, each with a white asterisk, printed to the right of the sentence."
-					}
-				],
-				"redRegionLines": [
-					"A thick red diagonal runs from the northwest, beside Ho Chi Minh City, southeast across the islands (east of Jakarta, over Borneo and the islands beyond) and off the bottom edge onto the yellow land at the southeast corner. It crosses the blue sea lane east of Jakarta and does not end on a city."
-				],
-				"specialAreas": [
-					{
-						"name": "western margin tint",
-						"kind": "region-tint",
-						"notes": "The far west edge is washed pink where this sticker meets the Indian Ocean tint. Not a red region line."
-					}
-				]
-			},
-			"mechanics": {
-				"addsCities": ["Bangkok", "Ho Chi Minh City", "Manila", "Jakarta"],
-				"recon": "At Jakarta, at a supply center, discard 2 red cards (asterisks, duplicates allowed) to open door 59.",
-				"notes": "All four cities are red ports at population 1. Only Manila is printed infested."
-			}
-		}
-	],
-	"summary": "Southeast Asia. Bangkok, Ho Chi Minh City, Manila, and Jakarta are red ports at population 1. Only Manila is infested. A sea lane runs from the north edge (Kolkata) through Jakarta and east off the sticker toward the door 59 haven. Jakarta's recon is 2 red cards at a supply center and opens door 59. A red diagonal region line crosses the lane."
+  "door": "63",
+  "folder": 6,
+  "id": "door-63",
+  "guid": "4670ec",
+  "frontImage": "dossiers/folder-6/door-63/front.jpg",
+  "frontText": "Navy 63 centered on a yellow door card. Dashed cut-line border. No other printed text.",
+  "items": [
+    {
+      "id": "item-01",
+      "image": "dossiers/folder-6/door-63/item-01.jpg",
+      "count": 1,
+      "printedCode": null,
+      "category": "map-sticker",
+      "title": "Southeast Asia",
+      "placementTarget": "Board, over Southeast Asia and Indonesia. Graticule shows 0° twice, 100°E, and 120°E.",
+      "text": "Recon with 2 red cards\nat a supply center\nhere to open 59.",
+      "mapDetails": {
+        "cities": [
+          {
+            "name": "Bangkok",
+            "color": "red",
+            "population": 1,
+            "port": true,
+            "infested": false,
+            "lab": null,
+            "marker": "anchor",
+            "lat": 13.8,
+            "lon": 100.5,
+            "graticule": "North of the printed 0° line, on the gulf. Population 1 square is west of the name. No rat."
+          },
+          {
+            "name": "Ho Chi Minh City",
+            "color": "red",
+            "population": 1,
+            "port": true,
+            "infested": false,
+            "lab": null,
+            "marker": "anchor",
+            "lat": 10.8,
+            "lon": 106.6,
+            "graticule": "East of Bangkok, north of the equator. Population 1 square is east of the disc. No rat."
+          },
+          {
+            "name": "Manila",
+            "color": "red",
+            "population": 1,
+            "port": true,
+            "infested": true,
+            "lab": null,
+            "marker": "anchor",
+            "lat": 14.6,
+            "lon": 121.0,
+            "graticule": "Northeast, north of the equator. Population 1 square is below the name. Rat icon above the disc."
+          },
+          {
+            "name": "Jakarta",
+            "color": "red",
+            "population": 1,
+            "port": true,
+            "infested": false,
+            "lab": null,
+            "marker": "anchor",
+            "lat": -6.2,
+            "lon": 106.8,
+            "graticule": "South of the printed 0° line and just east of the printed 100°E meridian. Population 1 square is north of the disc, on Sumatra. No rat."
+          }
+        ],
+        "havens": [],
+        "printedRoutes": [
+          {
+            "from": "off-sticker north (Kolkata on door 62)",
+            "to": "Jakarta",
+            "type": "sea_lane",
+            "notes": "The blue lane enters from the northwest edge, west of Bangkok, runs south along the west side of Sumatra past the printed 0° label, and passes through the Jakarta disc. It does not touch Bangkok, Ho Chi Minh City, or Manila."
+          },
+          {
+            "from": "Jakarta",
+            "to": "off-sticker east (Coral Sea haven on door 59)",
+            "type": "sea_lane",
+            "notes": "The same blue lane continues east from Jakarta, crosses the red diagonal region line, and leaves the right edge. Door 59 shows that lane entering from the west and reaching the haven."
+          }
+        ],
+        "reconRoutes": [
+          {
+            "text": "Recon with 2 red cards\nat a supply center\nhere to open 59.",
+            "location": "Jakarta",
+            "cardCount": 2,
+            "color": "red",
+            "duplicatesAllowed": true,
+            "symbol": "asterisk on each card (any city of that color; duplicates allowed)",
+            "supplyCenterRequired": true,
+            "opens": "door 59",
+            "cardIcons": "Two red cards, each with a white asterisk, printed to the right of the sentence."
+          }
+        ],
+        "redRegionLines": [
+          "A thick red diagonal runs from the northwest, beside Ho Chi Minh City, southeast across the islands (east of Jakarta, over Borneo and the islands beyond) and off the bottom edge onto the yellow land at the southeast corner. It crosses the blue sea lane east of Jakarta and does not end on a city."
+        ],
+        "specialAreas": [
+          {
+            "name": "western margin tint",
+            "kind": "region-tint",
+            "notes": "The far west edge is washed pink where this sticker meets the Indian Ocean tint. Not a red region line."
+          }
+        ]
+      },
+      "mechanics": {
+        "addsCities": ["Bangkok", "Ho Chi Minh City", "Manila", "Jakarta"],
+        "recon": "At Jakarta, at a supply center, discard 2 red cards (asterisks, duplicates allowed) to open door 59.",
+        "notes": "All four cities are red ports at population 1. Only Manila is printed infested."
+      }
+    }
+  ],
+  "summary": "Southeast Asia. Bangkok, Ho Chi Minh City, Manila, and Jakarta are red ports at population 1. Only Manila is infested. A sea lane runs from the north edge (Kolkata) through Jakarta and east off the sticker toward the door 59 haven. Jakarta's recon is 2 red cards at a supply center and opens door 59. A red diagonal region line crosses the lane."
 }

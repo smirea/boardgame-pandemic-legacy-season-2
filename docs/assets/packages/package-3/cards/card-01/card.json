@@ -1,44 +1,44 @@
 {
-	"package": 3,
-	"index": 1,
-	"cardId": 10700,
-	"printedCodes": {
-		"sideA": "P3-01a",
-		"sideB": "P3-01b"
-	},
-	"title": "Recon Report",
-	"category": "recon-report",
-	"city": null,
-	"color": null,
-	"coordinates": null,
-	"port": null,
-	"copies": 1,
-	"hasImprovementSlot": false,
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideASummary": "East Asia recon. The package holds 25 cards, 5 sticker cards, and 6 shelter miniatures. The region is living in shelters, afraid of walled-off Utopia. Hollow Men come from Utopia, and a new wave is released every November. A plan to get into Utopia in November needs Hollow Men who will defect. Read both sides, then keep this card in the reserve. Printed code P3-01a.",
-	"sideBSummary": "Open doors 56 and 63 if they are not already open. Jakarta joins the grid. Put Jakarta's Player card on the Player discard pile and Jakarta's Infection card in the Game End area. Put the 4 Hollow Men Gather cards on the Infection discard pile. Put the other Player and Infection cards in the reserve. Give Biodome Prototype to a player, into their hand. Printed code P3-01b.",
-	"searchBoxes": [],
-	"states": [],
-	"mechanics": {
-		"opensDoors": ["56", "63"],
-		"destroys": false,
-		"rules": [
-			"On opening the package, open doors 56 and 63 if they are not already open.",
-			"Jakarta joins the grid. Its Player card (P3-04b) goes to the Player discard pile.",
-			"Jakarta's Infection card (P3-05b) goes to the Game End area, so it is not shuffled in yet.",
-			"All 4 Hollow Men Gather cards go to the Infection discard pile.",
-			"Every other Player card and Infection card in this package goes to the reserve.",
-			"Give the Biodome Prototype Unrationed Event to a player, into their hand.",
-			"Keep this report in the reserve after both sides have been read."
-		],
-		"notes": [
-			"Card id 10700.",
-			"The 25 cards are this report, Biodome Prototype, An Incomplete Plan, 9 Player cards, 9 Infection cards, and 4 Hollow Men Gather cards. Card 24 is the scan used for 2 of those Gather cards.",
-			"The 5 sticker cards are the sheets. The scan splits some of them into a sticker and its carrier: Rule N, the Build Shelter player aid plus its mounting line, Rule V, the Game End Upgrades sheet with 5 Permanent Shelter icons, and 2 Rebirth stickers.",
-			"Cities left in the reserve are Bangkok, Ho Chi Minh City, Manila, Hong Kong, Shanghai, Osaka, Seoul, and Tokyo, one Player card and one Infection card each."
-		]
-	}
+  "package": 3,
+  "index": 1,
+  "cardId": 10700,
+  "printedCodes": {
+    "sideA": "P3-01a",
+    "sideB": "P3-01b"
+  },
+  "title": "Recon Report",
+  "category": "recon-report",
+  "city": null,
+  "color": null,
+  "coordinates": null,
+  "port": null,
+  "copies": 1,
+  "hasImprovementSlot": false,
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideASummary": "East Asia recon. The package holds 25 cards, 5 sticker cards, and 6 shelter miniatures. The region is living in shelters, afraid of walled-off Utopia. Hollow Men come from Utopia, and a new wave is released every November. A plan to get into Utopia in November needs Hollow Men who will defect. Read both sides, then keep this card in the reserve. Printed code P3-01a.",
+  "sideBSummary": "Open doors 56 and 63 if they are not already open. Jakarta joins the grid. Put Jakarta's Player card on the Player discard pile and Jakarta's Infection card in the Game End area. Put the 4 Hollow Men Gather cards on the Infection discard pile. Put the other Player and Infection cards in the reserve. Give Biodome Prototype to a player, into their hand. Printed code P3-01b.",
+  "searchBoxes": [],
+  "states": [],
+  "mechanics": {
+    "opensDoors": ["56", "63"],
+    "destroys": false,
+    "rules": [
+      "On opening the package, open doors 56 and 63 if they are not already open.",
+      "Jakarta joins the grid. Its Player card (P3-04b) goes to the Player discard pile.",
+      "Jakarta's Infection card (P3-05b) goes to the Game End area, so it is not shuffled in yet.",
+      "All 4 Hollow Men Gather cards go to the Infection discard pile.",
+      "Every other Player card and Infection card in this package goes to the reserve.",
+      "Give the Biodome Prototype Unrationed Event to a player, into their hand.",
+      "Keep this report in the reserve after both sides have been read."
+    ],
+    "notes": [
+      "Card id 10700.",
+      "The 25 cards are this report, Biodome Prototype, An Incomplete Plan, 9 Player cards, 9 Infection cards, and 4 Hollow Men Gather cards. Card 24 is the scan used for 2 of those Gather cards.",
+      "The 5 sticker cards are the sheets. The scan splits some of them into a sticker and its carrier: Rule N, the Build Shelter player aid plus its mounting line, Rule V, the Game End Upgrades sheet with 5 Permanent Shelter icons, and 2 Rebirth stickers.",
+      "Cities left in the reserve are Bangkok, Ho Chi Minh City, Manila, Hong Kong, Shanghai, Osaka, Seoul, and Tokyo, one Player card and one Infection card each."
+    ]
+  }
 }

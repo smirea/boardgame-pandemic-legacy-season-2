@@ -1,43 +1,43 @@
 {
-	"sequence": 4,
-	"folder": "004_01-04",
-	"cardCode": "01-04",
-	"printedCodes": {
-		"sideA": "01-04a",
-		"sideB": "01-04b"
-	},
-	"title": "Build 3 new supply centers",
-	"category": "objective",
-	"month": "january",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "NONE",
-		"header": "",
-		"trigger": "",
-		"text": "",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "MANDATORY OBJECTIVE",
-		"text": "Build 3 new supply centers.\n\n0\n1\n2\n3",
-		"footer": "",
-		"scratchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"whenRead": "One of the two January mandatory objectives. It follows 01-03 ('Our objectives follow').",
-		"triggers": [],
-		"opensDoors": [],
-		"opensPackages": [],
-		"destroys": [],
-		"addsToPool": ["Build 3 new supply centers (mandatory objective)"],
-		"rules": [
-			"Mandatory objective: build 3 new supply centers.",
-			"Vertical progress track of four circles, numbered 0, 1, 2, 3 from bottom to top."
-		],
-		"notes": "Side A is the objective-card back (haven star) with no rules text. Unlike 01-05, this face does not print 'Add this card to your pool of objectives.' It is still one of the two objectives 01-03 says follow."
-	}
+  "sequence": 4,
+  "folder": "004_01-04",
+  "cardCode": "01-04",
+  "printedCodes": {
+    "sideA": "01-04a",
+    "sideB": "01-04b"
+  },
+  "title": "Build 3 new supply centers",
+  "category": "objective",
+  "month": "january",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "NONE",
+    "header": "",
+    "trigger": "",
+    "text": "",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "MANDATORY OBJECTIVE",
+    "text": "Build 3 new supply centers.\n\n0\n1\n2\n3",
+    "footer": "",
+    "scratchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "whenRead": "One of the two January mandatory objectives. It follows 01-03 ('Our objectives follow').",
+    "triggers": [],
+    "opensDoors": [],
+    "opensPackages": [],
+    "destroys": [],
+    "addsToPool": ["Build 3 new supply centers (mandatory objective)"],
+    "rules": [
+      "Mandatory objective: build 3 new supply centers.",
+      "Vertical progress track of four circles, numbered 0, 1, 2, 3 from bottom to top."
+    ],
+    "notes": "Side A is the objective-card back (haven star) with no rules text. Unlike 01-05, this face does not print 'Add this card to your pool of objectives.' It is still one of the two objectives 01-03 says follow."
+  }
 }

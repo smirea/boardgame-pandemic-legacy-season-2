@@ -1,15 +1,15 @@
 {
-	"id": "scar-04",
-	"name": "Bacillophobic",
-	"category": "scar",
-	"costProductionUnits": null,
-	"copies": 1,
-	"image": "scar-04_bacillophobic.jpg",
-	"text": "Bacillophobic: Lose an action if you start your turn in\na location with a Plague cube.",
-	"mechanics": {
-		"timing": "start_of_turn",
-		"trigger": "If you start your turn in a location with a Plague cube",
-		"effect": "Lose an action.",
-		"restrictions": ["Only if your starting location has a Plague cube"]
-	}
+  "id": "scar-04",
+  "name": "Bacillophobic",
+  "category": "scar",
+  "costProductionUnits": null,
+  "copies": 1,
+  "image": "scar-04_bacillophobic.jpg",
+  "text": "Bacillophobic: Lose an action if you start your turn in\na location with a Plague cube.",
+  "mechanics": {
+    "timing": "start_of_turn",
+    "trigger": "If you start your turn in a location with a Plague cube",
+    "effect": "Lose an action.",
+    "restrictions": ["Only if your starting location has a Plague cube"]
+  }
 }

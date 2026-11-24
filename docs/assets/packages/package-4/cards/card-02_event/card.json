@@ -1,42 +1,42 @@
 {
-	"package": 4,
-	"index": 2,
-	"cardId": 10801,
-	"printedCodes": {
-		"sideA": null,
-		"sideB": "P4-02b"
-	},
-	"title": "Relocation",
-	"category": "unrationed-event",
-	"city": null,
-	"color": null,
-	"coordinates": null,
-	"copies": 1,
-	"hasImprovementSlot": false,
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideASummary": "Player deck back. No printed text and no code.",
-	"sideBSummary": "Unrationed Event, Relocation (P4-02b). Destroy up to 3 copies of one specific city in the Infection discard pile. You may play this card between step 2 and step 3 of an epidemic. Destroy this card after use. Play at any time. Not an action.",
-	"searchBoxes": [],
-	"states": [],
-	"mechanics": {
-		"opensDoors": [],
-		"destroys": [
-			"Up to 3 Infection cards that all name one city, taken from the Infection discard pile",
-			"This card, after it is used"
-		],
-		"rules": [
-			"Unrationed Event. Play at any time. Not an action.",
-			"Destroy up to 3 Infection cards of one city. They must be in the Infection discard pile, and they must all be copies of that one city.",
-			"The card may be played between epidemic step 2 and step 3. Step 2 discards the bottom Infection card after stripping that city. Step 3 shuffles the Infection discard onto the Infection deck. Cards destroyed in that window are not part of that shuffle.",
-			"Destroy Relocation after use."
-		],
-		"notes": [
-			"Card id 10801.",
-			"Given to a player when Package 4 is opened (P4-01b).",
-			"Side A is the Player deck back."
-		]
-	}
+  "package": 4,
+  "index": 2,
+  "cardId": 10801,
+  "printedCodes": {
+    "sideA": null,
+    "sideB": "P4-02b"
+  },
+  "title": "Relocation",
+  "category": "unrationed-event",
+  "city": null,
+  "color": null,
+  "coordinates": null,
+  "copies": 1,
+  "hasImprovementSlot": false,
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideASummary": "Player deck back. No printed text and no code.",
+  "sideBSummary": "Unrationed Event, Relocation (P4-02b). Destroy up to 3 copies of one specific city in the Infection discard pile. You may play this card between step 2 and step 3 of an epidemic. Destroy this card after use. Play at any time. Not an action.",
+  "searchBoxes": [],
+  "states": [],
+  "mechanics": {
+    "opensDoors": [],
+    "destroys": [
+      "Up to 3 Infection cards that all name one city, taken from the Infection discard pile",
+      "This card, after it is used"
+    ],
+    "rules": [
+      "Unrationed Event. Play at any time. Not an action.",
+      "Destroy up to 3 Infection cards of one city. They must be in the Infection discard pile, and they must all be copies of that one city.",
+      "The card may be played between epidemic step 2 and step 3. Step 2 discards the bottom Infection card after stripping that city. Step 3 shuffles the Infection discard onto the Infection deck. Cards destroyed in that window are not part of that shuffle.",
+      "Destroy Relocation after use."
+    ],
+    "notes": [
+      "Card id 10801.",
+      "Given to a player when Package 4 is opened (P4-01b).",
+      "Side A is the Player deck back."
+    ]
+  }
 }

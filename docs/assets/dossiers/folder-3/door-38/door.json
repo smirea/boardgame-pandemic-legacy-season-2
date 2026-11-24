@@ -1,51 +1,51 @@
 {
-	"door": "38",
-	"folder": 3,
-	"frontImage": "dossiers/folder-3/door-38/front.jpg",
-	"frontText": "38",
-	"items": [
-		{
-			"id": "item-01",
-			"image": "dossiers/folder-3/door-38/item-01.jpg",
-			"count": 1,
-			"printedCode": null,
-			"category": "action-reference",
-			"title": "SELF-INFECT",
-			"placementTarget": "Back of each player reference card",
-			"costProductionUnits": null,
-			"text": "SELF-INFECT\nAt PEARL, scratch off exposures until you reveal a scar symbol or die.\nIf you reveal a scar, add a Carrier scar to your character.",
-			"mechanics": {
-				"timing": "action",
-				"trigger": "At PEARL",
-				"effect": "Scratch off exposures until you reveal a scar symbol or die. If you reveal a scar, add a Carrier scar to your character.",
-				"restrictions": [
-					"Must be at PEARL",
-					"Stop when a scar symbol is revealed or the character dies",
-					"A revealed scar adds a Carrier scar, not a normal scar"
-				],
-				"icon": "Syringe over a figure",
-				"sourceGuids": ["5be805"]
-			}
-		},
-		{
-			"id": "item-02",
-			"image": "dossiers/folder-3/door-38/item-02.jpg",
-			"count": 1,
-			"printedCode": null,
-			"category": "placement-instruction",
-			"title": "Reference card placement",
-			"placementTarget": null,
-			"costProductionUnits": null,
-			"text": "Place this sticker on the back of each player reference card.",
-			"mechanics": {
-				"timing": "setup",
-				"trigger": null,
-				"effect": "Place the action sticker on the back of each player reference card.",
-				"restrictions": [],
-				"sourceGuids": ["00444a"]
-			}
-		}
-	],
-	"bags": [],
-	"summary": "Self-Infect action overlay for PEARL: scratch exposures until a scar symbol or death, and a scar adds a Carrier scar. Place it on the back of each player reference card. The door numeral is printed rotated 90° counter-clockwise. Guid 00444a is also the placement strip on door 39."
+  "door": "38",
+  "folder": 3,
+  "frontImage": "dossiers/folder-3/door-38/front.jpg",
+  "frontText": "38",
+  "items": [
+    {
+      "id": "item-01",
+      "image": "dossiers/folder-3/door-38/item-01.jpg",
+      "count": 1,
+      "printedCode": null,
+      "category": "action-reference",
+      "title": "SELF-INFECT",
+      "placementTarget": "Back of each player reference card",
+      "costProductionUnits": null,
+      "text": "SELF-INFECT\nAt PEARL, scratch off exposures until you reveal a scar symbol or die.\nIf you reveal a scar, add a Carrier scar to your character.",
+      "mechanics": {
+        "timing": "action",
+        "trigger": "At PEARL",
+        "effect": "Scratch off exposures until you reveal a scar symbol or die. If you reveal a scar, add a Carrier scar to your character.",
+        "restrictions": [
+          "Must be at PEARL",
+          "Stop when a scar symbol is revealed or the character dies",
+          "A revealed scar adds a Carrier scar, not a normal scar"
+        ],
+        "icon": "Syringe over a figure",
+        "sourceGuids": ["5be805"]
+      }
+    },
+    {
+      "id": "item-02",
+      "image": "dossiers/folder-3/door-38/item-02.jpg",
+      "count": 1,
+      "printedCode": null,
+      "category": "placement-instruction",
+      "title": "Reference card placement",
+      "placementTarget": null,
+      "costProductionUnits": null,
+      "text": "Place this sticker on the back of each player reference card.",
+      "mechanics": {
+        "timing": "setup",
+        "trigger": null,
+        "effect": "Place the action sticker on the back of each player reference card.",
+        "restrictions": [],
+        "sourceGuids": ["00444a"]
+      }
+    }
+  ],
+  "bags": [],
+  "summary": "Self-Infect action overlay for PEARL: scratch exposures until a scar symbol or death, and a scar adds a Carrier scar. Place it on the back of each player reference card. The door numeral is printed rotated 90° counter-clockwise. Guid 00444a is also the placement strip on door 39."
 }

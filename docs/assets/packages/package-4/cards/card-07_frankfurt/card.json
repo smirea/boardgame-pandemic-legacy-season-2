@@ -1,38 +1,38 @@
 {
-	"package": 4,
-	"index": 7,
-	"cardId": 10806,
-	"printedCodes": {
-		"sideA": null,
-		"sideB": "P4-08b"
-	},
-	"title": "Frankfurt",
-	"category": "player-card",
-	"city": "Frankfurt",
-	"color": "blue",
-	"coordinates": "50°6'39\"N 8°40'56\"E",
-	"port": false,
-	"copies": 1,
-	"hasImprovementSlot": true,
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideASummary": "Player deck back. No printed text.",
-	"sideBSummary": "Frankfurt, blue, 50°6'39\"N 8°40'56\"E. Inland Europe map with a bullseye in the center. Compass with no anchor. No search box. The name and coordinates repeat upside down along the bottom. P4-08b.",
-	"searchBoxes": [],
-	"states": [],
-	"mechanics": {
-		"opensDoors": [],
-		"destroys": [],
-		"rules": [
-			"Second blue Player card for Frankfurt. Not a port. No search.",
-			"The bullseye in the map art is the city-card improvement slot. A card holds at most one improvement."
-		],
-		"notes": [
-			"Card id 10806.",
-			"Same coordinates as the search card: 50°6'39\"N 8°40'56\"E.",
-			"Goes to the reserve when the package is opened."
-		]
-	}
+  "package": 4,
+  "index": 7,
+  "cardId": 10806,
+  "printedCodes": {
+    "sideA": null,
+    "sideB": "P4-08b"
+  },
+  "title": "Frankfurt",
+  "category": "player-card",
+  "city": "Frankfurt",
+  "color": "blue",
+  "coordinates": "50°6'39\"N 8°40'56\"E",
+  "port": false,
+  "copies": 1,
+  "hasImprovementSlot": true,
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideASummary": "Player deck back. No printed text.",
+  "sideBSummary": "Frankfurt, blue, 50°6'39\"N 8°40'56\"E. Inland Europe map with a bullseye in the center. Compass with no anchor. No search box. The name and coordinates repeat upside down along the bottom. P4-08b.",
+  "searchBoxes": [],
+  "states": [],
+  "mechanics": {
+    "opensDoors": [],
+    "destroys": [],
+    "rules": [
+      "Second blue Player card for Frankfurt. Not a port. No search.",
+      "The bullseye in the map art is the city-card improvement slot. A card holds at most one improvement."
+    ],
+    "notes": [
+      "Card id 10806.",
+      "Same coordinates as the search card: 50°6'39\"N 8°40'56\"E.",
+      "Goes to the reserve when the package is opened."
+    ]
+  }
 }

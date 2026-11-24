@@ -1,41 +1,48 @@
 {
-	"file": "page-16.jpg",
-	"printedPageNumber": 16,
-	"headings": ["MANUAL", "EXPOSURE, SCARS, AND DEATH", "EXPOSURE", "SCARS", "DEATH", "HAVEN WORKERS"],
-	"ruleStickerSlots": [],
-	"sections": [
-		{
-			"heading": "EXPOSURE",
-			"text": "It’s a dangerous world out there and characters will gain exposures. (One way is to start a turn in a location with a Plague cube. See page 10.)\n\nWhen a character gains an exposure, scratch off the next box on the character’s exposure track (starting at the leftmost box). If there is nothing under the box, there is no immediate effect."
-		},
-		{
-			"heading": "SCARS",
-			"text": "If the box that was just scratched off has a [scar icon], it means the character has developed a scar. Choose any of the available scars and place it onto a slot on the Character card. This can be an empty slot, or a slot with a job or a character ability. You cannot cover a scar with another scar."
-		},
-		{
-			"heading": "DEATH",
-			"text": "If the box that was just scratched off has a [skull icon], the character has died from the plague. Write down the location of the character’s death on the sheet. That character cannot be played in this or any future game.\n\nIf your character dies, discard all cards you have in hand and return any Supply cubes on the Character card to the stockpile. You lose any remaining actions, but must resolve the rest of your turn (i.e., do the “Draw Player cards” and “Infect” steps as usual).\n\nSelect a different character from those available and place your pawn at that character’s home. If there are no more characters available, use a haven worker for the rest of this game, placing your pawn at any haven connected to the grid."
-		},
-		{
-			"heading": "HAVEN WORKERS",
-			"text": "The rules for haven workers are on their cards.\n\nHAVEN WORKER\nStart the game in any haven.\n• You have no special abilities and cannot receive upgrades or scars.\n• If you gain an exposure, discard your hand and lose any remaining actions. Start your next turn in any haven."
-		},
-		{
-			"heading": "",
-			"text": "At the beginning of his turn, Newt finds himself in New York with 2 Plague cubes. He gains an exposure (even though there are 2 Plague cubes).\n\nHe scratches the next box on his Exposure track and reveals a scar.\n\nHe chooses a scar from those available and puts it on an available space on his Character card."
-		}
-	],
-	"tables": [],
-	"diagramsAndCallouts": [
-		"Running header: MANUAL.",
-		"The scar icon in the SCARS rule is a scratch mark, not the word scar. The death icon is a red skull.",
-		"Two Haven Worker cards are pictured. The fully visible card reads:\nHAVEN WORKER\nStart the game in any haven.\n• You have no special abilities and cannot receive upgrades or scars.\n• If you gain an exposure, discard your hand and lose any remaining actions. Start your next turn in any haven.",
-		"Example, right column. Map: New York with a blue pawn and 2 plague cubes (a 3 is also visible on a cube stack). Caption: At the beginning of his turn, Newt finds himself in New York with 2 Plague cubes. He gains an exposure (even though there are 2 Plague cubes).",
-		"Character card: Newt. Administrator: Once on your turn, as an action, move a pawn to any other pawn. Home Asgard, age 36. PLACE OF DEATH is blank. EXPOSURE track numbered 1 through 7; the first box is being scratched.",
-		"Scar sticker placed on the card: Xenophobia: You need 1 extra City card (of the same color) to do the Recon action.",
-		"Caption: He scratches the next box on his Exposure track and reveals a scar.",
-		"Caption: He chooses a scar from those available and puts it on an available space on his Character card.",
-		"Printed page number 16, bottom left."
-	],
-	"fullText": "MANUAL\n\nEXPOSURE, SCARS, AND DEATH\n\nEXPOSURE\n\nIt’s a dangerous world out there and characters will gain exposures. (One way is to start a turn in a location with a Plague cube. See page 10.)\n\nWhen a character gains an exposure, scratch off the next box on the character’s exposure track (starting at the leftmost box). If there is nothing under the box, there is no immediate effect.\n\nSCARS\n\nIf the box that was just scratched off has a [scar icon], it means the character has developed a scar. Choose any of the available scars and place it onto a slot on the Character card. This can be an empty slot, or a slot with a job or a character ability. You cannot cover a scar with another scar.\n\nDEATH\n\nIf the box that was just scratched off has a [skull icon], the character has died from the plague. Write down the location of the character’s death on the sheet. That character cannot be played in this or any future game.\n\nIf your character dies, discard all cards you have in hand and return any Supply cubes on the Character card to the stockpile. You lose any remaining actions, but must resolve the rest of your turn (i.e., do the “Draw Player cards” and “Infect” steps as usual).\n\nSelect a different character from those available and place your pawn at that character’s home. If there are no more characters available, use a haven worker for the rest of this game, placing your pawn at any haven connected to the grid.\n\nHAVEN WORKERS\n\nThe rules for haven workers are on their cards.\n\nHAVEN WORKER\nStart the game in any haven.\n• You have no special abilities and cannot receive upgrades or scars.\n• If you gain an exposure, discard your hand and lose any remaining actions. Start your next turn in any haven.\n\nAt the beginning of his turn, Newt finds himself in New York with 2 Plague cubes. He gains an exposure (even though there are 2 Plague cubes).\n\nHe scratches the next box on his Exposure track and reveals a scar.\n\nHe chooses a scar from those available and puts it on an available space on his Character card."
+  "file": "page-16.jpg",
+  "printedPageNumber": 16,
+  "headings": [
+    "MANUAL",
+    "EXPOSURE, SCARS, AND DEATH",
+    "EXPOSURE",
+    "SCARS",
+    "DEATH",
+    "HAVEN WORKERS"
+  ],
+  "ruleStickerSlots": [],
+  "sections": [
+    {
+      "heading": "EXPOSURE",
+      "text": "It’s a dangerous world out there and characters will gain exposures. (One way is to start a turn in a location with a Plague cube. See page 10.)\n\nWhen a character gains an exposure, scratch off the next box on the character’s exposure track (starting at the leftmost box). If there is nothing under the box, there is no immediate effect."
+    },
+    {
+      "heading": "SCARS",
+      "text": "If the box that was just scratched off has a [scar icon], it means the character has developed a scar. Choose any of the available scars and place it onto a slot on the Character card. This can be an empty slot, or a slot with a job or a character ability. You cannot cover a scar with another scar."
+    },
+    {
+      "heading": "DEATH",
+      "text": "If the box that was just scratched off has a [skull icon], the character has died from the plague. Write down the location of the character’s death on the sheet. That character cannot be played in this or any future game.\n\nIf your character dies, discard all cards you have in hand and return any Supply cubes on the Character card to the stockpile. You lose any remaining actions, but must resolve the rest of your turn (i.e., do the “Draw Player cards” and “Infect” steps as usual).\n\nSelect a different character from those available and place your pawn at that character’s home. If there are no more characters available, use a haven worker for the rest of this game, placing your pawn at any haven connected to the grid."
+    },
+    {
+      "heading": "HAVEN WORKERS",
+      "text": "The rules for haven workers are on their cards.\n\nHAVEN WORKER\nStart the game in any haven.\n• You have no special abilities and cannot receive upgrades or scars.\n• If you gain an exposure, discard your hand and lose any remaining actions. Start your next turn in any haven."
+    },
+    {
+      "heading": "",
+      "text": "At the beginning of his turn, Newt finds himself in New York with 2 Plague cubes. He gains an exposure (even though there are 2 Plague cubes).\n\nHe scratches the next box on his Exposure track and reveals a scar.\n\nHe chooses a scar from those available and puts it on an available space on his Character card."
+    }
+  ],
+  "tables": [],
+  "diagramsAndCallouts": [
+    "Running header: MANUAL.",
+    "The scar icon in the SCARS rule is a scratch mark, not the word scar. The death icon is a red skull.",
+    "Two Haven Worker cards are pictured. The fully visible card reads:\nHAVEN WORKER\nStart the game in any haven.\n• You have no special abilities and cannot receive upgrades or scars.\n• If you gain an exposure, discard your hand and lose any remaining actions. Start your next turn in any haven.",
+    "Example, right column. Map: New York with a blue pawn and 2 plague cubes (a 3 is also visible on a cube stack). Caption: At the beginning of his turn, Newt finds himself in New York with 2 Plague cubes. He gains an exposure (even though there are 2 Plague cubes).",
+    "Character card: Newt. Administrator: Once on your turn, as an action, move a pawn to any other pawn. Home Asgard, age 36. PLACE OF DEATH is blank. EXPOSURE track numbered 1 through 7; the first box is being scratched.",
+    "Scar sticker placed on the card: Xenophobia: You need 1 extra City card (of the same color) to do the Recon action.",
+    "Caption: He scratches the next box on his Exposure track and reveals a scar.",
+    "Caption: He chooses a scar from those available and puts it on an available space on his Character card.",
+    "Printed page number 16, bottom left."
+  ],
+  "fullText": "MANUAL\n\nEXPOSURE, SCARS, AND DEATH\n\nEXPOSURE\n\nIt’s a dangerous world out there and characters will gain exposures. (One way is to start a turn in a location with a Plague cube. See page 10.)\n\nWhen a character gains an exposure, scratch off the next box on the character’s exposure track (starting at the leftmost box). If there is nothing under the box, there is no immediate effect.\n\nSCARS\n\nIf the box that was just scratched off has a [scar icon], it means the character has developed a scar. Choose any of the available scars and place it onto a slot on the Character card. This can be an empty slot, or a slot with a job or a character ability. You cannot cover a scar with another scar.\n\nDEATH\n\nIf the box that was just scratched off has a [skull icon], the character has died from the plague. Write down the location of the character’s death on the sheet. That character cannot be played in this or any future game.\n\nIf your character dies, discard all cards you have in hand and return any Supply cubes on the Character card to the stockpile. You lose any remaining actions, but must resolve the rest of your turn (i.e., do the “Draw Player cards” and “Infect” steps as usual).\n\nSelect a different character from those available and place your pawn at that character’s home. If there are no more characters available, use a haven worker for the rest of this game, placing your pawn at any haven connected to the grid.\n\nHAVEN WORKERS\n\nThe rules for haven workers are on their cards.\n\nHAVEN WORKER\nStart the game in any haven.\n• You have no special abilities and cannot receive upgrades or scars.\n• If you gain an exposure, discard your hand and lose any remaining actions. Start your next turn in any haven.\n\nAt the beginning of his turn, Newt finds himself in New York with 2 Plague cubes. He gains an exposure (even though there are 2 Plague cubes).\n\nHe scratches the next box on his Exposure track and reveals a scar.\n\nHe chooses a scar from those available and puts it on an available space on his Character card."
 }

@@ -1,50 +1,50 @@
 {
-	"sequence": 79,
-	"folder": "079_12-10",
-	"cardCode": "12-10",
-	"printedCodes": {
-		"sideA": "12-10a",
-		"sideB": "12-10b"
-	},
-	"title": "Did Not Deliver: 551-700",
-	"category": "ending",
-	"month": "december",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "NONE",
-		"header": "DID NOT DELIVER: 551-700",
-		"trigger": "",
-		"summary": "DID NOT DELIVER: 551-700. Despite inexperience, they did the impossible, and the world paid for their leaders' fear, Utopia's malice, and the Hollow Men's savagery. Failing to get the sample has a price. They believe the world recovers in time, with new cities and new countries, and hope to be remembered. DID NOT DELIVER: 401-550. The world is rioting, in anarchy, and near collapse. Without Utopia in the east, those cities have risen. There is no cure, and it is not clear the world lasts long enough to use one. Some cities may make it, and the Faded will be gone soon.",
-		"text": "DID NOT DELIVER: 551-700\nDespite our inexperience, we did the impossible. The world has paid the price of our leaders’ fear, Utopia’s malice, and the Hollow Men’s savagery. We are paying the price for failing to get the sample. We believe that the world will recover in time. There will be new cities and new countries. We hope they remember what we did.\n\nDID NOT DELIVER: 401-550\nThe world is a disaster. There is rioting, anarchy, near collapse. Without Utopia in the east, those cities have risen up. We have no cure. We’re not sure the world would survive long enough to use it. Some cities will make it. We hope the world can rebuild from there. We will be gone soon.",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "DID NOT DELIVER: 400 AND BELOW",
-		"summary": "DID NOT DELIVER: 400 AND BELOW. A note left in hope that someone finds it. Mistrust between Faded and normal humans was too much, and they were overwhelmed. Utopia may save the humans, but not the Faded. The effort was great and the burden too heavy. They tried and failed. Found in the ruins of North Atlantic Haven.",
-		"text": "DID NOT DELIVER: 400 AND BELOW\n\"I hope someone finds this note. The mistrust between Faded and normal humans was too much for the world. We were overwhelmed. Utopia may save the humans...but not us. Our efforts were great but the burden was too heavy. We tried. We failed.\" – Found in ruins of North Atlantic Haven",
-		"footer": "",
-		"scratchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"whenRead": "After scoring on 12-08, if the sample was not delivered and the grand total is 700 or below. Read the blurb for the bracket the total falls in.",
-		"triggers": [
-			"Failed delivery and grand total 551-700",
-			"Failed delivery and grand total 401-550",
-			"Failed delivery and grand total 400 or below"
-		],
-		"opensDoors": [],
-		"opensPackages": [],
-		"destroys": [],
-		"addsToPool": [],
-		"rules": [
-			"Score bracket DID NOT DELIVER: 551-700, on side A.",
-			"Score bracket DID NOT DELIVER: 401-550, on side A.",
-			"Score bracket DID NOT DELIVER: 400 AND BELOW, on side B."
-		],
-		"notes": "Red border. The 400-and-below blurb is a quoted note attributed to the ruins of North Atlantic Haven. Flavor above is paraphrased. The brackets are exact. 701 and above for a failed delivery is on 12-09, not here."
-	}
+  "sequence": 79,
+  "folder": "079_12-10",
+  "cardCode": "12-10",
+  "printedCodes": {
+    "sideA": "12-10a",
+    "sideB": "12-10b"
+  },
+  "title": "Did Not Deliver: 551-700",
+  "category": "ending",
+  "month": "december",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "NONE",
+    "header": "DID NOT DELIVER: 551-700",
+    "trigger": "",
+    "summary": "DID NOT DELIVER: 551-700. Despite inexperience, they did the impossible, and the world paid for their leaders' fear, Utopia's malice, and the Hollow Men's savagery. Failing to get the sample has a price. They believe the world recovers in time, with new cities and new countries, and hope to be remembered. DID NOT DELIVER: 401-550. The world is rioting, in anarchy, and near collapse. Without Utopia in the east, those cities have risen. There is no cure, and it is not clear the world lasts long enough to use one. Some cities may make it, and the Faded will be gone soon.",
+    "text": "DID NOT DELIVER: 551-700\nDespite our inexperience, we did the impossible. The world has paid the price of our leaders’ fear, Utopia’s malice, and the Hollow Men’s savagery. We are paying the price for failing to get the sample. We believe that the world will recover in time. There will be new cities and new countries. We hope they remember what we did.\n\nDID NOT DELIVER: 401-550\nThe world is a disaster. There is rioting, anarchy, near collapse. Without Utopia in the east, those cities have risen up. We have no cure. We’re not sure the world would survive long enough to use it. Some cities will make it. We hope the world can rebuild from there. We will be gone soon.",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "DID NOT DELIVER: 400 AND BELOW",
+    "summary": "DID NOT DELIVER: 400 AND BELOW. A note left in hope that someone finds it. Mistrust between Faded and normal humans was too much, and they were overwhelmed. Utopia may save the humans, but not the Faded. The effort was great and the burden too heavy. They tried and failed. Found in the ruins of North Atlantic Haven.",
+    "text": "DID NOT DELIVER: 400 AND BELOW\n\"I hope someone finds this note. The mistrust between Faded and normal humans was too much for the world. We were overwhelmed. Utopia may save the humans...but not us. Our efforts were great but the burden was too heavy. We tried. We failed.\" – Found in ruins of North Atlantic Haven",
+    "footer": "",
+    "scratchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "whenRead": "After scoring on 12-08, if the sample was not delivered and the grand total is 700 or below. Read the blurb for the bracket the total falls in.",
+    "triggers": [
+      "Failed delivery and grand total 551-700",
+      "Failed delivery and grand total 401-550",
+      "Failed delivery and grand total 400 or below"
+    ],
+    "opensDoors": [],
+    "opensPackages": [],
+    "destroys": [],
+    "addsToPool": [],
+    "rules": [
+      "Score bracket DID NOT DELIVER: 551-700, on side A.",
+      "Score bracket DID NOT DELIVER: 401-550, on side A.",
+      "Score bracket DID NOT DELIVER: 400 AND BELOW, on side B."
+    ],
+    "notes": "Red border. The 400-and-below blurb is a quoted note attributed to the ruins of North Atlantic Haven. Flavor above is paraphrased. The brackets are exact. 701 and above for a failed delivery is on 12-09, not here."
+  }
 }

@@ -1,46 +1,46 @@
 {
-	"sequence": 73,
-	"folder": "073_12-04",
-	"cardCode": "12-04",
-	"printedCodes": {
-		"sideA": "12-04a",
-		"sideB": "12-04b"
-	},
-	"title": "Deliver the Sample",
-	"category": "objective",
-	"month": "december",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "NONE",
-		"header": "",
-		"trigger": "",
-		"summary": "Objective-card back. No rules text.",
-		"text": "",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "MANDATORY OBJECTIVE",
-		"summary": "Deliver the Sample. Complete it when a player carrying the sample is in Johannesburg and Johannesburg has a supply center. This is the last Objective card. Completing it wins the game.",
-		"text": "Deliver the Sample.\n\nThis objective is completed when:\n• a player carrying the sample is in Johannesburg,\nAND\n• Johannesburg has a supply center.\n\nThis is your last Objective card.\nIf you complete it, you win the game.",
-		"footer": "This is your last Objective card. If you complete it, you win the game.",
-		"scratchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"whenRead": "The mandatory objective enclosed by 12-03. Read during the first December setup draw and add it to the objective pool.",
-		"triggers": ["Win during play when both completion conditions are true"],
-		"opensDoors": [],
-		"opensPackages": [],
-		"destroys": [],
-		"addsToPool": ["Deliver the Sample (mandatory objective)"],
-		"rules": [
-			"Mandatory objective: Deliver the Sample.",
-			"Completed when a player carrying the sample is in Johannesburg AND Johannesburg has a supply center.",
-			"This is the last Objective card. Completing it wins the game."
-		],
-		"notes": "Side A is the objective back and prints 12-04a. Side B text is vertical, with a red MANDATORY OBJECTIVE label. The card does not say how the sample is acquired. The journal 12-02 names Lake Baikal and the PEARL lab as the place it comes from."
-	}
+  "sequence": 73,
+  "folder": "073_12-04",
+  "cardCode": "12-04",
+  "printedCodes": {
+    "sideA": "12-04a",
+    "sideB": "12-04b"
+  },
+  "title": "Deliver the Sample",
+  "category": "objective",
+  "month": "december",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "NONE",
+    "header": "",
+    "trigger": "",
+    "summary": "Objective-card back. No rules text.",
+    "text": "",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "MANDATORY OBJECTIVE",
+    "summary": "Deliver the Sample. Complete it when a player carrying the sample is in Johannesburg and Johannesburg has a supply center. This is the last Objective card. Completing it wins the game.",
+    "text": "Deliver the Sample.\n\nThis objective is completed when:\n• a player carrying the sample is in Johannesburg,\nAND\n• Johannesburg has a supply center.\n\nThis is your last Objective card.\nIf you complete it, you win the game.",
+    "footer": "This is your last Objective card. If you complete it, you win the game.",
+    "scratchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "whenRead": "The mandatory objective enclosed by 12-03. Read during the first December setup draw and add it to the objective pool.",
+    "triggers": ["Win during play when both completion conditions are true"],
+    "opensDoors": [],
+    "opensPackages": [],
+    "destroys": [],
+    "addsToPool": ["Deliver the Sample (mandatory objective)"],
+    "rules": [
+      "Mandatory objective: Deliver the Sample.",
+      "Completed when a player carrying the sample is in Johannesburg AND Johannesburg has a supply center.",
+      "This is the last Objective card. Completing it wins the game."
+    ],
+    "notes": "Side A is the objective back and prints 12-04a. Side B text is vertical, with a red MANDATORY OBJECTIVE label. The card does not say how the sample is acquired. The journal 12-02 names Lake Baikal and the PEARL lab as the place it comes from."
+  }
 }

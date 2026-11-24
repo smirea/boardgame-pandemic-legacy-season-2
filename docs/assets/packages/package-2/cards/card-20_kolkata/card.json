@@ -1,37 +1,37 @@
 {
-	"package": 2,
-	"index": 20,
-	"cardId": 10719,
-	"printedCodes": {
-		"sideA": null,
-		"sideB": "P2-20b"
-	},
-	"title": "Kolkata",
-	"category": "infection-card",
-	"city": "Kolkata",
-	"color": "black",
-	"coordinates": null,
-	"port": true,
-	"copies": 1,
-	"hasImprovementSlot": true,
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideASummary": "Infection deck back. Red biohazard on a dark field. No printed text.",
-	"sideBSummary": "KOLKATA printed vertically, code P2-20b. Map fragment, green ring, and a dashed white panel. No coordinates and no anchor on this face.",
-	"searchBoxes": [],
-	"states": [],
-	"mechanics": {
-		"opensDoors": [],
-		"destroys": [],
-		"rules": [
-			"Black Infection card for Kolkata. The only Kolkata Infection card.",
-			"The dashed white panel is the infection-card upgrade slot."
-		],
-		"notes": [
-			"The port anchor is on the Player card, not on this Infection face.",
-			"Goes to the reserve when the package is opened."
-		]
-	}
+  "package": 2,
+  "index": 20,
+  "cardId": 10719,
+  "printedCodes": {
+    "sideA": null,
+    "sideB": "P2-20b"
+  },
+  "title": "Kolkata",
+  "category": "infection-card",
+  "city": "Kolkata",
+  "color": "black",
+  "coordinates": null,
+  "port": true,
+  "copies": 1,
+  "hasImprovementSlot": true,
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideASummary": "Infection deck back. Red biohazard on a dark field. No printed text.",
+  "sideBSummary": "KOLKATA printed vertically, code P2-20b. Map fragment, green ring, and a dashed white panel. No coordinates and no anchor on this face.",
+  "searchBoxes": [],
+  "states": [],
+  "mechanics": {
+    "opensDoors": [],
+    "destroys": [],
+    "rules": [
+      "Black Infection card for Kolkata. The only Kolkata Infection card.",
+      "The dashed white panel is the infection-card upgrade slot."
+    ],
+    "notes": [
+      "The port anchor is on the Player card, not on this Infection face.",
+      "Goes to the reserve when the package is opened."
+    ]
+  }
 }
