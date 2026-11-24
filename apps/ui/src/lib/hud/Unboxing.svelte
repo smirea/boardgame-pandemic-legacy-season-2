@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
-	import { openings, pack, tablePlayers } from '@repo/game';
+	import { changesMap, openings, pack, tablePlayers } from '@repo/game';
 	import type { BriefingEntry, Campaign, Command, Opening, PlayerId, Table } from '@repo/game';
 	import { onDestroy, onMount, tick } from 'svelte';
 	import { cubicOut } from 'svelte/easing';
 	import { fade, fly, scale } from 'svelte/transition';
+	import Beacon from '#lib/Beacon.svelte';
 	import LegacyCard from '#lib/cards/LegacyCard.svelte';
 	import { fitZoom } from '#lib/cards/fit.ts';
 	import { sfxCardDraw, sfxCardFlip, sfxCrateOpen, sfxDoorTear } from '#lib/audio/sfx.ts';
@@ -43,11 +44,15 @@
 	const drawn = $derived(Math.min(progress.drawn, steps.length));
 	const flipped = $derived(progress.flipped);
 	const remaining = $derived(Math.max(0, steps.length - drawn));
-	const canDraw = $derived(!progress.stowing && remaining > 0 && (drawn === 0 || flipped));
-	const needsFlip = $derived(!progress.stowing && drawn > 0 && !flipped);
-	const allDrawn = $derived(steps.length > 0 && drawn >= steps.length && flipped);
-
 	const current = $derived<Opening | null>(drawn > 0 ? (steps[drawn - 1] ?? null) : null);
+	// What an opening changes on the map is shown once its story has been told, as a step of its own (`charted`).
+	const needsChart = $derived(
+		!progress.stowing && flipped && !progress.charted && current !== null && changesMap(current),
+	);
+	const canDraw = $derived(!progress.stowing && remaining > 0 && (drawn === 0 || (flipped && !needsChart)));
+	const needsFlip = $derived(!progress.stowing && drawn > 0 && !flipped);
+	const allDrawn = $derived(steps.length > 0 && drawn >= steps.length && flipped && !needsChart);
+
 	let dismissedStep = $state<number | null>(null);
 	const activeStory = $derived(
 		current && flipped && !progress.stowing && !paused && dismissedStep !== drawn
@@ -532,8 +537,8 @@
 				overlay
 				delivered={campaign.sampleDelivered}
 				ondone={() => {
-					if (!allDrawn) step();
-					else dismissedStep = drawn;
+					if (allDrawn || needsChart) dismissedStep = drawn;
+					else step();
 				}}
 				onclose={() => {
 					dismissedStep = drawn;
@@ -562,6 +567,10 @@
 					{#if progress.ready.length && waitingOn.length}
 						<span class="waiting">Waiting for {waitingOn.join(', ')}</span>
 					{/if}
+				{:else if needsChart && !activeStory}
+					<button class="chart-btn" onclick={step} data-testid="briefing-chart">
+						Show on the map<Beacon gap="0.15rem" />
+					</button>
 				{:else if !progress.stowing}
 					<span class="prompt">
 						{#if canDraw}
@@ -977,6 +986,23 @@
 		background: rgb(16 13 10 / 0.78);
 		color: var(--paper);
 		font-size: 0.85rem;
+	}
+
+	.chart-btn {
+		position: relative;
+		padding: 0.45rem 1.2rem;
+		border: 1px solid rgb(227 178 60 / 0.6);
+		border-radius: 3px;
+		background: rgb(18 15 11 / 0.9);
+		color: var(--paper);
+		font: inherit;
+		font-size: 0.95rem;
+		font-weight: 600;
+		cursor: pointer;
+	}
+
+	.chart-btn:hover {
+		border-color: var(--paper);
 	}
 
 	.summary-btn {

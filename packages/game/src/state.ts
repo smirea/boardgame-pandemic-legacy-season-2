@@ -346,6 +346,8 @@ export type TableBriefing = {
 	drawn: number;
 	/** Whether the most recently drawn card, package or door has been flipped or opened. */
 	flipped: boolean;
+	/** Whether what the most recently opened one changes on the map has been shown, a step after its story. */
+	charted: boolean;
 	/** Players who clicked Done once everything is drawn and opened. */
 	ready: PlayerId[];
 	/** True once everyone agreed on Done, while clients play the put-away sequence before `ACK_BRIEFING`. */

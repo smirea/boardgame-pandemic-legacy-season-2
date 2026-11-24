@@ -1,4 +1,4 @@
-import { openings } from './briefing';
+import { changesMap, openings } from './briefing';
 import { pack } from './content/pack';
 import { SEAT_IDS } from './helpers';
 import type { CharacterId, PlayerId, SeatId } from './ids';
@@ -30,7 +30,28 @@ export type TableCommand =
 	| { type: 'WEAR'; player: PlayerId; character: CharacterId; portrait: number };
 
 export const newDraft = (): CharacterDraft => ({ name: '', portrait: null, job: null, home: null });
-export const newTableBriefing = (): TableBriefing => ({ drawn: 0, flipped: false, ready: [], stowing: false });
+export const newTableBriefing = (): TableBriefing => ({
+	drawn: 0,
+	flipped: false,
+	charted: false,
+	ready: [],
+	stowing: false,
+});
+
+/**
+ * What the next step of the reading does: draw the next card, package or door, open the one drawn, show what it
+ * changes on the map once its story has been told, or nothing, once everything is drawn and done.
+ */
+export function briefingNext(world: World): 'draw' | 'flip' | 'chart' | null {
+	const steps = openings(world.campaign.briefing);
+	const { drawn, flipped, charted, stowing } = world.table.briefing;
+	if (stowing || steps.length === 0) return null;
+	if (drawn === 0) return 'draw';
+	if (!flipped) return 'flip';
+	const current = steps[Math.min(drawn, steps.length) - 1]!;
+	if (!charted && changesMap(current)) return 'chart';
+	return drawn < steps.length ? 'draw' : null;
+}
 export const newTable = (): Table => ({
 	seats: [],
 	ready: {},
@@ -106,12 +127,12 @@ export function rejectTable(world: World, lobby: boolean, command: TableCommand)
 		case 'BRIEFING_STEP': {
 			const total = openings(campaign.briefing).length;
 			if (total === 0 || table.briefing.stowing) return 'Nothing to draw';
-			return table.briefing.drawn >= total && table.briefing.flipped ? 'Everything is already drawn' : null;
+			return briefingNext(world) === null ? 'Everything is already drawn' : null;
 		}
 		case 'BRIEFING_READY': {
 			const total = openings(campaign.briefing).length;
 			if (total === 0 || table.briefing.stowing) return 'Nothing to confirm';
-			if (table.briefing.drawn < total || !table.briefing.flipped) return 'Draw and flip every card first';
+			if (briefingNext(world) !== null) return 'Draw and flip every card first';
 			if (table.seats.length > 0 && !seated(table, command.player)) return 'Sit down first';
 			return null;
 		}
@@ -259,12 +280,13 @@ export function applyTable(world: World, command: TableCommand) {
 			return;
 		case 'BRIEFING_STEP': {
 			const state = table.briefing;
-			if (state.drawn === 0 || state.flipped) {
+			const next = briefingNext(world);
+			if (next === 'draw') {
 				state.drawn += 1;
 				state.flipped = false;
-			} else {
-				state.flipped = true;
-			}
+				state.charted = false;
+			} else if (next === 'flip') state.flipped = true;
+			else if (next === 'chart') state.charted = true;
 			state.ready = [];
 			return;
 		}

@@ -1,11 +1,11 @@
 import { expect, test } from 'bun:test';
-import { openings } from './briefing';
+import { changesMap, openings } from './briefing';
 import { pack } from './content/pack';
 import type { JobId } from './content/types';
 import type { CityId, PlayerId } from './ids';
 import { createGameActor, reject } from './machine';
 import type { Start, World } from './state';
-import { tablePlayers, tableStart } from './table';
+import { newTableBriefing, tablePlayers, tableStart } from './table';
 import { campaignAt } from './scenarios';
 import { A, act, B, C, gameOf, late, phase, send, worldOf } from './testkit';
 
@@ -17,7 +17,13 @@ const freeJob = (world: World) =>
 		.id as JobId;
 
 function lobby() {
-	const actor = createGameActor({ seed: 3 }).start();
+	return seatAnnAndBen(createGameActor({ seed: 3 }).start());
+}
+
+/** The lobby of a month of the campaign, whose opening reading may already change the map. */
+const campaignLobby = (month: number) => seatAnnAndBen(createGameActor({ seed: 3, save: campaignAt(month) }).start());
+
+function seatAnnAndBen(actor: ReturnType<typeof createGameActor>) {
 	send(actor, { type: 'JOIN', player: ann, name: 'Ann' });
 	send(actor, { type: 'JOIN', player: ben, name: 'Ben' });
 	return actor;
@@ -191,19 +197,23 @@ test('returning players resume their previous seats and characters in a known ga
 	expect(gameOf(resumed).players[C]!.character).toBe(expected[C]);
 });
 
-test('a Legacy briefing is drawn and flipped step by step, and stows only once every seated player agrees', () => {
-	const actor = lobby();
+test('a Legacy briefing is drawn, opened, and shown on the map when it changes the map, one step at a time, and stows only once every seated player agrees', () => {
+	const actor = campaignLobby(11);
 	begin(actor, 'month');
-	const total = openings(worldOf(actor).campaign.briefing).length;
-	expect(total).toBeGreaterThan(1);
+	const steps = openings(worldOf(actor).campaign.briefing);
+	expect(steps.length).toBeGreaterThan(1);
+	expect(steps.some(changesMap)).toBe(true);
 	expect(reject(worldOf(actor), phase(actor), { type: 'BRIEFING_READY', player: ann, ready: true })).toBe(
 		'Draw and flip every card first',
 	);
-	for (let i = 0; i < total; i++) {
+	for (const [index, step] of steps.entries()) {
 		send(actor, { type: 'BRIEFING_STEP' });
-		expect(worldOf(actor).table.briefing).toMatchObject({ drawn: i + 1, flipped: false, stowing: false });
+		expect(worldOf(actor).table.briefing).toMatchObject({ drawn: index + 1, flipped: false, charted: false });
 		send(actor, { type: 'BRIEFING_STEP' });
-		expect(worldOf(actor).table.briefing).toMatchObject({ drawn: i + 1, flipped: true, stowing: false });
+		expect(worldOf(actor).table.briefing).toMatchObject({ drawn: index + 1, flipped: true, charted: false });
+		if (!changesMap(step)) continue;
+		send(actor, { type: 'BRIEFING_STEP' });
+		expect(worldOf(actor).table.briefing).toMatchObject({ drawn: index + 1, flipped: true, charted: true });
 	}
 	expect(reject(worldOf(actor), phase(actor), { type: 'BRIEFING_STEP' })).toBe('Everything is already drawn');
 	send(actor, { type: 'BRIEFING_READY', player: ann, ready: true });
@@ -212,5 +222,5 @@ test('a Legacy briefing is drawn and flipped step by step, and stows only once e
 	expect(worldOf(actor).table.briefing.stowing).toBe(true);
 	send(actor, { type: 'ACK_BRIEFING' });
 	expect(worldOf(actor).campaign.briefing).toEqual([]);
-	expect(worldOf(actor).table.briefing).toEqual({ drawn: 0, flipped: false, ready: [], stowing: false });
+	expect(worldOf(actor).table.briefing).toEqual(newTableBriefing());
 });

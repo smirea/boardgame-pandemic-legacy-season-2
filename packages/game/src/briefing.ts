@@ -165,6 +165,24 @@ export function openings(briefing: BriefingEntry[]): Opening[] {
 	return result;
 }
 
+/** Everything an opening put into play: its Legacy card's and its seals' contents, then the briefing's own lines. */
+export function openingUnlocks(opening: Opening): Unlock[] {
+	const from = opening.from;
+	const card = from.t === 'legacy' ? pack.legacyDeck.find(entry => entry.id === from.card) : undefined;
+	const seals = new Set([...(from.t === 'seal' ? [from.seal] : []), ...opening.seals].map(sealKey));
+	return [
+		...(card?.unlocks ?? []),
+		...pack.seals.filter(def => seals.has(sealKey(def.seal))).flatMap(def => def.unlocks),
+		// The briefing leaves out what it has nothing to say about, so its lines come after what the cards hold.
+		...opening.items.map(item => item.unlock),
+	];
+}
+
+const MAP_UNLOCKS = new Set<Unlock['t']>(['region', 'haven', 'lab', 'infest', 'forsake', 'destroy', 'edge', 'route']);
+
+/** Whether an opening changes the map, which the table is shown as a step of its own once its story is told. */
+export const changesMap = (opening: Opening) => openingUnlocks(opening).some(unlock => MAP_UNLOCKS.has(unlock.t));
+
 const named = <T extends { id: string; name: string; text: string }>(list: T[], id: string) => {
 	const found = list.find(entry => entry.id === id)!;
 	return `${found.name}. ${found.text}`;

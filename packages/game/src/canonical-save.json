@@ -1374,7 +1374,7 @@
 			],
 			"ready": {},
 			"start": null,
-			"briefing": { "drawn": 0, "flipped": false, "ready": [], "stowing": false },
+			"briefing": { "drawn": 0, "flipped": false, "charted": false, "ready": [], "stowing": false },
 			"undoVote": null,
 			"draft": { "name": "", "portrait": null, "job": null, "home": null }
 		}

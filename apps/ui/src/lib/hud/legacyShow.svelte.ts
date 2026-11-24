@@ -1,5 +1,5 @@
-import { edgeKey, openings, pack, sealKey } from '@repo/game';
-import type { CampaignLocation, CityId, EdgeDef, Opening, Unlock, World } from '@repo/game';
+import { edgeKey, openingUnlocks, openings, pack } from '@repo/game';
+import type { CampaignLocation, CityId, EdgeDef, Opening, World } from '@repo/game';
 
 /** The parts of the map a Legacy reading can change, as the board last showed them. */
 type Chart = { locations: Record<CityId, CampaignLocation>; edges: EdgeDef[]; routes: string[] };
@@ -35,16 +35,6 @@ function middleOf(cities: CityId[]): CityId {
 	return cities.reduce((best, id) => (far(id) < far(best) ? id : best));
 }
 
-function contentOf(opening: Opening): Unlock[] {
-	const from = opening.from;
-	const card = from.t === 'legacy' ? pack.legacyDeck.find(entry => entry.id === from.card) : undefined;
-	const seals = new Set([...(from.t === 'seal' ? [from.seal] : []), ...opening.seals].map(sealKey));
-	return [
-		...(card?.unlocks ?? []),
-		...pack.seals.filter(def => seals.has(sealKey(def.seal))).flatMap(def => def.unlocks),
-	];
-}
-
 /** Each place a scene changes the map, in the order it names them, with what changes there. */
 function beatsOf(opening: Opening, before: Chart, after: Chart): Beat[] {
 	const beats: Beat[] = [];
@@ -62,9 +52,7 @@ function beatsOf(opening: Opening, before: Chart, after: Chart): Beat[] {
 			? [key]
 			: [];
 	};
-	// The briefing leaves out what it has nothing to say about, such as a region with no city infested from the start,
-	// so what the map took comes from what the cards and doors hold, with the briefing's own lines after them.
-	const unlocks = [...contentOf(opening), ...opening.items.map(item => item.unlock)];
+	const unlocks = openingUnlocks(opening);
 	const havens = new Set(unlocks.flatMap(unlock => (unlock.t === 'haven' ? [unlock.city] : [])));
 	for (const unlock of unlocks) {
 		switch (unlock.t) {
@@ -107,18 +95,18 @@ function beatsOf(opening: Opening, before: Chart, after: Chart): Beat[] {
 	return beats;
 }
 
-/** Which openings of a briefing are face up on the table: drawn, and the newest one turned over. */
+/** Which openings of a briefing the map shows: those drawn before the newest, and the newest once it is charted. */
 function shownCount(world: World, total: number) {
 	const progress = world.table.briefing;
 	if (progress.stowing) return total;
-	return Math.min(total, Math.max(0, progress.drawn - (progress.flipped ? 0 : 1)));
+	return Math.min(total, Math.max(0, progress.drawn - (progress.charted ? 0 : 1)));
 }
 
 /**
- * Plays what a Legacy reading changes on the map as its scene is turned over in the Unboxing. The state took every
- * change at once when the cards were read, so the board shows each part as it was until its scene comes up: then the
- * Unboxing steps off the table, the camera finds the place, and the fog, the location or the line comes in. Every
- * scene is turned over by a command, so each browser plays it as the command arrives.
+ * Plays what a Legacy reading changes on the map once the table has heard its story and asked to see it (`charted`).
+ * The state took every change at once when the cards were read, so the board shows each part as it was until then:
+ * the Unboxing steps off the table, the camera finds the place, and the fog, the location or the line comes in. Every
+ * step is a command, so each browser plays it as the command arrives.
  */
 export class LegacyShow {
 	/** The Unboxing stands aside while a change plays on the board. */
@@ -216,8 +204,7 @@ export class LegacyShow {
 		this.playing = true;
 		const wait = (ms: number) => new Promise<boolean>(done => setTimeout(() => done(this.run === run), ms));
 		this.hold();
-		// The card turns over first, so the table reads what it says is coming.
-		if (!(await wait(1100))) return;
+		if (!(await wait(250))) return;
 		for (;;) {
 			const beat = this.queue.shift();
 			if (!beat) break;

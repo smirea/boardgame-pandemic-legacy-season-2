@@ -6,6 +6,8 @@
 	import { jobFigure } from '#lib/characters/figures.ts';
 	import BriefPiece from './BriefPiece.svelte';
 	import JobFigure from './JobFigure.svelte';
+	import MapPlace from './MapPlace.svelte';
+	import RichText from './RichText.svelte';
 	import Crate from './Crate.svelte';
 	import DossierDoor from './DossierDoor.svelte';
 	import type { Piece, PieceGroup } from './unboxPieces.ts';
@@ -25,6 +27,10 @@
 	/** A character the box brings stands as its whole figure, which carries its own name. */
 	const figureOf = (piece: Piece) =>
 		piece.t === 'unlock' && piece.unlock.t === 'job' ? jobFigure(piece.unlock.job) : null;
+	/** A new place stands as the board shows it, and a new rule is read where it lies: neither needs a word under it. */
+	const placeOf = (piece: Piece) => (piece.t === 'unlock' && piece.unlock.t === 'haven' ? piece.unlock.city : null);
+	const isRule = (piece: Piece) => piece.t === 'unlock' && piece.unlock.t === 'rule';
+	const speaks = (piece: Piece) => figureOf(piece) !== null || placeOf(piece) !== null || isRule(piece);
 	const label = (piece: Piece) =>
 		piece.t === 'card' ? piece.card.title : piece.t === 'seal' ? piece.tip : (piece.name ?? piece.tip);
 </script>
@@ -45,12 +51,13 @@
 						class="piece {piece.t}"
 						class:mechanic={piece.stow.cls === 'mechanic'}
 						class:figure={figureOf(piece) !== null}
+						class:whole={placeOf(piece) !== null || isRule(piece)}
 						data-stow-class={piece.stow.cls}
 						data-put={piece.stow.put}
 						aria-label={piece.tip}
-						onpointerenter={event => ontip(piece, event.currentTarget)}
+						onpointerenter={event => ontip(isRule(piece) ? null : piece, event.currentTarget)}
 						onpointerleave={() => ontip(null)}
-						onfocus={event => ontip(piece, event.currentTarget)}
+						onfocus={event => ontip(isRule(piece) ? null : piece, event.currentTarget)}
 						onblur={() => ontip(null)}
 						in:scale={{ start: 0.6, duration: 320 }}
 					>
@@ -64,12 +71,21 @@
 									<DossierDoor id={piece.seal.id} open={true} />
 								{/if}
 							</span>
+						{:else if placeOf(piece)}
+							{@const city = placeOf(piece)!}
+							<MapPlace {city} location={campaign.locations[city]} unit={big ? '0.62rem' : '0.48rem'} />
+						{:else if piece.t === 'unlock' && isRule(piece)}
+							<span class="rule">
+								<span class="kicker">Rule</span>
+								<b>{label(piece)}</b>
+								<span class="text"><RichText text={piece.tip} /></span>
+							</span>
 						{:else if figureOf(piece)}
 							<JobFigure figure={figureOf(piece)!} name={label(piece)} width={big ? '7.5rem' : '5.5rem'} />
 						{:else}
 							<BriefPiece unlock={piece.unlock} {campaign} size={big ? '2.8rem' : '2.2rem'} />
 						{/if}
-						{#if piece.t !== 'card' && !figureOf(piece) && (piece.t === 'seal' || piece.name)}
+						{#if piece.t !== 'card' && !speaks(piece) && (piece.t === 'seal' || piece.name)}
 							<span class="name">{label(piece)}</span>
 						{/if}
 					</button>
@@ -162,8 +178,44 @@
 	}
 
 	/* A name wraps under its sticker; a card, landscape ones included, keeps its own width. */
-	.piece:not(.card, .figure) {
+	.piece:not(.card, .figure, .whole) {
 		max-width: 7.4rem;
+	}
+
+	/* A rule is printed on a slip of the rulebook's paper, to be read where it lies. */
+	.rule {
+		display: flex;
+		flex-direction: column;
+		gap: 0.2rem;
+		width: 13rem;
+		padding: 0.5rem 0.65rem 0.6rem;
+		border-radius: 3px;
+		background: linear-gradient(180deg, #efe3c4, #e2d3ad);
+		box-shadow: 0 0.35rem 0.9rem rgb(0 0 0 / 0.5);
+		color: #2a2017;
+		font-size: 0.74rem;
+		line-height: 1.32;
+		text-align: left;
+	}
+
+	.spotlight .rule {
+		width: 16rem;
+		font-size: 0.8rem;
+	}
+
+	.rule .kicker {
+		color: #7a6748;
+		font-size: 0.62rem;
+		font-weight: 800;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+	}
+
+	.rule b {
+		font-family: var(--font-display);
+		font-size: 1.15em;
+		font-weight: 400;
+		line-height: 1.15;
 	}
 
 	.piece:hover,

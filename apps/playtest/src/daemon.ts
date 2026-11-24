@@ -9,11 +9,11 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
 	actionBriefs,
+	briefingNext,
 	gameIndexOf,
 	legalPlays,
 	newCampaign,
 	newTable,
-	openings,
 	overLimit,
 	parseRecord,
 	parseSave,
@@ -438,7 +438,7 @@ function needsOnScreen(state: PublicState, who: Who): string[] {
 	if (phase === 'finished') return ['The campaign is over. Write your report now, then stop.'];
 	if (campaign.briefing.length && phase !== 'lobby') {
 		if (table.briefing.stowing) return [];
-		const opened = table.briefing.drawn >= openings(campaign.briefing).length && table.briefing.flipped;
+		const opened = briefingNext(world) === null;
 		if (!opened) return who.lead ? [lead] : [];
 		return me && table.briefing.ready.includes(me) ? [] : [yours];
 	}

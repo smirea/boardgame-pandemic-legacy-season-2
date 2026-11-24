@@ -23,6 +23,8 @@ export { dossierView, rulebook, stickerStock } from './dossier';
 export {
 	actionBriefs,
 	briefingSections,
+	changesMap,
+	openingUnlocks,
 	openings,
 	ruleBriefs,
 	searchFind,
@@ -48,7 +50,7 @@ export { createGame } from './flow';
 export type { Command, GameActor, GameSnapshot, Phase, Save, Seating, UndoEntry } from './machine';
 export { createGameActor, fillSave, gameMachine, parseSave, phaseOf, reject } from './machine';
 export type { TableCommand } from './table';
-export { claimant, newDraft, newTable, newTableBriefing, tablePlayers, tableStart } from './table';
+export { briefingNext, claimant, newDraft, newTable, newTableBriefing, tablePlayers, tableStart } from './table';
 export {
 	actionMenu,
 	cardTargets,
