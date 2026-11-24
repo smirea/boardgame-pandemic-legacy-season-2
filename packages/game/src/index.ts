@@ -98,7 +98,7 @@ export {
 	tableSeating,
 	unlocksBehind,
 } from './helpers';
-export { freeCharacters, scarTargets } from './flow';
+export { freeCharacters, scarCandidates, scarTargets } from './flow';
 export { botCommand } from './bot';
 export { campaignAt, scenarios } from './scenarios';
 export { give, showReveals, stackInfection } from './testkit';

@@ -75,6 +75,7 @@
 	import Objectives from './Objectives.svelte';
 	import ScannerDialog from './ScannerDialog.svelte';
 	import ScarChoice from './ScarChoice.svelte';
+	import ScarVote from './ScarVote.svelte';
 	import SeatPicker from './SeatPicker.svelte';
 	import TopBar from './TopBar.svelte';
 	import UndoVote from './UndoVote.svelte';
@@ -180,6 +181,11 @@
 	const scarOwed = $derived.by(() => {
 		const pending = playing ? game?.pending[0] : undefined;
 		return pending?.t === 'scar' ? { seat: pending.seat, chooser: pending.seat ?? game!.active } : null;
+	});
+	/** A scar the Legacy deck owes is put to the table first: everyone votes for the character who takes it. */
+	const scarVoting = $derived.by(() => {
+		const pending = playing ? game?.pending[0] : undefined;
+		return pending?.t === 'scarVote' ? pending : null;
 	});
 	// A haven the character screen points at, which the camera looks at behind it.
 	let focus = $state.raw<{ city: CityId; x: number; y: number } | null>(null);
@@ -403,6 +409,7 @@
 			snap.phase === 'finished' ||
 			(snap.phase === 'upkeep' && !upkeepAside) ||
 			scarOwed !== null ||
+			scarVoting !== null ||
 			boxOpen ||
 			deckOpen ||
 			scannerOpen ||
@@ -1444,6 +1451,18 @@
 					canChoose={owns(scarOwed.chooser)}
 					{send}
 				/>
+			</div>
+		{/if}
+
+		{#if scarVoting && game && !fate.playing}
+			<div
+				class="scrim scar-scrim"
+				role="dialog"
+				aria-modal="true"
+				aria-label="Vote for who takes the scar"
+				transition:fade={{ duration: 200 }}
+			>
+				<ScarVote {world} vote={scarVoting} player={session.player} {spectator} {send} />
 			</div>
 		{/if}
 

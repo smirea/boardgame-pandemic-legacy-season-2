@@ -252,7 +252,7 @@ export function setupPlayerDeck(world: World) {
 		.map(card => card.id);
 	game.playerDeck = newPiledDeck(campaign.rng, deck, epidemicCards);
 	game.active = game.seats[nextInt(campaign.rng, game.seats.length)]!;
-	for (; campaign.owedScars > 0; campaign.owedScars--) game.pending.push({ t: 'scar', seat: null, at: null });
+	for (; campaign.owedScars > 0; campaign.owedScars--) game.pending.push({ t: 'scarVote', votes: {}, not: [] });
 	setProgress(world, 'triangulate', towerColours(game));
 	beginTurn(world);
 }
@@ -312,6 +312,12 @@ export function settleCarried(world: World) {
 		game.stockpile += carrier.supplies - CARRY_LIMIT;
 		carrier.supplies = CARRY_LIMIT;
 	}
+}
+
+/** The characters of this game a scar the Legacy deck owes may go to. */
+export function scarCandidates(world: World, vote: { not: SeatId[] }): SeatId[] {
+	const game = world.game!;
+	return game.seats.filter(seat => !vote.not.includes(seat) && canTakeScar(world, characterOf(world, seat)));
 }
 
 export const hasScar = (character: Character, scar: ScarId) =>

@@ -13,6 +13,7 @@ import {
 	hasScar,
 	intensify,
 	movePawn,
+	scarCandidates,
 	scarTargets,
 	settleCarried,
 } from './flow';
@@ -145,6 +146,7 @@ export function checkPlay(world: World, seat: SeatId, card: CardId, play: Play, 
 	const unresolved = game.pending[0]?.t;
 	if (unresolved === 'shield' || unresolved === 'cordon') return 'Resolve the card that was just drawn first';
 	if (unresolved === 'guard') return 'Choose how the Soldier gets past the Hollow Men first';
+	if (unresolved === 'scarVote') return 'Choose who takes the scar first';
 	if (unresolved === 'reveal' || unresolved === 'search') return 'Let the table see what was turned over first';
 	// A designer ruling: a Gather card and the city it gathers in are one draw, with no Event window between them.
 	if (game.gathering) return 'Flip the card the Hollow Men gather in first';
@@ -810,6 +812,7 @@ export function autoResolve(world: World) {
 		const scarFor = pending.t === 'scar' ? (pending.seat ? [pending.seat] : game.seats) : [];
 		if (pending.t === 'scar' && !scarFor.some(seat => canTakeScar(world, characterOf(world, seat))))
 			game.pending.shift();
+		else if (pending.t === 'scarVote' && scarCandidates(world, pending).length === 0) game.pending.shift();
 		else if (pending.t === 'discard' && player(game, pending.seat).hand.length === 0) game.pending.shift();
 		else if (pending.t === 'giveCard' && player(game, pending.seat).hand.length === 0) game.pending.shift();
 		else if (pending.t === 'removeHollow' && !Object.values(game.locations).some(location => location.hollow > 0))

@@ -206,6 +206,12 @@ export type Decision =
 	/** A null seat means the group chooses which character takes it. */
 	/** `at` is where the exposure that gave the scar happened. A scar a Legacy card hands out has no seat and no place. */
 	| { t: 'scar'; seat: SeatId | null; at: CityId | null }
+	/**
+	 * A scar the Legacy deck owes, settled as the game begins: everyone at the table votes for the character who takes
+	 * it, and once every vote names the same one it becomes that character's `scar`. `not` are the characters an
+	 * earlier owed scar of this game already went to, since a card that hands out two scars gives them to two people.
+	 */
+	| { t: 'scarVote'; votes: Partial<Record<PlayerId, SeatId>>; not: SeatId[] }
 	| { t: 'replace'; seat: SeatId }
 	| { t: 'retrieve'; seat: SeatId; filter: 'any' | 'city' }
 	| { t: 'freeEdge'; seat: SeatId; kind: 'land' | 'sea'; ignoreRedLines: boolean }

@@ -215,6 +215,11 @@ export function commandLabel(world: World, command: Command | null): { who: stri
 				text: entry ? `Gives back ${purchaseLabel(world, entry.purchase)}` : 'Gives back a purchase',
 			};
 		}
+		case 'SCAR_VOTE':
+			return {
+				who: null,
+				text: command.seat ? `Votes for ${seatName(world, command.seat)} to take the scar` : 'Takes back a scar vote',
+			};
 		case 'FINISH_UPKEEP':
 			return { who: null, text: command.done ? 'Done spending' : 'Not done spending' };
 	}

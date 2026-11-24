@@ -531,6 +531,7 @@ const DECISION_TITLES: Record<Decision['t'], string> = {
 	shield: 'Discard a matching card to keep the cube?',
 	cordon: 'Discard any card to stop the rest of this Infect step?',
 	guard: 'Discard a matching card to slip past the Hollow Men?',
+	scarVote: 'A scar is owed: vote for the character who takes it',
 	epidemicDrawn: 'Epidemic drawn — play TOPAZ Experimental Vaccine to cancel, or start the Epidemic.',
 	epidemicInfect: 'Epidemic Step 2: Infect — draw the bottom Infection card.',
 	intensify:

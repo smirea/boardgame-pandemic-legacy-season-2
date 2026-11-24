@@ -13,6 +13,7 @@ import {
 	infectStep,
 	isOver,
 	openingInfectStep,
+	scarCandidates,
 	setupInfection,
 	setupPlayerDeck,
 	startDrawStep,
@@ -35,7 +36,7 @@ import {
 } from './legacy';
 import type { Decide, Play } from './plays';
 import { applyDecide, applyPlay, autoResolve, checkDecide, checkPlay, playReveals } from './plays';
-import type { UndoSubject, World } from './state';
+import type { Decision, UndoSubject, World } from './state';
 import type { TableCommand } from './table';
 import {
 	applyTable,
@@ -76,6 +77,8 @@ export type Command =
 	| { type: 'END_TURN'; seat: SeatId }
 	| { type: 'PLAY'; seat: SeatId; card: CardId; play: Play }
 	| { type: 'DECIDE'; decide: Decide }
+	/** A vote for the character who takes a scar the Legacy deck owes. A null seat takes the vote back. */
+	| { type: 'SCAR_VOTE'; player: PlayerId; seat: SeatId | null }
 	/** Destroying a Lockdown card costs whoever does it a Player card from their hand. */
 	| { type: 'LOCKDOWN'; card: CardId; seat: SeatId; pay: CardId }
 	/** The group's call that an objective cannot be completed any more, so the rest decide the game. */
@@ -250,6 +253,14 @@ export function reject(world: World, phase: Phase, command: Command): string | n
 				inPhase('playing.actions', 'playing.draw', 'playing.infect') ??
 				checkPlay(world, command.seat, command.card, command.play, phase)
 			);
+		case 'SCAR_VOTE': {
+			const vote = game?.pending[0];
+			if (vote?.t !== 'scarVote') return 'No scar is owed';
+			if (world.table.seats.length > 0 && !tablePlayers(world.table).includes(command.player)) return 'Sit down first';
+			if (command.seat !== null && !scarCandidates(world, vote).includes(command.seat))
+				return 'That character cannot take this scar';
+			return inPhase('playing.actions', 'playing.draw', 'playing.infect');
+		}
 		case 'DECIDE':
 			if (world.table.undoVote) return 'Finish the undo vote first';
 			if (game?.gathering) return 'Flip the card the Hollow Men gather in first';
@@ -332,6 +343,7 @@ const anyStep = (phase: Phase) =>
 	({
 		PLAY: { guard: { type: 'legal', params: phase }, actions: { type: 'play', params: phase } },
 		DECIDE: { guard: { type: 'legal', params: phase }, actions: 'decide' },
+		SCAR_VOTE: { guard: { type: 'legal', params: phase }, actions: 'voteScar' },
 		LOCKDOWN: { guard: { type: 'legal', params: phase }, actions: { type: 'lockdown', params: phase } },
 		WAIVE_OBJECTIVE: { guard: { type: 'legal', params: phase }, actions: { type: 'waive', params: phase } },
 	}) as const;
@@ -569,6 +581,23 @@ export const gameMachine = setup({
 			}),
 			undo: context.undo,
 		})),
+		voteScar: assign(
+			change((world, event) => {
+				const { player, seat } = event as Of<'SCAR_VOTE'>;
+				const game = world.game!;
+				const vote = game.pending[0] as Extract<Decision, { t: 'scarVote' }>;
+				if (seat) vote.votes[player] = seat;
+				else delete vote.votes[player];
+				// With nobody seated (the bot, the tests) a single vote decides.
+				const players = tablePlayers(world.table);
+				const picks = players.length ? players.map(who => vote.votes[who]) : [seat];
+				const chosen = picks[0];
+				if (!chosen || picks.some(pick => pick !== chosen)) return;
+				game.pending.shift();
+				for (const later of game.pending) if (later.t === 'scarVote') later.not.push(chosen);
+				game.pending.unshift({ t: 'scar', seat: chosen, at: null });
+			}),
+		),
 		lockdown: assign(({ context, event }: Args, phase: Phase) => {
 			const { card, seat, pay } = event as Of<'LOCKDOWN'>;
 			return {

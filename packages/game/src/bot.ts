@@ -1,5 +1,5 @@
 import { pack } from './content/pack';
-import { freeCharacters } from './flow';
+import { freeCharacters, scarCandidates } from './flow';
 import type { CharacterId, PlayerId, SeatId } from './ids';
 import { checkRefund } from './legacy';
 import type { Command, Phase } from './machine';
@@ -58,6 +58,12 @@ export function botCommand(world: World, phase: Phase, rng: RngState, seats = 2)
 		case 'playing.actions':
 		case 'playing.draw':
 		case 'playing.infect': {
+			const owed = game!.pending[0];
+			if (owed?.t === 'scarVote') {
+				// Everyone at the table votes for the same character, the first who can take it.
+				const waiting = tablePlayers(world.table).find(player => !owed.votes[player]);
+				return { type: 'SCAR_VOTE', player: waiting ?? ('bot' as PlayerId), seat: scarCandidates(world, owed)[0]! };
+			}
 			const decides = legalDecides(world);
 			if (decides.length) {
 				const preferred = decides.filter(decide => decide.d !== 'skip');

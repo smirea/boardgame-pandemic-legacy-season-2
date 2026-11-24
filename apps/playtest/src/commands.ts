@@ -8,6 +8,7 @@ import {
 	pack,
 	purchaseCost,
 	reject,
+	scarCandidates,
 } from '@repo/game';
 import type {
 	CardId,
@@ -23,7 +24,7 @@ import type {
 	Purchase,
 	SeatId,
 } from '@repo/game';
-import { enc, human, isCity } from './names.ts';
+import { enc, human, isCity, seatName } from './names.ts';
 
 /** One player at the table, as the lab sees them. Seats follow the order of the config. */
 export type Who = { index: number; id: string; name: string; seat: SeatId; lead: boolean };
@@ -178,6 +179,17 @@ export function optionsFor(state: PublicState, who: Who, seating: (CharacterId |
 				play,
 			},
 		);
+	}
+	const owed = game.pending[0];
+	if (owed?.t === 'scarVote') {
+		const player = (world.table.seats.find(entry => entry.name === who.name)?.player ?? who.id) as PlayerId;
+		for (const seat of scarCandidates(world, owed))
+			add(
+				`scar-vote:${seat}`,
+				'decide',
+				`vote for ${seatName(world, seat)} to take the scar the Legacy deck owes; it goes to them once everyone at the table votes for the same character`,
+				{ type: 'SCAR_VOTE', player, seat },
+			);
 	}
 	for (const decide of legalDecides(world)) {
 		const named = 'seat' in decide && decide.seat !== undefined;

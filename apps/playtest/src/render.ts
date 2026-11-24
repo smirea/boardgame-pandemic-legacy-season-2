@@ -72,6 +72,8 @@ function pendingLine(world: World, pending: Decision): string {
 			return 'Epidemic Step 1 (Increase) is done. Advance Step 2 (draw the bottom Infection card) with `do decide:skip`';
 		case 'cordon':
 			return 'Cordon: any player may discard a card to end this Infect step now, or the active player skips';
+		case 'scarVote':
+			return 'The Legacy deck owes a scar: everyone votes for the character who takes it (`scar-vote:<seat>`), then that character chooses the scar';
 		case 'guard':
 			return `${who} is a Soldier leaving Hollow Men: discard a ${cityDef(world.game!.players[pending.seat]!.location).color} City card to slip past them with \`do decide:guard\`, or skip to be exposed. The move goes on either way`;
 		case 'shield':

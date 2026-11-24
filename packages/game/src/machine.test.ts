@@ -1641,7 +1641,7 @@ test('waiving an impossible objective lets the rest decide the game', () => {
 	expect(gameOf(actor).outcome).toMatchObject({ won: true });
 });
 
-test('a scar owed from a forced opening goes to a character the group picks as the game begins', () => {
+test('a scar owed from a forced opening goes to the character everyone at the table votes for, who then chooses it', () => {
 	const actor = createGameActor({ seed: 4, save: campaignAt(12) }).start();
 	const world = JSON.parse(JSON.stringify(worldOf(actor))) as World;
 	world.campaign.owedScars = 1;
@@ -1655,10 +1655,26 @@ test('a scar owed from a forced opening goes to a character the group picks as t
 		],
 	});
 	setUp(owed);
-	expect(gameOf(owed).pending[0]).toEqual({ t: 'scar', seat: null, at: null });
-	send(owed, { type: 'DECIDE', decide: { d: 'scar', scar: 'smallHand', target: 2, seat: B } });
-	expect(character(worldOf(owed), B).slots[2]).toEqual({ kind: 'scar', id: 'smallHand' });
-	expect(worldOf(owed).campaign.owedScars).toBe(0);
+	const ann = 'ann' as PlayerId;
+	const ben = 'ben' as PlayerId;
+	const seated = JSON.parse(JSON.stringify(worldOf(owed))) as World;
+	seated.table.seats = [
+		{ seat: A, player: ann, name: 'Ann' },
+		{ seat: B, player: ben, name: 'Ben' },
+	];
+	const table = createGameActor({ seed: 4, save: { v: 1, phase: phase(owed), world: seated } }).start();
+	expect(gameOf(table).pending[0]).toEqual({ t: 'scarVote', votes: {}, not: [] });
+	expect(reject(worldOf(table), phase(table), { type: 'ACTION', seat: A, action: { a: 'makeSupplies' } })).toBe(
+		'Resolve the pending choice first',
+	);
+	send(table, { type: 'SCAR_VOTE', player: ann, seat: A });
+	send(table, { type: 'SCAR_VOTE', player: ben, seat: B });
+	expect(gameOf(table).pending[0]?.t).toBe('scarVote');
+	send(table, { type: 'SCAR_VOTE', player: ann, seat: B });
+	expect(gameOf(table).pending[0]).toEqual({ t: 'scar', seat: B, at: null });
+	send(table, { type: 'DECIDE', decide: { d: 'scar', scar: 'smallHand', target: 2 } });
+	expect(character(worldOf(table), B).slots[2]).toEqual({ kind: 'scar', id: 'smallHand' });
+	expect(worldOf(table).campaign.owedScars).toBe(0);
 });
 
 describe('seats in the lobby are shared state', () => {
