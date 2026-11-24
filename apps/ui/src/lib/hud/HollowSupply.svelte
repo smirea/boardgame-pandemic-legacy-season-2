@@ -3,6 +3,7 @@
 	import { pack } from '@repo/game';
 	import type { CityId, World } from '@repo/game';
 	import { fade, fly } from 'svelte/transition';
+	import type { CitySpot } from '#lib/board/types.ts';
 	import { cityName } from './labels.svelte.ts';
 	import { HOLLOW_COLOR } from './rich.ts';
 	import type { Rich } from './rich.ts';
@@ -10,9 +11,11 @@
 
 	type Props = {
 		world: World;
+		/** The cities to point at on the board while the tip is open, or null once it closes. */
+		onspot?: (spots: ReadonlyMap<CityId, CitySpot> | null) => void;
 	};
 
-	let { world }: Props = $props();
+	let { world, onspot }: Props = $props();
 
 	let open = $state(false);
 
@@ -24,13 +27,16 @@
 	const low = $derived(left <= 6);
 	const danger = $derived(left <= 3);
 
+	const holding = $derived(
+		game
+			? (Object.entries(game.locations) as unknown as [CityId, { hollow: number }][])
+					.filter(([, loc]) => loc.hollow > 0)
+					.toSorted((a, b) => b[1].hollow - a[1].hollow || cityName(a[0]).localeCompare(cityName(b[0])))
+			: [],
+	);
 	const onBoard = $derived.by((): Rich => {
-		if (!game) return [];
-		const list = (Object.entries(game.locations) as unknown as [CityId, { hollow: number }][])
-			.filter(([, loc]) => loc.hollow > 0)
-			.toSorted((a, b) => b[1].hollow - a[1].hollow || cityName(a[0]).localeCompare(cityName(b[0])));
 		const parts: Rich = [];
-		list.forEach(([city, loc], index) => {
+		holding.forEach(([city, loc], index) => {
 			if (index) parts.push(', ');
 			parts.push({
 				glyph: 'hollow',
@@ -41,6 +47,13 @@
 		return parts;
 	});
 	const placed = $derived(total - left);
+
+	$effect(() => {
+		const point = onspot;
+		if (!open || !point) return;
+		point(new Map(holding.map(([city]) => [city, { tone: 'hollow', label: null }])));
+		return () => point(null);
+	});
 </script>
 
 <div class="hollow-wrap" {@attach feedback('Hollow Men supply', () => ({ left, placed, lethal }))}>

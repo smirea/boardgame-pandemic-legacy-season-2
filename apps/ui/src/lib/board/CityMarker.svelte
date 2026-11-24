@@ -326,8 +326,25 @@
 					<Beacon round gap="0px" width="{0.8 * HTML_PX}px" glow="{1.6 * HTML_PX}px" />
 				</span>
 			{/if}
+			{#if state.spot}
+				<span class="aim spot {state.spot.tone}" style:--ring="{AIM_RADIUS * 2 * HTML_PX}px">
+					<Beacon round gap="0px" width="{0.8 * HTML_PX}px" glow="{1.6 * HTML_PX}px" tone={state.spot.tone} />
+				</span>
+			{/if}
 		</span>
 	</HTML>
+
+	<!-- Stands upright on the screen above the city and its name, so no piece or print on the board covers it. -->
+	{#if state.spot?.label}
+		<HTML
+			position={[0, DISC + 1.6, placement.z < 0 ? placement.z - NAME_SIZE : 0]}
+			center
+			pointerEvents="none"
+			zIndexRange={[20, 11]}
+		>
+			<b class="spot-label" aria-hidden="true">{state.spot.label}</b>
+		</HTML>
+	{/if}
 
 	{#each supplies as cube, index (index)}
 		<Pop position={[cube.x, cube.y, cube.z]} delay={Math.min(index, 8) * 35}>
@@ -486,6 +503,37 @@
 
 	.lit {
 		background: radial-gradient(circle, transparent 52%, rgb(255 201 58 / 0.42) 100%);
+	}
+
+	.spot.danger {
+		background: radial-gradient(circle, transparent 52%, rgb(214 52 32 / 0.4) 100%);
+	}
+
+	.spot.hollow {
+		background: radial-gradient(circle, transparent 52%, rgb(150 100 220 / 0.4) 100%);
+	}
+
+	.spot-label {
+		display: block;
+		translate: 0 -50%;
+		color: #e8402a;
+		font-family: var(--font-display);
+		font-size: 2.6rem;
+		font-weight: 400;
+		line-height: 1;
+		white-space: nowrap;
+		-webkit-text-stroke: 0.14em #1c1004;
+		paint-order: stroke fill;
+		text-shadow: 0 0 0.6rem rgb(230 60 36 / 0.55);
+		animation: rise 260ms cubic-bezier(0.2, 1.4, 0.4, 1) both;
+	}
+
+	@keyframes rise {
+		from {
+			opacity: 0;
+			translate: 0 -20%;
+			scale: 0.7;
+		}
 	}
 
 	/* Where a card under the pointer could go: the same gold, still, so it never reads as a call to click. */

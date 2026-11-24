@@ -222,6 +222,7 @@ const scenarios: Scenario[] = [
 				'storage-deck',
 				'frequency-scanner',
 				'hollow-supply',
+				'at-risk',
 				'campaign-status',
 				'objectives',
 			]) {

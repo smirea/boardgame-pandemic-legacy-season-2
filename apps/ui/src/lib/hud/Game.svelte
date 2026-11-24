@@ -17,7 +17,7 @@
 	} from '@repo/game';
 	import type { BriefingEntry, CardId, CityId, Command, Decide, EdgeDef, SeatId } from '@repo/game';
 	import Board from '#lib/board/Board.svelte';
-	import type { BoardMarks, Fx, FxKind } from '#lib/board/types.ts';
+	import type { BoardMarks, CitySpot, Fx, FxKind } from '#lib/board/types.ts';
 	import type { SessionView } from '#lib/session/session.svelte.ts';
 	import { inkOn } from '#lib/color.ts';
 	import { presentFeedback } from '#lib/feedback.ts';
@@ -852,6 +852,8 @@
 		);
 	});
 	const NONE_PICKED: ReadonlyMap<CityId, number> = new Map();
+	const NO_SPOTS: ReadonlyMap<CityId, CitySpot> = new Map();
+	let spots = $state.raw(NO_SPOTS);
 	const NO_RECONS: ReadonlySet<string> = new Set();
 	const boardView = createBoardView({
 		get world() {
@@ -886,6 +888,9 @@
 		},
 		get hints() {
 			return hintCities;
+		},
+		get spots() {
+			return spots;
 		},
 		get picked() {
 			return choosing.targeting?.multi?.picked ?? NONE_PICKED;
@@ -1220,6 +1225,7 @@
 		onbox={() => (boxOpen = !boxOpen)}
 		ondeck={() => (deckOpen = !deckOpen)}
 		onscanner={openScanner}
+		onspot={next => (spots = next ?? NO_SPOTS)}
 	/>
 
 	<main class="stage" bind:this={stage} data-dest="map">

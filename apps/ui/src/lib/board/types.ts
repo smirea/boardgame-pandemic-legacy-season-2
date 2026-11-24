@@ -7,6 +7,9 @@ export type { CursorTool };
 /** `target` is lit for a click; `hint` shows where a card the pointer rests on could go. */
 export type CityHighlight = 'target' | 'hint' | 'selected' | null;
 
+/** A city a counter in the top bar points at while the pointer or focus rests on it, with what to print over it. */
+export type CitySpot = { tone: 'danger' | 'hollow'; label: string | null };
+
 /**
  * A panel lying over the board, in pixels from the stage's top left. The fitted view may slide the board a little
  * under the side panels on a narrow stage, but never under a firm one.
@@ -45,6 +48,7 @@ export type CityView = {
 	lab: boolean;
 	labInfo: LabInfo | null;
 	highlight: CityHighlight;
+	spot: CitySpot | null;
 	/** How many times a card that takes several places has picked this one so far. */
 	picks: number;
 	/** The city's Infection cards and its chance of being hit in the next Infect step, while a game is played. */

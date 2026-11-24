@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import { cityDef } from '@repo/game';
-	import type { Insights } from '@repo/game';
+	import type { CityId, Insights } from '@repo/game';
+	import type { CitySpot } from '#lib/board/types.ts';
 	import { fade, fly } from 'svelte/transition';
 	import { CITY_COLOR } from '#lib/board/CityMarker.svelte';
 	import Glyph from '#lib/board/Glyph.svelte';
@@ -9,15 +10,24 @@
 
 	type Props = {
 		infection: Insights['infection'];
+		/** The cities to point at on the board while the list is open, or null once it closes. */
+		onspot?: (spots: ReadonlyMap<CityId, CitySpot> | null) => void;
 	};
 
-	let { infection }: Props = $props();
+	let { infection, onspot }: Props = $props();
 
 	let open = $state(false);
 
 	const cities = $derived(infection.atRisk);
 	const incidents = $derived(cities.filter(entry => entry.outbreak).length);
 	const percent = (value: number) => (value < 0.01 ? '<1%' : `${Math.round(value * 100)}%`);
+
+	$effect(() => {
+		const point = onspot;
+		if (!open || !point) return;
+		point(new Map(cities.map(entry => [entry.city, { tone: 'danger', label: percent(entry.odds) }])));
+		return () => point(null);
+	});
 </script>
 
 <div class="risk-wrap" {@attach feedback('Problematic cities', () => ({ cities }))}>

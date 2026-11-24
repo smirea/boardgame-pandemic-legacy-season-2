@@ -16,14 +16,18 @@
 		gap?: string;
 		width?: string;
 		glow?: string;
+		/** Gold calls for a click. The others only point: red at danger, violet at the Hollow Men. */
+		tone?: 'gold' | 'danger' | 'hollow';
 	};
 
-	let { round = false, turns, gap = '0.2rem', width = '0.17rem', glow = '0.8rem' }: Props = $props();
+	let { round = false, turns, gap = '0.2rem', width = '0.17rem', glow = '0.8rem', tone = 'gold' }: Props = $props();
 </script>
 
 <span
 	class="beacon"
 	class:round
+	class:danger={tone === 'danger'}
+	class:hollow={tone === 'hollow'}
 	style:--gap={gap}
 	style:--width={width}
 	style:--glow={glow}
@@ -40,6 +44,8 @@
 		--gold: #ffc93a;
 		--hot: #fffbe6;
 		--edge: rgb(28 16 4 / 0.62);
+		--fill: rgb(255 201 58 / 0.62);
+		--halo: 255 186 48;
 		position: absolute;
 		inset: calc(-1 * var(--gap));
 		z-index: 3;
@@ -48,12 +54,26 @@
 		box-shadow:
 			0 0 0 1px var(--edge),
 			inset 0 0 0 calc(var(--width) + 1px) var(--edge),
-			0 0 var(--glow) calc(var(--glow) * 0.2) rgb(255 186 48 / 0.55);
+			0 0 var(--glow) calc(var(--glow) * 0.2) rgb(var(--halo) / 0.55);
 		animation: breathe 0.9s ease-in-out var(--breaths) alternate;
 	}
 
 	.round {
 		border-radius: 50%;
+	}
+
+	.danger {
+		--gold: #e8402a;
+		--hot: #ffd9cf;
+		--fill: rgb(214 52 32 / 0.62);
+		--halo: 230 60 36;
+	}
+
+	.hollow {
+		--gold: #a97ee0;
+		--hot: #f1e6ff;
+		--fill: rgb(150 108 205 / 0.62);
+		--halo: 150 100 220;
 	}
 
 	.sweep {
@@ -71,7 +91,7 @@
 				var(--gold) 0.94turn,
 				var(--hot) 1turn
 			),
-			linear-gradient(rgb(255 201 58 / 0.62), rgb(255 201 58 / 0.62));
+			linear-gradient(var(--fill), var(--fill));
 		mask:
 			linear-gradient(#000 0 0) content-box,
 			linear-gradient(#000 0 0);
@@ -100,7 +120,7 @@
 			box-shadow:
 				0 0 0 1px var(--edge),
 				inset 0 0 0 calc(var(--width) + 1px) var(--edge),
-				0 0 calc(var(--glow) * 1.6) calc(var(--glow) * 0.35) rgb(255 186 48 / 0.8);
+				0 0 calc(var(--glow) * 1.6) calc(var(--glow) * 0.35) rgb(var(--halo) / 0.8);
 		}
 	}
 </style>

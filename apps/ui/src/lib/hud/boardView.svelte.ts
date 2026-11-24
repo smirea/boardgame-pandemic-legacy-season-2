@@ -1,7 +1,7 @@
 import { breakthrough, inoculation, isForsaken, LABS, mapNotes, pack } from '@repo/game';
 import type { CityId, EdgeDef, Insights, ReconBox, SeatId, World } from '@repo/game';
 import { travelOf } from '#lib/board/travel.ts';
-import type { BoardMarks, BoardView, CityView, Fx, LabInfo } from '#lib/board/types.ts';
+import type { BoardMarks, BoardView, CitySpot, CityView, Fx, LabInfo } from '#lib/board/types.ts';
 import { reconciler } from '#lib/reconcile.ts';
 import type { SessionView } from '#lib/session/session.svelte.ts';
 import type { Lag } from './infectionShow.svelte.ts';
@@ -42,6 +42,8 @@ export type BoardSource = {
 	readonly targets: ReadonlySet<CityId>;
 	/** The cities a card under the pointer could go to. */
 	readonly hints: ReadonlySet<CityId>;
+	/** The cities a counter in the top bar points at while the pointer rests on it. */
+	readonly spots: ReadonlyMap<CityId, CitySpot>;
 	/** Cities a card that takes several places has picked so far, with how many times. */
 	readonly picked: ReadonlyMap<CityId, number>;
 	/** Recon boxes lit for a click, when Recon was started from somewhere that does not name the route. */
@@ -85,7 +87,7 @@ export function createBoardView(source: BoardSource): BoardView {
 	const sameCities = reconciler<Record<CityId, CityView>>();
 	const cities = $derived.by(() => {
 		const info = source.playing ? source.info : null;
-		const { lag, mapLag, populationLag, onGrid, selected, targets, hints, picked } = source;
+		const { lag, mapLag, populationLag, onGrid, selected, targets, hints, spots, picked } = source;
 		const stocks = inoculation(source.world);
 		const storageLeaks = campaign.rules.includes('epidemicFromStorage');
 		return sameCities(
@@ -147,6 +149,7 @@ export function createBoardView(source: BoardSource): BoardView {
 										: hints.has(city.id)
 											? 'hint'
 											: null,
+							spot: spots.get(city.id) ?? null,
 							picks: picked.get(city.id) ?? 0,
 							infection:
 								info && city.kind !== 'haven'

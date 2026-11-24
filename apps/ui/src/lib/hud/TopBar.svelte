@@ -3,7 +3,8 @@
 	import { hollowInPlay, pack } from '@repo/game';
 	import { fade } from 'svelte/transition';
 	import LegacyCard from '#lib/cards/LegacyCard.svelte';
-	import type { Insights, PublicState } from '@repo/game';
+	import type { CityId, Insights, PublicState } from '@repo/game';
+	import type { CitySpot } from '#lib/board/types.ts';
 	import AtRisk from './AtRisk.svelte';
 	import AudioMenu from '#lib/audio/AudioMenu.svelte';
 	import Calendar from './Calendar.svelte';
@@ -37,6 +38,8 @@
 		onbox: () => void;
 		ondeck: () => void;
 		onscanner?: () => void;
+		/** Cities on the board a counter points at while the pointer rests on it. */
+		onspot?: (spots: ReadonlyMap<CityId, CitySpot> | null) => void;
 	};
 
 	let {
@@ -59,6 +62,7 @@
 		onbox,
 		ondeck,
 		onscanner,
+		onspot,
 	}: Props = $props();
 
 	const campaign = $derived(snap.world.campaign);
@@ -89,10 +93,10 @@
 			<FrequencyScanner {campaign} {canMonitor} {monitorReason} onopen={onscanner} />
 		{/if}
 		{#if hasHollow}
-			<HollowSupply world={snap.world} />
+			<HollowSupply world={snap.world} {onspot} />
 		{/if}
 		{#if game && info && dealt}
-			<AtRisk infection={info.infection} />
+			<AtRisk infection={info.infection} {onspot} />
 		{/if}
 		<div class="stats">
 			<div class="deck-strip">
