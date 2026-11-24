@@ -13,7 +13,8 @@ type Change = Upkeep["populationChanges"][number];
  * Game End's population step, played one city at a time when the game closes: the camera finds each city whose
  * population moved, its disc turns to the new number and a flag says by how much and why. The state already holds
  * every new population; the board shows each late through `lag` until its turn comes. Only a browser that sees the
- * game close plays it, so a reload or a replay seeking into the spending step shows the numbers as they are.
+ * game close plays it, so a reload or a replay seeking into the spending step shows the numbers as they are. The
+ * spending sheet waits for it (`pending`) from the moment the game closes until the last flag has been read.
  */
 export class PopulationShow {
   focus = $state.raw<CityId | null>(null);
@@ -21,11 +22,22 @@ export class PopulationShow {
   shown = $state(0);
   playing = $state(false);
   flags = $state.raw<BoardMarks["flags"]>([]);
+  /** Waiting for whatever covers the board to close before it plays. */
+  private armed = $state(false);
 
   private changes = $state.raw<Change[]>([]);
   private phase: Phase | null = null;
   private run = 0;
-  private armed = false;
+
+  /** Every change still to be shown: the show is armed or playing. */
+  get pending() {
+    return this.armed || this.playing;
+  }
+
+  /** How many of all the changes there are, for a caption over the board. */
+  get total() {
+    return this.changes.length;
+  }
 
   constructor(private pulse: (city: CityId, kind: FxKind) => void) {}
 
@@ -91,9 +103,11 @@ export class PopulationShow {
       this.pulse(change.city, change.delta > 0 ? "build" : "infect");
       if (!(await wait(1150))) return;
     }
+    // The last city's flag is read before anything covers the board again.
+    if (!(await wait(1400))) return;
     this.focus = null;
     this.playing = false;
-    if (!(await wait(2600))) return;
+    if (!(await wait(1200))) return;
     this.flags = [];
   }
 }

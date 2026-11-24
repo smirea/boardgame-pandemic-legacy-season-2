@@ -416,11 +416,10 @@
   const briefingKey = $derived(JSON.stringify(campaign.briefing));
   const briefingOpen = $derived(campaign.briefing.length > 0 && briefingRead !== briefingKey);
   const population = new PopulationShow(said.pulse);
-  // The spending sheet steps aside to a side column while the population show plays, or while a player looks at the board.
+  // The spending sheet waits until the population show has played out on the board, then steps aside to a side
+  // column only while a player looks at the board.
   let upkeepAsideChosen = $state(false);
-  const upkeepAside = $derived(
-    snap.phase === "upkeep" && (population.playing || upkeepAsideChosen),
-  );
+  const upkeepAside = $derived(snap.phase === "upkeep" && upkeepAsideChosen);
   let upkeepScrim = $state<HTMLElement | null>(null);
   const upkeepDock = $derived(upkeepAside ? upkeepScrim : null);
   $effect(() => {
@@ -463,7 +462,7 @@
       choosingCharacters ||
       snap.phase === "lobby" ||
       snap.phase === "finished" ||
-      (snap.phase === "upkeep" && !upkeepAside) ||
+      (snap.phase === "upkeep" && !upkeepAside && !population.pending) ||
       scarOwed !== null ||
       scarVoting !== null ||
       replacing !== null ||
@@ -615,12 +614,13 @@
     const next = world;
     const lived = !spectator || announce;
     const phase = snap.phase;
-    // The reading's recap covers the board too, so the population show waits until this player closes it.
-    const held = briefingOpen || recap !== null;
+    // The reading's recap covers the board too, so the population show waits until this player closes it, and for an
+    // exposure the game's last move scratched open. The exposure is read as it now stands, after the state reached it.
+    const held = briefingOpen || recap !== null || fate.playing;
     untrack(() => {
       show.observe(next, lived, phase);
-      population.observe(next, lived, phase, held);
       fate.observe(next, lived);
+      population.observe(next, lived, phase, held || fate.playing);
     });
   });
   $effect(() => {
@@ -1343,6 +1343,12 @@
           }}
         />
       </Scrim>
+    {:else if snap.phase === "upkeep" && population.pending}
+      <div class="population-caption" role="status" data-testid="population-show">
+        <span>Game end · Population</span>
+        <b>{population.shown} of {population.total}</b>
+        <button onclick={() => population.stop()} data-testid="population-skip">Skip</button>
+      </div>
     {:else if snap.phase === "upkeep"}
       <Scrim
         label="Between games"
@@ -1357,9 +1363,7 @@
           player={session.player}
           {spectator}
           aside={upkeepAside}
-          showing={population.playing ? population.shown : null}
           onaside={(aside) => (upkeepAsideChosen = aside)}
-          onskip={() => population.stop()}
         />
       </Scrim>
     {/if}
@@ -1727,6 +1731,49 @@
     50% {
       box-shadow: 0 0 1.4rem color-mix(in srgb, var(--seat) 70%, transparent);
     }
+  }
+
+  /* While the population show plays on the board, the spending sheet waits: only this line stands over the table. */
+  .population-caption {
+    position: absolute;
+    bottom: 1.2rem;
+    left: 50%;
+    z-index: 46;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.4rem 0.5rem 0.4rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    background: var(--panel-solid);
+    color: var(--ink);
+    font-size: 0.9rem;
+    translate: -50% 0;
+  }
+
+  .population-caption span {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+  }
+
+  .population-caption b {
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .population-caption button {
+    padding: 0.2rem 0.7rem;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    background: none;
+    color: var(--ink);
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .population-caption button:hover,
+  .population-caption button:focus-visible {
+    border-color: var(--ink);
   }
 
   .rewatch {

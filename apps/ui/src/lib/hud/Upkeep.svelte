@@ -22,13 +22,10 @@
     spectator: boolean;
     /** Stepped aside to a side column, so the board can be read. */
     aside: boolean;
-    /** How many population changes the show has played, while it plays. */
-    showing: number | null;
     onaside: (aside: boolean) => void;
-    onskip: () => void;
   };
 
-  let { snap, send, player, spectator, aside, showing, onaside, onskip }: Props = $props();
+  let { snap, send, player, spectator, aside, onaside }: Props = $props();
 
   const world = $derived(snap.world);
   const campaign = $derived(world.campaign);
@@ -129,7 +126,6 @@
       class="aside-toggle"
       onclick={() => onaside(!aside)}
       data-testid="upkeep-aside"
-      disabled={showing !== null}
     >
       {#if aside}
         Back to spending
@@ -150,27 +146,10 @@
     aria-label="Population"
     {@attach feedback("Population changes", () => upkeep.populationChanges)}
   >
-    <h2>
-      Population
-      {#if showing !== null}<button class="link" onclick={onskip}>Skip</button>{/if}
-    </h2>
-    <ol
-      class="changes"
-      {@attach (node) => {
-        if (showing === null) node.scrollTop = 0;
-      }}
-    >
-      {#each upkeep.populationChanges as change, index (change.city)}
-        {@const hidden = showing !== null && index >= showing}
-        {@const now = showing !== null && index === showing - 1}
-        <li
-          class:up={change.delta > 0}
-          class:hidden
-          class:now
-          {@attach (node) => {
-            if (now) node.scrollIntoView({ block: "nearest", behavior: "smooth" });
-          }}
-        >
+    <h2>Population</h2>
+    <ol class="changes">
+      {#each upkeep.populationChanges as change (change.city)}
+        <li class:up={change.delta > 0}>
           <b>{cityName(change.city)}</b>
           <span class="delta">{change.delta > 0 ? "+" : "−"}{Math.abs(change.delta)}</span>
           <small>{REASON[change.reason]}</small>
@@ -501,18 +480,6 @@
     font-weight: 400;
   }
 
-  .link {
-    padding: 0;
-    border: 0;
-    background: none;
-    color: var(--muted);
-    font: inherit;
-    font-family: var(--font-ui);
-    font-size: 0.8rem;
-    text-decoration: underline;
-    cursor: pointer;
-  }
-
   .changes {
     display: flex;
     flex-wrap: wrap;
@@ -573,14 +540,6 @@
 
   .changes small {
     color: var(--muted);
-  }
-
-  .changes li.hidden {
-    opacity: 0.25;
-  }
-
-  .changes li.now {
-    background: rgb(231 220 198 / 0.16);
   }
 
   .changes li.none {
