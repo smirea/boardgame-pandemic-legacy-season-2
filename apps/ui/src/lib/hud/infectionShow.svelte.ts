@@ -34,9 +34,9 @@ const BRINK = 2;
 /** A moment of the show that is heard: the card turning over, what it does to its city, and an incident's three beats. */
 export type ShowCue =
 	| { t: 'flip' }
-	| { t: 'strike'; effect: 'hollow' | 'outbreak' | 'blocked' | 'gather' }
+	| { t: 'strike'; effect: 'hollow' | 'outbreak' | 'blocked' | 'gather'; city: CityId | null }
 	| { t: 'skull' }
-	| { t: 'plague' }
+	| { t: 'plague'; city: CityId }
 	/** A marker lands on the incident track. `waiting` is how many more the state holds that have not landed. */
 	| { t: 'marker'; waiting: number };
 
@@ -330,7 +330,7 @@ export class InfectionShow {
 			this.cue({ t: 'flip' });
 			if (!(await wait(before))) return;
 			this.reveal(beat.strike);
-			if (beat.effect) this.cue({ t: 'strike', effect: beat.effect });
+			if (beat.effect) this.cue({ t: 'strike', effect: beat.effect, city: beat.city });
 			if (beat.pulse && beat.city) this.pulse(beat.city, beat.pulse);
 			for (const incident of beat.incidents) {
 				if (incident.city !== this.focus) {
@@ -343,7 +343,7 @@ export class InfectionShow {
 				if (!(await wait(brink ? 2400 : 1575))) return;
 				this.skull = null;
 				this.reveal(incident.hidden);
-				this.cue({ t: 'plague' });
+				this.cue({ t: 'plague', city: incident.city });
 				this.pulse(incident.city, 'plague');
 				if (!(await wait(450))) return;
 				this.surge = true;

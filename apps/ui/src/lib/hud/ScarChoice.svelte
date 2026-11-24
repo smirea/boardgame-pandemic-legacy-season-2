@@ -7,6 +7,7 @@
 	import { fly } from 'svelte/transition';
 	import { seatName, SEAT_COLORS } from './labels.svelte.ts';
 	import { figureKey, figureUrl } from '#lib/characters/figures.ts';
+	import { characterVoice } from '#lib/characters/voice.svelte.ts';
 	import Exposure, { shownTrack } from './characters/Exposure.svelte';
 	import HavenChip from './characters/HavenChip.svelte';
 	import Sheet from './characters/Sheet.svelte';
@@ -157,7 +158,10 @@
 					class:on={other === who}
 					style:--seat={SEAT_COLORS[game.seats.indexOf(other)]}
 					disabled={!canChoose}
-					onclick={() => (picked = { seat: other, scar: null, target: null })}
+					onclick={() => {
+						if (other !== who) characterVoice.playFor(them, 'punchline', { priority: 'ui' });
+						picked = { seat: other, scar: null, target: null };
+					}}
 				>
 					<span class="face"
 						><Portrait portrait={them.portrait} color={SEAT_COLORS[game.seats.indexOf(other)]!} job={them.job} /></span
@@ -170,7 +174,12 @@
 
 	<div class="table">
 		<div class="card" aria-label={`${character.name}'s character card`}>
-			<Sheet figure={figureUrl(figureKey(character))} tone="mine" {color} fitted={character.name}>
+			<Sheet
+				figure={figureUrl(figureKey({ ...character, hooded: character.worker }))}
+				tone="mine"
+				{color}
+				fitted={character.name}
+			>
 				{#snippet name()}{character.name}{/snippet}
 				{#snippet meta()}
 					<Exposure boxes={shownTrack(character.exposureTrack, character.exposure)} />

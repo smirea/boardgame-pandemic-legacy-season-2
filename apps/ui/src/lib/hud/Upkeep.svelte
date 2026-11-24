@@ -3,6 +3,7 @@
 	import { cityDef, reject, tablePlayers } from '@repo/game';
 	import type { CharacterId, Command, PlayerId, PublicState } from '@repo/game';
 	import { CITY_COLOR } from '#lib/board/CityMarker.svelte';
+	import { characterVoice } from '#lib/characters/voice.svelte.ts';
 	import { flip } from 'svelte/animate';
 	import { fly } from 'svelte/transition';
 	import { cityName, SEAT_COLORS } from './labels.svelte.ts';
@@ -64,6 +65,10 @@
 	}
 
 	function buy(target: ShopTarget) {
+		if (target.character) {
+			const character = campaign.characters[target.character];
+			if (character) characterVoice.playFor(character, 'upgrade', { priority: 'ui' });
+		}
 		send({ type: 'PURCHASE', purchase: target.purchase });
 	}
 

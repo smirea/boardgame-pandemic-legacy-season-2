@@ -154,10 +154,12 @@ export class GameAudio {
 	}
 
 	/** A beat of what happens to a character, as the table is shown it. */
-	fateCue(cue: FateCue) {
+	fateCue(cue: FateCue, voiced = false) {
 		if (cue.t === 'scratch') sfxScratchBox();
 		else if (cue.t === 'memorial') ambientMusic.accent('setback');
-		else sfxExposure(cue.result === 'empty' ? 'safe' : cue.result === 'scar' ? 'scar' : 'death', cue.voice);
+		else if (cue.result === 'empty') sfxExposure('safe', cue.voice);
+		else if (voiced) sfxMoment(cue.result === 'scar' ? 'scar' : 'death');
+		else sfxExposure(cue.result === 'scar' ? 'scar' : 'death', cue.voice);
 	}
 
 	private playLogEntry(world: World, entry: LogEntry, log: LogEntry[]) {

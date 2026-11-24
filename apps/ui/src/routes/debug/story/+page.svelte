@@ -32,6 +32,16 @@
 	import { CUES, type Cue } from '#lib/audio/themes.ts';
 	import { TONES, type ToneId } from '#lib/audio/tones.ts';
 	import { CREATURES, type CreatureId } from '#lib/audio/wildlife.ts';
+	import { figureUrl } from '#lib/characters/figures.ts';
+	import {
+		CHARACTER_LINE_KINDS,
+		CHARACTER_LINE_LABELS,
+		CHARACTER_PERSONA_LIST,
+		CHARACTER_PERSONAS,
+	} from '#lib/characters/personas.ts';
+	import type { CharacterLineKind, FigureKey } from '#lib/characters/personas.ts';
+	import { characterVoice } from '#lib/characters/voice.svelte.ts';
+	import { characterVoiceManifest } from '#lib/characters/voices.generated.ts';
 	import { CAST_LIST } from '#lib/story/cast.ts';
 	import { STORY_SCENES } from '#lib/story/script.ts';
 	import type { SetPieceId, StoryScene } from '#lib/story/script.ts';
@@ -41,6 +51,13 @@
 
 	const allScenes = Object.values(STORY_SCENES);
 	const voiceCount = Object.keys(voiceManifest).length;
+	const characterClipCount = Object.keys(characterVoiceManifest).length;
+	let lastSpoken = $state<{ figure: FigureKey; kind: CharacterLineKind } | null>(null);
+
+	function auditionCharacter(figure: FigureKey, kind: CharacterLineKind) {
+		lastSpoken = { figure, kind };
+		characterVoice.play(figure, kind, { priority: 'ui', force: true });
+	}
 
 	let activeScene = $state<StoryScene | null>(null);
 	let activePiece = $state<SetPieceId | null>(null);
@@ -84,7 +101,10 @@
 		for (let n = 0; n < count; n++) setTimeout(() => sfxPiece(id, n), n * 110);
 	}
 
-	onDestroy(() => ambientMusic.stop());
+	onDestroy(() => {
+		ambientMusic.stop();
+		characterVoice.stop();
+	});
 
 	const SET_PIECES: { id: SetPieceId; label: string }[] = [
 		{ id: 'wearingOff', label: "Sep 09-03 · 2-It's wearing off" },
@@ -136,7 +156,8 @@
 			<span class="kicker">STORY & AUDIO WORKBENCH</span>
 			<h1>Narrative Theater, Cast & Sound</h1>
 			<p class="sub">
-				{allScenes.length} campaign scenes · {CAST_LIST.length} cast voices · {voiceCount} synthesized Gemini voice tracks
+				{allScenes.length} campaign scenes · {CAST_LIST.length} cast voices ({voiceCount} tracks) · {CHARACTER_PERSONA_LIST.length}
+				player figures ({characterClipCount} clips)
 			</p>
 		</div>
 		<div class="top-right">
@@ -159,6 +180,61 @@
 					<strong>{member.name}</strong>
 					<span>{member.title}</span>
 				</div>
+			{/each}
+		</div>
+	</section>
+
+	<section
+		class="section"
+		{@attach feedback('Player character voices', () => ({
+			figures: CHARACTER_PERSONA_LIST.length,
+			clips: characterClipCount,
+			playing: characterVoice.playing,
+		}))}
+	>
+		<div class="section-head">
+			<h2>Player Character Voices ({CHARACTER_PERSONA_LIST.length} Figures × {CHARACTER_LINE_KINDS.length} Lines)</h2>
+			{#if lastSpoken}
+				{@const spokenPersona = CHARACTER_PERSONAS[lastSpoken.figure]}
+				<p class="spoken-line" role="status" data-testid="character-voice-line">
+					<b>{spokenPersona.archetype}</b> ({CHARACTER_LINE_LABELS[lastSpoken.kind]}): “{spokenPersona.lines[
+						lastSpoken.kind
+					].text}”
+				</p>
+			{/if}
+		</div>
+		<div class="char-grid">
+			{#each CHARACTER_PERSONA_LIST as persona (persona.id)}
+				<article
+					class="char-card"
+					class:speaking={characterVoice.playing?.figure === persona.id}
+					data-testid={`char-voice-${persona.id}`}
+					{@attach feedback('Character voice card', () => ({ id: persona.id, archetype: persona.archetype }))}
+				>
+					<div class="char-head">
+						<img src={figureUrl(persona.id)} alt={persona.archetype} />
+						<div class="char-meta">
+							<strong>{persona.archetype}</strong>
+							<span class="char-id">{persona.id} · {persona.voiceBrief.accent}</span>
+							<span class="char-desc">{persona.voiceBrief.label}</span>
+						</div>
+					</div>
+					<div class="char-lines" role="group" aria-label={`${persona.archetype} voice lines`}>
+						{#each CHARACTER_LINE_KINDS as kind (kind)}
+							{@const active = characterVoice.playing?.figure === persona.id && characterVoice.playing?.kind === kind}
+							<button
+								type="button"
+								class:active
+								class:death={kind === 'death'}
+								aria-pressed={active}
+								onclick={() => auditionCharacter(persona.id, kind)}
+								data-testid={`audition-${persona.id}-${kind}`}
+							>
+								{CHARACTER_LINE_LABELS[kind]}
+							</button>
+						{/each}
+					</div>
+				</article>
 			{/each}
 		</div>
 	</section>
@@ -333,6 +409,7 @@
 
 	.top {
 		display: flex;
+		flex-wrap: wrap;
 		align-items: flex-start;
 		justify-content: space-between;
 		gap: 1rem;
@@ -428,6 +505,116 @@
 		color: var(--muted);
 	}
 
+	.section-head {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 0.5rem 1rem;
+		margin-bottom: 0.75rem;
+	}
+
+	.section-head h2 {
+		margin: 0;
+	}
+
+	.spoken-line {
+		margin: 0;
+		padding: 0.25rem 0.65rem;
+		border: 1px solid rgb(226 195 106 / 0.35);
+		border-radius: 999px;
+		background: rgb(226 195 106 / 0.1);
+		color: var(--paper);
+		font-size: 0.82rem;
+	}
+
+	.spoken-line b {
+		color: #e2c36a;
+	}
+
+	.char-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+		gap: 0.7rem;
+	}
+
+	.char-card {
+		display: flex;
+		flex-direction: column;
+		gap: 0.6rem;
+		padding: 0.7rem 0.8rem;
+		border: 1px solid var(--line);
+		border-radius: 5px;
+		background: var(--wash);
+		transition: border-color 160ms ease;
+	}
+
+	.char-card.speaking {
+		border-color: #e2c36a;
+	}
+
+	.char-head {
+		display: flex;
+		align-items: center;
+		gap: 0.7rem;
+	}
+
+	.char-head img {
+		width: 3.4rem;
+		height: 4.5rem;
+		flex: none;
+		object-fit: contain;
+		object-position: bottom center;
+	}
+
+	.char-meta {
+		display: flex;
+		flex-direction: column;
+		gap: 0.12rem;
+		min-width: 0;
+	}
+
+	.char-meta strong {
+		font-family: var(--font-display);
+		font-size: 1.05rem;
+		font-weight: 400;
+		color: var(--paper);
+	}
+
+	.char-id {
+		font-size: 0.68rem;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		color: #d6b66f;
+	}
+
+	.char-desc {
+		font-size: 0.74rem;
+		color: var(--muted);
+	}
+
+	.char-lines {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.3rem;
+	}
+
+	.char-lines button {
+		padding: 0.22rem 0.5rem;
+		font-size: 0.72rem;
+	}
+
+	.char-lines button.death {
+		border-color: rgb(212 82 67 / 0.45);
+		color: #f3a69b;
+	}
+
+	.char-lines button.death.active {
+		border-color: #d45243;
+		background: #d45243;
+		color: #fff6f2;
+	}
+
 	.audio-grid {
 		display: grid;
 		grid-template-columns: minmax(18rem, 1fr) minmax(20rem, 1.4fr);
@@ -501,7 +688,7 @@
 
 	.sliders label {
 		display: grid;
-		grid-template-columns: 11.5rem 1fr;
+		grid-template-columns: minmax(0, 11.5rem) minmax(0, 1fr);
 		align-items: center;
 		gap: 0.5rem;
 	}

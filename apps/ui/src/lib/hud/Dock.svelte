@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
+	import { characterVoice } from '#lib/characters/voice.svelte.ts';
 	import { handLimit, pack, reject, tablePlayers } from '@repo/game';
 	import type {
 		Action,
@@ -431,7 +432,10 @@
 													{#if purchase}
 														<button
 															class="give"
-															onclick={() => send({ type: 'PURCHASE', purchase })}
+															onclick={() => {
+																characterVoice.playFor(character, 'upgrade', { priority: 'ui' });
+																send({ type: 'PURCHASE', purchase });
+															}}
 															aria-label={`Give ${def.name} to ${character.name}`}>+</button
 														>
 													{/if}

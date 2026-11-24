@@ -31,6 +31,9 @@
 	import { fade, fly, scale } from 'svelte/transition';
 	import { GameAudio } from '#lib/audio/gameAudio.svelte.ts';
 	import { hushSfx, sfxMoment } from '#lib/audio/sfx.ts';
+	import { CharacterChatter } from '#lib/characters/chatter.svelte.ts';
+	import type { FigureKey } from '#lib/characters/personas.ts';
+	import { characterVoice } from '#lib/characters/voice.svelte.ts';
 	import { reconciler } from '#lib/reconcile.ts';
 	import { barkFor } from '#lib/story/barks.ts';
 	import { Radio } from '#lib/story/radio.svelte.ts';
@@ -131,6 +134,9 @@
 	);
 	const openSeats = $derived(picking ? game!.seats.filter(isOpen) : []);
 	function takeSeat(seat: SeatId) {
+		const id = game?.players[seat]?.character;
+		const character = id ? campaign.characters[id] : undefined;
+		if (character) characterVoice.playFor(character, 'punchline', { priority: 'ui' });
 		send({ type: 'TAKE_SEAT', player: session.player, name: LS.get('name', '').trim() || 'Player', seat });
 	}
 	let viewing = $state<SeatId | null>(null);
@@ -162,7 +168,11 @@
 	let storyInitial = $state<StoryScene | null>(null);
 	let legacyDeckOut = $state(false);
 	const gameAudio = new GameAudio();
-	onDestroy(() => gameAudio.stop());
+	const chatter = new CharacterChatter();
+	onDestroy(() => {
+		gameAudio.stop();
+		chatter.stop();
+	});
 	const monitorChoice = $derived(actionChoices.find(choice => choice.a === 'monitor') ?? null);
 	const canMonitor = $derived(live && Boolean(monitorChoice?.actions.length));
 	const monitorReason = $derived(
@@ -425,7 +435,10 @@
 			choosing.chooser?.action === 'monitor',
 	);
 	$effect(() => {
-		gameAudio.observe(world, snap.phase, !spectator || announce, briefingOpen || storyOpen || revealing !== null);
+		const lived = !spectator || announce;
+		const quiet = briefingOpen || storyOpen || revealing !== null || recap !== null;
+		gameAudio.observe(world, snap.phase, lived, briefingOpen || storyOpen || revealing !== null);
+		chatter.observe(world, snap.phase, lived, quiet);
 	});
 	let peeking = $state(false);
 	$effect(() => {
@@ -511,7 +524,14 @@
 			fx = [...fx, { id, city, kind, delay: 0 }];
 			setTimeout(() => (fx = fx.filter(entry => entry.id !== id)), 4000);
 		},
-		cue => gameAudio.showCue(cue),
+		cue => {
+			gameAudio.showCue(cue);
+			if (spectator && !announce) return;
+			if (cue.t === 'plague') chatter.dangerAt(world, cue.city);
+			else if (cue.t === 'strike' && cue.city && (cue.effect === 'hollow' || cue.effect === 'outbreak')) {
+				chatter.dangerAt(world, cue.city);
+			}
+		},
 	);
 	// Through an Infect step the cities with no cubes that a card still in the deck could strike are ringed, so the
 	// table sees what the next flip may cost before it is made. A city the show has not finished with waits its turn.
@@ -525,14 +545,35 @@
 	});
 
 	// A scratched exposure box and a death are shown to the whole table before the screens that follow them.
+	let deathVoiced: { figure: FigureKey; at: number } | null = null;
 	const fate = new FateScenes(
 		{
 			scar: character => characterTraits(character).flatMap(trait => (trait.kind === 'scar' ? [trait.name] : [])),
 			ability: character => characterTraits(character).flatMap(trait => (trait.kind === 'ability' ? [trait.name] : [])),
 		},
 		cue => {
-			gameAudio.fateCue(cue);
-			if (cue.t === 'memorial') voicePlayer.play(barkFor('epitaph', cue.key).id);
+			if (cue.t === 'result' && cue.result === 'scar') {
+				const voiced = characterVoice.play(cue.figure, 'scar', { priority: 'game', interrupt: true });
+				gameAudio.fateCue(cue, voiced);
+				return;
+			}
+			if (cue.t === 'result' && cue.result === 'skull') {
+				const voiced = characterVoice.play(cue.figure, 'death', { priority: 'death' });
+				if (voiced) deathVoiced = { figure: cue.figure, at: performance.now() };
+				gameAudio.fateCue(cue, voiced);
+				return;
+			}
+			gameAudio.fateCue(cue, true);
+			if (cue.t === 'memorial') {
+				const playEpitaph = () => voicePlayer.play(barkFor('epitaph', cue.key).id);
+				const alreadySpoke =
+					deathVoiced !== null && deathVoiced.figure === cue.figure && performance.now() - deathVoiced.at < 7000;
+				if (alreadySpoke) {
+					characterVoice.whenIdle(playEpitaph);
+				} else {
+					characterVoice.play(cue.figure, 'death', { priority: 'death', onEnd: playEpitaph });
+				}
+			}
 		},
 	);
 	const radio = new Radio();
@@ -688,13 +729,16 @@
 	const nextUp = $derived.by(() => {
 		const up = admin.turn.turn;
 		if (!up || !game || game.outcome || admin.deck !== null || show.playing || fate.playing || !playing) return null;
-		const character = campaign.characters[game.players[up.seat]?.character as keyof typeof campaign.characters];
+		const playerState = game.players[up.seat];
+		const character = campaign.characters[playerState?.character as keyof typeof campaign.characters];
+		const at = playerState ? game.locations[playerState.location] : undefined;
 		return {
 			key: up.key,
 			name: seatName(world, up.seat),
 			color: SEAT_COLORS[game.seats.indexOf(up.seat)] ?? '#fff',
 			seat: up.seat,
 			character: character ?? null,
+			danger: Boolean(at && (at.hollow > 0 || at.plague > 0)),
 			mine: owns(up.seat),
 		};
 	});
@@ -1283,6 +1327,7 @@
 					color={nextUp.color}
 					seat={nextUp.seat}
 					character={nextUp.character}
+					danger={nextUp.danger}
 					mine={nextUp.mine && !spectator}
 					ondone={() => admin.turn.announced(nextUp.key)}
 				/>

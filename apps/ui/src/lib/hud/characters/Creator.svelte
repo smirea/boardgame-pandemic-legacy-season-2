@@ -5,6 +5,8 @@
 	import { flip } from 'svelte/animate';
 	import { fade, fly } from 'svelte/transition';
 	import { figureUrl, jobFigure, UNKNOWN_FIGURE } from '#lib/characters/figures.ts';
+	import type { FigureKey } from '#lib/characters/personas.ts';
+	import { characterVoice } from '#lib/characters/voice.svelte.ts';
 	import { keep } from '../viewState.ts';
 	import Exposure, { shownTrack } from './Exposure.svelte';
 	import Faces from './Faces.svelte';
@@ -118,6 +120,8 @@
 	);
 	function mint() {
 		if (!create || refusal) return;
+		const key = (own ?? (face !== null ? `survivor-${face}` : null)) as FigureKey | null;
+		if (key) characterVoice.play(key, 'punchline', { priority: 'ui' });
 		clearTimeout(timer);
 		send(create);
 		typing = null;
@@ -178,7 +182,13 @@
 						name={option.name}
 						text={option.text}
 						refusal={job ? null : option.refusal}
-						onclick={job ? undefined : () => send({ type: 'DRAFT', set: { job: option.id } })}
+						onclick={job
+							? undefined
+							: () => {
+									const special = jobFigure(option.id) as FigureKey | null;
+									if (special) characterVoice.play(special, 'punchline', { priority: 'ui' });
+									send({ type: 'DRAFT', set: { job: option.id } });
+								}}
 						testid={job ? undefined : `job-${option.id}`}
 					>
 						{#if job}
@@ -202,7 +212,14 @@
 		{/snippet}
 		{#snippet over()}
 			{#if !own}
-				<Faces {faces} chosen={face} pick={portrait => send({ type: 'DRAFT', set: { portrait } })} />
+				<Faces
+					{faces}
+					chosen={face}
+					pick={portrait => {
+						characterVoice.play(`survivor-${portrait}` as FigureKey, 'punchline', { priority: 'ui' });
+						send({ type: 'DRAFT', set: { portrait } });
+					}}
+				/>
 			{/if}
 		{/snippet}
 		{#snippet base()}

@@ -5,6 +5,8 @@
 	import { flip } from 'svelte/animate';
 	import { fly } from 'svelte/transition';
 	import { jobFigure } from '#lib/characters/figures.ts';
+	import type { FigureKey } from '#lib/characters/personas.ts';
+	import { characterVoice } from '#lib/characters/voice.svelte.ts';
 	import CharacterSheet from './characters/CharacterSheet.svelte';
 	import Creator from './characters/Creator.svelte';
 	import Faces from './characters/Faces.svelte';
@@ -65,6 +67,7 @@
 	function take(character: Character) {
 		const holder = claimant(world, character.id);
 		if (holder && holder !== player) return;
+		if (holder !== player) characterVoice.playFor(character, 'punchline', { priority: 'ui' });
 		send({ type: 'CLAIM', player, character: holder === player ? null : character.id });
 	}
 	// Letting go of one of several characters goes through the claim rules: take the others again.
@@ -197,7 +200,10 @@
 									<Faces
 										faces={facesFor(character)}
 										chosen={character.portrait}
-										pick={portrait => send({ type: 'WEAR', player, character: character.id, portrait })}
+										pick={portrait => {
+											characterVoice.play(`survivor-${portrait}` as FigureKey, 'punchline', { priority: 'ui' });
+											send({ type: 'WEAR', player, character: character.id, portrait });
+										}}
 									/>
 								</div>
 							{/if}

@@ -1,5 +1,7 @@
 import { characterAt } from '@repo/game';
 import type { Character, CityId, ExposureBox, JobId, LogEntry, SeatId, World } from '@repo/game';
+import { characterFigureKey } from '#lib/characters/personas.ts';
+import type { FigureKey } from '#lib/characters/personas.ts';
 
 type Who = {
 	name: string;
@@ -40,12 +42,12 @@ export type Memorial = {
 export type FateScene = Scratch | Memorial;
 export type FateCue =
 	| { t: 'scratch' }
-	| { t: 'result'; result: ExposureBox; voice: number }
-	| { t: 'memorial'; key: number };
+	| { t: 'result'; result: ExposureBox; voice: number; figure: FigureKey }
+	| { t: 'memorial'; key: number; figure: FigureKey };
 
 /** More than this at once is a jump, such as a reload or a replay seeking, and nothing anyone watched. */
 const MOST_SCENES = 4;
-const SCRATCH_MS = { covered: 650, scratching: 950, empty: 1100, scar: 1700, skull: 1500 } as const;
+const SCRATCH_MS = { covered: 650, scratching: 950, empty: 1100, scar: 2100, skull: 2600 } as const;
 /** Long enough for the Chronicler to say most of a line over it. */
 const MEMORIAL_MS = 8000;
 
@@ -171,7 +173,7 @@ export class FateShow {
 			if (!scene) break;
 			this.scene = scene;
 			if (scene.t === 'memorial') {
-				this.cue({ t: 'memorial', key: scene.key });
+				this.cue({ t: 'memorial', key: scene.key, figure: characterFigureKey(scene.who.character) });
 				if (!(await wait(MEMORIAL_MS))) return;
 			} else {
 				if (!(await wait(SCRATCH_MS.covered))) return;
@@ -183,7 +185,12 @@ export class FateShow {
 					stage: 'open',
 					track: scene.track.map((kind, index) => (index === scene.box ? scene.result : kind)),
 				};
-				this.cue({ t: 'result', result: scene.result, voice: scene.who.voice });
+				this.cue({
+					t: 'result',
+					result: scene.result,
+					voice: scene.who.voice,
+					figure: characterFigureKey(scene.who.character),
+				});
 				if (!(await wait(SCRATCH_MS[scene.result]))) return;
 			}
 			this.scene = null;

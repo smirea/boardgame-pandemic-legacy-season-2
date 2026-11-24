@@ -10,9 +10,16 @@ class VoicePlayer {
 	private el: HTMLAudioElement | null = null;
 	private token = 0;
 	private active = false;
+	private startListeners = new Set<() => void>();
 
 	constructor() {
 		audioSettings.subscribe(() => this.syncVolume());
+	}
+
+	/** Invoked whenever a story, search, or radio voice track starts playing. */
+	onStart(fn: () => void): () => void {
+		this.startListeners.add(fn);
+		return () => this.startListeners.delete(fn);
 	}
 
 	hasAudio(beatId: string): boolean {
@@ -38,6 +45,7 @@ class VoicePlayer {
 			if (!entry) return false;
 
 			const run = ++this.token;
+			for (const fn of this.startListeners) fn();
 			const audio = new Audio(entry.src);
 			audio.volume = Math.max(0, Math.min(1, audioSettings.master * audioSettings.voice));
 			audio.preload = 'auto';

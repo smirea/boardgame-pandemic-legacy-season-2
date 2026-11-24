@@ -2,6 +2,7 @@
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import type { Character, SeatId } from '@repo/game';
 	import { fade } from 'svelte/transition';
+	import { characterVoice } from '#lib/characters/voice.svelte.ts';
 	import { inkOn } from '#lib/color.ts';
 	import CharacterSheet from './characters/CharacterSheet.svelte';
 
@@ -11,13 +12,15 @@
 		seat: SeatId;
 		/** The character who plays next, or none for a seat without one. */
 		character: Character | null;
+		/** True when the character starts their turn in a city with Plague or Hollow Men. */
+		danger?: boolean;
 		/** This browser plays the seat, so the panel speaks to its player. */
 		mine: boolean;
 		/** Called once the card is back in its seat. */
 		ondone: () => void;
 	};
 
-	let { name, color, seat, character, mine, ondone }: Props = $props();
+	let { name, color, seat, character, danger = false, mine, ondone }: Props = $props();
 
 	const HOLD_MS = 1300;
 	const GROW = { duration: 300, easing: 'cubic-bezier(0.2, 0.9, 0.3, 1.04)' };
@@ -39,6 +42,9 @@
 	let shown = $state(true);
 	function grow(card: HTMLElement) {
 		let live = true;
+		if (character) {
+			characterVoice.playFor(character, danger ? 'danger' : 'punchline', { priority: 'game', interrupt: true });
+		}
 		const away = morph(card);
 		card.animate(
 			away

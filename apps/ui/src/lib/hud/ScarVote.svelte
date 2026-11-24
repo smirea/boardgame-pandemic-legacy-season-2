@@ -5,6 +5,7 @@
 	import { onMount } from 'svelte';
 	import { fade, fly, scale } from 'svelte/transition';
 	import { backOut } from 'svelte/easing';
+	import { characterVoice } from '#lib/characters/voice.svelte.ts';
 	import CharacterSheet from './characters/CharacterSheet.svelte';
 	import { SEAT_COLORS } from './labels.svelte.ts';
 	import VoteButton from './VoteButton.svelte';
@@ -41,6 +42,11 @@
 
 	function choose(seat: SeatId) {
 		if (!canVote || !candidates.has(seat)) return;
+		if (mine !== seat) {
+			const id = game.players[seat]?.character;
+			const character = id ? world.campaign.characters[id] : undefined;
+			if (character) characterVoice.playFor(character, 'punchline', { priority: 'ui' });
+		}
 		send({ type: 'SCAR_VOTE', player, seat: mine === seat ? null : seat });
 	}
 </script>

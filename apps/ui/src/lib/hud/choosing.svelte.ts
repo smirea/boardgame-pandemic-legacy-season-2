@@ -1,5 +1,6 @@
 import { actionMenu, checkAction, grid, isFreeAction, legalPlays, pack, reject } from '@repo/game';
 import type { Action, CardId, CityId, Command, EventId, Phase, Play, ReconBox, SeatId, World } from '@repo/game';
+import { characterVoice } from '#lib/characters/voice.svelte.ts';
 import type { UiStep } from '#lib/studio/scene.ts';
 import { untrack } from 'svelte';
 import {
@@ -909,6 +910,9 @@ export function createChoosing(source: ChoosingSource) {
 	/** Lights the pawns that can be moved, then, once one is picked, where it can go. */
 	function aimPawns(label: string, a: Action['a'] | null, moves: Map<SeatId, Map<CityId, () => void>>) {
 		const pickPawn = (pawn: SeatId) => {
+			const id = game?.players[pawn]?.character;
+			const character = id ? campaign.characters[id] : undefined;
+			if (character) characterVoice.playFor(character, 'punchline', { priority: 'ui' });
 			only();
 			targeting = { label: `Move ${seatName(world, pawn)} to …`, a, cities: new Map(moves.get(pawn)!), pawn };
 		};
@@ -1343,7 +1347,21 @@ export function createChoosing(source: ChoosingSource) {
 				})),
 			);
 		};
-		aimSeats(aim.title, null, new Map([...bySeat].map(([seat, subset]) => [seat, () => abilities(subset)])));
+		aimSeats(
+			aim.title,
+			null,
+			new Map(
+				[...bySeat].map(([seat, subset]) => [
+					seat,
+					() => {
+						const id = game?.players[seat]?.character;
+						const character = id ? campaign.characters[id] : undefined;
+						if (character) characterVoice.playFor(character, 'punchline', { priority: 'ui' });
+						abilities(subset);
+					},
+				]),
+			),
+		);
 	}
 
 	function lockdown(card: CardId) {
