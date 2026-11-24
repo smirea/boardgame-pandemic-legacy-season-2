@@ -1,126 +1,126 @@
 {
-	"file": "page-06.jpg",
-	"printedPageNumber": 6,
-	"headings": [
-		"The Game Board",
-		"Locations",
-		"Havens",
-		"Population",
-		"Supply Lines",
-		"Sea Lanes & Sea Routes",
-		"The Grid",
-		"Expanding the Grid",
-		"Objectives Section",
-		"Game End Area",
-		"Incident Track",
-		"Supply Cube Stockpile"
-	],
-	"ruleStickerSlots": [
-		{
-			"slot": "A",
-			"context": "Blank dashed box directly under the population ladder (0–8 and the five status bands), before Supply Lines. Reserved for a later population or city-status rule."
-		}
-	],
-	"sections": [
-		{
-			"heading": "Locations",
-			"mechanicsSummary": [
-				"Cities and havens are both locations.",
-				"A card that names a city cannot be used on a haven, and a card that names a haven cannot be used on a city.",
-				"A location with an anchor symbol is a port."
-			]
-		},
-		{
-			"heading": "Havens",
-			"mechanicsSummary": [
-				"Havens are the white locations that have an anchor.",
-				"At the start of the campaign the group names the three havens on the board."
-			]
-		},
-		{
-			"heading": "Population",
-			"mechanicsSummary": [
-				"Every location has a population from 0 through 8.",
-				"Population is how many supply cubes a Produce Supplies card places there.",
-				"Status bands: Recovering 8–6, Surviving 5–3, Struggling 2, Falling 1, Forsaken 0."
-			]
-		},
-		{
-			"heading": "Supply Lines",
-			"mechanicsSummary": [
-				"No supply lines exist at the start.",
-				"Later, supply lines connect cities across land. Two cities joined by a supply line are adjacent."
-			]
-		},
-		{
-			"heading": "Sea Lanes & Sea Routes",
-			"mechanicsSummary": [
-				"Sea lanes connect locations across the ocean. Two locations joined by a sea lane are adjacent.",
-				"A sea route is a chain of connected sea lanes."
-			]
-		},
-		{
-			"heading": "The Grid",
-			"mechanicsSummary": [
-				"Most of the board starts blank.",
-				"The grid is every location that can be traced back to the starting havens along supply lines and/or sea lanes."
-			]
-		},
-		{
-			"heading": "Expanding the Grid",
-			"mechanicsSummary": [
-				"World-map stickers are added to the board when opened, lined up on the latitude and longitude lines."
-			]
-		},
-		{
-			"heading": "Objectives Section",
-			"mechanicsSummary": [
-				"One corner of the board holds objective cards.",
-				"January starts with two objectives.",
-				"Later months add and remove objectives. Overflow objectives sit beside the board."
-			]
-		},
-		{
-			"heading": "Game End Area",
-			"mechanicsSummary": [
-				"Some instructions place cards in the Game End area during the game.",
-				"At the end of the game, take every card from that area and follow it."
-			]
-		},
-		{
-			"heading": "Incident Track",
-			"mechanicsSummary": [
-				"Counts how many times a plague cube has been placed on a location.",
-				"Removing plague cubes does not move the Incident marker backward.",
-				"When the marker reaches the end of the track, the players lose immediately."
-			]
-		},
-		{
-			"heading": "Supply Cube Stockpile",
-			"mechanicsSummary": [
-				"The stockpile is the shared pool of supply cubes in play.",
-				"Unless a card or effect says otherwise, supply cubes are taken from the stockpile and returned to it.",
-				"When an effect tells a player to spend supply cubes, those cubes come off that player's Character card and go back to the stockpile.",
-				"At game end, every supply cube still in the stockpile goes to the reserve. Stockpile contents do not carry into the next game."
-			]
-		}
-	],
-	"tables": [
-		{
-			"name": "Population status bands",
-			"range": "0 through 8",
-			"rows": [
-				{ "band": "Recovering", "populations": [8, 7, 6] },
-				{ "band": "Surviving", "populations": [5, 4, 3] },
-				{ "band": "Struggling", "populations": [2] },
-				{ "band": "Falling", "populations": [1] },
-				{ "band": "Forsaken", "populations": [0] }
-			]
-		}
-	],
-	"diagramsAndCallouts": [
-		"Haven tile with an anchor and a small '3' badge.",
-		"Color key beside the population names: blue 8/7/6, gray 5/4/3, brown 2, orange 1, red 0.",
-		"Objectives tray, incident-track graphic, and a stockpile tray of gray cubes."
-	]
+  "file": "page-06.jpg",
+  "printedPageNumber": 6,
+  "headings": [
+    "The Game Board",
+    "Locations",
+    "Havens",
+    "Population",
+    "Supply Lines",
+    "Sea Lanes & Sea Routes",
+    "The Grid",
+    "Expanding the Grid",
+    "Objectives Section",
+    "Game End Area",
+    "Incident Track",
+    "Supply Cube Stockpile"
+  ],
+  "ruleStickerSlots": [
+    {
+      "slot": "A",
+      "context": "Blank dashed box directly under the population ladder (0–8 and the five status bands), before Supply Lines. Reserved for a later population or city-status rule."
+    }
+  ],
+  "sections": [
+    {
+      "heading": "Locations",
+      "mechanicsSummary": [
+        "Cities and havens are both locations.",
+        "A card that names a city cannot be used on a haven, and a card that names a haven cannot be used on a city.",
+        "A location with an anchor symbol is a port."
+      ]
+    },
+    {
+      "heading": "Havens",
+      "mechanicsSummary": [
+        "Havens are the white locations that have an anchor.",
+        "At the start of the campaign the group names the three havens on the board."
+      ]
+    },
+    {
+      "heading": "Population",
+      "mechanicsSummary": [
+        "Every location has a population from 0 through 8.",
+        "Population is how many supply cubes a Produce Supplies card places there.",
+        "Status bands: Recovering 8–6, Surviving 5–3, Struggling 2, Falling 1, Forsaken 0."
+      ]
+    },
+    {
+      "heading": "Supply Lines",
+      "mechanicsSummary": [
+        "No supply lines exist at the start.",
+        "Later, supply lines connect cities across land. Two cities joined by a supply line are adjacent."
+      ]
+    },
+    {
+      "heading": "Sea Lanes & Sea Routes",
+      "mechanicsSummary": [
+        "Sea lanes connect locations across the ocean. Two locations joined by a sea lane are adjacent.",
+        "A sea route is a chain of connected sea lanes."
+      ]
+    },
+    {
+      "heading": "The Grid",
+      "mechanicsSummary": [
+        "Most of the board starts blank.",
+        "The grid is every location that can be traced back to the starting havens along supply lines and/or sea lanes."
+      ]
+    },
+    {
+      "heading": "Expanding the Grid",
+      "mechanicsSummary": [
+        "World-map stickers are added to the board when opened, lined up on the latitude and longitude lines."
+      ]
+    },
+    {
+      "heading": "Objectives Section",
+      "mechanicsSummary": [
+        "One corner of the board holds objective cards.",
+        "January starts with two objectives.",
+        "Later months add and remove objectives. Overflow objectives sit beside the board."
+      ]
+    },
+    {
+      "heading": "Game End Area",
+      "mechanicsSummary": [
+        "Some instructions place cards in the Game End area during the game.",
+        "At the end of the game, take every card from that area and follow it."
+      ]
+    },
+    {
+      "heading": "Incident Track",
+      "mechanicsSummary": [
+        "Counts how many times a plague cube has been placed on a location.",
+        "Removing plague cubes does not move the Incident marker backward.",
+        "When the marker reaches the end of the track, the players lose immediately."
+      ]
+    },
+    {
+      "heading": "Supply Cube Stockpile",
+      "mechanicsSummary": [
+        "The stockpile is the shared pool of supply cubes in play.",
+        "Unless a card or effect says otherwise, supply cubes are taken from the stockpile and returned to it.",
+        "When an effect tells a player to spend supply cubes, those cubes come off that player's Character card and go back to the stockpile.",
+        "At game end, every supply cube still in the stockpile goes to the reserve. Stockpile contents do not carry into the next game."
+      ]
+    }
+  ],
+  "tables": [
+    {
+      "name": "Population status bands",
+      "range": "0 through 8",
+      "rows": [
+        { "band": "Recovering", "populations": [8, 7, 6] },
+        { "band": "Surviving", "populations": [5, 4, 3] },
+        { "band": "Struggling", "populations": [2] },
+        { "band": "Falling", "populations": [1] },
+        { "band": "Forsaken", "populations": [0] }
+      ]
+    }
+  ],
+  "diagramsAndCallouts": [
+    "Haven tile with an anchor and a small '3' badge.",
+    "Color key beside the population names: blue 8/7/6, gray 5/4/3, brown 2, orange 1, red 0.",
+    "Objectives tray, incident-track graphic, and a stockpile tray of gray cubes."
+  ]
 }

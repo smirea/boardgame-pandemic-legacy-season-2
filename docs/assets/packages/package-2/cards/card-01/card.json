@@ -1,40 +1,40 @@
 {
-	"package": 2,
-	"index": 1,
-	"cardId": 10700,
-	"printedCodes": {
-		"sideA": "P2-01a",
-		"sideB": "P2-01b"
-	},
-	"title": "Recon Report",
-	"category": "recon-report",
-	"city": null,
-	"color": null,
-	"copies": 1,
-	"hasImprovementSlot": false,
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideASummary": "P2-01a. This package holds 24 cards, 6 sticker cards, and 24 Hollow Men figures. The report calls the region sinister: locals say the Hollow Men who roam it carry rats and vermin and release them into cities. Satellite towers pick up faint transmissions from someone, possibly the Hollow Men. The team expects to tune the equipment and listen in by about August. They suspect a recon can be made from Kolkata, but not how. Read both sides, then keep this card in the reserve.",
-	"sideBSummary": "P2-01b, headed RIGHT NOW. Open doors 62, 53, F, and 14 if they are still closed. Baghdad is the newly connected city. Put Baghdad's Player cards on the Player discard pile. Put Baghdad's Infection cards in the Game End area. Put the 4 Hollow Men Gather cards on the Infection discard pile. Put every other Player card and Infection card from the package into the reserve. Give the Renewal Unrationed Event to a player to add to their hand.",
-	"searchBoxes": [],
-	"states": [],
-	"mechanics": {
-		"opensDoors": ["62", "53", "F", "14"],
-		"destroys": [],
-		"rules": [
-			"Read both sides, then keep this card in the reserve.",
-			"Open 62, 53, F, and 14 if they are not already open.",
-			"Baghdad joins the grid. Its two Player cards (P2-03b and P2-04b) go to the Player discard pile.",
-			"Baghdad's two Infection cards (both printed P2-06b) go to the Game End area.",
-			"The 4 Hollow Men Gather cards go to the Infection discard pile immediately.",
-			"Tehran, Riyadh, Delhi, New Mumbai, and Kolkata Player and Infection cards go to the reserve until those cities join the grid.",
-			"Give Renewal (P2-02b) to a player, into their hand."
-		],
-		"notes": [
-			"The package box shows only the numeral 2.",
-			"Door stickers for 62, 53, F, and 14 are dossier contents. They are not in this package's scans."
-		]
-	}
+  "package": 2,
+  "index": 1,
+  "cardId": 10700,
+  "printedCodes": {
+    "sideA": "P2-01a",
+    "sideB": "P2-01b"
+  },
+  "title": "Recon Report",
+  "category": "recon-report",
+  "city": null,
+  "color": null,
+  "copies": 1,
+  "hasImprovementSlot": false,
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideASummary": "P2-01a. This package holds 24 cards, 6 sticker cards, and 24 Hollow Men figures. The report calls the region sinister: locals say the Hollow Men who roam it carry rats and vermin and release them into cities. Satellite towers pick up faint transmissions from someone, possibly the Hollow Men. The team expects to tune the equipment and listen in by about August. They suspect a recon can be made from Kolkata, but not how. Read both sides, then keep this card in the reserve.",
+  "sideBSummary": "P2-01b, headed RIGHT NOW. Open doors 62, 53, F, and 14 if they are still closed. Baghdad is the newly connected city. Put Baghdad's Player cards on the Player discard pile. Put Baghdad's Infection cards in the Game End area. Put the 4 Hollow Men Gather cards on the Infection discard pile. Put every other Player card and Infection card from the package into the reserve. Give the Renewal Unrationed Event to a player to add to their hand.",
+  "searchBoxes": [],
+  "states": [],
+  "mechanics": {
+    "opensDoors": ["62", "53", "F", "14"],
+    "destroys": [],
+    "rules": [
+      "Read both sides, then keep this card in the reserve.",
+      "Open 62, 53, F, and 14 if they are not already open.",
+      "Baghdad joins the grid. Its two Player cards (P2-03b and P2-04b) go to the Player discard pile.",
+      "Baghdad's two Infection cards (both printed P2-06b) go to the Game End area.",
+      "The 4 Hollow Men Gather cards go to the Infection discard pile immediately.",
+      "Tehran, Riyadh, Delhi, New Mumbai, and Kolkata Player and Infection cards go to the reserve until those cities join the grid.",
+      "Give Renewal (P2-02b) to a player, into their hand."
+    ],
+    "notes": [
+      "The package box shows only the numeral 2.",
+      "Door stickers for 62, 53, F, and 14 are dossier contents. They are not in this package's scans."
+    ]
+  }
 }

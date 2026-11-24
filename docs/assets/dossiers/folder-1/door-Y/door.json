@@ -1,50 +1,50 @@
 {
-	"door": "Y",
-	"folder": 1,
-	"frontImage": "front.jpg",
-	"frontText": "Y",
-	"items": [
-		{
-			"id": "item-01",
-			"image": "item-01.png",
-			"count": 1,
-			"printedCode": null,
-			"category": "diagram_sticker",
-			"title": "",
-			"placementTarget": "Rulebook page 8, under setup step 4, at the right end of the infection-flip diagram",
-			"text": "",
-			"tables": [],
-			"mechanics": {
-				"opensDoors": [],
-				"opensPackages": [],
-				"rules": [
-					"No words are printed on this sticker. It is the green hooded Hollow Men face.",
-					"Item 02 says to place it on page 8 under step 4, marking the last 3 cards of the infection flip."
-				],
-				"effect": "Reminder icon that the last 3 cards of Infect the Grid place Hollow Men."
-			}
-		},
-		{
-			"id": "item-02",
-			"image": "item-02.jpg",
-			"count": 1,
-			"printedCode": "Y",
-			"category": "instruction",
-			"title": "",
-			"placementTarget": "Read and apply. The sticker it points at goes on rulebook page 8 under setup step 4.",
-			"text": "As a reminder to place Hollow Men for the last 3 cards, place this sticker on page 8, as shown, under step 4 of the setup.",
-			"tables": [],
-			"mechanics": {
-				"opensDoors": [],
-				"opensPackages": [],
-				"rules": [
-					"Place the Hollow Men icon (item 01) on page 8, under setup step 4.",
-					"The printed diagram is the step-4 infection flip: São Paulo, Lagos, Istanbul, Washington, London, New York, Jacksonville, Cairo, and a second São Paulo, with a supply cube being removed.",
-					"A red arrow points at the Hollow Men icon on the right of that diagram."
-				],
-				"effect": "Tells you where the Hollow Men reminder sticker goes."
-			}
-		}
-	],
-	"summary": "A Hollow Men icon sticker and the instruction to stick it on rulebook page 8, under setup step 4, as the reminder for the last 3 infection cards."
+  "door": "Y",
+  "folder": 1,
+  "frontImage": "front.jpg",
+  "frontText": "Y",
+  "items": [
+    {
+      "id": "item-01",
+      "image": "item-01.png",
+      "count": 1,
+      "printedCode": null,
+      "category": "diagram_sticker",
+      "title": "",
+      "placementTarget": "Rulebook page 8, under setup step 4, at the right end of the infection-flip diagram",
+      "text": "",
+      "tables": [],
+      "mechanics": {
+        "opensDoors": [],
+        "opensPackages": [],
+        "rules": [
+          "No words are printed on this sticker. It is the green hooded Hollow Men face.",
+          "Item 02 says to place it on page 8 under step 4, marking the last 3 cards of the infection flip."
+        ],
+        "effect": "Reminder icon that the last 3 cards of Infect the Grid place Hollow Men."
+      }
+    },
+    {
+      "id": "item-02",
+      "image": "item-02.jpg",
+      "count": 1,
+      "printedCode": "Y",
+      "category": "instruction",
+      "title": "",
+      "placementTarget": "Read and apply. The sticker it points at goes on rulebook page 8 under setup step 4.",
+      "text": "As a reminder to place Hollow Men for the last 3 cards, place this sticker on page 8, as shown, under step 4 of the setup.",
+      "tables": [],
+      "mechanics": {
+        "opensDoors": [],
+        "opensPackages": [],
+        "rules": [
+          "Place the Hollow Men icon (item 01) on page 8, under setup step 4.",
+          "The printed diagram is the step-4 infection flip: São Paulo, Lagos, Istanbul, Washington, London, New York, Jacksonville, Cairo, and a second São Paulo, with a supply cube being removed.",
+          "A red arrow points at the Hollow Men icon on the right of that diagram."
+        ],
+        "effect": "Tells you where the Hollow Men reminder sticker goes."
+      }
+    }
+  ],
+  "summary": "A Hollow Men icon sticker and the instruction to stick it on rulebook page 8, under setup step 4, as the reminder for the last 3 infection cards."
 }

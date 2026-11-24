@@ -10,28 +10,31 @@ Each connection has two lanes:
 ## Use it
 
 ```ts
-import { createHost, createWebRtcTransport, joinHost, peerId } from '@repo/net';
+import { createHost, createWebRtcTransport, joinHost, peerId } from "@repo/net";
 
-const transport = createWebRtcTransport({ signalUrl: 'https://net-signal.example.workers.dev', secret });
+const transport = createWebRtcTransport({
+  signalUrl: "https://net-signal.example.workers.dev",
+  secret,
+});
 const options = {
-	selfId: peerId(localStorage.playerId), // persist it so a reload rejoins as the same player
-	name: 'Ada',
-	transport,
-	parseMsg: (raw: unknown) => GameMsg.parse(raw), // throw on bad input
-	parsePresence: (raw: unknown) => Cursor.parse(raw),
+  selfId: peerId(localStorage.playerId), // persist it so a reload rejoins as the same player
+  name: "Ada",
+  transport,
+  parseMsg: (raw: unknown) => GameMsg.parse(raw), // throw on bad input
+  parsePresence: (raw: unknown) => Cursor.parse(raw),
 };
 
 const session = isHost ? createHost<GameMsg, Cursor>(options) : joinHost<GameMsg, Cursor>(options);
 
-session.on('peers', peers => {
-	if (session.role === 'host') session.send({ type: 'state', state: actor.getSnapshot() }); // a player joined or returned
+session.on("peers", (peers) => {
+  if (session.role === "host") session.send({ type: "state", state: actor.getSnapshot() }); // a player joined or returned
 });
-session.on('message', (msg, from) => actor.send({ ...msg, from }));
-session.on('presence', (cursor, from) => drawCursor(from, cursor));
-session.on('status', status => setOnline(status === 'connected'));
-session.on('error', error => console.warn(error.code, error.message));
+session.on("message", (msg, from) => actor.send({ ...msg, from }));
+session.on("presence", (cursor, from) => drawCursor(from, cursor));
+session.on("status", (status) => setOnline(status === "connected"));
+session.on("error", (error) => console.warn(error.code, error.message));
 
-window.addEventListener('pointermove', e => session.sendPresence({ x: e.clientX, y: e.clientY }));
+window.addEventListener("pointermove", (e) => session.sendPresence({ x: e.clientX, y: e.clientY }));
 ```
 
 Tests and other in-process code use `createMemoryTransport()` instead. One instance stands in for the whole network: pass it to the host and every peer. `drop(id)` cuts a player's link and `setCongested(id, true)` backs up their lossy lane.

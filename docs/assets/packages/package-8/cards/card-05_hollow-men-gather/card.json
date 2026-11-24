@@ -1,41 +1,41 @@
 {
-	"package": 8,
-	"index": 5,
-	"printedCodes": {
-		"sideA": null,
-		"sideB": "P2-21b"
-	},
-	"title": "Hollow Men Gather",
-	"category": "hollow-men-gather",
-	"city": null,
-	"color": null,
-	"copies": 4,
-	"hasImprovementSlot": false,
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"text": "Infection card back. No text."
-	},
-	"sideB": {
-		"text": "HOLLOW MEN GATHER\nDrawing this card is not an Infection card draw.\n\nDraw the next Infection card and add\na Hollow Men figure to it instead of\ninfecting it.\n\nIf you draw another Hollow Men\nGather card, keep drawing.\n(Add only 1 figure to the\nfirst city you reveal.)",
-		"searchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"opensDoors": [],
-		"rules": [
-			"Goes in the Infection deck, but drawing it is not an Infection card draw.",
-			"Draw the next Infection card and add a Hollow Men figure to that city instead of infecting it.",
-			"If the next card is another Hollow Men Gather, keep drawing. Add only 1 figure, and add it to the first city you reveal.",
-			"When the package is opened, all 4 copies go into the Infection discard pile."
-		],
-		"notes": [
-			"Card id 10705. Copies: 4.",
-			"The printed code is P2-21b, the Package 2 Hollow Men Gather code, not a P8 code.",
-			"Side A is the standard infection-card back. There is no upgrade panel and no city name.",
-			"The title and the red line \"Drawing this card is not an Infection card draw.\" run down the left edge. The rules text runs down the right."
-		]
-	}
+  "package": 8,
+  "index": 5,
+  "printedCodes": {
+    "sideA": null,
+    "sideB": "P2-21b"
+  },
+  "title": "Hollow Men Gather",
+  "category": "hollow-men-gather",
+  "city": null,
+  "color": null,
+  "copies": 4,
+  "hasImprovementSlot": false,
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "text": "Infection card back. No text."
+  },
+  "sideB": {
+    "text": "HOLLOW MEN GATHER\nDrawing this card is not an Infection card draw.\n\nDraw the next Infection card and add\na Hollow Men figure to it instead of\ninfecting it.\n\nIf you draw another Hollow Men\nGather card, keep drawing.\n(Add only 1 figure to the\nfirst city you reveal.)",
+    "searchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "opensDoors": [],
+    "rules": [
+      "Goes in the Infection deck, but drawing it is not an Infection card draw.",
+      "Draw the next Infection card and add a Hollow Men figure to that city instead of infecting it.",
+      "If the next card is another Hollow Men Gather, keep drawing. Add only 1 figure, and add it to the first city you reveal.",
+      "When the package is opened, all 4 copies go into the Infection discard pile."
+    ],
+    "notes": [
+      "Card id 10705. Copies: 4.",
+      "The printed code is P2-21b, the Package 2 Hollow Men Gather code, not a P8 code.",
+      "Side A is the standard infection-card back. There is no upgrade panel and no city name.",
+      "The title and the red line \"Drawing this card is not an Infection card draw.\" run down the left edge. The rules text runs down the right."
+    ]
+  }
 }

@@ -1,21 +1,21 @@
 {
-	"id": "sticker-05",
-	"package": 7,
-	"printedCode": null,
-	"name": "Transmit",
-	"category": "player-reference-action",
-	"placementTarget": "Back of each player reference card, with the Build Satellite Tower strip.",
-	"costProductionUnits": null,
-	"copies": 1,
-	"image": "sticker-05.jpg",
-	"text": "TRANSMIT\nAt a satellite tower, give a card matching the color of your city to another player,\nanywhere in the world.\n\n[satellite dish inside signal rings]",
-	"mechanics": {
-		"timing": "Action, on your turn, in a city with a satellite tower.",
-		"effect": "Give a card matching the color of your city to another player, anywhere in the world.",
-		"restrictions": [
-			"This strip is the short action reminder. Rule O is stricter: you must be in a city containing a satellite tower, and you give 1 card matching the color of the city you are in.",
-			"The other player may be anywhere in the world."
-		],
-		"opensDoors": []
-	}
+  "id": "sticker-05",
+  "package": 7,
+  "printedCode": null,
+  "name": "Transmit",
+  "category": "player-reference-action",
+  "placementTarget": "Back of each player reference card, with the Build Satellite Tower strip.",
+  "costProductionUnits": null,
+  "copies": 1,
+  "image": "sticker-05.jpg",
+  "text": "TRANSMIT\nAt a satellite tower, give a card matching the color of your city to another player,\nanywhere in the world.\n\n[satellite dish inside signal rings]",
+  "mechanics": {
+    "timing": "Action, on your turn, in a city with a satellite tower.",
+    "effect": "Give a card matching the color of your city to another player, anywhere in the world.",
+    "restrictions": [
+      "This strip is the short action reminder. Rule O is stricter: you must be in a city containing a satellite tower, and you give 1 card matching the color of the city you are in.",
+      "The other player may be anywhere in the world."
+    ],
+    "opensDoors": []
+  }
 }

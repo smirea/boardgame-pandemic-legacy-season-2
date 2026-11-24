@@ -1,18 +1,18 @@
 {
-	"id": "broker",
-	"name": "Broker",
-	"category": "ability",
-	"costProductionUnits": 2,
-	"copies": 1,
-	"image": "broker.jpg",
-	"text": "Broker: As an action, discard a City card to take a card\nof the same color from the Player discard pile.",
-	"mechanics": {
-		"timing": "action",
-		"trigger": null,
-		"effect": "Discard a City card to take a card of the same color from the Player discard pile.",
-		"restrictions": [
-			"The taken card must be the same color as the discarded City card",
-			"The card comes from the Player discard pile"
-		]
-	}
+  "id": "broker",
+  "name": "Broker",
+  "category": "ability",
+  "costProductionUnits": 2,
+  "copies": 1,
+  "image": "broker.jpg",
+  "text": "Broker: As an action, discard a City card to take a card\nof the same color from the Player discard pile.",
+  "mechanics": {
+    "timing": "action",
+    "trigger": null,
+    "effect": "Discard a City card to take a card of the same color from the Player discard pile.",
+    "restrictions": [
+      "The taken card must be the same color as the discarded City card",
+      "The card comes from the Player discard pile"
+    ]
+  }
 }

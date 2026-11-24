@@ -1,40 +1,40 @@
 {
-	"sequence": 45,
-	"folder": "045_07-02",
-	"cardCode": "07-02",
-	"printedCodes": {
-		"sideA": "07-02a",
-		"sideB": "07-02b"
-	},
-	"title": "Journal Entry",
-	"category": "legacy_journal",
-	"month": "july",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "NONE",
-		"header": "Journal Entry",
-		"trigger": "",
-		"text": "Satellite towers have started picking up faint broadcast signals. Need to know who is transmitting. We think it’s Hollow Men, but there’s someone else. Could the Hollow Men be taking orders?\n\nIs someone ordering them to spread the plague?\n\nThe grid is growing and can’t handle Hollow Men spreading the plague. We’re prepared to forsake some if need be. Would that make us the monsters the world thinks we are?",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "FROM THE ARCHIVES",
-		"text": "JULY, YEAR 38\n\nHaven networks still at full capacity – when we were re-located here, they set us up properly. Hope is still kindled. Strange to see adults on the havens who never knew the world before. I dream to live on land again. I sometimes dream of fleeing for Utopia. I imagine they still function like the old world. I miss land and dirt. I hear they are close to a cure. Would they share it with our people?",
-		"footer": "Keep papers like this in the reserve.",
-		"scratchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"whenRead": "Continue the July setup Legacy-deck reading, immediately after 07-01.",
-		"triggers": [],
-		"opensDoors": [],
-		"opensPackages": [],
-		"destroys": [],
-		"addsToPool": [],
-		"rules": ["Keep the card in the reserve. No rules change."],
-		"notes": "A handwritten signature under the Year 38 note is not transcribed."
-	}
+  "sequence": 45,
+  "folder": "045_07-02",
+  "cardCode": "07-02",
+  "printedCodes": {
+    "sideA": "07-02a",
+    "sideB": "07-02b"
+  },
+  "title": "Journal Entry",
+  "category": "legacy_journal",
+  "month": "july",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "NONE",
+    "header": "Journal Entry",
+    "trigger": "",
+    "text": "Satellite towers have started picking up faint broadcast signals. Need to know who is transmitting. We think it’s Hollow Men, but there’s someone else. Could the Hollow Men be taking orders?\n\nIs someone ordering them to spread the plague?\n\nThe grid is growing and can’t handle Hollow Men spreading the plague. We’re prepared to forsake some if need be. Would that make us the monsters the world thinks we are?",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "FROM THE ARCHIVES",
+    "text": "JULY, YEAR 38\n\nHaven networks still at full capacity – when we were re-located here, they set us up properly. Hope is still kindled. Strange to see adults on the havens who never knew the world before. I dream to live on land again. I sometimes dream of fleeing for Utopia. I imagine they still function like the old world. I miss land and dirt. I hear they are close to a cure. Would they share it with our people?",
+    "footer": "Keep papers like this in the reserve.",
+    "scratchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "whenRead": "Continue the July setup Legacy-deck reading, immediately after 07-01.",
+    "triggers": [],
+    "opensDoors": [],
+    "opensPackages": [],
+    "destroys": [],
+    "addsToPool": [],
+    "rules": ["Keep the card in the reserve. No rules change."],
+    "notes": "A handwritten signature under the Year 38 note is not transcribed."
+  }
 }

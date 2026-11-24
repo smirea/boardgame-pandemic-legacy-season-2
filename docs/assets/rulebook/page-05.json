@@ -1,122 +1,122 @@
 {
-	"file": "page-05.jpg",
-	"printedPageNumber": 5,
-	"headings": [
-		"Component Overview",
-		"Objectives",
-		"The Dossiers",
-		"The Packages",
-		"The Reserve",
-		"Rationed and Unrationed Events",
-		"Tracking Tokens",
-		"Card Stickers",
-		"Turning Point Cards",
-		"Supply Cubes",
-		"Plague Cubes",
-		"Supply Centers",
-		"Produce Supply Cards"
-	],
-	"ruleStickerSlots": [],
-	"sections": [
-		{
-			"heading": "Objectives",
-			"mechanicsSummary": [
-				"Each game requires one or more objectives. The number required is printed on the board for that month.",
-				"At least one objective is mandatory. Mandatory objectives are required to win.",
-				"The group does not have to choose the optional objectives before the game starts.",
-				"An objective stays available in later months, even after it has been completed, unless an instruction says to destroy it."
-			]
-		},
-		{
-			"heading": "The Dossiers",
-			"mechanicsSummary": [
-				"Some cards carry dossier numbers or letters.",
-				"When told to, open the matching precut door on a dossier and tear it off."
-			]
-		},
-		{
-			"heading": "The Packages",
-			"mechanicsSummary": ["Open a numbered package only when the game says to."]
-		},
-		{
-			"heading": "The Reserve",
-			"mechanicsSummary": [
-				"Box storage for cards, stickers, and pieces that are not in the current game but may be needed during or after one."
-			]
-		},
-		{
-			"heading": "Rationed and Unrationed Events",
-			"mechanicsSummary": [
-				"At the start of each game the group chooses Rationed Event cards and adds a number of them equal to the current rationing level.",
-				"Rationing starts at 4 for the prologue and for the start of January, then rises and falls. Minimum 0, maximum 10.",
-				"Unrationed Event cards are found later. Each is always in the Player deck, ignoring rationing, until it is used. Using one destroys it."
-			]
-		},
-		{
-			"heading": "Tracking Tokens",
-			"mechanicsSummary": ["Black tokens mark progress toward the current objectives."]
-		},
-		{
-			"heading": "Card Stickers",
-			"mechanicsSummary": [
-				"Some cards have an improvement space. Improvements are applied during the Game End Production step.",
-				"A card holds at most one improvement, and only if it has a space.",
-				"Infection-card improvements and City-card improvements have different shapes so they are not swapped.",
-				"Pictured Infrastructure improvement: that card counts as 3 cards of its color when building a supply center.",
-				"Pictured Well Stocked improvement: if the city already has 2 or more supply cubes when this Infection card is drawn, remove no supply cubes."
-			]
-		},
-		{
-			"heading": "Turning Point Cards",
-			"mechanicsSummary": [
-				"Every Turning Point card found is stored in the reserve, then moved to the Game End area at the start of each game.",
-				"At game end, check whether its requirement was met. If yes, follow the card. If no, return it to the reserve for the next game.",
-				"None are in play at the start of the campaign. They appear as the year continues."
-			]
-		},
-		{
-			"heading": "Supply Cubes",
-			"mechanicsSummary": [
-				"Gray cubes. They are what keeps a city from the plague.",
-				"When an Infection card is drawn, move 1 supply cube from that city to the stockpile.",
-				"If the city has no supply cube when the card is drawn, place a plague cube instead."
-			]
-		},
-		{
-			"heading": "Plague Cubes",
-			"mechanicsSummary": ["Green cubes. No cure or treatment is known."]
-		},
-		{
-			"heading": "Supply Centers",
-			"mechanicsSummary": [
-				"Temporary structures built during a game (hospital, depot, and headquarters combined).",
-				"They do not persist between games. The Hollow Men tear them down.",
-				"A city with a supply center may play Produce Supplies cards.",
-				"At the end of a game, each city that has a supply center gains population."
-			]
-		},
-		{
-			"heading": "Produce Supply Cards",
-			"mechanicsSummary": [
-				"Always shuffled into the Player deck.",
-				"Played at a haven or supply center to produce many supplies in one turn. The action is on page 10."
-			]
-		}
-	],
-	"tables": [
-		{
-			"name": "Rationing level",
-			"min": 0,
-			"max": 10,
-			"prologueAndStartOfJanuary": 4,
-			"rationedEventsAdded": "equal to the current level"
-		}
-	],
-	"diagramsAndCallouts": [
-		"Mandatory-objective card: build 3 new supply centers, with a 0–3 progress track.",
-		"Dossier door illustration labeled 34, opened from a card showing 34 and 3.",
-		"One rationed and one unrationed event card side by side.",
-		"Two example improvements: Infrastructure (counts as 3 cards of its color for Build Supply Center) and Well Stocked (2 or more supply cubes already present means the draw removes none).",
-		"Turning Point card, gray supply cubes, green plague cubes, a supply-center token, and a Produce Supplies card."
-	]
+  "file": "page-05.jpg",
+  "printedPageNumber": 5,
+  "headings": [
+    "Component Overview",
+    "Objectives",
+    "The Dossiers",
+    "The Packages",
+    "The Reserve",
+    "Rationed and Unrationed Events",
+    "Tracking Tokens",
+    "Card Stickers",
+    "Turning Point Cards",
+    "Supply Cubes",
+    "Plague Cubes",
+    "Supply Centers",
+    "Produce Supply Cards"
+  ],
+  "ruleStickerSlots": [],
+  "sections": [
+    {
+      "heading": "Objectives",
+      "mechanicsSummary": [
+        "Each game requires one or more objectives. The number required is printed on the board for that month.",
+        "At least one objective is mandatory. Mandatory objectives are required to win.",
+        "The group does not have to choose the optional objectives before the game starts.",
+        "An objective stays available in later months, even after it has been completed, unless an instruction says to destroy it."
+      ]
+    },
+    {
+      "heading": "The Dossiers",
+      "mechanicsSummary": [
+        "Some cards carry dossier numbers or letters.",
+        "When told to, open the matching precut door on a dossier and tear it off."
+      ]
+    },
+    {
+      "heading": "The Packages",
+      "mechanicsSummary": ["Open a numbered package only when the game says to."]
+    },
+    {
+      "heading": "The Reserve",
+      "mechanicsSummary": [
+        "Box storage for cards, stickers, and pieces that are not in the current game but may be needed during or after one."
+      ]
+    },
+    {
+      "heading": "Rationed and Unrationed Events",
+      "mechanicsSummary": [
+        "At the start of each game the group chooses Rationed Event cards and adds a number of them equal to the current rationing level.",
+        "Rationing starts at 4 for the prologue and for the start of January, then rises and falls. Minimum 0, maximum 10.",
+        "Unrationed Event cards are found later. Each is always in the Player deck, ignoring rationing, until it is used. Using one destroys it."
+      ]
+    },
+    {
+      "heading": "Tracking Tokens",
+      "mechanicsSummary": ["Black tokens mark progress toward the current objectives."]
+    },
+    {
+      "heading": "Card Stickers",
+      "mechanicsSummary": [
+        "Some cards have an improvement space. Improvements are applied during the Game End Production step.",
+        "A card holds at most one improvement, and only if it has a space.",
+        "Infection-card improvements and City-card improvements have different shapes so they are not swapped.",
+        "Pictured Infrastructure improvement: that card counts as 3 cards of its color when building a supply center.",
+        "Pictured Well Stocked improvement: if the city already has 2 or more supply cubes when this Infection card is drawn, remove no supply cubes."
+      ]
+    },
+    {
+      "heading": "Turning Point Cards",
+      "mechanicsSummary": [
+        "Every Turning Point card found is stored in the reserve, then moved to the Game End area at the start of each game.",
+        "At game end, check whether its requirement was met. If yes, follow the card. If no, return it to the reserve for the next game.",
+        "None are in play at the start of the campaign. They appear as the year continues."
+      ]
+    },
+    {
+      "heading": "Supply Cubes",
+      "mechanicsSummary": [
+        "Gray cubes. They are what keeps a city from the plague.",
+        "When an Infection card is drawn, move 1 supply cube from that city to the stockpile.",
+        "If the city has no supply cube when the card is drawn, place a plague cube instead."
+      ]
+    },
+    {
+      "heading": "Plague Cubes",
+      "mechanicsSummary": ["Green cubes. No cure or treatment is known."]
+    },
+    {
+      "heading": "Supply Centers",
+      "mechanicsSummary": [
+        "Temporary structures built during a game (hospital, depot, and headquarters combined).",
+        "They do not persist between games. The Hollow Men tear them down.",
+        "A city with a supply center may play Produce Supplies cards.",
+        "At the end of a game, each city that has a supply center gains population."
+      ]
+    },
+    {
+      "heading": "Produce Supply Cards",
+      "mechanicsSummary": [
+        "Always shuffled into the Player deck.",
+        "Played at a haven or supply center to produce many supplies in one turn. The action is on page 10."
+      ]
+    }
+  ],
+  "tables": [
+    {
+      "name": "Rationing level",
+      "min": 0,
+      "max": 10,
+      "prologueAndStartOfJanuary": 4,
+      "rationedEventsAdded": "equal to the current level"
+    }
+  ],
+  "diagramsAndCallouts": [
+    "Mandatory-objective card: build 3 new supply centers, with a 0–3 progress track.",
+    "Dossier door illustration labeled 34, opened from a card showing 34 and 3.",
+    "One rationed and one unrationed event card side by side.",
+    "Two example improvements: Infrastructure (counts as 3 cards of its color for Build Supply Center) and Well Stocked (2 or more supply cubes already present means the draw removes none).",
+    "Turning Point card, gray supply cubes, green plague cubes, a supply-center token, and a Produce Supplies card."
+  ]
 }

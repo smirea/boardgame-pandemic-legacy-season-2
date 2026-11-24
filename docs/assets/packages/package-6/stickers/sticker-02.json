@@ -1,19 +1,19 @@
 {
-	"id": "sticker-02",
-	"package": 6,
-	"guid": "96473f",
-	"printedCode": null,
-	"name": "Inoculate mounting instruction",
-	"category": "instruction",
-	"placementTarget": "Instruction for sticker-01. Not itself placed on a component.",
-	"costProductionUnits": null,
-	"copies": 1,
-	"image": "sticker-02.jpg",
-	"text": "Place this sticker on the back of each player reference card.",
-	"mechanics": {
-		"timing": "when the package is opened",
-		"effect": "Mount the Inoculate overlay (sticker-01) on the back of each player reference card.",
-		"restrictions": [],
-		"opensDoors": []
-	}
+  "id": "sticker-02",
+  "package": 6,
+  "guid": "96473f",
+  "printedCode": null,
+  "name": "Inoculate mounting instruction",
+  "category": "instruction",
+  "placementTarget": "Instruction for sticker-01. Not itself placed on a component.",
+  "costProductionUnits": null,
+  "copies": 1,
+  "image": "sticker-02.jpg",
+  "text": "Place this sticker on the back of each player reference card.",
+  "mechanics": {
+    "timing": "when the package is opened",
+    "effect": "Mount the Inoculate overlay (sticker-01) on the back of each player reference card.",
+    "restrictions": [],
+    "opensDoors": []
+  }
 }

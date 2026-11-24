@@ -1,43 +1,43 @@
 {
-	"sequence": 13,
-	"folder": "013_02-02",
-	"cardCode": "02-02",
-	"printedCodes": {
-		"sideA": "02-02a",
-		"sideB": "02-02b"
-	},
-	"title": "Journal Entry",
-	"category": "legacy_journal",
-	"month": "february",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "NONE",
-		"header": "Journal Entry",
-		"trigger": "",
-		"text": "Hollow Men are expanding their raids now that our leaders and soldiers have disappeared. Our supply routes, already abandoned, are unsafe.\n\nThe Hollow Men are working their way into South America, likely looking for one of the labs working on a cure. They are also hitting our supply centers, which means building new ones.\n\nWe need to find a way to fortify these centers so they can resist their attacks.",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "FROM THE ARCHIVES",
-		"text": "APRIL 24, YEAR 40\nReports from the frontier havens. Hollow Men have breached them with help of local population who still distrust us. Sending security patrols but it might be too late. Not sure how well we will function without a full network of havens. Nearing the end of our projected timetable with no cure in sight.\n\nWe're going to start having to dilute supplies or abandon supply routes.",
-		"footer": "Keep papers like this in the reserve.",
-		"scratchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"whenRead": "Next card in the Legacy deck after the February Stop (02-01), read when drawing resumes at the first February setup.",
-		"triggers": [],
-		"opensDoors": [],
-		"opensPackages": [],
-		"destroys": [],
-		"addsToPool": [],
-		"rules": [
-			"No board effect. The archive side says to keep papers like this in the reserve.",
-			"The journal side does not print the usual 'keep journal entries' footer."
-		],
-		"notes": "Side B is an archive memorandum dated April 24, Year 40, with an illegible signature. Printed 'with help of local population' (no 'the'). 'in sight' is two words."
-	}
+  "sequence": 13,
+  "folder": "013_02-02",
+  "cardCode": "02-02",
+  "printedCodes": {
+    "sideA": "02-02a",
+    "sideB": "02-02b"
+  },
+  "title": "Journal Entry",
+  "category": "legacy_journal",
+  "month": "february",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "NONE",
+    "header": "Journal Entry",
+    "trigger": "",
+    "text": "Hollow Men are expanding their raids now that our leaders and soldiers have disappeared. Our supply routes, already abandoned, are unsafe.\n\nThe Hollow Men are working their way into South America, likely looking for one of the labs working on a cure. They are also hitting our supply centers, which means building new ones.\n\nWe need to find a way to fortify these centers so they can resist their attacks.",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "FROM THE ARCHIVES",
+    "text": "APRIL 24, YEAR 40\nReports from the frontier havens. Hollow Men have breached them with help of local population who still distrust us. Sending security patrols but it might be too late. Not sure how well we will function without a full network of havens. Nearing the end of our projected timetable with no cure in sight.\n\nWe're going to start having to dilute supplies or abandon supply routes.",
+    "footer": "Keep papers like this in the reserve.",
+    "scratchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "whenRead": "Next card in the Legacy deck after the February Stop (02-01), read when drawing resumes at the first February setup.",
+    "triggers": [],
+    "opensDoors": [],
+    "opensPackages": [],
+    "destroys": [],
+    "addsToPool": [],
+    "rules": [
+      "No board effect. The archive side says to keep papers like this in the reserve.",
+      "The journal side does not print the usual 'keep journal entries' footer."
+    ],
+    "notes": "Side B is an archive memorandum dated April 24, Year 40, with an illegible signature. Printed 'with help of local population' (no 'the'). 'in sight' is two words."
+  }
 }

@@ -1,96 +1,99 @@
 {
-	"file": "page-10.jpg",
-	"printedPageNumber": 10,
-	"headings": [
-		"On Your Turn",
-		"Check for Exposure",
-		"Do 4 Actions",
-		"Movement Actions",
-		"Drive / Ferry",
-		"Sail",
-		"Charter Boat",
-		"Other Actions",
-		"Make Supplies",
-		"Produce Supplies",
-		"Deliver Supplies",
-		"Share Knowledge",
-		"Build Supply Center"
-	],
-	"ruleStickerSlots": [
-		{
-			"slot": "F",
-			"context": "Blank dashed box under Check for Exposure (and under the 1–7 exposure-track illustration), before Do 4 Actions. Reserved for an extra exposure rule."
-		},
-		{
-			"slot": "G",
-			"context": "Blank dashed box under the Movement Actions heading and above Drive / Ferry. Reserved for an additional movement action."
-		},
-		{
-			"slot": "H",
-			"context": "Blank dashed box at the top of the right column, above Other Actions. Reserved for an action or rule that sits ahead of Make Supplies."
-		}
-	],
-	"sections": [
-		{
-			"heading": "Check for Exposure",
-			"mechanicsSummary": [
-				"If your turn starts in a location that has 1 or more plague cubes, gain 1 exposure.",
-				"Scars and death from exposure are on page 16, not on this page."
-			]
-		},
-		{
-			"heading": "Do 4 Actions",
-			"mechanicsSummary": [
-				"After the exposure check, take up to 4 actions plus any number of free actions.",
-				"Actions may be repeated. Each use costs 1 action unless it is free.",
-				"Jobs and abilities can change how an action works.",
-				"Some actions discard a card. Those discards go to the Player discard pile.",
-				"Free actions do not spend one of the 4 actions. They may be taken before, between, or after the other actions, still inside this step.",
-				"Finish one action before starting the next."
-			]
-		},
-		{
-			"heading": "Movement Actions",
-			"mechanicsSummary": [
-				"Drive / Ferry: move to an adjacent location connected by a line. Costs an action.",
-				"Sail (anchor icon): discard a card and move to the city named on that card, if a sea route can be traced there. Both the origin and the destination have an anchor. Costs an action.",
-				"Charter Boat (anchor icon): discard the City card of the city you are in, then move to any location you can trace a sea route to. Both ends have an anchor. Costs an action.",
-				"Sail and Charter Boat cannot be used over land."
-			]
-		},
-		{
-			"heading": "Other Actions",
-			"mechanicsSummary": [
-				"Make Supplies: take 1 supply cube from the stockpile onto your Character card. No limit on how many cubes a character may hold.",
-				"Produce Supplies: discard a Produce Supplies card while you are in a haven or a supply center.",
-				"Local Production (one side of that card): fill the haven or supply center you are in up to its population. Do not add cubes once it is at or above population.",
-				"System-Wide Production (the other side): fill every haven and supply center on the grid up to its population, then mark one box on the card. You must still be in a haven or supply center. When the last box is marked, destroy the card.",
-				"If the stockpile cannot fill every chosen location, place as many cubes as you can, in any order.",
-				"Deliver Supplies: move any number of supply cubes from your Character card onto your current location.",
-				"Share Knowledge, either direction: give the City card of the city you are both in, or take that city card from the other player. The other player must be in the same city. Both must agree.",
-				"If the receiver would then be over the hand limit (usually 7), they immediately discard a card or play an Event.",
-				"Build Supply Center: discard 5 cards of the color of the city you are in. Place a supply center in that city. It lasts only until the end of this game. If none are left in the pool, move an existing supply center to this city instead. A city holds at most 1 supply center."
-			]
-		}
-	],
-	"tables": [
-		{
-			"name": "Action limits",
-			"rows": [
-				{ "item": "Actions per turn", "value": 4 },
-				{ "item": "Free actions per turn", "value": "unlimited, only during the action step" },
-				{ "item": "Plague cubes that trigger exposure at turn start", "value": "1 or more" },
-				{ "item": "Usual hand limit", "value": 7 },
-				{ "item": "Cards discarded to build a supply center", "value": "5, matching the current city's color" },
-				{ "item": "Supply centers per city", "value": 1 },
-				{ "item": "Cubes taken by Make Supplies", "value": "1 per action, no carry limit" }
-			]
-		}
-	],
-	"diagramsAndCallouts": [
-		"Exposure scratch strip numbered 1–7.",
-		"Produce Supplies card shown beside that action, with Local Production and System-Wide Production and a row of check boxes.",
-		"Anchor icons mark Sail and Charter Boat only. Drive / Ferry has no anchor.",
-		"Footer: Sail and Charter Boat do not work over land."
-	]
+  "file": "page-10.jpg",
+  "printedPageNumber": 10,
+  "headings": [
+    "On Your Turn",
+    "Check for Exposure",
+    "Do 4 Actions",
+    "Movement Actions",
+    "Drive / Ferry",
+    "Sail",
+    "Charter Boat",
+    "Other Actions",
+    "Make Supplies",
+    "Produce Supplies",
+    "Deliver Supplies",
+    "Share Knowledge",
+    "Build Supply Center"
+  ],
+  "ruleStickerSlots": [
+    {
+      "slot": "F",
+      "context": "Blank dashed box under Check for Exposure (and under the 1–7 exposure-track illustration), before Do 4 Actions. Reserved for an extra exposure rule."
+    },
+    {
+      "slot": "G",
+      "context": "Blank dashed box under the Movement Actions heading and above Drive / Ferry. Reserved for an additional movement action."
+    },
+    {
+      "slot": "H",
+      "context": "Blank dashed box at the top of the right column, above Other Actions. Reserved for an action or rule that sits ahead of Make Supplies."
+    }
+  ],
+  "sections": [
+    {
+      "heading": "Check for Exposure",
+      "mechanicsSummary": [
+        "If your turn starts in a location that has 1 or more plague cubes, gain 1 exposure.",
+        "Scars and death from exposure are on page 16, not on this page."
+      ]
+    },
+    {
+      "heading": "Do 4 Actions",
+      "mechanicsSummary": [
+        "After the exposure check, take up to 4 actions plus any number of free actions.",
+        "Actions may be repeated. Each use costs 1 action unless it is free.",
+        "Jobs and abilities can change how an action works.",
+        "Some actions discard a card. Those discards go to the Player discard pile.",
+        "Free actions do not spend one of the 4 actions. They may be taken before, between, or after the other actions, still inside this step.",
+        "Finish one action before starting the next."
+      ]
+    },
+    {
+      "heading": "Movement Actions",
+      "mechanicsSummary": [
+        "Drive / Ferry: move to an adjacent location connected by a line. Costs an action.",
+        "Sail (anchor icon): discard a card and move to the city named on that card, if a sea route can be traced there. Both the origin and the destination have an anchor. Costs an action.",
+        "Charter Boat (anchor icon): discard the City card of the city you are in, then move to any location you can trace a sea route to. Both ends have an anchor. Costs an action.",
+        "Sail and Charter Boat cannot be used over land."
+      ]
+    },
+    {
+      "heading": "Other Actions",
+      "mechanicsSummary": [
+        "Make Supplies: take 1 supply cube from the stockpile onto your Character card. No limit on how many cubes a character may hold.",
+        "Produce Supplies: discard a Produce Supplies card while you are in a haven or a supply center.",
+        "Local Production (one side of that card): fill the haven or supply center you are in up to its population. Do not add cubes once it is at or above population.",
+        "System-Wide Production (the other side): fill every haven and supply center on the grid up to its population, then mark one box on the card. You must still be in a haven or supply center. When the last box is marked, destroy the card.",
+        "If the stockpile cannot fill every chosen location, place as many cubes as you can, in any order.",
+        "Deliver Supplies: move any number of supply cubes from your Character card onto your current location.",
+        "Share Knowledge, either direction: give the City card of the city you are both in, or take that city card from the other player. The other player must be in the same city. Both must agree.",
+        "If the receiver would then be over the hand limit (usually 7), they immediately discard a card or play an Event.",
+        "Build Supply Center: discard 5 cards of the color of the city you are in. Place a supply center in that city. It lasts only until the end of this game. If none are left in the pool, move an existing supply center to this city instead. A city holds at most 1 supply center."
+      ]
+    }
+  ],
+  "tables": [
+    {
+      "name": "Action limits",
+      "rows": [
+        { "item": "Actions per turn", "value": 4 },
+        { "item": "Free actions per turn", "value": "unlimited, only during the action step" },
+        { "item": "Plague cubes that trigger exposure at turn start", "value": "1 or more" },
+        { "item": "Usual hand limit", "value": 7 },
+        {
+          "item": "Cards discarded to build a supply center",
+          "value": "5, matching the current city's color"
+        },
+        { "item": "Supply centers per city", "value": 1 },
+        { "item": "Cubes taken by Make Supplies", "value": "1 per action, no carry limit" }
+      ]
+    }
+  ],
+  "diagramsAndCallouts": [
+    "Exposure scratch strip numbered 1–7.",
+    "Produce Supplies card shown beside that action, with Local Production and System-Wide Production and a row of check boxes.",
+    "Anchor icons mark Sail and Charter Boat only. Drive / Ferry has no anchor.",
+    "Footer: Sail and Charter Boat do not work over land."
+  ]
 }

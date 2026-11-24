@@ -1,27 +1,27 @@
 {
-	"id": "london",
-	"cardId": 206,
-	"printedCode": null,
-	"title": "LONDON",
-	"category": "city_infection",
-	"color": "blue",
-	"copies": 3,
-	"images": {
-		"front": "london.jpg",
-		"back": "back.jpg"
-	},
-	"hasImprovementSlot": false,
-	"frontText": "LONDON",
-	"backText": null,
-	"states": [],
-	"mechanics": {
-		"timing": "An Infection deck card. The city name is the only printed text.",
-		"effect": "LONDON",
-		"rules": [
-			"LONDON is printed vertically in the right-hand banner, reading top to bottom.",
-			"The card face is blue, with a green crosshair and a faint biohazard mark.",
-			"No coordinates, population, or rules text are printed.",
-			"Epidemic step 2 draws the bottom Infection card, removes all Supply cubes from that city, and discards the card."
-		]
-	}
+  "id": "london",
+  "cardId": 206,
+  "printedCode": null,
+  "title": "LONDON",
+  "category": "city_infection",
+  "color": "blue",
+  "copies": 3,
+  "images": {
+    "front": "london.jpg",
+    "back": "back.jpg"
+  },
+  "hasImprovementSlot": false,
+  "frontText": "LONDON",
+  "backText": null,
+  "states": [],
+  "mechanics": {
+    "timing": "An Infection deck card. The city name is the only printed text.",
+    "effect": "LONDON",
+    "rules": [
+      "LONDON is printed vertically in the right-hand banner, reading top to bottom.",
+      "The card face is blue, with a green crosshair and a faint biohazard mark.",
+      "No coordinates, population, or rules text are printed.",
+      "Epidemic step 2 draws the bottom Infection card, removes all Supply cubes from that city, and discards the card."
+    ]
+  }
 }

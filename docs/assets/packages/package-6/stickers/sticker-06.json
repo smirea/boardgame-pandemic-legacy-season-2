@@ -1,19 +1,19 @@
 {
-	"id": "sticker-06",
-	"package": 6,
-	"guid": "e9a59c",
-	"printedCode": null,
-	"name": "Area 10 mounting instruction",
-	"category": "instruction",
-	"placementTarget": "Instruction for sticker-05_area-10. Not itself placed on the board.",
-	"costProductionUnits": null,
-	"copies": 1,
-	"image": "sticker-06.jpg",
-	"text": "Put this sticker on the game board onto Area 10 as a reminder to add 15 more Supply cubes to the stockpile during setup each month.",
-	"mechanics": {
-		"timing": "when the package is opened",
-		"effect": "Place the +15 marker on Area 10 of the game board. Each month's setup adds 15 more Supply cubes to the stockpile.",
-		"restrictions": [],
-		"opensDoors": []
-	}
+  "id": "sticker-06",
+  "package": 6,
+  "guid": "e9a59c",
+  "printedCode": null,
+  "name": "Area 10 mounting instruction",
+  "category": "instruction",
+  "placementTarget": "Instruction for sticker-05_area-10. Not itself placed on the board.",
+  "costProductionUnits": null,
+  "copies": 1,
+  "image": "sticker-06.jpg",
+  "text": "Put this sticker on the game board onto Area 10 as a reminder to add 15 more Supply cubes to the stockpile during setup each month.",
+  "mechanics": {
+    "timing": "when the package is opened",
+    "effect": "Place the +15 marker on Area 10 of the game board. Each month's setup adds 15 more Supply cubes to the stockpile.",
+    "restrictions": [],
+    "opensDoors": []
+  }
 }

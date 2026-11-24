@@ -1,105 +1,105 @@
 {
-	"door": "30",
-	"folder": 3,
-	"frontImage": "dossiers/folder-3/door-30/front.jpg",
-	"frontText": "30",
-	"items": [
-		{
-			"id": "item-01",
-			"image": "dossiers/folder-3/door-30/item-01.jpg",
-			"count": 1,
-			"printedCode": null,
-			"category": "laboratory-marker",
-			"title": "OPAL",
-			"placementTarget": "Board, next to the Opal laboratory's city",
-			"costProductionUnits": null,
-			"text": "OPAL",
-			"mechanics": {
-				"timing": "when you find a laboratory",
-				"trigger": "When you find the Opal laboratory",
-				"effect": "Add this sticker next to its city on the board.",
-				"restrictions": [],
-				"icon": "Yellow house with a white microscope, name in white on dark blue",
-				"sourceGuids": ["adf30b"]
-			}
-		},
-		{
-			"id": "item-02",
-			"image": "dossiers/folder-3/door-30/item-02.jpg",
-			"count": 1,
-			"printedCode": null,
-			"category": "laboratory-marker",
-			"title": "TOPAZ",
-			"placementTarget": "Board, next to the Topaz laboratory's city",
-			"costProductionUnits": null,
-			"text": "TOPAZ",
-			"mechanics": {
-				"timing": "when you find a laboratory",
-				"trigger": "When you find the Topaz laboratory",
-				"effect": "Add this sticker next to its city on the board.",
-				"restrictions": [],
-				"icon": "Yellow house with a white microscope, name in white on dark blue",
-				"sourceGuids": ["f1fcff"]
-			}
-		},
-		{
-			"id": "item-03",
-			"image": "dossiers/folder-3/door-30/item-03.jpg",
-			"count": 1,
-			"printedCode": null,
-			"category": "laboratory-marker",
-			"title": "PEARL",
-			"placementTarget": "Board, next to the Pearl laboratory's city",
-			"costProductionUnits": null,
-			"text": "PEARL",
-			"mechanics": {
-				"timing": "when you find a laboratory",
-				"trigger": "When you find the Pearl laboratory",
-				"effect": "Add this sticker next to its city on the board.",
-				"restrictions": [],
-				"icon": "Yellow house with a white microscope, name in white on dark blue",
-				"sourceGuids": ["460a1b"]
-			}
-		},
-		{
-			"id": "item-04",
-			"image": "dossiers/folder-3/door-30/item-04.jpg",
-			"count": 1,
-			"printedCode": null,
-			"category": "laboratory-marker",
-			"title": "JADE",
-			"placementTarget": "Board, next to the Jade laboratory's city",
-			"costProductionUnits": null,
-			"text": "JADE",
-			"mechanics": {
-				"timing": "when you find a laboratory",
-				"trigger": "When you find the Jade laboratory",
-				"effect": "Add this sticker next to its city on the board.",
-				"restrictions": [],
-				"icon": "Yellow house with a white microscope, name in white on dark blue",
-				"sourceGuids": ["bcc80c"]
-			}
-		},
-		{
-			"id": "item-05",
-			"image": "dossiers/folder-3/door-30/item-05.jpg",
-			"count": 1,
-			"printedCode": "30",
-			"category": "laboratory-instruction",
-			"title": "Laboratory stickers",
-			"placementTarget": null,
-			"costProductionUnits": null,
-			"text": "When you find a laboratory, add the matching sticker next to its city on the board.",
-			"mechanics": {
-				"timing": "when you find a laboratory",
-				"trigger": null,
-				"effect": "Add the matching laboratory sticker next to its city on the board.",
-				"restrictions": [],
-				"laboratories": ["OPAL", "TOPAZ", "PEARL", "JADE"],
-				"sourceGuids": ["d0dc96"]
-			}
-		}
-	],
-	"bags": [],
-	"summary": "Four laboratory markers, one each for OPAL, TOPAZ, PEARL, and JADE, plus the instruction to place the matching sticker next to that laboratory's city. Each marker is count 1. Corner badge on the instruction is 30."
+  "door": "30",
+  "folder": 3,
+  "frontImage": "dossiers/folder-3/door-30/front.jpg",
+  "frontText": "30",
+  "items": [
+    {
+      "id": "item-01",
+      "image": "dossiers/folder-3/door-30/item-01.jpg",
+      "count": 1,
+      "printedCode": null,
+      "category": "laboratory-marker",
+      "title": "OPAL",
+      "placementTarget": "Board, next to the Opal laboratory's city",
+      "costProductionUnits": null,
+      "text": "OPAL",
+      "mechanics": {
+        "timing": "when you find a laboratory",
+        "trigger": "When you find the Opal laboratory",
+        "effect": "Add this sticker next to its city on the board.",
+        "restrictions": [],
+        "icon": "Yellow house with a white microscope, name in white on dark blue",
+        "sourceGuids": ["adf30b"]
+      }
+    },
+    {
+      "id": "item-02",
+      "image": "dossiers/folder-3/door-30/item-02.jpg",
+      "count": 1,
+      "printedCode": null,
+      "category": "laboratory-marker",
+      "title": "TOPAZ",
+      "placementTarget": "Board, next to the Topaz laboratory's city",
+      "costProductionUnits": null,
+      "text": "TOPAZ",
+      "mechanics": {
+        "timing": "when you find a laboratory",
+        "trigger": "When you find the Topaz laboratory",
+        "effect": "Add this sticker next to its city on the board.",
+        "restrictions": [],
+        "icon": "Yellow house with a white microscope, name in white on dark blue",
+        "sourceGuids": ["f1fcff"]
+      }
+    },
+    {
+      "id": "item-03",
+      "image": "dossiers/folder-3/door-30/item-03.jpg",
+      "count": 1,
+      "printedCode": null,
+      "category": "laboratory-marker",
+      "title": "PEARL",
+      "placementTarget": "Board, next to the Pearl laboratory's city",
+      "costProductionUnits": null,
+      "text": "PEARL",
+      "mechanics": {
+        "timing": "when you find a laboratory",
+        "trigger": "When you find the Pearl laboratory",
+        "effect": "Add this sticker next to its city on the board.",
+        "restrictions": [],
+        "icon": "Yellow house with a white microscope, name in white on dark blue",
+        "sourceGuids": ["460a1b"]
+      }
+    },
+    {
+      "id": "item-04",
+      "image": "dossiers/folder-3/door-30/item-04.jpg",
+      "count": 1,
+      "printedCode": null,
+      "category": "laboratory-marker",
+      "title": "JADE",
+      "placementTarget": "Board, next to the Jade laboratory's city",
+      "costProductionUnits": null,
+      "text": "JADE",
+      "mechanics": {
+        "timing": "when you find a laboratory",
+        "trigger": "When you find the Jade laboratory",
+        "effect": "Add this sticker next to its city on the board.",
+        "restrictions": [],
+        "icon": "Yellow house with a white microscope, name in white on dark blue",
+        "sourceGuids": ["bcc80c"]
+      }
+    },
+    {
+      "id": "item-05",
+      "image": "dossiers/folder-3/door-30/item-05.jpg",
+      "count": 1,
+      "printedCode": "30",
+      "category": "laboratory-instruction",
+      "title": "Laboratory stickers",
+      "placementTarget": null,
+      "costProductionUnits": null,
+      "text": "When you find a laboratory, add the matching sticker next to its city on the board.",
+      "mechanics": {
+        "timing": "when you find a laboratory",
+        "trigger": null,
+        "effect": "Add the matching laboratory sticker next to its city on the board.",
+        "restrictions": [],
+        "laboratories": ["OPAL", "TOPAZ", "PEARL", "JADE"],
+        "sourceGuids": ["d0dc96"]
+      }
+    }
+  ],
+  "bags": [],
+  "summary": "Four laboratory markers, one each for OPAL, TOPAZ, PEARL, and JADE, plus the instruction to place the matching sticker next to that laboratory's city. Each marker is count 1. Corner badge on the instruction is 30."
 }

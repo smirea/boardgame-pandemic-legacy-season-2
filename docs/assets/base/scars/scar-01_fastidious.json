@@ -1,15 +1,15 @@
 {
-	"id": "scar-01",
-	"name": "Fastidious",
-	"category": "scar",
-	"costProductionUnits": null,
-	"copies": 1,
-	"image": "scar-01_fastidious.jpg",
-	"text": "Fastidious: You need 1 extra City card (of the same\ncolor) to do the Build Supply Center action.",
-	"mechanics": {
-		"timing": "action",
-		"trigger": "When doing the Build Supply Center action",
-		"effect": "You need 1 extra City card of the same color.",
-		"restrictions": ["The extra card must be the same color"]
-	}
+  "id": "scar-01",
+  "name": "Fastidious",
+  "category": "scar",
+  "costProductionUnits": null,
+  "copies": 1,
+  "image": "scar-01_fastidious.jpg",
+  "text": "Fastidious: You need 1 extra City card (of the same\ncolor) to do the Build Supply Center action.",
+  "mechanics": {
+    "timing": "action",
+    "trigger": "When doing the Build Supply Center action",
+    "effect": "You need 1 extra City card of the same color.",
+    "restrictions": ["The extra card must be the same color"]
+  }
 }

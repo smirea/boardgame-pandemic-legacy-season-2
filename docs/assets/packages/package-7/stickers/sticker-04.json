@@ -1,20 +1,20 @@
 {
-	"id": "sticker-04",
-	"package": 7,
-	"printedCode": null,
-	"name": "Player reference instruction",
-	"category": "instruction",
-	"placementTarget": "Not placed on the board. It tells you where the Build Satellite Tower and Transmit strips go.",
-	"costProductionUnits": null,
-	"copies": 2,
-	"image": "sticker-04.jpg",
-	"text": "Place this sticker on the back of\neach player reference card.",
-	"mechanics": {
-		"timing": "When the package is opened, before the new actions are used.",
-		"effect": "Instruction to stick the new action strips on the back of each player reference card.",
-		"restrictions": [
-			"The asset list counts 2 copies of this instruction. The Build Satellite Tower strip and the Transmit strip are each a single image."
-		],
-		"opensDoors": []
-	}
+  "id": "sticker-04",
+  "package": 7,
+  "printedCode": null,
+  "name": "Player reference instruction",
+  "category": "instruction",
+  "placementTarget": "Not placed on the board. It tells you where the Build Satellite Tower and Transmit strips go.",
+  "costProductionUnits": null,
+  "copies": 2,
+  "image": "sticker-04.jpg",
+  "text": "Place this sticker on the back of\neach player reference card.",
+  "mechanics": {
+    "timing": "When the package is opened, before the new actions are used.",
+    "effect": "Instruction to stick the new action strips on the back of each player reference card.",
+    "restrictions": [
+      "The asset list counts 2 copies of this instruction. The Build Satellite Tower strip and the Transmit strip are each a single image."
+    ],
+    "opensDoors": []
+  }
 }

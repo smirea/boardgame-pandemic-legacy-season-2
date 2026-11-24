@@ -1,95 +1,98 @@
 {
-	"door": "31",
-	"folder": 3,
-	"frontImage": "dossiers/folder-3/door-31/front.jpg",
-	"frontText": "31",
-	"items": [
-		{
-			"id": "item-01_scout",
-			"image": "dossiers/folder-3/door-31/item-01_scout.jpg",
-			"count": 1,
-			"printedCode": null,
-			"category": "ability",
-			"title": "Scout",
-			"placementTarget": "Character card ability slot",
-			"costProductionUnits": 2,
-			"text": "Scout: You may do the Recon action in a city that does not contain a supply center.",
-			"mechanics": {
-				"timing": "action",
-				"trigger": "When doing the Recon action",
-				"effect": "You may do the Recon action in a city that does not contain a supply center.",
-				"restrictions": [],
-				"printedCapitalization": "supply center is lowercase on the sticker",
-				"costPrintedOn": "dossiers/folder-3/door-31/item-04.jpg",
-				"sourceGuids": ["1af9c0"]
-			}
-		},
-		{
-			"id": "item-02_smuggler",
-			"image": "dossiers/folder-3/door-31/item-02_smuggler.jpg",
-			"count": 1,
-			"printedCode": null,
-			"category": "ability",
-			"title": "Smuggler",
-			"placementTarget": "Character card ability slot",
-			"costProductionUnits": 1,
-			"text": "Smuggler: As an action, discard a City card to take a Supply cube from the reserve and put it in the city matching the card.",
-			"mechanics": {
-				"timing": "action",
-				"trigger": null,
-				"effect": "Discard a City card to take a Supply cube from the reserve and put it in the city matching the card.",
-				"restrictions": ["The cube comes from the reserve", "The city must match the discarded City card"],
-				"costPrintedOn": "dossiers/folder-3/door-31/item-04.jpg",
-				"sourceGuids": ["af9cad"]
-			}
-		},
-		{
-			"id": "item-03_lookout",
-			"image": "dossiers/folder-3/door-31/item-03_lookout.jpg",
-			"count": 1,
-			"printedCode": null,
-			"category": "ability",
-			"title": "Lookout",
-			"placementTarget": "Character card ability slot",
-			"costProductionUnits": 2,
-			"text": "Lookout: To do the Search action, you may take the City card matching your current city from the discard pile, add it to your hand, then search it once.",
-			"mechanics": {
-				"timing": "action",
-				"trigger": "To do the Search action",
-				"effect": "Take the City card matching your current city from the discard pile, add it to your hand, then search it once.",
-				"restrictions": [
-					"The City card must match your current city",
-					"The card comes from the discard pile",
-					"Search that card once"
-				],
-				"costPrintedOn": "dossiers/folder-3/door-31/item-04.jpg",
-				"sourceGuids": ["ab9390"]
-			}
-		},
-		{
-			"id": "item-04",
-			"image": "dossiers/folder-3/door-31/item-04.jpg",
-			"count": 1,
-			"printedCode": "31",
-			"category": "ability-pool-card",
-			"title": "CHARACTER ABILITIES",
-			"placementTarget": null,
-			"costProductionUnits": null,
-			"text": "CHARACTER ABILITIES\nAdd these to your pool of character abilities.\n\nLookout: To do the Search action, you may take the City card matching your current city from the discard pile, add it to your hand, then search it once. (2)\n\nScout: You may do the Recon action in a city that does not contain a supply center. (2)\n\nSmuggler: As an action, discard a City card to take a Supply cube from the reserve and put it in the city matching the card. (1)",
-			"mechanics": {
-				"timing": "game end upgrade",
-				"trigger": null,
-				"effect": "Add these stickers to the pool of character abilities.",
-				"restrictions": [],
-				"costs": {
-					"Lookout": 2,
-					"Scout": 2,
-					"Smuggler": 1
-				},
-				"sourceGuids": ["e2abc8"]
-			}
-		}
-	],
-	"bags": [],
-	"summary": "Three character abilities and the pool card that prices them. Lookout 2, Scout 2, Smuggler 1. Scout prints \"supply center\" in lowercase. Lookout says \"the discard pile\", not \"Player discard pile\". Corner badge on the pool card is 31."
+  "door": "31",
+  "folder": 3,
+  "frontImage": "dossiers/folder-3/door-31/front.jpg",
+  "frontText": "31",
+  "items": [
+    {
+      "id": "item-01_scout",
+      "image": "dossiers/folder-3/door-31/item-01_scout.jpg",
+      "count": 1,
+      "printedCode": null,
+      "category": "ability",
+      "title": "Scout",
+      "placementTarget": "Character card ability slot",
+      "costProductionUnits": 2,
+      "text": "Scout: You may do the Recon action in a city that does not contain a supply center.",
+      "mechanics": {
+        "timing": "action",
+        "trigger": "When doing the Recon action",
+        "effect": "You may do the Recon action in a city that does not contain a supply center.",
+        "restrictions": [],
+        "printedCapitalization": "supply center is lowercase on the sticker",
+        "costPrintedOn": "dossiers/folder-3/door-31/item-04.jpg",
+        "sourceGuids": ["1af9c0"]
+      }
+    },
+    {
+      "id": "item-02_smuggler",
+      "image": "dossiers/folder-3/door-31/item-02_smuggler.jpg",
+      "count": 1,
+      "printedCode": null,
+      "category": "ability",
+      "title": "Smuggler",
+      "placementTarget": "Character card ability slot",
+      "costProductionUnits": 1,
+      "text": "Smuggler: As an action, discard a City card to take a Supply cube from the reserve and put it in the city matching the card.",
+      "mechanics": {
+        "timing": "action",
+        "trigger": null,
+        "effect": "Discard a City card to take a Supply cube from the reserve and put it in the city matching the card.",
+        "restrictions": [
+          "The cube comes from the reserve",
+          "The city must match the discarded City card"
+        ],
+        "costPrintedOn": "dossiers/folder-3/door-31/item-04.jpg",
+        "sourceGuids": ["af9cad"]
+      }
+    },
+    {
+      "id": "item-03_lookout",
+      "image": "dossiers/folder-3/door-31/item-03_lookout.jpg",
+      "count": 1,
+      "printedCode": null,
+      "category": "ability",
+      "title": "Lookout",
+      "placementTarget": "Character card ability slot",
+      "costProductionUnits": 2,
+      "text": "Lookout: To do the Search action, you may take the City card matching your current city from the discard pile, add it to your hand, then search it once.",
+      "mechanics": {
+        "timing": "action",
+        "trigger": "To do the Search action",
+        "effect": "Take the City card matching your current city from the discard pile, add it to your hand, then search it once.",
+        "restrictions": [
+          "The City card must match your current city",
+          "The card comes from the discard pile",
+          "Search that card once"
+        ],
+        "costPrintedOn": "dossiers/folder-3/door-31/item-04.jpg",
+        "sourceGuids": ["ab9390"]
+      }
+    },
+    {
+      "id": "item-04",
+      "image": "dossiers/folder-3/door-31/item-04.jpg",
+      "count": 1,
+      "printedCode": "31",
+      "category": "ability-pool-card",
+      "title": "CHARACTER ABILITIES",
+      "placementTarget": null,
+      "costProductionUnits": null,
+      "text": "CHARACTER ABILITIES\nAdd these to your pool of character abilities.\n\nLookout: To do the Search action, you may take the City card matching your current city from the discard pile, add it to your hand, then search it once. (2)\n\nScout: You may do the Recon action in a city that does not contain a supply center. (2)\n\nSmuggler: As an action, discard a City card to take a Supply cube from the reserve and put it in the city matching the card. (1)",
+      "mechanics": {
+        "timing": "game end upgrade",
+        "trigger": null,
+        "effect": "Add these stickers to the pool of character abilities.",
+        "restrictions": [],
+        "costs": {
+          "Lookout": 2,
+          "Scout": 2,
+          "Smuggler": 1
+        },
+        "sourceGuids": ["e2abc8"]
+      }
+    }
+  ],
+  "bags": [],
+  "summary": "Three character abilities and the pool card that prices them. Lookout 2, Scout 2, Smuggler 1. Scout prints \"supply center\" in lowercase. Lookout says \"the discard pile\", not \"Player discard pile\". Corner badge on the pool card is 31."
 }

@@ -1,23 +1,23 @@
 {
-	"id": "sticker-03",
-	"package": 1,
-	"guid": "ee1184",
-	"printedCode": null,
-	"name": "Exhausted",
-	"category": "scar",
-	"placementTarget": "Character card",
-	"costProductionUnits": null,
-	"copies": 1,
-	"image": "sticker-03.jpg",
-	"summary": "Exhausted: when you do the Establish Supply Line action, you must spend 1 more Supply cube.",
-	"mechanics": {
-		"timing": "When the character does Establish Supply Line. Permanent while the sticker is on the character. The sticker does not print when it is gained.",
-		"effect": "Establish Supply Line costs 1 more Supply cube.",
-		"restrictions": [
-			"The extra cost is 1 Supply cube",
-			"It applies only to Establish Supply Line",
-			"No production cost is printed"
-		],
-		"opensDoors": []
-	}
+  "id": "sticker-03",
+  "package": 1,
+  "guid": "ee1184",
+  "printedCode": null,
+  "name": "Exhausted",
+  "category": "scar",
+  "placementTarget": "Character card",
+  "costProductionUnits": null,
+  "copies": 1,
+  "image": "sticker-03.jpg",
+  "summary": "Exhausted: when you do the Establish Supply Line action, you must spend 1 more Supply cube.",
+  "mechanics": {
+    "timing": "When the character does Establish Supply Line. Permanent while the sticker is on the character. The sticker does not print when it is gained.",
+    "effect": "Establish Supply Line costs 1 more Supply cube.",
+    "restrictions": [
+      "The extra cost is 1 Supply cube",
+      "It applies only to Establish Supply Line",
+      "No production cost is printed"
+    ],
+    "opensDoors": []
+  }
 }

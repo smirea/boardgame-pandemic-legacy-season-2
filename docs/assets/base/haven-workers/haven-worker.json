@@ -1,26 +1,26 @@
 {
-	"id": "haven-worker",
-	"printedCode": null,
-	"title": "HAVEN WORKER",
-	"category": "haven_worker",
-	"color": null,
-	"copies": 4,
-	"images": {
-		"front": "front.jpg",
-		"back": "back.jpg"
-	},
-	"hasImprovementSlot": false,
-	"frontText": "HAVEN WORKER\nStart the game in any haven.\n• You have no special abilities and cannot receive upgrades or scars.\n• If you gain an exposure, discard your hand and lose any remaining actions. Start your next turn in any haven.",
-	"backText": "HAVEN WORKER\nStart the game in any haven.\n• You have no special abilities and cannot receive upgrades or scars.\n• If you gain an exposure, discard your hand and lose any remaining actions. Start your next turn in any haven.",
-	"states": [],
-	"mechanics": {
-		"timing": "A playable pawn card. The same rules are printed on both sides.",
-		"effect": "HAVEN WORKER\nStart the game in any haven.\n• You have no special abilities and cannot receive upgrades or scars.\n• If you gain an exposure, discard your hand and lose any remaining actions. Start your next turn in any haven.",
-		"rules": [
-			"Start the game in any haven. This line is not bulleted.",
-			"You have no special abilities and cannot receive upgrades or scars.",
-			"If you gain an exposure, discard your hand and lose any remaining actions. Start your next turn in any haven.",
-			"The front illustration is a goggled figure. The back illustration is a hooded figure. The words match."
-		]
-	}
+  "id": "haven-worker",
+  "printedCode": null,
+  "title": "HAVEN WORKER",
+  "category": "haven_worker",
+  "color": null,
+  "copies": 4,
+  "images": {
+    "front": "front.jpg",
+    "back": "back.jpg"
+  },
+  "hasImprovementSlot": false,
+  "frontText": "HAVEN WORKER\nStart the game in any haven.\n• You have no special abilities and cannot receive upgrades or scars.\n• If you gain an exposure, discard your hand and lose any remaining actions. Start your next turn in any haven.",
+  "backText": "HAVEN WORKER\nStart the game in any haven.\n• You have no special abilities and cannot receive upgrades or scars.\n• If you gain an exposure, discard your hand and lose any remaining actions. Start your next turn in any haven.",
+  "states": [],
+  "mechanics": {
+    "timing": "A playable pawn card. The same rules are printed on both sides.",
+    "effect": "HAVEN WORKER\nStart the game in any haven.\n• You have no special abilities and cannot receive upgrades or scars.\n• If you gain an exposure, discard your hand and lose any remaining actions. Start your next turn in any haven.",
+    "rules": [
+      "Start the game in any haven. This line is not bulleted.",
+      "You have no special abilities and cannot receive upgrades or scars.",
+      "If you gain an exposure, discard your hand and lose any remaining actions. Start your next turn in any haven.",
+      "The front illustration is a goggled figure. The back illustration is a hooded figure. The words match."
+    ]
+  }
 }

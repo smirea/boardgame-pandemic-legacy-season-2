@@ -1,89 +1,89 @@
 {
-	"door": "64",
-	"folder": 6,
-	"id": "door-64",
-	"guid": "d77fe1",
-	"frontImage": "dossiers/folder-6/door-64/front.jpg",
-	"frontText": "Navy 64 centered on a yellow door card. Dashed cut-line border. No other printed text.",
-	"items": [
-		{
-			"id": "item-01",
-			"image": "dossiers/folder-6/door-64/item-01.jpg",
-			"count": 1,
-			"printedCode": null,
-			"category": "map-sticker",
-			"title": "Europe",
-			"placementTarget": "Board, over Europe. Printed meridians are 20°E (through Frankfurt) and 40°E (just west of Moscow).",
-			"text": null,
-			"mapDetails": {
-				"cities": [
-					{
-						"name": "St. Petersburg",
-						"color": "blue",
-						"population": 1,
-						"port": true,
-						"infested": false,
-						"lab": null,
-						"marker": "anchor",
-						"lat": 60.0,
-						"lon": 30.0,
-						"graticule": "Far north, east of the gulf. A 20°E label is printed in the water southwest of the disc, so the city is east of that meridian. Population 1 square is east of the disc. No rat."
-					},
-					{
-						"name": "Paris",
-						"color": "blue",
-						"population": 2,
-						"port": false,
-						"infested": false,
-						"lab": null,
-						"marker": "inland-x",
-						"lat": 49.0,
-						"lon": 2.0,
-						"graticule": "Southwest of the sticker, west of the printed 20°E meridian. The population 2 square is above the disc and left of the name. No rat."
-					},
-					{
-						"name": "Frankfurt",
-						"color": "blue",
-						"population": 2,
-						"port": false,
-						"infested": false,
-						"lab": null,
-						"marker": "inland-x",
-						"lat": 50.0,
-						"lon": 20.0,
-						"graticule": "The disc is centered on the printed 20°E meridian. The name starts immediately east of the disc. Population 2 square is southeast of the disc. No latitude numeral is printed. No rat."
-					},
-					{
-						"name": "Moscow",
-						"color": "black",
-						"population": 1,
-						"port": false,
-						"infested": false,
-						"lab": null,
-						"marker": "inland-x",
-						"lat": 56.0,
-						"lon": 42.0,
-						"graticule": "East, just east of the printed 40°E meridian. Population 1 square is east of the disc. No rat."
-					}
-				],
-				"havens": [],
-				"printedRoutes": [
-					{
-						"from": "off-sticker west (London)",
-						"to": "Paris",
-						"type": "supply_line",
-						"notes": "A black land line enters from the west edge and ends in the Paris disc (the western of the two blue inland discs). London is the starting-board city in that direction; its name is not printed here. The line does not touch Frankfurt."
-					}
-				],
-				"reconRoutes": [],
-				"redRegionLines": [],
-				"specialAreas": []
-			},
-			"mechanics": {
-				"addsCities": ["St. Petersburg", "Paris", "Frankfurt", "Moscow"],
-				"notes": "St. Petersburg, Paris, and Frankfurt are blue. Moscow is black. Only St. Petersburg is a port. Paris and Frankfurt are population 2; St. Petersburg and Moscow are population 1. None are infested. No recon box and no red region line."
-			}
-		}
-	],
-	"summary": "Europe. St. Petersburg is a blue port at population 1. Paris and Frankfurt are blue, inland, population 2. Moscow is black, inland, population 1. A supply line runs from the west edge into Paris. Frankfurt's disc sits on the printed 20°E line. No infestation, recon, or red region line."
+  "door": "64",
+  "folder": 6,
+  "id": "door-64",
+  "guid": "d77fe1",
+  "frontImage": "dossiers/folder-6/door-64/front.jpg",
+  "frontText": "Navy 64 centered on a yellow door card. Dashed cut-line border. No other printed text.",
+  "items": [
+    {
+      "id": "item-01",
+      "image": "dossiers/folder-6/door-64/item-01.jpg",
+      "count": 1,
+      "printedCode": null,
+      "category": "map-sticker",
+      "title": "Europe",
+      "placementTarget": "Board, over Europe. Printed meridians are 20°E (through Frankfurt) and 40°E (just west of Moscow).",
+      "text": null,
+      "mapDetails": {
+        "cities": [
+          {
+            "name": "St. Petersburg",
+            "color": "blue",
+            "population": 1,
+            "port": true,
+            "infested": false,
+            "lab": null,
+            "marker": "anchor",
+            "lat": 60.0,
+            "lon": 30.0,
+            "graticule": "Far north, east of the gulf. A 20°E label is printed in the water southwest of the disc, so the city is east of that meridian. Population 1 square is east of the disc. No rat."
+          },
+          {
+            "name": "Paris",
+            "color": "blue",
+            "population": 2,
+            "port": false,
+            "infested": false,
+            "lab": null,
+            "marker": "inland-x",
+            "lat": 49.0,
+            "lon": 2.0,
+            "graticule": "Southwest of the sticker, west of the printed 20°E meridian. The population 2 square is above the disc and left of the name. No rat."
+          },
+          {
+            "name": "Frankfurt",
+            "color": "blue",
+            "population": 2,
+            "port": false,
+            "infested": false,
+            "lab": null,
+            "marker": "inland-x",
+            "lat": 50.0,
+            "lon": 20.0,
+            "graticule": "The disc is centered on the printed 20°E meridian. The name starts immediately east of the disc. Population 2 square is southeast of the disc. No latitude numeral is printed. No rat."
+          },
+          {
+            "name": "Moscow",
+            "color": "black",
+            "population": 1,
+            "port": false,
+            "infested": false,
+            "lab": null,
+            "marker": "inland-x",
+            "lat": 56.0,
+            "lon": 42.0,
+            "graticule": "East, just east of the printed 40°E meridian. Population 1 square is east of the disc. No rat."
+          }
+        ],
+        "havens": [],
+        "printedRoutes": [
+          {
+            "from": "off-sticker west (London)",
+            "to": "Paris",
+            "type": "supply_line",
+            "notes": "A black land line enters from the west edge and ends in the Paris disc (the western of the two blue inland discs). London is the starting-board city in that direction; its name is not printed here. The line does not touch Frankfurt."
+          }
+        ],
+        "reconRoutes": [],
+        "redRegionLines": [],
+        "specialAreas": []
+      },
+      "mechanics": {
+        "addsCities": ["St. Petersburg", "Paris", "Frankfurt", "Moscow"],
+        "notes": "St. Petersburg, Paris, and Frankfurt are blue. Moscow is black. Only St. Petersburg is a port. Paris and Frankfurt are population 2; St. Petersburg and Moscow are population 1. None are infested. No recon box and no red region line."
+      }
+    }
+  ],
+  "summary": "Europe. St. Petersburg is a blue port at population 1. Paris and Frankfurt are blue, inland, population 2. Moscow is black, inland, population 1. A supply line runs from the west edge into Paris. Frankfurt's disc sits on the printed 20°E line. No infestation, recon, or red region line."
 }

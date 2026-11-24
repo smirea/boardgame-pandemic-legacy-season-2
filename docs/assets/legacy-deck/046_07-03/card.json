@@ -1,45 +1,45 @@
 {
-	"sequence": 46,
-	"folder": "046_07-03",
-	"cardCode": "07-03",
-	"printedCodes": {
-		"sideA": "07-03a",
-		"sideB": "07-03b"
-	},
-	"title": "Triangulate signals.",
-	"category": "objective",
-	"month": "july",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "NONE",
-		"header": "",
-		"trigger": "",
-		"text": "",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "OBJECTIVE",
-		"text": "Triangulate signals.\n\nThis objective is completed when a blue city, a yellow city, and a black city each contain a satellite tower.\n\nWhen you complete this objective, open door 35.\n\nAdd this card to your pool of objectives. Destroy it at the end of the game in which you complete the objective.",
-		"footer": "Add this card to your pool of objectives. Destroy it at the end of the game in which you complete the objective.",
-		"scratchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"whenRead": "Continue the July setup Legacy-deck reading, after 07-02.",
-		"triggers": ["On completion: open door 35."],
-		"opensDoors": ["35, when this objective is completed"],
-		"opensPackages": [],
-		"destroys": ["This objective, at the end of the game in which it is completed."],
-		"addsToPool": ["Objective: Triangulate signals"],
-		"rules": [
-			"Add this card to the objective pool.",
-			"Complete it when a blue city, a yellow city, and a black city each contain a satellite tower.",
-			"When you complete it, open door 35.",
-			"Destroy it at the end of the game in which you complete the objective."
-		],
-		"notes": "Side A is the objective-card back and carries 07-03a. The face text is printed sideways relative to that code. The header OBJECTIVE is yellow. 35 is in a red box."
-	}
+  "sequence": 46,
+  "folder": "046_07-03",
+  "cardCode": "07-03",
+  "printedCodes": {
+    "sideA": "07-03a",
+    "sideB": "07-03b"
+  },
+  "title": "Triangulate signals.",
+  "category": "objective",
+  "month": "july",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "NONE",
+    "header": "",
+    "trigger": "",
+    "text": "",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "OBJECTIVE",
+    "text": "Triangulate signals.\n\nThis objective is completed when a blue city, a yellow city, and a black city each contain a satellite tower.\n\nWhen you complete this objective, open door 35.\n\nAdd this card to your pool of objectives. Destroy it at the end of the game in which you complete the objective.",
+    "footer": "Add this card to your pool of objectives. Destroy it at the end of the game in which you complete the objective.",
+    "scratchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "whenRead": "Continue the July setup Legacy-deck reading, after 07-02.",
+    "triggers": ["On completion: open door 35."],
+    "opensDoors": ["35, when this objective is completed"],
+    "opensPackages": [],
+    "destroys": ["This objective, at the end of the game in which it is completed."],
+    "addsToPool": ["Objective: Triangulate signals"],
+    "rules": [
+      "Add this card to the objective pool.",
+      "Complete it when a blue city, a yellow city, and a black city each contain a satellite tower.",
+      "When you complete it, open door 35.",
+      "Destroy it at the end of the game in which you complete the objective."
+    ],
+    "notes": "Side A is the objective-card back and carries 07-03a. The face text is printed sideways relative to that code. The header OBJECTIVE is yellow. 35 is in a red box."
+  }
 }

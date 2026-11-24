@@ -1,46 +1,50 @@
 {
-	"sequence": 60,
-	"folder": "060_10-03",
-	"cardCode": "10-03",
-	"printedCodes": {
-		"sideA": "10-03a",
-		"sideB": "10-03b"
-	},
-	"title": "NEW PRIORITIES",
-	"category": "legacy_instruction",
-	"month": "october",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "CONTINUE",
-		"header": "KEEP DRAWING",
-		"trigger": "",
-		"text": "Draw and read the other side of this card.",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "NEW PRIORITIES",
-		"text": "DESTROY THE FOLLOWING OBJECTIVES:\n• RECON EAST ASIA\n• CONNECT 2 NEW CITIES\n• COMPLETE 2 SEARCHES\n\nA new mandatory objective is enclosed. We need to complete 2 objectives this month.\n\nChart, with no further caption on the card:\nSEPTEMBER: 3 stars, 12\nOCTOBER: 2 stars, 8\nNOVEMBER: 1 star, 4\n\nOpen the following doors:\nP    37",
-		"footer": "",
-		"scratchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"whenRead": "Continue the October setup Legacy-deck reading, immediately after 10-02. Side A says to read side B now.",
-		"triggers": [],
-		"opensDoors": ["P", "37"],
-		"opensPackages": [],
-		"destroys": ["Objective: RECON EAST ASIA", "Objective: CONNECT 2 NEW CITIES", "Objective: COMPLETE 2 SEARCHES"],
-		"addsToPool": [],
-		"rules": [
-			"Destroy the objectives RECON EAST ASIA, CONNECT 2 NEW CITIES, and COMPLETE 2 SEARCHES.",
-			"A new mandatory objective is enclosed (10-04, the next card).",
-			"Complete 2 objectives this month (October).",
-			"The card prints a three-column chart: September shows 3 stars and 12, October shows 2 stars and 8, November shows 1 star and 4. The card does not label what the stars or the numbers stand for.",
-			"Immediately open doors P and 37."
-		],
-		"notes": "P and 37 are in separate white boxes with red type. P is a letter. October's 2 stars line up with the \"2 objectives this month\" sentence, and September and November show 3 and 1 stars. The numbers under the stars are 12, 8, and 4. What is inside doors P and 37 is not printed on this card."
-	}
+  "sequence": 60,
+  "folder": "060_10-03",
+  "cardCode": "10-03",
+  "printedCodes": {
+    "sideA": "10-03a",
+    "sideB": "10-03b"
+  },
+  "title": "NEW PRIORITIES",
+  "category": "legacy_instruction",
+  "month": "october",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "CONTINUE",
+    "header": "KEEP DRAWING",
+    "trigger": "",
+    "text": "Draw and read the other side of this card.",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "NEW PRIORITIES",
+    "text": "DESTROY THE FOLLOWING OBJECTIVES:\n• RECON EAST ASIA\n• CONNECT 2 NEW CITIES\n• COMPLETE 2 SEARCHES\n\nA new mandatory objective is enclosed. We need to complete 2 objectives this month.\n\nChart, with no further caption on the card:\nSEPTEMBER: 3 stars, 12\nOCTOBER: 2 stars, 8\nNOVEMBER: 1 star, 4\n\nOpen the following doors:\nP    37",
+    "footer": "",
+    "scratchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "whenRead": "Continue the October setup Legacy-deck reading, immediately after 10-02. Side A says to read side B now.",
+    "triggers": [],
+    "opensDoors": ["P", "37"],
+    "opensPackages": [],
+    "destroys": [
+      "Objective: RECON EAST ASIA",
+      "Objective: CONNECT 2 NEW CITIES",
+      "Objective: COMPLETE 2 SEARCHES"
+    ],
+    "addsToPool": [],
+    "rules": [
+      "Destroy the objectives RECON EAST ASIA, CONNECT 2 NEW CITIES, and COMPLETE 2 SEARCHES.",
+      "A new mandatory objective is enclosed (10-04, the next card).",
+      "Complete 2 objectives this month (October).",
+      "The card prints a three-column chart: September shows 3 stars and 12, October shows 2 stars and 8, November shows 1 star and 4. The card does not label what the stars or the numbers stand for.",
+      "Immediately open doors P and 37."
+    ],
+    "notes": "P and 37 are in separate white boxes with red type. P is a letter. October's 2 stars line up with the \"2 objectives this month\" sentence, and September and November show 3 and 1 stars. The numbers under the stars are 12, 8, and 4. What is inside doors P and 37 is not printed on this card."
+  }
 }

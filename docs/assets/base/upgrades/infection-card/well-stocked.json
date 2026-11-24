@@ -1,15 +1,15 @@
 {
-	"id": "well-stocked",
-	"name": "Well Stocked",
-	"category": "infection_card_upgrade",
-	"costProductionUnits": 1,
-	"copies": 2,
-	"image": "well-stocked.jpg",
-	"text": "Well Stocked:\nIf there are 2 or more Supply cubes in this city when\nthis card is drawn, do not remove any Supply cubes.",
-	"mechanics": {
-		"timing": "passive",
-		"trigger": "When this card is drawn, if its city has 2 or more Supply cubes",
-		"effect": "Do not remove any Supply cubes.",
-		"restrictions": ["Only if the city has 2 or more Supply cubes when the card is drawn"]
-	}
+  "id": "well-stocked",
+  "name": "Well Stocked",
+  "category": "infection_card_upgrade",
+  "costProductionUnits": 1,
+  "copies": 2,
+  "image": "well-stocked.jpg",
+  "text": "Well Stocked:\nIf there are 2 or more Supply cubes in this city when\nthis card is drawn, do not remove any Supply cubes.",
+  "mechanics": {
+    "timing": "passive",
+    "trigger": "When this card is drawn, if its city has 2 or more Supply cubes",
+    "effect": "Do not remove any Supply cubes.",
+    "restrictions": ["Only if the city has 2 or more Supply cubes when the card is drawn"]
+  }
 }

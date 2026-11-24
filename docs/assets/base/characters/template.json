@@ -1,103 +1,113 @@
 {
-	"id": "blank-character",
-	"images": {
-		"front": "blank-front.jpg",
-		"back": "back.jpg"
-	},
-	"front": {
-		"verbatimText": [
-			"PLACE OF DEATH",
-			"HOME",
-			"AGE",
-			"PHOTO",
-			"NAME",
-			"EXPOSURE",
-			"1",
-			"2",
-			"3",
-			"4",
-			"5",
-			"6",
-			"7",
-			"JOB"
-		],
-		"instructions": null,
-		"header": {
-			"fieldsLeftToRight": [
-				{
-					"label": "PLACE OF DEATH",
-					"orientation": "vertical",
-					"notes": "Tall writing strip at the left of the header."
-				},
-				{
-					"label": "HOME",
-					"orientation": "vertical",
-					"notes": "Upper half of the narrow strip next to Place of Death."
-				},
-				{
-					"label": "AGE",
-					"orientation": "vertical",
-					"notes": "Lower half of the same narrow strip, under HOME."
-				},
-				{
-					"label": null,
-					"orientation": null,
-					"notes": "Unlabeled haven illustration: buildings under an arch, on the dark header."
-				},
-				{
-					"label": "PHOTO",
-					"orientation": "vertical",
-					"notes": "Large blank rectangle. PHOTO is printed vertically on the right edge of the box. A double horizontal rule closes the bottom of the box."
-				},
-				{
-					"label": "NAME",
-					"orientation": "vertical",
-					"notes": "Narrow writing strip at the right of the header."
-				}
-			]
-		},
-		"exposure": {
-			"label": "EXPOSURE",
-			"labelColor": "red",
-			"labelOrientation": "vertical",
-			"boxCount": 7,
-			"order": "top to bottom, numbered 1 through 7",
-			"unscratchedAppearance": "gray scratch-off foil",
-			"rulesPrintedOnCard": null,
-			"notes": "The numbers sit in the left margin of the track. EXPOSURE is printed in the black band immediately to the right of the boxes. No rule text is printed. Scratched boxes on the ten character cards show one of three results: empty cream paper (safe), a red scratch mark (scar), or a red skull (death)."
-		},
-		"stickerSlots": {
-			"count": 5,
-			"layout": "Five equal blank columns to the right of the exposure track, running from under the header to the bottom border.",
-			"labeled": [
-				{
-					"slot": 5,
-					"label": "JOB",
-					"orientation": "vertical",
-					"notes": "JOB is printed in the right margin beside the bottom of the rightmost column."
-				}
-			],
-			"unlabeledSlots": [1, 2, 3, 4]
-		}
-	},
-	"back": {
-		"verbatimText": ["JOURNAL", "MONTH", "PLAYER", "WIN?", "DATE", "MONTH", "PLAYER", "WIN?", "DATE"],
-		"instructions": null,
-		"title": {
-			"label": "JOURNAL",
-			"orientation": "vertical",
-			"notes": "Printed in the right margin, spanning both halves of the card."
-		},
-		"panels": {
-			"count": 2,
-			"divider": "A solid horizontal rule splits the card into an upper journal and a lower journal.",
-			"eachPanel": {
-				"columns": 10,
-				"grid": "Dotted graph paper.",
-				"bandsTopToBottom": ["MONTH", "PLAYER", "WIN?", "DATE"],
-				"labelPlacement": "White vertical labels in a black strip along the right edge of the grid. A tick separates each label.",
-				"notes": "PLAYER is the tallest band. WIN? is the shortest. MONTH and DATE are the two middle heights, with MONTH shorter than DATE. The same four labels and the same band proportions repeat on the lower half."
-			}
-		}
-	}
+  "id": "blank-character",
+  "images": {
+    "front": "blank-front.jpg",
+    "back": "back.jpg"
+  },
+  "front": {
+    "verbatimText": [
+      "PLACE OF DEATH",
+      "HOME",
+      "AGE",
+      "PHOTO",
+      "NAME",
+      "EXPOSURE",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "JOB"
+    ],
+    "instructions": null,
+    "header": {
+      "fieldsLeftToRight": [
+        {
+          "label": "PLACE OF DEATH",
+          "orientation": "vertical",
+          "notes": "Tall writing strip at the left of the header."
+        },
+        {
+          "label": "HOME",
+          "orientation": "vertical",
+          "notes": "Upper half of the narrow strip next to Place of Death."
+        },
+        {
+          "label": "AGE",
+          "orientation": "vertical",
+          "notes": "Lower half of the same narrow strip, under HOME."
+        },
+        {
+          "label": null,
+          "orientation": null,
+          "notes": "Unlabeled haven illustration: buildings under an arch, on the dark header."
+        },
+        {
+          "label": "PHOTO",
+          "orientation": "vertical",
+          "notes": "Large blank rectangle. PHOTO is printed vertically on the right edge of the box. A double horizontal rule closes the bottom of the box."
+        },
+        {
+          "label": "NAME",
+          "orientation": "vertical",
+          "notes": "Narrow writing strip at the right of the header."
+        }
+      ]
+    },
+    "exposure": {
+      "label": "EXPOSURE",
+      "labelColor": "red",
+      "labelOrientation": "vertical",
+      "boxCount": 7,
+      "order": "top to bottom, numbered 1 through 7",
+      "unscratchedAppearance": "gray scratch-off foil",
+      "rulesPrintedOnCard": null,
+      "notes": "The numbers sit in the left margin of the track. EXPOSURE is printed in the black band immediately to the right of the boxes. No rule text is printed. Scratched boxes on the ten character cards show one of three results: empty cream paper (safe), a red scratch mark (scar), or a red skull (death)."
+    },
+    "stickerSlots": {
+      "count": 5,
+      "layout": "Five equal blank columns to the right of the exposure track, running from under the header to the bottom border.",
+      "labeled": [
+        {
+          "slot": 5,
+          "label": "JOB",
+          "orientation": "vertical",
+          "notes": "JOB is printed in the right margin beside the bottom of the rightmost column."
+        }
+      ],
+      "unlabeledSlots": [1, 2, 3, 4]
+    }
+  },
+  "back": {
+    "verbatimText": [
+      "JOURNAL",
+      "MONTH",
+      "PLAYER",
+      "WIN?",
+      "DATE",
+      "MONTH",
+      "PLAYER",
+      "WIN?",
+      "DATE"
+    ],
+    "instructions": null,
+    "title": {
+      "label": "JOURNAL",
+      "orientation": "vertical",
+      "notes": "Printed in the right margin, spanning both halves of the card."
+    },
+    "panels": {
+      "count": 2,
+      "divider": "A solid horizontal rule splits the card into an upper journal and a lower journal.",
+      "eachPanel": {
+        "columns": 10,
+        "grid": "Dotted graph paper.",
+        "bandsTopToBottom": ["MONTH", "PLAYER", "WIN?", "DATE"],
+        "labelPlacement": "White vertical labels in a black strip along the right edge of the grid. A tick separates each label.",
+        "notes": "PLAYER is the tallest band. WIN? is the shortest. MONTH and DATE are the two middle heights, with MONTH shorter than DATE. The same four labels and the same band proportions repeat on the lower half."
+      }
+    }
+  }
 }

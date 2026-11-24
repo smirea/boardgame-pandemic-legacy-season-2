@@ -1,15 +1,15 @@
 {
-	"id": "foundations",
-	"name": "Foundations",
-	"category": "player_card_upgrade",
-	"costProductionUnits": 1,
-	"copies": 3,
-	"image": "foundations.jpg",
-	"text": "Foundations:\nThis card counts as 2 cards of\nits color for the Build Supply\nCenter action.",
-	"mechanics": {
-		"timing": "action",
-		"trigger": "When used for the Build Supply Center action",
-		"effect": "This card counts as 2 cards of its color for the Build Supply Center action.",
-		"restrictions": ["Counts only for the Build Supply Center action"]
-	}
+  "id": "foundations",
+  "name": "Foundations",
+  "category": "player_card_upgrade",
+  "costProductionUnits": 1,
+  "copies": 3,
+  "image": "foundations.jpg",
+  "text": "Foundations:\nThis card counts as 2 cards of\nits color for the Build Supply\nCenter action.",
+  "mechanics": {
+    "timing": "action",
+    "trigger": "When used for the Build Supply Center action",
+    "effect": "This card counts as 2 cards of its color for the Build Supply Center action.",
+    "restrictions": ["Counts only for the Build Supply Center action"]
+  }
 }

@@ -1,5 +1,5 @@
 <script lang="ts" module>
-	const VERTEX = /* glsl */ `
+  const VERTEX = /* glsl */ `
 		varying vec2 vUv;
 		void main() {
 			vUv = uv;
@@ -7,16 +7,16 @@
 		}
 	`;
 
-	/*
-	 * Smoke over unexplored ground, in two layers: a dense bank on the chart and thin wisps drifting above
-	 * it, so the fog has depth as the camera tilts. The outline comes from a blurred copy of the exact
-	 * mask, pushed about by domain-warped noise: the noise bends the field's contour into billows, and the
-	 * contour sits just outside the true boundary, so unexplored ground is always fully hidden while the
-	 * edge curls over charted ground. A location being explored shrinks its field, and the billows erode
-	 * with it.
-	 */
-	const NOISE_SIZE = 256;
-	const FRAGMENT = /* glsl */ `
+  /*
+   * Smoke over unexplored ground, in two layers: a dense bank on the chart and thin wisps drifting above
+   * it, so the fog has depth as the camera tilts. The outline comes from a blurred copy of the exact
+   * mask, pushed about by domain-warped noise: the noise bends the field's contour into billows, and the
+   * contour sits just outside the true boundary, so unexplored ground is always fully hidden while the
+   * edge curls over charted ground. A location being explored shrinks its field, and the billows erode
+   * with it.
+   */
+  const NOISE_SIZE = 256;
+  const FRAGMENT = /* glsl */ `
 		#define NOISE_SIZE ${NOISE_SIZE}.0
 		uniform sampler2D uMask;
 		uniform sampler2D uField;
@@ -102,174 +102,195 @@
 </script>
 
 <script lang="ts">
-	import { groundCity, pack } from '@repo/game';
-	import type { CityId, GroundId } from '@repo/game';
-	import { T, useTask, useThrelte } from '@threlte/core';
-	import { untrack } from 'svelte';
-	import { cubicInOut } from 'svelte/easing';
-	import {
-		CanvasTexture,
-		DataTexture,
-		LinearFilter,
-		RedFormat,
-		RepeatWrapping,
-		ShaderMaterial,
-		Vector2,
-		Vector4,
-	} from 'three';
-	import type { FogMask } from './chart';
-	import { FRAME, LAND_HEIGHT } from './projection';
-	import type { BoardBounds } from './projection';
+  import { groundCity, pack } from "@repo/game";
+  import type { CityId, GroundId } from "@repo/game";
+  import { T, useTask, useThrelte } from "@threlte/core";
+  import { untrack } from "svelte";
+  import { cubicInOut } from "svelte/easing";
+  import {
+    CanvasTexture,
+    DataTexture,
+    LinearFilter,
+    RedFormat,
+    RepeatWrapping,
+    ShaderMaterial,
+    Vector2,
+    Vector4,
+  } from "three";
+  import type { FogMask } from "./chart";
+  import { FRAME, LAND_HEIGHT } from "./projection";
+  import type { BoardBounds } from "./projection";
 
-	type Props = {
-		bounds: BoardBounds;
-		mask: FogMask;
-		hidden: (city: CityId) => boolean;
-		/** After each repaint of the mask, so whatever else reads it can upload it. */
-		onpaint?: () => void;
-	};
+  type Props = {
+    bounds: BoardBounds;
+    mask: FogMask;
+    hidden: (city: CityId) => boolean;
+    /** After each repaint of the mask, so whatever else reads it can upload it. */
+    onpaint?: () => void;
+  };
 
-	let { bounds, mask: initialMask, hidden, onpaint }: Props = $props();
+  let { bounds, mask: initialMask, hidden, onpaint }: Props = $props();
 
-	const { invalidate, shouldRender } = useThrelte();
-	const REVEAL_SECONDS = 2.6;
-	const area = untrack(() => bounds);
-	const mask = untrack(() => initialMask);
-	const texture = (canvas: OffscreenCanvas) => {
-		const map = new CanvasTexture(canvas);
-		map.minFilter = LinearFilter;
-		map.generateMipmaps = false;
-		return map;
-	};
-	const maskTexture = texture(mask.canvas);
-	const fieldTexture = texture(mask.field);
-	// The same smoke on every load: the values come from a fixed seed.
-	const noiseTexture = (() => {
-		const values = new Uint8Array(NOISE_SIZE * NOISE_SIZE);
-		let seed = 0x2f6e2b1;
-		for (let index = 0; index < values.length; index++) {
-			seed = (Math.imul(seed, 1664525) + 1013904223) | 0;
-			values[index] = seed >>> 24;
-		}
-		const map = new DataTexture(values, NOISE_SIZE, NOISE_SIZE, RedFormat);
-		map.wrapS = map.wrapT = RepeatWrapping;
-		map.magFilter = map.minFilter = LinearFilter;
-		map.needsUpdate = true;
-		return map;
-	})();
+  const { invalidate, shouldRender } = useThrelte();
+  const REVEAL_SECONDS = 2.6;
+  const area = untrack(() => bounds);
+  const mask = untrack(() => initialMask);
+  const texture = (canvas: OffscreenCanvas) => {
+    const map = new CanvasTexture(canvas);
+    map.minFilter = LinearFilter;
+    map.generateMipmaps = false;
+    return map;
+  };
+  const maskTexture = texture(mask.canvas);
+  const fieldTexture = texture(mask.field);
+  // The same smoke on every load: the values come from a fixed seed.
+  const noiseTexture = (() => {
+    const values = new Uint8Array(NOISE_SIZE * NOISE_SIZE);
+    let seed = 0x2f6e2b1;
+    for (let index = 0; index < values.length; index++) {
+      seed = (Math.imul(seed, 1664525) + 1013904223) | 0;
+      values[index] = seed >>> 24;
+    }
+    const map = new DataTexture(values, NOISE_SIZE, NOISE_SIZE, RedFormat);
+    map.wrapS = map.wrapT = RepeatWrapping;
+    map.magFilter = map.minFilter = LinearFilter;
+    map.needsUpdate = true;
+    return map;
+  })();
 
-	const uniforms = {
-		uMask: { value: maskTexture },
-		uField: { value: fieldTexture },
-		uNoise: { value: noiseTexture },
-		uTime: { value: 0 },
-		uAspect: { value: (area.maxX - area.minX) / (area.maxZ - area.minZ) },
-		uFrame: {
-			value: new Vector4(
-				(FRAME.minX - area.minX) / (area.maxX - area.minX),
-				1 - (FRAME.maxZ - area.minZ) / (area.maxZ - area.minZ),
-				(FRAME.maxX - area.minX) / (area.maxX - area.minX),
-				1 - (FRAME.minZ - area.minZ) / (area.maxZ - area.minZ),
-			),
-		},
-		uTexel: { value: new Vector2(1 / mask.canvas.width, 1 / mask.canvas.height).multiplyScalar(mask.blur * 4) },
-	};
-	const layer = (index: number) =>
-		new ShaderMaterial({
-			vertexShader: VERTEX,
-			fragmentShader: FRAGMENT,
-			uniforms: { ...uniforms, uLayer: { value: index } },
-			transparent: true,
-			depthWrite: false,
-		});
-	const bank = layer(0);
-	const wisps = layer(1);
+  const uniforms = {
+    uMask: { value: maskTexture },
+    uField: { value: fieldTexture },
+    uNoise: { value: noiseTexture },
+    uTime: { value: 0 },
+    uAspect: { value: (area.maxX - area.minX) / (area.maxZ - area.minZ) },
+    uFrame: {
+      value: new Vector4(
+        (FRAME.minX - area.minX) / (area.maxX - area.minX),
+        1 - (FRAME.maxZ - area.minZ) / (area.maxZ - area.minZ),
+        (FRAME.maxX - area.minX) / (area.maxX - area.minX),
+        1 - (FRAME.minZ - area.minZ) / (area.maxZ - area.minZ),
+      ),
+    },
+    uTexel: {
+      value: new Vector2(1 / mask.canvas.width, 1 / mask.canvas.height).multiplyScalar(
+        mask.blur * 4,
+      ),
+    },
+  };
+  const layer = (index: number) =>
+    new ShaderMaterial({
+      vertexShader: VERTEX,
+      fragmentShader: FRAGMENT,
+      uniforms: { ...uniforms, uLayer: { value: index } },
+      transparent: true,
+      depthWrite: false,
+    });
+  const bank = layer(0);
+  const wisps = layer(1);
 
-	// Every location owns ground, lost havens included: the rules count theirs as unexplored too. So does each dark
-	// sea, hidden until the location it opens with is revealed, or for good.
-	const grounds: GroundId[] = [...pack.cities.map(city => city.id), ...pack.uncharted.map(patch => patch.id)];
-	const hiddenGround = (id: GroundId) => {
-		const city = groundCity(id);
-		return city === null || hidden(city);
-	};
-	const sources = new Map<GroundId, { cover: number; progress: number; target: number; wait: number }>(
-		grounds.map(id => {
-			const covered = hiddenGround(id) ? 1 : 0;
-			return [id, { cover: covered, progress: covered, target: covered, wait: 0 }];
-		}),
-	);
-	const paint = () => {
-		mask.draw(id => sources.get(id)?.cover ?? 0);
-		maskTexture.needsUpdate = true;
-		fieldTexture.needsUpdate = true;
-		onpaint?.();
-	};
-	paint();
-	const foggy = () => [...sources.values()].some(source => source.cover > 0);
+  // Every location owns ground, lost havens included: the rules count theirs as unexplored too. So does each dark
+  // sea, hidden until the location it opens with is revealed, or for good.
+  const grounds: GroundId[] = [
+    ...pack.cities.map((city) => city.id),
+    ...pack.uncharted.map((patch) => patch.id),
+  ];
+  const hiddenGround = (id: GroundId) => {
+    const city = groundCity(id);
+    return city === null || hidden(city);
+  };
+  const sources = new Map<
+    GroundId,
+    { cover: number; progress: number; target: number; wait: number }
+  >(
+    grounds.map((id) => {
+      const covered = hiddenGround(id) ? 1 : 0;
+      return [id, { cover: covered, progress: covered, target: covered, wait: 0 }];
+    }),
+  );
+  const paint = () => {
+    mask.draw((id) => sources.get(id)?.cover ?? 0);
+    maskTexture.needsUpdate = true;
+    fieldTexture.needsUpdate = true;
+    onpaint?.();
+  };
+  paint();
+  const foggy = () => [...sources.values()].some((source) => source.cover > 0);
 
-	// The smoke drifts while the board is alive and comes to rest once nothing on it has changed for a while, so
-	// a table nobody is touching draws nothing. The drift is slow, so it is drawn at half the screen's rate.
-	const REST_AFTER = 6;
-	const SETTLE = 3;
-	const DRIFT_FRAME = 1 / 30;
-	let still = 0;
-	let sinceFrame = 0;
-	const { start, stop } = useTask(
-		delta => {
-			let moving = false;
-			for (const source of sources.values()) {
-				if (source.progress === source.target) continue;
-				moving = true;
-				if (source.wait > 0) {
-					source.wait -= delta;
-					continue;
-				}
-				const step = delta / REVEAL_SECONDS;
-				source.progress =
-					source.target > source.progress
-						? Math.min(source.target, source.progress + step)
-						: Math.max(source.target, source.progress - step);
-				source.cover = cubicInOut(source.progress);
-			}
-			if (moving) paint();
-			if (!moving && !foggy()) return stop();
-			// A frame someone else asked for is the board changing: a piece, the camera, a highlight.
-			const alive = moving || shouldRender();
-			still = alive ? 0 : still + delta;
-			const pace = 1 - Math.min(1, Math.max(0, (still - REST_AFTER) / SETTLE));
-			if (pace === 0) return;
-			uniforms.uTime.value += delta * pace;
-			sinceFrame += delta;
-			if (alive || sinceFrame >= DRIFT_FRAME) {
-				sinceFrame = 0;
-				invalidate();
-			}
-		},
-		{ autoStart: false, autoInvalidate: false },
-	);
-	if (foggy()) start();
+  // The smoke drifts while the board is alive and comes to rest once nothing on it has changed for a while, so
+  // a table nobody is touching draws nothing. The drift is slow, so it is drawn at half the screen's rate.
+  const REST_AFTER = 6;
+  const SETTLE = 3;
+  const DRIFT_FRAME = 1 / 30;
+  let still = 0;
+  let sinceFrame = 0;
+  const { start, stop } = useTask(
+    (delta) => {
+      let moving = false;
+      for (const source of sources.values()) {
+        if (source.progress === source.target) continue;
+        moving = true;
+        if (source.wait > 0) {
+          source.wait -= delta;
+          continue;
+        }
+        const step = delta / REVEAL_SECONDS;
+        source.progress =
+          source.target > source.progress
+            ? Math.min(source.target, source.progress + step)
+            : Math.max(source.target, source.progress - step);
+        source.cover = cubicInOut(source.progress);
+      }
+      if (moving) paint();
+      if (!moving && !foggy()) return stop();
+      // A frame someone else asked for is the board changing: a piece, the camera, a highlight.
+      const alive = moving || shouldRender();
+      still = alive ? 0 : still + delta;
+      const pace = 1 - Math.min(1, Math.max(0, (still - REST_AFTER) / SETTLE));
+      if (pace === 0) return;
+      uniforms.uTime.value += delta * pace;
+      sinceFrame += delta;
+      if (alive || sinceFrame >= DRIFT_FRAME) {
+        sinceFrame = 0;
+        invalidate();
+      }
+    },
+    { autoStart: false, autoInvalidate: false },
+  );
+  if (foggy()) start();
 
-	$effect(() => {
-		let changed = false;
-		grounds.forEach((id, index) => {
-			const source = sources.get(id)!;
-			const target = hiddenGround(id) ? 1 : 0;
-			if (source.target === target) return;
-			source.target = target;
-			source.wait = (index % 9) * 0.12;
-			changed = true;
-		});
-		if (changed) start();
-	});
+  $effect(() => {
+    let changed = false;
+    grounds.forEach((id, index) => {
+      const source = sources.get(id)!;
+      const target = hiddenGround(id) ? 1 : 0;
+      if (source.target === target) return;
+      source.target = target;
+      source.wait = (index % 9) * 0.12;
+      changed = true;
+    });
+    if (changed) start();
+  });
 
-	const centre = $derived([(bounds.minX + bounds.maxX) / 2, (bounds.minZ + bounds.maxZ) / 2] as const);
+  const centre = $derived([
+    (bounds.minX + bounds.maxX) / 2,
+    (bounds.minZ + bounds.maxZ) / 2,
+  ] as const);
 </script>
 
-<T.Mesh rotation.x={-Math.PI / 2} position={[centre[0], LAND_HEIGHT + 0.12, centre[1]]} renderOrder={1}>
-	<T.PlaneGeometry args={[bounds.maxX - bounds.minX, bounds.maxZ - bounds.minZ]} />
-	<T is={bank} />
+<T.Mesh
+  rotation.x={-Math.PI / 2}
+  position={[centre[0], LAND_HEIGHT + 0.12, centre[1]]}
+  renderOrder={1}
+>
+  <T.PlaneGeometry args={[bounds.maxX - bounds.minX, bounds.maxZ - bounds.minZ]} />
+  <T is={bank} />
 </T.Mesh>
-<T.Mesh rotation.x={-Math.PI / 2} position={[centre[0], LAND_HEIGHT + 2.2, centre[1]]} renderOrder={2}>
-	<T.PlaneGeometry args={[bounds.maxX - bounds.minX, bounds.maxZ - bounds.minZ]} />
-	<T is={wisps} />
+<T.Mesh
+  rotation.x={-Math.PI / 2}
+  position={[centre[0], LAND_HEIGHT + 2.2, centre[1]]}
+  renderOrder={2}
+>
+  <T.PlaneGeometry args={[bounds.maxX - bounds.minX, bounds.maxZ - bounds.minZ]} />
+  <T is={wisps} />
 </T.Mesh>

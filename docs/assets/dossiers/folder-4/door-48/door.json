@@ -1,87 +1,87 @@
 {
-	"door": "48",
-	"folder": 4,
-	"frontImage": "dossiers/folder-4/door-48/front.jpg",
-	"frontText": "48",
-	"items": [
-		{
-			"id": "item-01",
-			"image": "dossiers/folder-4/door-48/item-01.jpg",
-			"count": 1,
-			"printedCode": null,
-			"category": "scar",
-			"title": "Susceptible",
-			"placementTarget": "Character card scar slot",
-			"costProductionUnits": null,
-			"text": "Susceptible: When you begin your turn in an\ninfested city (rat), get exposed twice instead of once.",
-			"mapDetails": null,
-			"mechanics": {
-				"timing": "start of turn",
-				"trigger": "When you begin your turn in an infested city",
-				"effect": "Get exposed twice instead of once.",
-				"restrictions": ["The city is infested"],
-				"infestedIcon": "green rat in parentheses, the same rat as the door 50 stickers",
-				"sourceGuids": ["c1303f"]
-			}
-		},
-		{
-			"id": "item-02",
-			"image": "dossiers/folder-4/door-48/item-02.jpg",
-			"count": 1,
-			"printedCode": null,
-			"category": "scar",
-			"title": "Fear of Needles",
-			"placementTarget": "Character card scar slot",
-			"costProductionUnits": null,
-			"text": "Fear of Needles: You cannot do the Inoculate\nfree action.",
-			"mapDetails": null,
-			"mechanics": {
-				"timing": "persistent",
-				"trigger": null,
-				"effect": "You cannot do the Inoculate free action.",
-				"restrictions": ["Inoculate is forbidden"],
-				"sourceGuids": ["b65330"]
-			}
-		},
-		{
-			"id": "item-03",
-			"image": "dossiers/folder-4/door-48/item-03.jpg",
-			"count": 1,
-			"printedCode": null,
-			"category": "scar",
-			"title": "Fear of Flying",
-			"placementTarget": "Character card scar slot",
-			"costProductionUnits": null,
-			"text": "Fear of Flying: You must discard a Player card (if you\nhave one) when you do the Shuttle Flight action.",
-			"mapDetails": null,
-			"mechanics": {
-				"timing": "action",
-				"trigger": "When you do the Shuttle Flight action",
-				"effect": "You must discard a Player card if you have one.",
-				"restrictions": ["Discard only if you have a Player card"],
-				"sourceGuids": ["eae3a2"]
-			}
-		},
-		{
-			"id": "item-04",
-			"image": "dossiers/folder-4/door-48/item-04.jpg",
-			"count": 1,
-			"printedCode": null,
-			"category": "scar-instruction",
-			"title": "SCARS",
-			"placementTarget": null,
-			"costProductionUnits": null,
-			"text": "SCARS\nAdd these to your pool of scars.",
-			"mapDetails": null,
-			"mechanics": {
-				"timing": "setup",
-				"trigger": null,
-				"effect": "Add these stickers to the pool of scars.",
-				"restrictions": [],
-				"sourceGuids": ["41ad10"]
-			}
-		}
-	],
-	"bags": [],
-	"summary": "Three scars for the pool: Susceptible (an infested-city start exposes you twice; the mark is a green rat), Fear of Needles (you cannot Inoculate), and Fear of Flying (Shuttle Flight discards a Player card if you have one). The SCARS label is byte-identical to door 47."
+  "door": "48",
+  "folder": 4,
+  "frontImage": "dossiers/folder-4/door-48/front.jpg",
+  "frontText": "48",
+  "items": [
+    {
+      "id": "item-01",
+      "image": "dossiers/folder-4/door-48/item-01.jpg",
+      "count": 1,
+      "printedCode": null,
+      "category": "scar",
+      "title": "Susceptible",
+      "placementTarget": "Character card scar slot",
+      "costProductionUnits": null,
+      "text": "Susceptible: When you begin your turn in an\ninfested city (rat), get exposed twice instead of once.",
+      "mapDetails": null,
+      "mechanics": {
+        "timing": "start of turn",
+        "trigger": "When you begin your turn in an infested city",
+        "effect": "Get exposed twice instead of once.",
+        "restrictions": ["The city is infested"],
+        "infestedIcon": "green rat in parentheses, the same rat as the door 50 stickers",
+        "sourceGuids": ["c1303f"]
+      }
+    },
+    {
+      "id": "item-02",
+      "image": "dossiers/folder-4/door-48/item-02.jpg",
+      "count": 1,
+      "printedCode": null,
+      "category": "scar",
+      "title": "Fear of Needles",
+      "placementTarget": "Character card scar slot",
+      "costProductionUnits": null,
+      "text": "Fear of Needles: You cannot do the Inoculate\nfree action.",
+      "mapDetails": null,
+      "mechanics": {
+        "timing": "persistent",
+        "trigger": null,
+        "effect": "You cannot do the Inoculate free action.",
+        "restrictions": ["Inoculate is forbidden"],
+        "sourceGuids": ["b65330"]
+      }
+    },
+    {
+      "id": "item-03",
+      "image": "dossiers/folder-4/door-48/item-03.jpg",
+      "count": 1,
+      "printedCode": null,
+      "category": "scar",
+      "title": "Fear of Flying",
+      "placementTarget": "Character card scar slot",
+      "costProductionUnits": null,
+      "text": "Fear of Flying: You must discard a Player card (if you\nhave one) when you do the Shuttle Flight action.",
+      "mapDetails": null,
+      "mechanics": {
+        "timing": "action",
+        "trigger": "When you do the Shuttle Flight action",
+        "effect": "You must discard a Player card if you have one.",
+        "restrictions": ["Discard only if you have a Player card"],
+        "sourceGuids": ["eae3a2"]
+      }
+    },
+    {
+      "id": "item-04",
+      "image": "dossiers/folder-4/door-48/item-04.jpg",
+      "count": 1,
+      "printedCode": null,
+      "category": "scar-instruction",
+      "title": "SCARS",
+      "placementTarget": null,
+      "costProductionUnits": null,
+      "text": "SCARS\nAdd these to your pool of scars.",
+      "mapDetails": null,
+      "mechanics": {
+        "timing": "setup",
+        "trigger": null,
+        "effect": "Add these stickers to the pool of scars.",
+        "restrictions": [],
+        "sourceGuids": ["41ad10"]
+      }
+    }
+  ],
+  "bags": [],
+  "summary": "Three scars for the pool: Susceptible (an infested-city start exposes you twice; the mark is a green rat), Fear of Needles (you cannot Inoculate), and Fear of Flying (Shuttle Flight discards a Player card if you have one). The SCARS label is byte-identical to door 47."
 }

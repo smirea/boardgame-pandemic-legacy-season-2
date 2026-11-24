@@ -1,45 +1,45 @@
 {
-	"sequence": 3,
-	"folder": "003_01-03",
-	"cardCode": "01-03",
-	"printedCodes": {
-		"sideA": "01-03a",
-		"sideB": "01-03b"
-	},
-	"title": "NEW PRIORITIES",
-	"category": "legacy_instruction",
-	"month": "january",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "CONTINUE",
-		"header": "KEEP DRAWING",
-		"trigger": "",
-		"text": "From this point on in the Legacy deck, draw cards, reading both sides, until you hit a Pause or Stop card.\nRead Pause and Stop cards to find out when to start drawing again.\nIf you do not see Pause or Stop card, keep drawing.",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "NEW PRIORITIES",
-		"text": "Our objectives follow.\nThis month we have 2 mandatory objectives.\nRemember you can always check to see how many objectives you need to complete for a given month by checking the objective calendar on the board.\n\nYEAR 71 OF THE FALL – 0\nPROLOGUE\nJANUARY\nFEBRUARY\nM\n36\n36\n33",
-		"footer": "",
-		"scratchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"whenRead": "During the January setup draw, after 01-02. The two mandatory objective cards are the next two cards (01-04 and 01-05).",
-		"triggers": [],
-		"opensDoors": [],
-		"opensPackages": [],
-		"destroys": [],
-		"addsToPool": [],
-		"rules": [
-			"From here, draw Legacy cards and read both sides until you hit a Pause or Stop. Those cards say when to start drawing again.",
-			"If you do not see a Pause or Stop card, keep drawing. The printed sentence has no 'a' before 'Pause or Stop card'.",
-			"January has 2 mandatory objectives.",
-			"Objective calendar shown on the card: header 'YEAR 71 OF THE FALL – 0'. Prologue column: 1 star, 36. January column (outlined in white): 2 stars, 36. February column: 2 stars, 33. A fourth column is cut off at the right edge; the visible month label begins with M and one star is visible. The supply number for that column is not on the card."
-		],
-		"notes": "The earlier sentence does say 'until you hit a Pause or Stop card' (with 'a'). Only the last sentence omits 'a'."
-	}
+  "sequence": 3,
+  "folder": "003_01-03",
+  "cardCode": "01-03",
+  "printedCodes": {
+    "sideA": "01-03a",
+    "sideB": "01-03b"
+  },
+  "title": "NEW PRIORITIES",
+  "category": "legacy_instruction",
+  "month": "january",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "CONTINUE",
+    "header": "KEEP DRAWING",
+    "trigger": "",
+    "text": "From this point on in the Legacy deck, draw cards, reading both sides, until you hit a Pause or Stop card.\nRead Pause and Stop cards to find out when to start drawing again.\nIf you do not see Pause or Stop card, keep drawing.",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "NEW PRIORITIES",
+    "text": "Our objectives follow.\nThis month we have 2 mandatory objectives.\nRemember you can always check to see how many objectives you need to complete for a given month by checking the objective calendar on the board.\n\nYEAR 71 OF THE FALL – 0\nPROLOGUE\nJANUARY\nFEBRUARY\nM\n36\n36\n33",
+    "footer": "",
+    "scratchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "whenRead": "During the January setup draw, after 01-02. The two mandatory objective cards are the next two cards (01-04 and 01-05).",
+    "triggers": [],
+    "opensDoors": [],
+    "opensPackages": [],
+    "destroys": [],
+    "addsToPool": [],
+    "rules": [
+      "From here, draw Legacy cards and read both sides until you hit a Pause or Stop. Those cards say when to start drawing again.",
+      "If you do not see a Pause or Stop card, keep drawing. The printed sentence has no 'a' before 'Pause or Stop card'.",
+      "January has 2 mandatory objectives.",
+      "Objective calendar shown on the card: header 'YEAR 71 OF THE FALL – 0'. Prologue column: 1 star, 36. January column (outlined in white): 2 stars, 36. February column: 2 stars, 33. A fourth column is cut off at the right edge; the visible month label begins with M and one star is visible. The supply number for that column is not on the card."
+    ],
+    "notes": "The earlier sentence does say 'until you hit a Pause or Stop card' (with 'a'). Only the last sentence omits 'a'."
+  }
 }

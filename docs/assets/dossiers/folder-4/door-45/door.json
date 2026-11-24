@@ -1,54 +1,54 @@
 {
-	"door": "45",
-	"folder": 4,
-	"frontImage": "dossiers/folder-4/door-45/front.jpg",
-	"frontText": "45",
-	"items": [
-		{
-			"id": "item-01_local-operatives",
-			"image": "dossiers/folder-4/door-45/item-01_local-operatives.jpg",
-			"count": 2,
-			"printedCode": null,
-			"category": "city-card-improvement",
-			"title": "Local Operatives",
-			"placementTarget": "City card",
-			"costProductionUnits": 1,
-			"text": "Local Operatives:\nThis card is both a red\nCity card and a card of\nits original color.",
-			"mapDetails": null,
-			"mechanics": {
-				"timing": "persistent",
-				"trigger": null,
-				"effect": "This card is both a red City card and a card of its original color.",
-				"restrictions": [],
-				"icon": "Solid red rectangle.",
-				"costPrintedOn": "dossiers/folder-4/door-45/item-02.jpg",
-				"sourceGuids": ["1dd723", "279c42"]
-			}
-		},
-		{
-			"id": "item-02",
-			"image": "dossiers/folder-4/door-45/item-02.jpg",
-			"count": 1,
-			"printedCode": "45",
-			"category": "city-card-improvement-pool-card",
-			"title": "CITY CARD IMPROVEMENTS",
-			"placementTarget": null,
-			"costProductionUnits": null,
-			"text": "CITY CARD IMPROVEMENTS\n\nLocal Operatives: (1)\nThis card is both a red\nCity card and a card of\nits original color.\n\nLocal Operatives: (1)\nThis card is both a red\nCity card and a card of\nits original color.\n\nAdd these to your pool of City card\nimprovements.",
-			"mapDetails": null,
-			"mechanics": {
-				"timing": "game end upgrade",
-				"trigger": null,
-				"effect": "Add these two Local Operatives stickers to the pool of City card improvements. Each costs 1 production unit.",
-				"restrictions": [],
-				"costs": {
-					"Local Operatives": 1
-				},
-				"copiesPriced": 2,
-				"sourceGuids": ["583142"]
-			}
-		}
-	],
-	"bags": [],
-	"summary": "Two Local Operatives City-card stickers and the pool card that prices each at 1. A sticker makes that card both red and its original color. Each listing has a red swatch. Corner badge is 45."
+  "door": "45",
+  "folder": 4,
+  "frontImage": "dossiers/folder-4/door-45/front.jpg",
+  "frontText": "45",
+  "items": [
+    {
+      "id": "item-01_local-operatives",
+      "image": "dossiers/folder-4/door-45/item-01_local-operatives.jpg",
+      "count": 2,
+      "printedCode": null,
+      "category": "city-card-improvement",
+      "title": "Local Operatives",
+      "placementTarget": "City card",
+      "costProductionUnits": 1,
+      "text": "Local Operatives:\nThis card is both a red\nCity card and a card of\nits original color.",
+      "mapDetails": null,
+      "mechanics": {
+        "timing": "persistent",
+        "trigger": null,
+        "effect": "This card is both a red City card and a card of its original color.",
+        "restrictions": [],
+        "icon": "Solid red rectangle.",
+        "costPrintedOn": "dossiers/folder-4/door-45/item-02.jpg",
+        "sourceGuids": ["1dd723", "279c42"]
+      }
+    },
+    {
+      "id": "item-02",
+      "image": "dossiers/folder-4/door-45/item-02.jpg",
+      "count": 1,
+      "printedCode": "45",
+      "category": "city-card-improvement-pool-card",
+      "title": "CITY CARD IMPROVEMENTS",
+      "placementTarget": null,
+      "costProductionUnits": null,
+      "text": "CITY CARD IMPROVEMENTS\n\nLocal Operatives: (1)\nThis card is both a red\nCity card and a card of\nits original color.\n\nLocal Operatives: (1)\nThis card is both a red\nCity card and a card of\nits original color.\n\nAdd these to your pool of City card\nimprovements.",
+      "mapDetails": null,
+      "mechanics": {
+        "timing": "game end upgrade",
+        "trigger": null,
+        "effect": "Add these two Local Operatives stickers to the pool of City card improvements. Each costs 1 production unit.",
+        "restrictions": [],
+        "costs": {
+          "Local Operatives": 1
+        },
+        "copiesPriced": 2,
+        "sourceGuids": ["583142"]
+      }
+    }
+  ],
+  "bags": [],
+  "summary": "Two Local Operatives City-card stickers and the pool card that prices each at 1. A sticker makes that card both red and its original color. Each listing has a red swatch. Corner badge is 45."
 }

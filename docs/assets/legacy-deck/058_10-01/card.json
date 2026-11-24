@@ -1,66 +1,66 @@
 {
-	"sequence": 58,
-	"folder": "058_10-01",
-	"cardCode": "10-01",
-	"printedCodes": {
-		"sideA": "10-01a",
-		"sideB": "10-01b"
-	},
-	"title": "PERIMETER REPORT",
-	"category": "legacy_stop",
-	"month": "october",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "STOP",
-		"header": "STOP",
-		"trigger": "Draw this card and read the other side during step 2 of the setup of your first game in October.",
-		"text": "STOP\nDRAW THIS CARD AND READ THE OTHER SIDE DURING STEP 2 OF THE SETUP OF YOUR FIRST GAME IN OCTOBER.",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "PERIMETER REPORT",
-		"text": "If you have not opened 56 and 63 (East Asia), scratch the box below.",
-		"footer": "Destroy this card after resolving it.",
-		"scratchBoxes": [
-			{
-				"index": 1,
-				"instruction": "Scratch if you have not opened 56 and 63 (East Asia).",
-				"coveredOnBase": true,
-				"revealedInState": 2
-			}
-		]
-	},
-	"states": [
-		{
-			"state": 2,
-			"images": {
-				"sideA": "state-2-side-a.jpg",
-				"sideB": "state-2-side-b.jpg"
-			},
-			"revealedCondition": "Box scratched because 56 and 63 (East Asia) were not both open.",
-			"revealedText": "We led a desperate strike force to find a path to Asia. Found one at great cost. Do the following:\n\n• Open Package 3 and follow the instructions inside. (This does not complete any objectives.)\n• After selecting characters for this game, add a scar to 1 of these characters.\n• Destroy the \"Biodome Prototype\" Unrationed Event card inside."
-		}
-	],
-	"mechanics": {
-		"whenRead": "STOP. Draw and read during step 2 of the setup of the first game in October.",
-		"triggers": ["You have not opened 56 and 63 (East Asia): scratch the box."],
-		"opensDoors": [],
-		"opensPackages": ["3, only if the box is scratched"],
-		"destroys": [
-			"The \"Biodome Prototype\" Unrationed Event inside Package 3, if the box is scratched.",
-			"This card, after resolving it."
-		],
-		"addsToPool": [],
-		"rules": [
-			"The printed condition is \"If you have not opened 56 and 63 (East Asia), scratch the box below.\" Scratch unless both doors have been opened. The parenthetical East Asia is printed with 63.",
-			"If the box is scratched, open Package 3 and follow the instructions inside. That does not complete any objectives.",
-			"After selecting characters for this game, add a scar to 1 of those characters.",
-			"Destroy the Unrationed Event named Biodome Prototype that is inside the package.",
-			"Destroy this card after resolving it."
-		],
-		"notes": "The three revealed instructions are bullets. \"Open Package 3\", \"add a scar\", and \"Destroy the \\\"Biodome Prototype\\\" Unrationed Event card inside.\" are emphasized. 56 and 63 are in red boxes. Side A is the same Stop face in state 2. The card does not itself say to open 56 or 63."
-	}
+  "sequence": 58,
+  "folder": "058_10-01",
+  "cardCode": "10-01",
+  "printedCodes": {
+    "sideA": "10-01a",
+    "sideB": "10-01b"
+  },
+  "title": "PERIMETER REPORT",
+  "category": "legacy_stop",
+  "month": "october",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "STOP",
+    "header": "STOP",
+    "trigger": "Draw this card and read the other side during step 2 of the setup of your first game in October.",
+    "text": "STOP\nDRAW THIS CARD AND READ THE OTHER SIDE DURING STEP 2 OF THE SETUP OF YOUR FIRST GAME IN OCTOBER.",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "PERIMETER REPORT",
+    "text": "If you have not opened 56 and 63 (East Asia), scratch the box below.",
+    "footer": "Destroy this card after resolving it.",
+    "scratchBoxes": [
+      {
+        "index": 1,
+        "instruction": "Scratch if you have not opened 56 and 63 (East Asia).",
+        "coveredOnBase": true,
+        "revealedInState": 2
+      }
+    ]
+  },
+  "states": [
+    {
+      "state": 2,
+      "images": {
+        "sideA": "state-2-side-a.jpg",
+        "sideB": "state-2-side-b.jpg"
+      },
+      "revealedCondition": "Box scratched because 56 and 63 (East Asia) were not both open.",
+      "revealedText": "We led a desperate strike force to find a path to Asia. Found one at great cost. Do the following:\n\n• Open Package 3 and follow the instructions inside. (This does not complete any objectives.)\n• After selecting characters for this game, add a scar to 1 of these characters.\n• Destroy the \"Biodome Prototype\" Unrationed Event card inside."
+    }
+  ],
+  "mechanics": {
+    "whenRead": "STOP. Draw and read during step 2 of the setup of the first game in October.",
+    "triggers": ["You have not opened 56 and 63 (East Asia): scratch the box."],
+    "opensDoors": [],
+    "opensPackages": ["3, only if the box is scratched"],
+    "destroys": [
+      "The \"Biodome Prototype\" Unrationed Event inside Package 3, if the box is scratched.",
+      "This card, after resolving it."
+    ],
+    "addsToPool": [],
+    "rules": [
+      "The printed condition is \"If you have not opened 56 and 63 (East Asia), scratch the box below.\" Scratch unless both doors have been opened. The parenthetical East Asia is printed with 63.",
+      "If the box is scratched, open Package 3 and follow the instructions inside. That does not complete any objectives.",
+      "After selecting characters for this game, add a scar to 1 of those characters.",
+      "Destroy the Unrationed Event named Biodome Prototype that is inside the package.",
+      "Destroy this card after resolving it."
+    ],
+    "notes": "The three revealed instructions are bullets. \"Open Package 3\", \"add a scar\", and \"Destroy the \\\"Biodome Prototype\\\" Unrationed Event card inside.\" are emphasized. 56 and 63 are in red boxes. Side A is the same Stop face in state 2. The card does not itself say to open 56 or 63."
+  }
 }

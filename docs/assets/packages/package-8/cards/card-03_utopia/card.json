@@ -1,60 +1,60 @@
 {
-	"package": 8,
-	"index": 3,
-	"printedCodes": {
-		"sideA": null,
-		"sideB": "P8-03b"
-	},
-	"title": "Utopia",
-	"category": "player-card",
-	"city": "Utopia",
-	"color": "red",
-	"port": false,
-	"cardCompassMisprint": "anchor (board map sticker sticker-01 shows inland white X; board is authoritative)",
-	"copies": 1,
-	"hasImprovementSlot": false,
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"text": "Player card back. No text."
-	},
-	"sideB": {
-		"text": "UTOPIA\n41°45'10\"N 111°31'60\"E\n\nSEARCH:\n[covered]\n\nAnchor on the compass. The bottom edge repeats UTOPIA and 41°45'10\"N 111°31'60\"E upside down.",
-		"searchBoxes": [
-			{
-				"id": "search",
-				"label": "SEARCH:",
-				"initially": "covered",
-				"revealedInState": 2
-			}
-		]
-	},
-	"states": [
-		{
-			"state": 2,
-			"images": {
-				"sideA": "state-2-side-a.jpg",
-				"sideB": "state-2-side-b.jpg"
-			},
-			"revealedText": "SEARCH:\nCompanion:\nInformant\n\nPlay this card at any time\nto move up to 4 \"Utopia\"\nInfection cards from the\nInfection discard pile to\nthe Game End area.",
-			"effect": "Companion Informant. Play this card at any time to move up to 4 Utopia Infection cards from the Infection discard pile to the Game End area."
-		}
-	],
-	"mechanics": {
-		"opensDoors": [],
-		"rules": [
-			"Red Player card for Utopia. Port: the compass has an anchor.",
-			"One SEARCH box. State 2 is the scratched face. State side A is the unchanged player-card back.",
-			"Companion Informant is played, not kept in hand for a passive bonus. It moves up to 4 Utopia Infection cards from the Infection discard into the Game End area."
-		],
-		"notes": [
-			"Card id 10702. Scratch state card id 10703.",
-			"Printed code P8-03b stays on the scratched face.",
-			"Coordinates are printed 41°45'10\"N 111°31'60\"E. The longitude seconds are printed 60.",
-			"This is the only Utopia Player card. The recon report puts it in the Player discard pile.",
-			"No bullseye sticker circle is printed. The Utopia Infection cards say Utopia cannot be improved. This Player card does not say that."
-		]
-	}
+  "package": 8,
+  "index": 3,
+  "printedCodes": {
+    "sideA": null,
+    "sideB": "P8-03b"
+  },
+  "title": "Utopia",
+  "category": "player-card",
+  "city": "Utopia",
+  "color": "red",
+  "port": false,
+  "cardCompassMisprint": "anchor (board map sticker sticker-01 shows inland white X; board is authoritative)",
+  "copies": 1,
+  "hasImprovementSlot": false,
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "text": "Player card back. No text."
+  },
+  "sideB": {
+    "text": "UTOPIA\n41°45'10\"N 111°31'60\"E\n\nSEARCH:\n[covered]\n\nAnchor on the compass. The bottom edge repeats UTOPIA and 41°45'10\"N 111°31'60\"E upside down.",
+    "searchBoxes": [
+      {
+        "id": "search",
+        "label": "SEARCH:",
+        "initially": "covered",
+        "revealedInState": 2
+      }
+    ]
+  },
+  "states": [
+    {
+      "state": 2,
+      "images": {
+        "sideA": "state-2-side-a.jpg",
+        "sideB": "state-2-side-b.jpg"
+      },
+      "revealedText": "SEARCH:\nCompanion:\nInformant\n\nPlay this card at any time\nto move up to 4 \"Utopia\"\nInfection cards from the\nInfection discard pile to\nthe Game End area.",
+      "effect": "Companion Informant. Play this card at any time to move up to 4 Utopia Infection cards from the Infection discard pile to the Game End area."
+    }
+  ],
+  "mechanics": {
+    "opensDoors": [],
+    "rules": [
+      "Red Player card for Utopia. Port: the compass has an anchor.",
+      "One SEARCH box. State 2 is the scratched face. State side A is the unchanged player-card back.",
+      "Companion Informant is played, not kept in hand for a passive bonus. It moves up to 4 Utopia Infection cards from the Infection discard into the Game End area."
+    ],
+    "notes": [
+      "Card id 10702. Scratch state card id 10703.",
+      "Printed code P8-03b stays on the scratched face.",
+      "Coordinates are printed 41°45'10\"N 111°31'60\"E. The longitude seconds are printed 60.",
+      "This is the only Utopia Player card. The recon report puts it in the Player discard pile.",
+      "No bullseye sticker circle is printed. The Utopia Infection cards say Utopia cannot be improved. This Player card does not say that."
+    ]
+  }
 }

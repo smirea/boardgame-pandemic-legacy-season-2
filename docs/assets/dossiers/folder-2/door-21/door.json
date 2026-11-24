@@ -1,51 +1,51 @@
 {
-	"door": "21",
-	"folder": 2,
-	"frontImage": "front.jpg",
-	"frontText": "21",
-	"items": [
-		{
-			"id": "item-01",
-			"image": "item-01.png",
-			"count": 1,
-			"printedCode": null,
-			"category": "map_overlay",
-			"title": "Destroyed city",
-			"placementTarget": "Frankfurt",
-			"costProductionUnits": null,
-			"text": "",
-			"mechanics": {
-				"opensDoors": [],
-				"opensPackages": [],
-				"destroys": ["Frankfurt"],
-				"rules": [],
-				"effect": "Purple skull on a yellow circle. Place it over Frankfurt. No text is printed on the token."
-			}
-		},
-		{
-			"id": "item-02",
-			"image": "item-02.jpg",
-			"count": 1,
-			"printedCode": "21",
-			"category": "instruction",
-			"title": "REIGN OF TERROR",
-			"placementTarget": "Frankfurt",
-			"costProductionUnits": null,
-			"text": "REIGN OF TERROR\nImmediately put this sticker over Frankfurt and destroy the \"Frankfurt\" Player and Infection cards.\nThis city no longer exists on the map and cannot become part of the grid. Players may not move to it or draw supply lines to it or through the destroyed area.",
-			"mechanics": {
-				"opensDoors": [],
-				"opensPackages": [],
-				"destroys": ["Frankfurt Player cards", "Frankfurt Infection cards", "Frankfurt"],
-				"rules": [
-					"Put the skull sticker over Frankfurt.",
-					"Destroy the \"Frankfurt\" Player and Infection cards.",
-					"The city no longer exists and cannot become part of the grid.",
-					"Players may not move to it.",
-					"Players may not draw supply lines to it or through the destroyed area."
-				],
-				"effect": "Frankfurt is destroyed. Remove its Player and Infection cards. It cannot be entered, added to the grid, or crossed by a supply line."
-			}
-		}
-	],
-	"summary": "Destroy Frankfurt. Cover the city with the skull sticker and destroy its Player and Infection cards. The city is gone: no movement to it, and no supply line to it or through it."
+  "door": "21",
+  "folder": 2,
+  "frontImage": "front.jpg",
+  "frontText": "21",
+  "items": [
+    {
+      "id": "item-01",
+      "image": "item-01.png",
+      "count": 1,
+      "printedCode": null,
+      "category": "map_overlay",
+      "title": "Destroyed city",
+      "placementTarget": "Frankfurt",
+      "costProductionUnits": null,
+      "text": "",
+      "mechanics": {
+        "opensDoors": [],
+        "opensPackages": [],
+        "destroys": ["Frankfurt"],
+        "rules": [],
+        "effect": "Purple skull on a yellow circle. Place it over Frankfurt. No text is printed on the token."
+      }
+    },
+    {
+      "id": "item-02",
+      "image": "item-02.jpg",
+      "count": 1,
+      "printedCode": "21",
+      "category": "instruction",
+      "title": "REIGN OF TERROR",
+      "placementTarget": "Frankfurt",
+      "costProductionUnits": null,
+      "text": "REIGN OF TERROR\nImmediately put this sticker over Frankfurt and destroy the \"Frankfurt\" Player and Infection cards.\nThis city no longer exists on the map and cannot become part of the grid. Players may not move to it or draw supply lines to it or through the destroyed area.",
+      "mechanics": {
+        "opensDoors": [],
+        "opensPackages": [],
+        "destroys": ["Frankfurt Player cards", "Frankfurt Infection cards", "Frankfurt"],
+        "rules": [
+          "Put the skull sticker over Frankfurt.",
+          "Destroy the \"Frankfurt\" Player and Infection cards.",
+          "The city no longer exists and cannot become part of the grid.",
+          "Players may not move to it.",
+          "Players may not draw supply lines to it or through the destroyed area."
+        ],
+        "effect": "Frankfurt is destroyed. Remove its Player and Infection cards. It cannot be entered, added to the grid, or crossed by a supply line."
+      }
+    }
+  ],
+  "summary": "Destroy Frankfurt. Cover the city with the skull sticker and destroy its Player and Infection cards. The city is gone: no movement to it, and no supply line to it or through it."
 }

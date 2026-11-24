@@ -1,29 +1,29 @@
 {
-	"id": "epidemic",
-	"cardId": 116,
-	"printedCode": "H-4B-Y12",
-	"title": "EPIDEMIC",
-	"category": "epidemic",
-	"color": null,
-	"copies": 5,
-	"images": {
-		"front": "epidemic.jpg",
-		"back": "back.jpg"
-	},
-	"hasImprovementSlot": false,
-	"frontText": "EPIDEMIC\n1-INCREASE\nMove the Infection Rate marker forward 1 space.\n2-INFECT\nDraw the bottom card from the Infection deck and remove all the Supply cubes (if any) from that city.\nDiscard that card.\n3-INTENSIFY\nShuffle the cards in the Infection discard pile and put them on top of the Infection deck.",
-	"backText": null,
-	"states": [],
-	"mechanics": {
-		"timing": "Resolve immediately when drawn from the Player deck, in the printed order.",
-		"effect": "Increase, then Infect, then Intensify.",
-		"rules": [
-			"1-INCREASE: Move the Infection Rate marker forward 1 space.",
-			"2-INFECT: Draw the bottom card from the Infection deck and remove all the Supply cubes (if any) from that city. Discard that card.",
-			"The words if any are italic.",
-			"3-INTENSIFY: Shuffle the cards in the Infection discard pile and put them on top of the Infection deck.",
-			"A worn sticker on the lower right reads H-4B-Y12.",
-			"The left knob is marked C, D, E, F, and G. Those letters are dial art, not rules text."
-		]
-	}
+  "id": "epidemic",
+  "cardId": 116,
+  "printedCode": "H-4B-Y12",
+  "title": "EPIDEMIC",
+  "category": "epidemic",
+  "color": null,
+  "copies": 5,
+  "images": {
+    "front": "epidemic.jpg",
+    "back": "back.jpg"
+  },
+  "hasImprovementSlot": false,
+  "frontText": "EPIDEMIC\n1-INCREASE\nMove the Infection Rate marker forward 1 space.\n2-INFECT\nDraw the bottom card from the Infection deck and remove all the Supply cubes (if any) from that city.\nDiscard that card.\n3-INTENSIFY\nShuffle the cards in the Infection discard pile and put them on top of the Infection deck.",
+  "backText": null,
+  "states": [],
+  "mechanics": {
+    "timing": "Resolve immediately when drawn from the Player deck, in the printed order.",
+    "effect": "Increase, then Infect, then Intensify.",
+    "rules": [
+      "1-INCREASE: Move the Infection Rate marker forward 1 space.",
+      "2-INFECT: Draw the bottom card from the Infection deck and remove all the Supply cubes (if any) from that city. Discard that card.",
+      "The words if any are italic.",
+      "3-INTENSIFY: Shuffle the cards in the Infection discard pile and put them on top of the Infection deck.",
+      "A worn sticker on the lower right reads H-4B-Y12.",
+      "The left knob is marked C, D, E, F, and G. Those letters are dial art, not rules text."
+    ]
+  }
 }

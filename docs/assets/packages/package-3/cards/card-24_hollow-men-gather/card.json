@@ -1,41 +1,41 @@
 {
-	"package": 3,
-	"index": 24,
-	"cardId": 10723,
-	"printedCodes": {
-		"sideA": null,
-		"sideB": "P2-21b"
-	},
-	"title": "Hollow Men Gather",
-	"category": "hollow-men-gather",
-	"city": null,
-	"color": null,
-	"coordinates": null,
-	"port": null,
-	"copies": 2,
-	"hasImprovementSlot": false,
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideASummary": "Infection deck back. Red biohazard on black, with a yellow caution stripe. No text and no printed code.",
-	"sideBSummary": "Hollow Men Gather. Drawing this card is not an Infection card draw. Draw the next Infection card and add a Hollow Men figure to that city instead of infecting it. If that card is another Hollow Men Gather, keep drawing, and add only 1 figure to the first city revealed. The printed code on this scan is P2-21b.",
-	"searchBoxes": [],
-	"states": [],
-	"mechanics": {
-		"opensDoors": [],
-		"destroys": false,
-		"rules": [
-			"This card is in the Infection deck, but drawing it does not count as an Infection card draw.",
-			"Draw the next Infection card. Add a Hollow Men figure to that city instead of infecting it.",
-			"If the next card is another Hollow Men Gather, keep drawing. Add only 1 figure, and add it to the first city you reveal.",
-			"When the package is opened, this card goes to the Infection discard pile with the other Gather cards. The report places all 4."
-		],
-		"notes": [
-			"Card id 10723. Copies in the manifest: 2.",
-			"The code printed on the face is P2-21b, the Package 2 Gather face, not a P3 code. The same face is used for cards 22, 23, and 24.",
-			"Side A is the Infection deck back. There is no city, no search, and no improvement panel.",
-			"This folder is the scan shared by 2 of the 4 Gather cards. The other two are cards 22 and 23, one copy each."
-		]
-	}
+  "package": 3,
+  "index": 24,
+  "cardId": 10723,
+  "printedCodes": {
+    "sideA": null,
+    "sideB": "P2-21b"
+  },
+  "title": "Hollow Men Gather",
+  "category": "hollow-men-gather",
+  "city": null,
+  "color": null,
+  "coordinates": null,
+  "port": null,
+  "copies": 2,
+  "hasImprovementSlot": false,
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideASummary": "Infection deck back. Red biohazard on black, with a yellow caution stripe. No text and no printed code.",
+  "sideBSummary": "Hollow Men Gather. Drawing this card is not an Infection card draw. Draw the next Infection card and add a Hollow Men figure to that city instead of infecting it. If that card is another Hollow Men Gather, keep drawing, and add only 1 figure to the first city revealed. The printed code on this scan is P2-21b.",
+  "searchBoxes": [],
+  "states": [],
+  "mechanics": {
+    "opensDoors": [],
+    "destroys": false,
+    "rules": [
+      "This card is in the Infection deck, but drawing it does not count as an Infection card draw.",
+      "Draw the next Infection card. Add a Hollow Men figure to that city instead of infecting it.",
+      "If the next card is another Hollow Men Gather, keep drawing. Add only 1 figure, and add it to the first city you reveal.",
+      "When the package is opened, this card goes to the Infection discard pile with the other Gather cards. The report places all 4."
+    ],
+    "notes": [
+      "Card id 10723. Copies in the manifest: 2.",
+      "The code printed on the face is P2-21b, the Package 2 Gather face, not a P3 code. The same face is used for cards 22, 23, and 24.",
+      "Side A is the Infection deck back. There is no city, no search, and no improvement panel.",
+      "This folder is the scan shared by 2 of the 4 Gather cards. The other two are cards 22 and 23, one copy each."
+    ]
+  }
 }

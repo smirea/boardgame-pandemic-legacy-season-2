@@ -1,40 +1,40 @@
 {
-	"sequence": 41,
-	"folder": "041_06-03",
-	"cardCode": "06-03",
-	"printedCodes": {
-		"sideA": "06-03a",
-		"sideB": "06-03b"
-	},
-	"title": "RIGHT NOW!",
-	"category": "legacy_pause",
-	"month": "june",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "PAUSE",
-		"header": "PAUSE",
-		"trigger": "Draw this card and read the other side during step 2 at the end of your first game in June.",
-		"text": "PAUSE\nDRAW THIS CARD AND READ THE OTHER SIDE DURING STEP 2 AT THE END OF YOUR FIRST GAME IN JUNE.",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "RIGHT NOW!",
-		"text": "NEW VOLUNTEERS FROM THE HAVENS HAVE DECIDED TO JOIN US.\n\nOpen the following doors:\n44    49",
-		"footer": "",
-		"scratchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"whenRead": "PAUSE. Drawn during step 2 of June setup, which stops on this card. Read side B during step 2 at the end of the first June game, then continue the Legacy deck.",
-		"triggers": [],
-		"opensDoors": ["44", "49"],
-		"opensPackages": [],
-		"destroys": [],
-		"addsToPool": [],
-		"rules": ["New volunteers from the havens join.", "Open doors 44 and 49 immediately."],
-		"notes": "The volunteer line is set in capitals above the door instruction. 44 and 49 are in white boxes with red type. What is inside them is not printed on this card."
-	}
+  "sequence": 41,
+  "folder": "041_06-03",
+  "cardCode": "06-03",
+  "printedCodes": {
+    "sideA": "06-03a",
+    "sideB": "06-03b"
+  },
+  "title": "RIGHT NOW!",
+  "category": "legacy_pause",
+  "month": "june",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "PAUSE",
+    "header": "PAUSE",
+    "trigger": "Draw this card and read the other side during step 2 at the end of your first game in June.",
+    "text": "PAUSE\nDRAW THIS CARD AND READ THE OTHER SIDE DURING STEP 2 AT THE END OF YOUR FIRST GAME IN JUNE.",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "RIGHT NOW!",
+    "text": "NEW VOLUNTEERS FROM THE HAVENS HAVE DECIDED TO JOIN US.\n\nOpen the following doors:\n44    49",
+    "footer": "",
+    "scratchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "whenRead": "PAUSE. Drawn during step 2 of June setup, which stops on this card. Read side B during step 2 at the end of the first June game, then continue the Legacy deck.",
+    "triggers": [],
+    "opensDoors": ["44", "49"],
+    "opensPackages": [],
+    "destroys": [],
+    "addsToPool": [],
+    "rules": ["New volunteers from the havens join.", "Open doors 44 and 49 immediately."],
+    "notes": "The volunteer line is set in capitals above the door instruction. 44 and 49 are in white boxes with red type. What is inside them is not printed on this card."
+  }
 }

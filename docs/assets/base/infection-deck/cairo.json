@@ -1,27 +1,27 @@
 {
-	"id": "cairo",
-	"cardId": 200,
-	"printedCode": null,
-	"title": "CAIRO",
-	"category": "city_infection",
-	"color": "black",
-	"copies": 3,
-	"images": {
-		"front": "cairo.jpg",
-		"back": "back.jpg"
-	},
-	"hasImprovementSlot": false,
-	"frontText": "CAIRO",
-	"backText": null,
-	"states": [],
-	"mechanics": {
-		"timing": "An Infection deck card. The city name is the only printed text.",
-		"effect": "CAIRO",
-		"rules": [
-			"CAIRO is printed vertically in the right-hand banner, reading top to bottom.",
-			"The card face is black, with a green crosshair and a faint biohazard mark.",
-			"No coordinates, population, or rules text are printed.",
-			"Epidemic step 2 draws the bottom Infection card, removes all Supply cubes from that city, and discards the card."
-		]
-	}
+  "id": "cairo",
+  "cardId": 200,
+  "printedCode": null,
+  "title": "CAIRO",
+  "category": "city_infection",
+  "color": "black",
+  "copies": 3,
+  "images": {
+    "front": "cairo.jpg",
+    "back": "back.jpg"
+  },
+  "hasImprovementSlot": false,
+  "frontText": "CAIRO",
+  "backText": null,
+  "states": [],
+  "mechanics": {
+    "timing": "An Infection deck card. The city name is the only printed text.",
+    "effect": "CAIRO",
+    "rules": [
+      "CAIRO is printed vertically in the right-hand banner, reading top to bottom.",
+      "The card face is black, with a green crosshair and a faint biohazard mark.",
+      "No coordinates, population, or rules text are printed.",
+      "Epidemic step 2 draws the bottom Infection card, removes all Supply cubes from that city, and discards the card."
+    ]
+  }
 }

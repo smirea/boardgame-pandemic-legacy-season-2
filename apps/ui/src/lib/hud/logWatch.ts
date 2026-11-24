@@ -1,13 +1,13 @@
-import type { Game, LogEntry } from '@repo/game';
+import type { Game, LogEntry } from "@repo/game";
 
 /**
  * What a game logged after entry `seq`, oldest first. Read from the end: a log runs to hundreds of entries and only
  * the last few are ever new.
  */
 export function entriesSince(log: readonly LogEntry[], seq: number): LogEntry[] {
-	let start = log.length;
-	while (start > 0 && log[start - 1]!.seq > seq) start--;
-	return log.slice(start);
+  let start = log.length;
+  while (start > 0 && log[start - 1]!.seq > seq) start--;
+  return log.slice(start);
 }
 
 /**
@@ -17,14 +17,14 @@ export function entriesSince(log: readonly LogEntry[], seq: number): LogEntry[] 
  * through, such as a replay seeking.
  */
 export class LogWatch {
-	#seen: number | null = null;
+  #seen: number | null = null;
 
-	take(game: Game | null | undefined, live: boolean): LogEntry[] | null {
-		const log = game?.log ?? [];
-		const newest = log.at(-1)?.seq ?? -1;
-		const before = this.#seen;
-		this.#seen = newest;
-		if (before === null || newest < before || !live || !game) return null;
-		return entriesSince(log, before);
-	}
+  take(game: Game | null | undefined, live: boolean): LogEntry[] | null {
+    const log = game?.log ?? [];
+    const newest = log.at(-1)?.seq ?? -1;
+    const before = this.#seen;
+    this.#seen = newest;
+    if (before === null || newest < before || !live || !game) return null;
+    return entriesSince(log, before);
+  }
 }

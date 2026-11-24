@@ -1,58 +1,58 @@
 {
-	"package": 2,
-	"index": 9,
-	"cardId": 10708,
-	"printedCodes": {
-		"sideA": null,
-		"sideB": "P2-09b"
-	},
-	"title": "Riyadh",
-	"category": "player-card",
-	"city": "Riyadh",
-	"color": "black",
-	"coordinates": "24°42'49\"N 46°40'31\"E",
-	"port": false,
-	"copies": 1,
-	"hasImprovementSlot": false,
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideASummary": "Player deck back. No printed text. State 2 side A is the same back.",
-	"sideBSummary": "Riyadh, 24°42'49\"N 46°40'31\"E, code P2-09b. Compass has no anchor. One sealed box labeled SEARCH:. The city name and coordinates repeat upside down along the bottom.",
-	"searchBoxes": [
-		{
-			"type": "search",
-			"stateRevealed": 2,
-			"isCompanion": false,
-			"companionName": null,
-			"opensDoors": [],
-			"effectSummary": "Immediately take 1 Player card from the discard pile and add it to your hand. The printed label is SEARCH:. The scratch calls this the Hollow Men headquarters: the city lives in fear of them, they come from Asia, and new members appear every year in November. No companion stays on the card."
-		}
-	],
-	"states": [
-		{
-			"state": 2,
-			"cardId": 10726,
-			"images": {
-				"sideA": "state-2-side-a.jpg",
-				"sideB": "state-2-side-b.jpg"
-			},
-			"summary": "SEARCH is scratched. Hollow Men have their headquarters here. The city lives in fear of them. They come from Asia, and new members appear every year in November. Immediately take 1 Player card from the discard pile and add it to your hand. Code P2-09b is unchanged. Side A is the player back."
-		}
-	],
-	"mechanics": {
-		"opensDoors": [],
-		"destroys": [],
-		"rules": [
-			"Black Player card for Riyadh. Not a port.",
-			"One SEARCH box. State 2 is the scratched face.",
-			"Scratching it immediately takes 1 Player card from the Player discard pile into your hand. No companion."
-		],
-		"notes": [
-			"Goes to the reserve when the package is opened.",
-			"The card does not say what to do if the Player discard pile is empty.",
-			"The scratch panel fills the center. No bullseye upgrade mark is printed."
-		]
-	}
+  "package": 2,
+  "index": 9,
+  "cardId": 10708,
+  "printedCodes": {
+    "sideA": null,
+    "sideB": "P2-09b"
+  },
+  "title": "Riyadh",
+  "category": "player-card",
+  "city": "Riyadh",
+  "color": "black",
+  "coordinates": "24°42'49\"N 46°40'31\"E",
+  "port": false,
+  "copies": 1,
+  "hasImprovementSlot": false,
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideASummary": "Player deck back. No printed text. State 2 side A is the same back.",
+  "sideBSummary": "Riyadh, 24°42'49\"N 46°40'31\"E, code P2-09b. Compass has no anchor. One sealed box labeled SEARCH:. The city name and coordinates repeat upside down along the bottom.",
+  "searchBoxes": [
+    {
+      "type": "search",
+      "stateRevealed": 2,
+      "isCompanion": false,
+      "companionName": null,
+      "opensDoors": [],
+      "effectSummary": "Immediately take 1 Player card from the discard pile and add it to your hand. The printed label is SEARCH:. The scratch calls this the Hollow Men headquarters: the city lives in fear of them, they come from Asia, and new members appear every year in November. No companion stays on the card."
+    }
+  ],
+  "states": [
+    {
+      "state": 2,
+      "cardId": 10726,
+      "images": {
+        "sideA": "state-2-side-a.jpg",
+        "sideB": "state-2-side-b.jpg"
+      },
+      "summary": "SEARCH is scratched. Hollow Men have their headquarters here. The city lives in fear of them. They come from Asia, and new members appear every year in November. Immediately take 1 Player card from the discard pile and add it to your hand. Code P2-09b is unchanged. Side A is the player back."
+    }
+  ],
+  "mechanics": {
+    "opensDoors": [],
+    "destroys": [],
+    "rules": [
+      "Black Player card for Riyadh. Not a port.",
+      "One SEARCH box. State 2 is the scratched face.",
+      "Scratching it immediately takes 1 Player card from the Player discard pile into your hand. No companion."
+    ],
+    "notes": [
+      "Goes to the reserve when the package is opened.",
+      "The card does not say what to do if the Player discard pile is empty.",
+      "The scratch panel fills the center. No bullseye upgrade mark is printed."
+    ]
+  }
 }

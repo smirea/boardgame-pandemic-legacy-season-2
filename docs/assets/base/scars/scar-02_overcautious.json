@@ -1,18 +1,18 @@
 {
-	"id": "scar-02",
-	"name": "Overcautious",
-	"category": "scar",
-	"costProductionUnits": null,
-	"copies": 1,
-	"image": "scar-02_overcautious.jpg",
-	"text": "Overcautious: You may not leave a haven with\nzero Supply cubes if you have Supply cubes on\nyour Character card.",
-	"mechanics": {
-		"timing": "passive",
-		"trigger": "When you would leave a haven",
-		"effect": "You may not leave a haven with zero Supply cubes if you have Supply cubes on your Character card.",
-		"restrictions": [
-			"Applies only when leaving a haven that has zero Supply cubes",
-			"Applies only if your Character card has Supply cubes"
-		]
-	}
+  "id": "scar-02",
+  "name": "Overcautious",
+  "category": "scar",
+  "costProductionUnits": null,
+  "copies": 1,
+  "image": "scar-02_overcautious.jpg",
+  "text": "Overcautious: You may not leave a haven with\nzero Supply cubes if you have Supply cubes on\nyour Character card.",
+  "mechanics": {
+    "timing": "passive",
+    "trigger": "When you would leave a haven",
+    "effect": "You may not leave a haven with zero Supply cubes if you have Supply cubes on your Character card.",
+    "restrictions": [
+      "Applies only when leaving a haven that has zero Supply cubes",
+      "Applies only if your Character card has Supply cubes"
+    ]
+  }
 }

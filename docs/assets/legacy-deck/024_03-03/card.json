@@ -1,43 +1,43 @@
 {
-	"sequence": 24,
-	"folder": "024_03-03",
-	"cardCode": "03-03",
-	"printedCodes": {
-		"sideA": "03-03a",
-		"sideB": "03-03b"
-	},
-	"title": "NEW PRIORITIES",
-	"category": "legacy_instruction",
-	"month": "march",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "CONTINUE",
-		"header": "KEEP DRAWING",
-		"trigger": "Draw and read the other side of this card.",
-		"text": "KEEP DRAWING\nDraw and read the other side of this card.",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "NEW PRIORITIES",
-		"text": "We now need to complete 3 objectives each month.\n\nUse the objective calendar on the board to help you remember how many objectives you need to complete each month.\n\nCalendar illustration, left edge cropped. Visible header: \"IE FALL – OBJECTIVES AND\". FEBRUARY: two stars, 33. MARCH: three stars, 30 (column outlined). APRIL: three stars, 27. The next column is cut off and shows one star.",
-		"footer": "",
-		"scratchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"whenRead": "Continue the March setup Legacy-deck reading. Side A says KEEP DRAWING, so read side B and draw the next card.",
-		"triggers": [],
-		"opensDoors": [],
-		"opensPackages": [],
-		"destroys": [],
-		"addsToPool": [],
-		"rules": [
-			"From March on, the group must complete 3 objectives each month.",
-			"The pictured calendar is the board's objective-and-supply calendar: February still shows 2 objective stars and 33 supply cubes; March and April show 3 stars, with 30 and 27 supply cubes."
-		],
-		"notes": "\"3 objectives\" is bold. The calendar header is clipped on the left, so only \"IE FALL – OBJECTIVES AND\" is visible. The dash in that header is an en dash."
-	}
+  "sequence": 24,
+  "folder": "024_03-03",
+  "cardCode": "03-03",
+  "printedCodes": {
+    "sideA": "03-03a",
+    "sideB": "03-03b"
+  },
+  "title": "NEW PRIORITIES",
+  "category": "legacy_instruction",
+  "month": "march",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "CONTINUE",
+    "header": "KEEP DRAWING",
+    "trigger": "Draw and read the other side of this card.",
+    "text": "KEEP DRAWING\nDraw and read the other side of this card.",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "NEW PRIORITIES",
+    "text": "We now need to complete 3 objectives each month.\n\nUse the objective calendar on the board to help you remember how many objectives you need to complete each month.\n\nCalendar illustration, left edge cropped. Visible header: \"IE FALL – OBJECTIVES AND\". FEBRUARY: two stars, 33. MARCH: three stars, 30 (column outlined). APRIL: three stars, 27. The next column is cut off and shows one star.",
+    "footer": "",
+    "scratchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "whenRead": "Continue the March setup Legacy-deck reading. Side A says KEEP DRAWING, so read side B and draw the next card.",
+    "triggers": [],
+    "opensDoors": [],
+    "opensPackages": [],
+    "destroys": [],
+    "addsToPool": [],
+    "rules": [
+      "From March on, the group must complete 3 objectives each month.",
+      "The pictured calendar is the board's objective-and-supply calendar: February still shows 2 objective stars and 33 supply cubes; March and April show 3 stars, with 30 and 27 supply cubes."
+    ],
+    "notes": "\"3 objectives\" is bold. The calendar header is clipped on the left, so only \"IE FALL – OBJECTIVES AND\" is visible. The dash in that header is an en dash."
+  }
 }

@@ -1,44 +1,44 @@
 {
-	"sequence": 54,
-	"folder": "054_09-03",
-	"cardCode": "09-03",
-	"printedCodes": {
-		"sideA": "09-03a",
-		"sideB": "09-03b"
-	},
-	"title": "NEW PRIORITIES",
-	"category": "legacy_instruction",
-	"month": "september",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "CONTINUE",
-		"header": "KEEP DRAWING",
-		"trigger": "",
-		"text": "Draw and read the other side of this card.",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "NEW PRIORITIES",
-		"text": "DESTROY THE FOLLOWING OBJECTIVE:\n• RECON 1 UNKNOWN REGION\n\nThe \"Recon East Asia\" objective is enclosed. If you have already Reconned East Asia, count this objective as complete during September!\n\nRIGHT NOW!\nOpen the following doors:\nR    55    D    Y    U",
-		"footer": "",
-		"scratchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"whenRead": "Continue the September setup Legacy-deck reading, immediately after 09-02. Side A says to read side B now.",
-		"triggers": [],
-		"opensDoors": ["R", "55", "D", "Y", "U"],
-		"opensPackages": [],
-		"destroys": ["Objective: RECON 1 UNKNOWN REGION"],
-		"addsToPool": [],
-		"rules": [
-			"Destroy the objective RECON 1 UNKNOWN REGION.",
-			"The Recon East Asia objective is enclosed (09-04, the next card). If East Asia has already been reconned, count that objective complete during September.",
-			"Immediately open doors R, 55, D, Y, and U."
-		],
-		"notes": "The five door badges are R, 55, D, Y, and U, in that order. R, D, Y, and U are letters. 55 is a number. What is inside them is not printed on this card."
-	}
+  "sequence": 54,
+  "folder": "054_09-03",
+  "cardCode": "09-03",
+  "printedCodes": {
+    "sideA": "09-03a",
+    "sideB": "09-03b"
+  },
+  "title": "NEW PRIORITIES",
+  "category": "legacy_instruction",
+  "month": "september",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "CONTINUE",
+    "header": "KEEP DRAWING",
+    "trigger": "",
+    "text": "Draw and read the other side of this card.",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "NEW PRIORITIES",
+    "text": "DESTROY THE FOLLOWING OBJECTIVE:\n• RECON 1 UNKNOWN REGION\n\nThe \"Recon East Asia\" objective is enclosed. If you have already Reconned East Asia, count this objective as complete during September!\n\nRIGHT NOW!\nOpen the following doors:\nR    55    D    Y    U",
+    "footer": "",
+    "scratchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "whenRead": "Continue the September setup Legacy-deck reading, immediately after 09-02. Side A says to read side B now.",
+    "triggers": [],
+    "opensDoors": ["R", "55", "D", "Y", "U"],
+    "opensPackages": [],
+    "destroys": ["Objective: RECON 1 UNKNOWN REGION"],
+    "addsToPool": [],
+    "rules": [
+      "Destroy the objective RECON 1 UNKNOWN REGION.",
+      "The Recon East Asia objective is enclosed (09-04, the next card). If East Asia has already been reconned, count that objective complete during September.",
+      "Immediately open doors R, 55, D, Y, and U."
+    ],
+    "notes": "The five door badges are R, 55, D, Y, and U, in that order. R, D, Y, and U are letters. 55 is a number. What is inside them is not printed on this card."
+  }
 }

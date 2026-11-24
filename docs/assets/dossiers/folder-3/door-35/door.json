@@ -1,31 +1,31 @@
 {
-	"door": "35",
-	"folder": 3,
-	"frontImage": "dossiers/folder-3/door-35/front.jpg",
-	"frontText": "35",
-	"items": [
-		{
-			"id": "item-01",
-			"image": "dossiers/folder-3/door-35/item-01.jpg",
-			"count": 1,
-			"printedCode": "35",
-			"category": "report",
-			"title": "WHAT YOU HEAR",
-			"placementTarget": "Keep this in the reserve",
-			"costProductionUnits": null,
-			"text": "WHAT YOU HEAR\n\nTriangulation complete. We've picked up some chatter from the Hollow Men.\n\nWe've learned that they primarily use three frequencies:\n9.2, 9.31, and 11.88. When we get the satellite towers fully operational (we predict this will happen around August), we will be able to listen in on their signals.\n\nKeep this in the reserve.",
-			"mechanics": {
-				"timing": "story",
-				"trigger": null,
-				"effect": "Keep this report in the reserve. It names the three Hollow Men frequencies.",
-				"restrictions": [],
-				"frequencies": ["9.2", "9.31", "11.88"],
-				"bold": ["9.2, 9.31, and 11.88."],
-				"italic": ["(we predict this will happen around August)", "Keep this in the reserve."],
-				"sourceGuids": ["6d3913"]
-			}
-		}
-	],
-	"bags": [],
-	"summary": "One Triangulate Signals report titled WHAT YOU HEAR. The three frequencies are 9.2, 9.31, and 11.88. Keep it in the reserve. Corner badge is 35. No action or sticker besides the report."
+  "door": "35",
+  "folder": 3,
+  "frontImage": "dossiers/folder-3/door-35/front.jpg",
+  "frontText": "35",
+  "items": [
+    {
+      "id": "item-01",
+      "image": "dossiers/folder-3/door-35/item-01.jpg",
+      "count": 1,
+      "printedCode": "35",
+      "category": "report",
+      "title": "WHAT YOU HEAR",
+      "placementTarget": "Keep this in the reserve",
+      "costProductionUnits": null,
+      "text": "WHAT YOU HEAR\n\nTriangulation complete. We've picked up some chatter from the Hollow Men.\n\nWe've learned that they primarily use three frequencies:\n9.2, 9.31, and 11.88. When we get the satellite towers fully operational (we predict this will happen around August), we will be able to listen in on their signals.\n\nKeep this in the reserve.",
+      "mechanics": {
+        "timing": "story",
+        "trigger": null,
+        "effect": "Keep this report in the reserve. It names the three Hollow Men frequencies.",
+        "restrictions": [],
+        "frequencies": ["9.2", "9.31", "11.88"],
+        "bold": ["9.2, 9.31, and 11.88."],
+        "italic": ["(we predict this will happen around August)", "Keep this in the reserve."],
+        "sourceGuids": ["6d3913"]
+      }
+    }
+  ],
+  "bags": [],
+  "summary": "One Triangulate Signals report titled WHAT YOU HEAR. The three frequencies are 9.2, 9.31, and 11.88. Keep it in the reserve. Corner badge is 35. No action or sticker besides the report."
 }

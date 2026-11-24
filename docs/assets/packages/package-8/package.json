@@ -1,92 +1,92 @@
 {
-	"name": "Utopia",
-	"bags": [],
-	"boxImage": "box.jpg",
-	"cards": [
-		{
-			"index": 1,
-			"title": "Recon Report",
-			"category": "recon-report",
-			"copies": 1,
-			"json": "cards/card-01/card.json"
-		},
-		{
-			"index": 2,
-			"title": "Riot Control",
-			"category": "unrationed-event",
-			"copies": 1,
-			"json": "cards/card-02_event/card.json"
-		},
-		{
-			"index": 3,
-			"title": "Utopia",
-			"category": "player-card",
-			"color": "red",
-			"port": false,
-			"cardCompassMisprint": "anchor (board map sticker sticker-01 shows inland white X; board is authoritative)",
-			"search": true,
-			"copies": 1,
-			"json": "cards/card-03_utopia/card.json"
-		},
-		{
-			"index": 4,
-			"title": "Utopia",
-			"category": "infection-card",
-			"color": "red",
-			"printedCode": "P8-11b",
-			"copies": 8,
-			"json": "cards/card-04_utopia/card.json"
-		},
-		{
-			"index": 5,
-			"title": "Hollow Men Gather",
-			"category": "hollow-men-gather",
-			"printedCode": "P2-21b",
-			"copies": 4,
-			"json": "cards/card-05_hollow-men-gather/card.json"
-		}
-	],
-	"guid": "6208c5",
-	"id": "package-8",
-	"number": 8,
-	"printedContents": {
-		"cards": 15,
-		"stickerCards": 1
-	},
-	"searchResults": {
-		"Utopia": "Companion Informant. Play the card at any time to move up to 4 Utopia Infection cards from the Infection discard pile to the Game End area."
-	},
-	"setup": {
-		"source": "P8-01b",
-		"opensDoors": [
-			"61"
-		],
-		"cityAddedToGrid": "Utopia",
-		"playerDiscard": [
-			"Utopia player card (P8-03b)",
-			"Riot Control (P8-02b)"
-		],
-		"infectionDiscard": [
-			"8 Utopia infection cards (P8-11b)",
-			"4 Hollow Men Gather cards (P2-21b)"
-		],
-		"gameEnd": [],
-		"reserve": "This report only, after it is read."
-	},
-	"stickers": [
-		{
-			"id": "sticker-01",
-			"name": "Utopia",
-			"copies": 1,
-			"population": 8,
-			"grid": [
-				"40° N",
-				"100° E"
-			],
-			"opensDoors": [
-				"22"
-			],
-			"json": "stickers/sticker-01.json"
-		}
-	]
+  "name": "Utopia",
+  "bags": [],
+  "boxImage": "box.jpg",
+  "cards": [
+    {
+      "index": 1,
+      "title": "Recon Report",
+      "category": "recon-report",
+      "copies": 1,
+      "json": "cards/card-01/card.json"
+    },
+    {
+      "index": 2,
+      "title": "Riot Control",
+      "category": "unrationed-event",
+      "copies": 1,
+      "json": "cards/card-02_event/card.json"
+    },
+    {
+      "index": 3,
+      "title": "Utopia",
+      "category": "player-card",
+      "color": "red",
+      "port": false,
+      "cardCompassMisprint": "anchor (board map sticker sticker-01 shows inland white X; board is authoritative)",
+      "search": true,
+      "copies": 1,
+      "json": "cards/card-03_utopia/card.json"
+    },
+    {
+      "index": 4,
+      "title": "Utopia",
+      "category": "infection-card",
+      "color": "red",
+      "printedCode": "P8-11b",
+      "copies": 8,
+      "json": "cards/card-04_utopia/card.json"
+    },
+    {
+      "index": 5,
+      "title": "Hollow Men Gather",
+      "category": "hollow-men-gather",
+      "printedCode": "P2-21b",
+      "copies": 4,
+      "json": "cards/card-05_hollow-men-gather/card.json"
+    }
+  ],
+  "guid": "6208c5",
+  "id": "package-8",
+  "number": 8,
+  "printedContents": {
+    "cards": 15,
+    "stickerCards": 1
+  },
+  "searchResults": {
+    "Utopia": "Companion Informant. Play the card at any time to move up to 4 Utopia Infection cards from the Infection discard pile to the Game End area."
+  },
+  "setup": {
+    "source": "P8-01b",
+    "opensDoors": [
+      "61"
+    ],
+    "cityAddedToGrid": "Utopia",
+    "playerDiscard": [
+      "Utopia player card (P8-03b)",
+      "Riot Control (P8-02b)"
+    ],
+    "infectionDiscard": [
+      "8 Utopia infection cards (P8-11b)",
+      "4 Hollow Men Gather cards (P2-21b)"
+    ],
+    "gameEnd": [],
+    "reserve": "This report only, after it is read."
+  },
+  "stickers": [
+    {
+      "id": "sticker-01",
+      "name": "Utopia",
+      "copies": 1,
+      "population": 8,
+      "grid": [
+        "40° N",
+        "100° E"
+      ],
+      "opensDoors": [
+        "22"
+      ],
+      "json": "stickers/sticker-01.json"
+    }
+  ]
 }

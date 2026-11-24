@@ -1,47 +1,47 @@
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<title>Net demo</title>
-		<style>
-			:root {
-				color-scheme: light dark;
-				font-family: ui-monospace, monospace;
-				font-size: 14px;
-			}
-			body {
-				margin: 0;
-				padding: 16px;
-				min-height: 100vh;
-				box-sizing: border-box;
-			}
-			.cursor {
-				position: fixed;
-				pointer-events: none;
-				transform: translate(-4px, -4px);
-				white-space: nowrap;
-			}
-			.cursor::before {
-				content: '';
-				display: inline-block;
-				width: 8px;
-				height: 8px;
-				border-radius: 50%;
-				background: crimson;
-				margin-right: 4px;
-			}
-			ol {
-				max-height: 50vh;
-				overflow: auto;
-			}
-		</style>
-	</head>
-	<body>
-		<div id="status"></div>
-		<ul id="peers"></ul>
-		<ol id="log"></ol>
-		<div id="cursors"></div>
-		<script type="module" src="./main.ts"></script>
-	</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Net demo</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: ui-monospace, monospace;
+        font-size: 14px;
+      }
+      body {
+        margin: 0;
+        padding: 16px;
+        min-height: 100vh;
+        box-sizing: border-box;
+      }
+      .cursor {
+        position: fixed;
+        pointer-events: none;
+        transform: translate(-4px, -4px);
+        white-space: nowrap;
+      }
+      .cursor::before {
+        content: "";
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: crimson;
+        margin-right: 4px;
+      }
+      ol {
+        max-height: 50vh;
+        overflow: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="status"></div>
+    <ul id="peers"></ul>
+    <ol id="log"></ol>
+    <div id="cursors"></div>
+    <script type="module" src="./main.ts"></script>
+  </body>
 </html>

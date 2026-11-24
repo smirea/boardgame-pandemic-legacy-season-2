@@ -1,27 +1,27 @@
 {
-	"door": "17",
-	"folder": 2,
-	"frontImage": "front.jpg",
-	"frontText": "17",
-	"items": [
-		{
-			"id": "item-01",
-			"image": "item-01.jpg",
-			"count": 1,
-			"printedCode": "17",
-			"category": "report",
-			"title": "AN EXCHANGE OF SECRETS",
-			"placementTarget": null,
-			"costProductionUnits": null,
-			"text": "AN EXCHANGE OF SECRETS\nThe Hollow Men had been told to fear us, that we were monsters, that we deserved death. We are, after all, the Faded, quarantined to the havens after COdA.\nThe vaccine created 70 years ago keeps our minds normal – it is our skin that is forever changed. Being on the havens spared us from the plague and put us in a position to help the world.\n70 years of helping humanity and they still hate us. Some of our fellow Faded are disgusted we brought the Hollow Men to the havens and have left us. We think this was the right move, however. We can now create a plan to get into Utopia.\nOpen door 58",
-			"mechanics": {
-				"opensDoors": ["58"],
-				"opensPackages": [],
-				"destroys": [],
-				"rules": ["Open door 58."],
-				"effect": "Narrative report from the Faded. Some of them have left the havens. Open door 58. The card grants no sticker or ability."
-			}
-		}
-	],
-	"summary": "Report titled AN EXCHANGE OF SECRETS. The Faded describe COdA, the 70-year-old vaccine, and the defection of Faded who opposed bringing the Hollow Men to the havens. It opens door 58 and adds no ability."
+  "door": "17",
+  "folder": 2,
+  "frontImage": "front.jpg",
+  "frontText": "17",
+  "items": [
+    {
+      "id": "item-01",
+      "image": "item-01.jpg",
+      "count": 1,
+      "printedCode": "17",
+      "category": "report",
+      "title": "AN EXCHANGE OF SECRETS",
+      "placementTarget": null,
+      "costProductionUnits": null,
+      "text": "AN EXCHANGE OF SECRETS\nThe Hollow Men had been told to fear us, that we were monsters, that we deserved death. We are, after all, the Faded, quarantined to the havens after COdA.\nThe vaccine created 70 years ago keeps our minds normal – it is our skin that is forever changed. Being on the havens spared us from the plague and put us in a position to help the world.\n70 years of helping humanity and they still hate us. Some of our fellow Faded are disgusted we brought the Hollow Men to the havens and have left us. We think this was the right move, however. We can now create a plan to get into Utopia.\nOpen door 58",
+      "mechanics": {
+        "opensDoors": ["58"],
+        "opensPackages": [],
+        "destroys": [],
+        "rules": ["Open door 58."],
+        "effect": "Narrative report from the Faded. Some of them have left the havens. Open door 58. The card grants no sticker or ability."
+      }
+    }
+  ],
+  "summary": "Report titled AN EXCHANGE OF SECRETS. The Faded describe COdA, the 70-year-old vaccine, and the defection of Faded who opposed bringing the Hollow Men to the havens. It opens door 58 and adds no ability."
 }

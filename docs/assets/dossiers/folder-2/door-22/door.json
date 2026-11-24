@@ -1,32 +1,32 @@
 {
-	"door": "22",
-	"folder": 2,
-	"frontImage": "front.jpg",
-	"frontText": "22",
-	"items": [
-		{
-			"id": "item-01",
-			"image": "item-01.jpg",
-			"count": 1,
-			"printedCode": "22",
-			"category": "report",
-			"title": "FIELD REPORT",
-			"placementTarget": null,
-			"costProductionUnits": null,
-			"text": "FIELD REPORT\nWe've found PEARL lab in Lake Baikal!\nPEARL\nScientists are here, isolated by Utopia. They have samples of a cure–we need to get it to JADE. Utopia patrols are everywhere–we will have to move cautiously. It's too dangerous to carry it in the open. We need to inject a massive dose of the sample in ourselves–carry it in our bodies.\nA dose that large will certainly kill the carrier.\nWe have exactly 4 doses. Once they're gone, they're gone.\nOpen the following doors:\nQ  38  27  32",
-			"mechanics": {
-				"opensDoors": ["Q", "38", "27", "32"],
-				"opensPackages": [],
-				"destroys": [],
-				"rules": [
-					"Discover the PEARL lab in Lake Baikal.",
-					"There are exactly 4 doses. Once they're gone, they're gone.",
-					"A dose that large will certainly kill the carrier.",
-					"Open doors Q, 38, 27, and 32."
-				],
-				"effect": "Pearl is in Lake Baikal and holds cure samples that must reach Jade. The team will carry exactly 4 doses in their bodies, and a dose kills the carrier. This door's only component is the report. The dose cards are not in this folder."
-			}
-		}
-	],
-	"summary": "Pearl field report from Lake Baikal. Exactly 4 doses exist, each one kills its carrier, and the samples have to reach Jade. Open doors Q, 38, 27, and 32. No dose cards are in this door."
+  "door": "22",
+  "folder": 2,
+  "frontImage": "front.jpg",
+  "frontText": "22",
+  "items": [
+    {
+      "id": "item-01",
+      "image": "item-01.jpg",
+      "count": 1,
+      "printedCode": "22",
+      "category": "report",
+      "title": "FIELD REPORT",
+      "placementTarget": null,
+      "costProductionUnits": null,
+      "text": "FIELD REPORT\nWe've found PEARL lab in Lake Baikal!\nPEARL\nScientists are here, isolated by Utopia. They have samples of a cure–we need to get it to JADE. Utopia patrols are everywhere–we will have to move cautiously. It's too dangerous to carry it in the open. We need to inject a massive dose of the sample in ourselves–carry it in our bodies.\nA dose that large will certainly kill the carrier.\nWe have exactly 4 doses. Once they're gone, they're gone.\nOpen the following doors:\nQ  38  27  32",
+      "mechanics": {
+        "opensDoors": ["Q", "38", "27", "32"],
+        "opensPackages": [],
+        "destroys": [],
+        "rules": [
+          "Discover the PEARL lab in Lake Baikal.",
+          "There are exactly 4 doses. Once they're gone, they're gone.",
+          "A dose that large will certainly kill the carrier.",
+          "Open doors Q, 38, 27, and 32."
+        ],
+        "effect": "Pearl is in Lake Baikal and holds cure samples that must reach Jade. The team will carry exactly 4 doses in their bodies, and a dose kills the carrier. This door's only component is the report. The dose cards are not in this folder."
+      }
+    }
+  ],
+  "summary": "Pearl field report from Lake Baikal. Exactly 4 doses exist, each one kills its carrier, and the samples have to reach Jade. Open doors Q, 38, 27, and 32. No dose cards are in this door."
 }

@@ -1,40 +1,42 @@
 {
-	"sequence": 40,
-	"folder": "040_06-02",
-	"cardCode": "06-02",
-	"printedCodes": {
-		"sideA": "06-02a",
-		"sideB": "06-02b"
-	},
-	"title": "Journal Entry",
-	"category": "legacy_journal",
-	"month": "june",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "NONE",
-		"header": "Journal Entry",
-		"trigger": "",
-		"text": "Utopia. Can we reach them?\n\nOur leaders went there. It's the last true piece of civilization left—secure enough to resist both the plague and the Hollow Men. Perhaps they have a cure? We don't know exactly where Utopia is. Somewhere in the far east.\n\nIf we can get there, some think they would help us. Some think they would kill us on sight.",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "FROM THE ARCHIVES",
-		"text": "MAY 23, YEAR 14 AFTER THE FALL\n\nA new problem – an organized militia has started attacking our supply routes. They seem to be normal humans but somehow dead inside. Military Director Yona has dubbed them the \"Hollow Men\" because of their \"violent souls.\" They have made our thankless task almost impossible as they have no love for us. We have stepped up patrols and have gotten the upper hand for now.",
-		"footer": "Keep papers like this in the reserve.",
-		"scratchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"whenRead": "Continue the June setup Legacy-deck reading, immediately after 06-01.",
-		"triggers": [],
-		"opensDoors": [],
-		"opensPackages": [],
-		"destroys": [],
-		"addsToPool": [],
-		"rules": ["Keep the card in the reserve. No rules change. This is the archive that names the Hollow Men."],
-		"notes": "The journal dash in \"left—secure\" is an em dash. The archive dash in \"problem – an\" is an en dash. A handwritten signature under the Year 14 note is not transcribed."
-	}
+  "sequence": 40,
+  "folder": "040_06-02",
+  "cardCode": "06-02",
+  "printedCodes": {
+    "sideA": "06-02a",
+    "sideB": "06-02b"
+  },
+  "title": "Journal Entry",
+  "category": "legacy_journal",
+  "month": "june",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "NONE",
+    "header": "Journal Entry",
+    "trigger": "",
+    "text": "Utopia. Can we reach them?\n\nOur leaders went there. It's the last true piece of civilization left—secure enough to resist both the plague and the Hollow Men. Perhaps they have a cure? We don't know exactly where Utopia is. Somewhere in the far east.\n\nIf we can get there, some think they would help us. Some think they would kill us on sight.",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "FROM THE ARCHIVES",
+    "text": "MAY 23, YEAR 14 AFTER THE FALL\n\nA new problem – an organized militia has started attacking our supply routes. They seem to be normal humans but somehow dead inside. Military Director Yona has dubbed them the \"Hollow Men\" because of their \"violent souls.\" They have made our thankless task almost impossible as they have no love for us. We have stepped up patrols and have gotten the upper hand for now.",
+    "footer": "Keep papers like this in the reserve.",
+    "scratchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "whenRead": "Continue the June setup Legacy-deck reading, immediately after 06-01.",
+    "triggers": [],
+    "opensDoors": [],
+    "opensPackages": [],
+    "destroys": [],
+    "addsToPool": [],
+    "rules": [
+      "Keep the card in the reserve. No rules change. This is the archive that names the Hollow Men."
+    ],
+    "notes": "The journal dash in \"left—secure\" is an em dash. The archive dash in \"problem – an\" is an en dash. A handwritten signature under the Year 14 note is not transcribed."
+  }
 }

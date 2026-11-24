@@ -1,43 +1,43 @@
 {
-	"sequence": 2,
-	"folder": "002_01-02",
-	"cardCode": "01-02",
-	"printedCodes": {
-		"sideA": "01-02a",
-		"sideB": "01-02b"
-	},
-	"title": "October 15, Year 70",
-	"category": "legacy_archive",
-	"month": "january",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "CONTINUE",
-		"header": "KEEP DRAWING",
-		"trigger": "",
-		"text": "Be sure to read both sides of each card as you make your way through the Legacy deck.",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "FROM THE ARCHIVES",
-		"text": "OCTOBER 15, YEAR 70\nDegradation of supplies and routes has reached critical level. We are no longer effective. Supply lines to the interior have been abandoned. Cities will fall within a year and, when they do, we will fall.\n\nNext year's stockpile projections are fatalistic. Haven leadership has voted to initiate the protocol we hoped would never come.",
-		"footer": "Keep papers like this in the reserve.",
-		"scratchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"whenRead": "Immediately after 01-01, while drawing through the Legacy deck. Read both sides, keep the archive, and continue drawing.",
-		"triggers": [],
-		"opensDoors": [],
-		"opensPackages": [],
-		"destroys": [],
-		"addsToPool": [],
-		"rules": [
-			"Read both sides of each Legacy card as you draw through the deck.",
-			"Keep this archive paper in the reserve. No board effect."
-		],
-		"notes": "Side B ends with an illegible handwritten signature under the memorandum."
-	}
+  "sequence": 2,
+  "folder": "002_01-02",
+  "cardCode": "01-02",
+  "printedCodes": {
+    "sideA": "01-02a",
+    "sideB": "01-02b"
+  },
+  "title": "October 15, Year 70",
+  "category": "legacy_archive",
+  "month": "january",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "CONTINUE",
+    "header": "KEEP DRAWING",
+    "trigger": "",
+    "text": "Be sure to read both sides of each card as you make your way through the Legacy deck.",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "FROM THE ARCHIVES",
+    "text": "OCTOBER 15, YEAR 70\nDegradation of supplies and routes has reached critical level. We are no longer effective. Supply lines to the interior have been abandoned. Cities will fall within a year and, when they do, we will fall.\n\nNext year's stockpile projections are fatalistic. Haven leadership has voted to initiate the protocol we hoped would never come.",
+    "footer": "Keep papers like this in the reserve.",
+    "scratchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "whenRead": "Immediately after 01-01, while drawing through the Legacy deck. Read both sides, keep the archive, and continue drawing.",
+    "triggers": [],
+    "opensDoors": [],
+    "opensPackages": [],
+    "destroys": [],
+    "addsToPool": [],
+    "rules": [
+      "Read both sides of each Legacy card as you draw through the deck.",
+      "Keep this archive paper in the reserve. No board effect."
+    ],
+    "notes": "Side B ends with an illegible handwritten signature under the memorandum."
+  }
 }

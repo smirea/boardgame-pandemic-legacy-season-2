@@ -1,40 +1,40 @@
 {
-	"sequence": 15,
-	"folder": "015_02-04",
-	"cardCode": "02-04",
-	"printedCodes": {
-		"sideA": "02-04a",
-		"sideB": "02-04b"
-	},
-	"title": "Recon 1 unknown region",
-	"category": "objective",
-	"month": "february",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "NONE",
-		"header": "",
-		"trigger": "",
-		"text": "",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "OBJECTIVE",
-		"text": "Recon 1 unknown region.\n\nAdd this card to your pool of objectives.",
-		"footer": "",
-		"scratchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"whenRead": "One of the new February objectives that follow 02-03. Not printed as mandatory (yellow OBJECTIVE label, yellow star).",
-		"triggers": [],
-		"opensDoors": [],
-		"opensPackages": [],
-		"destroys": [],
-		"addsToPool": ["Recon 1 unknown region"],
-		"rules": ["Objective: recon 1 unknown region.", "Add this card to the pool of objectives."],
-		"notes": "Side A is the objective-card back. Side B text is vertical."
-	}
+  "sequence": 15,
+  "folder": "015_02-04",
+  "cardCode": "02-04",
+  "printedCodes": {
+    "sideA": "02-04a",
+    "sideB": "02-04b"
+  },
+  "title": "Recon 1 unknown region",
+  "category": "objective",
+  "month": "february",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "NONE",
+    "header": "",
+    "trigger": "",
+    "text": "",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "OBJECTIVE",
+    "text": "Recon 1 unknown region.\n\nAdd this card to your pool of objectives.",
+    "footer": "",
+    "scratchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "whenRead": "One of the new February objectives that follow 02-03. Not printed as mandatory (yellow OBJECTIVE label, yellow star).",
+    "triggers": [],
+    "opensDoors": [],
+    "opensPackages": [],
+    "destroys": [],
+    "addsToPool": ["Recon 1 unknown region"],
+    "rules": ["Objective: recon 1 unknown region.", "Add this card to the pool of objectives."],
+    "notes": "Side A is the objective-card back. Side B text is vertical."
+  }
 }

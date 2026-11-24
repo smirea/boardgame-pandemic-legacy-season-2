@@ -1,8 +1,8 @@
 {
-	"folder": 6,
-	"id": "folder-6",
-	"guid": "b75a42",
-	"coverImage": "dossiers/folder-6/cover.jpg",
-	"coverText": "Yellow dossier sheet with a red dashed border. Seven die-cut doors, navy numbers only: 65, 64, and 61 across the top, 66 at center left, 62 at center right, 67 at the bottom left, 63 at the bottom right. Some numbers are rotated with the sticker.",
-	"doors": ["61", "62", "63", "64", "65", "66", "67"]
+  "folder": 6,
+  "id": "folder-6",
+  "guid": "b75a42",
+  "coverImage": "dossiers/folder-6/cover.jpg",
+  "coverText": "Yellow dossier sheet with a red dashed border. Seven die-cut doors, navy numbers only: 65, 64, and 61 across the top, 66 at center left, 62 at center right, 67 at the bottom left, 63 at the bottom right. Some numbers are rotated with the sticker.",
+  "doors": ["61", "62", "63", "64", "65", "66", "67"]
 }

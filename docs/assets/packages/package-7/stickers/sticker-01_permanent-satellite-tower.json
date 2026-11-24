@@ -1,21 +1,21 @@
 {
-	"id": "sticker-01_permanent-satellite-tower",
-	"package": 7,
-	"printedCode": null,
-	"name": "Permanent Satellite Tower",
-	"category": "game-end-upgrade",
-	"placementTarget": "On the board, next to a city that had a satellite tower in the just-played game.",
-	"costProductionUnits": 3,
-	"copies": 4,
-	"image": "sticker-01_permanent-satellite-tower.jpg",
-	"text": "No words. A yellow square with a dark blue circle and a yellow satellite dish emitting three signal arcs.",
-	"mechanics": {
-		"timing": "Game end, when spending production units on upgrades. The cost 3 is the orange circle printed beside each of these stickers on the Game End Upgrades sheet (P7-22a). The words \"production units\" are not printed on this sticker.",
-		"effect": "Put this sticker next to a city that had a satellite tower in the just-played game. During later setup, add a satellite tower to each city with a Permanent Satellite Tower sticker.",
-		"restrictions": [
-			"Four stickers. Only a city that had a satellite tower in the game just played.",
-			"The sheet that holds them is sticker-02, printed P7-22a."
-		],
-		"opensDoors": []
-	}
+  "id": "sticker-01_permanent-satellite-tower",
+  "package": 7,
+  "printedCode": null,
+  "name": "Permanent Satellite Tower",
+  "category": "game-end-upgrade",
+  "placementTarget": "On the board, next to a city that had a satellite tower in the just-played game.",
+  "costProductionUnits": 3,
+  "copies": 4,
+  "image": "sticker-01_permanent-satellite-tower.jpg",
+  "text": "No words. A yellow square with a dark blue circle and a yellow satellite dish emitting three signal arcs.",
+  "mechanics": {
+    "timing": "Game end, when spending production units on upgrades. The cost 3 is the orange circle printed beside each of these stickers on the Game End Upgrades sheet (P7-22a). The words \"production units\" are not printed on this sticker.",
+    "effect": "Put this sticker next to a city that had a satellite tower in the just-played game. During later setup, add a satellite tower to each city with a Permanent Satellite Tower sticker.",
+    "restrictions": [
+      "Four stickers. Only a city that had a satellite tower in the game just played.",
+      "The sheet that holds them is sticker-02, printed P7-22a."
+    ],
+    "opensDoors": []
+  }
 }

@@ -1,40 +1,40 @@
 {
-	"sequence": 27,
-	"folder": "027_03-06",
-	"cardCode": "03-06",
-	"printedCodes": {
-		"sideA": "03-06a",
-		"sideB": "03-06b"
-	},
-	"title": "RIGHT NOW!",
-	"category": "legacy_pause",
-	"month": "march",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "PAUSE",
-		"header": "PAUSE",
-		"trigger": "Draw this card and read the other side during step 2 at the end of your first game in March.",
-		"text": "PAUSE\nDRAW THIS CARD AND READ THE OTHER SIDE DURING STEP 2 AT THE END OF YOUR FIRST GAME IN MARCH.",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "RIGHT NOW!",
-		"text": "Open the following doors:\nK    24    47    E",
-		"footer": "",
-		"scratchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"whenRead": "PAUSE. Drawn during step 2 of March setup, which stops on this card. Read side B during step 2 at the end of the first March game, then continue the Legacy deck.",
-		"triggers": [],
-		"opensDoors": ["K", "24", "47", "E"],
-		"opensPackages": [],
-		"destroys": [],
-		"addsToPool": [],
-		"rules": ["Open doors K, 24, 47, and E immediately."],
-		"notes": "The four ids are each in a white box with red type. K and E are lettered doors. What is inside those doors is not printed on this card."
-	}
+  "sequence": 27,
+  "folder": "027_03-06",
+  "cardCode": "03-06",
+  "printedCodes": {
+    "sideA": "03-06a",
+    "sideB": "03-06b"
+  },
+  "title": "RIGHT NOW!",
+  "category": "legacy_pause",
+  "month": "march",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "PAUSE",
+    "header": "PAUSE",
+    "trigger": "Draw this card and read the other side during step 2 at the end of your first game in March.",
+    "text": "PAUSE\nDRAW THIS CARD AND READ THE OTHER SIDE DURING STEP 2 AT THE END OF YOUR FIRST GAME IN MARCH.",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "RIGHT NOW!",
+    "text": "Open the following doors:\nK    24    47    E",
+    "footer": "",
+    "scratchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "whenRead": "PAUSE. Drawn during step 2 of March setup, which stops on this card. Read side B during step 2 at the end of the first March game, then continue the Legacy deck.",
+    "triggers": [],
+    "opensDoors": ["K", "24", "47", "E"],
+    "opensPackages": [],
+    "destroys": [],
+    "addsToPool": [],
+    "rules": ["Open doors K, 24, 47, and E immediately."],
+    "notes": "The four ids are each in a white box with red type. K and E are lettered doors. What is inside those doors is not printed on this card."
+  }
 }

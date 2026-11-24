@@ -1,37 +1,37 @@
 {
-	"package": 1,
-	"index": 4,
-	"cardId": 903,
-	"printedCodes": {
-		"sideA": null,
-		"sideB": "P1-04b"
-	},
-	"title": "Chicago",
-	"category": "player-card",
-	"city": "Chicago",
-	"color": "blue",
-	"coordinates": "41°52'41\"N 87°37'47\"W",
-	"copies": 1,
-	"hasImprovementSlot": true,
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideASummary": "Player deck back. No text and no printed code.",
-	"sideBSummary": "Blue Chicago Player card, 41°52'41\"N 87°37'47\"W. Map of the Great Lakes and the east coast. No search box and no anchor. Code P1-04b.",
-	"searchBoxes": [],
-	"states": [],
-	"mechanics": {
-		"opensDoors": [],
-		"destroys": [],
-		"rules": [
-			"Blue Player card for Chicago with no search box.",
-			"P1-01b puts this card in the Player discard with P1-03b when the package is opened."
-		],
-		"notes": [
-			"Card id 903. Printed code P1-04b.",
-			"Same coordinates as the search card: 41°52'41\"N 87°37'47\"W.",
-			"A dashed improvement slot is printed across the map."
-		]
-	}
+  "package": 1,
+  "index": 4,
+  "cardId": 903,
+  "printedCodes": {
+    "sideA": null,
+    "sideB": "P1-04b"
+  },
+  "title": "Chicago",
+  "category": "player-card",
+  "city": "Chicago",
+  "color": "blue",
+  "coordinates": "41°52'41\"N 87°37'47\"W",
+  "copies": 1,
+  "hasImprovementSlot": true,
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideASummary": "Player deck back. No text and no printed code.",
+  "sideBSummary": "Blue Chicago Player card, 41°52'41\"N 87°37'47\"W. Map of the Great Lakes and the east coast. No search box and no anchor. Code P1-04b.",
+  "searchBoxes": [],
+  "states": [],
+  "mechanics": {
+    "opensDoors": [],
+    "destroys": [],
+    "rules": [
+      "Blue Player card for Chicago with no search box.",
+      "P1-01b puts this card in the Player discard with P1-03b when the package is opened."
+    ],
+    "notes": [
+      "Card id 903. Printed code P1-04b.",
+      "Same coordinates as the search card: 41°52'41\"N 87°37'47\"W.",
+      "A dashed improvement slot is printed across the map."
+    ]
+  }
 }

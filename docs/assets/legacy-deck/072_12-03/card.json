@@ -1,49 +1,49 @@
 {
-	"sequence": 72,
-	"folder": "072_12-03",
-	"cardCode": "12-03",
-	"printedCodes": {
-		"sideA": "12-03a",
-		"sideB": "12-03b"
-	},
-	"title": "New Priorities",
-	"category": "legacy_instruction",
-	"month": "december",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "CONTINUE",
-		"header": "KEEP DRAWING",
-		"trigger": "",
-		"summary": "Draw and read the other side of this card.",
-		"text": "Draw and read the other side of this card.",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "NEW PRIORITIES",
-		"summary": "If they are still around, destroy Complete the Plan and The Plan. One new mandatory objective is enclosed, and December needs only that 1 objective. The calendar shows December with 1 star and 0.",
-		"text": "DESTROY THE FOLLOWING CARDS IF YOU HAVE NOT DONE SO ALREADY:\n• COMPLETE THE PLAN\n• THE PLAN\n\nA new mandatory objective is enclosed.\nWe only need to complete this 1 objective in December.\n\nCalendar: DECEMBER 1 star, 0.",
-		"footer": "",
-		"scratchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"whenRead": "During the first December setup draw, after the journal 12-02. The enclosed mandatory objective is the next card, 12-04.",
-		"triggers": [],
-		"opensDoors": [],
-		"opensPackages": [],
-		"destroys": [
-			"COMPLETE THE PLAN objective, if it has not already been destroyed",
-			"THE PLAN card (11-05), if it has not already been destroyed"
-		],
-		"addsToPool": [],
-		"rules": [
-			"Destroy Complete the Plan and The Plan if those cards are still in play.",
-			"December requires 1 objective, the mandatory objective enclosed with this card.",
-			"Printed calendar: December, 1 star and 0."
-		],
-		"notes": "A sliver of the previous month's column is visible at the left edge of the inset and is not readable. December's column is outlined. Same calendar as 11-03: the star is the objective count and 0 is that month's projected stockpile. This card does not print a 'place Supply cubes' sentence."
-	}
+  "sequence": 72,
+  "folder": "072_12-03",
+  "cardCode": "12-03",
+  "printedCodes": {
+    "sideA": "12-03a",
+    "sideB": "12-03b"
+  },
+  "title": "New Priorities",
+  "category": "legacy_instruction",
+  "month": "december",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "CONTINUE",
+    "header": "KEEP DRAWING",
+    "trigger": "",
+    "summary": "Draw and read the other side of this card.",
+    "text": "Draw and read the other side of this card.",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "NEW PRIORITIES",
+    "summary": "If they are still around, destroy Complete the Plan and The Plan. One new mandatory objective is enclosed, and December needs only that 1 objective. The calendar shows December with 1 star and 0.",
+    "text": "DESTROY THE FOLLOWING CARDS IF YOU HAVE NOT DONE SO ALREADY:\n• COMPLETE THE PLAN\n• THE PLAN\n\nA new mandatory objective is enclosed.\nWe only need to complete this 1 objective in December.\n\nCalendar: DECEMBER 1 star, 0.",
+    "footer": "",
+    "scratchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "whenRead": "During the first December setup draw, after the journal 12-02. The enclosed mandatory objective is the next card, 12-04.",
+    "triggers": [],
+    "opensDoors": [],
+    "opensPackages": [],
+    "destroys": [
+      "COMPLETE THE PLAN objective, if it has not already been destroyed",
+      "THE PLAN card (11-05), if it has not already been destroyed"
+    ],
+    "addsToPool": [],
+    "rules": [
+      "Destroy Complete the Plan and The Plan if those cards are still in play.",
+      "December requires 1 objective, the mandatory objective enclosed with this card.",
+      "Printed calendar: December, 1 star and 0."
+    ],
+    "notes": "A sliver of the previous month's column is visible at the left edge of the inset and is not readable. December's column is outlined. Same calendar as 11-03: the star is the objective count and 0 is that month's projected stockpile. This card does not print a 'place Supply cubes' sentence."
+  }
 }

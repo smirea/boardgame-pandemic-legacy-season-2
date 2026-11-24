@@ -1,109 +1,109 @@
 {
-	"door": "56",
-	"folder": 5,
-	"id": "door-56",
-	"guid": "21bd4f",
-	"frontImage": "dossiers/folder-5/door-56/front.jpg",
-	"frontText": "Navy 56 centered on a yellow door card. Dashed cut-line border. No other printed text.",
-	"items": [
-		{
-			"id": "item-01",
-			"image": "dossiers/folder-5/door-56/item-01.jpg",
-			"count": 1,
-			"printedCode": null,
-			"category": "map-sticker",
-			"title": "East Asia",
-			"placementTarget": "Board, over the western Pacific and eastern Asia, including the Utopia landmass.",
-			"text": "Utopia\nYou cannot access\nUtopia until Hollow\nMen defect.",
-			"mapDetails": {
-				"cities": [
-					{
-						"name": "Hong Kong",
-						"color": "red",
-						"population": 1,
-						"port": true,
-						"infested": false,
-						"lab": null,
-						"marker": "anchor",
-						"lat": 22.3,
-						"lon": 114.2,
-						"graticule": "Just north of the printed 20°N line, between the printed 100°E and 120°E lines."
-					},
-					{
-						"name": "Shanghai",
-						"color": "red",
-						"population": 1,
-						"port": true,
-						"infested": true,
-						"lab": null,
-						"marker": "anchor",
-						"lat": 31.2,
-						"lon": 121.5,
-						"graticule": "North of the 20°N line. The 120°E label sits just west of the name. Rat icon on the landward (west) side of the disc."
-					},
-					{
-						"name": "Seoul",
-						"color": "red",
-						"population": 1,
-						"port": true,
-						"infested": false,
-						"lab": null,
-						"marker": "anchor",
-						"lat": 37.6,
-						"lon": 127.0,
-						"graticule": "South of the printed 40°N line, on the Korean peninsula. No rat icon."
-					},
-					{
-						"name": "Osaka",
-						"color": "red",
-						"population": 1,
-						"port": true,
-						"infested": true,
-						"lab": null,
-						"marker": "anchor",
-						"lat": 34.7,
-						"lon": 135.5,
-						"graticule": "South of Seoul and west of Tokyo, well north of 20°N. Rat icon southwest of the disc."
-					},
-					{
-						"name": "Tokyo",
-						"color": "red",
-						"population": 1,
-						"port": true,
-						"infested": true,
-						"lab": null,
-						"marker": "anchor",
-						"lat": 35.7,
-						"lon": 139.7,
-						"graticule": "Just south of the printed 40°N line. Rat icon north of the disc. Population 1 square sits east of the disc."
-					}
-				],
-				"havens": [],
-				"printedRoutes": [],
-				"reconRoutes": [],
-				"redRegionLines": [
-					"A horizontal red line runs along the printed 20°N parallel, starting in the sea east of Hong Kong (past the small island east of the coast) and continuing east across the Pacific until the dark ocean at the right edge. It passes south of Shanghai and Osaka and does not touch a city."
-				],
-				"specialAreas": [
-					{
-						"name": "Utopia",
-						"kind": "blocked-region",
-						"text": "Utopia\nYou cannot access\nUtopia until Hollow\nMen defect.",
-						"lat": 40,
-						"lon": 100,
-						"graticule": "Yellow land in the northwest of the sticker. A printed 40°N label is at the top right of the sticker, not on this land. The 100°E meridian is printed at the southwest corner, west of Hong Kong.",
-						"wall": "A thick black jagged wall follows the east and southeast coast of the Utopia landmass, separating it from the East Asian sea.",
-						"cityDisc": false,
-						"notes": "The name Utopia is printed, but there is no colored city disc, population, anchor, or rat on this land."
-					}
-				]
-			},
-			"mechanics": {
-				"addsCities": ["Hong Kong", "Shanghai", "Seoul", "Osaka", "Tokyo"],
-				"access": "Utopia cannot be entered until Hollow Men defect.",
-				"notes": "No supply line or sea lane is printed between these cities. All five discs are red ports at population 1. Printed infestation (green rat) is on Shanghai, Osaka, and Tokyo only."
-			}
-		}
-	],
-	"summary": "East Asia map. Hong Kong, Shanghai, Seoul, Osaka, and Tokyo are red ports at population 1. Shanghai, Osaka, and Tokyo are printed infested. Utopia is walled off until Hollow Men defect. A red region line runs east along 20°N. No recon box and no printed route."
+  "door": "56",
+  "folder": 5,
+  "id": "door-56",
+  "guid": "21bd4f",
+  "frontImage": "dossiers/folder-5/door-56/front.jpg",
+  "frontText": "Navy 56 centered on a yellow door card. Dashed cut-line border. No other printed text.",
+  "items": [
+    {
+      "id": "item-01",
+      "image": "dossiers/folder-5/door-56/item-01.jpg",
+      "count": 1,
+      "printedCode": null,
+      "category": "map-sticker",
+      "title": "East Asia",
+      "placementTarget": "Board, over the western Pacific and eastern Asia, including the Utopia landmass.",
+      "text": "Utopia\nYou cannot access\nUtopia until Hollow\nMen defect.",
+      "mapDetails": {
+        "cities": [
+          {
+            "name": "Hong Kong",
+            "color": "red",
+            "population": 1,
+            "port": true,
+            "infested": false,
+            "lab": null,
+            "marker": "anchor",
+            "lat": 22.3,
+            "lon": 114.2,
+            "graticule": "Just north of the printed 20°N line, between the printed 100°E and 120°E lines."
+          },
+          {
+            "name": "Shanghai",
+            "color": "red",
+            "population": 1,
+            "port": true,
+            "infested": true,
+            "lab": null,
+            "marker": "anchor",
+            "lat": 31.2,
+            "lon": 121.5,
+            "graticule": "North of the 20°N line. The 120°E label sits just west of the name. Rat icon on the landward (west) side of the disc."
+          },
+          {
+            "name": "Seoul",
+            "color": "red",
+            "population": 1,
+            "port": true,
+            "infested": false,
+            "lab": null,
+            "marker": "anchor",
+            "lat": 37.6,
+            "lon": 127.0,
+            "graticule": "South of the printed 40°N line, on the Korean peninsula. No rat icon."
+          },
+          {
+            "name": "Osaka",
+            "color": "red",
+            "population": 1,
+            "port": true,
+            "infested": true,
+            "lab": null,
+            "marker": "anchor",
+            "lat": 34.7,
+            "lon": 135.5,
+            "graticule": "South of Seoul and west of Tokyo, well north of 20°N. Rat icon southwest of the disc."
+          },
+          {
+            "name": "Tokyo",
+            "color": "red",
+            "population": 1,
+            "port": true,
+            "infested": true,
+            "lab": null,
+            "marker": "anchor",
+            "lat": 35.7,
+            "lon": 139.7,
+            "graticule": "Just south of the printed 40°N line. Rat icon north of the disc. Population 1 square sits east of the disc."
+          }
+        ],
+        "havens": [],
+        "printedRoutes": [],
+        "reconRoutes": [],
+        "redRegionLines": [
+          "A horizontal red line runs along the printed 20°N parallel, starting in the sea east of Hong Kong (past the small island east of the coast) and continuing east across the Pacific until the dark ocean at the right edge. It passes south of Shanghai and Osaka and does not touch a city."
+        ],
+        "specialAreas": [
+          {
+            "name": "Utopia",
+            "kind": "blocked-region",
+            "text": "Utopia\nYou cannot access\nUtopia until Hollow\nMen defect.",
+            "lat": 40,
+            "lon": 100,
+            "graticule": "Yellow land in the northwest of the sticker. A printed 40°N label is at the top right of the sticker, not on this land. The 100°E meridian is printed at the southwest corner, west of Hong Kong.",
+            "wall": "A thick black jagged wall follows the east and southeast coast of the Utopia landmass, separating it from the East Asian sea.",
+            "cityDisc": false,
+            "notes": "The name Utopia is printed, but there is no colored city disc, population, anchor, or rat on this land."
+          }
+        ]
+      },
+      "mechanics": {
+        "addsCities": ["Hong Kong", "Shanghai", "Seoul", "Osaka", "Tokyo"],
+        "access": "Utopia cannot be entered until Hollow Men defect.",
+        "notes": "No supply line or sea lane is printed between these cities. All five discs are red ports at population 1. Printed infestation (green rat) is on Shanghai, Osaka, and Tokyo only."
+      }
+    }
+  ],
+  "summary": "East Asia map. Hong Kong, Shanghai, Seoul, Osaka, and Tokyo are red ports at population 1. Shanghai, Osaka, and Tokyo are printed infested. Utopia is walled off until Hollow Men defect. A red region line runs east along 20°N. No recon box and no printed route."
 }

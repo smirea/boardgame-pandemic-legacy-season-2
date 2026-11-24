@@ -1,55 +1,55 @@
 {
-	"file": "page-11.jpg",
-	"printedPageNumber": 11,
-	"headings": [
-		"INSTRUCTIONS FOR A BETTER LIFE ON THE HAVENS",
-		"RECON (NOT IN PROLOGUE)",
-		"FREE ACTIONS",
-		"PICK UP SUPPLIES",
-		"TRANSFER SUPPLIES"
-	],
-	"ruleStickerSlots": [
-		{
-			"slot": "I",
-			"context": "FREE ACTIONS panel, below TRANSFER SUPPLIES: RULE STICKER I"
-		}
-	],
-	"sections": [
-		{
-			"heading": "RECON (NOT IN PROLOGUE)",
-			"text": "When you Recon, you are exploring some of the lost world in an attempt to learn what happened and how it can help you with your objectives.\n\nEach location where you can Recon shows you what you must discard in order to recon from there. In most cases you need to recon from a supply center. Read each recon description to see what you need:\n\n• Unless otherwise stated, there must be a supply center [supply center icon] in that city.\n• You need to discard City cards from your hand matching those on the route leaving the city.\n• If the cards on the route have an * symbol (e.g., [blue card icon with *]), the cards can be of any cities—only the color matters.\nExample:\nRecon with any 3 blue cards from a supply center here to open Package 1.\n[three blue squares, each with a white *]\n• If the cards have letters on them (e.g., [black square with A]), then each card discarded of that color must be a unique city.\nExample:\nRecon with 4 unique black cards from a supply center here to open Package 2.\n[four black squares labeled A B C D]\n• When you successfully do the Recon action, open the package number as shown on the route."
-		},
-		{
-			"heading": "FREE ACTIONS",
-			"text": "These actions must be taken during the “Do Actions” step but do not count toward your 4 actions for the turn. Free actions cannot be used to interrupt other actions. For example, you cannot do the Pick Up Supplies action on the haven in the Mediterranean while using the Sail action to get from London to Cairo."
-		},
-		{
-			"heading": "PICK UP SUPPLIES",
-			"text": "Take as many Supply cubes as you like from your location and put them onto your Character card."
-		},
-		{
-			"heading": "TRANSFER SUPPLIES",
-			"text": "Give as many Supply cubes as you like to a player in your location or take as many Supply cubes as you like from that player (with their permission).\n\nRULE STICKER I"
-		},
-		{
-			"heading": "",
-			"text": "It is Anna’s turn and she wishes to play her Produce Supplies card and deliver some supplies. Since she is already in a haven, she can set her plan in motion right away.\n\n1. She first plays a Produce Supplies card for its Local Production ability at the empty haven where she is. Anna takes 3 Supply cubes from the stockpile (the haven’s population limit) and fills her haven with them. (She does not check a box on the card since she played it for Local Production.)\n\nFree. She picks up all 3 cubes (she could have picked up fewer cubes) with the Pick Up Supplies free action and puts them onto her Character card.\n\n2. Anna does the Drive/Ferry action to move her pawn to Lagos.\n\n3. She does the Deliver Supplies action there and puts 2 cubes on Lagos (she could have delivered a different number of cubes instead).\n\n4. Then she does the Sail action, discarding the London card from her hand to move to London.\n\nFree. Anna transfers supplies for free to Adele, who is also in London, with the Transfer Supplies free action."
-		}
-	],
-	"tables": [],
-	"diagramsAndCallouts": [
-		"Running header: INSTRUCTIONS FOR A BETTER LIFE ON THE HAVENS.",
-		"RECON heading has a binoculars icon.",
-		"Supply-center icon is printed inline in the first Recon bullet, after the words supply center.",
-		"Asterisk bullet shows a blue square card icon with a white *.",
-		"Example card: Recon with any 3 blue cards from a supply center here to open Package 1. Package 1 is in red. Three blue squares with white asterisks.",
-		"Letter bullet shows a black square icon with a white A.",
-		"Example card: Recon with 4 unique black cards from a supply center here to open Package 2. Package 2 is in red. Four black squares labeled A, B, C, D.",
-		"FREE ACTIONS is a teal panel. PICK UP SUPPLIES has an icon of cubes with an arrow onto a card. TRANSFER SUPPLIES has an icon of two cubes with a curved arrow between them. (with their permission) is italic.",
-		"Empty dashed slot labeled RULE STICKER I sits in the lower part of the FREE ACTIONS panel.",
-		"Bottom walkthrough is a full-width example with numbered action icons (Produce Supplies, Pick Up Supplies, Drive/Ferry, Deliver Supplies, Sail, Transfer Supplies). Free steps are labeled Free in red.",
-		"Illustration includes Anna’s character card (Radio Operator ability; the small ability text is partly covered) and Adele’s card: Laborer: You may do the Build Supply Center action with 1 fewer card if you spend 2 Supply cubes from your Character card. Adele, home Asgard, age 32. Board cities shown include Lagos, London, and Asgard.",
-		"Printed page number 11, bottom right."
-	],
-	"fullText": "INSTRUCTIONS FOR A BETTER LIFE ON THE HAVENS\n\nRECON (NOT IN PROLOGUE)\n\nWhen you Recon, you are exploring some of the lost world in an attempt to learn what happened and how it can help you with your objectives.\n\nEach location where you can Recon shows you what you must discard in order to recon from there. In most cases you need to recon from a supply center. Read each recon description to see what you need:\n\n• Unless otherwise stated, there must be a supply center [supply center icon] in that city.\n• You need to discard City cards from your hand matching those on the route leaving the city.\n• If the cards on the route have an * symbol (e.g., [blue card icon with *]), the cards can be of any cities—only the color matters.\nExample:\nRecon with any 3 blue cards from a supply center here to open Package 1.\n[three blue squares, each with a white *]\n• If the cards have letters on them (e.g., [black square with A]), then each card discarded of that color must be a unique city.\nExample:\nRecon with 4 unique black cards from a supply center here to open Package 2.\n[four black squares labeled A B C D]\n• When you successfully do the Recon action, open the package number as shown on the route.\n\nFREE ACTIONS\n\nThese actions must be taken during the “Do Actions” step but do not count toward your 4 actions for the turn. Free actions cannot be used to interrupt other actions. For example, you cannot do the Pick Up Supplies action on the haven in the Mediterranean while using the Sail action to get from London to Cairo.\n\nPICK UP SUPPLIES\n\nTake as many Supply cubes as you like from your location and put them onto your Character card.\n\nTRANSFER SUPPLIES\n\nGive as many Supply cubes as you like to a player in your location or take as many Supply cubes as you like from that player (with their permission).\n\nRULE STICKER I\n\nIt is Anna’s turn and she wishes to play her Produce Supplies card and deliver some supplies. Since she is already in a haven, she can set her plan in motion right away.\n\n1. She first plays a Produce Supplies card for its Local Production ability at the empty haven where she is. Anna takes 3 Supply cubes from the stockpile (the haven’s population limit) and fills her haven with them. (She does not check a box on the card since she played it for Local Production.)\n\nFree. She picks up all 3 cubes (she could have picked up fewer cubes) with the Pick Up Supplies free action and puts them onto her Character card.\n\n2. Anna does the Drive/Ferry action to move her pawn to Lagos.\n\n3. She does the Deliver Supplies action there and puts 2 cubes on Lagos (she could have delivered a different number of cubes instead).\n\n4. Then she does the Sail action, discarding the London card from her hand to move to London.\n\nFree. Anna transfers supplies for free to Adele, who is also in London, with the Transfer Supplies free action."
+  "file": "page-11.jpg",
+  "printedPageNumber": 11,
+  "headings": [
+    "INSTRUCTIONS FOR A BETTER LIFE ON THE HAVENS",
+    "RECON (NOT IN PROLOGUE)",
+    "FREE ACTIONS",
+    "PICK UP SUPPLIES",
+    "TRANSFER SUPPLIES"
+  ],
+  "ruleStickerSlots": [
+    {
+      "slot": "I",
+      "context": "FREE ACTIONS panel, below TRANSFER SUPPLIES: RULE STICKER I"
+    }
+  ],
+  "sections": [
+    {
+      "heading": "RECON (NOT IN PROLOGUE)",
+      "text": "When you Recon, you are exploring some of the lost world in an attempt to learn what happened and how it can help you with your objectives.\n\nEach location where you can Recon shows you what you must discard in order to recon from there. In most cases you need to recon from a supply center. Read each recon description to see what you need:\n\n• Unless otherwise stated, there must be a supply center [supply center icon] in that city.\n• You need to discard City cards from your hand matching those on the route leaving the city.\n• If the cards on the route have an * symbol (e.g., [blue card icon with *]), the cards can be of any cities—only the color matters.\nExample:\nRecon with any 3 blue cards from a supply center here to open Package 1.\n[three blue squares, each with a white *]\n• If the cards have letters on them (e.g., [black square with A]), then each card discarded of that color must be a unique city.\nExample:\nRecon with 4 unique black cards from a supply center here to open Package 2.\n[four black squares labeled A B C D]\n• When you successfully do the Recon action, open the package number as shown on the route."
+    },
+    {
+      "heading": "FREE ACTIONS",
+      "text": "These actions must be taken during the “Do Actions” step but do not count toward your 4 actions for the turn. Free actions cannot be used to interrupt other actions. For example, you cannot do the Pick Up Supplies action on the haven in the Mediterranean while using the Sail action to get from London to Cairo."
+    },
+    {
+      "heading": "PICK UP SUPPLIES",
+      "text": "Take as many Supply cubes as you like from your location and put them onto your Character card."
+    },
+    {
+      "heading": "TRANSFER SUPPLIES",
+      "text": "Give as many Supply cubes as you like to a player in your location or take as many Supply cubes as you like from that player (with their permission).\n\nRULE STICKER I"
+    },
+    {
+      "heading": "",
+      "text": "It is Anna’s turn and she wishes to play her Produce Supplies card and deliver some supplies. Since she is already in a haven, she can set her plan in motion right away.\n\n1. She first plays a Produce Supplies card for its Local Production ability at the empty haven where she is. Anna takes 3 Supply cubes from the stockpile (the haven’s population limit) and fills her haven with them. (She does not check a box on the card since she played it for Local Production.)\n\nFree. She picks up all 3 cubes (she could have picked up fewer cubes) with the Pick Up Supplies free action and puts them onto her Character card.\n\n2. Anna does the Drive/Ferry action to move her pawn to Lagos.\n\n3. She does the Deliver Supplies action there and puts 2 cubes on Lagos (she could have delivered a different number of cubes instead).\n\n4. Then she does the Sail action, discarding the London card from her hand to move to London.\n\nFree. Anna transfers supplies for free to Adele, who is also in London, with the Transfer Supplies free action."
+    }
+  ],
+  "tables": [],
+  "diagramsAndCallouts": [
+    "Running header: INSTRUCTIONS FOR A BETTER LIFE ON THE HAVENS.",
+    "RECON heading has a binoculars icon.",
+    "Supply-center icon is printed inline in the first Recon bullet, after the words supply center.",
+    "Asterisk bullet shows a blue square card icon with a white *.",
+    "Example card: Recon with any 3 blue cards from a supply center here to open Package 1. Package 1 is in red. Three blue squares with white asterisks.",
+    "Letter bullet shows a black square icon with a white A.",
+    "Example card: Recon with 4 unique black cards from a supply center here to open Package 2. Package 2 is in red. Four black squares labeled A, B, C, D.",
+    "FREE ACTIONS is a teal panel. PICK UP SUPPLIES has an icon of cubes with an arrow onto a card. TRANSFER SUPPLIES has an icon of two cubes with a curved arrow between them. (with their permission) is italic.",
+    "Empty dashed slot labeled RULE STICKER I sits in the lower part of the FREE ACTIONS panel.",
+    "Bottom walkthrough is a full-width example with numbered action icons (Produce Supplies, Pick Up Supplies, Drive/Ferry, Deliver Supplies, Sail, Transfer Supplies). Free steps are labeled Free in red.",
+    "Illustration includes Anna’s character card (Radio Operator ability; the small ability text is partly covered) and Adele’s card: Laborer: You may do the Build Supply Center action with 1 fewer card if you spend 2 Supply cubes from your Character card. Adele, home Asgard, age 32. Board cities shown include Lagos, London, and Asgard.",
+    "Printed page number 11, bottom right."
+  ],
+  "fullText": "INSTRUCTIONS FOR A BETTER LIFE ON THE HAVENS\n\nRECON (NOT IN PROLOGUE)\n\nWhen you Recon, you are exploring some of the lost world in an attempt to learn what happened and how it can help you with your objectives.\n\nEach location where you can Recon shows you what you must discard in order to recon from there. In most cases you need to recon from a supply center. Read each recon description to see what you need:\n\n• Unless otherwise stated, there must be a supply center [supply center icon] in that city.\n• You need to discard City cards from your hand matching those on the route leaving the city.\n• If the cards on the route have an * symbol (e.g., [blue card icon with *]), the cards can be of any cities—only the color matters.\nExample:\nRecon with any 3 blue cards from a supply center here to open Package 1.\n[three blue squares, each with a white *]\n• If the cards have letters on them (e.g., [black square with A]), then each card discarded of that color must be a unique city.\nExample:\nRecon with 4 unique black cards from a supply center here to open Package 2.\n[four black squares labeled A B C D]\n• When you successfully do the Recon action, open the package number as shown on the route.\n\nFREE ACTIONS\n\nThese actions must be taken during the “Do Actions” step but do not count toward your 4 actions for the turn. Free actions cannot be used to interrupt other actions. For example, you cannot do the Pick Up Supplies action on the haven in the Mediterranean while using the Sail action to get from London to Cairo.\n\nPICK UP SUPPLIES\n\nTake as many Supply cubes as you like from your location and put them onto your Character card.\n\nTRANSFER SUPPLIES\n\nGive as many Supply cubes as you like to a player in your location or take as many Supply cubes as you like from that player (with their permission).\n\nRULE STICKER I\n\nIt is Anna’s turn and she wishes to play her Produce Supplies card and deliver some supplies. Since she is already in a haven, she can set her plan in motion right away.\n\n1. She first plays a Produce Supplies card for its Local Production ability at the empty haven where she is. Anna takes 3 Supply cubes from the stockpile (the haven’s population limit) and fills her haven with them. (She does not check a box on the card since she played it for Local Production.)\n\nFree. She picks up all 3 cubes (she could have picked up fewer cubes) with the Pick Up Supplies free action and puts them onto her Character card.\n\n2. Anna does the Drive/Ferry action to move her pawn to Lagos.\n\n3. She does the Deliver Supplies action there and puts 2 cubes on Lagos (she could have delivered a different number of cubes instead).\n\n4. Then she does the Sail action, discarding the London card from her hand to move to London.\n\nFree. Anna transfers supplies for free to Adele, who is also in London, with the Transfer Supplies free action."
 }

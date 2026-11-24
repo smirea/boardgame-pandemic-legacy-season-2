@@ -1,36 +1,36 @@
 {
-	"package": 5,
-	"index": 4,
-	"cardId": 10703,
-	"printedCodes": {
-		"sideA": null,
-		"sideB": "P5-04b"
-	},
-	"title": "Buenos Aires",
-	"category": "player-city",
-	"city": "Buenos Aires",
-	"color": "yellow",
-	"coordinates": "34°36'13\"S 58°22'54\"W",
-	"copies": 1,
-	"hasImprovementSlot": true,
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"text": "Player deck back. No printed text."
-	},
-	"sideB": {
-		"text": "Buenos Aires\n34°36'13\"S 58°22'54\"W\n(City map. No search box.)\n(City name and coordinates repeat upside down along the bottom.)\nP5-04b",
-		"searchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"opensDoors": [],
-		"rules": [
-			"Yellow Player city card.",
-			"One improvement sticker may be placed on this card. No empty sticker box is printed on the face."
-		],
-		"notes": "Second Buenos Aires Player card. Map only, no scratch-off."
-	}
+  "package": 5,
+  "index": 4,
+  "cardId": 10703,
+  "printedCodes": {
+    "sideA": null,
+    "sideB": "P5-04b"
+  },
+  "title": "Buenos Aires",
+  "category": "player-city",
+  "city": "Buenos Aires",
+  "color": "yellow",
+  "coordinates": "34°36'13\"S 58°22'54\"W",
+  "copies": 1,
+  "hasImprovementSlot": true,
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "text": "Player deck back. No printed text."
+  },
+  "sideB": {
+    "text": "Buenos Aires\n34°36'13\"S 58°22'54\"W\n(City map. No search box.)\n(City name and coordinates repeat upside down along the bottom.)\nP5-04b",
+    "searchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "opensDoors": [],
+    "rules": [
+      "Yellow Player city card.",
+      "One improvement sticker may be placed on this card. No empty sticker box is printed on the face."
+    ],
+    "notes": "Second Buenos Aires Player card. Map only, no scratch-off."
+  }
 }

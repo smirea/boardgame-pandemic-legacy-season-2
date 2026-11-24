@@ -1,51 +1,51 @@
 {
-	"door": "37",
-	"folder": 3,
-	"frontImage": "dossiers/folder-3/door-37/front.jpg",
-	"frontText": "37",
-	"items": [
-		{
-			"id": "item-01",
-			"image": "dossiers/folder-3/door-37/item-01.jpg",
-			"count": 1,
-			"printedCode": null,
-			"category": "action-reference",
-			"title": "BROADCAST MISINFORMATION",
-			"placementTarget": "Back of each player reference card",
-			"costProductionUnits": null,
-			"text": "BROADCAST MISINFORMATION\nAt a satellite tower, move a Hollow Men figure to a location adjacent to its current location. Your city's color must match the figure's current city.",
-			"mechanics": {
-				"timing": "action",
-				"trigger": "At a satellite tower",
-				"effect": "Move a Hollow Men figure to a location adjacent to its current location.",
-				"restrictions": [
-					"You must be at a satellite tower",
-					"The destination is adjacent to the figure's current location",
-					"Your city's color must match the figure's current city"
-				],
-				"icon": "Radio tower with question marks",
-				"sourceGuids": ["92eb04"]
-			}
-		},
-		{
-			"id": "item-02",
-			"image": "dossiers/folder-3/door-37/item-02.jpg",
-			"count": 1,
-			"printedCode": null,
-			"category": "placement-instruction",
-			"title": "Reference card placement",
-			"placementTarget": null,
-			"costProductionUnits": null,
-			"text": "Place this sticker on the back of each player reference card.",
-			"mechanics": {
-				"timing": "setup",
-				"trigger": null,
-				"effect": "Place the action sticker on the back of each player reference card.",
-				"restrictions": [],
-				"sourceGuids": ["96473f"]
-			}
-		}
-	],
-	"bags": [],
-	"summary": "Broadcast Misinformation action overlay and the instruction to put it on the back of each player reference card. The door numeral is printed rotated 90° counter-clockwise. The placement strip is byte-identical to doors 38 and 39."
+  "door": "37",
+  "folder": 3,
+  "frontImage": "dossiers/folder-3/door-37/front.jpg",
+  "frontText": "37",
+  "items": [
+    {
+      "id": "item-01",
+      "image": "dossiers/folder-3/door-37/item-01.jpg",
+      "count": 1,
+      "printedCode": null,
+      "category": "action-reference",
+      "title": "BROADCAST MISINFORMATION",
+      "placementTarget": "Back of each player reference card",
+      "costProductionUnits": null,
+      "text": "BROADCAST MISINFORMATION\nAt a satellite tower, move a Hollow Men figure to a location adjacent to its current location. Your city's color must match the figure's current city.",
+      "mechanics": {
+        "timing": "action",
+        "trigger": "At a satellite tower",
+        "effect": "Move a Hollow Men figure to a location adjacent to its current location.",
+        "restrictions": [
+          "You must be at a satellite tower",
+          "The destination is adjacent to the figure's current location",
+          "Your city's color must match the figure's current city"
+        ],
+        "icon": "Radio tower with question marks",
+        "sourceGuids": ["92eb04"]
+      }
+    },
+    {
+      "id": "item-02",
+      "image": "dossiers/folder-3/door-37/item-02.jpg",
+      "count": 1,
+      "printedCode": null,
+      "category": "placement-instruction",
+      "title": "Reference card placement",
+      "placementTarget": null,
+      "costProductionUnits": null,
+      "text": "Place this sticker on the back of each player reference card.",
+      "mechanics": {
+        "timing": "setup",
+        "trigger": null,
+        "effect": "Place the action sticker on the back of each player reference card.",
+        "restrictions": [],
+        "sourceGuids": ["96473f"]
+      }
+    }
+  ],
+  "bags": [],
+  "summary": "Broadcast Misinformation action overlay and the instruction to put it on the back of each player reference card. The door numeral is printed rotated 90° counter-clockwise. The placement strip is byte-identical to doors 38 and 39."
 }

@@ -1,40 +1,40 @@
 {
-	"package": 5,
-	"index": 1,
-	"cardId": 10700,
-	"printedCodes": {
-		"sideA": "P5-01a",
-		"sideB": "P5-01b"
-	},
-	"title": "Recon Report",
-	"category": "report",
-	"city": null,
-	"color": null,
-	"copies": 1,
-	"hasImprovementSlot": false,
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"text": "THIS PACKAGE INCLUDES:\n• 14 cards • 1 sticker card\n\nRECON REPORT\n\nLabs. There were laboratories looking for a cure. Things didn't seem to be going well. Our leaders were tight-lipped on the subject.\n\nDo these labs still exist? Common rumor on the havens is that they are all far to the south. Perhaps one is here? Is it still working? Have they made any advancements?\n\nRead both sides of this card then keep it in the reserve.\nP5-01a"
-	},
-	"sideB": {
-		"text": "RIGHT NOW!\n\nOpen the following doors if you have not done so already:\n67  J  23  L  39\n\nYou have connected a new city:\nBuenos Aires.\n\n• Add the Player cards for Buenos Aires to the Player discard pile.\n• Add the Infection cards for Buenos Aires to the Game End area.\n• Put the other Player and Infection cards included in this package into the reserve.\n• Finally, give the “Strategic Reserves” Unrationed Event card to a player to add to their hand.\nP5-01b",
-		"searchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"opensDoors": ["67", "J", "23", "L", "39"],
-		"rules": [
-			"Read both sides, then keep this card in the reserve.",
-			"Open 67, J, 23, L, and 39 if they are still closed.",
-			"Buenos Aires is now connected.",
-			"Buenos Aires Player cards (P5-03b, P5-04b) go to the Player discard pile.",
-			"Buenos Aires Infection cards (P5-05b, P5-06b) go to the Game End area.",
-			"The other Player and Infection cards in this package (Santiago, Lima, Bogotá) go to the reserve.",
-			"Give Strategic Reserves (P5-02b) to a player, into their hand."
-		],
-		"notes": "The package lists 14 cards and 1 sticker card. The sticker card holds Facilitator, Outrider, and Foreman."
-	}
+  "package": 5,
+  "index": 1,
+  "cardId": 10700,
+  "printedCodes": {
+    "sideA": "P5-01a",
+    "sideB": "P5-01b"
+  },
+  "title": "Recon Report",
+  "category": "report",
+  "city": null,
+  "color": null,
+  "copies": 1,
+  "hasImprovementSlot": false,
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "text": "THIS PACKAGE INCLUDES:\n• 14 cards • 1 sticker card\n\nRECON REPORT\n\nLabs. There were laboratories looking for a cure. Things didn't seem to be going well. Our leaders were tight-lipped on the subject.\n\nDo these labs still exist? Common rumor on the havens is that they are all far to the south. Perhaps one is here? Is it still working? Have they made any advancements?\n\nRead both sides of this card then keep it in the reserve.\nP5-01a"
+  },
+  "sideB": {
+    "text": "RIGHT NOW!\n\nOpen the following doors if you have not done so already:\n67  J  23  L  39\n\nYou have connected a new city:\nBuenos Aires.\n\n• Add the Player cards for Buenos Aires to the Player discard pile.\n• Add the Infection cards for Buenos Aires to the Game End area.\n• Put the other Player and Infection cards included in this package into the reserve.\n• Finally, give the “Strategic Reserves” Unrationed Event card to a player to add to their hand.\nP5-01b",
+    "searchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "opensDoors": ["67", "J", "23", "L", "39"],
+    "rules": [
+      "Read both sides, then keep this card in the reserve.",
+      "Open 67, J, 23, L, and 39 if they are still closed.",
+      "Buenos Aires is now connected.",
+      "Buenos Aires Player cards (P5-03b, P5-04b) go to the Player discard pile.",
+      "Buenos Aires Infection cards (P5-05b, P5-06b) go to the Game End area.",
+      "The other Player and Infection cards in this package (Santiago, Lima, Bogotá) go to the reserve.",
+      "Give Strategic Reserves (P5-02b) to a player, into their hand."
+    ],
+    "notes": "The package lists 14 cards and 1 sticker card. The sticker card holds Facilitator, Outrider, and Foreman."
+  }
 }

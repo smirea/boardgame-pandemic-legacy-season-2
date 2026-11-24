@@ -1,39 +1,39 @@
 {
-	"package": 7,
-	"index": 2,
-	"printedCodes": {
-		"sideA": null,
-		"sideB": "P7-02b"
-	},
-	"title": "TOPAZ Experimental Vaccine",
-	"category": "unrationed-event",
-	"city": null,
-	"color": null,
-	"copies": 1,
-	"hasImprovementSlot": false,
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"text": "Player card back. No text."
-	},
-	"sideB": {
-		"text": "UNRATIONED EVENT\n\nTOPAZ EXPERIMENTAL VACCINE\n\nDiscard 1 Epidemic card\nwithout effect.\n\nDestroy this card after use.\n\nPlay at any time. Not an action.",
-		"searchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"opensDoors": [],
-		"rules": [
-			"Unrationed Event. Play at any time. Not an action.",
-			"Discard 1 Epidemic card without resolving it.",
-			"Destroy this card after use. It does not go to the discard."
-		],
-		"notes": [
-			"Card id 10701.",
-			"The recon report gives this card to a player to add to their hand when the package is opened.",
-			"Side A is the standard player-card back."
-		]
-	}
+  "package": 7,
+  "index": 2,
+  "printedCodes": {
+    "sideA": null,
+    "sideB": "P7-02b"
+  },
+  "title": "TOPAZ Experimental Vaccine",
+  "category": "unrationed-event",
+  "city": null,
+  "color": null,
+  "copies": 1,
+  "hasImprovementSlot": false,
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "text": "Player card back. No text."
+  },
+  "sideB": {
+    "text": "UNRATIONED EVENT\n\nTOPAZ EXPERIMENTAL VACCINE\n\nDiscard 1 Epidemic card\nwithout effect.\n\nDestroy this card after use.\n\nPlay at any time. Not an action.",
+    "searchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "opensDoors": [],
+    "rules": [
+      "Unrationed Event. Play at any time. Not an action.",
+      "Discard 1 Epidemic card without resolving it.",
+      "Destroy this card after use. It does not go to the discard."
+    ],
+    "notes": [
+      "Card id 10701.",
+      "The recon report gives this card to a player to add to their hand when the package is opened.",
+      "Side A is the standard player-card back."
+    ]
+  }
 }

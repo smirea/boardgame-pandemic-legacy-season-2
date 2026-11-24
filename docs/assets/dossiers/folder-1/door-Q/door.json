@@ -1,33 +1,33 @@
 {
-	"door": "Q",
-	"folder": 1,
-	"frontImage": "front.jpg",
-	"frontText": "Q",
-	"items": [
-		{
-			"id": "item-01_rule-q",
-			"image": "item-01_rule-q.jpg",
-			"count": 1,
-			"printedCode": "Q",
-			"category": "action_sticker",
-			"title": "Self-Infect",
-			"placementTarget": "Rulebook page 12, slot Q (New Actions, right column, bottom)",
-			"text": "SELF-INFECT\nWhile in the PEARL lab, scratch off exposures until you reveal a [red double-mark] or [red skull]. If you reveal a [red double-mark], add the Carrier scar to your Character card. You are now carrying 1000x the safe dose of the sample in your body.\nWARNING: this scar has dangerous side effects. Be sure to read it.\nThe Carrier scar covers two slots on your Character card. Do not cover another scar, if possible.",
-			"tables": [],
-			"mechanics": {
-				"opensDoors": [],
-				"opensPackages": [],
-				"rules": [
-					"You must be in the PEARL lab.",
-					"Scratch exposure boxes one at a time until the result is the red double-mark or the red skull.",
-					"The red double-mark adds the Carrier scar. You are carrying 1000x the safe dose.",
-					"The sticker tells you to read the Carrier scar. It does not print the skull's effect.",
-					"The Carrier scar occupies two character-card slots.",
-					"Prefer not to cover an existing scar."
-				],
-				"effect": "Forced exposure scratching that either makes you the Carrier or stops on a skull."
-			}
-		}
-	],
-	"summary": "Action in the PEARL lab: scratch exposures until a red double-mark or a red skull. The double-mark adds the Carrier scar (two slots) and means you carry 1000x the safe dose. The sticker does not restate the skull's effect."
+  "door": "Q",
+  "folder": 1,
+  "frontImage": "front.jpg",
+  "frontText": "Q",
+  "items": [
+    {
+      "id": "item-01_rule-q",
+      "image": "item-01_rule-q.jpg",
+      "count": 1,
+      "printedCode": "Q",
+      "category": "action_sticker",
+      "title": "Self-Infect",
+      "placementTarget": "Rulebook page 12, slot Q (New Actions, right column, bottom)",
+      "text": "SELF-INFECT\nWhile in the PEARL lab, scratch off exposures until you reveal a [red double-mark] or [red skull]. If you reveal a [red double-mark], add the Carrier scar to your Character card. You are now carrying 1000x the safe dose of the sample in your body.\nWARNING: this scar has dangerous side effects. Be sure to read it.\nThe Carrier scar covers two slots on your Character card. Do not cover another scar, if possible.",
+      "tables": [],
+      "mechanics": {
+        "opensDoors": [],
+        "opensPackages": [],
+        "rules": [
+          "You must be in the PEARL lab.",
+          "Scratch exposure boxes one at a time until the result is the red double-mark or the red skull.",
+          "The red double-mark adds the Carrier scar. You are carrying 1000x the safe dose.",
+          "The sticker tells you to read the Carrier scar. It does not print the skull's effect.",
+          "The Carrier scar occupies two character-card slots.",
+          "Prefer not to cover an existing scar."
+        ],
+        "effect": "Forced exposure scratching that either makes you the Carrier or stops on a skull."
+      }
+    }
+  ],
+  "summary": "Action in the PEARL lab: scratch exposures until a red double-mark or a red skull. The double-mark adds the Carrier scar (two slots) and means you carry 1000x the safe dose. The sticker does not restate the skull's effect."
 }

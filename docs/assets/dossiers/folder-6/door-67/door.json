@@ -1,95 +1,95 @@
 {
-	"door": "67",
-	"folder": 6,
-	"id": "door-67",
-	"guid": "7e7b4c",
-	"frontImage": "dossiers/folder-6/door-67/front.jpg",
-	"frontText": "Navy 67 centered on a yellow door card. Dashed cut-line border. No other printed text.",
-	"items": [
-		{
-			"id": "item-01",
-			"image": "dossiers/folder-6/door-67/item-01.png",
-			"count": 1,
-			"printedCode": null,
-			"category": "map-sticker",
-			"title": "South America",
-			"placementTarget": "Board, over South America. Graticule shows 20°S, 60°W (northeast and again near the southeast coast), and 80°W.",
-			"text": null,
-			"mapDetails": {
-				"cities": [
-					{
-						"name": "Bogotá",
-						"color": "yellow",
-						"population": 2,
-						"port": false,
-						"infested": false,
-						"lab": null,
-						"marker": "inland-x",
-						"lat": 4.7,
-						"lon": -74.1,
-						"graticule": "Northwest of the continent, west of the printed 60°W label in the dark sea to the northeast. Population 2 square is east of the disc. The name is printed with an accent: Bogotá."
-					},
-					{
-						"name": "Lima",
-						"color": "yellow",
-						"population": 1,
-						"port": true,
-						"infested": false,
-						"lab": null,
-						"marker": "anchor",
-						"lat": -12.0,
-						"lon": -77.0,
-						"graticule": "West coast, just north of the printed 20°S line. Population 1 square is east of the disc. No sea lane touches the disc."
-					},
-					{
-						"name": "Santiago",
-						"color": "yellow",
-						"population": 1,
-						"port": false,
-						"infested": false,
-						"lab": null,
-						"marker": "inland-x",
-						"lat": -33.4,
-						"lon": -70.6,
-						"graticule": "South of 20°S, inland from the west coast and west of the meridian that falls between Santiago and Buenos Aires. Population 1 square is in the sea west of the disc."
-					},
-					{
-						"name": "Buenos Aires",
-						"color": "yellow",
-						"population": 2,
-						"port": true,
-						"infested": false,
-						"lab": null,
-						"marker": "anchor",
-						"lat": -34.6,
-						"lon": -58.4,
-						"graticule": "East coast, east of the meridian printed between it and Santiago (the 60°W label is at the bottom near this coast). Population 2 square is west of the disc."
-					}
-				],
-				"havens": [],
-				"printedRoutes": [
-					{
-						"from": "Buenos Aires",
-						"to": "off-sticker east (São Paulo)",
-						"type": "sea_lane",
-						"notes": "A blue sea lane leaves the east side of the Buenos Aires disc and exits the right edge. São Paulo is the starting-board port in that direction; its name is not printed on this sticker. Lima has no printed lane."
-					}
-				],
-				"reconRoutes": [],
-				"redRegionLines": [],
-				"specialAreas": [
-					{
-						"name": "northern void",
-						"kind": "board-edge",
-						"notes": "The sea north and northeast of the continent, including the area around the printed 60°W label, is the dark surround. It is not a red region line."
-					}
-				]
-			},
-			"mechanics": {
-				"addsCities": ["Bogotá", "Lima", "Santiago", "Buenos Aires"],
-				"notes": "All four cities are yellow. None are infested. Bogotá is inland population 2. Lima is a port at population 1. Santiago is inland population 1. Buenos Aires is a port at population 2. No recon box and no red region line."
-			}
-		}
-	],
-	"summary": "South America. All four cities are yellow and not infested. Bogotá inland 2, Lima port 1, Santiago inland 1, Buenos Aires port 2. A sea lane leaves Buenos Aires off the east edge toward São Paulo. No recon box and no red region line."
+  "door": "67",
+  "folder": 6,
+  "id": "door-67",
+  "guid": "7e7b4c",
+  "frontImage": "dossiers/folder-6/door-67/front.jpg",
+  "frontText": "Navy 67 centered on a yellow door card. Dashed cut-line border. No other printed text.",
+  "items": [
+    {
+      "id": "item-01",
+      "image": "dossiers/folder-6/door-67/item-01.png",
+      "count": 1,
+      "printedCode": null,
+      "category": "map-sticker",
+      "title": "South America",
+      "placementTarget": "Board, over South America. Graticule shows 20°S, 60°W (northeast and again near the southeast coast), and 80°W.",
+      "text": null,
+      "mapDetails": {
+        "cities": [
+          {
+            "name": "Bogotá",
+            "color": "yellow",
+            "population": 2,
+            "port": false,
+            "infested": false,
+            "lab": null,
+            "marker": "inland-x",
+            "lat": 4.7,
+            "lon": -74.1,
+            "graticule": "Northwest of the continent, west of the printed 60°W label in the dark sea to the northeast. Population 2 square is east of the disc. The name is printed with an accent: Bogotá."
+          },
+          {
+            "name": "Lima",
+            "color": "yellow",
+            "population": 1,
+            "port": true,
+            "infested": false,
+            "lab": null,
+            "marker": "anchor",
+            "lat": -12.0,
+            "lon": -77.0,
+            "graticule": "West coast, just north of the printed 20°S line. Population 1 square is east of the disc. No sea lane touches the disc."
+          },
+          {
+            "name": "Santiago",
+            "color": "yellow",
+            "population": 1,
+            "port": false,
+            "infested": false,
+            "lab": null,
+            "marker": "inland-x",
+            "lat": -33.4,
+            "lon": -70.6,
+            "graticule": "South of 20°S, inland from the west coast and west of the meridian that falls between Santiago and Buenos Aires. Population 1 square is in the sea west of the disc."
+          },
+          {
+            "name": "Buenos Aires",
+            "color": "yellow",
+            "population": 2,
+            "port": true,
+            "infested": false,
+            "lab": null,
+            "marker": "anchor",
+            "lat": -34.6,
+            "lon": -58.4,
+            "graticule": "East coast, east of the meridian printed between it and Santiago (the 60°W label is at the bottom near this coast). Population 2 square is west of the disc."
+          }
+        ],
+        "havens": [],
+        "printedRoutes": [
+          {
+            "from": "Buenos Aires",
+            "to": "off-sticker east (São Paulo)",
+            "type": "sea_lane",
+            "notes": "A blue sea lane leaves the east side of the Buenos Aires disc and exits the right edge. São Paulo is the starting-board port in that direction; its name is not printed on this sticker. Lima has no printed lane."
+          }
+        ],
+        "reconRoutes": [],
+        "redRegionLines": [],
+        "specialAreas": [
+          {
+            "name": "northern void",
+            "kind": "board-edge",
+            "notes": "The sea north and northeast of the continent, including the area around the printed 60°W label, is the dark surround. It is not a red region line."
+          }
+        ]
+      },
+      "mechanics": {
+        "addsCities": ["Bogotá", "Lima", "Santiago", "Buenos Aires"],
+        "notes": "All four cities are yellow. None are infested. Bogotá is inland population 2. Lima is a port at population 1. Santiago is inland population 1. Buenos Aires is a port at population 2. No recon box and no red region line."
+      }
+    }
+  ],
+  "summary": "South America. All four cities are yellow and not infested. Bogotá inland 2, Lima port 1, Santiago inland 1, Buenos Aires port 2. A sea lane leaves Buenos Aires off the east edge toward São Paulo. No recon box and no red region line."
 }

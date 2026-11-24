@@ -1,49 +1,49 @@
 {
-	"door": "25",
-	"folder": 2,
-	"frontImage": "front.jpg",
-	"frontText": "25",
-	"items": [
-		{
-			"id": "item-01",
-			"image": "item-01.jpg",
-			"count": 1,
-			"printedCode": null,
-			"category": "action_overlay",
-			"title": "MONITOR",
-			"placementTarget": "Back of each player reference card",
-			"costProductionUnits": null,
-			"text": "MONITOR\nAt a satellite tower, draw and discard 4 Player cards in any order. Then, scratch off one box on the Frequency Scanner.",
-			"mechanics": {
-				"opensDoors": [],
-				"opensPackages": [],
-				"destroys": [],
-				"rules": [
-					"Use it at a satellite tower.",
-					"Draw and discard 4 Player cards in any order.",
-					"Then scratch off one box on the Frequency Scanner."
-				],
-				"effect": "Action at a satellite tower: draw and discard 4 Player cards in any order, then scratch one Frequency Scanner box. The icon is a yellow scanner dial."
-			}
-		},
-		{
-			"id": "item-02",
-			"image": "item-02.jpg",
-			"count": 1,
-			"printedCode": null,
-			"category": "instruction",
-			"title": "Reference card placement",
-			"placementTarget": null,
-			"costProductionUnits": null,
-			"text": "Place this sticker on the back of each player reference card.",
-			"mechanics": {
-				"opensDoors": [],
-				"opensPackages": [],
-				"destroys": [],
-				"rules": [],
-				"effect": "Place the Monitor sticker on the back of each player reference card."
-			}
-		}
-	],
-	"summary": "Monitor action overlay. At a satellite tower, draw and discard 4 Player cards in any order, then scratch one box on the Frequency Scanner. Place it on the back of each player reference card."
+  "door": "25",
+  "folder": 2,
+  "frontImage": "front.jpg",
+  "frontText": "25",
+  "items": [
+    {
+      "id": "item-01",
+      "image": "item-01.jpg",
+      "count": 1,
+      "printedCode": null,
+      "category": "action_overlay",
+      "title": "MONITOR",
+      "placementTarget": "Back of each player reference card",
+      "costProductionUnits": null,
+      "text": "MONITOR\nAt a satellite tower, draw and discard 4 Player cards in any order. Then, scratch off one box on the Frequency Scanner.",
+      "mechanics": {
+        "opensDoors": [],
+        "opensPackages": [],
+        "destroys": [],
+        "rules": [
+          "Use it at a satellite tower.",
+          "Draw and discard 4 Player cards in any order.",
+          "Then scratch off one box on the Frequency Scanner."
+        ],
+        "effect": "Action at a satellite tower: draw and discard 4 Player cards in any order, then scratch one Frequency Scanner box. The icon is a yellow scanner dial."
+      }
+    },
+    {
+      "id": "item-02",
+      "image": "item-02.jpg",
+      "count": 1,
+      "printedCode": null,
+      "category": "instruction",
+      "title": "Reference card placement",
+      "placementTarget": null,
+      "costProductionUnits": null,
+      "text": "Place this sticker on the back of each player reference card.",
+      "mechanics": {
+        "opensDoors": [],
+        "opensPackages": [],
+        "destroys": [],
+        "rules": [],
+        "effect": "Place the Monitor sticker on the back of each player reference card."
+      }
+    }
+  ],
+  "summary": "Monitor action overlay. At a satellite tower, draw and discard 4 Player cards in any order, then scratch one box on the Frequency Scanner. Place it on the back of each player reference card."
 }

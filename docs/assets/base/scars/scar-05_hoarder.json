@@ -1,15 +1,15 @@
 {
-	"id": "scar-05",
-	"name": "Hoarder",
-	"category": "scar",
-	"costProductionUnits": null,
-	"copies": 1,
-	"image": "scar-05_hoarder.jpg",
-	"text": "Hoarder: When doing the Deliver Supplies action,\nyou may not put your last 2 Supply cubes onto\nthe board.",
-	"mechanics": {
-		"timing": "action",
-		"trigger": "When doing the Deliver Supplies action",
-		"effect": "You may not put your last 2 Supply cubes onto the board.",
-		"restrictions": ["Your last 2 Supply cubes cannot be delivered"]
-	}
+  "id": "scar-05",
+  "name": "Hoarder",
+  "category": "scar",
+  "costProductionUnits": null,
+  "copies": 1,
+  "image": "scar-05_hoarder.jpg",
+  "text": "Hoarder: When doing the Deliver Supplies action,\nyou may not put your last 2 Supply cubes onto\nthe board.",
+  "mechanics": {
+    "timing": "action",
+    "trigger": "When doing the Deliver Supplies action",
+    "effect": "You may not put your last 2 Supply cubes onto the board.",
+    "restrictions": ["Your last 2 Supply cubes cannot be delivered"]
+  }
 }

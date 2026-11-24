@@ -1,33 +1,36 @@
 {
-	"package": 1,
-	"index": 7,
-	"cardId": 906,
-	"printedCodes": {
-		"sideA": null,
-		"sideB": "P1-08b"
-	},
-	"title": "Denver",
-	"category": "player-card",
-	"city": "Denver",
-	"color": "blue",
-	"coordinates": "39°44'21\"N 104°59'25\"W",
-	"copies": 1,
-	"hasImprovementSlot": true,
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideASummary": "Player deck back. No text and no printed code.",
-	"sideBSummary": "Blue Denver Player card, 39°44'21\"N 104°59'25\"W. Map of the western United States and Mexico. No search box and no anchor. Code P1-08b.",
-	"searchBoxes": [],
-	"states": [],
-	"mechanics": {
-		"opensDoors": [],
-		"destroys": [],
-		"rules": [
-			"Blue Player card for Denver with no search box.",
-			"Goes to the reserve with the other unconnected cities when the package is opened."
-		],
-		"notes": ["Card id 906. Printed code P1-08b.", "Same coordinates as the search card: 39°44'21\"N 104°59'25\"W."]
-	}
+  "package": 1,
+  "index": 7,
+  "cardId": 906,
+  "printedCodes": {
+    "sideA": null,
+    "sideB": "P1-08b"
+  },
+  "title": "Denver",
+  "category": "player-card",
+  "city": "Denver",
+  "color": "blue",
+  "coordinates": "39°44'21\"N 104°59'25\"W",
+  "copies": 1,
+  "hasImprovementSlot": true,
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideASummary": "Player deck back. No text and no printed code.",
+  "sideBSummary": "Blue Denver Player card, 39°44'21\"N 104°59'25\"W. Map of the western United States and Mexico. No search box and no anchor. Code P1-08b.",
+  "searchBoxes": [],
+  "states": [],
+  "mechanics": {
+    "opensDoors": [],
+    "destroys": [],
+    "rules": [
+      "Blue Player card for Denver with no search box.",
+      "Goes to the reserve with the other unconnected cities when the package is opened."
+    ],
+    "notes": [
+      "Card id 906. Printed code P1-08b.",
+      "Same coordinates as the search card: 39°44'21\"N 104°59'25\"W."
+    ]
+  }
 }

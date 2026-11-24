@@ -1,39 +1,39 @@
 {
-	"run": "review-1",
-	"seed": 20261121,
-	"start": {},
-	"lastMonth": 12,
-	"passphrase": "playtest",
-	"port": 6230,
-	"signalPort": 8787,
-	"headed": false,
-	"players": [
-		{
-			"id": "sonnet",
-			"name": "Sonnet",
-			"persona": "personas/review-sonnet.md",
-			"harness": "screen",
-			"provider": "claudeAgent",
-			"model": "claude-sonnet-5-5",
-			"effort": "high"
-		},
-		{
-			"id": "neon",
-			"name": "Neon",
-			"persona": "personas/review-neon.md",
-			"harness": "screen",
-			"provider": "antigravity",
-			"model": "gemini-4-neon",
-			"effort": "high"
-		},
-		{
-			"id": "grok",
-			"name": "Grok",
-			"persona": "personas/review-grok.md",
-			"harness": "screen",
-			"provider": "grok",
-			"model": "grok-4.7",
-			"effort": "high"
-		}
-	]
+  "run": "review-1",
+  "seed": 20261121,
+  "start": {},
+  "lastMonth": 12,
+  "passphrase": "playtest",
+  "port": 6230,
+  "signalPort": 8787,
+  "headed": false,
+  "players": [
+    {
+      "id": "sonnet",
+      "name": "Sonnet",
+      "persona": "personas/review-sonnet.md",
+      "harness": "screen",
+      "provider": "claudeAgent",
+      "model": "claude-sonnet-5-5",
+      "effort": "high"
+    },
+    {
+      "id": "neon",
+      "name": "Neon",
+      "persona": "personas/review-neon.md",
+      "harness": "screen",
+      "provider": "antigravity",
+      "model": "gemini-4-neon",
+      "effort": "high"
+    },
+    {
+      "id": "grok",
+      "name": "Grok",
+      "persona": "personas/review-grok.md",
+      "harness": "screen",
+      "provider": "grok",
+      "model": "grok-4.7",
+      "effort": "high"
+    }
+  ]
 }

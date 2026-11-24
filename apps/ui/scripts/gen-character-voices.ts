@@ -16,99 +16,118 @@
  *   ./apps/ui/scripts/gen-character-voices.ts --redesign         # recreate custom voices even if cached
  *   ./apps/ui/scripts/gen-character-voices.ts --dry-run
  */
-import { GoogleGenAI } from '@google/genai';
-import { spawnSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { GoogleGenAI } from "@google/genai";
+import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
+import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
 import {
-	CHARACTER_LINE_KINDS,
-	CHARACTER_PERSONA_LIST,
-	CHARACTER_PERSONAS,
-	characterVoiceKey,
-} from '../src/lib/characters/personas.ts';
-import type { CharacterLineKind, CharacterPersona, FigureKey } from '../src/lib/characters/personas.ts';
-import type { CharacterDesignedVoiceEntry, CharacterVoiceEntry } from '../src/lib/characters/voices.generated.ts';
+  CHARACTER_LINE_KINDS,
+  CHARACTER_PERSONA_LIST,
+  CHARACTER_PERSONAS,
+  characterVoiceKey,
+} from "../src/lib/characters/personas.ts";
+import type {
+  CharacterLineKind,
+  CharacterPersona,
+  FigureKey,
+} from "../src/lib/characters/personas.ts";
+import type {
+  CharacterDesignedVoiceEntry,
+  CharacterVoiceEntry,
+} from "../src/lib/characters/voices.generated.ts";
 
-const ROOT = resolve(dirname(import.meta.path), '../../..');
-const OUT_DIR = resolve(ROOT, 'apps/ui/static/voices/characters');
-const MANIFEST_PATH = resolve(ROOT, 'apps/ui/src/lib/characters/voices.generated.ts');
+const ROOT = resolve(dirname(import.meta.path), "../../..");
+const OUT_DIR = resolve(ROOT, "apps/ui/static/voices/characters");
+const MANIFEST_PATH = resolve(ROOT, "apps/ui/src/lib/characters/voices.generated.ts");
 
-const TTS_MODEL = 'gemini-3.8-flash-tts';
+const TTS_MODEL = "gemini-3.8-flash-tts";
 const VOICE_CONCURRENCY = 4;
 const SYNTH_CONCURRENCY = 5;
 
 const KIND_STYLE_HINT: Record<CharacterLineKind, string> = {
-	punchline:
-		'snappy, brisk, expressive in-character one-liner delivered cleanly at a quick menu-friendly pace with no lingering pauses',
-	scar: 'immediate physical wince and concise in-character reaction to taking a painful scar, brisk natural pacing',
-	upgrade: 'lively concise delighted in-character reaction to gaining a new skill, upbeat brisk tempo',
-	thanks: 'brief natural warm in-character thank-you to a teammate, snappy conversational pace',
-	greet: 'natural upbeat concise in-character greeting meeting a teammate in the field, brisk friendly pace',
-	leave: 'brisk concise in-character parting remark heading out, snappy tempo',
-	danger: 'tense urgent concise warning spotting plague or Hollow Men right nearby, quick intense delivery',
-	companion:
-		'cheeky, expressive, natural in-character hello, remark, or playful flirtation upon recruiting a new companion, brisk conversational pace',
-	death:
-		'dramatic, heartfelt dying last words with genuine breathy anguish fading out, emotionally vivid yet compact without long dead air',
+  punchline:
+    "snappy, brisk, expressive in-character one-liner delivered cleanly at a quick menu-friendly pace with no lingering pauses",
+  scar: "immediate physical wince and concise in-character reaction to taking a painful scar, brisk natural pacing",
+  upgrade:
+    "lively concise delighted in-character reaction to gaining a new skill, upbeat brisk tempo",
+  thanks: "brief natural warm in-character thank-you to a teammate, snappy conversational pace",
+  greet:
+    "natural upbeat concise in-character greeting meeting a teammate in the field, brisk friendly pace",
+  leave: "brisk concise in-character parting remark heading out, snappy tempo",
+  danger:
+    "tense urgent concise warning spotting plague or Hollow Men right nearby, quick intense delivery",
+  companion:
+    "cheeky, expressive, natural in-character hello, remark, or playful flirtation upon recruiting a new companion, brisk conversational pace",
+  death:
+    "dramatic, heartfelt dying last words with genuine breathy anguish fading out, emotionally vivid yet compact without long dead air",
 };
 
 /** Soft ceiling (seconds) above which slow-cadence voices get a subtle, pitch-preserving tempo nudge. */
 const SOFT_MAX_SECONDS: Record<CharacterLineKind, number> = {
-	punchline: 2.35,
-	scar: 3.1,
-	upgrade: 2.7,
-	thanks: 2.1,
-	greet: 2.6,
-	leave: 2.5,
-	danger: 2.9,
-	companion: 2.6,
-	death: 7.2,
+  punchline: 2.35,
+  scar: 3.1,
+  upgrade: 2.7,
+  thanks: 2.1,
+  greet: 2.6,
+  leave: 2.5,
+  danger: 2.9,
+  companion: 2.6,
+  death: 7.2,
 };
 
 function loadKey(): string {
-	const fromEnv = process.env.GEMINI_API_KEY?.trim();
-	if (fromEnv) return fromEnv;
-	const localPath = resolve(ROOT, '.env.local');
-	if (existsSync(localPath)) {
-		const raw = readFileSync(localPath, 'utf8');
-		const match = /^GEMINI_API_KEY=(.+)$/m.exec(raw);
-		if (match?.[1]) return match[1].trim().replace(/^['"]|['"]$/g, '');
-	}
-	throw new Error('GEMINI_API_KEY is missing. Set it in .env.local or the environment.');
+  const fromEnv = process.env.GEMINI_API_KEY?.trim();
+  if (fromEnv) return fromEnv;
+  const localPath = resolve(ROOT, ".env.local");
+  if (existsSync(localPath)) {
+    const raw = readFileSync(localPath, "utf8");
+    const match = /^GEMINI_API_KEY=(.+)$/m.exec(raw);
+    if (match?.[1]) return match[1].trim().replace(/^['"]|['"]$/g, "");
+  }
+  throw new Error("GEMINI_API_KEY is missing. Set it in .env.local or the environment.");
 }
 
 function parseJsonMap<T>(raw: string | undefined): Record<string, T> {
-	if (!raw) return {};
-	try {
-		return JSON.parse(raw) as Record<string, T>;
-	} catch {
-		return {};
-	}
+  if (!raw) return {};
+  try {
+    return JSON.parse(raw) as Record<string, T>;
+  } catch {
+    return {};
+  }
 }
 
 function loadExistingState(): {
-	voices: Record<string, CharacterDesignedVoiceEntry>;
-	lines: Record<string, CharacterVoiceEntry>;
+  voices: Record<string, CharacterDesignedVoiceEntry>;
+  lines: Record<string, CharacterVoiceEntry>;
 } {
-	if (!existsSync(MANIFEST_PATH)) return { voices: {}, lines: {} };
-	const text = readFileSync(MANIFEST_PATH, 'utf8');
-	const vMatch =
-		/export const characterDesignedVoices: Record<string, CharacterDesignedVoiceEntry> = (\{[\s\S]*?\});/.exec(text);
-	const lMatch = /export const characterVoiceManifest: Record<string, CharacterVoiceEntry> = (\{[\s\S]*\});/.exec(text);
-	return {
-		voices: parseJsonMap<CharacterDesignedVoiceEntry>(vMatch?.[1]),
-		lines: parseJsonMap<CharacterVoiceEntry>(lMatch?.[1]),
-	};
+  if (!existsSync(MANIFEST_PATH)) return { voices: {}, lines: {} };
+  const text = readFileSync(MANIFEST_PATH, "utf8");
+  const vMatch =
+    /export const characterDesignedVoices: Record<string, CharacterDesignedVoiceEntry> = (\{[\s\S]*?\});/.exec(
+      text,
+    );
+  const lMatch =
+    /export const characterVoiceManifest: Record<string, CharacterVoiceEntry> = (\{[\s\S]*\});/.exec(
+      text,
+    );
+  return {
+    voices: parseJsonMap<CharacterDesignedVoiceEntry>(vMatch?.[1]),
+    lines: parseJsonMap<CharacterVoiceEntry>(lMatch?.[1]),
+  };
 }
 
 function writeManifest(
-	voices: Record<string, CharacterDesignedVoiceEntry>,
-	lines: Record<string, CharacterVoiceEntry>,
+  voices: Record<string, CharacterDesignedVoiceEntry>,
+  lines: Record<string, CharacterVoiceEntry>,
 ) {
-	const sortedVoices = Object.fromEntries(Object.entries(voices).toSorted(([a], [b]) => a.localeCompare(b)));
-	const sortedLines = Object.fromEntries(Object.entries(lines).toSorted(([a], [b]) => a.localeCompare(b)));
-	const body = `// Generated by apps/ui/scripts/gen-character-voices.ts using Google Gemini 3.8 Flash TTS + Voice Design. Do not edit by hand.
+  const sortedVoices = Object.fromEntries(
+    Object.entries(voices).toSorted(([a], [b]) => a.localeCompare(b)),
+  );
+  const sortedLines = Object.fromEntries(
+    Object.entries(lines).toSorted(([a], [b]) => a.localeCompare(b)),
+  );
+  const body = `// Generated by apps/ui/scripts/gen-character-voices.ts using Google Gemini 3.8 Flash TTS + Voice Design. Do not edit by hand.
 export type CharacterDesignedVoiceEntry = {
 	voiceId: string;
 	displayName: string;
@@ -124,343 +143,387 @@ export type CharacterVoiceEntry = {
 	bytes: number;
 };
 
-export const characterDesignedVoices: Record<string, CharacterDesignedVoiceEntry> = ${JSON.stringify(sortedVoices, null, '\t')};
+export const characterDesignedVoices: Record<string, CharacterDesignedVoiceEntry> = ${JSON.stringify(sortedVoices, null, "\t")};
 
-export const characterVoiceManifest: Record<string, CharacterVoiceEntry> = ${JSON.stringify(sortedLines, null, '\t')};
+export const characterVoiceManifest: Record<string, CharacterVoiceEntry> = ${JSON.stringify(sortedLines, null, "\t")};
 `;
-	writeFileSync(MANIFEST_PATH, body, 'utf8');
+  writeFileSync(MANIFEST_PATH, body, "utf8");
 }
 
 function voiceDesignHash(persona: CharacterPersona): string {
-	const brief = persona.voiceBrief;
-	return createHash('sha256')
-		.update(
-			JSON.stringify({
-				model: TTS_MODEL,
-				displayName: brief.displayName,
-				gender: brief.gender,
-				languageCode: brief.languageCode,
-				accent: brief.accent,
-				designPrompt: brief.designPrompt,
-			}),
-		)
-		.digest('hex')
-		.slice(0, 16);
+  const brief = persona.voiceBrief;
+  return createHash("sha256")
+    .update(
+      JSON.stringify({
+        model: TTS_MODEL,
+        displayName: brief.displayName,
+        gender: brief.gender,
+        languageCode: brief.languageCode,
+        accent: brief.accent,
+        designPrompt: brief.designPrompt,
+      }),
+    )
+    .digest("hex")
+    .slice(0, 16);
 }
 
 function lineStyleInstruction(persona: CharacterPersona, kind: CharacterLineKind): string {
-	const line = persona.lines[kind];
-	return `${persona.voiceBrief.defaultDelivery}; ${line.direction}; ${KIND_STYLE_HINT[kind]}`;
+  const line = persona.lines[kind];
+  return `${persona.voiceBrief.defaultDelivery}; ${line.direction}; ${KIND_STYLE_HINT[kind]}`;
 }
 
 function lineHash(voiceId: string, persona: CharacterPersona, kind: CharacterLineKind): string {
-	return createHash('sha256')
-		.update(
-			JSON.stringify({
-				model: TTS_MODEL,
-				voiceId,
-				muffled: Boolean(persona.voiceBrief.muffled),
-				trimVersion: 3,
-				styleInstruction: lineStyleInstruction(persona, kind),
-				text: persona.lines[kind].text,
-			}),
-		)
-		.digest('hex')
-		.slice(0, 16);
+  return createHash("sha256")
+    .update(
+      JSON.stringify({
+        model: TTS_MODEL,
+        voiceId,
+        muffled: Boolean(persona.voiceBrief.muffled),
+        trimVersion: 3,
+        styleInstruction: lineStyleInstruction(persona, kind),
+        text: persona.lines[kind].text,
+      }),
+    )
+    .digest("hex")
+    .slice(0, 16);
 }
 
 function probeDurationSeconds(mp3Bytes: Uint8Array): number {
-	const probe = spawnSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', 'pipe:0'], {
-		input: mp3Bytes,
-		encoding: 'utf8',
-	});
-	const value = Number(probe.stdout?.trim());
-	return Number.isFinite(value) && value > 0 ? value : 0;
+  const probe = spawnSync(
+    "ffprobe",
+    ["-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", "pipe:0"],
+    {
+      input: mp3Bytes,
+      encoding: "utf8",
+    },
+  );
+  const value = Number(probe.stdout?.trim());
+  return Number.isFinite(value) && value > 0 ? value : 0;
 }
 
-function encodeAudioToMp3(audioBytes: Buffer, mimeType: string, muffled: boolean, kind: CharacterLineKind): Uint8Array {
-	const isPcm = /audio\/L16|pcm/i.test(mimeType);
-	const inputArgs = isPcm ? ['-f', 's16le', '-ar', '24000', '-ac', '1', '-i', 'pipe:0'] : ['-i', 'pipe:0'];
-	// Trim only outer leading/trailing silence (via reverse) so dramatic mid-line pauses are never cut off.
-	const trim =
-		'silenceremove=start_periods=1:start_threshold=-48dB,areverse,silenceremove=start_periods=1:start_threshold=-48dB,areverse';
-	const cloth = muffled ? ',highpass=f=220,lowpass=f=2500' : '';
-	const runFfmpeg = (tempo: number) => {
-		const speed = tempo > 1.01 ? `,atempo=${tempo.toFixed(3)}` : '';
-		const filters = `${trim}${cloth}${speed},loudnorm=I=-16:TP=-1.5:LRA=11`;
-		const result = spawnSync(
-			'ffmpeg',
-			[
-				'-hide_banner',
-				'-loglevel',
-				'error',
-				...inputArgs,
-				'-af',
-				filters,
-				'-codec:a',
-				'libmp3lame',
-				'-b:a',
-				'80k',
-				'-f',
-				'mp3',
-				'pipe:1',
-			],
-			{ input: audioBytes, maxBuffer: 32 * 1024 * 1024 },
-		);
-		if (result.status !== 0) {
-			throw new Error(`ffmpeg failed (${result.status}): ${result.stderr?.toString('utf8')}`);
-		}
-		const out = new Uint8Array(result.stdout);
-		if (out.byteLength < 512) throw new Error(`Encoded MP3 unexpectedly small (${out.byteLength} bytes)`);
-		return out;
-	};
+function encodeAudioToMp3(
+  audioBytes: Buffer,
+  mimeType: string,
+  muffled: boolean,
+  kind: CharacterLineKind,
+): Uint8Array {
+  const isPcm = /audio\/L16|pcm/i.test(mimeType);
+  const inputArgs = isPcm
+    ? ["-f", "s16le", "-ar", "24000", "-ac", "1", "-i", "pipe:0"]
+    : ["-i", "pipe:0"];
+  // Trim only outer leading/trailing silence (via reverse) so dramatic mid-line pauses are never cut off.
+  const trim =
+    "silenceremove=start_periods=1:start_threshold=-48dB,areverse,silenceremove=start_periods=1:start_threshold=-48dB,areverse";
+  const cloth = muffled ? ",highpass=f=220,lowpass=f=2500" : "";
+  const runFfmpeg = (tempo: number) => {
+    const speed = tempo > 1.01 ? `,atempo=${tempo.toFixed(3)}` : "";
+    const filters = `${trim}${cloth}${speed},loudnorm=I=-16:TP=-1.5:LRA=11`;
+    const result = spawnSync(
+      "ffmpeg",
+      [
+        "-hide_banner",
+        "-loglevel",
+        "error",
+        ...inputArgs,
+        "-af",
+        filters,
+        "-codec:a",
+        "libmp3lame",
+        "-b:a",
+        "80k",
+        "-f",
+        "mp3",
+        "pipe:1",
+      ],
+      { input: audioBytes, maxBuffer: 32 * 1024 * 1024 },
+    );
+    if (result.status !== 0) {
+      throw new Error(`ffmpeg failed (${result.status}): ${result.stderr?.toString("utf8")}`);
+    }
+    const out = new Uint8Array(result.stdout);
+    if (out.byteLength < 512)
+      throw new Error(`Encoded MP3 unexpectedly small (${out.byteLength} bytes)`);
+    return out;
+  };
 
-	const first = runFfmpeg(1);
-	const duration = probeDurationSeconds(first);
-	const ceiling = SOFT_MAX_SECONDS[kind];
-	if (duration > ceiling) {
-		// Gentle pitch-preserving tempo nudge (capped so voices stay completely natural).
-		const maxTempo = kind === 'punchline' ? 1.24 : 1.18;
-		const tempo = Math.min(maxTempo, duration / (ceiling * 0.94));
-		return runFfmpeg(tempo);
-	}
-	return first;
+  const first = runFfmpeg(1);
+  const duration = probeDurationSeconds(first);
+  const ceiling = SOFT_MAX_SECONDS[kind];
+  if (duration > ceiling) {
+    // Gentle pitch-preserving tempo nudge (capped so voices stay completely natural).
+    const maxTempo = kind === "punchline" ? 1.24 : 1.18;
+    const tempo = Math.min(maxTempo, duration / (ceiling * 0.94));
+    return runFfmpeg(tempo);
+  }
+  return first;
 }
 
-async function createVoiceWithRetry(ai: GoogleGenAI, persona: CharacterPersona, attempt = 1): Promise<string> {
-	const brief = persona.voiceBrief;
-	try {
-		const created = await ai.voices.create({
-			store: true,
-			voice: {
-				type: 'prompted',
-				model: TTS_MODEL,
-				display_name: brief.displayName,
-				language_code: brief.languageCode,
-				gender: brief.gender,
-				accent: brief.accent,
-				description: brief.tone,
-				prompted: {
-					input: brief.designPrompt,
-				},
-			},
-		});
-		const voiceId = (created as { id?: string }).id;
-		if (!voiceId) throw new Error(`Voice Design did not return a voice id for ${persona.id}`);
-		return voiceId;
-	} catch (err) {
-		const msg = err instanceof Error ? err.message : String(err);
-		const retryable = /\b(429|500|502|503|504|RESOURCE_EXHAUSTED|UNAVAILABLE|deadline|fetch failed)\b/i.test(msg);
-		if (retryable && attempt <= 4) {
-			const delay = 1500 * attempt * attempt;
-			console.warn(`  retrying voice design for ${persona.id} in ${delay}ms: ${msg.slice(0, 120)}`);
-			await Bun.sleep(delay);
-			return createVoiceWithRetry(ai, persona, attempt + 1);
-		}
-		throw err;
-	}
+async function createVoiceWithRetry(
+  ai: GoogleGenAI,
+  persona: CharacterPersona,
+  attempt = 1,
+): Promise<string> {
+  const brief = persona.voiceBrief;
+  try {
+    const created = await ai.voices.create({
+      store: true,
+      voice: {
+        type: "prompted",
+        model: TTS_MODEL,
+        display_name: brief.displayName,
+        language_code: brief.languageCode,
+        gender: brief.gender,
+        accent: brief.accent,
+        description: brief.tone,
+        prompted: {
+          input: brief.designPrompt,
+        },
+      },
+    });
+    const voiceId = (created as { id?: string }).id;
+    if (!voiceId) throw new Error(`Voice Design did not return a voice id for ${persona.id}`);
+    return voiceId;
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    const retryable =
+      /\b(429|500|502|503|504|RESOURCE_EXHAUSTED|UNAVAILABLE|deadline|fetch failed)\b/i.test(msg);
+    if (retryable && attempt <= 4) {
+      const delay = 1500 * attempt * attempt;
+      console.warn(`  retrying voice design for ${persona.id} in ${delay}ms: ${msg.slice(0, 120)}`);
+      await Bun.sleep(delay);
+      return createVoiceWithRetry(ai, persona, attempt + 1);
+    }
+    throw err;
+  }
 }
 
 async function ensureDesignedVoices(
-	ai: GoogleGenAI,
-	voices: Record<string, CharacterDesignedVoiceEntry>,
-	lines: Record<string, CharacterVoiceEntry>,
-	neededFigures: FigureKey[],
-	redesign: boolean,
+  ai: GoogleGenAI,
+  voices: Record<string, CharacterDesignedVoiceEntry>,
+  lines: Record<string, CharacterVoiceEntry>,
+  neededFigures: FigureKey[],
+  redesign: boolean,
 ): Promise<void> {
-	const todo: CharacterPersona[] = [];
-	for (const id of neededFigures) {
-		const persona = CHARACTER_PERSONAS[id];
-		const hash = voiceDesignHash(persona);
-		const existing = voices[id];
-		if (!redesign && existing && existing.designHash === hash && existing.voiceId) {
-			console.log(`  [voice cached] ${id.padEnd(15)} -> ${existing.voiceId} (${persona.voiceBrief.label})`);
-		} else {
-			todo.push(persona);
-		}
-	}
-	if (!todo.length) return;
+  const todo: CharacterPersona[] = [];
+  for (const id of neededFigures) {
+    const persona = CHARACTER_PERSONAS[id];
+    const hash = voiceDesignHash(persona);
+    const existing = voices[id];
+    if (!redesign && existing && existing.designHash === hash && existing.voiceId) {
+      console.log(
+        `  [voice cached] ${id.padEnd(15)} -> ${existing.voiceId} (${persona.voiceBrief.label})`,
+      );
+    } else {
+      todo.push(persona);
+    }
+  }
+  if (!todo.length) return;
 
-	let cursor = 0;
-	let firstError: Error | null = null;
-	async function worker() {
-		while (cursor < todo.length && !firstError) {
-			const persona = todo[cursor++]!;
-			const hash = voiceDesignHash(persona);
-			console.log(`  [designing]    ${persona.id.padEnd(15)} -> ${persona.voiceBrief.label}...`);
-			try {
-				const voiceId = await createVoiceWithRetry(ai, persona);
-				voices[persona.id] = {
-					voiceId,
-					displayName: persona.voiceBrief.displayName,
-					designHash: hash,
-				};
-				writeManifest(voices, lines);
-				console.log(`  [voice ready]  ${persona.id.padEnd(15)} -> ${voiceId}`);
-			} catch (err) {
-				const msg = err instanceof Error ? err.message : String(err);
-				firstError = new Error(`Voice design failed for ${persona.id}: ${msg}`);
-				return;
-			}
-		}
-	}
-	await Promise.all(Array.from({ length: Math.min(VOICE_CONCURRENCY, todo.length) }, () => worker()));
-	if (firstError) throw firstError;
+  let cursor = 0;
+  let firstError: Error | null = null;
+  async function worker() {
+    while (cursor < todo.length && !firstError) {
+      const persona = todo[cursor++]!;
+      const hash = voiceDesignHash(persona);
+      console.log(`  [designing]    ${persona.id.padEnd(15)} -> ${persona.voiceBrief.label}...`);
+      try {
+        const voiceId = await createVoiceWithRetry(ai, persona);
+        voices[persona.id] = {
+          voiceId,
+          displayName: persona.voiceBrief.displayName,
+          designHash: hash,
+        };
+        writeManifest(voices, lines);
+        console.log(`  [voice ready]  ${persona.id.padEnd(15)} -> ${voiceId}`);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        firstError = new Error(`Voice design failed for ${persona.id}: ${msg}`);
+        return;
+      }
+    }
+  }
+  await Promise.all(
+    Array.from({ length: Math.min(VOICE_CONCURRENCY, todo.length) }, () => worker()),
+  );
+  if (firstError) throw firstError;
 }
 
 async function synthesizeLine(
-	ai: GoogleGenAI,
-	voiceId: string,
-	persona: CharacterPersona,
-	kind: CharacterLineKind,
-	attempt = 1,
+  ai: GoogleGenAI,
+  voiceId: string,
+  persona: CharacterPersona,
+  kind: CharacterLineKind,
+  attempt = 1,
 ): Promise<Uint8Array> {
-	const styleInstruction = lineStyleInstruction(persona, kind);
-	const key = characterVoiceKey(persona.id, kind);
-	try {
-		const response = await ai.models.generateContent({
-			model: TTS_MODEL,
-			contents: [
-				{
-					role: 'user',
-					parts: [
-						{
-							text: persona.lines[kind].text,
-							speechMetadata: { style: styleInstruction },
-						},
-					],
-				},
-			],
-			config: {
-				responseModalities: ['AUDIO'],
-				speechConfig: {
-					voiceConfig: {
-						voice: voiceId,
-					},
-				},
-			},
-		});
-		const part = response.candidates?.[0]?.content?.parts?.find(p => p.inlineData?.data);
-		const b64 = part?.inlineData?.data;
-		const mime = part?.inlineData?.mimeType ?? 'audio/wav';
-		if (!b64) throw new Error(`No audio returned for ${key}`);
-		const raw = Buffer.from(b64, 'base64');
-		if (raw.byteLength < 1024)
-			throw new Error(`Audio response unexpectedly small (${raw.byteLength} bytes) for ${key}`);
-		return encodeAudioToMp3(raw, mime, Boolean(persona.voiceBrief.muffled), kind);
-	} catch (err) {
-		const msg = err instanceof Error ? err.message : String(err);
-		const retryable = /\b(429|500|502|503|504|RESOURCE_EXHAUSTED|UNAVAILABLE|deadline|fetch failed)\b/i.test(msg);
-		if (retryable && attempt <= 4) {
-			const delay = 1500 * attempt * attempt;
-			console.warn(`  retrying ${key} in ${delay}ms: ${msg.slice(0, 120)}`);
-			await Bun.sleep(delay);
-			return synthesizeLine(ai, voiceId, persona, kind, attempt + 1);
-		}
-		throw err;
-	}
+  const styleInstruction = lineStyleInstruction(persona, kind);
+  const key = characterVoiceKey(persona.id, kind);
+  try {
+    const response = await ai.models.generateContent({
+      model: TTS_MODEL,
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              text: persona.lines[kind].text,
+              speechMetadata: { style: styleInstruction },
+            },
+          ],
+        },
+      ],
+      config: {
+        responseModalities: ["AUDIO"],
+        speechConfig: {
+          voiceConfig: {
+            voice: voiceId,
+          },
+        },
+      },
+    });
+    const part = response.candidates?.[0]?.content?.parts?.find((p) => p.inlineData?.data);
+    const b64 = part?.inlineData?.data;
+    const mime = part?.inlineData?.mimeType ?? "audio/wav";
+    if (!b64) throw new Error(`No audio returned for ${key}`);
+    const raw = Buffer.from(b64, "base64");
+    if (raw.byteLength < 1024)
+      throw new Error(`Audio response unexpectedly small (${raw.byteLength} bytes) for ${key}`);
+    return encodeAudioToMp3(raw, mime, Boolean(persona.voiceBrief.muffled), kind);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    const retryable =
+      /\b(429|500|502|503|504|RESOURCE_EXHAUSTED|UNAVAILABLE|deadline|fetch failed)\b/i.test(msg);
+    if (retryable && attempt <= 4) {
+      const delay = 1500 * attempt * attempt;
+      console.warn(`  retrying ${key} in ${delay}ms: ${msg.slice(0, 120)}`);
+      await Bun.sleep(delay);
+      return synthesizeLine(ai, voiceId, persona, kind, attempt + 1);
+    }
+    throw err;
+  }
 }
 
 if (import.meta.main) {
-	const args = process.argv.slice(2);
-	const dryRun = args.includes('--dry-run');
-	const force = args.includes('--force');
-	const redesign = args.includes('--redesign');
-	const onlyIdx = args.indexOf('--only');
-	const only = onlyIdx >= 0 ? (args[onlyIdx + 1] ?? null) : null;
+  const args = process.argv.slice(2);
+  const dryRun = args.includes("--dry-run");
+  const force = args.includes("--force");
+  const redesign = args.includes("--redesign");
+  const onlyIdx = args.indexOf("--only");
+  const only = onlyIdx >= 0 ? (args[onlyIdx + 1] ?? null) : null;
 
-	const apiKey = dryRun ? '' : loadKey();
-	mkdirSync(OUT_DIR, { recursive: true });
+  const apiKey = dryRun ? "" : loadKey();
+  mkdirSync(OUT_DIR, { recursive: true });
 
-	const state = loadExistingState();
-	const items: { persona: CharacterPersona; kind: CharacterLineKind; key: string }[] = [];
-	for (const persona of CHARACTER_PERSONA_LIST) {
-		for (const kind of CHARACTER_LINE_KINDS) {
-			const key = characterVoiceKey(persona.id, kind);
-			if (only && only !== persona.id && only !== key) continue;
-			items.push({ persona, kind, key });
-		}
-	}
-	if (!items.length) throw new Error(only ? `No character voice match for "${only}"` : 'No character voices defined');
+  const state = loadExistingState();
+  const items: { persona: CharacterPersona; kind: CharacterLineKind; key: string }[] = [];
+  for (const persona of CHARACTER_PERSONA_LIST) {
+    for (const kind of CHARACTER_LINE_KINDS) {
+      const key = characterVoiceKey(persona.id, kind);
+      if (only && only !== persona.id && only !== key) continue;
+      items.push({ persona, kind, key });
+    }
+  }
+  if (!items.length)
+    throw new Error(
+      only ? `No character voice match for "${only}"` : "No character voices defined",
+    );
 
-	const neededFigures = [...new Set(items.map(item => item.persona.id))];
-	if (dryRun) {
-		console.log(
-			`Google Gemini 3.8 TTS + Voice Design (${TTS_MODEL}): ${neededFigures.length} figures, ${items.length} lines`,
-		);
-		for (const id of neededFigures) {
-			const p = CHARACTER_PERSONAS[id];
-			console.log(`  ${id.padEnd(15)} -> ${p.voiceBrief.label} (${p.voiceBrief.accent}, ${p.voiceBrief.gender})`);
-		}
-		process.exit(0);
-	}
+  const neededFigures = [...new Set(items.map((item) => item.persona.id))];
+  if (dryRun) {
+    console.log(
+      `Google Gemini 3.8 TTS + Voice Design (${TTS_MODEL}): ${neededFigures.length} figures, ${items.length} lines`,
+    );
+    for (const id of neededFigures) {
+      const p = CHARACTER_PERSONAS[id];
+      console.log(
+        `  ${id.padEnd(15)} -> ${p.voiceBrief.label} (${p.voiceBrief.accent}, ${p.voiceBrief.gender})`,
+      );
+    }
+    process.exit(0);
+  }
 
-	const ai = new GoogleGenAI({ apiKey, apiVersion: 'v1beta' });
-	console.log(`Step 1: Designing / verifying ${neededFigures.length} custom character voices on ${TTS_MODEL}...`);
-	await ensureDesignedVoices(ai, state.voices, state.lines, neededFigures, redesign);
-	writeManifest(state.voices, state.lines);
+  const ai = new GoogleGenAI({ apiKey, apiVersion: "v1beta" });
+  console.log(
+    `Step 1: Designing / verifying ${neededFigures.length} custom character voices on ${TTS_MODEL}...`,
+  );
+  await ensureDesignedVoices(ai, state.voices, state.lines, neededFigures, redesign);
+  writeManifest(state.voices, state.lines);
 
-	const pending: typeof items = [];
-	let cachedCount = 0;
-	for (const item of items) {
-		const voiceId = state.voices[item.persona.id]!.voiceId;
-		const hash = lineHash(voiceId, item.persona, item.kind);
-		const file = resolve(OUT_DIR, `${item.key}.mp3`);
-		const existing = state.lines[item.key];
-		if (!force && existing && existing.hash === hash && existsSync(file) && statSync(file).size > 512) {
-			cachedCount++;
-		} else {
-			pending.push(item);
-		}
-	}
+  const pending: typeof items = [];
+  let cachedCount = 0;
+  for (const item of items) {
+    const voiceId = state.voices[item.persona.id]!.voiceId;
+    const hash = lineHash(voiceId, item.persona, item.kind);
+    const file = resolve(OUT_DIR, `${item.key}.mp3`);
+    const existing = state.lines[item.key];
+    if (
+      !force &&
+      existing &&
+      existing.hash === hash &&
+      existsSync(file) &&
+      statSync(file).size > 512
+    ) {
+      cachedCount++;
+    } else {
+      pending.push(item);
+    }
+  }
 
-	const pendingChars = pending.reduce((sum, item) => sum + item.persona.lines[item.kind].text.length, 0);
-	console.log(
-		`Step 2: Synthesizing (${TTS_MODEL}): ${items.length} selected | ${cachedCount} cached | ${pending.length} to generate (${pendingChars} chars)`,
-	);
+  const pendingChars = pending.reduce(
+    (sum, item) => sum + item.persona.lines[item.kind].text.length,
+    0,
+  );
+  console.log(
+    `Step 2: Synthesizing (${TTS_MODEL}): ${items.length} selected | ${cachedCount} cached | ${pending.length} to generate (${pendingChars} chars)`,
+  );
 
-	const started = Date.now();
-	let completed = 0;
-	let cursor = 0;
-	let firstError: Error | null = null;
+  const started = Date.now();
+  let completed = 0;
+  let cursor = 0;
+  let firstError: Error | null = null;
 
-	async function worker() {
-		while (cursor < pending.length && !firstError) {
-			const item = pending[cursor++]!;
-			const voiceId = state.voices[item.persona.id]!.voiceId;
-			const hash = lineHash(voiceId, item.persona, item.kind);
-			const file = resolve(OUT_DIR, `${item.key}.mp3`);
-			try {
-				const bytes = await synthesizeLine(ai, voiceId, item.persona, item.kind);
-				writeFileSync(file, bytes);
-				state.lines[item.key] = {
-					src: `/voices/characters/${item.key}.mp3`,
-					figure: item.persona.id,
-					kind: item.kind,
-					voiceId,
-					hash,
-					bytes: bytes.byteLength,
-				};
-				completed++;
-				if (completed % 8 === 0 || completed === pending.length) {
-					writeManifest(state.voices, state.lines);
-				}
-				console.log(`[${completed}/${pending.length}] ${item.key} -> ${(bytes.byteLength / 1024).toFixed(1)} KB`);
-			} catch (err) {
-				firstError = err instanceof Error ? err : new Error(String(err));
-				writeManifest(state.voices, state.lines);
-				return;
-			}
-		}
-	}
+  async function worker() {
+    while (cursor < pending.length && !firstError) {
+      const item = pending[cursor++]!;
+      const voiceId = state.voices[item.persona.id]!.voiceId;
+      const hash = lineHash(voiceId, item.persona, item.kind);
+      const file = resolve(OUT_DIR, `${item.key}.mp3`);
+      try {
+        const bytes = await synthesizeLine(ai, voiceId, item.persona, item.kind);
+        writeFileSync(file, bytes);
+        state.lines[item.key] = {
+          src: `/voices/characters/${item.key}.mp3`,
+          figure: item.persona.id,
+          kind: item.kind,
+          voiceId,
+          hash,
+          bytes: bytes.byteLength,
+        };
+        completed++;
+        if (completed % 8 === 0 || completed === pending.length) {
+          writeManifest(state.voices, state.lines);
+        }
+        console.log(
+          `[${completed}/${pending.length}] ${item.key} -> ${(bytes.byteLength / 1024).toFixed(1)} KB`,
+        );
+      } catch (err) {
+        firstError = err instanceof Error ? err : new Error(String(err));
+        writeManifest(state.voices, state.lines);
+        return;
+      }
+    }
+  }
 
-	await Promise.all(Array.from({ length: Math.min(SYNTH_CONCURRENCY, Math.max(1, pending.length)) }, () => worker()));
-	writeManifest(state.voices, state.lines);
-	if (firstError) throw firstError;
+  await Promise.all(
+    Array.from({ length: Math.min(SYNTH_CONCURRENCY, Math.max(1, pending.length)) }, () =>
+      worker(),
+    ),
+  );
+  writeManifest(state.voices, state.lines);
+  if (firstError) throw firstError;
 
-	const totalBytes = Object.values(state.lines).reduce((sum, e) => sum + e.bytes, 0);
-	const elapsed = ((Date.now() - started) / 1000).toFixed(1);
-	console.log(
-		`Done in ${elapsed}s: ${Object.keys(state.voices).length} character voices, ${Object.keys(state.lines).length} clips (${(totalBytes / (1024 * 1024)).toFixed(2)} MiB total).`,
-	);
+  const totalBytes = Object.values(state.lines).reduce((sum, e) => sum + e.bytes, 0);
+  const elapsed = ((Date.now() - started) / 1000).toFixed(1);
+  console.log(
+    `Done in ${elapsed}s: ${Object.keys(state.voices).length} character voices, ${Object.keys(state.lines).length} clips (${(totalBytes / (1024 * 1024)).toFixed(2)} MiB total).`,
+  );
 }

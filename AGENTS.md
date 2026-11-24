@@ -5,7 +5,7 @@
 - UI: SvelteKit SPA
 - Styling: Svelte CSS with Tailwind CSS v4 available
 - Data Fetching: TanStack Query
-- Linting: Oxlint + oxfmt
+- Linting: Oxlint
 - Git Hooks: Lefthook
 
 # Architecture

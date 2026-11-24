@@ -1,63 +1,63 @@
 {
-	"door": "E",
-	"folder": 1,
-	"frontImage": "front.jpg",
-	"frontText": "E",
-	"items": [
-		{
-			"id": "item-01_rule-e",
-			"image": "item-01_rule-e.jpg",
-			"count": 1,
-			"printedCode": "E",
-			"category": "rule_sticker",
-			"title": "Stretched Too Thin",
-			"placementTarget": "Rulebook page 9, slot E (setup step 5). It changes the pile count used in step 7.",
-			"text": "[5 in a red circle] STRETCHED TOO THIN\nCount the City cards in the Player deck. Set aside the number of Epidemic cards indicated below. In step 7, make this number of piles and add an Epidemic card to each pile.\nCity cards | Epidemic cards used\nup to 36 | 5\n37 to 44 | 6\n45 to 51 | 7\n52 to 57 | 8\n58 to 62 | 9\n63 or more | 10",
-			"tables": [
-				{
-					"name": "Epidemic cards used",
-					"columns": ["City cards", "Epidemic cards used"],
-					"rows": [
-						{
-							"cityCards": "up to 36",
-							"epidemicCards": 5
-						},
-						{
-							"cityCards": "37 to 44",
-							"epidemicCards": 6
-						},
-						{
-							"cityCards": "45 to 51",
-							"epidemicCards": 7
-						},
-						{
-							"cityCards": "52 to 57",
-							"epidemicCards": 8
-						},
-						{
-							"cityCards": "58 to 62",
-							"epidemicCards": 9
-						},
-						{
-							"cityCards": "63 or more",
-							"epidemicCards": 10
-						}
-					]
-				}
-			],
-			"mechanics": {
-				"opensDoors": [],
-				"opensPackages": [],
-				"rules": [
-					"Count only City cards in the Player deck. Events and Produce Supplies cards are not part of this count.",
-					"Set aside that many Epidemic cards before the deal.",
-					"In setup step 7, split the remaining Player deck into this many piles instead of the printed 5, and shuffle one Epidemic into each pile.",
-					"up to 36 city cards: 5 epidemics.",
-					"37 to 44: 6. 45 to 51: 7. 52 to 57: 8. 58 to 62: 9. 63 or more: 10."
-				],
-				"effect": "Scales the number of Epidemic cards and step-7 piles to the number of City cards in the Player deck."
-			}
-		}
-	],
-	"summary": "Setup step 5. Epidemic count is set by how many City cards are in the Player deck: 5, 6, 7, 8, 9, or 10. That many piles are built in step 7, one Epidemic each."
+  "door": "E",
+  "folder": 1,
+  "frontImage": "front.jpg",
+  "frontText": "E",
+  "items": [
+    {
+      "id": "item-01_rule-e",
+      "image": "item-01_rule-e.jpg",
+      "count": 1,
+      "printedCode": "E",
+      "category": "rule_sticker",
+      "title": "Stretched Too Thin",
+      "placementTarget": "Rulebook page 9, slot E (setup step 5). It changes the pile count used in step 7.",
+      "text": "[5 in a red circle] STRETCHED TOO THIN\nCount the City cards in the Player deck. Set aside the number of Epidemic cards indicated below. In step 7, make this number of piles and add an Epidemic card to each pile.\nCity cards | Epidemic cards used\nup to 36 | 5\n37 to 44 | 6\n45 to 51 | 7\n52 to 57 | 8\n58 to 62 | 9\n63 or more | 10",
+      "tables": [
+        {
+          "name": "Epidemic cards used",
+          "columns": ["City cards", "Epidemic cards used"],
+          "rows": [
+            {
+              "cityCards": "up to 36",
+              "epidemicCards": 5
+            },
+            {
+              "cityCards": "37 to 44",
+              "epidemicCards": 6
+            },
+            {
+              "cityCards": "45 to 51",
+              "epidemicCards": 7
+            },
+            {
+              "cityCards": "52 to 57",
+              "epidemicCards": 8
+            },
+            {
+              "cityCards": "58 to 62",
+              "epidemicCards": 9
+            },
+            {
+              "cityCards": "63 or more",
+              "epidemicCards": 10
+            }
+          ]
+        }
+      ],
+      "mechanics": {
+        "opensDoors": [],
+        "opensPackages": [],
+        "rules": [
+          "Count only City cards in the Player deck. Events and Produce Supplies cards are not part of this count.",
+          "Set aside that many Epidemic cards before the deal.",
+          "In setup step 7, split the remaining Player deck into this many piles instead of the printed 5, and shuffle one Epidemic into each pile.",
+          "up to 36 city cards: 5 epidemics.",
+          "37 to 44: 6. 45 to 51: 7. 52 to 57: 8. 58 to 62: 9. 63 or more: 10."
+        ],
+        "effect": "Scales the number of Epidemic cards and step-7 piles to the number of City cards in the Player deck."
+      }
+    }
+  ],
+  "summary": "Setup step 5. Epidemic count is set by how many City cards are in the Player deck: 5, 6, 7, 8, 9, or 10. That many piles are built in step 7, one Epidemic each."
 }

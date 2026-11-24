@@ -1,387 +1,399 @@
 <script lang="ts">
-	import { feedback } from '@stefan.inc/feedback-engine/svelte';
-	import { ending, score, SEAT_IDS } from '@repo/game';
-	import type { Command, PlayerId, PublicState, Start } from '@repo/game';
-	import { LS } from '#lib/storage.ts';
-	import { ENDING_TIERS } from '#lib/story/script.ts';
-	import { MONTHS, seatColor } from './labels.svelte.ts';
-	import Ready from './Ready.svelte';
-	import { tableVoters, waitingOn } from './voters.ts';
+  import { feedback } from "@stefan.inc/feedback-engine/svelte";
+  import { ending, score, SEAT_IDS } from "@repo/game";
+  import type { Command, PlayerId, PublicState, Start } from "@repo/game";
+  import { LS } from "#lib/storage.ts";
+  import { ENDING_TIERS } from "#lib/story/script.ts";
+  import { MONTHS, seatColor } from "./labels.svelte.ts";
+  import Ready from "./Ready.svelte";
+  import { tableVoters, waitingOn } from "./voters.ts";
 
-	type Props = {
-		snap: PublicState;
-		player: PlayerId;
-		send: (command: Command) => void;
-		rename: (name: string) => void;
-		onintro?: () => void;
-	};
+  type Props = {
+    snap: PublicState;
+    player: PlayerId;
+    send: (command: Command) => void;
+    rename: (name: string) => void;
+    onintro?: () => void;
+  };
 
-	let { snap, player, send, rename, onintro }: Props = $props();
+  let { snap, player, send, rename, onintro }: Props = $props();
 
-	const campaign = $derived(snap.world.campaign);
-	const table = $derived(snap.world.table);
-	const finished = $derived(snap.phase === 'finished');
-	const total = $derived(score(campaign));
-	const end = $derived(ending(campaign));
-	const endingStory = $derived(
-		ENDING_TIERS[campaign.sampleDelivered ? 'delivered' : 'failed'].find(tier => total.total >= tier.min) ??
-			ENDING_TIERS.failed.at(-1)!,
-	);
-	const mine = $derived(table.seats.filter(entry => entry.player === player));
+  const campaign = $derived(snap.world.campaign);
+  const table = $derived(snap.world.table);
+  const finished = $derived(snap.phase === "finished");
+  const total = $derived(score(campaign));
+  const end = $derived(ending(campaign));
+  const endingStory = $derived(
+    ENDING_TIERS[campaign.sampleDelivered ? "delivered" : "failed"].find(
+      (tier) => total.total >= tier.min,
+    ) ?? ENDING_TIERS.failed.at(-1)!,
+  );
+  const mine = $derived(table.seats.filter((entry) => entry.player === player));
 
-	const starts: { start: Start; label: string }[] = $derived(
-		campaign.month === 0
-			? [
-					{ start: 'prologue', label: 'Prologue' },
-					{ start: 'month', label: MONTHS[1]! },
-				]
-			: [{ start: 'month', label: MONTHS[campaign.month]! }],
-	);
-	const waiting = $derived(
-		waitingOn(
-			tableVoters(table, who => Boolean(table.ready[who])),
-			player,
-		),
-	);
-	const split = $derived(new Set(Object.values(table.ready)).size > 1);
+  const starts: { start: Start; label: string }[] = $derived(
+    campaign.month === 0
+      ? [
+          { start: "prologue", label: "Prologue" },
+          { start: "month", label: MONTHS[1]! },
+        ]
+      : [{ start: "month", label: MONTHS[campaign.month]! }],
+  );
+  const waiting = $derived(
+    waitingOn(
+      tableVoters(table, (who) => Boolean(table.ready[who])),
+      player,
+    ),
+  );
+  const split = $derived(new Set(Object.values(table.ready)).size > 1);
 
-	let name = $state(LS.get('name', ''));
-	let typing: ReturnType<typeof setTimeout> | undefined;
-	function typed() {
-		clearTimeout(typing);
-		typing = setTimeout(() => name.trim() && rename(name), 450);
-	}
+  let name = $state(LS.get("name", ""));
+  let typing: ReturnType<typeof setTimeout> | undefined;
+  function typed() {
+    clearTimeout(typing);
+    typing = setTimeout(() => name.trim() && rename(name), 450);
+  }
 </script>
 
 <div
-	class="lobby"
-	{@attach feedback(undefined, () => ({ phase: snap.phase, month: campaign.month, table }))}
-	data-testid="lobby"
+  class="lobby"
+  {@attach feedback(undefined, () => ({ phase: snap.phase, month: campaign.month, table }))}
+  data-testid="lobby"
 >
-	{#if finished}
-		<h1>Campaign complete</h1>
-		<p class="ending">
-			<span>{campaign.sampleDelivered ? 'The sample was delivered.' : 'The sample was not delivered.'}</span>
-			<b>{end.bracket}</b>
-		</p>
-		<p class="ending-story">{endingStory.text}</p>
-		<dl class="score">
-			<dt>Final score</dt>
-			<dd>{total.total}</dd>
-			<dt>Months won early</dt>
-			<dd>{total.earlyWins}</dd>
-			<dt>Months won late</dt>
-			<dd>{total.lateWins}</dd>
-			<dt>Population</dt>
-			<dd>{total.population}</dd>
-			<dt>Sample delivered</dt>
-			<dd>{total.sample}</dd>
-			<dt>Labs found</dt>
-			<dd>{total.labs}</dd>
-			<dt>Forsaken cities</dt>
-			<dd>{total.forsaken}</dd>
-		</dl>
-	{:else}
-		<h1>{campaign.month === 0 ? 'The table' : MONTHS[campaign.month]}</h1>
+  {#if finished}
+    <h1>Campaign complete</h1>
+    <p class="ending">
+      <span
+        >{campaign.sampleDelivered
+          ? "The sample was delivered."
+          : "The sample was not delivered."}</span
+      >
+      <b>{end.bracket}</b>
+    </p>
+    <p class="ending-story">{endingStory.text}</p>
+    <dl class="score">
+      <dt>Final score</dt>
+      <dd>{total.total}</dd>
+      <dt>Months won early</dt>
+      <dd>{total.earlyWins}</dd>
+      <dt>Months won late</dt>
+      <dd>{total.lateWins}</dd>
+      <dt>Population</dt>
+      <dd>{total.population}</dd>
+      <dt>Sample delivered</dt>
+      <dd>{total.sample}</dd>
+      <dt>Labs found</dt>
+      <dd>{total.labs}</dd>
+      <dt>Forsaken cities</dt>
+      <dd>{total.forsaken}</dd>
+    </dl>
+  {:else}
+    <h1>{campaign.month === 0 ? "The table" : MONTHS[campaign.month]}</h1>
 
-		<label class="name">
-			<span>Your name</span>
-			<input
-				bind:value={name}
-				oninput={typed}
-				onchange={() => name.trim() && rename(name)}
-				maxlength="24"
-				placeholder="Your name"
-				data-testid="lobby-name"
-			/>
-		</label>
+    <label class="name">
+      <span>Your name</span>
+      <input
+        bind:value={name}
+        oninput={typed}
+        onchange={() => name.trim() && rename(name)}
+        maxlength="24"
+        placeholder="Your name"
+        data-testid="lobby-name"
+      />
+    </label>
 
-		<ol class="seats" aria-label="Seats">
-			{#each SEAT_IDS as seat (seat)}
-				{@const entry = table.seats.find(candidate => candidate.seat === seat)}
-				<li class:open={!entry} class:you={entry?.player === player} style:--seat={seatColor(seat)}>
-					<i></i>
-					{#if entry}
-						<strong>{entry.name}</strong>
-						{#if entry.player === player && mine.length > 1}
-							<button
-								class="drop"
-								aria-label={`Give up this seat`}
-								onclick={() => send({ type: 'LEAVE', player, seat })}>×</button
-							>
-						{/if}
-					{:else}
-						<span>Open seat</span>
-					{/if}
-				</li>
-			{/each}
-		</ol>
-		{#if mine.length > 0 && table.seats.length < SEAT_IDS.length}
-			<button class="add" onclick={() => send({ type: 'ADD_SEAT', player })} data-testid="add-seat"
-				>+ Play another seat on this screen</button
-			>
-		{/if}
+    <ol class="seats" aria-label="Seats">
+      {#each SEAT_IDS as seat (seat)}
+        {@const entry = table.seats.find((candidate) => candidate.seat === seat)}
+        <li class:open={!entry} class:you={entry?.player === player} style:--seat={seatColor(seat)}>
+          <i></i>
+          {#if entry}
+            <strong>{entry.name}</strong>
+            {#if entry.player === player && mine.length > 1}
+              <button
+                class="drop"
+                aria-label={`Give up this seat`}
+                onclick={() => send({ type: "LEAVE", player, seat })}>×</button
+              >
+            {/if}
+          {:else}
+            <span>Open seat</span>
+          {/if}
+        </li>
+      {/each}
+    </ol>
+    {#if mine.length > 0 && table.seats.length < SEAT_IDS.length}
+      <button class="add" onclick={() => send({ type: "ADD_SEAT", player })} data-testid="add-seat"
+        >+ Play another seat on this screen</button
+      >
+    {/if}
 
-		{#if campaign.month === 0 && onintro}
-			<button type="button" class="intro-btn" onclick={onintro} data-testid="lobby-watch-intro">
-				✦ Watch Campaign Intro — “The World Almost Ended 71 Years Ago”
-			</button>
-		{/if}
+    {#if campaign.month === 0 && onintro}
+      <button type="button" class="intro-btn" onclick={onintro} data-testid="lobby-watch-intro">
+        ✦ Watch Campaign Intro — “The World Almost Ended 71 Years Ago”
+      </button>
+    {/if}
 
-		<div class="starts">
-			{#each starts as option (option.start)}
-				<Ready {table} {player} {send} start={option.start} label={option.label} surface="outline" />
-			{/each}
-		</div>
-		<p class="hint" aria-live="polite">
-			{#if table.seats.length < 2}
-				A game needs two seats. Others join with your passphrase, or play another seat here.
-			{:else if split}
-				Everyone has to pick the same game.
-			{:else if waiting.length}
-				Waiting for {waiting.join(', ')}.
-			{:else}
-				Choosing characters.
-			{/if}
-		</p>
-	{/if}
+    <div class="starts">
+      {#each starts as option (option.start)}
+        <Ready
+          {table}
+          {player}
+          {send}
+          start={option.start}
+          label={option.label}
+          surface="outline"
+        />
+      {/each}
+    </div>
+    <p class="hint" aria-live="polite">
+      {#if table.seats.length < 2}
+        A game needs two seats. Others join with your passphrase, or play another seat here.
+      {:else if split}
+        Everyone has to pick the same game.
+      {:else if waiting.length}
+        Waiting for {waiting.join(", ")}.
+      {:else}
+        Choosing characters.
+      {/if}
+    </p>
+  {/if}
 </div>
 
 <style>
-	.ending {
-		display: grid;
-		gap: 0.2rem;
-		margin: 0 0 1rem;
-	}
+  .ending {
+    display: grid;
+    gap: 0.2rem;
+    margin: 0 0 1rem;
+  }
 
-	.ending b {
-		font-family: var(--font-display);
-		font-size: 1.4rem;
-		font-weight: 400;
-	}
+  .ending b {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 400;
+  }
 
-	.ending-story {
-		margin: -0.35rem 0 0.5rem;
-		padding: 0.65rem 0.85rem;
-		border-left: 3px solid #9d2c22;
-		background: rgb(42 32 23 / 0.06);
-		font-size: 0.86rem;
-		line-height: 1.48;
-		color: var(--slip-ink);
-	}
+  .ending-story {
+    margin: -0.35rem 0 0.5rem;
+    padding: 0.65rem 0.85rem;
+    border-left: 3px solid #9d2c22;
+    background: rgb(42 32 23 / 0.06);
+    font-size: 0.86rem;
+    line-height: 1.48;
+    color: var(--slip-ink);
+  }
 
-	.intro-btn {
-		padding: 0.48rem 0.8rem;
-		border: 1px solid rgb(138 98 42 / 0.55);
-		border-radius: 3px;
-		background: linear-gradient(180deg, rgb(226 195 106 / 0.2), rgb(184 138 56 / 0.1));
-		color: var(--slip-ink);
-		font-size: 0.82rem;
-		font-weight: 700;
-		text-align: center;
-	}
+  .intro-btn {
+    padding: 0.48rem 0.8rem;
+    border: 1px solid rgb(138 98 42 / 0.55);
+    border-radius: 3px;
+    background: linear-gradient(180deg, rgb(226 195 106 / 0.2), rgb(184 138 56 / 0.1));
+    color: var(--slip-ink);
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-align: center;
+  }
 
-	.ending .hint {
-		font-size: 0.8rem;
-		opacity: 0.7;
-	}
+  .ending .hint {
+    font-size: 0.8rem;
+    opacity: 0.7;
+  }
 
-	.lobby {
-		display: flex;
-		flex-direction: column;
-		gap: 1.1rem;
-		width: min(26rem, 92vw);
-		padding: 1.6rem 1.8rem 1.4rem;
-		border-radius: 2px;
-		background: var(--document);
-		color: var(--slip-ink);
-		box-shadow: var(--document-shadow);
-		animation: laid 420ms cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
-	}
+  .lobby {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+    width: min(26rem, 92vw);
+    padding: 1.6rem 1.8rem 1.4rem;
+    border-radius: 2px;
+    background: var(--document);
+    color: var(--slip-ink);
+    box-shadow: var(--document-shadow);
+    animation: laid 420ms cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
+  }
 
-	@keyframes laid {
-		from {
-			opacity: 0;
-			translate: 0 1.5rem;
-			rotate: -1.2deg;
-		}
-	}
+  @keyframes laid {
+    from {
+      opacity: 0;
+      translate: 0 1.5rem;
+      rotate: -1.2deg;
+    }
+  }
 
-	h1 {
-		margin: 0;
-		font-family: var(--font-display);
-		font-size: 2.4rem;
-		font-weight: 400;
-		line-height: 1;
-	}
+  h1 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 2.4rem;
+    font-weight: 400;
+    line-height: 1;
+  }
 
-	.name {
-		display: flex;
-		flex-direction: column;
-		gap: 0.25rem;
-	}
+  .name {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
 
-	.name span {
-		color: var(--slip-muted);
-		font-size: 0.78rem;
-		letter-spacing: 0.04em;
-		text-transform: uppercase;
-	}
+  .name span {
+    color: var(--slip-muted);
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
 
-	input {
-		padding: 0.35rem 0.1rem;
-		border: 0;
-		border-bottom: 1px solid rgb(42 32 23 / 0.35);
-		background: none;
-		color: var(--slip-ink);
-		font-family: var(--font-display);
-		font-size: 1.35rem;
-	}
+  input {
+    padding: 0.35rem 0.1rem;
+    border: 0;
+    border-bottom: 1px solid rgb(42 32 23 / 0.35);
+    background: none;
+    color: var(--slip-ink);
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+  }
 
-	input:focus {
-		outline: none;
-		border-bottom-color: var(--slip-ink);
-	}
+  input:focus {
+    outline: none;
+    border-bottom-color: var(--slip-ink);
+  }
 
-	input::placeholder {
-		color: rgb(42 32 23 / 0.4);
-	}
+  input::placeholder {
+    color: rgb(42 32 23 / 0.4);
+  }
 
-	.seats {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 0.4rem;
-		margin: 0;
-		padding: 0;
-		list-style: none;
-	}
+  .seats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
 
-	.seats li {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		min-height: 2.3rem;
-		padding: 0.3rem 0.55rem;
-		border: 1px solid rgb(42 32 23 / 0.22);
-		border-radius: 2px;
-		font-size: 0.95rem;
-		animation: sit 320ms cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
-	}
+  .seats li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.3rem;
+    padding: 0.3rem 0.55rem;
+    border: 1px solid rgb(42 32 23 / 0.22);
+    border-radius: 2px;
+    font-size: 0.95rem;
+    animation: sit 320ms cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+  }
 
-	@keyframes sit {
-		from {
-			opacity: 0;
-			scale: 0.94;
-		}
-	}
+  @keyframes sit {
+    from {
+      opacity: 0;
+      scale: 0.94;
+    }
+  }
 
-	.seats li i {
-		flex: none;
-		width: 0.7rem;
-		height: 0.7rem;
-		border-radius: 50%;
-		background: var(--seat);
-	}
+  .seats li i {
+    flex: none;
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 50%;
+    background: var(--seat);
+  }
 
-	.seats li strong {
-		overflow: hidden;
-		font-family: var(--font-display);
-		font-size: 1.08rem;
-		font-weight: 400;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
+  .seats li strong {
+    overflow: hidden;
+    font-family: var(--font-display);
+    font-size: 1.08rem;
+    font-weight: 400;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 
-	.seats li.you {
-		border-color: var(--slip-ink);
-		box-shadow: inset 3px 0 0 var(--seat);
-	}
+  .seats li.you {
+    border-color: var(--slip-ink);
+    box-shadow: inset 3px 0 0 var(--seat);
+  }
 
-	.seats li.open {
-		border-style: dashed;
-		color: var(--slip-muted);
-		font-size: 0.85rem;
-	}
+  .seats li.open {
+    border-style: dashed;
+    color: var(--slip-muted);
+    font-size: 0.85rem;
+  }
 
-	.seats li.open i {
-		background: none;
-		box-shadow: inset 0 0 0 1.5px rgb(42 32 23 / 0.3);
-	}
+  .seats li.open i {
+    background: none;
+    box-shadow: inset 0 0 0 1.5px rgb(42 32 23 / 0.3);
+  }
 
-	button {
-		border: 1px solid rgb(42 32 23 / 0.4);
-		border-radius: 2px;
-		background: none;
-		color: var(--slip-ink);
-		font: inherit;
-		cursor: pointer;
-		transition:
-			background 150ms ease,
-			border-color 150ms ease,
-			color 150ms ease;
-	}
+  button {
+    border: 1px solid rgb(42 32 23 / 0.4);
+    border-radius: 2px;
+    background: none;
+    color: var(--slip-ink);
+    font: inherit;
+    cursor: pointer;
+    transition:
+      background 150ms ease,
+      border-color 150ms ease,
+      color 150ms ease;
+  }
 
-	button:hover:not(:disabled) {
-		border-color: var(--slip-ink);
-		background: rgb(42 32 23 / 0.06);
-	}
+  button:hover:not(:disabled) {
+    border-color: var(--slip-ink);
+    background: rgb(42 32 23 / 0.06);
+  }
 
-	button:disabled {
-		opacity: 0.4;
-		cursor: default;
-	}
+  button:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
 
-	.drop {
-		margin-left: auto;
-		padding: 0 0.35rem;
-		border-color: transparent;
-		color: var(--slip-muted);
-		font-size: 1rem;
-		line-height: 1.2;
-	}
+  .drop {
+    margin-left: auto;
+    padding: 0 0.35rem;
+    border-color: transparent;
+    color: var(--slip-muted);
+    font-size: 1rem;
+    line-height: 1.2;
+  }
 
-	.add {
-		align-self: flex-start;
-		margin-top: -0.6rem;
-		padding: 0.2rem 0;
-		border: 0;
-		color: var(--slip-muted);
-		font-size: 0.82rem;
-	}
+  .add {
+    align-self: flex-start;
+    margin-top: -0.6rem;
+    padding: 0.2rem 0;
+    border: 0;
+    color: var(--slip-muted);
+    font-size: 0.82rem;
+  }
 
-	.add:hover:not(:disabled) {
-		background: none;
-		color: var(--slip-ink);
-	}
+  .add:hover:not(:disabled) {
+    background: none;
+    color: var(--slip-ink);
+  }
 
-	.starts {
-		display: flex;
-		gap: 0.6rem;
-	}
+  .starts {
+    display: flex;
+    gap: 0.6rem;
+  }
 
-	.hint {
-		margin: -0.3rem 0 0;
-		color: var(--slip-muted);
-		font-size: 0.85rem;
-		text-align: center;
-	}
+  .hint {
+    margin: -0.3rem 0 0;
+    color: var(--slip-muted);
+    font-size: 0.85rem;
+    text-align: center;
+  }
 
-	.score {
-		display: grid;
-		grid-template-columns: 1fr auto;
-		gap: 0.35rem 2rem;
-		margin: 0;
-		font-size: 1rem;
-	}
+  .score {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.35rem 2rem;
+    margin: 0;
+    font-size: 1rem;
+  }
 
-	.score dt {
-		border-bottom: 1px dotted rgb(42 32 23 / 0.25);
-	}
+  .score dt {
+    border-bottom: 1px dotted rgb(42 32 23 / 0.25);
+  }
 
-	.score dd {
-		margin: 0;
-		font-family: var(--font-display);
-		font-size: 1.25rem;
-		text-align: right;
-	}
+  .score dd {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    text-align: right;
+  }
 </style>

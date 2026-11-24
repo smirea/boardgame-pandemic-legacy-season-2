@@ -1,36 +1,36 @@
 {
-	"package": 5,
-	"index": 10,
-	"cardId": 10709,
-	"printedCodes": {
-		"sideA": null,
-		"sideB": "P5-10b"
-	},
-	"title": "Lima",
-	"category": "infection",
-	"city": "Lima",
-	"color": "yellow",
-	"coordinates": null,
-	"copies": 1,
-	"hasImprovementSlot": true,
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"text": "Infection deck back. No printed text."
-	},
-	"sideB": {
-		"text": "Lima\nP5-10b",
-		"searchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"opensDoors": [],
-		"rules": [
-			"Yellow Infection card. The city name is printed vertically.",
-			"One improvement sticker may be placed on this card. No empty sticker box is printed on the face."
-		],
-		"notes": null
-	}
+  "package": 5,
+  "index": 10,
+  "cardId": 10709,
+  "printedCodes": {
+    "sideA": null,
+    "sideB": "P5-10b"
+  },
+  "title": "Lima",
+  "category": "infection",
+  "city": "Lima",
+  "color": "yellow",
+  "coordinates": null,
+  "copies": 1,
+  "hasImprovementSlot": true,
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "text": "Infection deck back. No printed text."
+  },
+  "sideB": {
+    "text": "Lima\nP5-10b",
+    "searchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "opensDoors": [],
+    "rules": [
+      "Yellow Infection card. The city name is printed vertically.",
+      "One improvement sticker may be placed on this card. No empty sticker box is printed on the face."
+    ],
+    "notes": null
+  }
 }

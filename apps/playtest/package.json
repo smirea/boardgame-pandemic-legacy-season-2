@@ -1,15 +1,15 @@
 {
-	"name": "@repo/playtest",
-	"private": true,
-	"type": "module",
-	"exports": {
-		"./replays": "./src/replays.ts"
-	},
-	"scripts": {
-		"typecheck": "bun check"
-	},
-	"dependencies": {
-		"@repo/game": "workspace:*",
-		"playwright": "1.65.1"
-	}
+  "name": "@repo/playtest",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./replays": "./src/replays.ts"
+  },
+  "scripts": {
+    "typecheck": "bun check"
+  },
+  "dependencies": {
+    "@repo/game": "workspace:*",
+    "playwright": "1.65.1"
+  }
 }

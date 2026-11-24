@@ -1,20 +1,20 @@
 {
-	"id": "sticker-02_outrider",
-	"package": 5,
-	"guid": "55cbf8",
-	"printedCode": null,
-	"name": "Outrider",
-	"category": "ability",
-	"placementTarget": "Character card",
-	"costProductionUnits": 3,
-	"copies": 1,
-	"image": "sticker-02_outrider.jpg",
-	"text": "Outrider: You may do the Recon action with 1 fewer card.",
-	"mechanics": {
-		"timing": "action",
-		"effect": "The Recon action requires 1 fewer card.",
-		"restrictions": ["Applies when doing the Recon action"],
-		"opensDoors": [],
-		"notes": "The production cost is not printed on the sticker. The package manifest lists it as 3 Production Units."
-	}
+  "id": "sticker-02_outrider",
+  "package": 5,
+  "guid": "55cbf8",
+  "printedCode": null,
+  "name": "Outrider",
+  "category": "ability",
+  "placementTarget": "Character card",
+  "costProductionUnits": 3,
+  "copies": 1,
+  "image": "sticker-02_outrider.jpg",
+  "text": "Outrider: You may do the Recon action with 1 fewer card.",
+  "mechanics": {
+    "timing": "action",
+    "effect": "The Recon action requires 1 fewer card.",
+    "restrictions": ["Applies when doing the Recon action"],
+    "opensDoors": [],
+    "notes": "The production cost is not printed on the sticker. The package manifest lists it as 3 Production Units."
+  }
 }

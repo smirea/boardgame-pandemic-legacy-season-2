@@ -1,40 +1,40 @@
 {
-	"package": 3,
-	"index": 3,
-	"cardId": 10702,
-	"printedCodes": {
-		"sideA": "P3-03a",
-		"sideB": "P3-03b"
-	},
-	"title": "An Incomplete Plan",
-	"category": "plan",
-	"city": null,
-	"color": null,
-	"coordinates": null,
-	"port": null,
-	"copies": 1,
-	"hasImprovementSlot": false,
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideASummary": "A plan to get into Utopia still needs a way in. The start of that plan is on the back, and it cannot be started until more is learned. Keep this card in the reserve between games. Printed code P3-03a.",
-	"sideBSummary": "Handwritten checklist. Five red squares labeled A, B, C, D, and E sit beside \"Find a way in.\" Three other questions are still marked Unknown: how to bypass their security, whether to devise a distraction, and what is needed if a cure is found. A red note says more information is required before the plan can start. Printed code P3-03b.",
-	"searchBoxes": [],
-	"states": [],
-	"mechanics": {
-		"opensDoors": [],
-		"destroys": false,
-		"rules": [
-			"Keep this card in the reserve between games.",
-			"The plan on the back cannot be started until a later instruction says more has been learned.",
-			"Letters A through E are blank steps on the plan. This card does not open them."
-		],
-		"notes": [
-			"Card id 10702. One copy.",
-			"Side A is P3-03a. Side B is P3-03b.",
-			"The five red letters are not the doors opened by the recon report. Those doors are 56 and 63.",
-			"Nothing on either side gives an action, an objective, or a search."
-		]
-	}
+  "package": 3,
+  "index": 3,
+  "cardId": 10702,
+  "printedCodes": {
+    "sideA": "P3-03a",
+    "sideB": "P3-03b"
+  },
+  "title": "An Incomplete Plan",
+  "category": "plan",
+  "city": null,
+  "color": null,
+  "coordinates": null,
+  "port": null,
+  "copies": 1,
+  "hasImprovementSlot": false,
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideASummary": "A plan to get into Utopia still needs a way in. The start of that plan is on the back, and it cannot be started until more is learned. Keep this card in the reserve between games. Printed code P3-03a.",
+  "sideBSummary": "Handwritten checklist. Five red squares labeled A, B, C, D, and E sit beside \"Find a way in.\" Three other questions are still marked Unknown: how to bypass their security, whether to devise a distraction, and what is needed if a cure is found. A red note says more information is required before the plan can start. Printed code P3-03b.",
+  "searchBoxes": [],
+  "states": [],
+  "mechanics": {
+    "opensDoors": [],
+    "destroys": false,
+    "rules": [
+      "Keep this card in the reserve between games.",
+      "The plan on the back cannot be started until a later instruction says more has been learned.",
+      "Letters A through E are blank steps on the plan. This card does not open them."
+    ],
+    "notes": [
+      "Card id 10702. One copy.",
+      "Side A is P3-03a. Side B is P3-03b.",
+      "The five red letters are not the doors opened by the recon report. Those doors are 56 and 63.",
+      "Nothing on either side gives an action, an objective, or a search."
+    ]
+  }
 }

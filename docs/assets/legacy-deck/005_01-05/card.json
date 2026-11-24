@@ -1,44 +1,44 @@
 {
-	"sequence": 5,
-	"folder": "005_01-05",
-	"cardCode": "01-05",
-	"printedCodes": {
-		"sideA": "01-05a",
-		"sideB": "01-05b"
-	},
-	"title": "Recon North America",
-	"category": "objective",
-	"month": "january",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "NONE",
-		"header": "",
-		"trigger": "",
-		"text": "",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "MANDATORY OBJECTIVE",
-		"text": "Recon North America.\n\nAdd this card to your pool of objectives.\nIf you complete it, but lose the first game in January, it counts as complete during your second game in January!",
-		"footer": "",
-		"scratchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"whenRead": "The second January mandatory objective, drawn with 01-04 after 01-03.",
-		"triggers": [],
-		"opensDoors": [],
-		"opensPackages": [],
-		"destroys": [],
-		"addsToPool": ["Recon North America (mandatory objective)"],
-		"rules": [
-			"Mandatory objective: recon North America.",
-			"Add this card to the pool of objectives.",
-			"If you complete it but lose the first game in January, it still counts as complete during the second game in January."
-		],
-		"notes": "Side A is the objective-card back. The objective name and the two small sentences are printed vertically on side B."
-	}
+  "sequence": 5,
+  "folder": "005_01-05",
+  "cardCode": "01-05",
+  "printedCodes": {
+    "sideA": "01-05a",
+    "sideB": "01-05b"
+  },
+  "title": "Recon North America",
+  "category": "objective",
+  "month": "january",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "NONE",
+    "header": "",
+    "trigger": "",
+    "text": "",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "MANDATORY OBJECTIVE",
+    "text": "Recon North America.\n\nAdd this card to your pool of objectives.\nIf you complete it, but lose the first game in January, it counts as complete during your second game in January!",
+    "footer": "",
+    "scratchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "whenRead": "The second January mandatory objective, drawn with 01-04 after 01-03.",
+    "triggers": [],
+    "opensDoors": [],
+    "opensPackages": [],
+    "destroys": [],
+    "addsToPool": ["Recon North America (mandatory objective)"],
+    "rules": [
+      "Mandatory objective: recon North America.",
+      "Add this card to the pool of objectives.",
+      "If you complete it but lose the first game in January, it still counts as complete during the second game in January."
+    ],
+    "notes": "Side A is the objective-card back. The objective name and the two small sentences are printed vertically on side B."
+  }
 }

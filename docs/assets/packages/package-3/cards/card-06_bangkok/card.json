@@ -1,40 +1,40 @@
 {
-	"package": 3,
-	"index": 6,
-	"cardId": 10705,
-	"printedCodes": {
-		"sideA": null,
-		"sideB": "P3-06b"
-	},
-	"title": "Bangkok",
-	"category": "player-card",
-	"city": "Bangkok",
-	"color": "red",
-	"coordinates": "13°45'23\"N 100°30'6\"E",
-	"port": true,
-	"copies": 1,
-	"hasImprovementSlot": true,
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideASummary": "Player deck back. Dark blue sunburst around a haven on the water. No text and no printed code.",
-	"sideBSummary": "Bangkok, red Player card. Coordinates 13°45'23\"N 100°30'6\"E. The compass has an anchor, so the city is a port. The map has a target marker and no scratch-off box. The city name and coordinates repeat upside down along the bottom. Printed code P3-06b.",
-	"searchBoxes": [],
-	"states": [],
-	"mechanics": {
-		"opensDoors": [],
-		"destroys": false,
-		"rules": [
-			"Red Player card for Bangkok.",
-			"Port city: the compass is marked with an anchor.",
-			"No search box. Nothing on this card is scratched.",
-			"A dashed improvement slot is printed across the map."
-		],
-		"notes": [
-			"Card id 10705. One copy.",
-			"Printed code P3-06b is on side B only.",
-			"Goes to the reserve when Package 3 is opened. Jakarta is the only city this report places immediately."
-		]
-	}
+  "package": 3,
+  "index": 6,
+  "cardId": 10705,
+  "printedCodes": {
+    "sideA": null,
+    "sideB": "P3-06b"
+  },
+  "title": "Bangkok",
+  "category": "player-card",
+  "city": "Bangkok",
+  "color": "red",
+  "coordinates": "13°45'23\"N 100°30'6\"E",
+  "port": true,
+  "copies": 1,
+  "hasImprovementSlot": true,
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideASummary": "Player deck back. Dark blue sunburst around a haven on the water. No text and no printed code.",
+  "sideBSummary": "Bangkok, red Player card. Coordinates 13°45'23\"N 100°30'6\"E. The compass has an anchor, so the city is a port. The map has a target marker and no scratch-off box. The city name and coordinates repeat upside down along the bottom. Printed code P3-06b.",
+  "searchBoxes": [],
+  "states": [],
+  "mechanics": {
+    "opensDoors": [],
+    "destroys": false,
+    "rules": [
+      "Red Player card for Bangkok.",
+      "Port city: the compass is marked with an anchor.",
+      "No search box. Nothing on this card is scratched.",
+      "A dashed improvement slot is printed across the map."
+    ],
+    "notes": [
+      "Card id 10705. One copy.",
+      "Printed code P3-06b is on side B only.",
+      "Goes to the reserve when Package 3 is opened. Jakarta is the only city this report places immediately."
+    ]
+  }
 }

@@ -1,21 +1,21 @@
 {
-	"id": "sticker-02",
-	"package": 7,
-	"printedCode": "P7-22a",
-	"name": "Game End Upgrades",
-	"category": "game-end-upgrades-sheet",
-	"placementTarget": "Reference sheet. The four tower icons on it are the stickers that go on the board. This sheet itself is not a board sticker.",
-	"costProductionUnits": null,
-	"copies": 1,
-	"image": "sticker-02.jpg",
-	"text": "GAME END UPGRADES\n\n[four satellite-dish icons]\n[an orange circle with 3 under each icon]\n\nPERMANENT SATELLITE TOWERS\nPut a Permanent Satellite Tower sticker next to a city\nthat had a satellite tower in the just-played game.\nDuring setup, add a satellite tower to each city with\na Permanent Satellite Tower sticker.",
-	"mechanics": {
-		"timing": "Game end, when placing permanent satellite towers. Also read at the start of later games, during setup.",
-		"effect": "Explains the four Permanent Satellite Tower stickers. Each is marked 3. Place one next to a city that had a satellite tower in the game just played. In later setup, add a satellite tower miniature to every city that has the sticker.",
-		"restrictions": [
-			"The sticker records a tower from the game just finished, not a tower you wish the city had.",
-			"Four stickers, so at most four cities keep a tower this way."
-		],
-		"opensDoors": []
-	}
+  "id": "sticker-02",
+  "package": 7,
+  "printedCode": "P7-22a",
+  "name": "Game End Upgrades",
+  "category": "game-end-upgrades-sheet",
+  "placementTarget": "Reference sheet. The four tower icons on it are the stickers that go on the board. This sheet itself is not a board sticker.",
+  "costProductionUnits": null,
+  "copies": 1,
+  "image": "sticker-02.jpg",
+  "text": "GAME END UPGRADES\n\n[four satellite-dish icons]\n[an orange circle with 3 under each icon]\n\nPERMANENT SATELLITE TOWERS\nPut a Permanent Satellite Tower sticker next to a city\nthat had a satellite tower in the just-played game.\nDuring setup, add a satellite tower to each city with\na Permanent Satellite Tower sticker.",
+  "mechanics": {
+    "timing": "Game end, when placing permanent satellite towers. Also read at the start of later games, during setup.",
+    "effect": "Explains the four Permanent Satellite Tower stickers. Each is marked 3. Place one next to a city that had a satellite tower in the game just played. In later setup, add a satellite tower miniature to every city that has the sticker.",
+    "restrictions": [
+      "The sticker records a tower from the game just finished, not a tower you wish the city had.",
+      "Four stickers, so at most four cities keep a tower this way."
+    ],
+    "opensDoors": []
+  }
 }

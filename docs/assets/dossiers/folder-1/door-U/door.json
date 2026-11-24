@@ -1,30 +1,30 @@
 {
-	"door": "U",
-	"folder": 1,
-	"frontImage": "front.jpg",
-	"frontText": "U",
-	"items": [
-		{
-			"id": "item-01_rule-u",
-			"image": "item-01_rule-u.jpg",
-			"count": 1,
-			"printedCode": "U",
-			"category": "rule_sticker",
-			"title": "",
-			"placementTarget": "Rulebook page 15, slot U (GAME END, under the loss bullets)",
-			"text": "• If you are unable to place a Hollow Men figure on the board when needed.",
-			"tables": [],
-			"mechanics": {
-				"opensDoors": [],
-				"opensPackages": [],
-				"rules": [
-					"The sticker is only this bullet. It does not itself say that the game ends.",
-					"It is placed in the list of ways the game ends in a loss, after the incident-track loss and the failure to draw 2 player cards.",
-					"The trigger is being unable to place a Hollow Men figure when the rules require one."
-				],
-				"effect": "Adds running out of Hollow Men figures as a loss condition."
-			}
-		}
-	],
-	"summary": "Extra game-end bullet, placed on the loss list: being unable to place a Hollow Men figure when one is required."
+  "door": "U",
+  "folder": 1,
+  "frontImage": "front.jpg",
+  "frontText": "U",
+  "items": [
+    {
+      "id": "item-01_rule-u",
+      "image": "item-01_rule-u.jpg",
+      "count": 1,
+      "printedCode": "U",
+      "category": "rule_sticker",
+      "title": "",
+      "placementTarget": "Rulebook page 15, slot U (GAME END, under the loss bullets)",
+      "text": "• If you are unable to place a Hollow Men figure on the board when needed.",
+      "tables": [],
+      "mechanics": {
+        "opensDoors": [],
+        "opensPackages": [],
+        "rules": [
+          "The sticker is only this bullet. It does not itself say that the game ends.",
+          "It is placed in the list of ways the game ends in a loss, after the incident-track loss and the failure to draw 2 player cards.",
+          "The trigger is being unable to place a Hollow Men figure when the rules require one."
+        ],
+        "effect": "Adds running out of Hollow Men figures as a loss condition."
+      }
+    }
+  ],
+  "summary": "Extra game-end bullet, placed on the loss list: being unable to place a Hollow Men figure when one is required."
 }

@@ -1,53 +1,53 @@
 {
-	"door": "43",
-	"folder": 4,
-	"frontImage": "dossiers/folder-4/door-43/front.jpg",
-	"frontText": "43",
-	"items": [
-		{
-			"id": "item-01_decryption-key",
-			"image": "dossiers/folder-4/door-43/item-01_decryption-key.jpg",
-			"count": 1,
-			"printedCode": null,
-			"category": "city-card-improvement",
-			"title": "Decryption Key",
-			"placementTarget": "City card",
-			"costProductionUnits": 1,
-			"text": "Decryption Key:\nYou may use this card\nas a City card of any\ncolor when doing the\nRecon or Build Supply\nCenter action.",
-			"mapDetails": null,
-			"mechanics": {
-				"timing": "action",
-				"trigger": "When doing the Recon or Build Supply Center action",
-				"effect": "You may use this card as a City card of any color.",
-				"restrictions": ["Only when doing the Recon or Build Supply Center action"],
-				"icon": "Circle split into four quadrants: blue, black, yellow, and red.",
-				"costPrintedOn": "dossiers/folder-4/door-43/item-02.jpg",
-				"sourceGuids": ["6f1944"]
-			}
-		},
-		{
-			"id": "item-02",
-			"image": "dossiers/folder-4/door-43/item-02.jpg",
-			"count": 1,
-			"printedCode": "43",
-			"category": "report",
-			"title": "TRANSMISSIONS DECRYPTED",
-			"placementTarget": null,
-			"costProductionUnits": null,
-			"text": "TRANSMISSIONS DECRYPTED\nWe've managed to decrypt an\nimportant transmission that will help\nus avoid the Hollow Men.\n\nDecryption Key: (1)\nYou may use this card\nas a City card of any\ncolor when doing the\nRecon or Build Supply\nCenter action.\n\nAdd this to your pool of City card\nimprovements.",
-			"mapDetails": null,
-			"mechanics": {
-				"timing": "game end upgrade",
-				"trigger": null,
-				"effect": "Add the Decryption Key sticker to the pool of City card improvements. It costs 1 production unit.",
-				"restrictions": [],
-				"costs": {
-					"Decryption Key": 1
-				},
-				"sourceGuids": ["432a83"]
-			}
-		}
-	],
-	"bags": [],
-	"summary": "One Decryption Key City-card sticker and the Transmissions Decrypted report that adds it to the City card improvement pool at 1 production unit. The sticker counts as a City card of any color for Recon or Build Supply Center. The icon is a four-color circle. Corner badge is 43."
+  "door": "43",
+  "folder": 4,
+  "frontImage": "dossiers/folder-4/door-43/front.jpg",
+  "frontText": "43",
+  "items": [
+    {
+      "id": "item-01_decryption-key",
+      "image": "dossiers/folder-4/door-43/item-01_decryption-key.jpg",
+      "count": 1,
+      "printedCode": null,
+      "category": "city-card-improvement",
+      "title": "Decryption Key",
+      "placementTarget": "City card",
+      "costProductionUnits": 1,
+      "text": "Decryption Key:\nYou may use this card\nas a City card of any\ncolor when doing the\nRecon or Build Supply\nCenter action.",
+      "mapDetails": null,
+      "mechanics": {
+        "timing": "action",
+        "trigger": "When doing the Recon or Build Supply Center action",
+        "effect": "You may use this card as a City card of any color.",
+        "restrictions": ["Only when doing the Recon or Build Supply Center action"],
+        "icon": "Circle split into four quadrants: blue, black, yellow, and red.",
+        "costPrintedOn": "dossiers/folder-4/door-43/item-02.jpg",
+        "sourceGuids": ["6f1944"]
+      }
+    },
+    {
+      "id": "item-02",
+      "image": "dossiers/folder-4/door-43/item-02.jpg",
+      "count": 1,
+      "printedCode": "43",
+      "category": "report",
+      "title": "TRANSMISSIONS DECRYPTED",
+      "placementTarget": null,
+      "costProductionUnits": null,
+      "text": "TRANSMISSIONS DECRYPTED\nWe've managed to decrypt an\nimportant transmission that will help\nus avoid the Hollow Men.\n\nDecryption Key: (1)\nYou may use this card\nas a City card of any\ncolor when doing the\nRecon or Build Supply\nCenter action.\n\nAdd this to your pool of City card\nimprovements.",
+      "mapDetails": null,
+      "mechanics": {
+        "timing": "game end upgrade",
+        "trigger": null,
+        "effect": "Add the Decryption Key sticker to the pool of City card improvements. It costs 1 production unit.",
+        "restrictions": [],
+        "costs": {
+          "Decryption Key": 1
+        },
+        "sourceGuids": ["432a83"]
+      }
+    }
+  ],
+  "bags": [],
+  "summary": "One Decryption Key City-card sticker and the Transmissions Decrypted report that adds it to the City card improvement pool at 1 production unit. The sticker counts as a City card of any color for Recon or Build Supply Center. The icon is a four-color circle. Corner badge is 43."
 }

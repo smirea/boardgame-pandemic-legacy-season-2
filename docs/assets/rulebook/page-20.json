@@ -1,89 +1,89 @@
 {
-	"file": "page-20.jpg",
-	"printedPageNumber": null,
-	"headings": [
-		"MANUAL",
-		"GAME END STEPS",
-		"1. ADJUST POPULATION",
-		"2. CHECK THE LEGACY DECK",
-		"3. RESOLVE CARDS IN THE GAME END AREA",
-		"4. SPEND PRODUCTION UNITS",
-		"CHARACTER ABILITIES",
-		"CITY CARD IMPROVEMENTS",
-		"INFECTION CARD IMPROVEMENTS",
-		"POPULATION",
-		"IF YOU WON THE GAME",
-		"IF YOU LOST THE GAME"
-	],
-	"ruleStickerSlots": [
-		{
-			"slot": "V",
-			"context": "1. ADJUST POPULATION, dashed box in place of step a: RULE STICKER V will give you step a. Skip it for now."
-		},
-		{
-			"slot": "W",
-			"context": "1. ADJUST POPULATION, dashed box in place of step c: RULE STICKER W will give you step c. Skip it for now."
-		}
-	],
-	"sections": [
-		{
-			"heading": "1. ADJUST POPULATION",
-			"text": "RULE STICKER V will\ngive you step a. Skip it for now.\n\nb. For each location that has at least 1 Plague cube, decrease that location’s population by 1. It only ever goes down by 1, even if there are 2 or 3 Plague cubes in it.\n\nRULE STICKER W will\ngive you step c. Skip it for now.\n\nd. For each city that has a supply center, increase that city’s population by 1.\n\nIf a location’s population would decrease and increase by 1, its population stays the same."
-		},
-		{
-			"heading": "2. CHECK THE LEGACY DECK",
-			"text": "You may be instructed to draw more cards if there is a PAUSE card at the top of the deck."
-		},
-		{
-			"heading": "3. RESOLVE CARDS IN THE GAME END AREA",
-			"text": "a. If there are any Infection cards in this area, add them to the Infection deck.\n\nb. Review all Turning Point cards in the Game End area to see if they triggered. Resolve these cards in numerical order from low to high."
-		},
-		{
-			"heading": "4. SPEND PRODUCTION UNITS",
-			"text": "Win or lose, you choose upgrades at the end of each game based on the number of cities on the grid.\n\nCalculate the number of cities on the grid and look at the table in the Game End area to see how many units you get to spend. You get an additional +1 unit if you won the game. Any unused units are lost; do not carry them over from game to game."
-		},
-		{
-			"heading": "CHARACTER ABILITIES",
-			"text": "Spend the cost next to an ability to add it to a created character, even one who did not play in the most recent game. Use any empty slot on the Character card. You cannot place an ability over a scar, a job, or another ability."
-		},
-		{
-			"heading": "CITY CARD IMPROVEMENTS",
-			"text": "Spend the cost next to a City improvement sticker to add it to a City card with an available slot. That city must be connected to the grid and each slot can have only 1 sticker."
-		},
-		{
-			"heading": "INFECTION CARD IMPROVEMENTS",
-			"text": "Spend the cost next to an Infection improvement sticker to add it to an Infection card with an available slot. That city must be connected to the grid and each slot can have only 1 sticker.\n\nInfection improvements are in effect during:\n• Game set up\n• The Infect step during an Epidemic\n• The Infect step at the end of every player turn"
-		},
-		{
-			"heading": "POPULATION",
-			"text": "Spend 1 production unit to increase the population of any non-forsaken location by 1. If the location is a forsaken city then increasing it back to 1 costs 2 production units.\n\nTake the sticker and place it over the location’s current population. You can spend multiple production units to increase the population by more than one. If you do so, apply the final population sticker to the location; do not place all the stickers in between the old level and the new one. If you ever run out of population stickers, record the population near the city with a pen or pencil, but remember the population cannot go above 8."
-		},
-		{
-			"heading": "IF YOU WON THE GAME",
-			"text": "• Start your next game at the beginning of the next month.\n• Your rationing level is dropped by 2 (minimum of 0) as you save more resources for future troubles.\n• Record your new rationing level on the calendar."
-		},
-		{
-			"heading": "IF YOU LOST THE GAME",
-			"text": "• If this is the first time the month has been played, you must try the month again. If it was your second attempt at the month, move on to the next month for your next game.\n• Your rationing level is increased by 2 (maximum of 10) as you realize you need to dig a little deeper.\n• Record your new rationing level on the calendar."
-		},
-		{
-			"heading": "",
-			"text": "Clear the board of all game pieces (but not stickers, those are permanent). These all reset for the start of the next game.\n\nSet up future games as described on pages 8 and 9."
-		}
-	],
-	"tables": [],
-	"diagramsAndCallouts": [
-		"Running header: MANUAL.",
-		"No page number is printed on this page.",
-		"Step letters b and d are red. Steps a and c are the sticker slots.",
-		"+1 in “an additional +1 unit” is white type inside an orange circle.",
-		"Character-ability sample sticker: Record Keeper: Increase your hand limit by 1 card. It points at an empty slot on a character card that already shows Administrator: Once on your turn, as an action, move a pawn to any other pawn.",
-		"City card sample: LONDON, coordinates 51°30'27\"N 0°7'40\"W, anchor icon. Sticker: Foundations: This card counts as 2 cards of its color for the Build Supply Center action.",
-		"Infection card sample: LONDON. Sticker: Lockdown: If this card is in the Infection discard pile, any player may discard a Player card to destroy this card at any time.",
-		"Population diagram: a sticker numbered 4 is placed over a population marker numbered 3.",
-		"A Legacy deck card labeled PAUSE is pictured beside step 2. The small body text on that card is not legible at this scan size.",
-		"“those are permanent” is italic.",
-		"The two closing paragraphs sit under the win and loss lists and apply after either result."
-	],
-	"fullText": "MANUAL\n\nGAME END STEPS\n\n1. ADJUST POPULATION\n\nRULE STICKER V will\ngive you step a. Skip it for now.\n\nb. For each location that has at least 1 Plague cube, decrease that location’s population by 1. It only ever goes down by 1, even if there are 2 or 3 Plague cubes in it.\n\nRULE STICKER W will\ngive you step c. Skip it for now.\n\nd. For each city that has a supply center, increase that city’s population by 1.\n\nIf a location’s population would decrease and increase by 1, its population stays the same.\n\n2. CHECK THE LEGACY DECK\n\nYou may be instructed to draw more cards if there is a PAUSE card at the top of the deck.\n\n3. RESOLVE CARDS IN THE GAME END AREA\n\na. If there are any Infection cards in this area, add them to the Infection deck.\n\nb. Review all Turning Point cards in the Game End area to see if they triggered. Resolve these cards in numerical order from low to high.\n\n4. SPEND PRODUCTION UNITS\n\nWin or lose, you choose upgrades at the end of each game based on the number of cities on the grid.\n\nCalculate the number of cities on the grid and look at the table in the Game End area to see how many units you get to spend. You get an additional +1 unit if you won the game. Any unused units are lost; do not carry them over from game to game.\n\nCHARACTER ABILITIES\n\nSpend the cost next to an ability to add it to a created character, even one who did not play in the most recent game. Use any empty slot on the Character card. You cannot place an ability over a scar, a job, or another ability.\n\nCITY CARD IMPROVEMENTS\n\nSpend the cost next to a City improvement sticker to add it to a City card with an available slot. That city must be connected to the grid and each slot can have only 1 sticker.\n\nINFECTION CARD IMPROVEMENTS\n\nSpend the cost next to an Infection improvement sticker to add it to an Infection card with an available slot. That city must be connected to the grid and each slot can have only 1 sticker.\n\nInfection improvements are in effect during:\n• Game set up\n• The Infect step during an Epidemic\n• The Infect step at the end of every player turn\n\nPOPULATION\n\nSpend 1 production unit to increase the population of any non-forsaken location by 1. If the location is a forsaken city then increasing it back to 1 costs 2 production units.\n\nTake the sticker and place it over the location’s current population. You can spend multiple production units to increase the population by more than one. If you do so, apply the final population sticker to the location; do not place all the stickers in between the old level and the new one. If you ever run out of population stickers, record the population near the city with a pen or pencil, but remember the population cannot go above 8.\n\nIF YOU WON THE GAME\n\n• Start your next game at the beginning of the next month.\n• Your rationing level is dropped by 2 (minimum of 0) as you save more resources for future troubles.\n• Record your new rationing level on the calendar.\n\nIF YOU LOST THE GAME\n\n• If this is the first time the month has been played, you must try the month again. If it was your second attempt at the month, move on to the next month for your next game.\n• Your rationing level is increased by 2 (maximum of 10) as you realize you need to dig a little deeper.\n• Record your new rationing level on the calendar.\n\nClear the board of all game pieces (but not stickers, those are permanent). These all reset for the start of the next game.\n\nSet up future games as described on pages 8 and 9."
+  "file": "page-20.jpg",
+  "printedPageNumber": null,
+  "headings": [
+    "MANUAL",
+    "GAME END STEPS",
+    "1. ADJUST POPULATION",
+    "2. CHECK THE LEGACY DECK",
+    "3. RESOLVE CARDS IN THE GAME END AREA",
+    "4. SPEND PRODUCTION UNITS",
+    "CHARACTER ABILITIES",
+    "CITY CARD IMPROVEMENTS",
+    "INFECTION CARD IMPROVEMENTS",
+    "POPULATION",
+    "IF YOU WON THE GAME",
+    "IF YOU LOST THE GAME"
+  ],
+  "ruleStickerSlots": [
+    {
+      "slot": "V",
+      "context": "1. ADJUST POPULATION, dashed box in place of step a: RULE STICKER V will give you step a. Skip it for now."
+    },
+    {
+      "slot": "W",
+      "context": "1. ADJUST POPULATION, dashed box in place of step c: RULE STICKER W will give you step c. Skip it for now."
+    }
+  ],
+  "sections": [
+    {
+      "heading": "1. ADJUST POPULATION",
+      "text": "RULE STICKER V will\ngive you step a. Skip it for now.\n\nb. For each location that has at least 1 Plague cube, decrease that location’s population by 1. It only ever goes down by 1, even if there are 2 or 3 Plague cubes in it.\n\nRULE STICKER W will\ngive you step c. Skip it for now.\n\nd. For each city that has a supply center, increase that city’s population by 1.\n\nIf a location’s population would decrease and increase by 1, its population stays the same."
+    },
+    {
+      "heading": "2. CHECK THE LEGACY DECK",
+      "text": "You may be instructed to draw more cards if there is a PAUSE card at the top of the deck."
+    },
+    {
+      "heading": "3. RESOLVE CARDS IN THE GAME END AREA",
+      "text": "a. If there are any Infection cards in this area, add them to the Infection deck.\n\nb. Review all Turning Point cards in the Game End area to see if they triggered. Resolve these cards in numerical order from low to high."
+    },
+    {
+      "heading": "4. SPEND PRODUCTION UNITS",
+      "text": "Win or lose, you choose upgrades at the end of each game based on the number of cities on the grid.\n\nCalculate the number of cities on the grid and look at the table in the Game End area to see how many units you get to spend. You get an additional +1 unit if you won the game. Any unused units are lost; do not carry them over from game to game."
+    },
+    {
+      "heading": "CHARACTER ABILITIES",
+      "text": "Spend the cost next to an ability to add it to a created character, even one who did not play in the most recent game. Use any empty slot on the Character card. You cannot place an ability over a scar, a job, or another ability."
+    },
+    {
+      "heading": "CITY CARD IMPROVEMENTS",
+      "text": "Spend the cost next to a City improvement sticker to add it to a City card with an available slot. That city must be connected to the grid and each slot can have only 1 sticker."
+    },
+    {
+      "heading": "INFECTION CARD IMPROVEMENTS",
+      "text": "Spend the cost next to an Infection improvement sticker to add it to an Infection card with an available slot. That city must be connected to the grid and each slot can have only 1 sticker.\n\nInfection improvements are in effect during:\n• Game set up\n• The Infect step during an Epidemic\n• The Infect step at the end of every player turn"
+    },
+    {
+      "heading": "POPULATION",
+      "text": "Spend 1 production unit to increase the population of any non-forsaken location by 1. If the location is a forsaken city then increasing it back to 1 costs 2 production units.\n\nTake the sticker and place it over the location’s current population. You can spend multiple production units to increase the population by more than one. If you do so, apply the final population sticker to the location; do not place all the stickers in between the old level and the new one. If you ever run out of population stickers, record the population near the city with a pen or pencil, but remember the population cannot go above 8."
+    },
+    {
+      "heading": "IF YOU WON THE GAME",
+      "text": "• Start your next game at the beginning of the next month.\n• Your rationing level is dropped by 2 (minimum of 0) as you save more resources for future troubles.\n• Record your new rationing level on the calendar."
+    },
+    {
+      "heading": "IF YOU LOST THE GAME",
+      "text": "• If this is the first time the month has been played, you must try the month again. If it was your second attempt at the month, move on to the next month for your next game.\n• Your rationing level is increased by 2 (maximum of 10) as you realize you need to dig a little deeper.\n• Record your new rationing level on the calendar."
+    },
+    {
+      "heading": "",
+      "text": "Clear the board of all game pieces (but not stickers, those are permanent). These all reset for the start of the next game.\n\nSet up future games as described on pages 8 and 9."
+    }
+  ],
+  "tables": [],
+  "diagramsAndCallouts": [
+    "Running header: MANUAL.",
+    "No page number is printed on this page.",
+    "Step letters b and d are red. Steps a and c are the sticker slots.",
+    "+1 in “an additional +1 unit” is white type inside an orange circle.",
+    "Character-ability sample sticker: Record Keeper: Increase your hand limit by 1 card. It points at an empty slot on a character card that already shows Administrator: Once on your turn, as an action, move a pawn to any other pawn.",
+    "City card sample: LONDON, coordinates 51°30'27\"N 0°7'40\"W, anchor icon. Sticker: Foundations: This card counts as 2 cards of its color for the Build Supply Center action.",
+    "Infection card sample: LONDON. Sticker: Lockdown: If this card is in the Infection discard pile, any player may discard a Player card to destroy this card at any time.",
+    "Population diagram: a sticker numbered 4 is placed over a population marker numbered 3.",
+    "A Legacy deck card labeled PAUSE is pictured beside step 2. The small body text on that card is not legible at this scan size.",
+    "“those are permanent” is italic.",
+    "The two closing paragraphs sit under the win and loss lists and apply after either result."
+  ],
+  "fullText": "MANUAL\n\nGAME END STEPS\n\n1. ADJUST POPULATION\n\nRULE STICKER V will\ngive you step a. Skip it for now.\n\nb. For each location that has at least 1 Plague cube, decrease that location’s population by 1. It only ever goes down by 1, even if there are 2 or 3 Plague cubes in it.\n\nRULE STICKER W will\ngive you step c. Skip it for now.\n\nd. For each city that has a supply center, increase that city’s population by 1.\n\nIf a location’s population would decrease and increase by 1, its population stays the same.\n\n2. CHECK THE LEGACY DECK\n\nYou may be instructed to draw more cards if there is a PAUSE card at the top of the deck.\n\n3. RESOLVE CARDS IN THE GAME END AREA\n\na. If there are any Infection cards in this area, add them to the Infection deck.\n\nb. Review all Turning Point cards in the Game End area to see if they triggered. Resolve these cards in numerical order from low to high.\n\n4. SPEND PRODUCTION UNITS\n\nWin or lose, you choose upgrades at the end of each game based on the number of cities on the grid.\n\nCalculate the number of cities on the grid and look at the table in the Game End area to see how many units you get to spend. You get an additional +1 unit if you won the game. Any unused units are lost; do not carry them over from game to game.\n\nCHARACTER ABILITIES\n\nSpend the cost next to an ability to add it to a created character, even one who did not play in the most recent game. Use any empty slot on the Character card. You cannot place an ability over a scar, a job, or another ability.\n\nCITY CARD IMPROVEMENTS\n\nSpend the cost next to a City improvement sticker to add it to a City card with an available slot. That city must be connected to the grid and each slot can have only 1 sticker.\n\nINFECTION CARD IMPROVEMENTS\n\nSpend the cost next to an Infection improvement sticker to add it to an Infection card with an available slot. That city must be connected to the grid and each slot can have only 1 sticker.\n\nInfection improvements are in effect during:\n• Game set up\n• The Infect step during an Epidemic\n• The Infect step at the end of every player turn\n\nPOPULATION\n\nSpend 1 production unit to increase the population of any non-forsaken location by 1. If the location is a forsaken city then increasing it back to 1 costs 2 production units.\n\nTake the sticker and place it over the location’s current population. You can spend multiple production units to increase the population by more than one. If you do so, apply the final population sticker to the location; do not place all the stickers in between the old level and the new one. If you ever run out of population stickers, record the population near the city with a pen or pencil, but remember the population cannot go above 8.\n\nIF YOU WON THE GAME\n\n• Start your next game at the beginning of the next month.\n• Your rationing level is dropped by 2 (minimum of 0) as you save more resources for future troubles.\n• Record your new rationing level on the calendar.\n\nIF YOU LOST THE GAME\n\n• If this is the first time the month has been played, you must try the month again. If it was your second attempt at the month, move on to the next month for your next game.\n• Your rationing level is increased by 2 (maximum of 10) as you realize you need to dig a little deeper.\n• Record your new rationing level on the calendar.\n\nClear the board of all game pieces (but not stickers, those are permanent). These all reset for the start of the next game.\n\nSet up future games as described on pages 8 and 9."
 }

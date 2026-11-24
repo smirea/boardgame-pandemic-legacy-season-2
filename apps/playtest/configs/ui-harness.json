@@ -1,32 +1,32 @@
 {
-	"run": "ui-harness",
-	"seed": 7,
-	"start": { "scenario": "october" },
-	"lastMonth": 10,
-	"passphrase": "playtest",
-	"port": 6230,
-	"signalPort": 8787,
-	"headed": false,
-	"players": [
-		{
-			"id": "vex",
-			"name": "Vex",
-			"persona": "personas/vex.md",
-			"memory": "memory/vex.md",
-			"harness": "ui",
-			"provider": "grok",
-			"model": "grok-4.7-build-fast",
-			"effort": "medium"
-		},
-		{
-			"id": "sol",
-			"name": "Sol",
-			"persona": "personas/sol.md",
-			"memory": "memory/sol.md",
-			"harness": "ui",
-			"provider": "grok",
-			"model": "grok-4.7-build-fast",
-			"effort": "medium"
-		}
-	]
+  "run": "ui-harness",
+  "seed": 7,
+  "start": { "scenario": "october" },
+  "lastMonth": 10,
+  "passphrase": "playtest",
+  "port": 6230,
+  "signalPort": 8787,
+  "headed": false,
+  "players": [
+    {
+      "id": "vex",
+      "name": "Vex",
+      "persona": "personas/vex.md",
+      "memory": "memory/vex.md",
+      "harness": "ui",
+      "provider": "grok",
+      "model": "grok-4.7-build-fast",
+      "effort": "medium"
+    },
+    {
+      "id": "sol",
+      "name": "Sol",
+      "persona": "personas/sol.md",
+      "memory": "memory/sol.md",
+      "harness": "ui",
+      "provider": "grok",
+      "model": "grok-4.7-build-fast",
+      "effort": "medium"
+    }
+  ]
 }

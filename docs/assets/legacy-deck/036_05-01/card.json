@@ -1,62 +1,62 @@
 {
-	"sequence": 36,
-	"folder": "036_05-01",
-	"cardCode": "05-01",
-	"printedCodes": {
-		"sideA": "05-01a",
-		"sideB": "05-01b"
-	},
-	"title": "PERIMETER REPORT",
-	"category": "legacy_stop",
-	"month": "may",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "STOP",
-		"header": "STOP",
-		"trigger": "Draw this card and read the other side during step 2 of the setup of your first game in May.",
-		"text": "STOP\nDRAW THIS CARD AND READ THE OTHER SIDE DURING STEP 2 OF THE SETUP OF YOUR FIRST GAME IN MAY.",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "PERIMETER REPORT",
-		"text": "If you have not opened 60, scratch the box below.",
-		"footer": "Destroy this card after resolving it.",
-		"scratchBoxes": [
-			{
-				"index": 1,
-				"instruction": "Scratch if 60 has not been opened.",
-				"coveredOnBase": true,
-				"revealedInState": 2
-			}
-		]
-	},
-	"states": [
-		{
-			"state": 2,
-			"images": {
-				"sideA": "state-2-side-a.jpg",
-				"sideB": "state-2-side-b.jpg"
-			},
-			"revealedCondition": "Box scratched because 60 was still sealed.",
-			"revealedText": "We have found records from 25 years ago showing the location of a now-fallen haven. It contained the equipment to generate supplies and was about to field test inoculating against the plague! We now know where it is. It is vital we access it.\n\nOpen 60 and put it on the board. You have not yet accessed this haven."
-		}
-	],
-	"mechanics": {
-		"whenRead": "STOP. Draw and read during step 2 of the setup of the first game in May.",
-		"triggers": ["60 has not been opened: scratch the box."],
-		"opensDoors": ["60, only if it is still sealed. Put it on the board."],
-		"opensPackages": [],
-		"destroys": ["This card, after resolving it."],
-		"addsToPool": [],
-		"rules": [
-			"If 60 is already open, scratch nothing.",
-			"If 60 is sealed, open 60 and put it on the board.",
-			"The haven is revealed but not yet accessed. This does not open Package 6 and does not say it completes an objective.",
-			"Destroy this card after resolving it."
-		],
-		"notes": "The closing sentence \"Open 60 and put it on the board. You have not yet accessed this haven.\" is bold, and the second 60 is in a red box. \"25 years ago\" is the printed figure. Side A is unchanged in state 2."
-	}
+  "sequence": 36,
+  "folder": "036_05-01",
+  "cardCode": "05-01",
+  "printedCodes": {
+    "sideA": "05-01a",
+    "sideB": "05-01b"
+  },
+  "title": "PERIMETER REPORT",
+  "category": "legacy_stop",
+  "month": "may",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "STOP",
+    "header": "STOP",
+    "trigger": "Draw this card and read the other side during step 2 of the setup of your first game in May.",
+    "text": "STOP\nDRAW THIS CARD AND READ THE OTHER SIDE DURING STEP 2 OF THE SETUP OF YOUR FIRST GAME IN MAY.",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "PERIMETER REPORT",
+    "text": "If you have not opened 60, scratch the box below.",
+    "footer": "Destroy this card after resolving it.",
+    "scratchBoxes": [
+      {
+        "index": 1,
+        "instruction": "Scratch if 60 has not been opened.",
+        "coveredOnBase": true,
+        "revealedInState": 2
+      }
+    ]
+  },
+  "states": [
+    {
+      "state": 2,
+      "images": {
+        "sideA": "state-2-side-a.jpg",
+        "sideB": "state-2-side-b.jpg"
+      },
+      "revealedCondition": "Box scratched because 60 was still sealed.",
+      "revealedText": "We have found records from 25 years ago showing the location of a now-fallen haven. It contained the equipment to generate supplies and was about to field test inoculating against the plague! We now know where it is. It is vital we access it.\n\nOpen 60 and put it on the board. You have not yet accessed this haven."
+    }
+  ],
+  "mechanics": {
+    "whenRead": "STOP. Draw and read during step 2 of the setup of the first game in May.",
+    "triggers": ["60 has not been opened: scratch the box."],
+    "opensDoors": ["60, only if it is still sealed. Put it on the board."],
+    "opensPackages": [],
+    "destroys": ["This card, after resolving it."],
+    "addsToPool": [],
+    "rules": [
+      "If 60 is already open, scratch nothing.",
+      "If 60 is sealed, open 60 and put it on the board.",
+      "The haven is revealed but not yet accessed. This does not open Package 6 and does not say it completes an objective.",
+      "Destroy this card after resolving it."
+    ],
+    "notes": "The closing sentence \"Open 60 and put it on the board. You have not yet accessed this haven.\" is bold, and the second 60 is in a red box. \"25 years ago\" is the printed figure. Side A is unchanged in state 2."
+  }
 }

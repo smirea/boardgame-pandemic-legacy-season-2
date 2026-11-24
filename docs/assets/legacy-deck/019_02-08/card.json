@@ -1,44 +1,44 @@
 {
-	"sequence": 19,
-	"folder": "019_02-08",
-	"cardCode": "02-08",
-	"printedCodes": {
-		"sideA": "",
-		"sideB": "02-08b"
-	},
-	"title": "Hidden Stockpile",
-	"category": "rationed_event",
-	"month": "february",
-	"images": {
-		"sideA": "side-a.jpg",
-		"sideB": "side-b.jpg"
-	},
-	"sideA": {
-		"stopOrPause": "NONE",
-		"header": "",
-		"trigger": "",
-		"text": "",
-		"footer": ""
-	},
-	"sideB": {
-		"header": "RATIONED EVENT",
-		"text": "HIDDEN STOCKPILE\n\nTake up to 6 Supply cubes from the reserve and add them to a location containing a player pawn.\n\nPlay at any time. Not an action.",
-		"footer": "Play at any time. Not an action.",
-		"scratchBoxes": []
-	},
-	"states": [],
-	"mechanics": {
-		"whenRead": "The next Rationed Event in the deck after the February pause (02-07). Add it to the Rationed Event pool when drawing reaches it. 02-07 itself does not say that events follow.",
-		"triggers": [],
-		"opensDoors": [],
-		"opensPackages": [],
-		"destroys": [],
-		"addsToPool": ["Hidden Stockpile (Rationed Event)"],
-		"rules": [
-			"Take up to 6 Supply cubes from the reserve and add them to a location containing a player pawn.",
-			"Play at any time. Not an action.",
-			"Take up to 6 Supply cubes from the reserve and add them to one location that contains a player pawn."
-		],
-		"notes": "Side A is the shared rationed-event back (haven in a signal ring, yellow bars, red arc). No printed card code and no rules text. The screen title is HIDDEN STOCKPILE."
-	}
+  "sequence": 19,
+  "folder": "019_02-08",
+  "cardCode": "02-08",
+  "printedCodes": {
+    "sideA": "",
+    "sideB": "02-08b"
+  },
+  "title": "Hidden Stockpile",
+  "category": "rationed_event",
+  "month": "february",
+  "images": {
+    "sideA": "side-a.jpg",
+    "sideB": "side-b.jpg"
+  },
+  "sideA": {
+    "stopOrPause": "NONE",
+    "header": "",
+    "trigger": "",
+    "text": "",
+    "footer": ""
+  },
+  "sideB": {
+    "header": "RATIONED EVENT",
+    "text": "HIDDEN STOCKPILE\n\nTake up to 6 Supply cubes from the reserve and add them to a location containing a player pawn.\n\nPlay at any time. Not an action.",
+    "footer": "Play at any time. Not an action.",
+    "scratchBoxes": []
+  },
+  "states": [],
+  "mechanics": {
+    "whenRead": "The next Rationed Event in the deck after the February pause (02-07). Add it to the Rationed Event pool when drawing reaches it. 02-07 itself does not say that events follow.",
+    "triggers": [],
+    "opensDoors": [],
+    "opensPackages": [],
+    "destroys": [],
+    "addsToPool": ["Hidden Stockpile (Rationed Event)"],
+    "rules": [
+      "Take up to 6 Supply cubes from the reserve and add them to a location containing a player pawn.",
+      "Play at any time. Not an action.",
+      "Take up to 6 Supply cubes from the reserve and add them to one location that contains a player pawn."
+    ],
+    "notes": "Side A is the shared rationed-event back (haven in a signal ring, yellow bars, red arc). No printed card code and no rules text. The screen title is HIDDEN STOCKPILE."
+  }
 }

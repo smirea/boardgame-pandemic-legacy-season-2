@@ -1,15 +1,15 @@
 {
-	"id": "laborer",
-	"name": "Laborer",
-	"category": "occupation",
-	"costProductionUnits": null,
-	"copies": 1,
-	"image": "laborer.jpg",
-	"text": "Laborer: You may do the Build Supply Center\naction with 1 fewer card if you spend 2 Supply cubes\nfrom your Character card.",
-	"mechanics": {
-		"timing": "action",
-		"trigger": "When doing the Build Supply Center action",
-		"effect": "Spend 2 Supply cubes from your Character card to do Build Supply Center with 1 fewer card.",
-		"restrictions": ["Requires spending 2 Supply cubes from your Character card"]
-	}
+  "id": "laborer",
+  "name": "Laborer",
+  "category": "occupation",
+  "costProductionUnits": null,
+  "copies": 1,
+  "image": "laborer.jpg",
+  "text": "Laborer: You may do the Build Supply Center\naction with 1 fewer card if you spend 2 Supply cubes\nfrom your Character card.",
+  "mechanics": {
+    "timing": "action",
+    "trigger": "When doing the Build Supply Center action",
+    "effect": "Spend 2 Supply cubes from your Character card to do Build Supply Center with 1 fewer card.",
+    "restrictions": ["Requires spending 2 Supply cubes from your Character card"]
+  }
 }

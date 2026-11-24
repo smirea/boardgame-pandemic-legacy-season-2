@@ -1,9 +1,9 @@
 {
-	"folder": 2,
-	"id": "folder-2",
-	"guid": "40ad03",
-	"coverImage": "dossiers/folder-2/cover.jpg",
-	"coverText": "2/6",
-	"doors": ["11", "12", "13", "14", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26"],
-	"summary": "Folder 2 cover is the perforated door sheet for doors 11, 12, 13, 14, 17, 18, 19, 20, 21, 22, 23, 24, 25, and 26. The only words are the door numerals and a 2/6 mark at the lower right of the scan, beside a small United States flag. In the scan the numerals are rotated 90° clockwise relative to that mark. Turned upright, the rows read 11 12 13 14 17, then 18 19 20 21 22, then 23 24 25 26."
+  "folder": 2,
+  "id": "folder-2",
+  "guid": "40ad03",
+  "coverImage": "dossiers/folder-2/cover.jpg",
+  "coverText": "2/6",
+  "doors": ["11", "12", "13", "14", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26"],
+  "summary": "Folder 2 cover is the perforated door sheet for doors 11, 12, 13, 14, 17, 18, 19, 20, 21, 22, 23, 24, 25, and 26. The only words are the door numerals and a 2/6 mark at the lower right of the scan, beside a small United States flag. In the scan the numerals are rotated 90° clockwise relative to that mark. Turned upright, the rows read 11 12 13 14 17, then 18 19 20 21 22, then 23 24 25 26."
 }
