@@ -126,14 +126,7 @@
 						kind: 'sealed' as const,
 						index,
 						scope: box.scope,
-						label:
-							card.search.length > 1
-								? box.scope === 'sea'
-									? 'Search the sea'
-									: 'Search the land'
-								: box.scope === 'sea'
-									? 'Search the sea'
-									: 'Search',
+						label: box.scope === 'sea' ? 'Search the sea' : 'Search the land',
 					},
 				];
 			}
@@ -144,7 +137,7 @@
 					kind: 'revealed' as const,
 					index,
 					scope: box.scope,
-					heading: card.search.length > 1 ? (box.scope === 'sea' ? 'Sea' : 'Land') : 'Searched',
+					heading: box.scope === 'sea' ? 'Sea' : 'Land',
 					info,
 				},
 			];

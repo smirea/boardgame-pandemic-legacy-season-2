@@ -986,14 +986,7 @@ export function createChoosing(source: ChoosingSource) {
 					for (const variant of variants) {
 						if (variant.a !== 'search') continue;
 						const scope = held.search[variant.box]?.scope;
-						const label =
-							held.search.length > 1
-								? scope === 'sea'
-									? 'Search the sea'
-									: 'Search the land'
-								: scope === 'sea'
-									? 'Search the sea'
-									: 'Search';
+						const label = scope === 'sea' ? 'Search the sea' : 'Search the land';
 						uses.push({
 							key: `search:${variant.box}`,
 							label,

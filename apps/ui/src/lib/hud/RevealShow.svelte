@@ -60,7 +60,7 @@
 				? `Monitor · ${pack.frequencyLabels[reveal.by.frequency]}`
 				: 'Cautious Approach'
 			: searched
-				? `${searched.sea ? 'Searched the sea at' : 'Searched'} ${searched.city}`
+				? `${searched.sea ? 'Searched the sea at' : 'Searched the land at'} ${searched.city}`
 				: 'Search',
 	);
 	const rule = $derived(
