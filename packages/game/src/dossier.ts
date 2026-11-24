@@ -3,6 +3,7 @@ import { sealKey } from "./content/types";
 import type { DoorId, RuleId, Seal, SealDef, TurningPointId } from "./content/types";
 import { INFESTED_STICKERS } from "./helpers";
 import { unlockText } from "./briefing";
+import type { BriefedUnlock } from "./briefing";
 import { RULEBOOK, RULE_STICKERS } from "./content/rulebook";
 import type { RuleBlock, RuleGate, RuleText, StickerSlot } from "./content/rulebook";
 import type { Campaign } from "./state";
@@ -16,7 +17,10 @@ export type DossierSlot<Id> = {
   open: boolean;
   forced: boolean;
   name: string | null;
-  contents: string[];
+  /** What it held, piece by piece, each with the words for it. */
+  items: { unlock: BriefedUnlock; text: string }[];
+  /** The doors and packages that opening it opened in turn. */
+  opens: Seal[];
 };
 
 export type DossierView = {
@@ -24,16 +28,19 @@ export type DossierView = {
   sheets: DossierSlot<DoorId>[][];
 };
 
-function contents(campaign: Campaign, def: SealDef, forced: boolean): string[] {
+function held(
+  campaign: Campaign,
+  def: SealDef,
+  forced: boolean,
+): Pick<DossierSlot<never>, "items" | "opens"> {
   const unlocks = [...def.unlocks, ...(forced ? [] : (def.reward ?? []))];
-  const doors = unlocks.flatMap((unlock) => (unlock.t === "open" ? [String(unlock.seal.id)] : []));
-  return [
-    ...unlocks.flatMap((unlock) => {
+  return {
+    items: unlocks.flatMap((unlock) => {
       const text = unlockText(campaign, unlock);
-      return text ? [text] : [];
+      return text ? [{ unlock: unlock as BriefedUnlock, text }] : [];
     }),
-    ...(doors.length ? [`Opened door${doors.length > 1 ? "s" : ""} ${doors.join(", ")}.`] : []),
-  ];
+    opens: unlocks.flatMap((unlock) => (unlock.t === "open" ? [unlock.seal] : [])),
+  };
 }
 
 function slot<Id extends number | DoorId>(
@@ -43,12 +50,13 @@ function slot<Id extends number | DoorId>(
   const key = sealKey(seal);
   const open = campaign.opened.includes(key);
   const def = pack.seals.find((candidate) => sealKey(candidate.seal) === key)!;
+  const forced = campaign.forced.includes(key);
   return {
     id: seal.id,
     open,
-    forced: campaign.forced.includes(key),
+    forced,
     name: open ? def.name : null,
-    contents: open ? contents(campaign, def, campaign.forced.includes(key)) : [],
+    ...(open ? held(campaign, def, forced) : { items: [], opens: [] }),
   };
 }
 

@@ -52,6 +52,9 @@ export const fitText =
 export const fitZoom =
   ({ min = 0.3 }: { min?: number } = {}): Attachment<HTMLElement> =>
   (element) => {
+    // A new zoom resizes the child, which asks for a fit again. The same child at the same size in the same room has
+    // its answer already, and every try at another zoom lays the whole pile out again.
+    let fitted: { child: HTMLElement; size: string } | null = null;
     const fit = () => {
       const child = element.firstElementChild as HTMLElement | null;
       if (!child) return;
@@ -60,20 +63,30 @@ export const fitZoom =
         element.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
       const roomY =
         element.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
+      const size = () => `${roomX} ${roomY} ${child.offsetWidth} ${child.offsetHeight}`;
+      if (fitted?.child === child && fitted.size === size()) return;
       // offsetWidth and offsetHeight are the child's own unzoomed size, so `zoom` times them is what it covers.
       const overflows = (zoom: number) => {
         child.style.zoom = `${zoom}`;
         return child.offsetWidth * zoom > roomX + 0.5 || child.offsetHeight * zoom > roomY + 0.5;
       };
-      if (!overflows(1)) return;
-      let low = min;
-      let high = 1;
-      for (let step = 0; step < 7; step++) {
-        const middle = (low + high) / 2;
-        if (overflows(middle)) high = middle;
-        else low = middle;
+      if (overflows(1)) {
+        // A pile that cannot wrap covers its zoom times its size, and one that wraps freely about the square of
+        // its zoom, so the answer lies between those two and the search starts there, not across the whole range.
+        const stiff = Math.min(roomX / child.offsetWidth, roomY / child.offsetHeight);
+        let low = min;
+        let high = 1;
+        const probe = (zoom: number) => {
+          if (zoom <= low || zoom >= high) return;
+          if (overflows(zoom)) high = zoom;
+          else low = zoom;
+        };
+        probe(Math.sqrt(stiff));
+        if (low === min) probe(stiff);
+        while (high - low > 0.03) probe((low + high) / 2);
+        child.style.zoom = `${low}`;
       }
-      child.style.zoom = `${low}`;
+      fitted = { child, size: size() };
     };
     const observer = new ResizeObserver(fit);
     observer.observe(element);

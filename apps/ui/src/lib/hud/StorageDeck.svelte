@@ -1,17 +1,14 @@
 <script lang="ts">
   import { feedback } from "@stefan.inc/feedback-engine/svelte";
-  import { cityDef, pack } from "@repo/game";
+  import { pack } from "@repo/game";
   import type { Campaign, CardId } from "@repo/game";
   import { untrack } from "svelte";
   import { fade, fly } from "svelte/transition";
-  import { cityColor } from "#lib/board/CityMarker.svelte";
   import CardSpread from "./CardSpread.svelte";
   import { sortHand, sortInfection } from "./handOrder.ts";
   import { HoverTip } from "./hoverTip.svelte.ts";
-  import { cardColor } from "./PlayerCard.svelte";
-  import { HOLLOW_COLOR } from "./rich.ts";
-  import type { Rich } from "./rich.ts";
   import RichText from "./RichText.svelte";
+  import { storedInfectionLine, storedLabel, storedPlayerLine } from "./storedCards.ts";
 
   type Props = {
     campaign: Campaign;
@@ -24,78 +21,9 @@
   const open = $derived(tip.open === "storage");
   let buttonEl = $state<HTMLButtonElement>();
 
-  const cityName = (id: Parameters<typeof cityDef>[0]) => campaign.names[id] ?? cityDef(id).name;
-
-  const cardLabel = (id: CardId) => {
-    const p = campaign.playerCards[id];
-    if (p) {
-      if (p.kind === "city") return cityName(p.city);
-      if (p.kind === "event") return pack.events.find((e) => e.id === p.event)?.name ?? p.event;
-      return p.kind === "produce" ? "Produce Supplies" : "Epidemic";
-    }
-    const inf = campaign.infectionCards[id];
-    if (inf) {
-      if (inf.kind === "city") return cityName(inf.city);
-      return inf.kind === "gather" ? "Hollow Men Gather" : "Hollow Men Assemble";
-    }
-    return String(id);
-  };
-
-  const playerCards = $derived.by((): Rich => {
-    const cards = sortHand(
-      campaign.stored.player.flatMap((id) => campaign.playerCards[id] ?? []),
-      (card) => cardLabel(card.id),
-    );
-    const groups = new Map<string, { card: (typeof cards)[number]; count: number }>();
-    for (const card of cards) {
-      const key =
-        card.kind === "city"
-          ? `city:${card.city}`
-          : card.kind === "event"
-            ? `event:${card.event}`
-            : card.kind;
-      const hit = groups.get(key);
-      if (hit) hit.count += 1;
-      else groups.set(key, { card, count: 1 });
-    }
-    return [...groups.values()].flatMap(({ card, count }, index) => [
-      ...(index ? [", "] : []),
-      {
-        glyph:
-          card.kind === "epidemic"
-            ? ("epidemic" as const)
-            : card.kind === "event"
-              ? ("event" as const)
-              : ("card" as const),
-        color: cardColor(card),
-        text: `${cardLabel(card.id)}${count > 1 ? ` ×${count}` : ""}`,
-      },
-    ]);
-  });
-
-  const infectionCards = $derived.by((): Rich => {
-    const counts = new Map<string, { color: string; name: string; count: number }>();
-    for (const id of campaign.stored.infection) {
-      const card = campaign.infectionCards[id];
-      if (!card) continue;
-      const key = card.kind === "city" ? `city:${card.city}` : card.kind;
-      const color = card.kind === "city" ? cityColor(card.city) : HOLLOW_COLOR;
-      const name = cardLabel(id);
-      const hit = counts.get(key);
-      if (hit) hit.count += 1;
-      else counts.set(key, { color, name, count: 1 });
-    }
-    return [...counts.values()]
-      .toSorted((a, b) => b.count - a.count || a.name.localeCompare(b.name))
-      .flatMap(({ color, name, count }, index) => [
-        ...(index ? [", "] : []),
-        {
-          glyph: "infection" as const,
-          color,
-          text: `${name}${count > 1 ? ` ×${count}` : ""}`,
-        },
-      ]);
-  });
+  const cardLabel = (id: CardId) => storedLabel(campaign, id);
+  const playerCards = $derived(storedPlayerLine(campaign));
+  const infectionCards = $derived(storedInfectionLine(campaign));
 
   const spread = $derived(
     tip.section === "player"

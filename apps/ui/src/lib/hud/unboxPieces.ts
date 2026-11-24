@@ -139,7 +139,7 @@ const nameIn = (list: { id: string; name: string }[], id: string) =>
 const plus = (amount: number, what: string) => `+${amount} ${what}`;
 
 /** The few words a piece that is no card carries under it; a card names itself. */
-function unlockName(unlock: BriefedUnlock): string | null {
+export function unlockName(unlock: BriefedUnlock): string | null {
   switch (unlock.t) {
     case "rule":
       return RULE_NAME[unlock.rule];

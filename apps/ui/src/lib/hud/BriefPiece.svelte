@@ -78,7 +78,14 @@
           const card = Object.values(campaign.playerCards).find(
             (card) => card.kind === "event" && card.event === unlock.event,
           );
-          return card ? { t: "player", card } : null;
+          // An Event the box has given joins the deck only with the next game. Its card is known all the same.
+          const face = {
+            id: `event:${unlock.event}`,
+            kind: "event",
+            event: unlock.event,
+            mode: unlock.mode,
+          };
+          return { t: "player", card: card ?? (face as PlayerCardData) };
         }
         case "gather":
         case "assemble": {
@@ -126,15 +133,16 @@
 {/if}
 
 <style>
+  /* `--brief-card` lets a crowded page, such as the Box's overview, lay the cards out smaller. */
   .piece {
-    --card-size: 0.6rem;
+    --card-size: var(--brief-card, 0.6rem);
     position: relative;
     display: flex;
     flex: none;
   }
 
   .piece.infection {
-    --card-size: 0.56rem;
+    --card-size: calc(var(--brief-card, 0.6rem) * 0.93);
   }
 
   .copies {

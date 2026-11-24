@@ -437,6 +437,35 @@ const scenarios: Scenario[] = [
     },
   },
   {
+    // The Box lays a package or door out as the pointer crosses it, and a piece of the whole box in its slip.
+    id: "box",
+    async run() {
+      const open = await center("[data-testid=open-box]").catch(() => null);
+      if (!open) return;
+      await page.mouse.click(open.x, open.y);
+      await sleep(700);
+      const cross = async (selector: string) => {
+        const count = Math.min(await page.locator(selector).count(), 30);
+        for (let nth = 0; nth < count; nth += 2) {
+          const point = await center(selector, nth).catch(() => null);
+          if (!point) continue;
+          await page.mouse.move(point.x, point.y, { steps: 4 });
+          await sleep(120);
+        }
+      };
+      await cross("[data-seal][data-open=true]");
+      await cross(".spread .piece");
+      for (const kind of ["people", "rules"]) {
+        const chip = await center(`[data-kind=${kind}]`).catch(() => null);
+        if (!chip) continue;
+        await page.mouse.click(chip.x, chip.y);
+        await sleep(400);
+      }
+      await page.keyboard.press("Escape");
+      await sleep(500);
+    },
+  },
+  {
     id: "move",
     save: atActions,
     async run() {
