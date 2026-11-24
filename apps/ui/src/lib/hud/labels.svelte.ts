@@ -404,6 +404,38 @@ function discarded(action: Action): CardId[] {
 }
 
 /** What every way of taking an action spends alike, as Charter boat always discards the card of the port it leaves. */
+/** So many cards of one colour, as a cost: "5 ▮ cards". */
+function cardsOf(world: World, ids: CardId[]): Rich {
+	const card = world.campaign.playerCards[ids[0]!];
+	return [`${ids.length}\u00a0`, { glyph: 'card', ...(card ? { color: cardColor(card) } : {}), text: 'cards' }];
+}
+
+/**
+ * What an action costs when the player picks which cards pay, as a count of cards of a colour rather than one
+ * set of them: Build supply center and Recon. Null for any other action, or Recon routes that differ.
+ */
+export function offerDetail(world: World, offered: Action[]): Rich | null {
+	if (offered.length && offered.every(action => action.a === 'buildCenter')) {
+		const centers = offered as Extract<Action, { a: 'buildCenter' }>[];
+		const plain = centers.find(action => !action.laborer);
+		const laborer = centers.find(action => action.laborer);
+		const moved = new Set(centers.flatMap(action => (action.moveFrom ? [action.moveFrom] : [])));
+		return [
+			...(plain ? cardsOf(world, plain.cards) : []),
+			...(plain && laborer ? [' or '] : []),
+			...(laborer ? [...cardsOf(world, laborer.cards), ' and ', ...cubeCount(2)] : []),
+			...(moved.size === 1 ? [`, moved from ${cityName([...moved][0]!)}`] : moved.size ? [', moving a center'] : []),
+		];
+	}
+	if (offered.length && offered.every(action => action.a === 'recon')) {
+		const recons = offered as Extract<Action, { a: 'recon' }>[];
+		if (recons.some(action => action.route !== recons[0]!.route)) return null;
+		const [name] = actionDetail(world, recons[0]!);
+		return [name!, ...cardsOf(world, recons[0]!.cards)];
+	}
+	return null;
+}
+
 export function sharedCost(world: World, variants: Action[]): Rich | null {
 	const spent = variants.map(action => discarded(action).toSorted().join(','));
 	if (!spent[0] || spent.some(key => key !== spent[0])) return null;

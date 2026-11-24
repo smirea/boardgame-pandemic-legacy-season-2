@@ -7,6 +7,7 @@
 		ACTION_NAMES,
 		actionAt,
 		actionDetail,
+		offerDetail,
 		actionTarget,
 		actionText,
 		cityName,
@@ -59,7 +60,8 @@
 			const offered = ways(world, choice.actions);
 			const only = offered.length === 1 ? offered[0]! : null;
 			const target = only ? actionTarget(world, only) : null;
-			const detail = only ? actionDetail(world, only) : sharedCost(world, offered);
+			const summary = offerDetail(world, offered);
+			const detail = summary ?? (only ? actionDetail(world, only) : sharedCost(world, offered));
 			const free =
 				live &&
 				choice.actions.length > 0 &&
@@ -70,7 +72,7 @@
 				title: live && target ? actionAt(choice.a, target) : ACTION_NAMES[choice.a],
 				text:
 					live && choice.reason ? choice.reason : live && detail?.length ? detail : actionText(world, seat, choice.a),
-				count: live && offered.length > 1 ? offered.length : null,
+				count: live && offered.length > 1 && !summary ? offered.length : null,
 				free,
 			};
 		}),

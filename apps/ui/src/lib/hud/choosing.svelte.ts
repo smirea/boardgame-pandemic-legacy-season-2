@@ -6,6 +6,7 @@ import {
 	ACTION_NAMES,
 	actionAt,
 	actionDetail,
+	offerDetail,
 	actionText,
 	actionTarget,
 	cardName,
@@ -930,7 +931,9 @@ export function createChoosing(source: ChoosingSource) {
 				{
 					a: choice.a,
 					label: ACTION_NAMES[choice.a],
-					detail: single ? actionDetail(world, single) : there.length ? `${offered.length} ways` : summary(choice.a),
+					detail:
+						offerDetail(world, offered) ??
+						(single ? actionDetail(world, single) : there.length ? `${offered.length} ways` : summary(choice.a)),
 					variants,
 				},
 			];
