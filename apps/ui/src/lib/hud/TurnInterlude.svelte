@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import type { Character, SeatId } from '@repo/game';
+	import { untrack } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { characterVoice } from '#lib/characters/voice.svelte.ts';
 	import { inkOn } from '#lib/color.ts';
@@ -40,7 +41,10 @@
 	};
 
 	let shown = $state(true);
-	function grow(card: HTMLElement) {
+	// Untracked: the attachment runs once per turn announced. Run again by a change to what it read, it would say
+	// the line twice, and while the table moves on under it those props go away and their getters throw.
+	const grow = (card: HTMLElement) => untrack(() => play(card));
+	function play(card: HTMLElement) {
 		let live = true;
 		if (character) {
 			characterVoice.playFor(character, danger ? 'danger' : 'punchline', { priority: 'game', interrupt: true });

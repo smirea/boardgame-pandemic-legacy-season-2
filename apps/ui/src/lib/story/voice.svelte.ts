@@ -12,9 +12,16 @@ class VoicePlayer {
 	private active = false;
 	private cut: (() => void) | null = null;
 	private startListeners = new Set<() => void>();
+	private hushed = false;
 
 	constructor() {
 		audioSettings.subscribe(() => this.syncVolume());
+	}
+
+	/** While hushed nothing is spoken and a line under way stops, as if the voices were turned off. */
+	hush(on: boolean) {
+		this.hushed = on;
+		if (on) this.stop();
 	}
 
 	/** Invoked whenever a story, search, or radio voice track starts playing. */
@@ -44,7 +51,7 @@ class VoicePlayer {
 		return untrack(() => {
 			this.stop();
 			if (typeof window === 'undefined') return false;
-			if (audioSettings.muted || !audioSettings.voiceEnabled) return false;
+			if (this.hushed || audioSettings.muted || !audioSettings.voiceEnabled) return false;
 			const entry = voiceManifest[beatId];
 			if (!entry) return false;
 

@@ -9,8 +9,10 @@
 	import { load, marksAt, ReplaySession } from '#lib/replay/replay.svelte.ts';
 	import type { IndexGame, Loaded, PanelTab, ReplayIndex, SaidNote } from '#lib/replay/replay.svelte.ts';
 	import Transport, { SPEEDS } from '#lib/replay/Transport.svelte';
+	import { hushVoices } from '#lib/characters/voice.svelte.ts';
 	import { typing } from '#lib/keys.ts';
 	import { LS } from '#lib/storage.ts';
+	import { onDestroy } from 'svelte';
 
 	const params = new URLSearchParams(location.search);
 	const session = new ReplaySession();
@@ -34,6 +36,8 @@
 	let stepped = $state(true);
 
 	$effect(() => LS.set({ replay: { speed, panel, bubbles } }));
+	$effect(() => hushVoices(speed > 1));
+	onDestroy(() => hushVoices(false));
 
 	const total = $derived(loaded?.record.steps.length ?? 0);
 	const step = $derived(frame > 0 ? (loaded?.timeline[frame - 1] ?? null) : null);

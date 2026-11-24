@@ -47,12 +47,19 @@ class CharacterVoicePlayer {
 	private lastKeyAt = 0;
 	private lastGameAt = 0;
 	private cooldowns = new Map<string, number>();
+	private hushed = false;
 
 	constructor() {
 		audioSettings.subscribe(() => this.syncVolume());
 		voicePlayer.onStart(() => {
 			if (this.active) this.stop();
 		});
+	}
+
+	/** While hushed nothing is spoken and a line under way stops, as if the voices were turned off. */
+	hush(on: boolean) {
+		this.hushed = on;
+		if (on) this.stop();
 	}
 
 	hasAudio(figure: FigureKey, kind: CharacterLineKind): boolean {
@@ -90,7 +97,7 @@ class CharacterVoicePlayer {
 			};
 
 			if (typeof window === 'undefined') return bail();
-			if (audioSettings.muted || !audioSettings.voiceEnabled) return bail();
+			if (this.hushed || audioSettings.muted || !audioSettings.voiceEnabled) return bail();
 			const entry = characterVoiceManifest[key];
 			if (!entry) return bail();
 
@@ -192,3 +199,12 @@ class CharacterVoicePlayer {
 }
 
 export const characterVoice = new CharacterVoicePlayer();
+
+/**
+ * Silences the characters and the cast on the radio while a replay runs faster than it was played: a line would
+ * still be speaking about a moment the board left behind, and the next would cut it off. Their words still show.
+ */
+export function hushVoices(on: boolean) {
+	characterVoice.hush(on);
+	voicePlayer.hush(on);
+}
