@@ -334,14 +334,9 @@
 		</span>
 	</HTML>
 
-	<!-- Stands upright on the screen above the city and its name, so no piece or print on the board covers it. -->
+	<!-- Stands upright on the screen, sitting on the top of the ring, so no piece or print on the board covers it. -->
 	{#if state.spot?.label}
-		<HTML
-			position={[0, DISC + 1.6, placement.z < 0 ? placement.z - NAME_SIZE : 0]}
-			center
-			pointerEvents="none"
-			zIndexRange={[20, 11]}
-		>
+		<HTML position={[0, DISC, -AIM_RADIUS]} center pointerEvents="none" zIndexRange={[20, 11]}>
 			<b class="spot-label {state.spot.tone}" aria-hidden="true">{state.spot.label}</b>
 		</HTML>
 	{/if}
@@ -523,7 +518,7 @@
 
 	.spot-label {
 		display: block;
-		translate: 0 -50%;
+		translate: 0 -38%;
 		color: #e8402a;
 		font-family: var(--font-display);
 		font-size: 2.6rem;
