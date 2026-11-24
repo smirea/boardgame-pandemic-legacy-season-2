@@ -1,10 +1,10 @@
 import type { BoardBounds } from './projection';
 
-export type ChartImages = { known: ImageBitmap; lines: ImageBitmap };
+export type ChartImages = { known: ImageBitmap };
 
 const loads = new Map<string, Promise<ChartImages>>();
 
-/** The chart sheets, painted off the main thread so the game is usable while the paper is still being inked. */
+/** The chart sheet, painted off the main thread so the game is usable while the paper is still being inked. */
 export function loadChart(bounds: BoardBounds): Promise<ChartImages> {
 	const key = `${bounds.minX}:${bounds.maxX}:${bounds.minZ}:${bounds.maxZ}`;
 	const known = loads.get(key);

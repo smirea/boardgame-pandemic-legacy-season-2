@@ -6,18 +6,7 @@
 	import { onDestroy, untrack } from 'svelte';
 	import { cubicInOut } from 'svelte/easing';
 	import { Tween } from 'svelte/motion';
-	import {
-		CanvasTexture,
-		LinearFilter,
-		MeshStandardMaterial,
-		MOUSE,
-		Plane,
-		Raycaster,
-		SRGBColorSpace,
-		Texture,
-		Vector2,
-		Vector3,
-	} from 'three';
+	import { MeshStandardMaterial, MOUSE, Plane, Raycaster, SRGBColorSpace, Texture, Vector2, Vector3 } from 'three';
 	import type { PerspectiveCamera } from 'three';
 	import type { OrbitControls as OrbitControlsImpl } from 'three/examples/jsm/controls/OrbitControls.js';
 	import { sfxPiece } from '#lib/audio/sfx.ts';
@@ -168,44 +157,21 @@
 		return map;
 	};
 	// Until the worker hands the chart back, the board is a blank sheet of the same paper.
-	let sheets = $state.raw<{ known: Texture; lines: Texture } | null>(null);
+	let sheets = $state.raw<{ known: Texture } | null>(null);
 	loadChart(bounds).then(
 		images => {
-			sheets = { known: texture(images.known), lines: texture(images.lines) };
+			sheets = { known: texture(images.known) };
 			invalidate();
 		},
 		error => console.error(error),
 	);
 
-	// Region lines mark the edge of what is known, so a line shows only beside a location still hidden and
-	// fades out with the fog as the regions on both sides are revealed.
 	const fogMask = new FogMask(bounds);
-	const lineMask = new CanvasTexture(fogMask.lines);
-	lineMask.minFilter = LinearFilter;
-	lineMask.generateMipmaps = false;
-	const regionLines = { uLines: { value: null as Texture | null }, uLineMask: { value: lineMask } };
-	const inkRegionLines = (material: MeshStandardMaterial) => {
-		material.onBeforeCompile = shader => {
-			Object.assign(shader.uniforms, regionLines);
-			shader.fragmentShader = shader.fragmentShader
-				.replace('#include <common>', '#include <common>\nuniform sampler2D uLines;\nuniform sampler2D uLineMask;')
-				.replace(
-					'#include <map_fragment>',
-					`#include <map_fragment>
-					#ifdef USE_MAP
-						vec4 regionInk = texture2D( uLines, vMapUv );
-						diffuseColor.rgb = mix( diffuseColor.rgb, regionInk.rgb, regionInk.a * texture2D( uLineMask, vMapUv ).r );
-					#endif`,
-				);
-		};
-		return material;
-	};
 
 	// The materials stay put and take the chart when it lands; swapping material objects under a mesh loses them.
-	const sheetMaterial = inkRegionLines(new MeshStandardMaterial({ color: BLANK, alphaTest: 0.5, roughness: 0.92 }));
-	const landMaterial = inkRegionLines(new MeshStandardMaterial({ color: BLANK, roughness: 0.92 }));
+	const sheetMaterial = new MeshStandardMaterial({ color: BLANK, alphaTest: 0.5, roughness: 0.92 });
+	const landMaterial = new MeshStandardMaterial({ color: BLANK, roughness: 0.92 });
 	$effect(() => {
-		regionLines.uLines.value = sheets?.lines ?? null;
 		for (const material of [sheetMaterial, landMaterial]) {
 			material.map = sheets?.known ?? null;
 			material.color.set(sheets ? '#ffffff' : BLANK);
@@ -893,15 +859,7 @@
 	<T is={landMaterial} />
 </T.Mesh>
 
-<Fog
-	{bounds}
-	mask={fogMask}
-	hidden={city => !view.cities[city]!.revealed}
-	onpaint={() => {
-		lineMask.needsUpdate = true;
-		invalidate();
-	}}
-/>
+<Fog {bounds} mask={fogMask} hidden={city => !view.cities[city]!.revealed} onpaint={() => invalidate()} />
 
 {#each view.ghostEdges as route (`ghost:${routeKey(route)}`)}
 	<RouteTube {route} ghost />

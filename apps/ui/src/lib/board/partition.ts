@@ -1,4 +1,4 @@
-import { cityDef, groundCity, pack } from '@repo/game';
+import { cityDef, pack } from '@repo/game';
 import type { GroundId } from '@repo/game';
 import type { BoardBounds, BoardPoint } from './projection';
 
@@ -6,15 +6,13 @@ import type { BoardBounds, BoardPoint } from './projection';
  * The board's partition drawn exactly: the ground that `nearestGround` assigns to each location or uncharted ground is
  * its cell of the power diagram over `pack.positions`, `pack.uncharted` and each location's `groundWeight`, whose edges
  * are straight, so the cells are cut with half-planes rather than sampled.
- * `partition.test.ts` checks them against `nearestGround` and `regionAt` themselves.
+ * `partition.test.ts` checks them against `nearestGround` itself.
  */
 
 /** A cell's outline. `next` is the location across the edge that leaves each corner, or null on the bounds. */
 type Ring = { at: BoardPoint; next: GroundId | null }[];
 
 export type Cell = { id: GroundId; outline: BoardPoint[] };
-/** A stretch of region line, between the ground of `a` and of `b`. */
-export type Border = { from: BoardPoint; to: BoardPoint; a: GroundId; b: GroundId };
 
 type Site = { at: BoardPoint; weight: number };
 const sites: [GroundId, Site][] = [
@@ -23,12 +21,6 @@ const sites: [GroundId, Site][] = [
 	),
 	...pack.uncharted.map(patch => [patch.id, { at: patch.at, weight: 0 }] as [GroundId, Site]),
 ];
-/** The region a cell lies in, or null for uncharted ground that stays dark. */
-const regionOf = (id: GroundId) => {
-	const city = groundCity(id);
-	return city && cityDef(city).region;
-};
-
 /** Keeps the part of `ring` that belongs to `site` rather than to `other`; the new edge faces `otherId`. */
 function clip(
 	ring: Ring,
@@ -76,26 +68,15 @@ function rings(bounds: BoardBounds): Map<GroundId, Ring> {
 	return result;
 }
 
-const cache = new Map<string, { cells: Cell[]; borders: Border[] }>();
+const cache = new Map<string, { cells: Cell[] }>();
 
-/** Every location's ground, and the region lines: the cell edges whose two sides lie in different regions. */
+/** Every location's ground. */
 export function partition(bounds: BoardBounds) {
 	const key = `${bounds.minX}:${bounds.maxX}:${bounds.minZ}:${bounds.maxZ}`;
 	const cached = cache.get(key);
 	if (cached) return cached;
-	const all = rings(bounds);
-	const cells: Cell[] = [];
-	const borders: Border[] = [];
-	for (const [id, ring] of all) {
-		cells.push({ id, outline: ring.map(corner => corner.at) });
-		ring.forEach((corner, index) => {
-			// Each shared edge is listed by both cells, so only the lesser id draws it.
-			if (!corner.next || corner.next < id) return;
-			if (regionOf(corner.next) === regionOf(id)) return;
-			borders.push({ from: corner.at, to: ring[(index + 1) % ring.length]!.at, a: id, b: corner.next });
-		});
-	}
-	const found = { cells, borders };
+	const cells: Cell[] = [...rings(bounds)].map(([id, ring]) => ({ id, outline: ring.map(corner => corner.at) }));
+	const found = { cells };
 	cache.set(key, found);
 	return found;
 }

@@ -11,7 +11,7 @@ import type { BoardBounds, BoardPoint } from './projection';
 
 /**
  * The board is a printed chart: paper, water, coasts from the same 50m data the rules use, the
- * graticule, red lines, region lines and wear. Unexplored ground is hidden under smoke drawn by `Fog.svelte`.
+ * graticule, red lines and wear. Unexplored ground is hidden under smoke drawn by `Fog.svelte`.
  */
 
 const PIXELS = 4096;
@@ -256,10 +256,9 @@ function wear(ctx: Ctx, width: number, height: number) {
 	ctx.globalCompositeOperation = 'source-over';
 }
 
-/** The printed chart, and the region lines on a clear sheet of their own, which fade as regions are revealed. */
-export type Chart = { known: OffscreenCanvas; lines: OffscreenCanvas };
+export type Chart = { known: OffscreenCanvas };
 
-/** Paints both sheets. Slow enough that the board calls it through `loadChart`, in a worker. */
+/** Paints the printed chart. Slow enough that the board calls it through `loadChart`, in a worker. */
 export function paintChart(bounds: BoardBounds): Chart {
 	const width = PIXELS;
 	const scale = width / (bounds.maxX - bounds.minX);
@@ -410,10 +409,7 @@ export function paintChart(bounds: BoardBounds): Chart {
 		wear(ctx, width, height);
 		return canvas;
 	};
-	const lines = sheet(width, height);
-	toBoard(lines.ctx);
-	regionLines(lines.ctx, bounds, px);
-	return { known: finish(ink), lines: lines.canvas };
+	return { known: finish(ink) };
 }
 
 /**
@@ -432,31 +428,6 @@ function redLines(ctx: Ctx, sphere: Path2D, px: (pixels: number) => number) {
 	ctx.stroke(path);
 	ctx.strokeStyle = 'rgb(196 32 36 / 0.92)';
 	ctx.lineWidth = px(6);
-	ctx.stroke(path);
-	ctx.restore();
-}
-
-/**
- * Region boundaries, exactly where `regionAt` changes: a dash-and-dot rule in ink on a pale halo, so it
- * reads over water-lining and coast without competing with routes. Ink, not red: only the red lines limit lanes.
- */
-function regionLines(ctx: Ctx, bounds: BoardBounds, px: (pixels: number) => number) {
-	const path = new Path2D();
-	for (const border of partition(bounds).borders) {
-		path.moveTo(border.from.x, border.from.z);
-		path.lineTo(border.to.x, border.to.z);
-	}
-	ctx.save();
-	ctx.beginPath();
-	ctx.rect(FRAME.minX, FRAME.minZ, FRAME.maxX - FRAME.minX, FRAME.maxZ - FRAME.minZ);
-	ctx.clip();
-	ctx.lineCap = 'round';
-	ctx.strokeStyle = 'rgb(246 238 218 / 0.5)';
-	ctx.lineWidth = px(10);
-	ctx.stroke(path);
-	ctx.strokeStyle = `rgb(${INK} / 0.9)`;
-	ctx.lineWidth = px(4.4);
-	ctx.setLineDash([px(26), px(7), px(5), px(7)]);
 	ctx.stroke(path);
 	ctx.restore();
 }
@@ -557,10 +528,6 @@ export class FogMask {
 	 * and to 0 a little way out. The smoke shader shapes its billowing outline from this field.
 	 */
 	readonly field: OffscreenCanvas;
-	/** Where region lines show: white along each border, as strong as the more hidden of the two locations it divides. */
-	readonly lines: OffscreenCanvas;
-	#linesCtx: OffscreenCanvasRenderingContext2D;
-	#borders: { a: GroundId; b: GroundId; path: Path2D }[];
 	#fieldCtx: OffscreenCanvasRenderingContext2D;
 	#ctx: Ctx;
 	#scale: number;
@@ -578,14 +545,6 @@ export class FogMask {
 		// CPU-backed on purpose: uploading a GPU canvas into WebGL forces a readback that stalled a reveal for 500ms.
 		this.field = new OffscreenCanvas(canvas.width, canvas.height);
 		this.#fieldCtx = this.field.getContext('2d', { willReadFrequently: true })!;
-		this.lines = new OffscreenCanvas(canvas.width, canvas.height);
-		this.#linesCtx = this.lines.getContext('2d', { willReadFrequently: true })!;
-		this.#borders = partition(bounds).borders.map(border => {
-			const path = new Path2D();
-			path.moveTo(border.from.x, border.from.z);
-			path.lineTo(border.to.x, border.to.z);
-			return { a: border.a, b: border.b, path };
-		});
 		this.#cells = partition(bounds).cells.map(cell => {
 			const at = pack.positions[cell.id as CityId] ?? pack.uncharted.find(patch => patch.id === cell.id)!.at;
 			const path = new Path2D();
@@ -639,20 +598,5 @@ export class FogMask {
 		field.filter = `blur(${this.blur * scale}px)`;
 		field.drawImage(this.canvas, 0, 0);
 		field.filter = 'none';
-		const lines = this.#linesCtx;
-		lines.setTransform(1, 0, 0, 1, 0, 0);
-		lines.fillStyle = '#000';
-		lines.fillRect(0, 0, this.lines.width, this.lines.height);
-		lines.setTransform(scale, 0, 0, scale, -this.bounds.minX * scale, -this.bounds.minZ * scale);
-		lines.strokeStyle = '#fff';
-		lines.lineWidth = 1.2;
-		lines.lineCap = 'round';
-		for (const border of this.#borders) {
-			const amount = Math.max(cover(border.a), cover(border.b));
-			if (amount <= 0.001) continue;
-			lines.globalAlpha = amount;
-			lines.stroke(border.path);
-		}
-		lines.globalAlpha = 1;
 	}
 }
