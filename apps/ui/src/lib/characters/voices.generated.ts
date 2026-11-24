@@ -118,6 +118,14 @@ export const characterDesignedVoices: Record<string, CharacterDesignedVoiceEntry
 };
 
 export const characterVoiceManifest: Record<string, CharacterVoiceEntry> = {
+	"haven-worker_companion": {
+		"src": "/voices/characters/haven-worker_companion.mp3",
+		"figure": "haven-worker",
+		"kind": "companion",
+		"voiceId": "voice_t6cnoijxotdk",
+		"hash": "818f6ee5db13040b",
+		"bytes": 18764
+	},
 	"haven-worker_danger": {
 		"src": "/voices/characters/haven-worker_danger.mp3",
 		"figure": "haven-worker",
@@ -181,6 +189,14 @@ export const characterVoiceManifest: Record<string, CharacterVoiceEntry> = {
 		"voiceId": "voice_t6cnoijxotdk",
 		"hash": "af550ac93e3847da",
 		"bytes": 17564
+	},
+	"immunologist_companion": {
+		"src": "/voices/characters/immunologist_companion.mp3",
+		"figure": "immunologist",
+		"kind": "companion",
+		"voiceId": "voice_5q8mak9hpv9y",
+		"hash": "3a23045cd90eb3b1",
+		"bytes": 28604
 	},
 	"immunologist_danger": {
 		"src": "/voices/characters/immunologist_danger.mp3",
@@ -246,6 +262,14 @@ export const characterVoiceManifest: Record<string, CharacterVoiceEntry> = {
 		"hash": "d52615825759352f",
 		"bytes": 22604
 	},
+	"scientist_companion": {
+		"src": "/voices/characters/scientist_companion.mp3",
+		"figure": "scientist",
+		"kind": "companion",
+		"voiceId": "voice_zx1ekz7kkuql",
+		"hash": "2f05f1009858796c",
+		"bytes": 27404
+	},
 	"scientist_danger": {
 		"src": "/voices/characters/scientist_danger.mp3",
 		"figure": "scientist",
@@ -309,6 +333,14 @@ export const characterVoiceManifest: Record<string, CharacterVoiceEntry> = {
 		"voiceId": "voice_zx1ekz7kkuql",
 		"hash": "fd07fe81dded937d",
 		"bytes": 29564
+	},
+	"survivor-0_companion": {
+		"src": "/voices/characters/survivor-0_companion.mp3",
+		"figure": "survivor-0",
+		"kind": "companion",
+		"voiceId": "voice_h64lmmnwy7pw",
+		"hash": "1c622736f66e10f4",
+		"bytes": 31964
 	},
 	"survivor-0_danger": {
 		"src": "/voices/characters/survivor-0_danger.mp3",
@@ -374,6 +406,14 @@ export const characterVoiceManifest: Record<string, CharacterVoiceEntry> = {
 		"hash": "d37d43af5994a80d",
 		"bytes": 29804
 	},
+	"survivor-1_companion": {
+		"src": "/voices/characters/survivor-1_companion.mp3",
+		"figure": "survivor-1",
+		"kind": "companion",
+		"voiceId": "voice_zaaonepc8zym",
+		"hash": "c562d69c36f12de9",
+		"bytes": 28604
+	},
 	"survivor-1_danger": {
 		"src": "/voices/characters/survivor-1_danger.mp3",
 		"figure": "survivor-1",
@@ -437,6 +477,14 @@ export const characterVoiceManifest: Record<string, CharacterVoiceEntry> = {
 		"voiceId": "voice_zaaonepc8zym",
 		"hash": "1c882aac38fe6a47",
 		"bytes": 14684
+	},
+	"survivor-10_companion": {
+		"src": "/voices/characters/survivor-10_companion.mp3",
+		"figure": "survivor-10",
+		"kind": "companion",
+		"voiceId": "voice_xaptg1n5mppk",
+		"hash": "4251e6118d7d5ff9",
+		"bytes": 26444
 	},
 	"survivor-10_danger": {
 		"src": "/voices/characters/survivor-10_danger.mp3",
@@ -502,6 +550,14 @@ export const characterVoiceManifest: Record<string, CharacterVoiceEntry> = {
 		"hash": "ddd8fed1c5bd2bf6",
 		"bytes": 40124
 	},
+	"survivor-11_companion": {
+		"src": "/voices/characters/survivor-11_companion.mp3",
+		"figure": "survivor-11",
+		"kind": "companion",
+		"voiceId": "voice_91zkmbzr2d3n",
+		"hash": "9a2b65364cf01cf6",
+		"bytes": 25724
+	},
 	"survivor-11_danger": {
 		"src": "/voices/characters/survivor-11_danger.mp3",
 		"figure": "survivor-11",
@@ -565,6 +621,14 @@ export const characterVoiceManifest: Record<string, CharacterVoiceEntry> = {
 		"voiceId": "voice_91zkmbzr2d3n",
 		"hash": "d19e568db900bc24",
 		"bytes": 18524
+	},
+	"survivor-12_companion": {
+		"src": "/voices/characters/survivor-12_companion.mp3",
+		"figure": "survivor-12",
+		"kind": "companion",
+		"voiceId": "voice_bl4pyi6vcu9i",
+		"hash": "b0d93eb694573017",
+		"bytes": 33164
 	},
 	"survivor-12_danger": {
 		"src": "/voices/characters/survivor-12_danger.mp3",
@@ -630,6 +694,14 @@ export const characterVoiceManifest: Record<string, CharacterVoiceEntry> = {
 		"hash": "d1ded15471c24f1c",
 		"bytes": 20684
 	},
+	"survivor-13_companion": {
+		"src": "/voices/characters/survivor-13_companion.mp3",
+		"figure": "survivor-13",
+		"kind": "companion",
+		"voiceId": "voice_9hnvm9fwfnhe",
+		"hash": "095d8622014db214",
+		"bytes": 41324
+	},
 	"survivor-13_danger": {
 		"src": "/voices/characters/survivor-13_danger.mp3",
 		"figure": "survivor-13",
@@ -693,6 +765,14 @@ export const characterVoiceManifest: Record<string, CharacterVoiceEntry> = {
 		"voiceId": "voice_9hnvm9fwfnhe",
 		"hash": "5c68df97bf8e0de6",
 		"bytes": 30764
+	},
+	"survivor-14_companion": {
+		"src": "/voices/characters/survivor-14_companion.mp3",
+		"figure": "survivor-14",
+		"kind": "companion",
+		"voiceId": "voice_c8eicc8za5ek",
+		"hash": "3cc1e3c646b1bb4d",
+		"bytes": 25964
 	},
 	"survivor-14_danger": {
 		"src": "/voices/characters/survivor-14_danger.mp3",
@@ -758,6 +838,14 @@ export const characterVoiceManifest: Record<string, CharacterVoiceEntry> = {
 		"hash": "9fa2089bbcd42b3a",
 		"bytes": 23084
 	},
+	"survivor-15_companion": {
+		"src": "/voices/characters/survivor-15_companion.mp3",
+		"figure": "survivor-15",
+		"kind": "companion",
+		"voiceId": "voice_mloba29lkgvc",
+		"hash": "4c12cb09ead1032d",
+		"bytes": 41804
+	},
 	"survivor-15_danger": {
 		"src": "/voices/characters/survivor-15_danger.mp3",
 		"figure": "survivor-15",
@@ -821,6 +909,14 @@ export const characterVoiceManifest: Record<string, CharacterVoiceEntry> = {
 		"voiceId": "voice_mloba29lkgvc",
 		"hash": "8c0cf5f20b65c51f",
 		"bytes": 21404
+	},
+	"survivor-2_companion": {
+		"src": "/voices/characters/survivor-2_companion.mp3",
+		"figure": "survivor-2",
+		"kind": "companion",
+		"voiceId": "voice_rt9uuorqqp9i",
+		"hash": "838e0aee12299d2d",
+		"bytes": 25724
 	},
 	"survivor-2_danger": {
 		"src": "/voices/characters/survivor-2_danger.mp3",
@@ -886,6 +982,14 @@ export const characterVoiceManifest: Record<string, CharacterVoiceEntry> = {
 		"hash": "46a2c9d70ba6831e",
 		"bytes": 14924
 	},
+	"survivor-3_companion": {
+		"src": "/voices/characters/survivor-3_companion.mp3",
+		"figure": "survivor-3",
+		"kind": "companion",
+		"voiceId": "voice_g0s9arbly0hj",
+		"hash": "ba82a90c81e7e326",
+		"bytes": 31004
+	},
 	"survivor-3_danger": {
 		"src": "/voices/characters/survivor-3_danger.mp3",
 		"figure": "survivor-3",
@@ -949,6 +1053,14 @@ export const characterVoiceManifest: Record<string, CharacterVoiceEntry> = {
 		"voiceId": "voice_g0s9arbly0hj",
 		"hash": "af8a0cb5bf7c2a26",
 		"bytes": 24044
+	},
+	"survivor-4_companion": {
+		"src": "/voices/characters/survivor-4_companion.mp3",
+		"figure": "survivor-4",
+		"kind": "companion",
+		"voiceId": "voice_j0206lsqjscm",
+		"hash": "4fdeea20d9727060",
+		"bytes": 31484
 	},
 	"survivor-4_danger": {
 		"src": "/voices/characters/survivor-4_danger.mp3",
@@ -1014,6 +1126,14 @@ export const characterVoiceManifest: Record<string, CharacterVoiceEntry> = {
 		"hash": "854ab5e278c46df3",
 		"bytes": 19244
 	},
+	"survivor-5_companion": {
+		"src": "/voices/characters/survivor-5_companion.mp3",
+		"figure": "survivor-5",
+		"kind": "companion",
+		"voiceId": "voice_ubkgibp2g63o",
+		"hash": "a3141ee2f409c39b",
+		"bytes": 38204
+	},
 	"survivor-5_danger": {
 		"src": "/voices/characters/survivor-5_danger.mp3",
 		"figure": "survivor-5",
@@ -1077,6 +1197,14 @@ export const characterVoiceManifest: Record<string, CharacterVoiceEntry> = {
 		"voiceId": "voice_ubkgibp2g63o",
 		"hash": "19639b28e5568a10",
 		"bytes": 21644
+	},
+	"survivor-6_companion": {
+		"src": "/voices/characters/survivor-6_companion.mp3",
+		"figure": "survivor-6",
+		"kind": "companion",
+		"voiceId": "voice_bzftmf93os9e",
+		"hash": "d32877bd3887f500",
+		"bytes": 28364
 	},
 	"survivor-6_danger": {
 		"src": "/voices/characters/survivor-6_danger.mp3",
@@ -1142,6 +1270,14 @@ export const characterVoiceManifest: Record<string, CharacterVoiceEntry> = {
 		"hash": "f7f40682e91896d7",
 		"bytes": 20924
 	},
+	"survivor-7_companion": {
+		"src": "/voices/characters/survivor-7_companion.mp3",
+		"figure": "survivor-7",
+		"kind": "companion",
+		"voiceId": "voice_80k3k5q6c62t",
+		"hash": "c5670a4d91b35af4",
+		"bytes": 39884
+	},
 	"survivor-7_danger": {
 		"src": "/voices/characters/survivor-7_danger.mp3",
 		"figure": "survivor-7",
@@ -1205,6 +1341,14 @@ export const characterVoiceManifest: Record<string, CharacterVoiceEntry> = {
 		"voiceId": "voice_80k3k5q6c62t",
 		"hash": "a8313721569c3a9a",
 		"bytes": 27884
+	},
+	"survivor-8_companion": {
+		"src": "/voices/characters/survivor-8_companion.mp3",
+		"figure": "survivor-8",
+		"kind": "companion",
+		"voiceId": "voice_519hu8o6vo02",
+		"hash": "b7a04bb8d53fc265",
+		"bytes": 20684
 	},
 	"survivor-8_danger": {
 		"src": "/voices/characters/survivor-8_danger.mp3",
@@ -1270,6 +1414,14 @@ export const characterVoiceManifest: Record<string, CharacterVoiceEntry> = {
 		"hash": "3ecab473797f08e1",
 		"bytes": 24284
 	},
+	"survivor-9_companion": {
+		"src": "/voices/characters/survivor-9_companion.mp3",
+		"figure": "survivor-9",
+		"kind": "companion",
+		"voiceId": "voice_ltumt3mp9qbg",
+		"hash": "ec93ea09db2c32c1",
+		"bytes": 30764
+	},
 	"survivor-9_danger": {
 		"src": "/voices/characters/survivor-9_danger.mp3",
 		"figure": "survivor-9",
@@ -1333,6 +1485,14 @@ export const characterVoiceManifest: Record<string, CharacterVoiceEntry> = {
 		"voiceId": "voice_ltumt3mp9qbg",
 		"hash": "d54d99e307297ec7",
 		"bytes": 18764
+	},
+	"vector-control_companion": {
+		"src": "/voices/characters/vector-control_companion.mp3",
+		"figure": "vector-control",
+		"kind": "companion",
+		"voiceId": "voice_nhtz9kbf255z",
+		"hash": "48c3e987abb21a3d",
+		"bytes": 26684
 	},
 	"vector-control_danger": {
 		"src": "/voices/characters/vector-control_danger.mp3",

@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Designs 20 bespoke player-character voices with Google Gemini 3.8 Voice Design (`ai.voices.create`)
- * and synthesizes all 8 short expressive voice lines per figure via `gemini-3.8-flash-tts`
+ * and synthesizes all 9 short expressive voice lines per figure via `gemini-3.8-flash-tts`
  * (`speechMetadata.style`) for every persona in `apps/ui/src/lib/characters/personas.ts`.
  *
  * Outputs `apps/ui/static/voices/characters/<figure>_<kind>.mp3` and
@@ -9,8 +9,8 @@
  * Resumable and content-hash cached: unchanged voices and clips are skipped.
  *
  * Usage:
- *   ./apps/ui/scripts/gen-character-voices.ts                    # design missing voices + synthesize all 160 lines
- *   ./apps/ui/scripts/gen-character-voices.ts --only survivor-0  # one character (all 8 lines)
+ *   ./apps/ui/scripts/gen-character-voices.ts                    # design missing voices + synthesize all 180 lines
+ *   ./apps/ui/scripts/gen-character-voices.ts --only survivor-0  # one character (all 9 lines)
  *   ./apps/ui/scripts/gen-character-voices.ts --only survivor-0_death
  *   ./apps/ui/scripts/gen-character-voices.ts --force            # re-synthesize selected lines even if cached
  *   ./apps/ui/scripts/gen-character-voices.ts --redesign         # recreate custom voices even if cached
@@ -47,6 +47,8 @@ const KIND_STYLE_HINT: Record<CharacterLineKind, string> = {
 	greet: 'natural upbeat concise in-character greeting meeting a teammate in the field, brisk friendly pace',
 	leave: 'brisk concise in-character parting remark heading out, snappy tempo',
 	danger: 'tense urgent concise warning spotting plague or Hollow Men right nearby, quick intense delivery',
+	companion:
+		'cheeky, expressive, natural in-character hello, remark, or playful flirtation upon recruiting a new companion, brisk conversational pace',
 	death:
 		'dramatic, heartfelt dying last words with genuine breathy anguish fading out, emotionally vivid yet compact without long dead air',
 };
@@ -60,6 +62,7 @@ const SOFT_MAX_SECONDS: Record<CharacterLineKind, number> = {
 	greet: 2.6,
 	leave: 2.5,
 	danger: 2.9,
+	companion: 2.6,
 	death: 7.2,
 };
 

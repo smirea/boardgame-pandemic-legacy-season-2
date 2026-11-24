@@ -2,7 +2,16 @@ import type { Character } from '@repo/game';
 import { figureKey } from './figures.ts';
 import { HEADS } from './figures.generated.ts';
 
-export type CharacterLineKind = 'punchline' | 'scar' | 'upgrade' | 'thanks' | 'greet' | 'leave' | 'danger' | 'death';
+export type CharacterLineKind =
+	| 'punchline'
+	| 'scar'
+	| 'upgrade'
+	| 'thanks'
+	| 'greet'
+	| 'leave'
+	| 'danger'
+	| 'companion'
+	| 'death';
 
 export const CHARACTER_LINE_KINDS: readonly CharacterLineKind[] = [
 	'punchline',
@@ -12,6 +21,7 @@ export const CHARACTER_LINE_KINDS: readonly CharacterLineKind[] = [
 	'greet',
 	'leave',
 	'danger',
+	'companion',
 	'death',
 ];
 
@@ -23,6 +33,7 @@ export const CHARACTER_LINE_LABELS: Record<CharacterLineKind, string> = {
 	greet: 'Greet',
 	leave: 'Leave',
 	danger: 'Danger',
+	companion: 'Companion',
 	death: 'Death',
 };
 
@@ -115,6 +126,10 @@ export const CHARACTER_PERSONAS: Record<FigureKey, CharacterPersona> = {
 				text: 'Get back, love! Nothing good lives in that!',
 				direction: 'sharp startled warning, fierce protective dread',
 			},
+			companion: {
+				text: "Well hello, gorgeous! You're coming with me.",
+				direction: 'cheeky delighted Irish chuckle, teasing playful flirtation',
+			},
 			death: {
 				text: "Ahh... don't fuss over me, love... I had a grand run... go on...",
 				direction: 'dramatic ragged gasp of pain softening into brave tender farewell as her breath fades',
@@ -163,6 +178,10 @@ export const CHARACTER_PERSONAS: Record<FigureKey, CharacterPersona> = {
 			danger: {
 				text: 'Whoa! Everybody stay behind me!',
 				direction: 'sharp tense protective edge, braced for a fight',
+			},
+			companion: {
+				text: "Hey there, trouble. Glad you're on my side.",
+				direction: 'smooth cocky smirk, playful charming swagger',
 			},
 			death: {
 				text: "Gah... dammit... I ain't done yet... get outta here...",
@@ -213,6 +232,10 @@ export const CHARACTER_PERSONAS: Record<FigureKey, CharacterPersona> = {
 				text: 'Uh-oh! Okay, very bad vibe here!',
 				direction: 'wide-eyed startled alarm, quick adrenaline',
 			},
+			companion: {
+				text: 'Ooh, hello! Think you can keep up?',
+				direction: 'bright mischievous grin, cheeky playful tease',
+			},
 			death: {
 				text: "Ngh... wait... I always land on my feet... don't leave me...",
 				direction: 'raw shocked gasp turning into a heartbreaking breathless cry fading out',
@@ -261,6 +284,10 @@ export const CHARACTER_PERSONAS: Record<FigureKey, CharacterPersona> = {
 			danger: {
 				text: "Quiet. Something's moving beside us.",
 				direction: 'chilling low hushed warning',
+			},
+			companion: {
+				text: "Huh. Good company's hard to find.",
+				direction: 'low smoke-dry half-smile, understated sly warmth',
 			},
 			death: {
 				text: 'Ugh... long road... finally ends... keep moving...',
@@ -311,6 +338,10 @@ export const CHARACTER_PERSONAS: Record<FigureKey, CharacterPersona> = {
 				text: 'Aw hell, this whole place is going sideways!',
 				direction: 'angry alarmed grit, braced and tense',
 			},
+			companion: {
+				text: 'Well hello! Finally, some decent company!',
+				direction: 'brisk brassy grin, blunt cheeky delight',
+			},
 			death: {
 				text: 'Agh... no, not today... somebody hold the line... please...',
 				direction: 'choked heavy gasp of shock, stubborn voice breaking into a desperate fading plea',
@@ -359,6 +390,10 @@ export const CHARACTER_PERSONAS: Record<FigureKey, CharacterPersona> = {
 			danger: {
 				text: 'Watch yourself! This darkness is too close!',
 				direction: 'urgent crisp alarm',
+			},
+			companion: {
+				text: 'Well hello! Now this journey just got interesting.',
+				direction: 'bright gallant charm, warm intrigued smile',
 			},
 			death: {
 				text: "Ah... I can't see the shore anymore... keep going... for all of us...",
@@ -409,6 +444,10 @@ export const CHARACTER_PERSONAS: Record<FigureKey, CharacterPersona> = {
 				text: 'Oh no! Stay close to me, please!',
 				direction: 'urgent trembling protective alarm',
 			},
+			companion: {
+				text: 'Oh, hello you! Come on, stick by me.',
+				direction: 'soft delighted smile, warm affectionate welcome',
+			},
 			death: {
 				text: "Ah... don't cry... make sure they're safe... I'm so tired...",
 				direction: 'heartbreaking tearful gasp breaking into a tender fading selfless whisper',
@@ -457,6 +496,10 @@ export const CHARACTER_PERSONAS: Record<FigureKey, CharacterPersona> = {
 			danger: {
 				text: 'Tread lightly. Death lingers here.',
 				direction: 'chilling crisp commanding warning',
+			},
+			companion: {
+				text: 'Well now. You look like good trouble.',
+				direction: 'deep weathered amusement, rare dry twinkle of approval',
 			},
 			death: {
 				text: 'Ahh... my time is spent... keep the flame alive... remember us...',
@@ -507,6 +550,10 @@ export const CHARACTER_PERSONAS: Record<FigureKey, CharacterPersona> = {
 				text: "Heads up! We've got trouble right on top of us!",
 				direction: 'sharp intense alarm',
 			},
+			companion: {
+				text: 'Hey! Try not to slow me down, alright?',
+				direction: 'fierce cheeky smirk, playful competitive tease',
+			},
 			death: {
 				text: "Gah... dammit... get up, legs... don't you dare quit...",
 				direction: 'raw furious cry of pain collapsing into jagged breathless defiance',
@@ -555,6 +602,10 @@ export const CHARACTER_PERSONAS: Record<FigureKey, CharacterPersona> = {
 			danger: {
 				text: 'Blast it, smells like the grave in here!',
 				direction: 'low growling alarm, rough dread',
+			},
+			companion: {
+				text: 'Hah! Welcome aboard, ya cheeky devil!',
+				direction: 'gruff booming chuckle, fond salty amusement',
 			},
 			death: {
 				text: "Urrgh... cold water's rising... leave me, lads... save yourselves...",
@@ -605,6 +656,10 @@ export const CHARACTER_PERSONAS: Record<FigureKey, CharacterPersona> = {
 				text: 'Okay, zero jokes, we need to move!',
 				direction: 'startled urgent alarm, humor suddenly gone',
 			},
+			companion: {
+				text: "Well hello. Where've you been hiding?",
+				direction: 'smooth wry half-smile, playful effortless flirtation',
+			},
 			death: {
 				text: 'Agh... tough break... hey... finish it for me, alright...?',
 				direction: 'shocked ragged cry of agony softening into fragile rueful warmth',
@@ -653,6 +708,10 @@ export const CHARACTER_PERSONAS: Record<FigureKey, CharacterPersona> = {
 			danger: {
 				text: 'Whoa, whoa, bad news, right here!',
 				direction: 'panicked high-adrenaline warning',
+			},
+			companion: {
+				text: 'Oh, hey! Awesome, I love having backup!',
+				direction: 'fast bright thrilled burst, earnest upbeat charm',
 			},
 			death: {
 				text: "Ah... no, wait... I wasn't fast enough... tell them I tried...",
@@ -703,6 +762,10 @@ export const CHARACTER_PERSONAS: Record<FigureKey, CharacterPersona> = {
 				text: 'Step back! This whole street is compromised!',
 				direction: 'sharp fierce urgent alarm',
 			},
+			companion: {
+				text: 'Ah, splendid. Someone with actual taste.',
+				direction: 'poised dry amusement, crisp sly approval',
+			},
 			death: {
 				text: 'Ahh... do not let this be for nothing... finish what we started...',
 				direction: 'strained agonized gasp fighting to hold dignity as her voice fractures and fades',
@@ -751,6 +814,10 @@ export const CHARACTER_PERSONAS: Record<FigureKey, CharacterPersona> = {
 			danger: {
 				text: 'Whoa! Time to fold and run!',
 				direction: 'rattled urgent alarm, smooth veneer cracked',
+			},
+			companion: {
+				text: "Ooh, bonjour! Now aren't you a sight!",
+				direction: 'silky theatrical purr, shameless playful flirtation',
 			},
 			death: {
 				text: 'Gah... what a rotten hand... smile for me, darling...',
@@ -801,6 +868,10 @@ export const CHARACTER_PERSONAS: Record<FigureKey, CharacterPersona> = {
 				text: 'Whoa, hold up — stay close, bad trouble here!',
 				direction: 'deep serious protective rumble of alarm',
 			},
+			companion: {
+				text: 'Ayyy! Look who just joined the party!',
+				direction: 'booming joyful laugh, warm playful welcome',
+			},
 			death: {
 				text: "Uhh... hey, don't be sad... keep laughing for me, alright...?",
 				direction: 'heart-wrenching gentle giant gasp, booming warm voice breaking into a tender whisper',
@@ -849,6 +920,10 @@ export const CHARACTER_PERSONAS: Record<FigureKey, CharacterPersona> = {
 			danger: {
 				text: 'Hush... something hollow is watching us.',
 				direction: 'eerie hushed shivering dread',
+			},
+			companion: {
+				text: 'Oh, hello... you have a lovely aura.',
+				direction: 'soft enigmatic smile, playful luminous warmth',
 			},
 			death: {
 				text: "Ahh... it's alright... the noise is fading... I see the light...",
@@ -899,6 +974,10 @@ export const CHARACTER_PERSONAS: Record<FigureKey, CharacterPersona> = {
 				text: 'Masks up! Live threat right here!',
 				direction: 'sharp urgent clinical alarm',
 			},
+			companion: {
+				text: 'Hola! Finally, someone who can keep pace!',
+				direction: 'sharp delighted spark, brisk playful approval',
+			},
 			death: {
 				text: "Ngh... too fast... please, don't let it win... finish what I started...",
 				direction: 'frantic agonized gasp, fierce voice breaking into breathless tragic urgency',
@@ -947,6 +1026,10 @@ export const CHARACTER_PERSONAS: Record<FigureKey, CharacterPersona> = {
 			danger: {
 				text: "Heads down! Whole block's crawling with 'em!",
 				direction: 'tense rugged startled alarm',
+			},
+			companion: {
+				text: 'Well hello, legend! Ready to get stuck in?',
+				direction: 'dry rugged grin, cheeky warm Australian banter',
 			},
 			death: {
 				text: "Argh... rotten luck... keep moving, mate... don't look back...",
@@ -997,6 +1080,10 @@ export const CHARACTER_PERSONAS: Record<FigureKey, CharacterPersona> = {
 				text: 'Goodness me, we really must leave!',
 				direction: 'flustered urgent polite alarm',
 			},
+			companion: {
+				text: 'Oh! Why hello there — how delightful!',
+				direction: 'bright delighted surprise, warm charmingly flustered greeting',
+			},
 			death: {
 				text: "Ah... oh dear... everything's going dim... please... look after each other...",
 				direction: 'heartbreakingly gentle bewildered gasp trembling and fading into soft silence',
@@ -1046,6 +1133,10 @@ export const CHARACTER_PERSONAS: Record<FigureKey, CharacterPersona> = {
 			danger: {
 				text: "Careful... something's right here with us.",
 				direction: 'low tense muffled warning',
+			},
+			companion: {
+				text: 'Hello. Good to have you along.',
+				direction: 'quiet humble warmth, gentle understated welcome',
 			},
 			death: {
 				text: 'Ngh... leave me... keep going... someone else will step up...',

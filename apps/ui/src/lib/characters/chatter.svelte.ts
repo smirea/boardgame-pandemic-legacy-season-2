@@ -89,8 +89,9 @@ function capture(world: World, phase: Phase): Snapshot {
 
 /**
  * Turns synced game transitions into short character voice reactions across every browser at the table and in replays:
- * lobby selection/avatar changes, scar votes, ability upgrades, card/cube transfers, moves (greet/leave/danger),
- * replacement characters, and scars. Local clicks play immediately in UI handlers and are deduplicated here.
+ * lobby selection/avatar changes, scar votes, ability upgrades, card/cube transfers, companions drawn from the deck,
+ * moves (greet/leave/danger), replacement characters, and scars. Local clicks play immediately in UI handlers and are
+ * deduplicated here.
  */
 export class CharacterChatter {
 	private prev: Snapshot | null = null;
@@ -188,7 +189,18 @@ export class CharacterChatter {
 			}
 		}
 
-		// 7. Movement -> danger if entering Plague/Hollow Men, greet if joining a teammate,
+		// 7. Companion drawn from the Player deck (DRAW or Monitor / Cautious Approach reveal, never player-to-player).
+		const companionSeat = this.findDeckCompanionSeat(world, fresh);
+		if (companionSeat) {
+			const drawer = game.players[companionSeat];
+			const character = drawer ? world.campaign.characters[drawer.character] : undefined;
+			if (character) {
+				characterVoice.playFor(character, 'companion', { priority: 'game', interrupt: true });
+				return;
+			}
+		}
+
+		// 8. Movement -> danger if entering Plague/Hollow Men, greet if joining a teammate,
 		//    thanks if moved by a teammate, else leave.
 		const move = fresh.findLast(entry => entry.t === 'move');
 		if (move) {
@@ -328,6 +340,19 @@ export class CharacterChatter {
 			return supplyReceiver;
 		}
 
+		return null;
+	}
+
+	private findDeckCompanionSeat(world: World, fresh: NonNullable<World['game']>['log']): SeatId | null {
+		const isCompanion = (id: CardId) => {
+			const card = world.campaign.playerCards[id];
+			return card?.kind === 'city' && card.companion !== null;
+		};
+		for (let i = fresh.length - 1; i >= 0; i--) {
+			const entry = fresh[i]!;
+			if (entry.t === 'draw' && isCompanion(entry.card)) return entry.seat;
+			if (entry.t === 'revealed' && entry.kept.some(isCompanion)) return entry.seat;
+		}
 		return null;
 	}
 }

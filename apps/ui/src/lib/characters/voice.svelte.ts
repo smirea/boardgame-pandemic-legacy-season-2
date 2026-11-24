@@ -31,6 +31,7 @@ const DEFAULT_COOLDOWN_MS: Record<CharacterLineKind, number> = {
 	greet: 4500,
 	leave: 4500,
 	danger: 6000,
+	companion: 3500,
 	death: 0,
 };
 
