@@ -12,9 +12,9 @@
 
 	const hoverCard = getContext<((card: CardId | null) => void) | undefined>('card-hover');
 
-	type Props = { card: InfectionCard; onclick?: () => void; note?: string; alarm?: boolean };
+	type Props = { card: InfectionCard; onclick?: () => void };
 
-	let { card, onclick, note, alarm = false }: Props = $props();
+	let { card, onclick }: Props = $props();
 
 	const city = $derived(card.kind === 'city' ? cityDef(card.city) : null);
 	const accent = $derived(city ? CITY_COLOR[city.color ?? 'haven'] : '#8f74ad');
@@ -84,7 +84,6 @@
 				</span>
 			</span>
 		{/if}
-		{#if note}<span class="note" class:alarm>{note}</span>{/if}
 	</button>
 </div>
 
@@ -248,25 +247,5 @@
 	.improvement-name {
 		margin-right: 0.22em;
 		font-weight: 700;
-	}
-
-	.note {
-		position: absolute;
-		top: 0.4em;
-		right: 0.4em;
-		z-index: 4;
-		padding: 0.05em 0.45em;
-		border: 1px solid rgb(42 32 23 / 0.35);
-		border-radius: 0.15em;
-		background: #e7dcc6;
-		color: #2a2017;
-		box-shadow: 0 0.12em 0.35em rgb(0 0 0 / 0.45);
-		font-size: 0.64em;
-		font-weight: 600;
-	}
-
-	.note.alarm {
-		background: #a3271f;
-		color: #fff4e6;
 	}
 </style>

@@ -16,9 +16,6 @@ type Beat = {
 	/** A Gather card names no city, so the camera stays where it is. */
 	city: CityId | null;
 	card: InfectionCard;
-	note: string;
-	/** The card cost the table an incident, so its note is drawn as a warning. */
-	alarm: boolean;
 	strike: Hidden[];
 	pulse: FxKind | null;
 	incidents: { city: CityId; hidden: Hidden[] }[];
@@ -43,16 +40,8 @@ export type ShowCue =
 	/** A marker lands on the incident track. `waiting` is how many more the state holds that have not landed. */
 	| { t: 'marker'; waiting: number };
 
-export type DrawnInfection = { key: number; card: InfectionCard; note: string; alarm: boolean; city: CityId | null };
+export type DrawnInfection = { key: number; card: InfectionCard; city: CityId | null };
 export type Lag = { cities: Partial<Record<CityId, Pieces>>; stockpile: number };
-
-const NOTE = {
-	supply: 'cube lost',
-	plague: 'incident',
-	outbreak: 'outbreak',
-	hollow: 'Hollow Men',
-	blocked: 'held',
-} as const;
 
 /** How long the riffle on the turn desk takes, with a little to spare. */
 const SHUFFLE_MS = 2200;
@@ -258,8 +247,6 @@ export class InfectionShow {
 					effect: entry.effect === 'supply' || entry.effect === 'plague' ? null : entry.effect,
 					city: entry.city,
 					card,
-					note: NOTE[entry.effect],
-					alarm: entry.effect === 'plague' || entry.effect === 'outbreak',
 					strike,
 					pulse: pulse === 'plague' ? null : pulse,
 					incidents: [],
@@ -275,8 +262,6 @@ export class InfectionShow {
 					effect: 'gather',
 					city: null,
 					card,
-					note: 'next city gets a Hollow Man',
-					alarm: true,
 					strike: [],
 					pulse: null,
 					incidents: [],
@@ -290,8 +275,6 @@ export class InfectionShow {
 					effect: null,
 					city: entry.city,
 					card,
-					note: 'epidemic',
-					alarm: false,
 					strike: [...take(entry.city, 'supplies', -entry.removed), ...take(null, 'stockpile', entry.removed)],
 					pulse: 'epidemic',
 					incidents: [],
@@ -342,10 +325,7 @@ export class InfectionShow {
 			if (!beat) break;
 			const [before, after] = HOLD[beat.stakes === 'brink' || !beat.incidents.length ? beat.stakes : 'incident'];
 			const brink = beat.stakes === 'brink';
-			this.stack = [
-				{ key: beat.seq, card: beat.card, note: beat.note, alarm: beat.alarm, city: beat.city },
-				...this.stack,
-			];
+			this.stack = [{ key: beat.seq, card: beat.card, city: beat.city }, ...this.stack];
 			if (beat.city) this.focus = beat.city;
 			this.cue({ t: 'flip' });
 			if (!(await wait(before))) return;

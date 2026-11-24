@@ -203,7 +203,7 @@
 	<div class="slot" data-turn-slot data-testid="infection-draw">
 		{#each stack as entry, index (entry.key)}
 			<div class="layer" style:--z={stack.length - index} data-order={index} in:fromDeck out:leave>
-				<div class="whole"><InfectionCard card={entry.card} note={entry.note} alarm={entry.alarm} /></div>
+				<div class="whole"><InfectionCard card={entry.card} /></div>
 			</div>
 		{/each}
 	</div>
