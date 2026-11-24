@@ -7,8 +7,9 @@ export type { CursorTool };
 /** `target` is lit for a click; `hint` shows where a card the pointer rests on could go. */
 export type CityHighlight = 'target' | 'hint' | 'selected' | null;
 
+export type SpotTone = 'danger' | 'warn' | 'muted' | 'hollow';
 /** A city a counter in the top bar points at while the pointer or focus rests on it, with what to print over it. */
-export type CitySpot = { tone: 'danger' | 'hollow'; label: string | null };
+export type CitySpot = { tone: SpotTone; label: string | null };
 
 /**
  * A panel lying over the board, in pixels from the stage's top left. The fitted view may slide the board a little

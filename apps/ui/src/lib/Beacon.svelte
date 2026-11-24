@@ -16,8 +16,8 @@
 		gap?: string;
 		width?: string;
 		glow?: string;
-		/** Gold calls for a click. The others only point: red at danger, violet at the Hollow Men. */
-		tone?: 'gold' | 'danger' | 'hollow';
+		/** Gold calls for a click. The others only point: red, yellow and grey by how much is at stake, violet at the Hollow Men. */
+		tone?: 'gold' | 'danger' | 'warn' | 'muted' | 'hollow';
 	};
 
 	let { round = false, turns, gap = '0.2rem', width = '0.17rem', glow = '0.8rem', tone = 'gold' }: Props = $props();
@@ -27,6 +27,8 @@
 	class="beacon"
 	class:round
 	class:danger={tone === 'danger'}
+	class:warn={tone === 'warn'}
+	class:muted={tone === 'muted'}
 	class:hollow={tone === 'hollow'}
 	style:--gap={gap}
 	style:--width={width}
@@ -67,6 +69,20 @@
 		--hot: #ffd9cf;
 		--fill: rgb(214 52 32 / 0.62);
 		--halo: 230 60 36;
+	}
+
+	.warn {
+		--gold: #f2c230;
+		--hot: #fff6d6;
+		--fill: rgb(226 178 40 / 0.62);
+		--halo: 236 186 40;
+	}
+
+	.muted {
+		--gold: #a8a296;
+		--hot: #f1eee8;
+		--fill: rgb(150 144 134 / 0.55);
+		--halo: 150 144 134;
 	}
 
 	.hollow {

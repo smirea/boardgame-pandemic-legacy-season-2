@@ -342,7 +342,7 @@
 			pointerEvents="none"
 			zIndexRange={[20, 11]}
 		>
-			<b class="spot-label" aria-hidden="true">{state.spot.label}</b>
+			<b class="spot-label {state.spot.tone}" aria-hidden="true">{state.spot.label}</b>
 		</HTML>
 	{/if}
 
@@ -509,6 +509,14 @@
 		background: radial-gradient(circle, transparent 52%, rgb(214 52 32 / 0.4) 100%);
 	}
 
+	.spot.warn {
+		background: radial-gradient(circle, transparent 52%, rgb(226 178 40 / 0.4) 100%);
+	}
+
+	.spot.muted {
+		background: radial-gradient(circle, transparent 52%, rgb(150 144 134 / 0.35) 100%);
+	}
+
 	.spot.hollow {
 		background: radial-gradient(circle, transparent 52%, rgb(150 100 220 / 0.4) 100%);
 	}
@@ -526,6 +534,18 @@
 		paint-order: stroke fill;
 		text-shadow: 0 0 0.6rem rgb(230 60 36 / 0.55);
 		animation: rise 260ms cubic-bezier(0.2, 1.4, 0.4, 1) both;
+	}
+
+	.spot-label.warn {
+		color: #f2c230;
+		font-size: 2.15rem;
+		text-shadow: 0 0 0.6rem rgb(236 186 40 / 0.5);
+	}
+
+	.spot-label.muted {
+		color: #c9c3b8;
+		font-size: 1.7rem;
+		text-shadow: none;
 	}
 
 	@keyframes rise {
