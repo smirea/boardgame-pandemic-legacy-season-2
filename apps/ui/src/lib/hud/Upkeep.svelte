@@ -6,7 +6,7 @@
 	import { characterVoice } from '#lib/characters/voice.svelte.ts';
 	import { flip } from 'svelte/animate';
 	import { fly } from 'svelte/transition';
-	import { cityName, SEAT_COLORS } from './labels.svelte.ts';
+	import { cityName, seatColor } from './labels.svelte.ts';
 	import { REASON } from './populationShow.svelte.ts';
 	import Portrait from './Portrait.svelte';
 	import { purchaseName, purchaseTarget, shopOf } from './upkeepShop.ts';
@@ -61,7 +61,7 @@
 	/** A character's colour is the seat they played this game, else a neutral ink. */
 	function characterColor(id: CharacterId) {
 		const seat = game.seats.find(entry => game.players[entry]?.character === id);
-		return seat ? SEAT_COLORS[game.seats.indexOf(seat)]! : '#5a4e40';
+		return seat ? seatColor(seat) : '#5a4e40';
 	}
 
 	function buy(target: ShopTarget) {
@@ -281,7 +281,6 @@
 		border: 1px solid var(--line);
 		border-radius: 6px;
 		background: var(--panel);
-		backdrop-filter: blur(12px);
 		box-shadow: 0 2rem 5rem rgb(0 0 0 / 0.6);
 		color: var(--ink);
 		animation: laid 420ms cubic-bezier(0.2, 0.9, 0.3, 1.1) both;

@@ -1,4 +1,4 @@
-import { applyPatches, diff } from '@repo/game';
+import { applyPatches, diff, frozen } from '@repo/game';
 import type { Patch, PublicState } from '@repo/game';
 
 /**
@@ -42,10 +42,10 @@ export class StateMirror {
 	apply(msg: StateMsg): PublicState | 'lost' {
 		if (msg.t === 'state') {
 			this.#seq = msg.seq;
-			return (this.#state = msg.state);
+			return (this.#state = frozen(msg.state));
 		}
 		if (!this.#state || msg.seq !== this.#seq + 1) return 'lost';
 		this.#seq = msg.seq;
-		return (this.#state = applyPatches(this.#state, msg.patch));
+		return (this.#state = frozen(applyPatches(this.#state, msg.patch)));
 	}
 }

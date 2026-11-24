@@ -66,8 +66,10 @@ export class Radio {
 			this.waiting = { moment, pick: now.seq + world.campaign.results.length, key: now.seq };
 		if (!this.waiting || busy) return;
 		const { moment: due, pick, key } = this.waiting;
-		this.waiting = null;
 		const def = BARKS[due];
+		// A line that cannot wait still never talks over the story or a reading: it is said once they are done.
+		if (def.urgent && quiet) return;
+		this.waiting = null;
 		if (def.once && this.said.has(due)) return;
 		if (!def.urgent && (quiet || this.line || voicePlayer.busy || game.turn - this.lastTurn < QUIET_TURNS)) return;
 		this.said.add(due);
@@ -82,7 +84,9 @@ export class Radio {
 		const done = () => {
 			if (this.line?.key === key) this.line = null;
 		};
-		if (!voicePlayer.play(bark.id, () => (this.timer = setTimeout(done, 500)))) this.timer = setTimeout(done, READ_MS);
+		// A line cut off, by the story starting or the voices being turned off, leaves with its voice.
+		const spoken = voicePlayer.play(bark.id, () => (this.timer = setTimeout(done, 500)), done);
+		if (!spoken) this.timer = setTimeout(done, READ_MS);
 	}
 
 	stop() {

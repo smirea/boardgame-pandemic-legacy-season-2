@@ -21,7 +21,7 @@
 	import Beacon from '#lib/Beacon.svelte';
 	import ActionIcon from './ActionIcon.svelte';
 	import type { CardUse, DockChoice, HandPick } from './choosing.svelte.ts';
-	import { cityName, decideLabel, decisionTitle, seatName, SEAT_COLORS, cardName } from './labels.svelte.ts';
+	import { cityName, decideLabel, decisionTitle, seatColor, seatName, cardName } from './labels.svelte.ts';
 	import { deal } from './deal.ts';
 	import { sortHand } from './handOrder.ts';
 	import VoteButton from './VoteButton.svelte';
@@ -146,7 +146,7 @@
 				const job = character.job ? pack.jobs.find(candidate => candidate.id === character.job)!.name : null;
 				return {
 					character,
-					color: at >= 0 ? SEAT_COLORS[at]! : '#4a4238',
+					color: at >= 0 ? seatColor(game.seats[at]!) : '#4a4238',
 					seated: at >= 0,
 					job: job === character.name ? null : job,
 				};
@@ -179,7 +179,6 @@
 	const cardsOf = (other: SeatId) =>
 		(game.players[other]?.hand ?? []).flatMap(id => world.campaign.playerCards[id] ?? []);
 	const handCards = $derived(sortHand(cardsOf(seat), card => cardName(world, card.id)));
-	const seatColor = (other: SeatId) => SEAT_COLORS[game.seats.indexOf(other)];
 	// The fan tightens as the hand grows, and further when its column is too narrow, so it never reaches the prompts.
 	let handWidth = $state(0);
 	let hand = $state<HTMLElement>();
@@ -1075,7 +1074,6 @@
 		border: 1px solid var(--line);
 		border-radius: 3px;
 		background: var(--panel);
-		backdrop-filter: blur(10px);
 		box-shadow: 0 0.6rem 1.6rem rgb(0 0 0 / 0.4);
 		animation: rise 320ms cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
 	}
@@ -1163,7 +1161,6 @@
 		border: 1px solid var(--line);
 		border-radius: 0.5rem;
 		background: var(--panel);
-		backdrop-filter: blur(10px);
 		box-shadow: 0 0.8rem 2rem rgb(0 0 0 / 0.45);
 	}
 

@@ -7,7 +7,7 @@
 	import { backOut } from 'svelte/easing';
 	import { characterVoice } from '#lib/characters/voice.svelte.ts';
 	import CharacterSheet from './characters/CharacterSheet.svelte';
-	import { SEAT_COLORS } from './labels.svelte.ts';
+	import { seatColor } from './labels.svelte.ts';
 	import VoteButton from './VoteButton.svelte';
 	import { tableVoters, waitingOn } from './voters.ts';
 
@@ -30,7 +30,7 @@
 	const everyone = $derived(tableVoters(world.table, who => vote.votes[who] !== undefined));
 	const waiting = $derived(waitingOn(everyone, player));
 	const split = $derived(new Set(Object.values(vote.votes)).size > 1);
-	const colorOf = (seat: SeatId) => SEAT_COLORS[game.seats.indexOf(seat)] ?? '#4a4238';
+	const colorOf = (seat: SeatId) => seatColor(seat);
 
 	// The table is warned before it is asked: the note holds a moment on every screen, then the characters come up.
 	const NOTE_MS = 2600;

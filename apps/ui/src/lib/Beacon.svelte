@@ -3,9 +3,11 @@
 	seat, a recon box, the deck to draw from. A gold stroke with two bright heads running round it, between two dark
 	hairlines so it reads on the chart's paper and on the dark table alike, and a glow behind.
 
-	It lies over its parent's edge, so the parent must be positioned. `round` is for a circle and turns the stroke
-	itself, which the compositor does alone; the others move the gradient round a box of any shape. A beacon that
-	shows while nobody is touching the game must stop (`turns`): an animation that never ends keeps the page drawing.
+	It lies over its parent's edge, so the parent must be positioned. Nothing in it is painted again while it runs:
+	the heads are a gradient turned behind the stroke's mask and the glow only changes its opacity, both of which the
+	compositor does alone. A table with thirty cities lit would otherwise repaint thirty shadows every frame. A beacon
+	that shows while nobody is touching the game must stop (`turns`): an animation that never ends keeps the page
+	drawing.
 -->
 <script lang="ts">
 	type Props = {
@@ -55,8 +57,16 @@
 		pointer-events: none;
 		box-shadow:
 			0 0 0 1px var(--edge),
-			inset 0 0 0 calc(var(--width) + 1px) var(--edge),
-			0 0 var(--glow) calc(var(--glow) * 0.2) rgb(var(--halo) / 0.55);
+			inset 0 0 0 calc(var(--width) + 1px) var(--edge);
+	}
+
+	.beacon::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		border-radius: inherit;
+		box-shadow: 0 0 calc(var(--glow) * 1.4) calc(var(--glow) * 0.3) rgb(var(--halo) / 0.8);
+		opacity: 0.55;
 		animation: breathe 0.9s ease-in-out var(--breaths) alternate;
 	}
 
@@ -96,47 +106,45 @@
 		position: absolute;
 		inset: 0;
 		padding: var(--width);
+		overflow: hidden;
 		border-radius: inherit;
-		background:
-			conic-gradient(
-				from var(--beacon-angle),
-				transparent 0 0.28turn,
-				var(--gold) 0.44turn,
-				var(--hot) 0.5turn,
-				transparent 0.5turn 0.78turn,
-				var(--gold) 0.94turn,
-				var(--hot) 1turn
-			),
-			linear-gradient(var(--fill), var(--fill));
+		background: linear-gradient(var(--fill), var(--fill));
 		mask:
 			linear-gradient(#000 0 0) content-box,
 			linear-gradient(#000 0 0);
 		mask-composite: exclude;
-		animation: sweep 1.8s linear var(--turns);
+		container-type: size;
 	}
 
-	.round .sweep {
-		animation-name: turn;
-	}
-
-	@keyframes sweep {
-		to {
-			--beacon-angle: 1turn;
-		}
+	/* A square wide enough to cover the box at any angle, so turning it carries the heads round a box of any shape. */
+	.sweep::before {
+		content: '';
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: calc(hypot(100cqw, 100cqh) + 4 * var(--width));
+		aspect-ratio: 1;
+		translate: -50% -50%;
+		background: conic-gradient(
+			transparent 0 0.28turn,
+			var(--gold) 0.44turn,
+			var(--hot) 0.5turn,
+			transparent 0.5turn 0.78turn,
+			var(--gold) 0.94turn,
+			var(--hot) 1turn
+		);
+		animation: turn 1.8s linear var(--turns);
 	}
 
 	@keyframes turn {
 		to {
-			transform: rotate(1turn);
+			rotate: 1turn;
 		}
 	}
 
 	@keyframes breathe {
 		to {
-			box-shadow:
-				0 0 0 1px var(--edge),
-				inset 0 0 0 calc(var(--width) + 1px) var(--edge),
-				0 0 calc(var(--glow) * 1.6) calc(var(--glow) * 0.35) rgb(var(--halo) / 0.8);
+			opacity: 1;
 		}
 	}
 </style>

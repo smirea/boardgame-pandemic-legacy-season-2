@@ -35,22 +35,37 @@
 		return { ...open, d: `M${sx},${sy} C${c1.join(',')} ${c2.join(',')} ${ex},${ey}`, head };
 	}
 
-	// The corners fly in and the side columns resize, so the arrows follow their targets every frame while shown.
+	// The corners fly in and the side columns resize, so the arrows follow their targets for a moment after anything
+	// here changes size or a seat is taken, and then rest: a loop that never ends keeps the page drawing.
+	const FOLLOW_MS = 900;
 	$effect(() => {
+		const open = seats;
+		const at = prompt;
 		let frame = 0;
+		let until = 0;
 		const draw = () => {
 			const origin = stage.getBoundingClientRect();
-			const from = prompt?.getBoundingClientRect();
+			const from = at?.getBoundingClientRect();
 			arrows = from
-				? seats.flatMap(open => {
-						const target = stage.querySelector<HTMLElement>(`[data-place=${open.place}]`);
-						return target ? [arrow(open, from, target.getBoundingClientRect(), origin)] : [];
+				? open.flatMap(seat => {
+						const target = stage.querySelector<HTMLElement>(`[data-place=${seat.place}]`);
+						return target ? [arrow(seat, from, target.getBoundingClientRect(), origin)] : [];
 					})
 				: [];
-			frame = requestAnimationFrame(draw);
+			frame = performance.now() < until ? requestAnimationFrame(draw) : 0;
 		};
-		draw();
-		return () => cancelAnimationFrame(frame);
+		const follow = () => {
+			until = performance.now() + FOLLOW_MS;
+			frame ||= requestAnimationFrame(draw);
+		};
+		const observer = new ResizeObserver(follow);
+		observer.observe(stage);
+		if (at) observer.observe(at);
+		follow();
+		return () => {
+			cancelAnimationFrame(frame);
+			observer.disconnect();
+		};
 	});
 </script>
 

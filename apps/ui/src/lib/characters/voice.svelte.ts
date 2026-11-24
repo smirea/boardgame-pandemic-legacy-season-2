@@ -100,7 +100,8 @@ class CharacterVoicePlayer {
 
 			if (force) {
 				voicePlayer.stop();
-			} else if (priority !== 'death' && voicePlayer.busy) {
+			} else if (priority !== 'death' && (voicePlayer.busy || this.ducked)) {
+				// Nothing but another death talks over the story or over a character's last words.
 				return bail();
 			}
 

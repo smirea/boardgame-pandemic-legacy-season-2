@@ -1,4 +1,15 @@
-import { characterAt, cityDef, handLimit, has, pack, revealDone, routeCost, sealDef, suppliesMade } from '@repo/game';
+import {
+	characterAt,
+	cityDef,
+	handLimit,
+	has,
+	pack,
+	revealDone,
+	routeCost,
+	sealDef,
+	SEAT_IDS,
+	suppliesMade,
+} from '@repo/game';
 import type { Action, CardId, CityId, Decide, Decision, LogEntry, Play, Purchase, SeatId, World } from '@repo/game';
 import { CITY_COLOR } from '#lib/board/CityMarker.svelte';
 import { cardColor } from './PlayerCard.svelte';
@@ -22,6 +33,11 @@ export const MONTHS = [
 ];
 
 export const SEAT_COLORS = ['#d9573f', '#4f93c4', '#e3b23c', '#9a7cc9'];
+/**
+ * A seat's colour. It goes with the seat, not with how many seats a game fills, so a player is the same colour in the
+ * lobby, on the board and on every vote.
+ */
+export const seatColor = (seat: SeatId): string => SEAT_COLORS[SEAT_IDS.indexOf(seat)]!;
 
 export const ACTION_NAMES: Record<Action['a'], string> = {
 	drive: 'Drive / Ferry',

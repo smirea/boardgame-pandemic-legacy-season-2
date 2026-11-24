@@ -836,8 +836,7 @@
 		border-radius: 0.2em;
 		background:
 			repeating-linear-gradient(-35deg, rgb(255 255 255 / 0.22) 0 0.24em, transparent 0.24em 0.52em),
-			rgb(220 229 233 / 0.74);
-		backdrop-filter: blur(1.5px);
+			rgb(220 229 233 / 0.8);
 		box-shadow: 0 0.08em 0.22em rgb(0 0 0 / 0.22);
 		color: #14191e;
 		font-size: 0.56em;
@@ -969,7 +968,6 @@
 		border: 1px solid rgb(42 32 22 / 0.42);
 		border-radius: 0.2em;
 		background: rgb(246 239 222 / 0.92);
-		backdrop-filter: blur(1.5px);
 		box-shadow:
 			inset 0 1px 2px rgb(34 25 16 / 0.12),
 			0 0.08em 0.22em rgb(0 0 0 / 0.24);

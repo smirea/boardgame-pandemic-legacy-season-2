@@ -86,6 +86,9 @@ export async function keepGame(record: GameRecord, state: PublicState) {
 		request.onerror = () => reject(request.error ?? new Error('The replay database could not be read'));
 	});
 	db.close();
+	// The copy in localStorage stops growing once that fills up, and a reload reads it back: the longer recording
+	// already kept here is the game.
+	if (previous && previous.steps > record.steps.length) return;
 	const entry = summarize(record, state, previous);
 	if (!entry) return;
 	await run<void>('readwrite', transaction => {

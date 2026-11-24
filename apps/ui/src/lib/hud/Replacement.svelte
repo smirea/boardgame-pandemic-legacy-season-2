@@ -5,7 +5,7 @@
 	import { fade, fly, scale } from 'svelte/transition';
 	import { figureUrl } from '#lib/characters/figures.ts';
 	import CharacterSheet from './characters/CharacterSheet.svelte';
-	import { SEAT_COLORS, seatName } from './labels.svelte.ts';
+	import { seatColor, seatName } from './labels.svelte.ts';
 	import { placed } from './traits.ts';
 
 	type Props = {
@@ -21,7 +21,7 @@
 
 	const game = $derived(world.game!);
 	const fallen = $derived(world.campaign.characters[game.players[seat]!.character]!);
-	const color = $derived(SEAT_COLORS[game.seats.indexOf(seat)] ?? '#4a4238');
+	const color = $derived(seatColor(seat));
 	const free = $derived(freeCharacters(world));
 	// A haven worker steps in only when no living character is free, as the engine allows.
 	const worker = $derived(decides.some(decide => decide.d === 'replace' && decide.character === null));

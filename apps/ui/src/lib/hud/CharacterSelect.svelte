@@ -10,7 +10,7 @@
 	import CharacterSheet from './characters/CharacterSheet.svelte';
 	import Creator from './characters/Creator.svelte';
 	import Faces from './characters/Faces.svelte';
-	import { cityName, MONTHS, SEAT_COLORS } from './labels.svelte.ts';
+	import { cityName, MONTHS, seatColor } from './labels.svelte.ts';
 	import Ready from './Ready.svelte';
 
 	type Props = {
@@ -42,15 +42,15 @@
 	const nameOf = (who: PlayerId) => table.seats.find(entry => entry.player === who)?.name ?? '';
 	const seatsOf = (who: PlayerId) => table.seats.filter(entry => entry.player === who).map(entry => entry.seat);
 	const claimedBy = (who: PlayerId) => living.filter(character => claimant(world, character.id) === who);
-	const seatColor = (who: PlayerId, index: number) => {
+	const colorOf = (who: PlayerId, index: number) => {
 		const seat = seatsOf(who)[index];
-		return seat ? SEAT_COLORS[SEAT_IDS.indexOf(seat)]! : null;
+		return seat ? seatColor(seat) : null;
 	};
 
 	/** The colour a claimed character plays in: a player's characters go to their seats in order, as the deal does. */
 	function colorFor(character: Character): string | null {
 		const holder = claimant(world, character.id);
-		return holder ? seatColor(holder, claimedBy(holder).indexOf(character)) : null;
+		return holder ? colorOf(holder, claimedBy(holder).indexOf(character)) : null;
 	}
 	const choosing = $derived(players.filter(who => claimedBy(who).length < seatsOf(who).length));
 	const mine = $derived(claimedBy(player));
@@ -233,7 +233,7 @@
 						{snap}
 						{player}
 						{send}
-						color={seatColor(player, mine.length)}
+						color={colorOf(player, mine.length)}
 						{canRename}
 						rename={renameHaven}
 						{look}
@@ -270,7 +270,7 @@
 			{#each players as who (who)}
 				{@const state = table.ready[who] ? 'ready' : choosing.includes(who) ? 'choosing' : 'waiting'}
 				<li class={state}>
-					{@render pawn(seatColor(who, 0)!)}
+					{@render pawn(colorOf(who, 0)!)}
 					<b>{who === player ? 'You' : nameOf(who)}</b>
 					<span>{state === 'ready' ? 'Ready' : state === 'choosing' ? 'Choosing' : 'Not ready'}</span>
 				</li>

@@ -11,7 +11,7 @@
 	import { sceneForSearch } from '#lib/story/script.ts';
 	import StoryStage from '#lib/story/StoryStage.svelte';
 	import { onButton, typing } from '#lib/keys.ts';
-	import { cardName, cityName, seatName, SEAT_COLORS } from './labels.svelte.ts';
+	import { cardName, cityName, seatName, seatColor } from './labels.svelte.ts';
 	import PlayerCard from './PlayerCard.svelte';
 
 	type Props = {
@@ -32,7 +32,7 @@
 
 	const game = $derived(world.game!);
 	const who = $derived(seatName(world, pending.seat));
-	const color = $derived(SEAT_COLORS[game.seats.indexOf(pending.seat)] ?? '#f4e8cd');
+	const color = $derived(seatColor(pending.seat));
 
 	const reveal = $derived(pending.t === 'reveal' ? pending : null);
 	const done = $derived(reveal ? revealDone(game, reveal) : true);

@@ -101,9 +101,11 @@ function applyGains() {
 	}
 }
 
-function ensureGraph(): AudioGraph | null {
+/** A graph whose context and nodes exist and whose noise and reverbs are still being made, a piece at a time. */
+let building: { graph: AudioGraph; todo: (() => void)[] } | null = null;
+
+function startGraph(): typeof building {
 	if (typeof window === 'undefined') return null;
-	if (graph) return graph;
 	const Ctor =
 		window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
 	if (!Ctor) return null;
@@ -124,9 +126,7 @@ function ensureGraph(): AudioGraph | null {
 	const voice = ctx.createGain();
 
 	const hullReverb = ctx.createConvolver();
-	hullReverb.buffer = makeImpulseResponse(ctx, 1.85, 2.7, 0.72);
 	const voidReverb = ctx.createConvolver();
-	voidReverb.buffer = makeImpulseResponse(ctx, 3.6, 2.2, 0.82);
 
 	const hullWet = ctx.createGain();
 	hullWet.gain.value = 0.34;
@@ -146,23 +146,27 @@ function ensureGraph(): AudioGraph | null {
 	master.connect(compressor);
 	compressor.connect(ctx.destination);
 
-	graph = {
-		ctx,
-		master,
-		music,
-		musicDuck,
-		cues,
-		sfx,
-		voice,
-		hullReverb,
-		voidReverb,
-		noise: {
-			white: makeNoiseBuffer(ctx, 'white', 3),
+	const noise = {} as AudioGraph['noise'];
+	return {
+		graph: { ctx, master, music, musicDuck, cues, sfx, voice, hullReverb, voidReverb, noise },
+		todo: [
+			() => (noise.white = makeNoiseBuffer(ctx, 'white', 3)),
 			// The sea and the wind loop these for minutes, so they are long enough for a loop not to be heard as one.
-			pink: makeNoiseBuffer(ctx, 'pink', 10),
-			brown: makeNoiseBuffer(ctx, 'brown', 10),
-		},
+			() => (noise.pink = makeNoiseBuffer(ctx, 'pink', 10)),
+			() => (noise.brown = makeNoiseBuffer(ctx, 'brown', 10)),
+			() => (hullReverb.buffer = makeImpulseResponse(ctx, 1.85, 2.7, 0.72)),
+			() => (voidReverb.buffer = makeImpulseResponse(ctx, 3.6, 2.2, 0.82)),
+		],
 	};
+}
+
+function ensureGraph(): AudioGraph | null {
+	if (graph) return graph;
+	building ??= startGraph();
+	if (!building) return null;
+	for (const piece of building.todo.splice(0)) piece();
+	graph = building.graph;
+	building = null;
 
 	audioSettings.subscribe(applyGains);
 	if (typeof document !== 'undefined') {
@@ -170,6 +174,27 @@ function ensureGraph(): AudioGraph | null {
 	}
 	applyGains();
 	return graph;
+}
+
+/**
+ * Builds the graph while the page has nothing else to do, a piece per idle moment. Opening the audio device takes the
+ * browser about 90 ms and the noise and reverbs another 40, which the first click of a session otherwise pays for in
+ * one frozen frame. A context made before any click waits suspended until `wake` resumes it, which Chrome notes once
+ * in the console. A click that comes first finishes whatever is left on the spot.
+ */
+function warmGraph() {
+	const soon = (run: () => void) =>
+		typeof requestIdleCallback === 'function' ? requestIdleCallback(run, { timeout: 4000 }) : setTimeout(run, 200);
+	const next = () => {
+		if (graph) return;
+		building ??= startGraph();
+		if (!building) return;
+		const piece = building.todo.shift();
+		if (!piece) return void ensureGraph();
+		piece();
+		soon(next);
+	};
+	soon(next);
 }
 
 /** Binds one-time user gesture unlock so audio activates cleanly only after real interaction. */
@@ -186,6 +211,7 @@ export function bindAudioUnlock() {
 	};
 	window.addEventListener('pointerdown', wake, { capture: true, passive: true });
 	window.addEventListener('keydown', wake, { capture: true, passive: true });
+	warmGraph();
 }
 
 export function onAudioUnlocked(cb: () => void): () => void {

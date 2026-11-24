@@ -5,7 +5,7 @@
 	import CardIcon from '#lib/cards/CardIcon.svelte';
 	import { SCAR_ICON } from '#lib/cards/icons.ts';
 	import { fly } from 'svelte/transition';
-	import { seatName, SEAT_COLORS } from './labels.svelte.ts';
+	import { seatName, seatColor } from './labels.svelte.ts';
 	import { figureKey, figureUrl } from '#lib/characters/figures.ts';
 	import { characterVoice } from '#lib/characters/voice.svelte.ts';
 	import Exposure, { shownTrack } from './characters/Exposure.svelte';
@@ -50,7 +50,7 @@
 
 	const who = $derived(seat ?? (picked.seat && seats.includes(picked.seat) ? picked.seat : seats[0]!));
 	const character = $derived(world.campaign.characters[game.players[who]!.character]!);
-	const color = $derived(SEAT_COLORS[game.seats.indexOf(who)] ?? '#4a4238');
+	const color = $derived(seatColor(who));
 	const mineOptions = $derived(options.filter(option => (option.seat ?? seat) === who));
 	const legalScars = $derived(new Set(mineOptions.map(option => option.scar)));
 	const scar = $derived(picked.scar && legalScars.has(picked.scar) ? picked.scar : null);
@@ -156,16 +156,14 @@
 					role="tab"
 					aria-selected={other === who}
 					class:on={other === who}
-					style:--seat={SEAT_COLORS[game.seats.indexOf(other)]}
+					style:--seat={seatColor(other)}
 					disabled={!canChoose}
 					onclick={() => {
 						if (other !== who) characterVoice.playFor(them, 'punchline', { priority: 'ui' });
 						picked = { seat: other, scar: null, target: null };
 					}}
 				>
-					<span class="face"
-						><Portrait portrait={them.portrait} color={SEAT_COLORS[game.seats.indexOf(other)]!} job={them.job} /></span
-					>
+					<span class="face"><Portrait portrait={them.portrait} color={seatColor(other)} job={them.job} /></span>
 					{them.name}
 				</button>
 			{/each}
@@ -260,7 +258,6 @@
 		border: 1px solid var(--line);
 		border-radius: 6px;
 		background: var(--panel);
-		backdrop-filter: blur(12px);
 		box-shadow: 0 2rem 5rem rgb(0 0 0 / 0.6);
 	}
 

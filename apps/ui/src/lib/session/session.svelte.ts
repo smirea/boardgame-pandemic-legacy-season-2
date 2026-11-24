@@ -14,6 +14,20 @@ import { storedDrawings, storedId, storedName, storedRecord, storedSave } from '
 import { StateFeed, StateMirror } from './sync';
 
 const DRAWINGS_SAVE_MS = 1000;
+/** How long a seated player may be gone before the host gets up for them while the table waits on a vote. */
+const GONE_MS = 20_000;
+
+/** Whether the game cannot go on until everyone seated has agreed to something. */
+function tableWaits(state: PublicState): boolean {
+	const { campaign, game, table } = state.world;
+	return (
+		state.phase === 'over' ||
+		state.phase === 'upkeep' ||
+		campaign.briefing.length > 0 ||
+		table.undoVote !== null ||
+		game?.pending[0]?.t === 'scarVote'
+	);
+}
 /** A recording runs to a few megabytes, which the host sends in 16 KB frames. */
 const RECORD_ASK_MS = 30_000;
 
@@ -81,6 +95,9 @@ export class GameSession {
 	#pointersFrame = 0;
 	#storageFailed = false;
 	#drawingsTimer: ReturnType<typeof setTimeout> | null = null;
+	/** When each seated player who is not connected was first missed. */
+	readonly #goneSince = new Map<string, number>();
+	#goneTimer: ReturnType<typeof setTimeout> | null = null;
 
 	/** False for a session that stands apart from this browser's campaign, which neither reads nor writes storage. */
 	readonly #persist: boolean;
@@ -138,11 +155,21 @@ export class GameSession {
 		if (options.mode !== 'join') {
 			const save = options.save === undefined ? storedSave() : options.save;
 			const rawUndo = this.#persist && save ? LS.get('undo') : null;
-			const savedUndo = Array.isArray(rawUndo)
+			const kept = Array.isArray(rawUndo)
 				? rawUndo.filter((entry): entry is UndoEntry =>
 						Boolean(entry && typeof entry === 'object' && 'world' in entry && 'subject' in entry),
 					)
 				: [];
+			// A move can be taken back to a world as well as loaded into one, so each is checked as the save was.
+			const sound = (entry: UndoEntry) => {
+				try {
+					parseSave({ v: 1, phase: save!.phase, world: entry.world });
+					return true;
+				} catch {
+					return false;
+				}
+			};
+			const savedUndo = kept.every(sound) ? kept : [];
 			// Read before the first change can put a new game's recording in its place.
 			if (this.#persist) void keepStoredGame().catch(error => console.warn('The last recording was not kept:', error));
 			this.#record = this.#persist ? storedRecord(save) : null;
@@ -164,6 +191,7 @@ export class GameSession {
 				this.#store({ save: this.save(), undo: snapshot.context.undo });
 				const change = this.#feed.next(after);
 				if (change && this.#net.status !== 'closed') this.#net.send(change);
+				queueMicrotask(() => this.#tidyVotes());
 			});
 			this.#actor.start();
 			this.#sitDown();
@@ -189,6 +217,7 @@ export class GameSession {
 		for (const id of this.#pointers.keys()) if (!present.has(id)) this.#pointers.delete(id);
 		this.#showPointers();
 		this.#tidyLobby();
+		this.#tidyVotes();
 	}
 
 	#onMessage(msg: Msg, from: PeerId) {
@@ -306,6 +335,36 @@ export class GameSession {
 		for (const player of gone) this.#apply({ type: 'LEAVE', player }, null);
 	}
 
+	/**
+	 * A vote of the whole table waits for everyone seated, and a player whose laptop closed never votes. So while the
+	 * table waits on one, the host gets up for a player who has been gone a while, as it does in the lobby: the rest
+	 * decide, and the player sits back down when they return. With nobody else left connected it does nothing, since
+	 * it cannot tell their absence from its own.
+	 */
+	#tidyVotes() {
+		if (this.#goneTimer !== null) clearTimeout(this.#goneTimer);
+		this.#goneTimer = null;
+		const state = this.state;
+		if (!this.#actor || this.mode === 'solo' || !state || state.phase === 'lobby') return this.#goneSince.clear();
+		const here = new Set(this.peers.filter(peer => peer.connected).map(peer => peer.id as string));
+		here.add(this.selfId);
+		const seated = new Set<string>(state.world.table.seats.map(entry => entry.player));
+		const now = Date.now();
+		for (const player of this.#goneSince.keys())
+			if (here.has(player) || !seated.has(player)) this.#goneSince.delete(player);
+		for (const player of seated)
+			if (!here.has(player) && !this.#goneSince.has(player)) this.#goneSince.set(player, now);
+		const others = [...seated].filter(player => player !== this.selfId);
+		if (!tableWaits(state) || this.#goneSince.size === 0 || others.every(player => !here.has(player))) return;
+		const late = [...this.#goneSince].filter(([, since]) => now - since >= GONE_MS).map(([player]) => player);
+		for (const player of late) {
+			this.#goneSince.delete(player);
+			this.#apply({ type: 'LEAVE', player: player as PlayerId }, null);
+		}
+		const next = Math.min(...[...this.#goneSince.values()].map(since => since + GONE_MS - now));
+		if (Number.isFinite(next)) this.#goneTimer = setTimeout(() => this.#tidyVotes(), next);
+	}
+
 	/** Keeps the name for next time and renames this player wherever they sit. */
 	rename(name: string) {
 		LS.set({ name: name.trim() });
@@ -331,6 +390,9 @@ export class GameSession {
 			LS.set(values);
 		} catch (error) {
 			console.warn('The game could not be saved in this browser:', error);
+			// A recording that no longer fits would be read back short after a reload and written on from there. Without
+			// it the save has its room back, and the library keeps the whole recording.
+			if ('record' in values) LS.delete('record');
 			if (!this.#storageFailed)
 				this.#say('This browser cannot save the game: its storage is full. Export the campaign from the Menu.');
 			this.#storageFailed = true;
@@ -482,6 +544,7 @@ export class GameSession {
 	close() {
 		void flushGames();
 		this.#saveDrawings();
+		if (this.#goneTimer !== null) clearTimeout(this.#goneTimer);
 		removeEventListener('pagehide', this.#saveDrawings);
 		cancelAnimationFrame(this.#pointersFrame);
 		this.#sketch.dispose();

@@ -16,7 +16,7 @@
 		danger?: boolean;
 		/** This browser plays the seat, so the panel speaks to its player. */
 		mine: boolean;
-		/** Called once the card is back in its seat. */
+		/** Called once the card is back in its seat, or when something else takes the table before it gets there. */
 		ondone: () => void;
 	};
 
@@ -55,7 +55,13 @@
 				: [{ opacity: 0 }, { opacity: 1 }],
 			{ ...GROW, fill: 'backwards' },
 		);
-		const done = () => live && ondone();
+		// Read now: by the time the card is put away, the turn it announced may no longer be the one to announce.
+		const finished = ondone;
+		const done = () => {
+			if (!live) return;
+			live = false;
+			finished();
+		};
 		const timer = setTimeout(() => {
 			if (!live) return;
 			shown = false;
@@ -69,8 +75,9 @@
 			card.animate(frames, { ...SHRINK, fill: 'forwards' }).onfinish = done;
 		}, GROW.duration + HOLD_MS);
 		return () => {
-			live = false;
 			clearTimeout(timer);
+			// An interlude cut short by what the turn's first move set off has still been shown: it does not play again.
+			done();
 		};
 	}
 </script>

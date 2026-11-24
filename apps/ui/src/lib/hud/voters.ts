@@ -1,6 +1,6 @@
 import { SEAT_IDS, tablePlayers } from '@repo/game';
 import type { PlayerId, Table } from '@repo/game';
-import { SEAT_COLORS } from './labels.svelte.ts';
+import { seatColor } from './labels.svelte.ts';
 
 export type Voter = { player: PlayerId; name: string; color: string; voted: boolean };
 
@@ -8,7 +8,7 @@ export type Voter = { player: PlayerId; name: string; color: string; voted: bool
 export function tableVoters(table: Table, voted: (player: PlayerId) => boolean): Voter[] {
 	return tablePlayers(table).map(player => {
 		const seat = table.seats.find(entry => entry.player === player)!;
-		return { player, name: seat.name, color: SEAT_COLORS[SEAT_IDS.indexOf(seat.seat)]!, voted: voted(player) };
+		return { player, name: seat.name, color: seatColor(seat.seat), voted: voted(player) };
 	});
 }
 

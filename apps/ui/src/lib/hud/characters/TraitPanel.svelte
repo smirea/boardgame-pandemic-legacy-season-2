@@ -88,8 +88,7 @@
 		padding: 0.35em 0.65em;
 		border: 1px solid rgb(240 230 206 / 0.14);
 		border-radius: 0.5em;
-		background: linear-gradient(100deg, rgb(14 11 9 / 0.88), rgb(14 11 9 / 0.7));
-		backdrop-filter: blur(6px) saturate(1.2);
+		background: linear-gradient(100deg, rgb(14 11 9 / 0.9), rgb(14 11 9 / 0.78));
 		box-shadow:
 			0 0.6em 1.6em rgb(0 0 0 / 0.4),
 			inset 0 1px 0 rgb(255 248 232 / 0.06);
@@ -142,7 +141,6 @@
 		border: 1px dashed rgb(240 230 206 / 0.2);
 		background: rgb(14 11 9 / 0.16);
 		box-shadow: none;
-		backdrop-filter: none;
 	}
 
 	.mark {

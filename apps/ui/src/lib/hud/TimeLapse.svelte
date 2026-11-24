@@ -2,7 +2,7 @@
 	import { feedback } from '@stefan.inc/feedback-engine/svelte';
 	import type { World } from '@repo/game';
 	import { fly } from 'svelte/transition';
-	import { seatName, SEAT_COLORS } from './labels.svelte.ts';
+	import { seatName, seatColor } from './labels.svelte.ts';
 
 	type Props = {
 		/** The moment of the game the board shows. */
@@ -30,7 +30,7 @@
 	{#if game}
 		<span class="turn">
 			{#if active}
-				<i style:background={SEAT_COLORS[game.seats.indexOf(active)]}></i>{seatName(world, active)} · turn {game.turn}
+				<i style:background={seatColor(active)}></i>{seatName(world, active)} · turn {game.turn}
 			{:else}
 				Setting up
 			{/if}

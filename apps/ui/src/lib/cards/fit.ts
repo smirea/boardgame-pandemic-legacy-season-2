@@ -30,8 +30,9 @@ export const fitText =
 		};
 		let live = true;
 		// No fit on mount: the observer's first call comes after the first layout and before paint, so a pile of cards
-		// mounting together lays the page out once instead of once per card.
-		void document.fonts.ready.then(() => live && fit());
+		// mounting together lays the page out once instead of once per card. Only a face still loading needs a second
+		// fit, when it arrives and reflows the text without resizing its box.
+		if (document.fonts.status !== 'loaded') void document.fonts.ready.then(() => live && fit());
 		const observer = new ResizeObserver(fit);
 		observer.observe(element);
 		return () => {
@@ -118,7 +119,7 @@ export const fitGroup =
 			frame = requestAnimationFrame(fit);
 		};
 		let live = true;
-		void document.fonts.ready.then(() => live && fit());
+		if (document.fonts.status !== 'loaded') void document.fonts.ready.then(() => live && fit());
 		const observer = new ResizeObserver(soon);
 		observer.observe(element);
 		const watched = new MutationObserver(soon);

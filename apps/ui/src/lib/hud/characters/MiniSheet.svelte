@@ -285,8 +285,7 @@
 		padding: 0.12em 0.5em;
 		border: 1px solid rgb(240 230 206 / 0.14);
 		border-radius: 0.35em;
-		background: rgb(14 11 9 / 0.74);
-		backdrop-filter: blur(4px);
+		background: rgb(14 11 9 / 0.82);
 		text-shadow: none;
 		white-space: nowrap;
 	}

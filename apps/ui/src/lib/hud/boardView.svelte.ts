@@ -6,7 +6,7 @@ import { reconciler } from '#lib/reconcile.ts';
 import type { SessionView } from '#lib/session/session.svelte.ts';
 import type { Lag } from './infectionShow.svelte.ts';
 import type { MapLag } from './legacyShow.svelte.ts';
-import { cityName, SEAT_COLORS, seatName } from './labels.svelte.ts';
+import { cityName, SEAT_COLORS, seatColor, seatName } from './labels.svelte.ts';
 
 const LAB_META: Record<string, { id?: keyof typeof LABS; name: string; effect: string | null }> = {
 	[LABS.opal]: { id: 'opal', name: 'Opal Lab', effect: 'Make Supplies at a haven or supply center takes +1 cube.' },
@@ -73,8 +73,7 @@ export function createBoardView(source: BoardSource): BoardView {
 
 	const colorOf = (player: string) => {
 		const seat = source.world.table.seats.find(entry => entry.player === player)?.seat;
-		const index = seat && game ? game.seats.indexOf(seat) : -1;
-		if (index >= 0) return SEAT_COLORS[index]!;
+		if (seat && game?.seats.includes(seat)) return seatColor(seat);
 		if (player === source.session.player) return SEAT_COLORS[0]!;
 		const peer = source.session.peers.findIndex(entry => entry.id === player);
 		return SEAT_COLORS[(Math.max(0, peer) + 1) % SEAT_COLORS.length]!;
@@ -222,7 +221,7 @@ export function createBoardView(source: BoardSource): BoardView {
 			(game?.seats ?? []).map((seat, index) => ({
 				id: seat,
 				city: game!.players[seat]!.location,
-				color: SEAT_COLORS[index]!,
+				color: seatColor(seat),
 				name: seatName(source.world, seat),
 				active: game!.active === seat && source.playing,
 				lit: source.litPawn(seat),

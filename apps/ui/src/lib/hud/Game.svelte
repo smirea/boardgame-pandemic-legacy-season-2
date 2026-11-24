@@ -66,7 +66,7 @@
 	import { InfectionShow } from './infectionShow.svelte.ts';
 	import { PopulationShow } from './populationShow.svelte.ts';
 	import { LegacyShow } from './legacyShow.svelte.ts';
-	import { cardName, cityName, seatName, SEAT_COLORS, setNames } from './labels.svelte.ts';
+	import { cardName, cityName, seatName, seatColor, setNames } from './labels.svelte.ts';
 	import { characterTraits } from './traits.ts';
 	import Lobby from './Lobby.svelte';
 	import CharacterSelect from './CharacterSelect.svelte';
@@ -152,9 +152,10 @@
 	const home = $derived(game ? (me ?? game.active) : null);
 	const dockSeat = $derived(spectator ? null : (viewing ?? home));
 
-	const actionChoices = $derived(game && playing ? actionMenu(world, game.active) : []);
-	// Actions are offered only to whoever plays the active seat, and only in its action step.
+	// Actions are offered only to whoever plays the active seat, and only in its action step. Nobody else reads the
+	// menu, and listing it is the costliest thing a state change asks of the engine.
 	const live = $derived(snap.phase === 'playing.actions' && canAct);
+	const actionChoices = $derived(game && live ? actionMenu(world, game.active) : []);
 	const actions = $derived(live ? actionChoices.flatMap(choice => choice.actions) : []);
 	const plays = $derived(playing ? legalPlays(world, snap.phase) : []);
 	const decides = $derived(playing ? legalDecides(world) : []);
@@ -735,13 +736,14 @@
 		return {
 			key: up.key,
 			name: seatName(world, up.seat),
-			color: SEAT_COLORS[game.seats.indexOf(up.seat)] ?? '#fff',
+			color: seatColor(up.seat),
 			seat: up.seat,
 			character: character ?? null,
 			danger: Boolean(at && (at.hollow > 0 || at.plague > 0)),
 			mine: owns(up.seat),
 		};
 	});
+	const announced = (key: number) => () => admin.turn.announced(key);
 	// Where the foot of the Actions panel stood in its column, which is where the desk stands once the panel leaves.
 	const panelFoot = $state<{ left: number | null; right: number | null }>({ left: null, right: null });
 	const notePanel =
@@ -992,6 +994,8 @@
 		const focused = event.composedPath()[0];
 		const onFocusOnly = focused instanceof HTMLButtonElement && focused.classList.contains('focus-only');
 		if ((onButton(event) && !onFocusOnly) || !game || modalOpen()) return;
+		// A held key repeats thirty times a second: one press is one undo, one card, one step.
+		if (event.repeat) return;
 		if (key === 'z' && snap.canUndo && canAct) {
 			if (onFocusOnly) focused.blur();
 			send({ type: 'UNDO', by: session.player });
@@ -1104,7 +1108,7 @@
 				task={admin.task}
 				action={admin.action}
 				name={admin.seat ? seatName(world, admin.seat) : null}
-				color={admin.seat ? (SEAT_COLORS[game.seats.indexOf(admin.seat)] ?? '#fff') : '#f4e8cd'}
+				color={admin.seat ? seatColor(admin.seat) : '#f4e8cd'}
 				epidemic={admin.epidemic !== null}
 				stack={show.stack}
 				exit={show.exit}
@@ -1162,7 +1166,7 @@
 							{place}
 							{world}
 							name={seatName(world, seat)}
-							color={SEAT_COLORS[game.seats.indexOf(seat)]!}
+							color={seatColor(seat)}
 							selected={viewing === seat}
 							showHand={seat !== dockSeat}
 							arriving={hiddenCards}
@@ -1178,7 +1182,7 @@
 			{#if openSeats.includes(seat)}
 				<button
 					class="take"
-					style:--seat={SEAT_COLORS[game.seats.indexOf(seat)]}
+					style:--seat={seatColor(seat)}
 					onclick={() => takeSeat(seat)}
 					data-testid={`take-${seat}`}
 					transition:fade={{ duration: 200 }}>Sit here as {seatName(world, seat)}</button
@@ -1294,7 +1298,7 @@
 					seat,
 					place: [...seatAt!].find(([, at]) => at === seat)![0],
 					name: seatName(world, seat),
-					color: SEAT_COLORS[game!.seats.indexOf(seat)]!,
+					color: seatColor(seat),
 				}))}
 				onpick={takeSeat}
 			/>
@@ -1335,7 +1339,7 @@
 					character={nextUp.character}
 					danger={nextUp.danger}
 					mine={nextUp.mine && !spectator}
-					ondone={() => admin.turn.announced(nextUp.key)}
+					ondone={announced(nextUp.key)}
 				/>
 			{/key}
 		{/if}
@@ -1348,7 +1352,7 @@
 			{#key fate.scene.key}
 				<FateShow
 					scene={fate.scene}
-					color={SEAT_COLORS[game.seats.indexOf(fate.scene.who.seat)] ?? '#4a4238'}
+					color={seatColor(fate.scene.who.seat)}
 					epitaph={barkFor('epitaph', fate.scene.key).text}
 				/>
 			{/key}
@@ -1962,7 +1966,7 @@
 		font-size: 0.95rem;
 		font-weight: 700;
 		cursor: pointer;
-		animation: beckon 1.6s ease-in-out infinite;
+		animation: beckon 1.6s ease-in-out 4;
 	}
 
 	.take:hover {
@@ -2110,7 +2114,6 @@
 		border: 1px solid var(--danger);
 		border-radius: 2px;
 		background: rgb(20 18 14 / 0.9);
-		backdrop-filter: blur(10px);
 		color: var(--danger);
 		translate: -50% 0;
 		pointer-events: none;
@@ -2182,8 +2185,7 @@
 
 	.scrim.undo-scrim {
 		z-index: 75;
-		background: rgb(14 9 8 / 0.78);
-		backdrop-filter: blur(8px);
+		background: rgb(14 9 8 / 0.84);
 	}
 
 	/* Show board: every cover steps off the table and lets the board be panned and read, until Back. */

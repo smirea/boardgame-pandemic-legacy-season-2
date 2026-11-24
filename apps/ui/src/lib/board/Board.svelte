@@ -304,24 +304,32 @@
 	}}
 >
 	<Canvas toneMapping={NoToneMapping} {createRenderer}>
-		<Scene
-			bind:this={scene}
-			{view}
-			oncity={city => tool === null && oncity?.(city)}
-			{onrecon}
-			onpointer={point => tool === null && onpointer?.(point)}
-			{tool}
-			{eraserAt}
-			{onhint}
-			hoverCity={hovered?.city ?? null}
-			{onstockpile}
-			hoverStockpile={hovered !== null && hovered.city === null}
-			{onpawn}
-			{resetView}
-			{covered}
-			{focus}
-			{handover}
-		/>
+		<!--
+			Svelte keeps a comment node in the page for every piece of the scene, and Threlte puts them straight under
+			the <canvas>, where the browser takes about forty times as long to add or remove a node as anywhere else. A
+			turn that clears a few hundred pieces spent most of its frame there. Inside an element of their own they cost
+			nothing.
+		-->
+		<div hidden>
+			<Scene
+				bind:this={scene}
+				{view}
+				oncity={city => tool === null && oncity?.(city)}
+				{onrecon}
+				onpointer={point => tool === null && onpointer?.(point)}
+				{tool}
+				{eraserAt}
+				{onhint}
+				hoverCity={hovered?.city ?? null}
+				{onstockpile}
+				hoverStockpile={hovered !== null && hovered.city === null}
+				{onpawn}
+				{resetView}
+				{covered}
+				{focus}
+				{handover}
+			/>
+		</div>
 	</Canvas>
 	{#if tool !== null}
 		<!-- Captures pen and eraser input above canvas, tall 3D pieces, and HTML board overlays. -->

@@ -4,7 +4,7 @@
 	import type { Command, PlayerId, PublicState, SeatId, Start } from '@repo/game';
 	import { LS } from '#lib/storage.ts';
 	import { ENDING_TIERS } from '#lib/story/script.ts';
-	import { MONTHS, SEAT_COLORS } from './labels.svelte.ts';
+	import { MONTHS, seatColor } from './labels.svelte.ts';
 	import Ready from './Ready.svelte';
 
 	type Props = {
@@ -27,7 +27,7 @@
 			ENDING_TIERS.failed.at(-1)!,
 	);
 	const players = $derived(tablePlayers(table));
-	const colorOf = (seat: SeatId) => SEAT_COLORS[SEAT_IDS.indexOf(seat)]!;
+	const colorOf = (seat: SeatId) => seatColor(seat);
 	const firstSeat = (who: PlayerId) => table.seats.find(entry => entry.player === who)!;
 	const mine = $derived(table.seats.filter(entry => entry.player === player));
 

@@ -28,7 +28,7 @@ import {
 	MONTHS,
 	playGroup,
 	purchaseLabel,
-	SEAT_COLORS,
+	seatColor,
 	seatName,
 } from '#lib/hud/labels.svelte.ts';
 import type { SessionView } from '#lib/session/session.svelte.ts';
@@ -299,7 +299,7 @@ function castOf(record: GameRecord, frames: PublicState[], timeline: TimelineSte
 			return {
 				name,
 				seat,
-				color: at >= 0 ? SEAT_COLORS[at]! : NEUTRAL,
+				color: seat && at >= 0 ? seatColor(seat) : NEUTRAL,
 				order: at >= 0 ? at : 10 + names.indexOf(name),
 			};
 		})
@@ -469,7 +469,7 @@ export function marksAt(loaded: Loaded, frame: number): BoardMarks {
 	const world = loaded.frames[frame]!.world;
 	const colorOf = (seat: SeatId | null) => {
 		const at = seat ? (world.game?.seats.indexOf(seat) ?? -1) : -1;
-		return at >= 0 ? SEAT_COLORS[at]! : null;
+		return seat && at >= 0 ? seatColor(seat) : null;
 	};
 	const actor = colorOf(step.beat.seat);
 	const trails: BoardMarks['trails'] = [];

@@ -78,14 +78,18 @@ Each reading waits for the rest of the machine to go quiet (`--quiet <cores>`, 1
 
 ## Cost of playing
 
-`./apps/playtest/src/interact.ts` measures the game while it is played. It stands a real, GPU-backed Chromium window on a July game and makes each interaction with real input: the pointer crossing cities, the hand, the seats and the decks, a pan, a zoom, a line drawn and erased, the ring over a city, the Box and Legacy deck dialogs, moves, forty steps of turns, and undo. For each it prints the frames drawn and how many ran long, the script, style and layout time on the main thread, and the scripts behind any long frame. No interaction may draw a frame over 50 ms. Run it against a built app, since a dev server compiles while it runs.
+`./apps/playtest/src/interact.ts` measures the game while it is played. It stands a real, GPU-backed Chromium window on a July game and makes each interaction with real input: the pointer crossing cities, the hand, the seats and the decks, a pan, a zoom, a line drawn and erased, the ring over a city, the Box and Legacy deck dialogs, each action aimed and put down, a deck's cards laid out section by section, moves, forty steps of turns, and undo. It then loads the canonical save's lobby and crosses its characters, and replays moments of a bot's own game of that month, found by playing it offline first: the opening deal, an Epidemic, an exposure, and the last turn through the time lapse and the spending. For each it prints the frames drawn and how many ran long, the script, style and layout time on the main thread, and the scripts behind any long frame. No interaction may draw a frame over 50 ms. Run it against a built app, since a dev server compiles while it runs.
 
 ```sh
 bun run ui:build && bun run ui:preview -- --host 127.0.0.1 --port 6490 &
 ./apps/playtest/src/interact.ts --url http://127.0.0.1:6490                  # every interaction
 ./apps/playtest/src/interact.ts --url http://127.0.0.1:6490 --only turn --profile /tmp/play   # with a CPU profile
-./apps/playtest/src/interact.ts --url http://127.0.0.1:6490 --throttle 4    # on a CPU four times slower
+./apps/playtest/src/interact.ts --url http://127.0.0.1:6490 --month 12 --throttle 4   # the worst case: December on a CPU four times slower
+./apps/playtest/src/interact.ts --url http://127.0.0.1:6490 --only lobby --trace /tmp/trace   # where the browser's own time went
+./apps/playtest/src/interact.ts --url http://127.0.0.1:6490 --css '.panel { backdrop-filter: blur(10px) }'   # with a style changed
 ```
+
+A long frame with almost no script behind it is the browser's own work: an image decoded, a layer rastered, a pass on the GPU. `--trace` saves a trace per interaction and prints its longest pieces of work on any thread.
 
 ## The table over the network
 

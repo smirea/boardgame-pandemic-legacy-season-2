@@ -19,7 +19,7 @@
 	import RichText from './RichText.svelte';
 	import { groupPieces, legacyCardOf, piecesOf, STOW_ORDER, wings, type Piece } from './unboxPieces.ts';
 	import { keep } from './viewState.ts';
-	import { typing } from '#lib/keys.ts';
+	import { onButton, typing } from '#lib/keys.ts';
 	import VoteButton from './VoteButton.svelte';
 	import { tableVoters, waitingOn as stillWaiting } from './voters.ts';
 
@@ -208,6 +208,10 @@
 		}
 	});
 
+	// Whichever browser finishes putting the reading away acknowledges it for the whole table, so one that shows no
+	// motion takes as long over it as the others take to show theirs.
+	const hold = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
+
 	async function runStow() {
 		tip = null;
 		await tick();
@@ -231,7 +235,7 @@
 					{ duration: 680, easing: 'cubic-bezier(0.45, 0, 0.2, 1)', fill: 'forwards' },
 				);
 				await anim.finished.catch(() => {});
-			}
+			} else if (target) await hold(680);
 			if (destroyed) return;
 			deckReturned = true;
 			ondeckout?.(false);
@@ -242,7 +246,7 @@
 					easing: 'cubic-bezier(0.3, 1.6, 0.5, 1)',
 				});
 			}
-			await wait(240);
+			await hold(240);
 		}
 
 		// 2. Stow each class of items one at a time, giving new mechanics extra emphasis and time.
@@ -255,6 +259,7 @@
 				if (!nodes.length) continue;
 
 				const isMechanic = cls === 'mechanic';
+				if (isMechanic && still) await hold(860);
 				if (isMechanic && !still) {
 					await Promise.all(
 						nodes.map(node => {
@@ -273,7 +278,7 @@
 							return pulse.finished.catch(() => {});
 						}),
 					);
-					await wait(240);
+					await hold(240);
 				}
 
 				const stagger = isMechanic ? 240 : 90;
@@ -282,18 +287,19 @@
 				nodes.forEach((node, order) => {
 					const destNames = (node.dataset.put ?? (cls === 'trash' ? 'trash' : 'box')).split(' ').filter(Boolean);
 					const target = cls === 'trash' ? (trashEl ?? destination('trash')) : (destination(...destNames) ?? trashEl);
+					const delay = order * stagger;
 					if (!target || still) {
 						node.style.visibility = 'hidden';
+						if (target) flights.push(hold(delay + duration));
 						return;
 					}
-					const delay = order * stagger;
 					flights.push(flyTo(node, target, { delay, duration }));
 					setTimeout(() => {
 						if (!destroyed) node.style.visibility = 'hidden';
 					}, delay);
 				});
 				await Promise.all(flights);
-				await wait(isMechanic ? 320 : 200);
+				await hold(isMechanic ? 320 : 200);
 			}
 		}
 
@@ -308,7 +314,8 @@
 			if (event.key === 'Escape') full = false;
 			return;
 		}
-		if (event.key === ' ' && !progress.stowing && !paused) {
+		// Space on a focused button already presses it.
+		if (event.key === ' ' && !progress.stowing && !paused && !onButton(event)) {
 			event.preventDefault();
 			if (activeStory && storyStage?.advance()) return;
 			if (allDrawn) toggleReady();
@@ -631,7 +638,7 @@
 
 	.deck-pile.pulsing,
 	.seal-trigger.pulsing {
-		animation: deckPulse 1.7s ease-in-out infinite;
+		animation: deckPulse 1.7s ease-in-out 4;
 	}
 
 	.deck-pile.pulsing:hover,
@@ -868,8 +875,7 @@
 	.caption-plate {
 		padding: 0.35rem 1rem;
 		border-radius: 6px;
-		background: rgb(16 13 10 / 0.82);
-		backdrop-filter: blur(6px);
+		background: rgb(16 13 10 / 0.88);
 		text-align: center;
 	}
 

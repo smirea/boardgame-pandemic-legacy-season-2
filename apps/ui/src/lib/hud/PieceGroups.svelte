@@ -107,8 +107,7 @@
 		padding: 0.45rem 0.65rem 0.6rem;
 		border: 1px solid rgb(231 220 198 / 0.2);
 		border-radius: 6px;
-		background: rgb(18 15 11 / 0.8);
-		backdrop-filter: blur(6px);
+		background: rgb(18 15 11 / 0.86);
 		box-shadow: 0 0.7rem 1.8rem rgb(0 0 0 / 0.45);
 		transform: rotate(var(--tilt));
 	}

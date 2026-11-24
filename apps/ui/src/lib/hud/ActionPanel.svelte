@@ -212,7 +212,6 @@
 		border: 1px solid var(--line);
 		border-radius: 3px;
 		background: var(--panel);
-		backdrop-filter: blur(10px);
 		box-shadow: 0 0.6rem 1.6rem rgb(0 0 0 / 0.35);
 	}
 

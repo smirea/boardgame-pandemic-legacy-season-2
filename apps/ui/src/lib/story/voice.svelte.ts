@@ -10,6 +10,7 @@ class VoicePlayer {
 	private el: HTMLAudioElement | null = null;
 	private token = 0;
 	private active = false;
+	private cut: (() => void) | null = null;
 	private startListeners = new Set<() => void>();
 
 	constructor() {
@@ -35,8 +36,11 @@ class VoicePlayer {
 		this.el.volume = Math.max(0, Math.min(1, audioSettings.master * audioSettings.voice));
 	}
 
-	/** Plays the generated MP3 for `beatId`, ducking ambient music while active. Returns true if audio started. */
-	play(beatId: string, onEnd?: () => void): boolean {
+	/**
+	 * Plays the generated MP3 for `beatId`, ducking ambient music while active. Returns true if audio started.
+	 * `onEnd` runs when the clip plays to its end, `onCut` when something stops it first: another clip, the mute.
+	 */
+	play(beatId: string, onEnd?: () => void, onCut?: () => void): boolean {
 		return untrack(() => {
 			this.stop();
 			if (typeof window === 'undefined') return false;
@@ -51,12 +55,14 @@ class VoicePlayer {
 			audio.preload = 'auto';
 			this.el = audio;
 			this.active = true;
+			this.cut = onCut ?? null;
 			this.playingId = beatId;
 			this.busy = true;
 			setMusicDuck(true, 0.28);
 
 			const finish = () => {
 				if (this.token !== run) return;
+				this.cut = null;
 				this.active = false;
 				this.playingId = null;
 				this.busy = false;
@@ -88,6 +94,9 @@ class VoicePlayer {
 				this.busy = false;
 				setMusicDuck(false);
 			}
+			const cut = this.cut;
+			this.cut = null;
+			cut?.();
 		});
 	}
 }
