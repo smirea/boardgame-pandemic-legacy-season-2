@@ -11,15 +11,12 @@
 		pack,
 		reconBoxes,
 		reject,
-		sealKey,
 		tableStart,
 	} from '@repo/game';
 	import type { BriefingEntry, CardId, CityId, Command, Decide, EdgeDef, SeatId } from '@repo/game';
 	import Board from '#lib/board/Board.svelte';
-	import type { BoardMarks, CitySpot, Fx, FxKind } from '#lib/board/types.ts';
+	import type { BoardMarks, CitySpot } from '#lib/board/types.ts';
 	import type { SessionView } from '#lib/session/session.svelte.ts';
-	import { inkOn } from '#lib/color.ts';
-	import { inFeedback, modalOpen, onButton, typing } from '#lib/keys.ts';
 	import { LS } from '#lib/storage.ts';
 	import { setContext, tick, untrack, onDestroy } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
@@ -40,11 +37,14 @@
 	import type { StoryScene } from '#lib/story/script.ts';
 	import StoryArchive from '#lib/story/StoryArchive.svelte';
 	import ActionPanel from './ActionPanel.svelte';
+	import Announcements from './Announcements.svelte';
+	import { createAnnouncements } from './announcements.svelte.ts';
 	import CardPick from './CardPick.svelte';
 	import { createBoardView } from './boardView.svelte.ts';
 	import { createChoosing } from './choosing.svelte.ts';
 	import { MapTools } from './mapTools.svelte.ts';
 	import { flyToStorage } from './storageFlight.ts';
+	import { createGameKeys } from './gameKeys.ts';
 	import { measurePanels } from './panels.svelte.ts';
 	import Corner from './Corner.svelte';
 	import { placeSeats } from './seats.ts';
@@ -63,7 +63,7 @@
 	import { InfectionShow } from './infectionShow.svelte.ts';
 	import { PopulationShow } from './populationShow.svelte.ts';
 	import { LegacyShow } from './legacyShow.svelte.ts';
-	import { cardName, cityName, seatName, seatColor, setNames } from './labels.svelte.ts';
+	import { seatName, seatColor, setNames } from './labels.svelte.ts';
 	import { characterTraits } from './traits.ts';
 	import GameMenu from './GameMenu.svelte';
 	import Lobby from './Lobby.svelte';
@@ -241,6 +241,22 @@
 
 	const send = (command: Command) => session.send(command);
 
+	const said = createAnnouncements({
+		get game() {
+			return game;
+		},
+		get campaign() {
+			return campaign;
+		},
+		get spectator() {
+			return spectator;
+		},
+		get announce() {
+			return announce;
+		},
+	});
+	const toast = said.toast;
+
 	const recons = $derived(reconBoxes(world, snap.phase));
 	const choosing = createChoosing({
 		get world() {
@@ -315,8 +331,6 @@
 	const view = provideViewState();
 	const covers = provideCovers();
 	let board = $state<Board>();
-	// Announcements put back by `applyUi` stay up until the game moves on, where live ones time out.
-	let heldAnnouncements = false;
 
 	/** Everything on this screen that the game state does not decide, as plain JSON. */
 	export function ui(): GameUi {
@@ -329,8 +343,8 @@
 			hotkeys: hotkeysOpen,
 			scanner: scannerOpen,
 			steps: choosing.steps,
-			toasts: toasts.map(({ text, tone }) => ({ text, tone })),
-			banner: banner && { title: banner.title, text: banner.text },
+			toasts: said.toasts.map(({ text, tone }) => ({ text, tone })),
+			banner: said.banner && { title: said.banner.title, text: said.banner.text },
 			parts: view.read(),
 		};
 	}
@@ -352,9 +366,7 @@
 		hotkeysOpen = next.hotkeys ?? false;
 		scannerOpen = next.scanner ?? false;
 		viewing = next.viewing;
-		heldAnnouncements = next.toasts.length > 0 || next.banner !== null;
-		toasts = next.toasts.map(entry => ({ id: nextFx++, ...entry }));
-		banner = next.banner && { id: nextFx++, ...next.banner };
+		said.restore(next.toasts, next.banner);
 		view.write(next.parts);
 		board?.setCamera(next.camera);
 		for (const [index, entry] of next.steps.entries()) {
@@ -383,11 +395,7 @@
 	let briefingRead = $state('');
 	const briefingKey = $derived(JSON.stringify(campaign.briefing));
 	const briefingOpen = $derived(campaign.briefing.length > 0 && briefingRead !== briefingKey);
-	const population = new PopulationShow((city, kind) => {
-		const id = nextFx++;
-		fx = [...fx, { id, city, kind, delay: 0 }];
-		setTimeout(() => (fx = fx.filter(entry => entry.id !== id)), 4000);
-	});
+	const population = new PopulationShow(said.pulse);
 	// The spending sheet steps aside to a side column while the population show plays, or while a player looks at the board.
 	let upkeepAsideChosen = $state(false);
 	const upkeepAside = $derived(snap.phase === 'upkeep' && (population.playing || upkeepAsideChosen));
@@ -456,89 +464,14 @@
 		if (campaign.briefing.length) shownBriefing = campaign.briefing;
 	});
 
-	let fx = $state.raw<Fx[]>([]);
-	let toasts = $state.raw<{ id: number; text: string; tone: string }[]>([]);
-	let banner = $state.raw<{ id: number; title: string; text: string } | null>(null);
-	let lastSeq = untrack(() => game?.log.at(-1)?.seq ?? 0);
-	let lastGame = untrack(() => campaign.results.length);
-	let nextFx = 1;
-
-	function toast(text: string, tone = '') {
-		const id = nextFx++;
-		toasts = [...toasts, { id, text, tone }];
-		setTimeout(() => (toasts = toasts.filter(entry => entry.id !== id)), 5200);
-	}
-
-	$effect(() => {
-		const log = game?.log ?? [];
-		const newest = log.at(-1)?.seq ?? 0;
-		// A spectator jumping through a recording skips over events rather than living through each one at once,
-		// and what was announced where they jumped from no longer applies.
-		const jumped = spectator && (newest < lastSeq || !untrack(() => announce));
-		// A shorter log is a new game, whose every line is news, or an undo, which leaves nothing new to announce.
-		const index = campaign.results.length;
-		if (newest < lastSeq) lastSeq = spectator || index === lastGame ? newest : 0;
-		lastGame = index;
-		if (jumped) {
-			lastSeq = newest;
-			untrack(() => {
-				toasts = [];
-				banner = null;
-				fx = [];
-			});
-			return;
+	const show = new InfectionShow(said.pulse, cue => {
+		gameAudio.showCue(cue);
+		if (spectator && !announce) return;
+		if (cue.t === 'plague') chatter.dangerAt(world, cue.city);
+		else if (cue.t === 'strike' && cue.city && (cue.effect === 'hollow' || cue.effect === 'outbreak')) {
+			chatter.dangerAt(world, cue.city);
 		}
-		const fresh = log.filter(entry => entry.seq > lastSeq);
-		if (fresh.length === 0) return;
-		lastSeq = newest;
-		if (heldAnnouncements) {
-			heldAnnouncements = false;
-			untrack(() => {
-				toasts = [];
-				banner = null;
-			});
-		}
-		const added: Fx[] = [];
-		const pulse = (city: CityId, kind: FxKind) => added.push({ id: nextFx++, city, kind, delay: added.length * 240 });
-		// Infections pulse their cities from the infection show, each at its own moment.
-		for (const entry of fresh) {
-			if (entry.t === 'connected') pulse(entry.city, 'connected');
-			else if (entry.t === 'structure') pulse(entry.city, 'build');
-			else if (entry.t === 'epidemic') {
-				// The banner went up when the Epidemic was started. This is the city its second step struck.
-				if (entry.city)
-					toast(
-						entry.removed > 0
-							? `Epidemic: ${cityName(entry.city)} loses ${entry.removed} cube${entry.removed === 1 ? '' : 's'}`
-							: `Epidemic: ${cityName(entry.city)} had no cubes to lose`,
-						'bad',
-					);
-			} else if (entry.t === 'unlock')
-				toast(`Opened: ${pack.seals.find(def => sealKey(def.seal) === entry.seal)?.name}`, 'good');
-			else if (entry.t === 'note') toast(entry.text, 'good');
-		}
-		untrack(() => {
-			fx = [...fx, ...added];
-			const ids = new Set(added.map(entry => entry.id));
-			setTimeout(() => (fx = fx.filter(entry => !ids.has(entry.id))), 6000);
-		});
 	});
-
-	const show = new InfectionShow(
-		(city, kind) => {
-			const id = nextFx++;
-			fx = [...fx, { id, city, kind, delay: 0 }];
-			setTimeout(() => (fx = fx.filter(entry => entry.id !== id)), 4000);
-		},
-		cue => {
-			gameAudio.showCue(cue);
-			if (spectator && !announce) return;
-			if (cue.t === 'plague') chatter.dangerAt(world, cue.city);
-			else if (cue.t === 'strike' && cue.city && (cue.effect === 'hollow' || cue.effect === 'outbreak')) {
-				chatter.dangerAt(world, cue.city);
-			}
-		},
-	);
 	// Through an Infect step the cities with no cubes that a card still in the deck could strike are ringed, so the
 	// table sees what the next flip may cost before it is made. A city the show has not finished with waits its turn.
 	const sameThreats = reconciler<BoardMarks | undefined>();
@@ -716,10 +649,8 @@
 	$effect(() => {
 		if (admin.turn.struck === 0) return;
 		untrack(() => {
-			const id = nextFx++;
 			const rate = pack.numbers.infectionRates[game?.rateIndex ?? 0];
-			banner = { id, title: 'Epidemic', text: `Infection rate: ${rate} cards a turn.` };
-			setTimeout(() => banner?.id === id && (banner = null), 2600);
+			said.raise('Epidemic', `Infection rate: ${rate} cards a turn.`, 2600);
 		});
 	});
 	/** Cards hidden from hand/corner while in flight from the deck or spotlighted for a search. */
@@ -927,7 +858,7 @@
 			return session;
 		},
 		get fx() {
-			return fx;
+			return said.fx;
 		},
 		get marks() {
 			return marks ?? population.marks ?? threats;
@@ -940,97 +871,44 @@
 		() => board?.pointerBoardPoint() ?? null,
 	);
 
-	/** Space advances the turn, Z undoes, F draws, E toggles eraser, Tab pings the map, ? opens hotkeys, Escape closes. */
-	function onkey(event: KeyboardEvent) {
-		if (inFeedback(event)) return;
-		if (event.key === 'Escape') {
-			if (lapse.playing) {
-				lapse.stop();
-				return;
-			}
-			if (peeking) {
-				peeking = false;
-				return;
-			}
-			// A dialog that Escape closes, the last one opened first. A key typed into one of its fields is the field's.
-			if (!typing(event) && covers.closeTop()) return;
-			if (world.table.undoVote && (!world.table.undoVote.by || world.table.undoVote.by === session.player)) {
-				send({ type: 'CANCEL_UNDO_VOTE', player: session.player });
-				return;
-			}
-			if (document.activeElement instanceof HTMLElement && document.activeElement.classList.contains('focus-only')) {
-				document.activeElement.blur();
-			}
+	const keys = createGameKeys({
+		get world() {
+			return world;
+		},
+		get phase() {
+			return snap.phase;
+		},
+		get canUndo() {
+			return snap.canUndo;
+		},
+		get canAct() {
+			return canAct;
+		},
+		get spectator() {
+			return spectator;
+		},
+		get player() {
+			return session.player;
+		},
+		tools,
+		admin,
+		covers,
+		// The game's playback and Show board come off before any dialog under them.
+		escapes: [() => lapse.playing && (lapse.stop(), true), () => peeking && ((peeking = false), true)],
+		cancel() {
 			cancel();
 			menu = false;
-		}
-		if (typing(event) || event.metaKey || event.ctrlKey || event.altKey) return;
-		if (event.key === '?' && !spectator) {
-			event.preventDefault();
+		},
+		toggleHotkeys() {
 			menu = false;
 			hotkeysOpen = !hotkeysOpen;
-			return;
-		}
-		if (event.key === 'Tab' && !spectator && !modalOpen()) {
-			event.preventDefault();
-			if (!event.repeat) tools.ping();
-			return;
-		}
-		const key = event.key.toLowerCase();
-		if (key === 'f' && !event.repeat && !spectator && !modalOpen()) {
-			tools.holdPen();
-			return;
-		}
-		if (key === 'e' && !event.repeat && !spectator && tools.hasDrawings && !modalOpen()) {
-			tools.toggleEraser();
-			return;
-		}
-		const focused = event.composedPath()[0];
-		const onFocusOnly = focused instanceof HTMLButtonElement && focused.classList.contains('focus-only');
-		if ((onButton(event) && !onFocusOnly) || !game || modalOpen()) return;
-		// A held key repeats thirty times a second: one press is one undo, one card, one step.
-		if (event.repeat) return;
-		if (key === 'z' && snap.canUndo && canAct) {
-			if (onFocusOnly) focused.blur();
-			send({ type: 'UNDO', by: session.player });
-		}
-		if (key !== ' ') return;
-		if (onFocusOnly) focused.blur();
-		// The cards that open a game are anyone's to flip.
-		if (admin.opening) {
-			event.preventDefault();
-			if (admin.action && !admin.action.busy) admin.action.onclick();
-			return;
-		}
-		if (!canAct) return;
-		event.preventDefault();
-		if (admin.epidemic) return admin.start();
-		// Space is the desk's next click: a card, an Epidemic's step, or Done.
-		if (snap.phase !== 'playing.actions') {
-			if (admin.action && !admin.action.busy) admin.action.onclick();
-			return;
-		}
-		// Space moves the turn on at every other step, so a press meant for a deck can land here. It ends a turn
-		// that is spent, and never throws away actions: those go by the End actions button.
-		if (game.actionsLeft === 0) send({ type: 'END_ACTIONS', seat: game.active });
-		else
-			toast(
-				`${game.actionsLeft} action${game.actionsLeft === 1 ? '' : 's'} left. Click End actions to end your turn early.`,
-			);
-	}
-
-	function onkeyup(event: KeyboardEvent) {
-		if (event.key.toLowerCase() === 'f' && !typing(event)) {
-			tools.releasePen();
-		}
-	}
-
-	function onblur() {
-		tools.letGo();
-	}
+		},
+		send,
+		toast,
+	});
 </script>
 
-<svelte:window onkeydown={onkey} {onkeyup} {onblur} />
+<svelte:window onkeydown={keys.onkeydown} onkeyup={keys.onkeyup} onblur={keys.onblur} />
 
 {#snippet turnSlot(side: 'left' | 'right')}
 	{#if game && admin.deck}
@@ -1255,23 +1133,9 @@
 			/>
 		{/if}
 
-		<div class="toasts">
-			{#each toasts as entry (entry.id)}
-				<div class={entry.tone} in:fly={{ y: -16, duration: 220 }} out:fade={{ duration: 300 }}>{entry.text}</div>
-			{/each}
-		</div>
+		<Announcements toasts={said.toasts} banner={said.banner} {spectator} />
 
-		<!-- A player's Epidemic card lands in the middle of the table and says all of this itself. -->
-		{#if banner && (spectator || banner.title !== 'Epidemic')}
-			{#key banner.id}
-				<div class="banner" out:fade={{ duration: 450 }}>
-					<strong>{banner.title}</strong>
-					<span>{banner.text}</span>
-				</div>
-			{/key}
-		{/if}
-
-		{#if nextUp && !banner}
+		{#if nextUp && !said.banner}
 			{#key nextUp.key}
 				<TurnInterlude
 					name={nextUp.name}
@@ -1283,10 +1147,6 @@
 					ondone={announced(nextUp.key)}
 				/>
 			{/key}
-		{/if}
-
-		{#if banner}
-			{#key banner.id}<div class="flash" out:fade={{ duration: 200 }}></div>{/key}
 		{/if}
 
 		{#if fate.scene && game}
@@ -1738,105 +1598,6 @@
 	@keyframes beckon {
 		50% {
 			box-shadow: 0 0 1.4rem color-mix(in srgb, var(--seat) 70%, transparent);
-		}
-	}
-
-	.toasts {
-		position: absolute;
-		top: 5.6rem;
-		left: 50%;
-		z-index: 50;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 0.3rem;
-		transform: translateX(-50%);
-		pointer-events: none;
-	}
-
-	.toasts div {
-		padding: 0.3rem 0.8rem;
-		border: 1px solid var(--line);
-		border-radius: 2px;
-		background: var(--panel-solid);
-		font-size: 0.82rem;
-	}
-
-	.toasts .good {
-		border-color: var(--good);
-		color: var(--good);
-	}
-
-	.toasts .bad {
-		border-color: var(--danger);
-		color: var(--danger);
-	}
-
-	/* The epidemic lands like a quarantine stamp across the chart: it overshoots, settles, and bleeds. */
-	/* Above the Epidemic's panel, which opens under it in the middle of the table. */
-	.banner {
-		position: absolute;
-		top: 6%;
-		left: 50%;
-		z-index: 45;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 0.15rem;
-		padding: 0.7rem 2.6rem 0.8rem;
-		border: 3px double rgb(176 48 28 / 0.9);
-		background: rgb(28 12 8 / 0.82);
-		color: #e46a4c;
-		translate: -50% 0;
-		rotate: -3deg;
-		pointer-events: none;
-		animation: stamp 520ms cubic-bezier(0.2, 1.4, 0.4, 1) both;
-	}
-
-	.banner strong {
-		font-family: var(--font-display);
-		font-size: 3rem;
-		font-weight: 400;
-		line-height: 1;
-		letter-spacing: 0.04em;
-	}
-
-	.banner span {
-		color: var(--ink);
-		font-size: 0.9rem;
-	}
-
-	@keyframes stamp {
-		from {
-			opacity: 0;
-			scale: 1.7;
-		}
-		60% {
-			opacity: 1;
-		}
-		to {
-			scale: 1;
-		}
-	}
-
-	.flash {
-		position: absolute;
-		inset: 0;
-		z-index: 43;
-		box-shadow: inset 0 0 10rem 2rem rgb(140 28 18 / 0.6);
-		animation: flash 1.6s ease-out forwards;
-		pointer-events: none;
-	}
-
-	@keyframes flash {
-		0% {
-			opacity: 0;
-		}
-		12% {
-			opacity: 1;
-		}
-		100% {
-			opacity: 0;
 		}
 	}
 

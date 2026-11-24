@@ -2,6 +2,7 @@ import { characterAt } from '@repo/game';
 import type { Character, CityId, ExposureBox, JobId, LogEntry, SeatId, World } from '@repo/game';
 import { characterFigureKey } from '#lib/characters/personas.ts';
 import type { FigureKey } from '#lib/characters/personas.ts';
+import { LogWatch } from './logWatch.ts';
 
 type Who = {
 	name: string;
@@ -63,7 +64,7 @@ export class FateShow {
 	scene = $state.raw<FateScene | null>(null);
 	playing = $state(false);
 
-	private seen: number | null = null;
+	private log = new LogWatch();
 	private queue: FateScene[] = [];
 	private run = 0;
 
@@ -73,15 +74,9 @@ export class FateShow {
 	) {}
 
 	observe(world: World, live: boolean) {
-		const log = world.game?.log ?? [];
-		const newest = log.at(-1)?.seq ?? -1;
-		const before = this.seen;
-		this.seen = newest;
-		if (before === null || newest < before || !live || !world.game) return this.stop();
-		const scenes = this.scenes(
-			world,
-			log.filter(entry => entry.seq > before),
-		);
+		const fresh = this.log.take(world.game, live);
+		if (!fresh) return this.stop();
+		const scenes = this.scenes(world, fresh);
 		if (scenes.length > MOST_SCENES) return this.stop();
 		if (!scenes.length) return;
 		this.queue.push(...scenes);

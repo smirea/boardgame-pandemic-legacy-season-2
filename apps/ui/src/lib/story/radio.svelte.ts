@@ -2,6 +2,7 @@ import { pack } from '@repo/game';
 import type { LogEntry, Phase, World } from '@repo/game';
 import { barkFor, BARKS, type Bark, type BarkMoment } from './barks.ts';
 import { voicePlayer } from './voice.svelte.ts';
+import { entriesSince } from '#lib/hud/logWatch.ts';
 
 /** A line stays up this long when nothing is heard: the voice is off, or the browser has not been clicked yet. */
 const READ_MS = 4200;
@@ -57,7 +58,7 @@ export class Radio {
 			this.waiting = null;
 			return;
 		}
-		const fresh = game.log.filter(entry => entry.seq > before.seq);
+		const fresh = entriesSince(game.log, before.seq);
 		// Setting a game up empties the stockpile and builds the deck on purpose: nothing there is news.
 		const inPlay = phase.startsWith('playing') || phase === 'over';
 		const moment = fresh.length > MOST_ENTRIES || !inPlay ? null : this.moment(world, fresh, before, now);

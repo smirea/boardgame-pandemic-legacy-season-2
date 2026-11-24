@@ -1,6 +1,7 @@
 import { pack } from '@repo/game';
 import type { CityId, InfectionCard, LogEntry, Phase, World } from '@repo/game';
 import type { FxKind } from '#lib/board/types.ts';
+import { entriesSince } from './logWatch.ts';
 
 type Piece = 'supplies' | 'plague' | 'hollow';
 type Pieces = Record<Piece, number>;
@@ -128,7 +129,7 @@ export class InfectionShow {
 		const discarded = this.discarded;
 		this.discarded = world.game?.infectionDiscard.length ?? 0;
 		this.board = boardOf(world);
-		const fresh = log.filter(entry => entry.seq > this.seen);
+		const fresh = entriesSince(log, this.seen);
 		const undone = newest < this.seen;
 		this.seen = newest;
 		if (undone || !live || !before || !this.board) return this.stop();

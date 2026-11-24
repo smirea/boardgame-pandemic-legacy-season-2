@@ -22,6 +22,7 @@ import {
 	sfxTravel,
 } from './sfx.ts';
 import { campaignTone, TONES } from './tones.ts';
+import { entriesSince } from '#lib/hud/logWatch.ts';
 
 const EPIDEMIC_STEPS = new Set(['epidemicDrawn', 'epidemicInfect', 'intensify']);
 const INFECTING = new Set<Phase>(['setup.infect', 'playing.infect']);
@@ -124,7 +125,7 @@ export class GameAudio {
 			sfxEpidemic('intensify');
 		}
 
-		const fresh = log.filter(entry => entry.seq > prevSeq);
+		const fresh = entriesSince(log, prevSeq);
 		if (fresh.length > 8) return;
 
 		// Hollow Men arrive in the infection show. One that goes was driven off by a player, which nothing else reports.

@@ -3,6 +3,7 @@ import type { CardId, Character, CharacterId, CityId, JobId, Phase, PlayerId, Se
 import { jobFigure } from './figures.ts';
 import type { FigureKey } from './personas.ts';
 import { characterVoice } from './voice.svelte.ts';
+import { entriesSince } from '#lib/hud/logWatch.ts';
 
 /** More fresh log entries than this at once is a jump (reload, undo, replay seek) and stays silent. */
 const MOST_ENTRIES = 8;
@@ -158,7 +159,7 @@ export class CharacterChatter {
 		// Ignore undo or new game log resets.
 		if (now.logSeq < before.logSeq || now.resultsCount !== before.resultsCount) return;
 
-		const fresh = game.log.filter(entry => entry.seq > before.logSeq);
+		const fresh = entriesSince(game.log, before.logSeq);
 		if (fresh.length === 0 || fresh.length > MOST_ENTRIES) return;
 
 		// 5. Scar inflicted on a character (exposure confirm or Legacy/ScarVote scar).

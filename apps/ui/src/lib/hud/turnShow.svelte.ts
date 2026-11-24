@@ -1,4 +1,5 @@
 import type { CardId, PlayerCard, SeatId, World } from '@repo/game';
+import { LogWatch } from './logWatch.ts';
 
 /** A drawn Player card turns face up beside the deck, rests there for everyone to read, then goes to its hand. */
 export const FLIP_MS = 420;
@@ -33,24 +34,18 @@ export class TurnShow {
 	/** True while a card is still face up beside the deck, when the next draw waits. */
 	readonly busy = $derived(this.reveals.some(reveal => reveal.stage === 'shown'));
 
-	private seen: number | null = null;
+	private log = new LogWatch();
 	private step: string | null = null;
 	private timers = new Set<ReturnType<typeof setTimeout>>();
 
 	/** Takes in the newest state. `live` is false for a jump that nobody lived through, which only catches up. */
 	observe(world: World, live: boolean) {
-		const game = world.game;
-		const log = game?.log ?? [];
-		const newest = log.at(-1)?.seq ?? -1;
-		const before = this.seen;
-		this.seen = newest;
-		const step = game?.pending[0]?.t ?? null;
+		const fresh = this.log.take(world.game, live);
+		const step = world.game?.pending[0]?.t ?? null;
 		const started = this.step === 'epidemicDrawn' && step === 'epidemicInfect';
 		this.step = step;
-		// The first state seen is where the table already was, and a log that went backwards was undone.
-		if (before === null || newest < before || !live || !game) return this.stop();
+		if (!fresh) return this.stop();
 		if (started) this.struck++;
-		const fresh = log.filter(entry => entry.seq > before);
 		const draws = fresh.filter(entry => entry.t === 'draw');
 		if (draws.length > MOST_DRAWS) return this.stop();
 		for (const entry of fresh) {
