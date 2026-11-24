@@ -19,8 +19,7 @@ import {
 	startDrawStep,
 	startInfectStep,
 } from './flow';
-import { cityDef, discardFromHand, grid, hasEdge, isForsaken, log, overLimit, SEAT_IDS, tableSeating } from './helpers';
-import { edgeKey } from './ids';
+import { cityDef, discardFromHand, grid, isForsaken, log, overLimit, SEAT_IDS, tableSeating } from './helpers';
 import type { CardId, CharacterId, CityId, PlayerId, SeatId } from './ids';
 import type { Purchase } from './legacy';
 import {
@@ -544,7 +543,7 @@ export const gameMachine = setup({
 			}),
 		})),
 		startTable: assign(
-			change((world, event) => {
+			change(world => {
 				if (tableStart(world) === 'month' && world.campaign.month === 0) world.campaign.month = 1;
 				world.table.ready = {};
 				world.table.start = null;

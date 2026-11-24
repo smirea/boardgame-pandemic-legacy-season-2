@@ -10,7 +10,6 @@ import {
 	has,
 	hasRule,
 	isForsaken,
-	isHaven,
 	log,
 	neighbours,
 	player,
@@ -513,8 +512,6 @@ function sparedByCard(world: World, city: CityId, cardId: CardId): boolean {
 export function infectCity(world: World, city: CityId, cardId: CardId) {
 	const { campaign, game } = world as { campaign: World['campaign']; game: Game };
 	const location = game.locations[city]!;
-	const card = campaign.infectionCards[cardId]!;
-	const improvement = card.kind === 'city' ? card.improvement : null;
 	if (sparedByCard(world, city, cardId)) return log(game, { t: 'infect', city, card: cardId, effect: 'blocked' });
 	if (location.supplies > 0) {
 		location.supplies -= 1;

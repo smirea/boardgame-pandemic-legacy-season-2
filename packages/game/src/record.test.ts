@@ -1,8 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import { botCommand } from './bot';
-import { tableSeating } from './helpers';
 import { createGameActor } from './machine';
-import type { GameRecord, Patch } from './record';
+import type { GameRecord } from './record';
 import { applyPatches, diff, framesOf, gameIndexOf, parseRecord, recordStep, startRecord } from './record';
 import type { PublicState } from './view';
 import { publicState } from './view';

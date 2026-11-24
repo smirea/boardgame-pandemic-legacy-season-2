@@ -218,7 +218,7 @@ export function createBoardView(source: BoardSource): BoardView {
 	const samePawns = reconciler<BoardView['pawns']>();
 	const pawns = $derived(
 		samePawns(
-			(game?.seats ?? []).map((seat, index) => ({
+			(game?.seats ?? []).map(seat => ({
 				id: seat,
 				city: game!.players[seat]!.location,
 				color: seatColor(seat),

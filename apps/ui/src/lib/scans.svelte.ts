@@ -1,5 +1,5 @@
 import { characterCardIndex, pack } from '@repo/game';
-import type { CityId, CompanionId, EventId, ExposureBox, InfectionCard, PlayerCard, Seal } from '@repo/game';
+import type { CityId, CompanionId, ExposureBox, InfectionCard, PlayerCard, Seal } from '@repo/game';
 import {
 	characterCardScans,
 	cityImprovementScans,

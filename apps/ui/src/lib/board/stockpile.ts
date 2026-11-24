@@ -40,7 +40,9 @@ export const PILE: PileSlot[] = (() => {
 				});
 			}
 	}
-	return slots.sort((a, b) => a.key - b.key).map(({ key: _, ...slot }) => slot);
+	return slots
+		.sort((a, b) => a.key - b.key)
+		.map(({ x, y, z, turn }) => ({ x, y, z, turn }));
 })();
 
 /** What holds supply cubes on the board. */

@@ -2,13 +2,10 @@ import { pack } from './content/pack';
 import { sealKey } from './content/types';
 import type {
 	AbilityId,
-	ActionId,
 	CityImprovementId,
 	EventId,
 	InfectionImprovementId,
 	JobId,
-	ObjectiveId,
-	RuleId,
 	SearchBoxDef,
 	Seal,
 	StructureKind,
@@ -33,7 +30,7 @@ import {
 } from './helpers';
 import type { CardId, CharacterId, CityId, SeatId } from './ids';
 import { shuffle } from './rng';
-import type { Bought, Campaign, Character, ExposureBox, GameChronicle, LogEntry, Upkeep, World } from './state';
+import type { Bought, Campaign, Character, GameChronicle, LogEntry, Upkeep, World } from './state';
 
 const numbers = pack.numbers;
 

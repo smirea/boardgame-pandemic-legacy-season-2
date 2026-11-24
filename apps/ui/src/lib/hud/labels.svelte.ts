@@ -213,7 +213,6 @@ export function cardName(world: World, id: CardId): string {
 	return 'card';
 }
 
-const cubes = (count: number) => `${count} cube${count === 1 ? '' : 's'}`;
 const cards = (world: World, ids: CardId[]) => ids.map(id => cardName(world, id)).join(', ');
 
 /** A card named in a line of text: its glyph in the colour it is known by, then its name. */

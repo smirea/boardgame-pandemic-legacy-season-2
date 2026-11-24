@@ -3,8 +3,7 @@ import { checkEdge } from './actions';
 import type { Action } from './actions';
 import { botCommand } from './bot';
 import { pack } from './content/pack';
-import type { EdgeDef, EventId, ScarId, SearchResult } from './content/types';
-import { edge } from './content/world';
+import type { EventId, ScarId, SearchResult } from './content/types';
 import { beginTurn, bump, epidemicCount, placeHollow, setupInfection } from './flow';
 import {
 	breakthrough,
@@ -18,7 +17,6 @@ import {
 	segmentsCross,
 	tableSeating,
 } from './helpers';
-import { edgeKey } from './ids';
 import type { CardId, CityId, PlayerId } from './ids';
 import { createGameActor, parseSave, phaseOf, reject } from './machine';
 import type { Command, GameActor, Phase, Save } from './machine';

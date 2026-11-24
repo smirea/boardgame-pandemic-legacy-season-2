@@ -1,5 +1,5 @@
 import { pack } from './content/pack';
-import type { ActionId, CityDef, CompanionId, EdgeKind, RuleId, SearchResult } from './content/types';
+import type { ActionId, CityDef, EdgeKind, RuleId, SearchResult } from './content/types';
 import { startReveal } from './reveal';
 import {
 	bump,
@@ -131,10 +131,6 @@ const trait = (ctx: Ctx, id: Parameters<typeof has>[2]) => has(ctx.world, ctx.se
 function spendCubes(ctx: Ctx, amount: number) {
 	ctx.me.supplies -= amount;
 	ctx.game.stockpile += amount;
-}
-
-function structureCities(game: Game, kind: 'center' | 'tower' | 'shelter'): CityId[] {
-	return (Object.keys(game.locations) as CityId[]).filter(id => game.locations[id]![kind]);
 }
 
 function fillTargets(ctx: Ctx, mode: 'local' | 'system', first: CityId[] = []): CityId[] {
