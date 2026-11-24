@@ -172,7 +172,7 @@
 
 			const onFinished = () => {
 				if (!autoAdvance || currentIndex >= total - 1) return;
-				const pauseMs = audioSettings.pacing === 'punchy' ? 450 : 900;
+				const pauseMs = 900;
 				timer = setTimeout(() => {
 					if (index === currentIndex && index < total - 1) index += 1;
 				}, pauseMs);
@@ -182,7 +182,7 @@
 			if (!startedVoice && autoAdvance && currentIndex < total - 1 && !overlay) {
 				// Gentle reading fallback when voice is muted or audio hasn't been generated yet.
 				const words = current.text.split(/\s+/).length;
-				const baseMs = audioSettings.pacing === 'punchy' ? Math.max(2400, words * 110) : Math.max(4200, words * 210);
+				const baseMs = Math.max(4200, words * 210);
 				const ms = current.setPiece ? Math.max(5800, baseMs) : baseMs;
 				timer = setTimeout(() => {
 					if (index === currentIndex && index < total - 1) index += 1;

@@ -8,7 +8,6 @@
 	import LegacyCard from '#lib/cards/LegacyCard.svelte';
 	import { fitZoom } from '#lib/cards/fit.ts';
 	import { sfxCardDraw, sfxCardFlip, sfxCrateOpen, sfxDoorTear } from '#lib/audio/sfx.ts';
-	import { audioSettings } from '#lib/audio/settings.svelte.ts';
 	import { sceneForOpening } from '#lib/story/script.ts';
 	import StoryStage from '#lib/story/StoryStage.svelte';
 	import Briefing from './Briefing.svelte';
@@ -311,7 +310,7 @@
 		}
 		if (event.key === ' ' && !progress.stowing && !paused) {
 			event.preventDefault();
-			if (activeStory && audioSettings.pacing === 'story' && storyStage?.advance()) return;
+			if (activeStory && storyStage?.advance()) return;
 			if (allDrawn) toggleReady();
 			else step();
 		}

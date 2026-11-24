@@ -10,6 +10,15 @@
 	function onDocClick(event: PointerEvent) {
 		if (open && wrap && !wrap.contains(event.target as Node)) open = false;
 	}
+
+	// The top bar stacks under the covers over the table (the lobby, a reading), so the mixer hangs from it in the
+	// top layer, or it would open behind them.
+	function hang(mixer: HTMLElement) {
+		const anchor = wrap!.getBoundingClientRect();
+		mixer.style.top = `${anchor.bottom + 8}px`;
+		mixer.style.right = `${document.documentElement.clientWidth - anchor.right}px`;
+		mixer.showPopover();
+	}
 </script>
 
 <svelte:window onpointerdown={onDocClick} />
@@ -41,7 +50,14 @@
 	</button>
 
 	{#if open}
-		<div class="mixer" role="dialog" aria-label="Sound and narration settings" transition:fade={{ duration: 130 }}>
+		<div
+			class="mixer"
+			popover="manual"
+			role="dialog"
+			aria-label="Sound and narration settings"
+			transition:fade={{ duration: 130 }}
+			{@attach hang}
+		>
 			<header>
 				<strong>Sound & Story</strong>
 				<button
@@ -110,14 +126,6 @@
 				>
 					Voices: {audioSettings.voiceEnabled ? 'On' : 'Off'}
 				</button>
-				<button
-					type="button"
-					class="chip"
-					class:active={audioSettings.pacing === 'story'}
-					onclick={() => audioSettings.setPacing(audioSettings.pacing === 'story' ? 'punchy' : 'story')}
-				>
-					Pacing: {audioSettings.pacing === 'story' ? 'Full story' : 'Punchy'}
-				</button>
 			</div>
 		</div>
 	{/if}
@@ -162,10 +170,10 @@
 	}
 
 	.mixer {
-		position: absolute;
-		top: calc(100% + 0.5rem);
-		right: 0;
-		z-index: 80;
+		position: fixed;
+		inset: auto;
+		margin: 0;
+		overflow: visible;
 		display: flex;
 		flex-direction: column;
 		gap: 0.55rem;

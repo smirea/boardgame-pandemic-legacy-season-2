@@ -26,7 +26,7 @@ export const LS = new LocalStorage<{
 	/** The studio stage's game (`/debug/studio`), kept apart from the campaign so a reload resumes it. */
 	studio: unknown;
 	studioView: { viewport: { width: number; height: number }; panel: boolean };
-	/** Audio mixer volumes, mute, voice acting toggle, and narrative pacing preference. */
+	/** Audio mixer volumes, mute and voice acting toggle. */
 	audio: unknown;
 }>({
 	namespace,

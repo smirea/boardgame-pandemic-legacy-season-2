@@ -1,7 +1,5 @@
 import { LS } from '#lib/storage.ts';
 
-export type StoryPacing = 'story' | 'punchy';
-
 export type AudioPrefs = {
 	muted: boolean;
 	master: number;
@@ -9,7 +7,6 @@ export type AudioPrefs = {
 	sfx: number;
 	voice: number;
 	voiceEnabled: boolean;
-	pacing: StoryPacing;
 };
 
 const DEFAULTS: AudioPrefs = {
@@ -19,7 +16,6 @@ const DEFAULTS: AudioPrefs = {
 	sfx: 0.85,
 	voice: 0.95,
 	voiceEnabled: true,
-	pacing: 'story',
 };
 
 function loadPrefs(): AudioPrefs {
@@ -33,7 +29,6 @@ function loadPrefs(): AudioPrefs {
 		sfx: typeof stored.sfx === 'number' ? clamp01(stored.sfx) : DEFAULTS.sfx,
 		voice: typeof stored.voice === 'number' ? clamp01(stored.voice) : DEFAULTS.voice,
 		voiceEnabled: typeof stored.voiceEnabled === 'boolean' ? stored.voiceEnabled : DEFAULTS.voiceEnabled,
-		pacing: stored.pacing === 'punchy' ? 'punchy' : 'story',
 	};
 }
 
@@ -48,7 +43,6 @@ class AudioSettings {
 	sfx = $state(DEFAULTS.sfx);
 	voice = $state(DEFAULTS.voice);
 	voiceEnabled = $state(DEFAULTS.voiceEnabled);
-	pacing = $state<StoryPacing>(DEFAULTS.pacing);
 
 	private listeners = new Set<() => void>();
 
@@ -60,7 +54,6 @@ class AudioSettings {
 		this.sfx = initial.sfx;
 		this.voice = initial.voice;
 		this.voiceEnabled = initial.voiceEnabled;
-		this.pacing = initial.pacing;
 	}
 
 	subscribe(fn: () => void): () => void {
@@ -78,7 +71,6 @@ class AudioSettings {
 					sfx: this.sfx,
 					voice: this.voice,
 					voiceEnabled: this.voiceEnabled,
-					pacing: this.pacing,
 				},
 			});
 		}
@@ -113,11 +105,6 @@ class AudioSettings {
 
 	toggleVoice() {
 		this.voiceEnabled = !this.voiceEnabled;
-		this.persist();
-	}
-
-	setPacing(pacing: StoryPacing) {
-		this.pacing = pacing;
 		this.persist();
 	}
 }
