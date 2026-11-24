@@ -39,15 +39,28 @@ const VOICE_CONCURRENCY = 4;
 const SYNTH_CONCURRENCY = 5;
 
 const KIND_STYLE_HINT: Record<CharacterLineKind, string> = {
-	punchline: 'snappy, expressive, in-character signature one-liner delivered with vivid personality',
-	scar: 'raw immediate physical wince and expressive in-character reaction to taking a painful permanent scar',
-	upgrade: 'lively delighted in-character reaction to gaining a powerful new skill',
-	thanks: 'natural warm in-character thank-you to a teammate, brief and human',
-	greet: 'natural upbeat in-character greeting meeting a teammate in the field',
-	leave: 'brisk in-character parting remark heading out on the move',
-	danger: 'tense urgent in-character reaction spotting terrifying plague or Hollow Men right nearby',
+	punchline:
+		'snappy, brisk, expressive in-character one-liner delivered cleanly at a quick menu-friendly pace with no lingering pauses',
+	scar: 'immediate physical wince and concise in-character reaction to taking a painful scar, brisk natural pacing',
+	upgrade: 'lively concise delighted in-character reaction to gaining a new skill, upbeat brisk tempo',
+	thanks: 'brief natural warm in-character thank-you to a teammate, snappy conversational pace',
+	greet: 'natural upbeat concise in-character greeting meeting a teammate in the field, brisk friendly pace',
+	leave: 'brisk concise in-character parting remark heading out, snappy tempo',
+	danger: 'tense urgent concise warning spotting plague or Hollow Men right nearby, quick intense delivery',
 	death:
-		'deeply dramatic, theatrical, gut-wrenching dying last words with genuine breathy anguish and voice fading at the end',
+		'dramatic, heartfelt dying last words with genuine breathy anguish fading out, emotionally vivid yet compact without long dead air',
+};
+
+/** Soft ceiling (seconds) above which slow-cadence voices get a subtle, pitch-preserving tempo nudge. */
+const SOFT_MAX_SECONDS: Record<CharacterLineKind, number> = {
+	punchline: 2.35,
+	scar: 3.1,
+	upgrade: 2.7,
+	thanks: 2.1,
+	greet: 2.6,
+	leave: 2.5,
+	danger: 2.9,
+	death: 7.2,
 };
 
 function loadKey(): string {
@@ -144,7 +157,7 @@ function lineHash(voiceId: string, persona: CharacterPersona, kind: CharacterLin
 				model: TTS_MODEL,
 				voiceId,
 				muffled: Boolean(persona.voiceBrief.muffled),
-				trimVersion: 2,
+				trimVersion: 3,
 				styleInstruction: lineStyleInstruction(persona, kind),
 				text: persona.lines[kind].text,
 			}),
@@ -153,40 +166,62 @@ function lineHash(voiceId: string, persona: CharacterPersona, kind: CharacterLin
 		.slice(0, 16);
 }
 
-function encodeAudioToMp3(audioBytes: Buffer, mimeType: string, muffled: boolean): Uint8Array {
+function probeDurationSeconds(mp3Bytes: Uint8Array): number {
+	const probe = spawnSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', 'pipe:0'], {
+		input: mp3Bytes,
+		encoding: 'utf8',
+	});
+	const value = Number(probe.stdout?.trim());
+	return Number.isFinite(value) && value > 0 ? value : 0;
+}
+
+function encodeAudioToMp3(audioBytes: Buffer, mimeType: string, muffled: boolean, kind: CharacterLineKind): Uint8Array {
 	const isPcm = /audio\/L16|pcm/i.test(mimeType);
 	const inputArgs = isPcm ? ['-f', 's16le', '-ar', '24000', '-ac', '1', '-i', 'pipe:0'] : ['-i', 'pipe:0'];
 	// Trim only outer leading/trailing silence (via reverse) so dramatic mid-line pauses are never cut off.
 	const trim =
 		'silenceremove=start_periods=1:start_threshold=-48dB,areverse,silenceremove=start_periods=1:start_threshold=-48dB,areverse';
 	const cloth = muffled ? ',highpass=f=220,lowpass=f=2500' : '';
-	const filters = `${trim}${cloth},loudnorm=I=-16:TP=-1.5:LRA=11`;
+	const runFfmpeg = (tempo: number) => {
+		const speed = tempo > 1.01 ? `,atempo=${tempo.toFixed(3)}` : '';
+		const filters = `${trim}${cloth}${speed},loudnorm=I=-16:TP=-1.5:LRA=11`;
+		const result = spawnSync(
+			'ffmpeg',
+			[
+				'-hide_banner',
+				'-loglevel',
+				'error',
+				...inputArgs,
+				'-af',
+				filters,
+				'-codec:a',
+				'libmp3lame',
+				'-b:a',
+				'80k',
+				'-f',
+				'mp3',
+				'pipe:1',
+			],
+			{ input: audioBytes, maxBuffer: 32 * 1024 * 1024 },
+		);
+		if (result.status !== 0) {
+			throw new Error(`ffmpeg failed (${result.status}): ${result.stderr?.toString('utf8')}`);
+		}
+		const out = new Uint8Array(result.stdout);
+		if (out.byteLength < 512) throw new Error(`Encoded MP3 unexpectedly small (${out.byteLength} bytes)`);
+		return out;
+	};
 
-	const result = spawnSync(
-		'ffmpeg',
-		[
-			'-hide_banner',
-			'-loglevel',
-			'error',
-			...inputArgs,
-			'-af',
-			filters,
-			'-codec:a',
-			'libmp3lame',
-			'-b:a',
-			'80k',
-			'-f',
-			'mp3',
-			'pipe:1',
-		],
-		{ input: audioBytes, maxBuffer: 32 * 1024 * 1024 },
-	);
-	if (result.status !== 0) {
-		throw new Error(`ffmpeg failed (${result.status}): ${result.stderr?.toString('utf8')}`);
+	const first = runFfmpeg(1);
+	const duration = probeDurationSeconds(first);
+	const ceiling = SOFT_MAX_SECONDS[kind];
+	if (duration > ceiling) {
+		// Gentle pitch-preserving tempo nudge (capped so voices stay completely natural).
+		const maxTempo = kind === 'punchline' ? 1.24 : 1.18;
+		const tempo = Math.min(maxTempo, duration / (ceiling * 0.94));
+		return runFfmpeg(tempo);
 	}
-	const out = new Uint8Array(result.stdout);
-	if (out.byteLength < 512) throw new Error(`Encoded MP3 unexpectedly small (${out.byteLength} bytes)`);
-	return out;
+	return first;
 }
 
 async function createVoiceWithRetry(ai: GoogleGenAI, persona: CharacterPersona, attempt = 1): Promise<string> {
@@ -309,7 +344,7 @@ async function synthesizeLine(
 		const raw = Buffer.from(b64, 'base64');
 		if (raw.byteLength < 1024)
 			throw new Error(`Audio response unexpectedly small (${raw.byteLength} bytes) for ${key}`);
-		return encodeAudioToMp3(raw, mime, Boolean(persona.voiceBrief.muffled));
+		return encodeAudioToMp3(raw, mime, Boolean(persona.voiceBrief.muffled), kind);
 	} catch (err) {
 		const msg = err instanceof Error ? err.message : String(err);
 		const retryable = /\b(429|500|502|503|504|RESOURCE_EXHAUSTED|UNAVAILABLE|deadline|fetch failed)\b/i.test(msg);

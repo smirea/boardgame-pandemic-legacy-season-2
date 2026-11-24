@@ -123,159 +123,159 @@ export const characterVoiceManifest: Record<string, CharacterVoiceEntry> = {
 		"figure": "haven-worker",
 		"kind": "danger",
 		"voiceId": "voice_t6cnoijxotdk",
-		"hash": "0a06ab848156692d",
-		"bytes": 29084
+		"hash": "6a43d12ec22a085f",
+		"bytes": 21884
 	},
 	"haven-worker_death": {
 		"src": "/voices/characters/haven-worker_death.mp3",
 		"figure": "haven-worker",
 		"kind": "death",
 		"voiceId": "voice_t6cnoijxotdk",
-		"hash": "0cf5c0845c29fcf8",
-		"bytes": 113084
+		"hash": "1a994395131a0f3b",
+		"bytes": 81884
 	},
 	"haven-worker_greet": {
 		"src": "/voices/characters/haven-worker_greet.mp3",
 		"figure": "haven-worker",
 		"kind": "greet",
 		"voiceId": "voice_t6cnoijxotdk",
-		"hash": "037b5f3c6f464817",
-		"bytes": 23564
+		"hash": "2ac2390a95139e0b",
+		"bytes": 10604
 	},
 	"haven-worker_leave": {
 		"src": "/voices/characters/haven-worker_leave.mp3",
 		"figure": "haven-worker",
 		"kind": "leave",
 		"voiceId": "voice_t6cnoijxotdk",
-		"hash": "602de989081cc18c",
-		"bytes": 35084
+		"hash": "97c9cf542f7b83d4",
+		"bytes": 15884
 	},
 	"haven-worker_punchline": {
 		"src": "/voices/characters/haven-worker_punchline.mp3",
 		"figure": "haven-worker",
 		"kind": "punchline",
 		"voiceId": "voice_t6cnoijxotdk",
-		"hash": "d3251fb662eb5a29",
-		"bytes": 20684
+		"hash": "d6ca019968ccb72e",
+		"bytes": 15884
 	},
 	"haven-worker_scar": {
 		"src": "/voices/characters/haven-worker_scar.mp3",
 		"figure": "haven-worker",
 		"kind": "scar",
 		"voiceId": "voice_t6cnoijxotdk",
-		"hash": "95ce76f6102e9886",
-		"bytes": 68204
+		"hash": "2e5d2ed6ced4d812",
+		"bytes": 33164
 	},
 	"haven-worker_thanks": {
 		"src": "/voices/characters/haven-worker_thanks.mp3",
 		"figure": "haven-worker",
 		"kind": "thanks",
 		"voiceId": "voice_t6cnoijxotdk",
-		"hash": "6224f7be0a949376",
-		"bytes": 28124
+		"hash": "130902532b676234",
+		"bytes": 22124
 	},
 	"haven-worker_upgrade": {
 		"src": "/voices/characters/haven-worker_upgrade.mp3",
 		"figure": "haven-worker",
 		"kind": "upgrade",
 		"voiceId": "voice_t6cnoijxotdk",
-		"hash": "5dfd6d9dd18eb911",
-		"bytes": 30044
+		"hash": "af550ac93e3847da",
+		"bytes": 17564
 	},
 	"immunologist_danger": {
 		"src": "/voices/characters/immunologist_danger.mp3",
 		"figure": "immunologist",
 		"kind": "danger",
 		"voiceId": "voice_5q8mak9hpv9y",
-		"hash": "cc8f4306d970b652",
-		"bytes": 20684
+		"hash": "db4b25247e8f6354",
+		"bytes": 21884
 	},
 	"immunologist_death": {
 		"src": "/voices/characters/immunologist_death.mp3",
 		"figure": "immunologist",
 		"kind": "death",
 		"voiceId": "voice_5q8mak9hpv9y",
-		"hash": "b6b8eb3882075f8a",
-		"bytes": 65324
+		"hash": "41d9e75731e284a6",
+		"bytes": 69884
 	},
 	"immunologist_greet": {
 		"src": "/voices/characters/immunologist_greet.mp3",
 		"figure": "immunologist",
 		"kind": "greet",
 		"voiceId": "voice_5q8mak9hpv9y",
-		"hash": "97d3184041e5f5a1",
-		"bytes": 14684
+		"hash": "d59451f2493f7a50",
+		"bytes": 14924
 	},
 	"immunologist_leave": {
 		"src": "/voices/characters/immunologist_leave.mp3",
 		"figure": "immunologist",
 		"kind": "leave",
 		"voiceId": "voice_5q8mak9hpv9y",
-		"hash": "1648f2606a89bbbf",
-		"bytes": 20444
+		"hash": "ca2d44c147587f98",
+		"bytes": 14204
 	},
 	"immunologist_punchline": {
 		"src": "/voices/characters/immunologist_punchline.mp3",
 		"figure": "immunologist",
 		"kind": "punchline",
 		"voiceId": "voice_5q8mak9hpv9y",
-		"hash": "e4f094cc95ee5761",
-		"bytes": 20684
+		"hash": "0f9d4f3c95266b92",
+		"bytes": 17324
 	},
 	"immunologist_scar": {
 		"src": "/voices/characters/immunologist_scar.mp3",
 		"figure": "immunologist",
 		"kind": "scar",
 		"voiceId": "voice_5q8mak9hpv9y",
-		"hash": "6a5cbdfe86e02a03",
-		"bytes": 28604
+		"hash": "fb66833143e23b8b",
+		"bytes": 23084
 	},
 	"immunologist_thanks": {
 		"src": "/voices/characters/immunologist_thanks.mp3",
 		"figure": "immunologist",
 		"kind": "thanks",
 		"voiceId": "voice_5q8mak9hpv9y",
-		"hash": "6c25b791705d5333",
-		"bytes": 15884
+		"hash": "3870eb968af79e15",
+		"bytes": 12284
 	},
 	"immunologist_upgrade": {
 		"src": "/voices/characters/immunologist_upgrade.mp3",
 		"figure": "immunologist",
 		"kind": "upgrade",
 		"voiceId": "voice_5q8mak9hpv9y",
-		"hash": "e650822b7dca4dd5",
-		"bytes": 27404
+		"hash": "d52615825759352f",
+		"bytes": 22604
 	},
 	"scientist_danger": {
 		"src": "/voices/characters/scientist_danger.mp3",
 		"figure": "scientist",
 		"kind": "danger",
 		"voiceId": "voice_zx1ekz7kkuql",
-		"hash": "8ab1f8aea0c384cb",
-		"bytes": 30044
+		"hash": "f3bef2d22c4925eb",
+		"bytes": 16844
 	},
 	"scientist_death": {
 		"src": "/voices/characters/scientist_death.mp3",
 		"figure": "scientist",
 		"kind": "death",
 		"voiceId": "voice_zx1ekz7kkuql",
-		"hash": "81c444e181e27095",
-		"bytes": 102284
+		"hash": "15c920b18c40eb1b",
+		"bytes": 73724
 	},
 	"scientist_greet": {
 		"src": "/voices/characters/scientist_greet.mp3",
 		"figure": "scientist",
 		"kind": "greet",
 		"voiceId": "voice_zx1ekz7kkuql",
-		"hash": "ef172fe5c1907346",
-		"bytes": 39404
+		"hash": "6826c191f72d096b",
+		"bytes": 27164
 	},
 	"scientist_leave": {
 		"src": "/voices/characters/scientist_leave.mp3",
 		"figure": "scientist",
 		"kind": "leave",
 		"voiceId": "voice_zx1ekz7kkuql",
-		"hash": "8d073540f27738e2",
+		"hash": "4749315fa5642ed8",
 		"bytes": 24764
 	},
 	"scientist_punchline": {
@@ -283,1039 +283,1039 @@ export const characterVoiceManifest: Record<string, CharacterVoiceEntry> = {
 		"figure": "scientist",
 		"kind": "punchline",
 		"voiceId": "voice_zx1ekz7kkuql",
-		"hash": "907b1e9bb1e2cc1f",
-		"bytes": 43484
+		"hash": "d20ac135931ad1bc",
+		"bytes": 23324
 	},
 	"scientist_scar": {
 		"src": "/voices/characters/scientist_scar.mp3",
 		"figure": "scientist",
 		"kind": "scar",
 		"voiceId": "voice_zx1ekz7kkuql",
-		"hash": "f5e7993578fe28f3",
-		"bytes": 62924
+		"hash": "af5a8f791dcb09cc",
+		"bytes": 26924
 	},
 	"scientist_thanks": {
 		"src": "/voices/characters/scientist_thanks.mp3",
 		"figure": "scientist",
 		"kind": "thanks",
 		"voiceId": "voice_zx1ekz7kkuql",
-		"hash": "61de11b701d57e3e",
-		"bytes": 26684
+		"hash": "eac29ace94cc2d37",
+		"bytes": 21884
 	},
 	"scientist_upgrade": {
 		"src": "/voices/characters/scientist_upgrade.mp3",
 		"figure": "scientist",
 		"kind": "upgrade",
 		"voiceId": "voice_zx1ekz7kkuql",
-		"hash": "ab68bb2427f99663",
-		"bytes": 35084
+		"hash": "fd07fe81dded937d",
+		"bytes": 29564
 	},
 	"survivor-0_danger": {
 		"src": "/voices/characters/survivor-0_danger.mp3",
 		"figure": "survivor-0",
 		"kind": "danger",
 		"voiceId": "voice_h64lmmnwy7pw",
-		"hash": "bbfe3ef7f0e0c1a2",
-		"bytes": 29324
+		"hash": "58532166d4f8bc34",
+		"bytes": 22844
 	},
 	"survivor-0_death": {
 		"src": "/voices/characters/survivor-0_death.mp3",
 		"figure": "survivor-0",
 		"kind": "death",
 		"voiceId": "voice_h64lmmnwy7pw",
-		"hash": "44b1b66ad6ec7b2f",
-		"bytes": 83804
+		"hash": "e97776a3342b143f",
+		"bytes": 58844
 	},
 	"survivor-0_greet": {
 		"src": "/voices/characters/survivor-0_greet.mp3",
 		"figure": "survivor-0",
 		"kind": "greet",
 		"voiceId": "voice_h64lmmnwy7pw",
-		"hash": "ee2a189288f9acf3",
-		"bytes": 32684
+		"hash": "ccd1e918408f103d",
+		"bytes": 20924
 	},
 	"survivor-0_leave": {
 		"src": "/voices/characters/survivor-0_leave.mp3",
 		"figure": "survivor-0",
 		"kind": "leave",
 		"voiceId": "voice_h64lmmnwy7pw",
-		"hash": "c50f583d67b8d1e4",
-		"bytes": 13244
+		"hash": "96d4c2114279f798",
+		"bytes": 17084
 	},
 	"survivor-0_punchline": {
 		"src": "/voices/characters/survivor-0_punchline.mp3",
 		"figure": "survivor-0",
 		"kind": "punchline",
 		"voiceId": "voice_h64lmmnwy7pw",
-		"hash": "9d5fcd654dfa3599",
-		"bytes": 34604
+		"hash": "77230a89b4f29bbe",
+		"bytes": 21884
 	},
 	"survivor-0_scar": {
 		"src": "/voices/characters/survivor-0_scar.mp3",
 		"figure": "survivor-0",
 		"kind": "scar",
 		"voiceId": "voice_h64lmmnwy7pw",
-		"hash": "754d97ab8851fff0",
-		"bytes": 27884
+		"hash": "be89863df99966ab",
+		"bytes": 21884
 	},
 	"survivor-0_thanks": {
 		"src": "/voices/characters/survivor-0_thanks.mp3",
 		"figure": "survivor-0",
 		"kind": "thanks",
 		"voiceId": "voice_h64lmmnwy7pw",
-		"hash": "c4fd1c83ad93d03e",
-		"bytes": 20684
+		"hash": "0d8169197faf17bf",
+		"bytes": 22844
 	},
 	"survivor-0_upgrade": {
 		"src": "/voices/characters/survivor-0_upgrade.mp3",
 		"figure": "survivor-0",
 		"kind": "upgrade",
 		"voiceId": "voice_h64lmmnwy7pw",
-		"hash": "93ea7d6b2451280d",
-		"bytes": 38924
+		"hash": "d37d43af5994a80d",
+		"bytes": 29804
 	},
 	"survivor-1_danger": {
 		"src": "/voices/characters/survivor-1_danger.mp3",
 		"figure": "survivor-1",
 		"kind": "danger",
 		"voiceId": "voice_zaaonepc8zym",
-		"hash": "e8bc44be330e42d7",
-		"bytes": 26684
+		"hash": "75ec9e094cc9c169",
+		"bytes": 15404
 	},
 	"survivor-1_death": {
 		"src": "/voices/characters/survivor-1_death.mp3",
 		"figure": "survivor-1",
 		"kind": "death",
 		"voiceId": "voice_zaaonepc8zym",
-		"hash": "6b319be6a7ca9feb",
-		"bytes": 65564
+		"hash": "1a6b6fc5fdbd1648",
+		"bytes": 87164
 	},
 	"survivor-1_greet": {
 		"src": "/voices/characters/survivor-1_greet.mp3",
 		"figure": "survivor-1",
 		"kind": "greet",
 		"voiceId": "voice_zaaonepc8zym",
-		"hash": "5e3488bd9e89b33e",
-		"bytes": 25244
+		"hash": "432aa185a56b541e",
+		"bytes": 12764
 	},
 	"survivor-1_leave": {
 		"src": "/voices/characters/survivor-1_leave.mp3",
 		"figure": "survivor-1",
 		"kind": "leave",
 		"voiceId": "voice_zaaonepc8zym",
-		"hash": "ab087c6fb0bc701c",
-		"bytes": 11084
+		"hash": "358d844531f34d8e",
+		"bytes": 9404
 	},
 	"survivor-1_punchline": {
 		"src": "/voices/characters/survivor-1_punchline.mp3",
 		"figure": "survivor-1",
 		"kind": "punchline",
 		"voiceId": "voice_zaaonepc8zym",
-		"hash": "4061c5ed31593eda",
-		"bytes": 22124
+		"hash": "9cadf66923c68d40",
+		"bytes": 14924
 	},
 	"survivor-1_scar": {
 		"src": "/voices/characters/survivor-1_scar.mp3",
 		"figure": "survivor-1",
 		"kind": "scar",
 		"voiceId": "voice_zaaonepc8zym",
-		"hash": "72740f5c612aeca9",
-		"bytes": 34604
+		"hash": "999ab86802a53a2c",
+		"bytes": 37244
 	},
 	"survivor-1_thanks": {
 		"src": "/voices/characters/survivor-1_thanks.mp3",
 		"figure": "survivor-1",
 		"kind": "thanks",
 		"voiceId": "voice_zaaonepc8zym",
-		"hash": "e1713c22509d0518",
-		"bytes": 13004
+		"hash": "965f70339ce499ef",
+		"bytes": 16844
 	},
 	"survivor-1_upgrade": {
 		"src": "/voices/characters/survivor-1_upgrade.mp3",
 		"figure": "survivor-1",
 		"kind": "upgrade",
 		"voiceId": "voice_zaaonepc8zym",
-		"hash": "26c3faf2fb863b5d",
-		"bytes": 28124
+		"hash": "1c882aac38fe6a47",
+		"bytes": 14684
 	},
 	"survivor-10_danger": {
 		"src": "/voices/characters/survivor-10_danger.mp3",
 		"figure": "survivor-10",
 		"kind": "danger",
 		"voiceId": "voice_xaptg1n5mppk",
-		"hash": "0a6ba175c4c44d43",
-		"bytes": 27884
+		"hash": "6419a93d5bdc2b5a",
+		"bytes": 24524
 	},
 	"survivor-10_death": {
 		"src": "/voices/characters/survivor-10_death.mp3",
 		"figure": "survivor-10",
 		"kind": "death",
 		"voiceId": "voice_xaptg1n5mppk",
-		"hash": "ed273b646484ee4e",
-		"bytes": 70844
+		"hash": "d9536f333c07343f",
+		"bytes": 53804
 	},
 	"survivor-10_greet": {
 		"src": "/voices/characters/survivor-10_greet.mp3",
 		"figure": "survivor-10",
 		"kind": "greet",
 		"voiceId": "voice_xaptg1n5mppk",
-		"hash": "e9d042c671de9fe6",
-		"bytes": 38444
+		"hash": "8498edcb538a3991",
+		"bytes": 20924
 	},
 	"survivor-10_leave": {
 		"src": "/voices/characters/survivor-10_leave.mp3",
 		"figure": "survivor-10",
 		"kind": "leave",
 		"voiceId": "voice_xaptg1n5mppk",
-		"hash": "0bcff6f01afa6b87",
-		"bytes": 19004
+		"hash": "001b11685da649dc",
+		"bytes": 19244
 	},
 	"survivor-10_punchline": {
 		"src": "/voices/characters/survivor-10_punchline.mp3",
 		"figure": "survivor-10",
 		"kind": "punchline",
 		"voiceId": "voice_xaptg1n5mppk",
-		"hash": "7c4cf1e3c1134bda",
-		"bytes": 17564
+		"hash": "e0462b3ec7e2a164",
+		"bytes": 16364
 	},
 	"survivor-10_scar": {
 		"src": "/voices/characters/survivor-10_scar.mp3",
 		"figure": "survivor-10",
 		"kind": "scar",
 		"voiceId": "voice_xaptg1n5mppk",
-		"hash": "8415cc6edaf1332a",
-		"bytes": 42284
+		"hash": "582bbf7791685350",
+		"bytes": 34844
 	},
 	"survivor-10_thanks": {
 		"src": "/voices/characters/survivor-10_thanks.mp3",
 		"figure": "survivor-10",
 		"kind": "thanks",
 		"voiceId": "voice_xaptg1n5mppk",
-		"hash": "7544a80fb8908936",
-		"bytes": 25964
+		"hash": "dabaa739f1069634",
+		"bytes": 15164
 	},
 	"survivor-10_upgrade": {
 		"src": "/voices/characters/survivor-10_upgrade.mp3",
 		"figure": "survivor-10",
 		"kind": "upgrade",
 		"voiceId": "voice_xaptg1n5mppk",
-		"hash": "3b494733c7643c44",
-		"bytes": 37004
+		"hash": "ddd8fed1c5bd2bf6",
+		"bytes": 40124
 	},
 	"survivor-11_danger": {
 		"src": "/voices/characters/survivor-11_danger.mp3",
 		"figure": "survivor-11",
 		"kind": "danger",
 		"voiceId": "voice_91zkmbzr2d3n",
-		"hash": "dc15b66f3df79f21",
-		"bytes": 13484
+		"hash": "e64f4efa79437f95",
+		"bytes": 15404
 	},
 	"survivor-11_death": {
 		"src": "/voices/characters/survivor-11_death.mp3",
 		"figure": "survivor-11",
 		"kind": "death",
 		"voiceId": "voice_91zkmbzr2d3n",
-		"hash": "ba87e7e8572ceac0",
-		"bytes": 91244
+		"hash": "d677f5df37bb7228",
+		"bytes": 58364
 	},
 	"survivor-11_greet": {
 		"src": "/voices/characters/survivor-11_greet.mp3",
 		"figure": "survivor-11",
 		"kind": "greet",
 		"voiceId": "voice_91zkmbzr2d3n",
-		"hash": "b2db86ec7cd0f094",
-		"bytes": 13724
+		"hash": "bf2858bde4f703e9",
+		"bytes": 15644
 	},
 	"survivor-11_leave": {
 		"src": "/voices/characters/survivor-11_leave.mp3",
 		"figure": "survivor-11",
 		"kind": "leave",
 		"voiceId": "voice_91zkmbzr2d3n",
-		"hash": "26186bda43faef83",
-		"bytes": 13484
+		"hash": "f9a86a66004a7437",
+		"bytes": 11084
 	},
 	"survivor-11_punchline": {
 		"src": "/voices/characters/survivor-11_punchline.mp3",
 		"figure": "survivor-11",
 		"kind": "punchline",
 		"voiceId": "voice_91zkmbzr2d3n",
-		"hash": "c6002995d41bce21",
-		"bytes": 16844
+		"hash": "f7a2610139848d3d",
+		"bytes": 11804
 	},
 	"survivor-11_scar": {
 		"src": "/voices/characters/survivor-11_scar.mp3",
 		"figure": "survivor-11",
 		"kind": "scar",
 		"voiceId": "voice_91zkmbzr2d3n",
-		"hash": "3a1827b148a90250",
-		"bytes": 21164
+		"hash": "c692b59629fabc80",
+		"bytes": 20924
 	},
 	"survivor-11_thanks": {
 		"src": "/voices/characters/survivor-11_thanks.mp3",
 		"figure": "survivor-11",
 		"kind": "thanks",
 		"voiceId": "voice_91zkmbzr2d3n",
-		"hash": "6f40e1ecee7fa6f0",
-		"bytes": 19484
+		"hash": "daf44eac43cc0eba",
+		"bytes": 15884
 	},
 	"survivor-11_upgrade": {
 		"src": "/voices/characters/survivor-11_upgrade.mp3",
 		"figure": "survivor-11",
 		"kind": "upgrade",
 		"voiceId": "voice_91zkmbzr2d3n",
-		"hash": "6143af2a37bb1747",
-		"bytes": 28844
+		"hash": "d19e568db900bc24",
+		"bytes": 18524
 	},
 	"survivor-12_danger": {
 		"src": "/voices/characters/survivor-12_danger.mp3",
 		"figure": "survivor-12",
 		"kind": "danger",
 		"voiceId": "voice_bl4pyi6vcu9i",
-		"hash": "8c53e46ae5b9ff9b",
-		"bytes": 32684
+		"hash": "728959a7ede00a42",
+		"bytes": 26444
 	},
 	"survivor-12_death": {
 		"src": "/voices/characters/survivor-12_death.mp3",
 		"figure": "survivor-12",
 		"kind": "death",
 		"voiceId": "voice_bl4pyi6vcu9i",
-		"hash": "e49cb60021590ab0",
-		"bytes": 93884
+		"hash": "e9d91b67fec606ee",
+		"bytes": 64844
 	},
 	"survivor-12_greet": {
 		"src": "/voices/characters/survivor-12_greet.mp3",
 		"figure": "survivor-12",
 		"kind": "greet",
 		"voiceId": "voice_bl4pyi6vcu9i",
-		"hash": "2bc663c2f7df43d3",
-		"bytes": 17564
+		"hash": "d7d764bcdfe07294",
+		"bytes": 17324
 	},
 	"survivor-12_leave": {
 		"src": "/voices/characters/survivor-12_leave.mp3",
 		"figure": "survivor-12",
 		"kind": "leave",
 		"voiceId": "voice_bl4pyi6vcu9i",
-		"hash": "247fd622666cef33",
-		"bytes": 24764
+		"hash": "e0a197683f6fecde",
+		"bytes": 23804
 	},
 	"survivor-12_punchline": {
 		"src": "/voices/characters/survivor-12_punchline.mp3",
 		"figure": "survivor-12",
 		"kind": "punchline",
 		"voiceId": "voice_bl4pyi6vcu9i",
-		"hash": "626f340e0af01437",
-		"bytes": 28604
+		"hash": "2e38c5352c915c40",
+		"bytes": 15884
 	},
 	"survivor-12_scar": {
 		"src": "/voices/characters/survivor-12_scar.mp3",
 		"figure": "survivor-12",
 		"kind": "scar",
 		"voiceId": "voice_bl4pyi6vcu9i",
-		"hash": "539c476b562a529f",
-		"bytes": 37964
+		"hash": "96330b8c548aeea4",
+		"bytes": 41324
 	},
 	"survivor-12_thanks": {
 		"src": "/voices/characters/survivor-12_thanks.mp3",
 		"figure": "survivor-12",
 		"kind": "thanks",
 		"voiceId": "voice_bl4pyi6vcu9i",
-		"hash": "39c6784771820ed8",
-		"bytes": 14924
+		"hash": "eeb573bb54c4aede",
+		"bytes": 19244
 	},
 	"survivor-12_upgrade": {
 		"src": "/voices/characters/survivor-12_upgrade.mp3",
 		"figure": "survivor-12",
 		"kind": "upgrade",
 		"voiceId": "voice_bl4pyi6vcu9i",
-		"hash": "a5296c3092802735",
-		"bytes": 30044
+		"hash": "d1ded15471c24f1c",
+		"bytes": 20684
 	},
 	"survivor-13_danger": {
 		"src": "/voices/characters/survivor-13_danger.mp3",
 		"figure": "survivor-13",
 		"kind": "danger",
 		"voiceId": "voice_9hnvm9fwfnhe",
-		"hash": "cb7b7bcd369a2c72",
-		"bytes": 36044
+		"hash": "7b2ec28dcff89cc9",
+		"bytes": 14444
 	},
 	"survivor-13_death": {
 		"src": "/voices/characters/survivor-13_death.mp3",
 		"figure": "survivor-13",
 		"kind": "death",
 		"voiceId": "voice_9hnvm9fwfnhe",
-		"hash": "3b0cfbc2c1ccdc07",
-		"bytes": 83804
+		"hash": "3ddc05977f4e7777",
+		"bytes": 58844
 	},
 	"survivor-13_greet": {
 		"src": "/voices/characters/survivor-13_greet.mp3",
 		"figure": "survivor-13",
 		"kind": "greet",
 		"voiceId": "voice_9hnvm9fwfnhe",
-		"hash": "1954da1d170f6bd2",
-		"bytes": 50684
+		"hash": "3cf854b67399bec2",
+		"bytes": 25484
 	},
 	"survivor-13_leave": {
 		"src": "/voices/characters/survivor-13_leave.mp3",
 		"figure": "survivor-13",
 		"kind": "leave",
 		"voiceId": "voice_9hnvm9fwfnhe",
-		"hash": "99a1eb713ca32c53",
-		"bytes": 32204
+		"hash": "55efd51fdd82b1d2",
+		"bytes": 19964
 	},
 	"survivor-13_punchline": {
 		"src": "/voices/characters/survivor-13_punchline.mp3",
 		"figure": "survivor-13",
 		"kind": "punchline",
 		"voiceId": "voice_9hnvm9fwfnhe",
-		"hash": "c76a778038216184",
-		"bytes": 56684
+		"hash": "ba78a707064456e8",
+		"bytes": 20684
 	},
 	"survivor-13_scar": {
 		"src": "/voices/characters/survivor-13_scar.mp3",
 		"figure": "survivor-13",
 		"kind": "scar",
 		"voiceId": "voice_9hnvm9fwfnhe",
-		"hash": "b18d899fecc2c677",
-		"bytes": 52604
+		"hash": "de33596f8a7e637e",
+		"bytes": 32444
 	},
 	"survivor-13_thanks": {
 		"src": "/voices/characters/survivor-13_thanks.mp3",
 		"figure": "survivor-13",
 		"kind": "thanks",
 		"voiceId": "voice_9hnvm9fwfnhe",
-		"hash": "433170061f6868c3",
-		"bytes": 23564
+		"hash": "542693d18c5b1b3d",
+		"bytes": 20204
 	},
 	"survivor-13_upgrade": {
 		"src": "/voices/characters/survivor-13_upgrade.mp3",
 		"figure": "survivor-13",
 		"kind": "upgrade",
 		"voiceId": "voice_9hnvm9fwfnhe",
-		"hash": "d4dec7b8c6a98dfe",
-		"bytes": 39644
+		"hash": "5c68df97bf8e0de6",
+		"bytes": 30764
 	},
 	"survivor-14_danger": {
 		"src": "/voices/characters/survivor-14_danger.mp3",
 		"figure": "survivor-14",
 		"kind": "danger",
 		"voiceId": "voice_c8eicc8za5ek",
-		"hash": "3507810013fa94e5",
-		"bytes": 33884
+		"hash": "027632134231a559",
+		"bytes": 28604
 	},
 	"survivor-14_death": {
 		"src": "/voices/characters/survivor-14_death.mp3",
 		"figure": "survivor-14",
 		"kind": "death",
 		"voiceId": "voice_c8eicc8za5ek",
-		"hash": "c940ad7b89ffbd41",
-		"bytes": 87164
+		"hash": "58424a6b38d1c852",
+		"bytes": 74684
 	},
 	"survivor-14_greet": {
 		"src": "/voices/characters/survivor-14_greet.mp3",
 		"figure": "survivor-14",
 		"kind": "greet",
 		"voiceId": "voice_c8eicc8za5ek",
-		"hash": "ccf9e609f1c76067",
-		"bytes": 33404
+		"hash": "05c3b47910d6bf3b",
+		"bytes": 22124
 	},
 	"survivor-14_leave": {
 		"src": "/voices/characters/survivor-14_leave.mp3",
 		"figure": "survivor-14",
 		"kind": "leave",
 		"voiceId": "voice_c8eicc8za5ek",
-		"hash": "2ca214ff154a9fca",
-		"bytes": 39644
+		"hash": "0f6febc5089ba94d",
+		"bytes": 17324
 	},
 	"survivor-14_punchline": {
 		"src": "/voices/characters/survivor-14_punchline.mp3",
 		"figure": "survivor-14",
 		"kind": "punchline",
 		"voiceId": "voice_c8eicc8za5ek",
-		"hash": "2f4198e039e8133f",
-		"bytes": 28124
+		"hash": "fe6ba71bea98bc4e",
+		"bytes": 19244
 	},
 	"survivor-14_scar": {
 		"src": "/voices/characters/survivor-14_scar.mp3",
 		"figure": "survivor-14",
 		"kind": "scar",
 		"voiceId": "voice_c8eicc8za5ek",
-		"hash": "fe9dea535d90bb38",
-		"bytes": 57884
+		"hash": "c7e3d4f16af5bdce",
+		"bytes": 29084
 	},
 	"survivor-14_thanks": {
 		"src": "/voices/characters/survivor-14_thanks.mp3",
 		"figure": "survivor-14",
 		"kind": "thanks",
 		"voiceId": "voice_c8eicc8za5ek",
-		"hash": "d6861a0ba274c3a1",
-		"bytes": 20684
+		"hash": "aee0c3d1cd049287",
+		"bytes": 13004
 	},
 	"survivor-14_upgrade": {
 		"src": "/voices/characters/survivor-14_upgrade.mp3",
 		"figure": "survivor-14",
 		"kind": "upgrade",
 		"voiceId": "voice_c8eicc8za5ek",
-		"hash": "a37de86160ebdba1",
-		"bytes": 43244
+		"hash": "9fa2089bbcd42b3a",
+		"bytes": 23084
 	},
 	"survivor-15_danger": {
 		"src": "/voices/characters/survivor-15_danger.mp3",
 		"figure": "survivor-15",
 		"kind": "danger",
 		"voiceId": "voice_mloba29lkgvc",
-		"hash": "5d985982c0adb0b7",
-		"bytes": 38924
+		"hash": "5631363c88fc404a",
+		"bytes": 30284
 	},
 	"survivor-15_death": {
 		"src": "/voices/characters/survivor-15_death.mp3",
 		"figure": "survivor-15",
 		"kind": "death",
 		"voiceId": "voice_mloba29lkgvc",
-		"hash": "d785fdd424448e87",
-		"bytes": 81884
+		"hash": "1ef2626c518c4e9a",
+		"bytes": 92684
 	},
 	"survivor-15_greet": {
 		"src": "/voices/characters/survivor-15_greet.mp3",
 		"figure": "survivor-15",
 		"kind": "greet",
 		"voiceId": "voice_mloba29lkgvc",
-		"hash": "9641cc1075098516",
-		"bytes": 19724
+		"hash": "f32616d3e0df75c1",
+		"bytes": 19484
 	},
 	"survivor-15_leave": {
 		"src": "/voices/characters/survivor-15_leave.mp3",
 		"figure": "survivor-15",
 		"kind": "leave",
 		"voiceId": "voice_mloba29lkgvc",
-		"hash": "ac387005f480e397",
-		"bytes": 25484
+		"hash": "1530ceaea944aac2",
+		"bytes": 16844
 	},
 	"survivor-15_punchline": {
 		"src": "/voices/characters/survivor-15_punchline.mp3",
 		"figure": "survivor-15",
 		"kind": "punchline",
 		"voiceId": "voice_mloba29lkgvc",
-		"hash": "c6ad21c05ace6769",
-		"bytes": 23324
+		"hash": "098fc9245075c94f",
+		"bytes": 17564
 	},
 	"survivor-15_scar": {
 		"src": "/voices/characters/survivor-15_scar.mp3",
 		"figure": "survivor-15",
 		"kind": "scar",
 		"voiceId": "voice_mloba29lkgvc",
-		"hash": "ec9630d72995495a",
-		"bytes": 58124
+		"hash": "9bac24a35a1d78d2",
+		"bytes": 49964
 	},
 	"survivor-15_thanks": {
 		"src": "/voices/characters/survivor-15_thanks.mp3",
 		"figure": "survivor-15",
 		"kind": "thanks",
 		"voiceId": "voice_mloba29lkgvc",
-		"hash": "dc772418c0e571b0",
-		"bytes": 21404
+		"hash": "111af8e176a0e367",
+		"bytes": 18044
 	},
 	"survivor-15_upgrade": {
 		"src": "/voices/characters/survivor-15_upgrade.mp3",
 		"figure": "survivor-15",
 		"kind": "upgrade",
 		"voiceId": "voice_mloba29lkgvc",
-		"hash": "dcb19011dd42fc13",
-		"bytes": 36524
+		"hash": "8c0cf5f20b65c51f",
+		"bytes": 21404
 	},
 	"survivor-2_danger": {
 		"src": "/voices/characters/survivor-2_danger.mp3",
 		"figure": "survivor-2",
 		"kind": "danger",
 		"voiceId": "voice_rt9uuorqqp9i",
-		"hash": "ee2da78e7d576e17",
-		"bytes": 22364
+		"hash": "3e5a324db3608305",
+		"bytes": 19244
 	},
 	"survivor-2_death": {
 		"src": "/voices/characters/survivor-2_death.mp3",
 		"figure": "survivor-2",
 		"kind": "death",
 		"voiceId": "voice_rt9uuorqqp9i",
-		"hash": "f6b8e50ac438af49",
-		"bytes": 72524
+		"hash": "6435a6d4b62ead7a",
+		"bytes": 86684
 	},
 	"survivor-2_greet": {
 		"src": "/voices/characters/survivor-2_greet.mp3",
 		"figure": "survivor-2",
 		"kind": "greet",
 		"voiceId": "voice_rt9uuorqqp9i",
-		"hash": "9227170395dc52bb",
-		"bytes": 25004
+		"hash": "33da0b4c9c8e3071",
+		"bytes": 21404
 	},
 	"survivor-2_leave": {
 		"src": "/voices/characters/survivor-2_leave.mp3",
 		"figure": "survivor-2",
 		"kind": "leave",
 		"voiceId": "voice_rt9uuorqqp9i",
-		"hash": "c9c3fafe0f042498",
-		"bytes": 18284
+		"hash": "33d35c10d28a456b",
+		"bytes": 9164
 	},
 	"survivor-2_punchline": {
 		"src": "/voices/characters/survivor-2_punchline.mp3",
 		"figure": "survivor-2",
 		"kind": "punchline",
 		"voiceId": "voice_rt9uuorqqp9i",
-		"hash": "cee0338c5355ad82",
-		"bytes": 34844
+		"hash": "cc2092a16148b440",
+		"bytes": 12044
 	},
 	"survivor-2_scar": {
 		"src": "/voices/characters/survivor-2_scar.mp3",
 		"figure": "survivor-2",
 		"kind": "scar",
 		"voiceId": "voice_rt9uuorqqp9i",
-		"hash": "7aeb06eff5262a9e",
-		"bytes": 27884
+		"hash": "8a661608a5e53d65",
+		"bytes": 25244
 	},
 	"survivor-2_thanks": {
 		"src": "/voices/characters/survivor-2_thanks.mp3",
 		"figure": "survivor-2",
 		"kind": "thanks",
 		"voiceId": "voice_rt9uuorqqp9i",
-		"hash": "ff1f4a8456364c30",
-		"bytes": 10604
+		"hash": "9a9ecd7b22c03d45",
+		"bytes": 14684
 	},
 	"survivor-2_upgrade": {
 		"src": "/voices/characters/survivor-2_upgrade.mp3",
 		"figure": "survivor-2",
 		"kind": "upgrade",
 		"voiceId": "voice_rt9uuorqqp9i",
-		"hash": "e60e963322f37241",
-		"bytes": 37244
+		"hash": "46a2c9d70ba6831e",
+		"bytes": 14924
 	},
 	"survivor-3_danger": {
 		"src": "/voices/characters/survivor-3_danger.mp3",
 		"figure": "survivor-3",
 		"kind": "danger",
 		"voiceId": "voice_g0s9arbly0hj",
-		"hash": "0411ec78daed55da",
-		"bytes": 41564
+		"hash": "2f167eeefb77b706",
+		"bytes": 23324
 	},
 	"survivor-3_death": {
 		"src": "/voices/characters/survivor-3_death.mp3",
 		"figure": "survivor-3",
 		"kind": "death",
 		"voiceId": "voice_g0s9arbly0hj",
-		"hash": "cd168cbe28c514da",
-		"bytes": 68444
+		"hash": "700412d781d6e908",
+		"bytes": 58124
 	},
 	"survivor-3_greet": {
 		"src": "/voices/characters/survivor-3_greet.mp3",
 		"figure": "survivor-3",
 		"kind": "greet",
 		"voiceId": "voice_g0s9arbly0hj",
-		"hash": "0b6345704a9b5cb6",
-		"bytes": 15164
+		"hash": "dae64247421a024a",
+		"bytes": 17564
 	},
 	"survivor-3_leave": {
 		"src": "/voices/characters/survivor-3_leave.mp3",
 		"figure": "survivor-3",
 		"kind": "leave",
 		"voiceId": "voice_g0s9arbly0hj",
-		"hash": "7af68cc9862e20b7",
-		"bytes": 18044
+		"hash": "d2f25bb087cc71a8",
+		"bytes": 12044
 	},
 	"survivor-3_punchline": {
 		"src": "/voices/characters/survivor-3_punchline.mp3",
 		"figure": "survivor-3",
 		"kind": "punchline",
 		"voiceId": "voice_g0s9arbly0hj",
-		"hash": "f30c8c20e7c0e563",
-		"bytes": 21644
+		"hash": "705ad62f3de0725c",
+		"bytes": 17804
 	},
 	"survivor-3_scar": {
 		"src": "/voices/characters/survivor-3_scar.mp3",
 		"figure": "survivor-3",
 		"kind": "scar",
 		"voiceId": "voice_g0s9arbly0hj",
-		"hash": "e5392568c0629398",
-		"bytes": 26444
+		"hash": "1de8eddd6f83142a",
+		"bytes": 17084
 	},
 	"survivor-3_thanks": {
 		"src": "/voices/characters/survivor-3_thanks.mp3",
 		"figure": "survivor-3",
 		"kind": "thanks",
 		"voiceId": "voice_g0s9arbly0hj",
-		"hash": "79704f1ada92f41b",
-		"bytes": 23564
+		"hash": "14f571cb5a9a538a",
+		"bytes": 8684
 	},
 	"survivor-3_upgrade": {
 		"src": "/voices/characters/survivor-3_upgrade.mp3",
 		"figure": "survivor-3",
 		"kind": "upgrade",
 		"voiceId": "voice_g0s9arbly0hj",
-		"hash": "9f15da108ea1d6f4",
-		"bytes": 32444
+		"hash": "af8a0cb5bf7c2a26",
+		"bytes": 24044
 	},
 	"survivor-4_danger": {
 		"src": "/voices/characters/survivor-4_danger.mp3",
 		"figure": "survivor-4",
 		"kind": "danger",
 		"voiceId": "voice_j0206lsqjscm",
-		"hash": "9dd7d27e8fb729f8",
-		"bytes": 23564
+		"hash": "a790c2b5356f1a0f",
+		"bytes": 21884
 	},
 	"survivor-4_death": {
 		"src": "/voices/characters/survivor-4_death.mp3",
 		"figure": "survivor-4",
 		"kind": "death",
 		"voiceId": "voice_j0206lsqjscm",
-		"hash": "8f3ee3194b36f9b5",
-		"bytes": 65564
+		"hash": "4f239dcc5c61f8a7",
+		"bytes": 57404
 	},
 	"survivor-4_greet": {
 		"src": "/voices/characters/survivor-4_greet.mp3",
 		"figure": "survivor-4",
 		"kind": "greet",
 		"voiceId": "voice_j0206lsqjscm",
-		"hash": "0dab64d57bf5914b",
-		"bytes": 15644
+		"hash": "79dd86167526ca03",
+		"bytes": 21404
 	},
 	"survivor-4_leave": {
 		"src": "/voices/characters/survivor-4_leave.mp3",
 		"figure": "survivor-4",
 		"kind": "leave",
 		"voiceId": "voice_j0206lsqjscm",
-		"hash": "30b9fd9cbdbbd736",
-		"bytes": 14684
+		"hash": "e4baca6ece2ab4e7",
+		"bytes": 19484
 	},
 	"survivor-4_punchline": {
 		"src": "/voices/characters/survivor-4_punchline.mp3",
 		"figure": "survivor-4",
 		"kind": "punchline",
 		"voiceId": "voice_j0206lsqjscm",
-		"hash": "9dbbdc67778581ea",
-		"bytes": 25964
+		"hash": "a6789ec8ab22201d",
+		"bytes": 21404
 	},
 	"survivor-4_scar": {
 		"src": "/voices/characters/survivor-4_scar.mp3",
 		"figure": "survivor-4",
 		"kind": "scar",
 		"voiceId": "voice_j0206lsqjscm",
-		"hash": "a5d8d18ddc76f5e4",
-		"bytes": 35084
+		"hash": "7da7e884fd1aed4d",
+		"bytes": 22364
 	},
 	"survivor-4_thanks": {
 		"src": "/voices/characters/survivor-4_thanks.mp3",
 		"figure": "survivor-4",
 		"kind": "thanks",
 		"voiceId": "voice_j0206lsqjscm",
-		"hash": "8129c427a4cd8046",
-		"bytes": 19484
+		"hash": "9c5a6a8e2368b4b7",
+		"bytes": 16364
 	},
 	"survivor-4_upgrade": {
 		"src": "/voices/characters/survivor-4_upgrade.mp3",
 		"figure": "survivor-4",
 		"kind": "upgrade",
 		"voiceId": "voice_j0206lsqjscm",
-		"hash": "140c274a69fac815",
-		"bytes": 22844
+		"hash": "854ab5e278c46df3",
+		"bytes": 19244
 	},
 	"survivor-5_danger": {
 		"src": "/voices/characters/survivor-5_danger.mp3",
 		"figure": "survivor-5",
 		"kind": "danger",
 		"voiceId": "voice_ubkgibp2g63o",
-		"hash": "6535a69d3d6277e9",
-		"bytes": 31004
+		"hash": "019eb3b679c27bb3",
+		"bytes": 23084
 	},
 	"survivor-5_death": {
 		"src": "/voices/characters/survivor-5_death.mp3",
 		"figure": "survivor-5",
 		"kind": "death",
 		"voiceId": "voice_ubkgibp2g63o",
-		"hash": "b9d4811dad35f044",
-		"bytes": 75164
+		"hash": "d416bf8c16d48972",
+		"bytes": 68444
 	},
 	"survivor-5_greet": {
 		"src": "/voices/characters/survivor-5_greet.mp3",
 		"figure": "survivor-5",
 		"kind": "greet",
 		"voiceId": "voice_ubkgibp2g63o",
-		"hash": "026ed141c67343b4",
-		"bytes": 23804
+		"hash": "914ee4baab351faf",
+		"bytes": 23564
 	},
 	"survivor-5_leave": {
 		"src": "/voices/characters/survivor-5_leave.mp3",
 		"figure": "survivor-5",
 		"kind": "leave",
 		"voiceId": "voice_ubkgibp2g63o",
-		"hash": "868eec9e5e5860cd",
-		"bytes": 24044
+		"hash": "63bc4358a050c782",
+		"bytes": 19964
 	},
 	"survivor-5_punchline": {
 		"src": "/voices/characters/survivor-5_punchline.mp3",
 		"figure": "survivor-5",
 		"kind": "punchline",
 		"voiceId": "voice_ubkgibp2g63o",
-		"hash": "4342ef341b75dac8",
-		"bytes": 25004
+		"hash": "9f99eaff9484df90",
+		"bytes": 16604
 	},
 	"survivor-5_scar": {
 		"src": "/voices/characters/survivor-5_scar.mp3",
 		"figure": "survivor-5",
 		"kind": "scar",
 		"voiceId": "voice_ubkgibp2g63o",
-		"hash": "145f4f5649ee0c0b",
-		"bytes": 43004
+		"hash": "a798798e2e811ebf",
+		"bytes": 26204
 	},
 	"survivor-5_thanks": {
 		"src": "/voices/characters/survivor-5_thanks.mp3",
 		"figure": "survivor-5",
 		"kind": "thanks",
 		"voiceId": "voice_ubkgibp2g63o",
-		"hash": "0e7a05c29e2f6895",
-		"bytes": 15884
+		"hash": "8033c3a107986cef",
+		"bytes": 21164
 	},
 	"survivor-5_upgrade": {
 		"src": "/voices/characters/survivor-5_upgrade.mp3",
 		"figure": "survivor-5",
 		"kind": "upgrade",
 		"voiceId": "voice_ubkgibp2g63o",
-		"hash": "5258d584ae97e4e0",
-		"bytes": 40124
+		"hash": "19639b28e5568a10",
+		"bytes": 21644
 	},
 	"survivor-6_danger": {
 		"src": "/voices/characters/survivor-6_danger.mp3",
 		"figure": "survivor-6",
 		"kind": "danger",
 		"voiceId": "voice_bzftmf93os9e",
-		"hash": "e8a2e8d60890b048",
-		"bytes": 32924
+		"hash": "0f2fbd7b2ea7a700",
+		"bytes": 16844
 	},
 	"survivor-6_death": {
 		"src": "/voices/characters/survivor-6_death.mp3",
 		"figure": "survivor-6",
 		"kind": "death",
 		"voiceId": "voice_bzftmf93os9e",
-		"hash": "5c122750c3754868",
-		"bytes": 87644
+		"hash": "ecaf8af49359a250",
+		"bytes": 82844
 	},
 	"survivor-6_greet": {
 		"src": "/voices/characters/survivor-6_greet.mp3",
 		"figure": "survivor-6",
 		"kind": "greet",
 		"voiceId": "voice_bzftmf93os9e",
-		"hash": "65870413ddf1a5f9",
-		"bytes": 20924
+		"hash": "db793a92c9da0dbc",
+		"bytes": 20444
 	},
 	"survivor-6_leave": {
 		"src": "/voices/characters/survivor-6_leave.mp3",
 		"figure": "survivor-6",
 		"kind": "leave",
 		"voiceId": "voice_bzftmf93os9e",
-		"hash": "125ee67a0d563a2e",
-		"bytes": 22124
+		"hash": "fd947f7ae0d261f8",
+		"bytes": 13244
 	},
 	"survivor-6_punchline": {
 		"src": "/voices/characters/survivor-6_punchline.mp3",
 		"figure": "survivor-6",
 		"kind": "punchline",
 		"voiceId": "voice_bzftmf93os9e",
-		"hash": "4bb8414b4961eb9a",
-		"bytes": 24284
+		"hash": "27be7bd26f36a072",
+		"bytes": 16124
 	},
 	"survivor-6_scar": {
 		"src": "/voices/characters/survivor-6_scar.mp3",
 		"figure": "survivor-6",
 		"kind": "scar",
 		"voiceId": "voice_bzftmf93os9e",
-		"hash": "3fbb667c43806eb0",
-		"bytes": 52124
+		"hash": "2ff9b0d725702227",
+		"bytes": 19964
 	},
 	"survivor-6_thanks": {
 		"src": "/voices/characters/survivor-6_thanks.mp3",
 		"figure": "survivor-6",
 		"kind": "thanks",
 		"voiceId": "voice_bzftmf93os9e",
-		"hash": "8254c50ba8be696d",
-		"bytes": 21164
+		"hash": "bddb2d366cf7dff1",
+		"bytes": 24284
 	},
 	"survivor-6_upgrade": {
 		"src": "/voices/characters/survivor-6_upgrade.mp3",
 		"figure": "survivor-6",
 		"kind": "upgrade",
 		"voiceId": "voice_bzftmf93os9e",
-		"hash": "20d56e0021c1631d",
-		"bytes": 28124
+		"hash": "f7f40682e91896d7",
+		"bytes": 20924
 	},
 	"survivor-7_danger": {
 		"src": "/voices/characters/survivor-7_danger.mp3",
 		"figure": "survivor-7",
 		"kind": "danger",
 		"voiceId": "voice_80k3k5q6c62t",
-		"hash": "33f411a2f3a0fd47",
-		"bytes": 51644
+		"hash": "5805e383357c7900",
+		"bytes": 36284
 	},
 	"survivor-7_death": {
 		"src": "/voices/characters/survivor-7_death.mp3",
 		"figure": "survivor-7",
 		"kind": "death",
 		"voiceId": "voice_80k3k5q6c62t",
-		"hash": "6a5f429d14b305a2",
-		"bytes": 127484
+		"hash": "3f331710dd00f64c",
+		"bytes": 85724
 	},
 	"survivor-7_greet": {
 		"src": "/voices/characters/survivor-7_greet.mp3",
 		"figure": "survivor-7",
 		"kind": "greet",
 		"voiceId": "voice_80k3k5q6c62t",
-		"hash": "934dbbf02f67283e",
-		"bytes": 45644
+		"hash": "1f9fce34a2ac9913",
+		"bytes": 20444
 	},
 	"survivor-7_leave": {
 		"src": "/voices/characters/survivor-7_leave.mp3",
 		"figure": "survivor-7",
 		"kind": "leave",
 		"voiceId": "voice_80k3k5q6c62t",
-		"hash": "6e0f8b28ee58bb26",
-		"bytes": 43964
+		"hash": "65b09fbc769aa0af",
+		"bytes": 18044
 	},
 	"survivor-7_punchline": {
 		"src": "/voices/characters/survivor-7_punchline.mp3",
 		"figure": "survivor-7",
 		"kind": "punchline",
 		"voiceId": "voice_80k3k5q6c62t",
-		"hash": "fd32b74c9fdd7a85",
-		"bytes": 50444
+		"hash": "411586dbe997a1cd",
+		"bytes": 26924
 	},
 	"survivor-7_scar": {
 		"src": "/voices/characters/survivor-7_scar.mp3",
 		"figure": "survivor-7",
 		"kind": "scar",
 		"voiceId": "voice_80k3k5q6c62t",
-		"hash": "2325d0028908113e",
-		"bytes": 55964
+		"hash": "f50c54fdc08d8945",
+		"bytes": 32684
 	},
 	"survivor-7_thanks": {
 		"src": "/voices/characters/survivor-7_thanks.mp3",
 		"figure": "survivor-7",
 		"kind": "thanks",
 		"voiceId": "voice_80k3k5q6c62t",
-		"hash": "b0cf62f43ef4eec4",
-		"bytes": 26444
+		"hash": "f70a0d1ba9db52fe",
+		"bytes": 20684
 	},
 	"survivor-7_upgrade": {
 		"src": "/voices/characters/survivor-7_upgrade.mp3",
 		"figure": "survivor-7",
 		"kind": "upgrade",
 		"voiceId": "voice_80k3k5q6c62t",
-		"hash": "1677f77208ef2a7f",
-		"bytes": 43724
+		"hash": "a8313721569c3a9a",
+		"bytes": 27884
 	},
 	"survivor-8_danger": {
 		"src": "/voices/characters/survivor-8_danger.mp3",
 		"figure": "survivor-8",
 		"kind": "danger",
 		"voiceId": "voice_519hu8o6vo02",
-		"hash": "7242190b0aa89b45",
-		"bytes": 22124
+		"hash": "83fc5cd517ef7410",
+		"bytes": 21884
 	},
 	"survivor-8_death": {
 		"src": "/voices/characters/survivor-8_death.mp3",
 		"figure": "survivor-8",
 		"kind": "death",
 		"voiceId": "voice_519hu8o6vo02",
-		"hash": "13322dad69afd36f",
-		"bytes": 74924
+		"hash": "919030a7bad8cee0",
+		"bytes": 54764
 	},
 	"survivor-8_greet": {
 		"src": "/voices/characters/survivor-8_greet.mp3",
 		"figure": "survivor-8",
 		"kind": "greet",
 		"voiceId": "voice_519hu8o6vo02",
-		"hash": "72454d8bbdc340a8",
-		"bytes": 17804
+		"hash": "d84c5244c2b46864",
+		"bytes": 11804
 	},
 	"survivor-8_leave": {
 		"src": "/voices/characters/survivor-8_leave.mp3",
 		"figure": "survivor-8",
 		"kind": "leave",
 		"voiceId": "voice_519hu8o6vo02",
-		"hash": "b4952d85761075b9",
-		"bytes": 17804
+		"hash": "0b964760d4ee8f62",
+		"bytes": 13964
 	},
 	"survivor-8_punchline": {
 		"src": "/voices/characters/survivor-8_punchline.mp3",
 		"figure": "survivor-8",
 		"kind": "punchline",
 		"voiceId": "voice_519hu8o6vo02",
-		"hash": "7f12e2bcf3425338",
-		"bytes": 14444
+		"hash": "f81335a1f6a9edc0",
+		"bytes": 11324
 	},
 	"survivor-8_scar": {
 		"src": "/voices/characters/survivor-8_scar.mp3",
 		"figure": "survivor-8",
 		"kind": "scar",
 		"voiceId": "voice_519hu8o6vo02",
-		"hash": "18ac0b450324167e",
-		"bytes": 17084
+		"hash": "58800ac292d061ab",
+		"bytes": 21404
 	},
 	"survivor-8_thanks": {
 		"src": "/voices/characters/survivor-8_thanks.mp3",
 		"figure": "survivor-8",
 		"kind": "thanks",
 		"voiceId": "voice_519hu8o6vo02",
-		"hash": "b77fb48caf156029",
-		"bytes": 12524
+		"hash": "16eb74dd649858f3",
+		"bytes": 14924
 	},
 	"survivor-8_upgrade": {
 		"src": "/voices/characters/survivor-8_upgrade.mp3",
 		"figure": "survivor-8",
 		"kind": "upgrade",
 		"voiceId": "voice_519hu8o6vo02",
-		"hash": "e6850fa2a48a1980",
-		"bytes": 17324
+		"hash": "3ecab473797f08e1",
+		"bytes": 24284
 	},
 	"survivor-9_danger": {
 		"src": "/voices/characters/survivor-9_danger.mp3",
 		"figure": "survivor-9",
 		"kind": "danger",
 		"voiceId": "voice_ltumt3mp9qbg",
-		"hash": "76e1548ca7b5d55c",
-		"bytes": 39404
+		"hash": "d1a187c96415ee1e",
+		"bytes": 27404
 	},
 	"survivor-9_death": {
 		"src": "/voices/characters/survivor-9_death.mp3",
 		"figure": "survivor-9",
 		"kind": "death",
 		"voiceId": "voice_ltumt3mp9qbg",
-		"hash": "f228514ee3bfd021",
-		"bytes": 99644
+		"hash": "08e9bacb366b9c7f",
+		"bytes": 88844
 	},
 	"survivor-9_greet": {
 		"src": "/voices/characters/survivor-9_greet.mp3",
 		"figure": "survivor-9",
 		"kind": "greet",
 		"voiceId": "voice_ltumt3mp9qbg",
-		"hash": "1c870de44f3d19f3",
-		"bytes": 40364
+		"hash": "90b2c74b7b7f0d41",
+		"bytes": 21164
 	},
 	"survivor-9_leave": {
 		"src": "/voices/characters/survivor-9_leave.mp3",
 		"figure": "survivor-9",
 		"kind": "leave",
 		"voiceId": "voice_ltumt3mp9qbg",
-		"hash": "9a5d9623b217711a",
-		"bytes": 30764
+		"hash": "c01fa6dd7480f9d2",
+		"bytes": 15644
 	},
 	"survivor-9_punchline": {
 		"src": "/voices/characters/survivor-9_punchline.mp3",
 		"figure": "survivor-9",
 		"kind": "punchline",
 		"voiceId": "voice_ltumt3mp9qbg",
-		"hash": "3cd8d3c2bd64ee9e",
-		"bytes": 44204
+		"hash": "106efe4d36bafb8c",
+		"bytes": 25484
 	},
 	"survivor-9_scar": {
 		"src": "/voices/characters/survivor-9_scar.mp3",
 		"figure": "survivor-9",
 		"kind": "scar",
 		"voiceId": "voice_ltumt3mp9qbg",
-		"hash": "c2e968b691b5b45d",
+		"hash": "40685fdc2ff898e2",
 		"bytes": 37724
 	},
 	"survivor-9_thanks": {
@@ -1323,79 +1323,79 @@ export const characterVoiceManifest: Record<string, CharacterVoiceEntry> = {
 		"figure": "survivor-9",
 		"kind": "thanks",
 		"voiceId": "voice_ltumt3mp9qbg",
-		"hash": "42f6951c67a70aad",
-		"bytes": 18524
+		"hash": "09047e87169745ea",
+		"bytes": 7484
 	},
 	"survivor-9_upgrade": {
 		"src": "/voices/characters/survivor-9_upgrade.mp3",
 		"figure": "survivor-9",
 		"kind": "upgrade",
 		"voiceId": "voice_ltumt3mp9qbg",
-		"hash": "c10e6cea7dd9e780",
-		"bytes": 33164
+		"hash": "d54d99e307297ec7",
+		"bytes": 18764
 	},
 	"vector-control_danger": {
 		"src": "/voices/characters/vector-control_danger.mp3",
 		"figure": "vector-control",
 		"kind": "danger",
 		"voiceId": "voice_nhtz9kbf255z",
-		"hash": "66346346f39f7b45",
-		"bytes": 25004
+		"hash": "785f004cf6a93433",
+		"bytes": 17804
 	},
 	"vector-control_death": {
 		"src": "/voices/characters/vector-control_death.mp3",
 		"figure": "vector-control",
 		"kind": "death",
 		"voiceId": "voice_nhtz9kbf255z",
-		"hash": "8e3f844719ed098b",
-		"bytes": 72044
+		"hash": "4050e3ff120520ca",
+		"bytes": 62444
 	},
 	"vector-control_greet": {
 		"src": "/voices/characters/vector-control_greet.mp3",
 		"figure": "vector-control",
 		"kind": "greet",
 		"voiceId": "voice_nhtz9kbf255z",
-		"hash": "4cbd0ee6de360d74",
-		"bytes": 19004
+		"hash": "9e7b89e474a3842d",
+		"bytes": 21404
 	},
 	"vector-control_leave": {
 		"src": "/voices/characters/vector-control_leave.mp3",
 		"figure": "vector-control",
 		"kind": "leave",
 		"voiceId": "voice_nhtz9kbf255z",
-		"hash": "69e88565838c4f96",
-		"bytes": 18044
+		"hash": "61d65b075fc03860",
+		"bytes": 21404
 	},
 	"vector-control_punchline": {
 		"src": "/voices/characters/vector-control_punchline.mp3",
 		"figure": "vector-control",
 		"kind": "punchline",
 		"voiceId": "voice_nhtz9kbf255z",
-		"hash": "7e73ff9704d98d37",
-		"bytes": 19484
+		"hash": "3956a32bd3f9822d",
+		"bytes": 16604
 	},
 	"vector-control_scar": {
 		"src": "/voices/characters/vector-control_scar.mp3",
 		"figure": "vector-control",
 		"kind": "scar",
 		"voiceId": "voice_nhtz9kbf255z",
-		"hash": "06cf3cbf45914413",
-		"bytes": 30764
+		"hash": "73fa26ccd3daf376",
+		"bytes": 20444
 	},
 	"vector-control_thanks": {
 		"src": "/voices/characters/vector-control_thanks.mp3",
 		"figure": "vector-control",
 		"kind": "thanks",
 		"voiceId": "voice_nhtz9kbf255z",
-		"hash": "7d4a0dfd7b648897",
-		"bytes": 15884
+		"hash": "9d09a0613b310fc3",
+		"bytes": 17084
 	},
 	"vector-control_upgrade": {
 		"src": "/voices/characters/vector-control_upgrade.mp3",
 		"figure": "vector-control",
 		"kind": "upgrade",
 		"voiceId": "voice_nhtz9kbf255z",
-		"hash": "8c2a8907ac087546",
-		"bytes": 24284
+		"hash": "53c0bf92f01bc530",
+		"bytes": 17324
 	}
 };
