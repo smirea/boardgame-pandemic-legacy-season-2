@@ -7,9 +7,9 @@
   import { LAND_HEIGHT } from "./projection";
   import { CITY_RADIUS } from "./routes";
 
-  type Props = { at: BoardPoint; color: string; faint?: boolean };
+  type Props = { at: BoardPoint; color: string };
 
-  let { at, color, faint = false }: Props = $props();
+  let { at, color }: Props = $props();
 
   // The ring closes in on its city from wide, so the eye is pulled to where the step happened.
   const close = new Tween(0, { duration: 650, easing: backOut });
@@ -18,23 +18,21 @@
 </script>
 
 <T.Group position={[at.x, LAND_HEIGHT + 0.08, at.z]} rotation.x={-Math.PI / 2} {scale}>
-  {#if !faint}
-    <T.Mesh>
-      <T.CircleGeometry args={[CITY_RADIUS * 2.4, 48]} />
-      <T.MeshBasicMaterial
-        {color}
-        transparent
-        opacity={Math.min(1, close.current) * 0.22}
-        depthWrite={false}
-      />
-    </T.Mesh>
-  {/if}
-  <T.Mesh position.z={0.01}>
-    <T.RingGeometry args={[CITY_RADIUS * (faint ? 2.1 : 1.9), CITY_RADIUS * 2.4, 48]} />
+  <T.Mesh>
+    <T.CircleGeometry args={[CITY_RADIUS * 2.4, 48]} />
     <T.MeshBasicMaterial
       {color}
       transparent
-      opacity={Math.min(1, close.current) * (faint ? 0.6 : 1)}
+      opacity={Math.min(1, close.current) * 0.22}
+      depthWrite={false}
+    />
+  </T.Mesh>
+  <T.Mesh position.z={0.01}>
+    <T.RingGeometry args={[CITY_RADIUS * 1.9, CITY_RADIUS * 2.4, 48]} />
+    <T.MeshBasicMaterial
+      {color}
+      transparent
+      opacity={Math.min(1, close.current)}
       depthWrite={false}
     />
   </T.Mesh>

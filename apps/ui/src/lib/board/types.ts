@@ -135,8 +135,7 @@ export type BoardMarks = {
     course: BoardPoint[] | null;
     fresh: boolean;
   }[];
-  /** `faint` is a thin ring with no fill, for a city only to be kept in mind. */
-  rings: { city: CityId; color: string; faint?: boolean }[];
+  rings: { city: CityId; color: string }[];
   flags: { id: string; city: CityId; text: string; tone: MarkTone }[];
 };
 

@@ -4,6 +4,8 @@ import type {
   CardId,
   CityId,
   Command,
+  Decide,
+  Decision,
   EventId,
   Phase,
   Play,
@@ -23,6 +25,7 @@ import {
   actionTarget,
   cardName,
   cityName,
+  decisionTitle,
   playGroup,
   playTarget,
   seatName,
@@ -60,6 +63,8 @@ export type Targeting = {
   pawn?: SeatId;
   recons?: ReadonlySet<string>;
   prompt?: string;
+  /** A choice the game waits on cannot be put down, only answered or skipped with this. */
+  skip?: string;
   multi?: {
     picked: ReadonlyMap<CityId, number>;
     verb: string;
@@ -85,7 +90,17 @@ export type CardPick = {
   confirm: { label: string; ready: boolean } | null;
   onpick: (card: CardId) => void;
   onconfirm?: () => void;
+  /** A choice the game waits on cannot be put down, only answered or skipped (`confirm`). */
+  held?: boolean;
 };
+
+/** Pending choices answered on the cards or the map rather than in the dock's slip. */
+export const ANSWERED_ON_TABLE = new Set<Decision["t"]>([
+  "retrieve",
+  "quarantineCard",
+  "freeEdge",
+  "removeHollow",
+]);
 
 /**
  * An action or Lockdown waiting for the player to pick card(s) directly from their hand in the dock.
@@ -138,6 +153,7 @@ export type ChoosingSource = {
   readonly actionChoices: ReturnType<typeof actionMenu>;
   readonly plays: ReturnType<typeof legalPlays>;
   readonly recons: ReconBox[];
+  readonly decides: Decide[];
   owns(seat: SeatId): boolean;
   send(command: Command): void;
   toast(text: string, tone?: string): void;
@@ -203,6 +219,7 @@ export function createChoosing(source: ChoosingSource) {
   const actionChoices = $derived(source.actionChoices);
   const plays = $derived(source.plays);
   const recons = $derived(source.recons);
+  const decides = $derived(source.decides);
 
   let targeting = $state.raw<Targeting | null>(null);
   let handPick = $state.raw<HandPick | null>(null);
@@ -257,6 +274,75 @@ export function createChoosing(source: ChoosingSource) {
     only();
   }
   const busy = () => Boolean(targeting || handPick || dockChoice || chooser || ring || cardPick);
+
+  // A pending choice this browser answers is laid out from the state itself, so it comes back after a reload or an
+  // event played over it, and it steps aside while an event is being aimed.
+  const held = $derived.by((): { targeting: Targeting | null; cardPick: CardPick | null } => {
+    const none = { targeting: null, cardPick: null };
+    const pending = game?.pending[0];
+    if (!pending || !ANSWERED_ON_TABLE.has(pending.t) || !("seat" in pending) || !pending.seat) return none;
+    if (!owns(pending.seat)) return none;
+    const decide = (answer: Decide) => send({ type: "DECIDE", decide: answer });
+    const title = decisionTitle(world, pending);
+    if (pending.t === "retrieve" || pending.t === "quarantineCard") {
+      const runs = new Map<CardId, () => void>();
+      for (const answer of decides) {
+        if (answer.d === "retrieve" || answer.d === "quarantineCard")
+          runs.set(answer.card, () => decide(answer));
+      }
+      const player = pending.t === "retrieve";
+      return {
+        targeting: null,
+        cardPick: {
+          title,
+          prompt: runs.size
+            ? `Click one of the lit cards, or ${player ? "take none" : "set none aside"}.`
+            : "The discard pile holds no card to take.",
+          a: null,
+          groups: [
+            {
+              label: player ? "Player discard pile" : "Infection discard pile",
+              pile: player ? "player" : "infection",
+              cards: [...runs.keys()],
+            },
+          ],
+          eligible: new Set(runs.keys()),
+          picked: [],
+          ordered: false,
+          confirm: { label: player ? "Take none" : "Set none aside", ready: true },
+          onpick: (card) => runs.get(card)?.(),
+          onconfirm: () => decide({ d: "skip" }),
+          held: true,
+        },
+      };
+    }
+    const cities = new Map<CityId, () => void>();
+    for (const answer of decides) {
+      if (answer.d === "freeEdge") cities.set(answer.to, () => decide(answer));
+      if (answer.d === "removeHollow") cities.set(answer.city, () => decide(answer));
+    }
+    const from = game!.players[pending.seat]!.location;
+    const line = pending.t === "freeEdge" && pending.kind === "sea" ? "sea lane" : "supply line";
+    return {
+      cardPick: null,
+      targeting: {
+        label: title,
+        a: null,
+        cities,
+        prompt:
+          pending.t === "freeEdge"
+            ? cities.size
+              ? `Click a lit city to draw a free ${line} to it from ${cityName(from)}.`
+              : `No ${line} can be drawn from ${cityName(from)}.`
+            : cities.size
+              ? "Click a lit city to take one Hollow Man off it."
+              : "No Hollow Men stand on the board.",
+        skip: pending.t === "freeEdge" ? `Draw no ${line}` : "Remove no more",
+      },
+    };
+  });
+  const currentTargeting = () => targeting ?? (busy() ? null : held.targeting);
+  const currentCardPick = () => cardPick ?? (busy() ? null : held.cardPick);
   // Whatever was half-chosen belongs to the game state it was chosen in, so UNDO, PLAY, DECIDE or remote changes clear it.
   $effect(() => {
     void live;
@@ -1076,8 +1162,9 @@ export function createChoosing(source: ChoosingSource) {
 
   function clickCity(city: CityId) {
     if (snap.phase === "setup.supply") return send({ type: "PLACE_SUPPLY", city, count: 1 });
-    if (targeting) {
-      const run = targeting.cities.get(city);
+    const aimed = currentTargeting();
+    if (aimed) {
+      const run = aimed.cities.get(city);
       if (!run) return;
       targeting = null;
       chosen.city = city;
@@ -1258,13 +1345,20 @@ export function createChoosing(source: ChoosingSource) {
       if (!option) return false;
       option.run();
     } else if (click.t === "card") {
-      if (!cardPick?.eligible.has(click.card)) return false;
-      cardPick.onpick(click.card);
+      const pick = currentCardPick();
+      if (!pick?.eligible.has(click.card)) return false;
+      pick.onpick(click.card);
     } else if (click.t === "cardConfirm") {
-      if (!cardPick?.confirm?.ready || !cardPick.onconfirm) return false;
-      cardPick.onconfirm();
+      const pick = currentCardPick();
+      if (!pick?.confirm?.ready || !pick.onconfirm) return false;
+      pick.onconfirm();
     } else if (click.t === "aimConfirm") {
-      if (!targeting?.multi?.ready || !confirmAim) return false;
+      const aimed = currentTargeting();
+      if (aimed?.skip && !aimed.multi) {
+        send({ type: "DECIDE", decide: { d: "skip" } });
+        return true;
+      }
+      if (!aimed?.multi?.ready || !confirmAim) return false;
       confirmAim();
     } else if (click.t === "recon") clickRecon(click.route);
     else if (click.t === "play") playCard(click.seat, click.card);
@@ -1660,7 +1754,7 @@ export function createChoosing(source: ChoosingSource) {
 
   return {
     get targeting() {
-      return targeting;
+      return currentTargeting();
     },
     get handPick() {
       return handPick;
@@ -1675,7 +1769,7 @@ export function createChoosing(source: ChoosingSource) {
       return chooser;
     },
     get cardPick() {
-      return cardPick;
+      return currentCardPick();
     },
     get ringEntries() {
       return ringEntries;

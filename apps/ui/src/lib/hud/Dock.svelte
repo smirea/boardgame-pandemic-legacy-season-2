@@ -20,6 +20,7 @@
   import { fade, fly } from "svelte/transition";
   import Beacon from "#lib/Beacon.svelte";
   import ActionIcon from "./ActionIcon.svelte";
+  import { ANSWERED_ON_TABLE } from "./choosing.svelte.ts";
   import type { CardUse, DockChoice, HandPick } from "./choosing.svelte.ts";
   import {
     cityName,
@@ -55,8 +56,10 @@
       label: string;
       a: Action["a"] | null;
       prompt: string;
-      /** A card that takes several places is sent once they are picked. */
+      /** A card that takes several places is sent once they are picked, and a choice the game waits on is skipped. */
       confirm: { label: string; ready: boolean } | null;
+      /** The game waits on this choice, so it cannot be put down. */
+      held: boolean;
     } | null;
     onaimconfirm?: () => void;
     /** A word in the dock slip's choice, by its key. */
@@ -294,9 +297,10 @@
     pending && "seat" in pending && pending.seat ? pending.seat : game.active,
   );
   // Card-discard / card-give decisions are answered by clicking a card in hand; the slip keeps only non-card choices (such as Skip).
+  const answeredOnTable = $derived(Boolean(pending && ANSWERED_ON_TABLE.has(pending.t) && owns(decider)));
   const choices = $derived(
     decides.filter((decide) => {
-      if (decide.d === "discard") return false;
+      if (decide.d === "discard" || answeredOnTable) return false;
       if (
         decide.d === "shield" ||
         decide.d === "cordon" ||
@@ -766,7 +770,7 @@
             {#if aiming.a}<ActionIcon action={aiming.a} size="2.4rem" />{/if}
             <div class="say">
               <strong>{aiming.label}</strong>
-              <span>{aiming.prompt} Esc or a right click cancels.</span>
+              <span>{aiming.prompt}{aiming.held ? "" : " Esc or a right click cancels."}</span>
             </div>
             <div class="step-actions">
               {#if aiming.confirm}
@@ -778,7 +782,9 @@
                   onclick={onaimconfirm}>{aiming.confirm.label}</button
                 >
               {/if}
-              <button onclick={oncancel} data-testid="cancel-aim">Cancel</button>
+              {#if !aiming.held}
+                <button onclick={oncancel} data-testid="cancel-aim">Cancel</button>
+              {/if}
             </div>
           </div>
         {:else if discarding.length}
@@ -798,7 +804,7 @@
               discards once the draw is finished.
             </p>
           </div>
-        {:else if pending && pending.t !== "scar" && pending.t !== "scarVote" && pending.t !== "replace" && pending.t !== "reveal" && pending.t !== "search" && (!epidemicStep || elsewhere.length || lockableHere.length)}
+        {:else if pending && pending.t !== "scar" && pending.t !== "scarVote" && pending.t !== "replace" && pending.t !== "reveal" && pending.t !== "search" && (!epidemicStep || elsewhere.length || lockableHere.length) && (!answeredOnTable || elsewhere.length || lockableHere.length)}
           <div class="slip">
             <p class="prompt">
               {decisionTitle(world, pending)}
@@ -848,7 +854,7 @@
                   >
                 {/each}
               </div>
-            {:else if !epidemicStep && !pendingHandActive}
+            {:else if !epidemicStep && !pendingHandActive && !answeredOnTable}
               <p class="waiting">Waiting for {seatName(world, decider)}.</p>
             {/if}
             {#if elsewhere.length || (lockableHere.length && onlockdown)}

@@ -1044,7 +1044,7 @@
 {/if}
 
 {#each view.marks?.rings ?? [] as ring (`${ring.city}:${ring.color}`)}
-  <Ring at={layout[ring.city]!} color={ring.color} faint={ring.faint} />
+  <Ring at={layout[ring.city]!} color={ring.color} />
 {/each}
 
 {#each view.marks?.trails ?? [] as trail (trail.id)}

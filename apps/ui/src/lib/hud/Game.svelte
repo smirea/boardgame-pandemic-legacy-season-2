@@ -28,7 +28,6 @@
   import { CharacterChatter } from "#lib/characters/chatter.svelte.ts";
   import type { FigureKey } from "#lib/characters/personas.ts";
   import { characterVoice } from "#lib/characters/voice.svelte.ts";
-  import { reconciler } from "#lib/reconcile.ts";
   import { barkFor } from "#lib/story/barks.ts";
   import { Radio } from "#lib/story/radio.svelte.ts";
   import RadioLine from "#lib/story/RadioLine.svelte";
@@ -298,6 +297,9 @@
     get recons() {
       return recons;
     },
+    get decides() {
+      return decides;
+    },
     owns,
     send,
     toast,
@@ -500,18 +502,6 @@
       chatter.dangerAt(world, cue.city);
     }
   });
-  // Through an Infect step the cities with no cubes that a card still in the deck could strike are ringed, so the
-  // table sees what the next flip may cost before it is made. A city the show has not finished with waits its turn.
-  const sameThreats = reconciler<BoardMarks | undefined>();
-  const threats = $derived.by(() => {
-    if (snap.phase !== "playing.infect" && snap.phase !== "setup.infect")
-      return sameThreats(undefined);
-    const rings = (info?.infection.atRisk ?? [])
-      .filter((entry) => !show.lag.cities[entry.city]?.supplies)
-      .map((entry) => ({ city: entry.city, color: "#c8361f", faint: true }));
-    return sameThreats(rings.length ? { trails: [], rings, flags: [] } : undefined);
-  });
-
   // A scratched exposure box and a death are shown to the whole table before the screens that follow them.
   let deathVoiced: { figure: FigureKey; at: number } | null = null;
   const fate = new FateScenes(
@@ -937,7 +927,7 @@
       return said.fx;
     },
     get marks() {
-      return marks ?? population.marks ?? threats;
+      return marks ?? population.marks;
     },
   });
 
@@ -1524,7 +1514,10 @@
                     label: `${choosing.targeting.multi.verb}: ${choosing.targeting.multi.count} of up to ${choosing.targeting.multi.max}`,
                     ready: choosing.targeting.multi.ready,
                   }
-                : null,
+                : choosing.targeting.skip
+                  ? { label: choosing.targeting.skip, ready: true }
+                  : null,
+              held: Boolean(choosing.targeting.skip),
             }
           : null}
         onaimconfirm={() => choosing.step({ t: "aimConfirm" })}

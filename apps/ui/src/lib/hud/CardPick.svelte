@@ -10,6 +10,7 @@
   import { fly } from "svelte/transition";
   import Beacon from "#lib/Beacon.svelte";
   import InfectionCard from "#lib/cards/InfectionCard.svelte";
+  import { fitZoom } from "#lib/cards/fit.ts";
   import ActionIcon from "./ActionIcon.svelte";
   import type { CardPick } from "./choosing.svelte.ts";
   import PlayerCard from "./PlayerCard.svelte";
@@ -44,7 +45,7 @@
     {#if pick.a}<ActionIcon action={pick.a} size="2.2rem" />{/if}
     <div class="say">
       <strong>{pick.title}</strong>
-      <span>{pick.prompt} Esc or a right click cancels.</span>
+      <span>{pick.prompt}{pick.held ? "" : " Esc or a right click cancels."}</span>
     </div>
     <div class="buttons">
       {#if pick.confirm}
@@ -56,70 +57,94 @@
           onclick={onconfirm}>{pick.confirm.label}</button
         >
       {/if}
-      <button type="button" onclick={oncancel} data-testid="card-pick-cancel">Cancel</button>
+      {#if !pick.held}
+        <button type="button" onclick={oncancel} data-testid="card-pick-cancel">Cancel</button>
+      {/if}
     </div>
   </header>
-  {#each pick.groups as group (group.label)}
-    <div class="group" role="group" aria-label={group.label}>
-      <span class="label">{group.label}</span>
-      <div class="cards" class:sideways={group.pile === "infection"}>
-        {#each group.cards as id, index (id)}
-          {@const open = pick.eligible.has(id)}
-          {@const place = pick.picked.indexOf(id)}
-          {@const player = group.pile === "player" ? world.campaign.playerCards[id] : undefined}
-          {@const infection =
-            group.pile === "infection" ? world.campaign.infectionCards[id] : undefined}
-          <div
-            class="card"
-            class:open
-            class:picked={place >= 0}
-            style:--i={index}
-            data-card={id}
-            data-picked={place >= 0 || undefined}
-            {@attach feedback(undefined, () => ({ id, open, place }))}
-          >
-            {#if player}
-              <PlayerCard
-                card={player}
-                dimmed={!open}
-                onclick={open ? () => oncard(id) : undefined}
-              />
-            {:else if infection}
-              <InfectionCard card={infection} onclick={open ? () => oncard(id) : undefined} />
-            {/if}
-            {#if place >= 0}
-              <span class="tick" aria-label={pick.ordered ? `Number ${place + 1}` : "Picked"}
-                >{pick.ordered ? place + 1 : "✓"}</span
+  <div class="room" {@attach fitZoom()}>
+    <div class="piles">
+      {#each pick.groups as group (group.label)}
+        <div class="group" role="group" aria-label={group.label}>
+          <span class="label">{group.label}</span>
+          <div class="cards" class:sideways={group.pile === "infection"}>
+            {#each group.cards as id, index (id)}
+              {@const open = pick.eligible.has(id)}
+              {@const place = pick.picked.indexOf(id)}
+              {@const player = group.pile === "player" ? world.campaign.playerCards[id] : undefined}
+              {@const infection =
+                group.pile === "infection" ? world.campaign.infectionCards[id] : undefined}
+              <div
+                class="card"
+                class:open
+                class:picked={place >= 0}
+                style:--i={index}
+                data-card={id}
+                data-picked={place >= 0 || undefined}
+                {@attach feedback(undefined, () => ({ id, open, place }))}
               >
-            {:else if open}
-              <Beacon />
-            {/if}
+                {#if player}
+                  <PlayerCard
+                    card={player}
+                    dimmed={!open}
+                    onclick={open ? () => oncard(id) : undefined}
+                  />
+                {:else if infection}
+                  <InfectionCard card={infection} onclick={open ? () => oncard(id) : undefined} />
+                {/if}
+                {#if place >= 0}
+                  <span class="tick" aria-label={pick.ordered ? `Number ${place + 1}` : "Picked"}
+                    >{pick.ordered ? place + 1 : "✓"}</span
+                  >
+                {:else if open}
+                  <Beacon />
+                {/if}
+              </div>
+            {/each}
           </div>
-        {/each}
-      </div>
+        </div>
+      {/each}
     </div>
-  {/each}
+  </div>
 </section>
 
 <style>
-  /* In front of the middle of the table, clear of the hand floating at its foot. */
+  /* Over the table between the top bar and the hand floating at its foot, the cards zoomed down to fit. */
   .pick {
     position: absolute;
-    left: calc(var(--left, 0px) + (100% - var(--left, 0px) - var(--right, 0px)) / 2);
-    top: 46%;
+    top: 4.5rem;
+    bottom: 14rem;
+    left: calc(var(--left, 0px) + 1rem);
+    right: calc(var(--right, 0px) + 1rem);
     z-index: 40;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 0.6rem;
-    width: max-content;
-    max-width: calc(100% - var(--left, 0px) - var(--right, 0px) - 2rem);
-    translate: -50% -50%;
     pointer-events: none;
   }
 
-  .pick > :global(*) {
+  .slip,
+  .group {
     pointer-events: auto;
+  }
+
+  /* Sized by its place, never by the cards, so fitZoom can measure the cards against it. */
+  .room {
+    flex: 1 1 0;
+    min-height: 0;
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .piles {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    max-width: 100%;
   }
 
   .slip {
