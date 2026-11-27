@@ -11,8 +11,9 @@ export function flyTo(
   const start = from.getBoundingClientRect();
   const end = to.getBoundingClientRect();
   const into = end.width > start.width * 1.5 && end.height > start.height * 1.5;
-  // A piece shown zoomed out (a pile fitted to its box) is copied at its own size and shrunk to how it looks.
-  const zoom = from.currentCSSZoom || 1;
+  // A piece shown zoomed out (a pile fitted to its box, or a piece scaled on the table) is copied at its own size and
+  // shrunk to how it looks.
+  const zoom = from.offsetWidth ? start.width / from.offsetWidth : from.currentCSSZoom || 1;
   const fly = into
     ? Math.min(0.3, 48 / start.width)
     : Math.min(end.width / start.width, end.height / start.height);
@@ -31,6 +32,8 @@ export function flyTo(
     margin: "0",
     zIndex: "95",
     pointerEvents: "none",
+    transform: "none",
+    transition: "none",
     fontSize: getComputedStyle(from).fontSize,
   });
   document.body.append(ghost);

@@ -27,6 +27,7 @@ export type Stow = { cls: StowClass; put: string };
 export type Piece =
   | { t: "card"; key: string; card: LegacyCardDef; tip: string; stow: Stow }
   | { t: "seal"; key: string; seal: Seal; tip: string; stow: Stow }
+  | { t: "note"; key: string; title: string; text: string | null; tip: string; stow: Stow }
   | {
       t: "unlock";
       key: string;
@@ -36,9 +37,7 @@ export type Piece =
       stow: Stow;
     };
 
-export type PieceGroup = { heading: string; pieces: Piece[] };
-
-type Placed = { heading: string; piece: Piece };
+export type Placed = { heading: string; piece: Piece };
 
 function stowOf(unlock: BriefedUnlock): Stow {
   const to = (cls: StowClass, ...put: string[]): Stow => ({ cls, put: put.join(" ") });
@@ -203,7 +202,10 @@ const sentence = (title: string, text: string | null) =>
 
 const sealName = (seal: Seal) => (seal.t === "package" ? `Package ${seal.id}` : `Door ${seal.id}`);
 
-/** Everything an opening puts on the table, each once and under its heading: the Legacy card, then its seals, then what came out. */
+/**
+ * Everything an opening puts on the table, each once and under its heading: the Legacy card, then its seals, then
+ * what came out. The first is what the table opens: the card, else the package or door, else a note of the opening.
+ */
 export function piecesOf(opening: Opening, at: number): Placed[] {
   const placed: Placed[] = [];
   const items = opening.items.filter((item) => item.unlock.t !== "objectives");
@@ -224,6 +226,18 @@ export function piecesOf(opening: Opening, at: number): Placed[] {
       },
     });
   }
+  if (!card && !opening.seals.length)
+    placed.push({
+      heading: "Notes",
+      piece: {
+        t: "note",
+        key: `${at}:note`,
+        title: opening.title,
+        text: opening.text,
+        tip: sentence(opening.title, opening.text),
+        stow: { cls: "trash", put: "trash" },
+      },
+    });
   for (const seal of opening.seals)
     placed.push({
       heading: "Packages & doors",
@@ -250,35 +264,4 @@ export function piecesOf(opening: Opening, at: number): Placed[] {
     });
   });
   return placed;
-}
-
-/**
- * What was read before the spotlight, grouped and laid on the two wings. A new group goes to the wing holding less, a
- * Legacy card weighing as much as three smaller pieces, and stays there as the group grows, so nothing jumps across
- * the table.
- */
-export function wings(read: Opening[]): { left: PieceGroup[]; right: PieceGroup[] } {
-  const side = new Map<string, "left" | "right">();
-  const weight = { left: 0, right: 0 };
-  const placed = { left: [] as Placed[], right: [] as Placed[] };
-  read.forEach((opening, at) => {
-    for (const entry of piecesOf(opening, at)) {
-      const wing = side.get(entry.heading) ?? (weight.left <= weight.right ? "left" : "right");
-      side.set(entry.heading, wing);
-      weight[wing] += entry.piece.t === "card" ? 3 : 1;
-      placed[wing].push(entry);
-    }
-  });
-  return { left: groupPieces(placed.left), right: groupPieces(placed.right) };
-}
-
-/** Pieces gathered under their headings, each group where its first piece came. */
-export function groupPieces(placed: Placed[]): PieceGroup[] {
-  const groups = new Map<string, PieceGroup>();
-  for (const { heading, piece } of placed) {
-    const group = groups.get(heading) ?? { heading, pieces: [] };
-    group.pieces.push(piece);
-    groups.set(heading, group);
-  }
-  return [...groups.values()];
 }
