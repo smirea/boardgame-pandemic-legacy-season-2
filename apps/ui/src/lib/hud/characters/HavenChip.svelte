@@ -33,7 +33,9 @@
     naming = null;
     if (name && name !== cityName(city)) rename(city, name);
   }
+  // A list closed by a click away takes its field with it before the field can blur, so the name is kept here.
   function close() {
+    if (naming) finish(naming);
     open = false;
     look?.(null);
   }
@@ -87,9 +89,7 @@
     <path d="M8 1.5 1 7.6h2v6.9h4v-4.5h2v4.5h4V7.6h2z" />
   </svg>
   <span class="sr-only">Home:</span>
-  {#if home && naming === home}
-    {@render field(home)}
-  {:else if options}
+  {#if options}
     <button
       type="button"
       class="value"
@@ -102,6 +102,8 @@
       {home ? cityName(home) : "Pick a haven"}
       <svg class="caret" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" /></svg>
     </button>
+  {:else if home && naming === home}
+    {@render field(home)}
   {:else if home}
     <b class="value">{cityName(home)}</b>
     {#if canRename(home)}{@render pen(home)}{/if}
