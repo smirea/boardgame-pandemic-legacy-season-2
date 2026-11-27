@@ -18,67 +18,58 @@
   "sections": [
     {
       "heading": "5. Setup step 5 (missing)",
-      "mechanicsSummary": ["No rule is printed. Skip step 5 until rule sticker E is applied."]
-    },
-    {
-      "heading": "6b. Deal Cards",
-      "mechanicsSummary": [
-        "Shuffle the chosen Event cards, all Produce Supplies cards, and the City cards together.",
-        "Deal by player count: 4 cards at 2 players, 3 cards at 3 players, 2 cards at 4 players.",
-        "Hands stay face up for the whole game.",
-        "Epidemics are not in this shuffle. They are added in step 7 to the deck that remains after the deal."
-      ]
-    },
-    {
-      "heading": "7. Add Epidemics to the Player Deck",
-      "mechanicsSummary": [
-        "Split the remaining Player deck into 5 face-down piles, as equal as possible.",
-        "Shuffle 1 Epidemic into each pile.",
-        "Stack the piles into the Player deck with the smaller piles on the bottom."
-      ]
-    },
-    {
-      "heading": "8. Select Characters",
-      "mechanicsSummary": [
-        "Each player picks a character and a color, and takes the matching pawn and Reference cards.",
-        "Each pawn starts at that character's home.",
-        "If there are fewer characters than players, the extra players use haven workers."
-      ]
-    },
-    {
-      "heading": "9. Begin Play",
-      "mechanicsSummary": [
-        "Randomly choose one pawn. That player is first.",
-        "Play continues clockwise."
-      ]
+      "text": "INSTRUCTIONS FOR A BETTER LIFE ON THE HAVENS\n\nRULE STICKER E\nwill give you step 5 for set up.\nSkip this step for now.\nInfection\nInfection Rate\nGame End\ncards\nRate track\nmarker\nInfection\nInfection\ndeck\ndiscard pile\nGAME END\nINFECTION\nGAME END\nDISCARD PILE\nCARDS\nLAB CD\nA B/C/D\nABCD\nKPILE\nPLAYER\nDISCARD"
     },
     {
       "heading": "On Your Turn",
-      "mechanicsSummary": [
-        "Four steps, in order: check for exposure; take 4 actions; draw 2 Player cards; infect cities.",
-        "After the infect step, the turn passes to the player on the left.",
-        "Anyone may advise. The player whose turn it is decides.",
-        "A hand holds City cards, Produce Supplies cards, and Event cards.",
-        "City cards are spent on some actions. Produce Supplies cards move cubes from the stockpile onto havens and supply centers. Event cards may be played at any time."
-      ]
+      "text": "PILE\nPlayer discard pile\nPlayer deck\n6b. Shuffle these Event cards, all Produce Supplies\ncards, and the City cards together. Deal cards to\neach player according to the number of players:\nCards\n# of players\n4\n2 players\n3 players\n2\n4 players\nPlayers keep their hands face up at all times.\n\nADD EPIDEMICS TO\n7\nATHE PLAYER DECK\nDivide the remaining Player deck into 5 face down\npiles, as equal in size as possible. Shuffle 1 Epidemic\ncard into each pile. Stack these piles to form the Player\ndeck, placing smaller piles at the bottom."
+    },
+    {
+      "heading": "8. Select Characters",
+      "text": "Each player selects a character and player color and\ntakes the corresponding pawn and Reference cards.\nPlace each pawn at their home. If there aren't enough\ncharacters for all players, some players must play a\nhaven worker.\nBEGIN PLAY\nTake all the pawns and randomly select one.\nThat player goes first and play proceeds clockwise."
+    },
+    {
+      "heading": "On Your Turn",
+      "text": "EACH PLAYER TURN IS DIVIDED INTO 4 STEPS:\n1. Check for exposure.\n2. Do 4 actions.\n3. Draw 2 Player cards.\n4. Infect cities,\nAfter a player is done infecting cities, the turn ends\nand the player on their left goes next.\nPlayers should freely give each other advice\nLet everyone offer opinions and ideas. However,\nthe player whose turn it is decides what to do.\nYour hand can have City, Produce Supplies, and\nEvent cards in it. City cards are used in some\nactions, Produce Supplies cards are used to bring\nsupplies from the stockpile to havens and supply\ncenters, and Event cards can be played at any time"
     }
   ],
   "tables": [
     {
       "name": "Opening hand size",
       "rows": [
-        { "players": 2, "cards": 4 },
-        { "players": 3, "cards": 3 },
-        { "players": 4, "cards": 2 }
+        {
+          "players": 2,
+          "cards": 4
+        },
+        {
+          "players": 3,
+          "cards": 3
+        },
+        {
+          "players": 4,
+          "cards": 2
+        }
       ]
     },
     {
       "name": "Turn structure",
       "rows": [
-        { "step": 1, "do": "Check for exposure" },
-        { "step": 2, "do": "Do 4 actions" },
-        { "step": 3, "do": "Draw 2 Player cards" },
-        { "step": 4, "do": "Infect cities" }
+        {
+          "step": 1,
+          "do": "Check for exposure"
+        },
+        {
+          "step": 2,
+          "do": "Do 4 actions"
+        },
+        {
+          "step": 3,
+          "do": "Draw 2 Player cards"
+        },
+        {
+          "step": 4,
+          "do": "Infect cities"
+        }
       ]
     }
   ],
@@ -88,5 +79,6 @@
     "The board's own turn reminder repeats the four steps and, unlike the blue rules box, mentions resolving epidemics as part of the draw.",
     "Five-pile diagram: one Epidemic shuffled into each pile, then stacked.",
     "Sample pawn, two-sided actions reference, and a character card (home Asgard, age 28) whose pictured job mentions a Transfer Supplies free action that can move supply cubes to or from a player at any location."
-  ]
+  ],
+  "fullText": "INSTRUCTIONS FOR A BETTER LIFE ON THE HAVENS\n\nRULE STICKER E\nwill give you step 5 for set up.\nSkip this step for now.\nInfection\nInfection Rate\nGame End\ncards\nRate track\nmarker\nInfection\nInfection\ndeck\ndiscard pile\nGAME END\nINFECTION\nGAME END\nDISCARD PILE\nCARDS\nLAB CD\nA B/C/D\nABCD\nKPILE\nPLAYER\nDISCARD\nON YOUR TURN\nPILE\nPlayer discard pile\nPlayer deck\n6b. Shuffle these Event cards, all Produce Supplies\ncards, and the City cards together. Deal cards to\neach player according to the number of players:\nCards\n# of players\n4\n2 players\n3 players\n2\n4 players\nPlayers keep their hands face up at all times.\n\nADD EPIDEMICS TO\n7\nATHE PLAYER DECK\nDivide the remaining Player deck into 5 face down\npiles, as equal in size as possible. Shuffle 1 Epidemic\ncard into each pile. Stack these piles to form the Player\ndeck, placing smaller piles at the bottom.\n8 SELECT CHARACTERS\nEach player selects a character and player color and\ntakes the corresponding pawn and Reference cards.\nPlace each pawn at their home. If there aren't enough\ncharacters for all players, some players must play a\nhaven worker.\nBEGIN PLAY\nTake all the pawns and randomly select one.\nThat player goes first and play proceeds clockwise.\nON YOUR TURN\nEACH PLAYER TURN IS DIVIDED INTO 4 STEPS:\n1. Check for exposure.\n2. Do 4 actions.\n3. Draw 2 Player cards.\n4. Infect cities,\nAfter a player is done infecting cities, the turn ends\nand the player on their left goes next.\nPlayers should freely give each other advice\nLet everyone offer opinions and ideas. However,\nthe player whose turn it is decides what to do.\nYour hand can have City, Produce Supplies, and\nEvent cards in it. City cards are used in some\nactions, Produce Supplies cards are used to bring\nsupplies from the stockpile to havens and supply\ncenters, and Event cards can be played at any time"
 }

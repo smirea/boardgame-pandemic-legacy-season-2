@@ -18,18 +18,20 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "Player deck back. No printed text. State 2 side A is the same back.",
-  "sideBSummary": "Riyadh, 24°42'49\"N 46°40'31\"E, code P2-09b. Compass has no anchor. One sealed box labeled SEARCH:. The city name and coordinates repeat upside down along the bottom.",
-  "searchBoxes": [
-    {
-      "type": "search",
-      "stateRevealed": 2,
-      "isCompanion": false,
-      "companionName": null,
-      "opensDoors": [],
-      "effectSummary": "Immediately take 1 Player card from the discard pile and add it to your hand. The printed label is SEARCH:. The scratch calls this the Hollow Men headquarters: the city lives in fear of them, they come from Asia, and new members appear every year in November. No companion stays on the card."
-    }
-  ],
+  "sideA": {
+    "text": "Player deck back. No printed text."
+  },
+  "sideB": {
+    "text": "RIYADH\n24°42'49\"N 46°40'31\"E\n\nSEARCH:\n[covered]\n\nThe bottom edge repeats RIYADH and 24°42'49\"N 46°40'31\"E upside down.\nP2-09b",
+    "searchBoxes": [
+      {
+        "id": "search",
+        "label": "SEARCH:",
+        "initially": "covered",
+        "revealedInState": 2
+      }
+    ]
+  },
   "states": [
     {
       "state": 2,
@@ -38,7 +40,8 @@
         "sideA": "state-2-side-a.jpg",
         "sideB": "state-2-side-b.jpg"
       },
-      "summary": "SEARCH is scratched. Hollow Men have their headquarters here. The city lives in fear of them. They come from Asia, and new members appear every year in November. Immediately take 1 Player card from the discard pile and add it to your hand. Code P2-09b is unchanged. Side A is the player back."
+      "revealedText": "SEARCH:\nHollow Men have headquarters here. The whole\ncity lives in fear of them. They come from Asia\nand new members appear every year in\nNovember. We must tread carefully.\nWe are heading into darkness.\nImmediately take 1 Player card from the discard\npile and add it to your hand.",
+      "effect": "Immediately take 1 Player card from the discard pile and add it to your hand. The printed label is SEARCH:. The scratch calls this the Hollow Men headquarters: the city lives in fear of them, they come from Asia, and new members appear every year in November. No companion stays on the card."
     }
   ],
   "mechanics": {

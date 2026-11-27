@@ -17,13 +17,11 @@
     "stopOrPause": "NONE",
     "header": "THE PLAN",
     "trigger": "",
-    "summary": "The Hollow Men supplied inside information for reaching Utopia, and the plan is final. Destroy An Incomplete Plan. The other side has four steps, in any order; checked boxes carry to later games. When every box is checked, open Package 8. Keep this card in the reserve between games.",
     "text": "The Hollow Men gave us inside information to help us access Utopia. We’ve finalized our plan.\n\nDestroy the An Incomplete Plan card. The Plan is on the other side of this card and contains four steps that may be done in any order. When a step is complete, check its box. Any boxes checked carry over to future games.\n\nWhen all boxes are checked, open Package 8 (you have completed the plan). Keep this card in the reserve between games.",
     "footer": ""
   },
   "sideB": {
     "header": "The Plan",
-    "summary": "Recon in Shanghai with the cards listed to check a step. A supply center is not required. Locate hidden entrance: red A B C D E. Decode access key: black A B C D. Devise distraction: yellow A B C. Prepare containment units: blue A B C. When every box is checked, open Package 8 and destroy this card.",
     "text": "Do the Recon action in Shanghai with the cards indicated below to check off a part of the plan.\nA supply center is not required to do this.\n\n• Locate hidden entrance — red A, B, C, D, E\n• Decode access key — black A, B, C, D\n• Devise distraction — yellow A, B, C\n• Prepare containment units — blue A, B, C\n\nWhen everything is checked, you have completed the plan.\nOpen Package 8 and destroy this card.",
     "footer": "",
     "scratchBoxes": []
@@ -36,7 +34,9 @@
       "When the fourth box is checked, open Package 8 and destroy this card"
     ],
     "opensDoors": [],
-    "opensPackages": ["8"],
+    "opensPackages": [
+      "8"
+    ],
     "destroys": [
       "An Incomplete Plan card, when this card is read",
       "this card, when every box is checked"

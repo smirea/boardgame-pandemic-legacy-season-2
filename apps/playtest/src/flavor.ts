@@ -4,80 +4,176 @@
 const FLAVOR: [prefix: string, line: string][] = [
   [
     "January",
-    "The Tidewatch council opens the year with a ledger that does not balance. Scouts are told to look past the edge of the chart.",
+    "Year 71 begins on the havens with the leaders gone and the supply projections failing. Time to look past the edge of the grid.",
   ],
   [
     "Supplies arrive",
-    "A convoy nobody expected ties up at dawn. The quartermasters argue over who signs for it.",
+    "Extra Rationed Event stores are logged into the reserve for the months ahead.",
   ],
-  ["February", "A watch-post on the western shore reports lights where no one should be living."],
+  [
+    "February",
+    "With the security detail missing, the Hollow Men are pressing harder against coastal supply centers.",
+  ],
   [
     "Putting down roots",
-    "The masons ask for stone instead of canvas. Some depots are meant to outlast this crew.",
+    "Supply centers can now be built to last from month to month instead of collapsing between runs.",
   ],
   [
     "March",
-    "Old harbour charts turn up in a drowned archive. Half the names on them are unknown to anyone alive.",
+    "Archive records show the four cure labs were never meant to last past fifty years—and PEARL went silent on the brink of a breakthrough.",
   ],
-  ["Stretched too thin", "Every new city is another mouth and another door left open at night."],
-  ["April", "The southern relay goes quiet for a week, then answers in a voice nobody recognises."],
-  ["Rebuilding", "A town that was written off sends a census. The number on it has gone up."],
-  ["May", "Fishermen talk of a platform far out east, lit and silent."],
-  ["Experience", "The veterans start teaching. The lessons are short and none of them are kind."],
-  ["June", "The fog over the old continent thins enough to count rooftops."],
-  ["New arrivals", "Two strangers walk in off the causeway with their own tools and no questions."],
-  ["July", "Someone is transmitting on a band the council retired years ago."],
-  ["Listening", "The operators sit up through the night and write down nothing they can use."],
-  ["August", "The towers hum. Whatever is out there has started to answer."],
-  ["Hard lessons", "The crews who came back are not the crews who left."],
-  ["September", "The stores that were locked away for safety are the first to spoil."],
-  ["Closing in", "The map has fewer blank places and none of them are empty."],
+  [
+    "Stretched too thin",
+    "Five more Epidemics enter the box as the plague accelerates across the grid.",
+  ],
+  [
+    "April",
+    "A torn coordinate slip names the Southern Hemisphere labs: JADE, OPAL, TOPAZ, and half a line for PEARL.",
+  ],
+  [
+    "Rebuilding",
+    "Cities with standing supply centers begin to climb back on the population track.",
+  ],
+  [
+    "May",
+    "Archive notes from last November reveal the truth: haven leadership compiled a list and abandoned everyone else to march toward Utopia.",
+  ],
+  [
+    "Experience",
+    "Crews who survive the mainland bring back hard-won techniques for the roster.",
+  ],
+  [
+    "June",
+    "Archive records from Year 14 explain the Hollow Men—an organized militia attacking supply routes since the earliest years after the Fall.",
+  ],
+  [
+    "New arrivals",
+    "Volunteers from the havens—a Sanitation Officer and a veteran Captain—step forward to join the roster.",
+  ],
+  [
+    "July",
+    "Satellite towers pick up faint transmissions across multiple bands; someone out there may be coordinating the Hollow Men.",
+  ],
+  [
+    "Listening",
+    "Crews align satellite towers across three regions to triangulate the unknown broadcasts.",
+  ],
+  [
+    "August",
+    "The satellite network comes fully online with the Frequency Scanner, and Year 48 archives confirm PEARL once isolated a bacteriophage.",
+  ],
+  [
+    "Hard lessons",
+    "Additional abilities and scars join the pool as the year's toll deepens.",
+  ],
+  [
+    "September",
+    "The experimental inoculation stored in Package 6 begins wearing off—Epidemics now pull quarantined cities back into play.",
+  ],
+  [
+    "Closing in",
+    "The remaining blank space on the chart narrows toward East Asia and the walls of Utopia.",
+  ],
   [
     "October",
-    "The ones outside the walls are not all of one mind. Some of them are listening too.",
+    "Using the satellite towers to broadcast misinformation can lure Hollow Men onto the havens where they may be turned.",
   ],
-  ["A gap in the wall", "A gate is found unbarred from the inside."],
+  [
+    "A gap in the wall",
+    "New shelter and resistance tactics open up as the grid pushes toward Asia.",
+  ],
   [
     "November",
-    "Four ledgers, four colours, one harbour. The council calls it the Plan and will not say who wrote it.",
+    "Utopia releases a fresh wave of Hollow Men each November—for two days their perimeter is distracted, and The Plan is set in motion at Shanghai.",
   ],
-  ["Almost there", "Nobody sleeps. The boats are loaded twice."],
-  ["December", "One vial, one road, and a courier who will not be coming back the same."],
+  [
+    "Almost there",
+    "Every card and supply run converges on the four steps of The Plan.",
+  ],
+  [
+    "December",
+    "One final month left: reach Lake Baikal, take the PEARL sample, and carry it to JADE in Johannesburg before the havens run dry.",
+  ],
   [
     "The final reckoning",
-    "The council counts the living, city by city, and writes the year into the book.",
+    "Twelve months recorded on the chart; the Final Reckoning tallies what survived and whether the sample reached JADE.",
   ],
   [
     "North America revealed",
-    "The western shore resolves into streets, and the streets are not all dark.",
+    "Recon reaches North America—where COdA collapsed and the plague first broke loose.",
   ],
-  ["South America revealed", "River towns appear on the chart, strung along the water like beads."],
-  ["Europe revealed", "The old continent is crowded, tired, and very much awake."],
-  ["Africa revealed", "The southern roads are long, and someone has been keeping them clear."],
+  [
+    "South America revealed",
+    "Recon opens South America in search of the rumored Southern Hemisphere laboratories.",
+  ],
+  [
+    "Europe revealed",
+    "Recon reaches Europe and uncovers old military runways capable of linking havens and supply centers by air.",
+  ],
+  [
+    "Africa revealed",
+    "Recon charts Africa—infested cities alongside intact satellite towers capable of relaying signals across the grid.",
+  ],
   [
     "Middle East and South Asia revealed",
-    "Caravan cities come onto the chart with their gates shut.",
+    "Recon pushes into the Middle East and South Asia, where Hollow Men gather and faint transmissions linger over the towers.",
   ],
-  ["East Asia revealed", "The far coast is brighter than anyone guessed."],
-  ["Coral Sea haven found", "A reef-ringed platform answers the hail on the first try."],
+  [
+    "East Asia revealed",
+    "Recon uncovers East Asia: survivors huddled in shelters outside the walled enclave of Utopia.",
+  ],
+  [
+    "Coral Sea haven found",
+    "A lost haven in the Coral Sea appears on the chart, still linked to the old southern approaches.",
+  ],
   [
     "Wellington and the Topaz lab found",
-    "At the bottom of the chart, a clean room with the lights still on.",
+    "TOPAZ lab in Wellington has survived untouched by the plague for nearly fifty years and confirms PEARL's location at Lake Baikal.",
   ],
-  ["Eastern Pacific haven sighted", "A dot on the horizon holds its position against the current."],
-  ["Eastern Pacific haven reached", "The gangway is down. Whoever lowered it is gone."],
-  ["Indian Ocean haven sighted", "A beacon blinks a pattern from the old signal book."],
-  ["Indian Ocean haven reached", "The storerooms are full and the bunks are cold."],
-  ["Opal lab found", "Behind a collapsed stairwell, a door with a working lock."],
-  ["Jade lab found", "The notebooks are in three hands and end on the same day."],
-  ["Pearl lab reached", "Ice on the inside of the glass, and one rack still sealed."],
+  [
+    "Eastern Pacific haven sighted",
+    "Bearings locate a silent Pacific haven off the American coast, waiting to be reached by sea.",
+  ],
+  [
+    "Eastern Pacific haven reached",
+    "Inside the empty Eastern Pacific haven sit portable supply labs, experimental inoculation, and fifteen Supply cubes.",
+  ],
+  [
+    "Indian Ocean haven sighted",
+    "Bearings locate the silent Indian Ocean haven, waiting for a sea lane to reach it.",
+  ],
+  [
+    "Indian Ocean haven reached",
+    "A locked storage room inside the Indian Ocean haven yields fifteen more Supply cubes for every remaining month.",
+  ],
+  [
+    "Opal lab found",
+    "OPAL lab in Buenos Aires still stands; its Immunologist joins the roster and points toward Lake Baikal.",
+  ],
+  [
+    "Jade lab found",
+    "JADE lab in Johannesburg still has working mass-production gear; its Scientist joins to help manufacture the cure.",
+  ],
+  [
+    "Pearl lab reached",
+    "PEARL lab at Lake Baikal holds four doses of the cure sample—carrying one past Utopia's patrols requires injecting it directly.",
+  ],
   [
     "Forsaken cities",
-    "The last lamp in a city goes out. The boats stop calling there until someone pays to bring it back.",
+    "A city drops to population zero and goes forsaken—infested and cut off from every action except Drive/Ferry until restored.",
   ],
-  ["Signals triangulated", "Three towers, three bearings, and the lines cross on land."],
-  ["The Hollow Men defect", "They come in unarmed, and they bring maps."],
-  ["Utopia opened", "The harbour at the end of the Plan is real."],
+  [
+    "Signals triangulated",
+    "Three towers lock onto the Hollow Men's primary bands: 9.2, 9.31, and 11.88.",
+  ],
+  [
+    "The Hollow Men defect",
+    "Defectors brought onto the havens exchange secrets with the Faded, opening the path to plan a breach into Utopia.",
+  ],
+  [
+    "Utopia opened",
+    "Inside Utopia's walls, the truth is laid bare: Utopia kept PEARL under guard for thirty years, waiting for the Faded to die out.",
+  ],
 ];
 
 export function flavorFor(title: string): string | null {

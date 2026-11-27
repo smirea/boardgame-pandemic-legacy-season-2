@@ -18,18 +18,20 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "Player deck back. No printed text. State 2 side A is the same back.",
-  "sideBSummary": "Tehran, 35°41'21\"N 51°23'20\"E, code P2-07b. Compass has no anchor. One sealed box labeled SEARCH:. The city name and coordinates repeat upside down along the bottom.",
-  "searchBoxes": [
-    {
-      "type": "search",
-      "stateRevealed": 2,
-      "isCompanion": false,
-      "companionName": null,
-      "opensDoors": [],
-      "effectSummary": "Remove up to 2 Hollow Men figures from the board. The printed label is SEARCH:. The scratch says captured Hollow Men were questioned and the information was used to remove threats. The removal is immediate and is not limited to Tehran. No companion stays on the card."
-    }
-  ],
+  "sideA": {
+    "text": "Player deck back. No printed text."
+  },
+  "sideB": {
+    "text": "TEHRAN\n35°41'21\"N 51°23'20\"E\n\nSEARCH:\n[covered]\n\nThe bottom edge repeats TEHRAN and 35°41'21\"N 51°23'20\"E upside down.\nP2-07b",
+    "searchBoxes": [
+      {
+        "id": "search",
+        "label": "SEARCH:",
+        "initially": "covered",
+        "revealedInState": 2
+      }
+    ]
+  },
   "states": [
     {
       "state": 2,
@@ -38,7 +40,8 @@
         "sideA": "state-2-side-a.jpg",
         "sideB": "state-2-side-b.jpg"
       },
-      "summary": "SEARCH is scratched. Captured Hollow Men were questioned about their plans, and that information removes threats. Remove up to 2 Hollow Men figures from the board. Code P2-07b is unchanged. Side A is the player back."
+      "revealedText": "SEARCH:\nCaptured some Hollow Men and questioned\nthem about their current plans. We used this\ninformation to remove some threats...\nRemove up to 2 Hollow Men figures from\nthe board.",
+      "effect": "Remove up to 2 Hollow Men figures from the board. The printed label is SEARCH:. The scratch says captured Hollow Men were questioned and the information was used to remove threats. The removal is immediate and is not limited to Tehran. No companion stays on the card."
     }
   ],
   "mechanics": {

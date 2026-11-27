@@ -16,12 +16,21 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "P2-01a. This package holds 24 cards, 6 sticker cards, and 24 Hollow Men figures. The report calls the region sinister: locals say the Hollow Men who roam it carry rats and vermin and release them into cities. Satellite towers pick up faint transmissions from someone, possibly the Hollow Men. The team expects to tune the equipment and listen in by about August. They suspect a recon can be made from Kolkata, but not how. Read both sides, then keep this card in the reserve.",
-  "sideBSummary": "P2-01b, headed RIGHT NOW. Open doors 62, 53, F, and 14 if they are still closed. Baghdad is the newly connected city. Put Baghdad's Player cards on the Player discard pile. Put Baghdad's Infection cards in the Game End area. Put the 4 Hollow Men Gather cards on the Infection discard pile. Put every other Player card and Infection card from the package into the reserve. Give the Renewal Unrationed Event to a player to add to their hand.",
-  "searchBoxes": [],
+  "sideA": {
+    "text": "THIS PACKAGE INCLUDES:\n\n• 24 cards • 6 sticker cards\n\n• 24 Hollow Men figures\n\nRECON REPORT\n\nThis region is sinister. The locals swear that the Hollow Men who roam the area transport rats and vermin and release them into cities. There are satellite towers here, picking up faint transmissions trom...someone. The Hollow Men? By...August(?) we think we'll be able to fine tune our equipment and start listening in on them. Although we suspect we can recon from Kolkata, as of yet we do not know how.\n\nRead both sides of this card\n\nP2-01 a then keep it in the reserve."
+  },
+  "sideB": {
+    "text": "RIGHT NOW!\n\nOpen the following doors if you have not done so already:\n\n62\n\nYou have connected a new city: Baghdad.\n\n• Add the Player cards for Baghdad to the Player discard pile.\n\n• Add the Infection cards for Baghdad to the Game End area.\n\n• Put the 4 Hollow Men Gather cards into the Infection discard pile:\n\n• Put the other Player and Infection cards into the reserve.\n\n• Finally, give the \"Renewal\" Unrationed Event card to a player to add to their hand.\n\nP2-01b",
+    "searchBoxes": []
+  },
   "states": [],
   "mechanics": {
-    "opensDoors": ["62", "53", "F", "14"],
+    "opensDoors": [
+      "62",
+      "53",
+      "F",
+      "14"
+    ],
     "destroys": [],
     "rules": [
       "Read both sides, then keep this card in the reserve.",

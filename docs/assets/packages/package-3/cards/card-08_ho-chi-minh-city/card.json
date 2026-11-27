@@ -18,9 +18,13 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "Player deck back. Dark blue sunburst around a haven on the water. No text and no printed code.",
-  "sideBSummary": "Ho Chi Minh City, red Player card. Coordinates 10°49'23\"N 106°37'47\"E. The compass has an anchor, so the city is a port. The map has a target marker and no scratch-off box. The city name and coordinates repeat upside down along the bottom. Printed code P3-08b.",
-  "searchBoxes": [],
+  "sideA": {
+    "text": "Player deck back. No printed text."
+  },
+  "sideB": {
+    "text": "HO CHI MINH CITY\n10°49'23\"N 106°37'47\"E\n(City map. No search box.)\n(City name and coordinates repeat upside down along the bottom.)\nP3-08b",
+    "searchBoxes": []
+  },
   "states": [],
   "mechanics": {
     "opensDoors": [],

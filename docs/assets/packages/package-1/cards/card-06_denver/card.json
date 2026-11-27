@@ -17,18 +17,22 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "Player deck back. No text and no printed code.",
-  "sideBSummary": "Blue Denver Player card, 39°44'21\"N 104°59'25\"W. One covered SEARCH box. Not a port. Code P1-07b.",
-  "searchBoxes": [
-    {
-      "type": "land",
-      "stateRevealed": 2,
-      "isCompanion": true,
-      "companionName": "Logistics Expert",
-      "opensDoors": [],
-      "effectSummary": "While this card is in your hand, the Establish Supply Lines action costs 1 fewer Supply cube."
-    }
-  ],
+  "sideA": {
+    "text": "Player deck back. No printed text."
+  },
+  "sideB": {
+    "text": "DENVER\n39°44'21\"N 104°59'25\"W\n\nSEARCH:\n[covered]\n\nThe bottom edge repeats DENVER and 39°44'21\"N 104°59'25\"W upside down.\nP1-07b",
+    "searchBoxes": [
+      {
+        "id": "search",
+        "label": "SEARCH:",
+        "initially": "covered",
+        "revealedInState": 2,
+        "isCompanion": true,
+        "companionName": "Logistics Expert"
+      }
+    ]
+  },
   "states": [
     {
       "state": 2,
@@ -36,7 +40,8 @@
       "images": {
         "sideB": "state-2-side-b.jpg"
       },
-      "summary": "Companion: Logistics Expert. You may do the Establish Supply Lines action with 1 fewer Supply cube if you have this card in your hand."
+      "revealedText": "SEARCH:\nCompanion:\nLogistics Expert\nYou may do the Establish\nSupply Lines action with\n1 fewer Supply cube if you\nhave this card in your hand.",
+      "effect": "While this card is in your hand, the Establish Supply Lines action costs 1 fewer Supply cube."
     }
   ],
   "mechanics": {

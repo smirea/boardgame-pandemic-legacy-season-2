@@ -16,13 +16,19 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "Player deck back. No text and no printed code.",
-  "sideBSummary": "Unrationed Event, Decontamination Kit. Remove all Plague cubes from 1 location on the grid. Destroy this card after use. Play at any time. Not an action. Code P1-02b.",
-  "searchBoxes": [],
+  "sideA": {
+    "text": "Player deck back. No printed text."
+  },
+  "sideB": {
+    "text": "UNRATIONED EVENT\nDECONTAMINATION KIT\nRemove all Plague cubes from\n1 location on the grid.\nDestroy this card after use.\nP1-02b\nPlay at any time. Not an action.",
+    "searchBoxes": []
+  },
   "states": [],
   "mechanics": {
     "opensDoors": [],
-    "destroys": ["Decontamination Kit"],
+    "destroys": [
+      "Decontamination Kit"
+    ],
     "rules": [
       "Play at any time. It is not an action.",
       "Remove all Plague cubes from 1 location on the grid.",

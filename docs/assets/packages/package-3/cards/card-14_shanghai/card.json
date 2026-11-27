@@ -19,18 +19,20 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "Player deck back. Dark blue sunburst around a haven on the water. No text and no printed code.",
-  "sideBSummary": "Shanghai, red Player card. Coordinates 31°13'50\"N 121°28'25\"E. The compass has no anchor, so the city is not a port. One covered SEARCH box fills the map. The city name and coordinates repeat upside down along the bottom. Printed code P3-14b.",
-  "searchBoxes": [
-    {
-      "type": "search",
-      "stateRevealed": 2,
-      "isCompanion": false,
-      "companionName": null,
-      "opensDoors": [],
-      "effectSummary": "Story only. Haven leaders were found dead outside Utopia's walls, shot where they had asked to be let in. Utopia accepts no outsiders and leaves no survivors. No game instruction and no door."
-    }
-  ],
+  "sideA": {
+    "text": "Player deck back. No printed text."
+  },
+  "sideB": {
+    "text": "SHANGHAI\n31°13'50\"N 121°28'25\"E\n\nSEARCH:\n[covered]\n\nThe bottom edge repeats SHANGHAI and 31°13'50\"N 121°28'25\"E upside down.\nP3-14b",
+    "searchBoxes": [
+      {
+        "id": "search",
+        "label": "SEARCH:",
+        "initially": "covered",
+        "revealedInState": 2
+      }
+    ]
+  },
   "states": [
     {
       "state": 2,
@@ -39,7 +41,8 @@
         "sideA": "state-2-side-a.jpg",
         "sideB": "state-2-side-b.jpg"
       },
-      "summary": "Same Player back. The SEARCH box is scratched. Story only. Haven leaders were found dead outside Utopia's walls, shot where they had asked to be let in. Utopia accepts no outsiders and leaves no survivors. No game instruction and no door."
+      "revealedText": "SEARCH:\nWe found the Haven leaders. Dead. Unburied.\nShot outside the walls of Utopia where they\npetitioned to get in. There were no survivors.\nUtopia accepts no outsiders.\nUtopia leaves no survivors.",
+      "effect": "Story only. Haven leaders were found dead outside Utopia's walls, shot where they had asked to be let in. Utopia accepts no outsiders and leaves no survivors. No game instruction and no door."
     }
   ],
   "mechanics": {

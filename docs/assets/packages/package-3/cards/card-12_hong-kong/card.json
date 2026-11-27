@@ -19,18 +19,22 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "Player deck back. Dark blue sunburst around a haven on the water. No text and no printed code.",
-  "sideBSummary": "Hong Kong, red Player card. Coordinates 22°16'32\"N 114°8'38\"E. The compass has no anchor, so the city is not a port. One covered SEARCH box fills the map. The city name and coordinates repeat upside down along the bottom. Printed code P3-12b.",
-  "searchBoxes": [
-    {
-      "type": "search",
-      "stateRevealed": 2,
-      "isCompanion": true,
-      "companionName": "Structural Engineer",
-      "opensDoors": [],
-      "effectSummary": "Companion Structural Engineer. While this card is in your hand, Build Shelter may discard a City card of any color, including this one."
-    }
-  ],
+  "sideA": {
+    "text": "Player deck back. No printed text."
+  },
+  "sideB": {
+    "text": "HONG KONG\n22°16'32\"N 114°8'38\"E\n\nSEARCH:\n[covered]\n\nThe bottom edge repeats HONG KONG and 22°16'32\"N 114°8'38\"E upside down.\nP3-12b",
+    "searchBoxes": [
+      {
+        "id": "search",
+        "label": "SEARCH:",
+        "initially": "covered",
+        "revealedInState": 2,
+        "isCompanion": true,
+        "companionName": "Structural Engineer"
+      }
+    ]
+  },
   "states": [
     {
       "state": 2,
@@ -39,7 +43,8 @@
         "sideA": "state-2-side-a.jpg",
         "sideB": "state-2-side-b.jpg"
       },
-      "summary": "Same Player back. The SEARCH box is scratched. Companion Structural Engineer. While this card is in your hand, Build Shelter may discard a City card of any color, including this one."
+      "revealedText": "SEARCH:\nCompanion:\nStructural Engineer\nWhen you do the Build\nShelter action, you may\ndiscard any color City card\n(including this one) if you\nhave this card in your hand.",
+      "effect": "Companion Structural Engineer. While this card is in your hand, Build Shelter may discard a City card of any color, including this one."
     }
   ],
   "mechanics": {

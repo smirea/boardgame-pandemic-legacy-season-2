@@ -18,9 +18,13 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "Infection deck back. Biohazard art. No printed text.",
-  "sideBSummary": "Paris Infection card. Blue Europe map, city name down the left edge, white center panel, green ring. No coordinates and no special rule. P4-06b.",
-  "searchBoxes": [],
+  "sideA": {
+    "text": "Infection deck back. No printed text."
+  },
+  "sideB": {
+    "text": "PARIS\nP4-06b",
+    "searchBoxes": []
+  },
   "states": [],
   "mechanics": {
     "opensDoors": [],

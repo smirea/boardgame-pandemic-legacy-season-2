@@ -1,30 +1,44 @@
 {
   "file": "page-07.jpg",
   "printedPageNumber": 7,
-  "headings": ["Characters"],
+  "headings": [
+    "Characters"
+  ],
   "ruleStickerSlots": [],
   "sections": [
     {
       "heading": "Characters",
-      "mechanicsSummary": [
-        "Players may switch characters between games.",
-        "Before the prologue, create the five starting characters. The other five Character cards are for characters discovered during the campaign.",
-        "To create one: take a blank Character card; stick a job into the Job box; stick an image as the photo; write a name and an age; choose one of the named havens as the home.",
-        "Leave Place of Death blank.",
-        "The Exposure track is scratched as the character gains exposure. Later scratches can reveal scars or a skull. Do not scratch any at creation.",
-        "The illustrated Administrator job (an example sticker, not a rule added by this page): once on your turn, as an action, move a pawn onto any other pawn."
-      ]
+      "text": "INSTRUCTIONS FOR A BETTER LIFE ON THE HAVENS"
+    },
+    {
+      "heading": "Characters",
+      "text": "Characters have little experience outside the\nAdministrator: Once on your turn, as an action,\nmove a pawn to any other pawn.\nhavens-perhaps they've never seen the mainland at all.\nBut they will grow into something more. Players do not\nneed to play the same character each game.\nBefore the prologue, create the five starting characters.\nAs you play the campaign, you may find new characters\nthat will use the other five Character cards.\nASGARD\nTo create a new character:\n1. Take a blank Character card.\n2. Choose a job and place the sticker onto the\nJob box on your Character card.\nNewt\n3. Choose an image sticker for your character and\nplace it as your Character card's photo.\n4. Name the character and give them an age.\n5. Choose one of the named havens as their home.\nDo not fill in the place of death. That may come to pass\nas your characters gain exposure. As you scratch off the\nExposure track on your Character card, you may reveal\nscars or a skull. But not now. Not yet.\nAsgard\nWe did not ask to be here.\nWe do not want this responsibility.\n7"
     }
   ],
   "tables": [
     {
       "name": "Character creation",
       "rows": [
-        { "step": 1, "do": "Take a blank Character card" },
-        { "step": 2, "do": "Apply a job sticker to the Job box" },
-        { "step": 3, "do": "Apply an image sticker as the photo" },
-        { "step": 4, "do": "Write a name and an age" },
-        { "step": 5, "do": "Choose a named haven as the home" }
+        {
+          "step": 1,
+          "do": "Take a blank Character card"
+        },
+        {
+          "step": 2,
+          "do": "Apply a job sticker to the Job box"
+        },
+        {
+          "step": 3,
+          "do": "Apply an image sticker as the photo"
+        },
+        {
+          "step": 4,
+          "do": "Write a name and an age"
+        },
+        {
+          "step": 5,
+          "do": "Choose a named haven as the home"
+        }
       ]
     }
   ],
@@ -33,5 +47,6 @@
     "Haven tile labeled Asgard with an anchor, pointed at the Home line.",
     "Portrait sticker pointed at the photo box, and an Administrator ability callout pointed at the Job box.",
     "Flavor line at the bottom: the group did not ask to be here and did not want the responsibility."
-  ]
+  ],
+  "fullText": "INSTRUCTIONS FOR A BETTER LIFE ON THE HAVENS\nCHARACTERS\nCharacters have little experience outside the\nAdministrator: Once on your turn, as an action,\nmove a pawn to any other pawn.\nhavens-perhaps they've never seen the mainland at all.\nBut they will grow into something more. Players do not\nneed to play the same character each game.\nBefore the prologue, create the five starting characters.\nAs you play the campaign, you may find new characters\nthat will use the other five Character cards.\nASGARD\nTo create a new character:\n1. Take a blank Character card.\n2. Choose a job and place the sticker onto the\nJob box on your Character card.\nNewt\n3. Choose an image sticker for your character and\nplace it as your Character card's photo.\n4. Name the character and give them an age.\n5. Choose one of the named havens as their home.\nDo not fill in the place of death. That may come to pass\nas your characters gain exposure. As you scratch off the\nExposure track on your Character card, you may reveal\nscars or a skull. But not now. Not yet.\nAsgard\nWe did not ask to be here.\nWe do not want this responsibility.\n7"
 }

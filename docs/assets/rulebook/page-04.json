@@ -15,90 +15,68 @@
   "ruleStickerSlots": [],
   "sections": [
     {
+      "heading": "Welcome to Pandemic Legacy - Season 2",
+      "text": "-MANUAL"
+    },
+    {
+      "heading": "Welcome to Pandemic Legacy - Season 2",
+      "text": ""
+    },
+    {
       "heading": "Playing a Legacy Game",
-      "mechanicsSummary": [
-        "Choices persist from game to game. Different groups get different campaigns.",
-        "Players will write on components, apply stickers to cards, characters, and the board, and sometimes tear up a card. Those changes are permanent.",
-        "Each game also ends with permanent upgrades chosen for later games.",
-        "Some material is sealed. Open a package or dossier only when an instruction says to.",
-        "Some rules are absent from the manual at the start. When found, those rules are stuck into the manual and replace what was there."
-      ]
+      "text": "Unlike most games, which fully reset every time\nyou play, Pandemic Legacy carries some elements\nforward from one game to the next. Decisions you\nmake in game 1 will be there in game 2, 3, and every\ngame played with your copy of the game. Different\ngroups will make different decisions and will have a\ndifferent experience. What results is a game unique\nto the group that plays it.\nYou will write on parts of the game. You will put\nstickers on cards, the characters, and the board.\nSometimes you will even destroy (tear up) a card.\nThese changes are permanent. Also, at the end\nof each game, your group will make permanent\nimprovements to prepare for future games.\nAs you play, you will find other ways the game\nwill change.\nSome elements of play are hidden and sealed off\nbefore your very first game. As you play, you will\nfind instructions that tell you when to open these\npackages. Do not open the packages in the box until\nyou receive instructions to do so. The dossiers also\ncontain hidden intormation that will be revealed as\nyou play.\nSome rules are missing throughout the manual.\nAs you play, you will gain these missing rules and\nstick them into the manual. From that point on,\nthe rules will be permanently changed."
     },
     {
       "heading": "Legacy Deck",
-      "mechanicsSummary": [
-        "82-card story deck covering 12 months. Kept in a fixed order. Do not look through it or shuffle it.",
-        "During setup, read cards one at a time until a card whose back says PAUSE or STOP.",
-        "That card says when to resume: sometimes at the end of the current game, sometimes during setup of the next month.",
-        "The deck is one-way. Do not return Legacy cards when a month is replayed.",
-        "If the deck is scrambled, someone who is not playing restores the order from the number in each card's corner."
-      ]
-    },
-    {
-      "heading": "If You've Played Pandemic Legacy Season 1",
-      "mechanicsSummary": [
-        "Shared ideas include the Legacy deck, rationing (called funding in Season 1), end-of-game upgrades, dossiers, and sealed packages.",
-        "Season 1 is not required. The two games are separate campaigns joined only by story."
-      ]
+      "text": "The Legacy deck contains cards that\nSTOP\nwill describe what happens over the\ncourse of the game's 12 months. It is\narranged in a specific order-do not\nlook through or shuffle these cards.\nDuring setup, draw the cards and\nread them one at a time, until you get to a card that\nsays PAUSE or STOP on the back. This card will tell\nyou when to continue drawing from the deck, which\nmight be at the end of a game, or during setup of\nthe next month. The Legacy deck is a one way trip.\nEven it you repeat a month, do not put Legacy cards\nback. If the Legacy deck becomes scattered, have\nsomeone who is not playing the game put the cards\nback in order using the numbers in the corner of\neach card.\nPANDEMIC\nIF YOU'VE PLAYED LEGACY SEASON 1\nYou will be familiar with a lot of elements in this\ngame, such as the Legacy deck, rationing levels\n(called funding in Season 1), game end upgrades,\ndossiers, and sealed packages. But there is a lot that\nis new. You don't have to have played Season 1 to\nplay this game; they are independent games linked\nby their storyline."
     },
     {
       "heading": "What Stays and What Gets Reset?",
-      "mechanicsSummary": [
-        "Permanent: writing, stickers on the board or cards, opening new material, scratching cards, and tearing up or destroying components.",
-        "When told to destroy a component, it never returns. Tear it up or set it aside.",
-        "Everything else resets at the start of each game, including pieces on the board, cards in hand, and incidents."
-      ]
+      "text": "Writing on the components, putting stickers on the\nboard or on cards, opening new materials, scratching\noff cards, and tearing up or destroying components are\npermanent changes.\nWhen the game tells you to destroy a component, it will\nnot be used in that or any future games. Tear it up (or\ndo what you like with it).\nIn all other ways, the game resets for the start of each\ngame. The pieces on the board, cards in hand, incidents,\netc. all reset."
     },
     {
       "heading": "Game Months",
-      "mechanicsSummary": [
-        "The campaign is 12 months, beginning in the 71st year after the end of the world.",
-        "A win advances the group to the next month.",
-        "The first loss of a month grants one retry of that same month, with the same rules and objectives. Set the lost game up again.",
-        "A second loss of that month still advances to the next month. The calendar does not wait."
-      ]
+      "text": "Pandemic Legacy is broken into 12 months, starting in\nthe 71st year after the end of the world.\nIf your group succeeds in a month, you move on to play\nthe next month. If you fail, you get one more chance to\nsucceed in the current month. Start a new game with\nthe current set of rules and objectives for the month you\njust lost. If you lose again, you must move on to the next\nmonth for your next game. The world can't wait."
     },
     {
       "heading": "End of the Campaign",
-      "mechanicsSummary": [
-        "The campaign ends when December is finished, win or lose, and is then scored.",
-        "Score is mostly how many months were won. A win earlier in a month scores better than a win on the retry.",
-        "Grid population affects the score less than months won. Other criteria will add or subtract points."
-      ]
+      "text": "The campaign will end after you finish December\n(win or lose!). At that point, you will be scored on your\nfinal results. Your score will largely be based on how\nmany months you won (winning in the earlier part of the\nmonth is better). The population of the grid will have a\n(lesser) impact on your score. There will be other criteria\nthat will also add to or subtract from your score."
     },
     {
       "heading": "The Prologue",
-      "mechanicsSummary": [
-        "The prologue teaches rules that differ from base Pandemic and from Season 1.",
-        "The prologue has no legacy effects and no permanent changes.",
-        "Play it at least once, and repeat it as many times as the group wants, before starting the campaign."
-      ]
+      "text": "Since this game is different from base Pandemic\n(and from Pandemic Legacy-Season 1), there is a\nprologue game. This prologue game has no legacy\neffects- there are no permanent changes. You should\nplay the prologue at least once and as many times\nas you want, until you teel comtortable with the new\ngameplay After that, you should start your\nLegacy. campaign."
     },
     {
       "heading": "Prologue Rules",
-      "mechanicsSummary": [
-        "Two Prologue cards, found with the Player and Infection decks, walk through the objectives.",
-        "Read the Journal Entry / Prologue card for background and for which rules differ in the prologue.",
-        "Use the Prologue Objective card during the game."
-      ]
+      "text": "Use the two Prologue cards (found\nwith the Player and Infection decks)\nto walk you through your objectives.\nRead the Journal Entry/Prologue card for background\ninformation and to learn what rules are different for the\nprologue game.\nUse the Prologue Objective card during the game."
     }
   ],
   "tables": [
     {
       "name": "Month outcome",
       "rows": [
-        { "result": "Win", "next": "Play the next month" },
+        {
+          "result": "Win",
+          "next": "Play the next month"
+        },
         {
           "result": "First loss of the month",
           "next": "Retry the same month with the same rules and objectives"
         },
-        { "result": "Second loss of the month", "next": "Advance to the next month anyway" },
-        { "result": "December finished, win or lose", "next": "Campaign ends and is scored" }
+        {
+          "result": "Second loss of the month",
+          "next": "Advance to the next month anyway"
+        },
+        {
+          "result": "December finished, win or lose",
+          "next": "Campaign ends and is scored"
+        }
       ]
     }
   ],
   "diagramsAndCallouts": [
     "Legacy-deck stack pictured with a STOP back.",
     "Shaded prologue box with the two Prologue cards."
-  ]
+  ],
+  "fullText": "-MANUAL\nWELCOME TO PANDEMIC LEGACY - SEASON 2\n\nPLAYING A LEGACY GAME\nUnlike most games, which fully reset every time\nyou play, Pandemic Legacy carries some elements\nforward from one game to the next. Decisions you\nmake in game 1 will be there in game 2, 3, and every\ngame played with your copy of the game. Different\ngroups will make different decisions and will have a\ndifferent experience. What results is a game unique\nto the group that plays it.\nYou will write on parts of the game. You will put\nstickers on cards, the characters, and the board.\nSometimes you will even destroy (tear up) a card.\nThese changes are permanent. Also, at the end\nof each game, your group will make permanent\nimprovements to prepare for future games.\nAs you play, you will find other ways the game\nwill change.\nSome elements of play are hidden and sealed off\nbefore your very first game. As you play, you will\nfind instructions that tell you when to open these\npackages. Do not open the packages in the box until\nyou receive instructions to do so. The dossiers also\ncontain hidden intormation that will be revealed as\nyou play.\nSome rules are missing throughout the manual.\nAs you play, you will gain these missing rules and\nstick them into the manual. From that point on,\nthe rules will be permanently changed.\nLEGACY DECK\nThe Legacy deck contains cards that\nSTOP\nwill describe what happens over the\ncourse of the game's 12 months. It is\narranged in a specific order-do not\nlook through or shuffle these cards.\nDuring setup, draw the cards and\nread them one at a time, until you get to a card that\nsays PAUSE or STOP on the back. This card will tell\nyou when to continue drawing from the deck, which\nmight be at the end of a game, or during setup of\nthe next month. The Legacy deck is a one way trip.\nEven it you repeat a month, do not put Legacy cards\nback. If the Legacy deck becomes scattered, have\nsomeone who is not playing the game put the cards\nback in order using the numbers in the corner of\neach card.\nPANDEMIC\nIF YOU'VE PLAYED LEGACY SEASON 1\nYou will be familiar with a lot of elements in this\ngame, such as the Legacy deck, rationing levels\n(called funding in Season 1), game end upgrades,\ndossiers, and sealed packages. But there is a lot that\nis new. You don't have to have played Season 1 to\nplay this game; they are independent games linked\nby their storyline.\n\nWHAT STAYS AND WHAT GETS RESET?\nWriting on the components, putting stickers on the\nboard or on cards, opening new materials, scratching\noff cards, and tearing up or destroying components are\npermanent changes.\nWhen the game tells you to destroy a component, it will\nnot be used in that or any future games. Tear it up (or\ndo what you like with it).\nIn all other ways, the game resets for the start of each\ngame. The pieces on the board, cards in hand, incidents,\netc. all reset.\nGAME MONTHS\nPandemic Legacy is broken into 12 months, starting in\nthe 71st year after the end of the world.\nIf your group succeeds in a month, you move on to play\nthe next month. If you fail, you get one more chance to\nsucceed in the current month. Start a new game with\nthe current set of rules and objectives for the month you\njust lost. If you lose again, you must move on to the next\nmonth for your next game. The world can't wait.\nEND OF THE CAMPAIGN\nThe campaign will end after you finish December\n(win or lose!). At that point, you will be scored on your\nfinal results. Your score will largely be based on how\nmany months you won (winning in the earlier part of the\nmonth is better). The population of the grid will have a\n(lesser) impact on your score. There will be other criteria\nthat will also add to or subtract from your score.\nTHE PROLOGUE\nSince this game is different from base Pandemic\n(and from Pandemic Legacy-Season 1), there is a\nprologue game. This prologue game has no legacy\neffects- there are no permanent changes. You should\nplay the prologue at least once and as many times\nas you want, until you teel comtortable with the new\ngameplay After that, you should start your\nLegacy. campaign.\nPROLOGUE RULES\nUse the two Prologue cards (found\nwith the Player and Infection decks)\nto walk you through your objectives.\nRead the Journal Entry/Prologue card for background\ninformation and to learn what rules are different for the\nprologue game.\nUse the Prologue Objective card during the game."
 }

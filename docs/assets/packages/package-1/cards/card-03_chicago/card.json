@@ -17,18 +17,20 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "Player deck back. No text and no printed code.",
-  "sideBSummary": "Blue Chicago Player card, 41°52'41\"N 87°37'47\"W. One covered SEARCH box. Not a port. Code P1-03b. The city name and coordinates repeat upside down along the bottom.",
-  "searchBoxes": [
-    {
-      "type": "land",
-      "stateRevealed": 2,
-      "isCompanion": false,
-      "companionName": null,
-      "opensDoors": [],
-      "effectSummary": "You may put up to 2 Supply cubes into Chicago from the stockpile. Resolved once, when the box is scratched."
-    }
-  ],
+  "sideA": {
+    "text": "Player deck back. No printed text."
+  },
+  "sideB": {
+    "text": "CHICAGO\n41°52'41\"N 87°37'47\"W\n\nSEARCH:\n[covered]\n\nThe bottom edge repeats CHICAGO and 41°52'41\"N 87°37'47\"W upside down.\nP1-03b",
+    "searchBoxes": [
+      {
+        "id": "search",
+        "label": "SEARCH:",
+        "initially": "covered",
+        "revealedInState": 2
+      }
+    ]
+  },
   "states": [
     {
       "state": 2,
@@ -36,7 +38,8 @@
       "images": {
         "sideB": "state-2-side-b.jpg"
       },
-      "summary": "Survivors in Chicago say their Pacific haven stopped supply runs. You may put up to 2 Supply cubes into Chicago from the stockpile."
+      "revealedText": "SEARCH:\nSurvivors here are holding on despite supplies\nbeing gone for years. They told us how their\nhaven in the Pacific stopped supply runs for\nunknown reasons.\nYou may put up to 2 Supply cubes into Chicago\nfrom the stockpile.",
+      "effect": "You may put up to 2 Supply cubes into Chicago from the stockpile. Resolved once, when the box is scratched."
     }
   ],
   "mechanics": {

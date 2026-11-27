@@ -17,13 +17,11 @@
     "stopOrPause": "STOP",
     "header": "STOP",
     "trigger": "DRAW THIS CARD AND READ THE OTHER SIDE DURING STEP 2 OF THE SETUP OF YOUR FIRST GAME IN NOVEMBER.",
-    "summary": "Stop. Draw this card and read the other side during step 2 of setup of your first game in November.",
     "text": "STOP\n\nDRAW THIS CARD AND READ THE OTHER SIDE DURING STEP 2 OF THE SETUP OF YOUR FIRST GAME IN NOVEMBER.",
     "footer": ""
   },
   "sideB": {
     "header": "INTELLIGENCE REPORT",
-    "summary": "If the Hollow Men have not yet defected, scratch the box. Destroy this card after resolving it.",
     "text": "If Hollow Men have not yet defected, scratch the box below.\n\nDestroy this card after resolving it.",
     "footer": "Destroy this card after resolving it.",
     "scratchBoxes": [
@@ -51,9 +49,13 @@
       "Step 2 of setup of the first game in November",
       "Scratch only if Hollow Men have not yet defected"
     ],
-    "opensDoors": ["17"],
+    "opensDoors": [
+      "17"
+    ],
     "opensPackages": [],
-    "destroys": ["this card, after resolving it"],
+    "destroys": [
+      "this card, after resolving it"
+    ],
     "addsToPool": [],
     "rules": [
       "If Hollow Men have not yet defected, scratch the box.",

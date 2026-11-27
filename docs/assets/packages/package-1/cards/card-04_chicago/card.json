@@ -17,9 +17,13 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "Player deck back. No text and no printed code.",
-  "sideBSummary": "Blue Chicago Player card, 41°52'41\"N 87°37'47\"W. Map of the Great Lakes and the east coast. No search box and no anchor. Code P1-04b.",
-  "searchBoxes": [],
+  "sideA": {
+    "text": "Player deck back. No printed text."
+  },
+  "sideB": {
+    "text": "CHICAGO\n41°52'41\"N 87°37'47\"W\n(City map. No search box.)\n(City name and coordinates repeat upside down along the bottom.)\nP1-04b",
+    "searchBoxes": []
+  },
   "states": [],
   "mechanics": {
     "opensDoors": [],

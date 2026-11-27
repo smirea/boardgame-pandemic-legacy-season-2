@@ -18,18 +18,20 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "Player deck back. No printed text. State 2 side A is the same back.",
-  "sideBSummary": "Moscow, black, 55°45'21\"N 37°37'2\"E. Compass with no anchor. One covered SEARCH box. The name and coordinates repeat upside down along the bottom. P4-13b.",
-  "searchBoxes": [
-    {
-      "type": "search",
-      "stateRevealed": 2,
-      "isCompanion": false,
-      "companionName": null,
-      "opensDoors": [],
-      "effectSummary": "You may give 1 Player card in your hand to another player. The scratched story says locals still resent leaders who left decades ago for a Utopia in the east, and that a glow in that sky led the searchers to an old Soviet military facility at Smolensk. No door. The card does not say the other player must share your city, does not say this costs an action, and does not say to discard Moscow."
-    }
-  ],
+  "sideA": {
+    "text": "Player deck back. No printed text."
+  },
+  "sideB": {
+    "text": "MOSCOW\n55°45'21\"N 37°37'2\"E\n\nSEARCH:\n[covered]\n\nThe bottom edge repeats MOSCOW and 55°45'21\"N 37°37'2\"E upside down.\nP4-13b",
+    "searchBoxes": [
+      {
+        "id": "search",
+        "label": "SEARCH:",
+        "initially": "covered",
+        "revealedInState": 2
+      }
+    ]
+  },
   "states": [
     {
       "state": 2,
@@ -38,7 +40,8 @@
         "sideA": "state-2-side-a.jpg",
         "sideB": "state-2-side-b.jpg"
       },
-      "summary": "SEARCH reveals a story about leaders who left for a Utopia in the east and a lead to Smolensk, then the rule: you may give 1 Player card in your hand to another player. No companion name and no door. P4-13b stays on the scratched face. Side A is still the Player deck back."
+      "revealedText": "SEARCH:\nLocals still bitter their leaders left them decades\nago for a 'Utopia in the east. A week after their\ntrain left, the sky to the east started glowing.\nThey led us to Smolensk, an old Soviet military\nfacility outside of town, to report our findings.\nYou may give 1 Player card in your hand\nto another player.",
+      "effect": "You may give 1 Player card in your hand to another player. The scratched story says locals still resent leaders who left decades ago for a Utopia in the east, and that a glow in that sky led the searchers to an old Soviet military facility at Smolensk. No door. The card does not say the other player must share your city, does not say this costs an action, and does not say to discard Moscow."
     }
   ],
   "mechanics": {

@@ -386,15 +386,8 @@ function card(
   return { id: code, month: Number(code.slice(0, 2)), kind, title, text, unlocks, ...extras };
 }
 
-const archive = (code: string, extras?: CardExtras) =>
-  card(
-    code,
-    "archive",
-    "Journal entry",
-    "An entry from the archive, kept in the reserve.",
-    [],
-    extras,
-  );
+const archive = (code: string, title: string, text: string, extras?: CardExtras) =>
+  card(code, "archive", title, text, [], extras);
 const objective = (
   code: string,
   id: ObjectiveId,
@@ -429,8 +422,8 @@ const epidemicCard = (code: string, extras?: CardExtras) =>
     [{ t: "epidemicCard" }],
     extras,
   );
-const tier = (code: string, title: string, when: "delivered" | "notDelivered") =>
-  card(code, "ending", title, "The outcome for the final score.", [], { when });
+const tier = (code: string, title: string, text: string, when: "delivered" | "notDelivered") =>
+  card(code, "ending", title, text, [], { when });
 
 /**
  * The Legacy deck as printed, top first. A card's `halt` stands for the STOP or PAUSE printed on the back of
@@ -461,7 +454,11 @@ const legacyDeck: LegacyCardDef[] = [
       { t: "infectionImprovement", improvement: "lockdown", copies: 2 },
     ],
   ),
-  archive("01-02"),
+  archive(
+    "01-02",
+    "From the Archives · Oct 15, Year 70",
+    "Archive report: supplies and interior routes are failing; haven leadership voted to initiate their contingency protocol.",
+  ),
   card("01-03", "priorities", "New priorities", "This month 2 objectives are mandatory.", [
     { t: "required", count: 2 },
   ]),
@@ -493,7 +490,11 @@ const legacyDeck: LegacyCardDef[] = [
     "If door 66 is still sealed, Package 1 opens without its reward.",
     [perimeter(pkg(1))],
   ),
-  archive("02-02"),
+  archive(
+    "02-02",
+    "Journal & Archive · Apr 24, Year 40",
+    "Hollow Men are pushing into South America and striking supply centers. Year 40 archives recall frontier havens breached and routes abandoned.",
+  ),
   card(
     "02-03",
     "priorities",
@@ -528,7 +529,11 @@ const legacyDeck: LegacyCardDef[] = [
     "If door 67 is still sealed: a warning that South America is still unexplored.",
     [{ t: "scratch", box: "03-01:1", unlessOpen: door("67") }],
   ),
-  archive("03-02"),
+  archive(
+    "03-02",
+    "Journal & Archive · Year 57 Summary",
+    "The four cure labs and supplies were never built to last past 50 years. Year 57 records note PEARL went silent on the verge of a cure while OPAL, JADE, and TOPAZ remain support labs.",
+  ),
   card(
     "03-03",
     "priorities",
@@ -558,7 +563,12 @@ const legacyDeck: LegacyCardDef[] = [
     "If door 67 is still sealed, Package 5 opens without its reward.",
     [perimeter(pkg(5))],
   ),
-  archive("04-02", { halt: "pause" }),
+  archive(
+    "04-02",
+    "Journal & Archive · Year 42",
+    "The Southern Hemisphere labs may still be working. Year 42 logs record the Pacific and Indian havens silent alongside a torn coordinate slip for JADE, OPAL, TOPAZ, and PEARL.",
+    { halt: "pause" },
+  ),
   rightNow("04-03", ["42"], { halt: "stop" }),
 
   card(
@@ -568,7 +578,12 @@ const legacyDeck: LegacyCardDef[] = [
     "If door 60 is still sealed, the eastern Pacific haven goes on the map.",
     [perimeter(door("60"))],
   ),
-  archive("05-02", { halt: "pause" }),
+  archive(
+    "05-02",
+    "Journal & Archive · Nov 5, Year 70",
+    "We learned where haven leadership went: a Year 70 memo confirms they drafted a list and abandoned the havens to seek entry into Utopia.",
+    { halt: "pause" },
+  ),
   rightNow("05-03", ["31", "36"], { halt: "stop" }),
 
   card(
@@ -578,7 +593,12 @@ const legacyDeck: LegacyCardDef[] = [
     "If door 64 is still sealed, Package 4 opens without its reward, and door 21 destroys Frankfurt.",
     [perimeter(pkg(4), opens("21"))],
   ),
-  archive("06-02", { halt: "pause" }),
+  archive(
+    "06-02",
+    "Journal & Archive · May 23, Year 14",
+    "Rumors place Utopia somewhere in the far east. Year 14 military records first name the organized raiders attacking supply routes the Hollow Men.",
+    { halt: "pause" },
+  ),
   card(
     "06-03",
     "pause",
@@ -596,7 +616,11 @@ const legacyDeck: LegacyCardDef[] = [
     "If door 57 is still sealed, Package 7 opens without its reward.",
     [perimeter(pkg(7))],
   ),
-  archive("07-02"),
+  archive(
+    "07-02",
+    "Journal & Archive · July, Year 38",
+    "Satellite towers are catching faint broadcasts—someone may be directing the Hollow Men. A Year 38 haven log longs for land and wonders whether Utopia would share a cure.",
+  ),
   objective(
     "07-03",
     "triangulate",
@@ -637,7 +661,11 @@ const legacyDeck: LegacyCardDef[] = [
     "If door 65 is still sealed, the Indian Ocean haven goes on the map.",
     [perimeter(door("65"))],
   ),
-  archive("09-02"),
+  archive(
+    "09-02",
+    "Journal & Archive · Apr 15, Year 44",
+    "PEARL's possible cure is our last chance before the year closes. A Year 44 entry mourns two lost havens and asks who would condemn the Faded to die.",
+  ),
   card(
     "09-03",
     "priorities",
@@ -662,7 +690,11 @@ const legacyDeck: LegacyCardDef[] = [
     "If doors 56 and 63 are not both open, Package 3 opens without its reward and one character takes a scar.",
     [perimeter(pkg(3), [{ t: "owedScar" }])],
   ),
-  archive("10-02"),
+  archive(
+    "10-02",
+    "Journal & Archive · Oct, Year 1",
+    "Satellite broadcasts can lure Hollow Men onto the havens to turn them. A Year 1 archive recalls five months at sea, dreaming the children might one day return home.",
+  ),
   card(
     "10-03",
     "priorities",
@@ -698,7 +730,11 @@ const legacyDeck: LegacyCardDef[] = [
     "If the Hollow Men have not defected, door 17 opens anyway and two characters take a scar.",
     [perimeter(door("17"), [{ t: "owedScar" }, { t: "owedScar" }])],
   ),
-  archive("11-02"),
+  archive(
+    "11-02",
+    "Journal & Archive · June 18, Year 10",
+    "Each November Utopia releases new Hollow Men, leaving a brief window to breach its walls. A Year 10 log reflects on how the Faded's quarantine became humanity's last hope.",
+  ),
   card(
     "11-03",
     "priorities",
@@ -736,7 +772,11 @@ const legacyDeck: LegacyCardDef[] = [
     "If the Plan is not complete, Package 8 opens without its reward.",
     [perimeter(pkg(8))],
   ),
-  archive("12-02"),
+  archive(
+    "12-02",
+    "Journal & Archive · Dec, Year 70",
+    "Final month: reach Lake Baikal, retrieve the cure sample from PEARL, and carry it to Johannesburg. Leadership's final Year 70 note bids farewell as they march toward Utopia.",
+  ),
   card(
     "12-03",
     "priorities",
@@ -760,13 +800,43 @@ const legacyDeck: LegacyCardDef[] = [
     "At last",
     "The campaign is over. What happens next, then the final score.",
   ),
-  tier("12-06", "If you failed to deliver the sample", "notDelivered"),
-  tier("12-07", "If you delivered the sample", "delivered"),
+  tier(
+    "12-06",
+    "If you failed to deliver the sample",
+    "Without the sample and supplies, the Faded will soon be gone—leaving a plea to be remembered as people.",
+    "notDelivered",
+  ),
+  tier(
+    "12-07",
+    "If you delivered the sample",
+    "The sample is extracted from the carrier and cure production begins—Utopia's plan fails, and the Faded are here to stay.",
+    "delivered",
+  ),
   card("12-08", "reckoning", "The Final Reckoning", "The campaign is scored."),
-  tier("12-09", "Did not deliver: 851 and above, 701 to 850", "notDelivered"),
-  tier("12-10", "Did not deliver: 551 to 700, 401 to 550, 400 and below", "notDelivered"),
-  tier("12-11", "Delivered: 851 and above, 701 to 850", "delivered"),
-  tier("12-12", "Delivered: 551 to 700, 401 to 550, 400 and below", "delivered"),
+  tier(
+    "12-09",
+    "Did not deliver: 851 and above, 701 to 850",
+    "High-score endings without the sample: humanity endures, though Utopia withholds the cure from the Faded.",
+    "notDelivered",
+  ),
+  tier(
+    "12-10",
+    "Did not deliver: 551 to 700, 401 to 550, 400 and below",
+    "Mid- and low-score endings without the sample: from fragile recovery to a final note in the ruins of North Atlantic Haven.",
+    "notDelivered",
+  ),
+  tier(
+    "12-11",
+    "Delivered: 851 and above, 701 to 850",
+    "High-score endings with the cure: the Hollow Men are freed and Faded and non-Faded rebuild a new world together.",
+    "delivered",
+  ),
+  tier(
+    "12-12",
+    "Delivered: 551 to 700, 401 to 550, 400 and below",
+    "Mid- and low-score endings with the cure: a hard-won recovery or a race to distribute the cure before collapse.",
+    "delivered",
+  ),
   // Nothing printed stops the reading here, so the campaign ends on this card.
   card("12-13", "end", "Congratulations", "The end of the Legacy deck and of the campaign."),
 ];

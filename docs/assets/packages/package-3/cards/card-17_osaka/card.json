@@ -18,9 +18,13 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "Infection deck back. Red biohazard on black, with a yellow caution stripe. No text and no printed code.",
-  "sideBSummary": "Osaka Infection card, red. The name runs down the left edge. A blank white panel in the middle takes one improvement sticker. A green plague ring sits on a faded map. No search box and no coordinates. Printed code P3-17b.",
-  "searchBoxes": [],
+  "sideA": {
+    "text": "Infection deck back. No printed text."
+  },
+  "sideB": {
+    "text": "OSAKA\nP3-17b",
+    "searchBoxes": []
+  },
   "states": [],
   "mechanics": {
     "opensDoors": [],

@@ -17,18 +17,20 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "Player deck back. No text and no printed code.",
-  "sideBSummary": "Blue Atlanta Player card, 33°47'60\"N 84°19'46\"W. One covered SEARCH box. Not a port. This is Atlanta's only Player card. Code P1-11b.",
-  "searchBoxes": [
-    {
-      "type": "land",
-      "stateRevealed": 2,
-      "isCompanion": false,
-      "companionName": null,
-      "opensDoors": [],
-      "effectSummary": "You may move 1 card in the Infection discard pile to the Game End area. Resolved once, when the box is scratched."
-    }
-  ],
+  "sideA": {
+    "text": "Player deck back. No printed text."
+  },
+  "sideB": {
+    "text": "ATLANTA\n33°47'60\"N 84°19'46\"W\n\nSEARCH:\n[covered]\n\nThe bottom edge repeats ATLANTA and 33°47'60\"N 84°19'46\"W upside down.\nP1-11b",
+    "searchBoxes": [
+      {
+        "id": "search",
+        "label": "SEARCH:",
+        "initially": "covered",
+        "revealedInState": 2
+      }
+    ]
+  },
   "states": [
     {
       "state": 2,
@@ -36,7 +38,8 @@
       "images": {
         "sideB": "state-2-side-b.jpg"
       },
-      "summary": "The plague started when a group blew up the CDC, destroying the CCdA virus and releasing a plague. You may move 1 card in the Infection discard pile to the Game End area."
+      "revealedText": "SEARCH:\nThe plague that broke the world started here.\nạiA group blew up the CDC, destroying the COdA\nvirus but releasing a plague that couldn't be\nstopped. Not sure what prompted this action or\nif they knew what would result from it\nYou may move 1 card in the Infection discard pile\nto the Game End area.",
+      "effect": "You may move 1 card in the Infection discard pile to the Game End area. Resolved once, when the box is scratched."
     }
   ],
   "mechanics": {

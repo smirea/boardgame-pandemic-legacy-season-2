@@ -16,9 +16,13 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "Infection deck back. Biohazard symbol. No text and no printed code.",
-  "sideBSummary": "Blue Denver Infection card. City name down the left edge, blue western North America map, green infection mark. No rules text. The scan is numbered P1-09b.",
-  "searchBoxes": [],
+  "sideA": {
+    "text": "Infection deck back. No printed text."
+  },
+  "sideB": {
+    "text": "DENVER\nP1-09b",
+    "searchBoxes": []
+  },
   "states": [],
   "mechanics": {
     "opensDoors": [],

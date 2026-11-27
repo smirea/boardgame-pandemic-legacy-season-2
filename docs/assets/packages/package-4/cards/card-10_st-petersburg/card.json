@@ -18,9 +18,13 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "Infection deck back. Biohazard art. No printed text.",
-  "sideBSummary": "St. Petersburg Infection card. Blue Europe map, city name down the left edge, white center panel, green ring. No coordinates and no special rule. P4-12b.",
-  "searchBoxes": [],
+  "sideA": {
+    "text": "Infection deck back. No printed text."
+  },
+  "sideB": {
+    "text": "ST. PETERSBURG\nP4-12b",
+    "searchBoxes": []
+  },
   "states": [],
   "mechanics": {
     "opensDoors": [],
@@ -30,6 +34,9 @@
       "The white center panel is the infection-card improvement slot. The green ring is standard infection-card art.",
       "No extra effect is printed. The port anchor is on the Player card, not on this Infection card."
     ],
-    "notes": ["Card id 10809.", "Goes to the reserve when the package is opened."]
+    "notes": [
+      "Card id 10809.",
+      "Goes to the reserve when the package is opened."
+    ]
   }
 }

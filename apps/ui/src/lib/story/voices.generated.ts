@@ -465,6 +465,76 @@ export const voiceManifest: Record<string, VoiceEntry> = {
 		"hash": "81181cebe5209a74",
 		"bytes": 132524
 	},
+	"12_09_701": {
+		"src": "/voices/12_09_701.mp3",
+		"speaker": "chronicler",
+		"voiceId": "voice_9auwlihc1j6b",
+		"hash": "88a944631c3fdbb9",
+		"bytes": 395469
+	},
+	"12_09_851": {
+		"src": "/voices/12_09_851.mp3",
+		"speaker": "chronicler",
+		"voiceId": "voice_9auwlihc1j6b",
+		"hash": "ea09fec72005abf1",
+		"bytes": 434061
+	},
+	"12_10_400": {
+		"src": "/voices/12_10_400.mp3",
+		"speaker": "chronicler",
+		"voiceId": "voice_9auwlihc1j6b",
+		"hash": "ea860f207679658f",
+		"bytes": 383949
+	},
+	"12_10_401": {
+		"src": "/voices/12_10_401.mp3",
+		"speaker": "chronicler",
+		"voiceId": "voice_9auwlihc1j6b",
+		"hash": "d4bd67b2a88426d3",
+		"bytes": 368685
+	},
+	"12_10_551": {
+		"src": "/voices/12_10_551.mp3",
+		"speaker": "chronicler",
+		"voiceId": "voice_9auwlihc1j6b",
+		"hash": "d06b16a37ffab665",
+		"bytes": 400653
+	},
+	"12_11_701": {
+		"src": "/voices/12_11_701.mp3",
+		"speaker": "chronicler",
+		"voiceId": "voice_9auwlihc1j6b",
+		"hash": "35fb5971444ff5d2",
+		"bytes": 323181
+	},
+	"12_11_851": {
+		"src": "/voices/12_11_851.mp3",
+		"speaker": "chronicler",
+		"voiceId": "voice_9auwlihc1j6b",
+		"hash": "23beccc8163abbe5",
+		"bytes": 399213
+	},
+	"12_12_400": {
+		"src": "/voices/12_12_400.mp3",
+		"speaker": "chronicler",
+		"voiceId": "voice_9auwlihc1j6b",
+		"hash": "13db05ae0cf4a9af",
+		"bytes": 379917
+	},
+	"12_12_401": {
+		"src": "/voices/12_12_401.mp3",
+		"speaker": "chronicler",
+		"voiceId": "voice_9auwlihc1j6b",
+		"hash": "9408f1338d6457bc",
+		"bytes": 329805
+	},
+	"12_12_551": {
+		"src": "/voices/12_12_551.mp3",
+		"speaker": "chronicler",
+		"voiceId": "voice_9auwlihc1j6b",
+		"hash": "711726ada5a2406e",
+		"bytes": 382509
+	},
 	"bark_brink_1": {
 		"src": "/voices/bark_brink_1.mp3",
 		"speaker": "mara",
@@ -938,8 +1008,8 @@ export const voiceManifest: Record<string, VoiceEntry> = {
 		"src": "/voices/prelude_04.mp3",
 		"speaker": "kai",
 		"voiceId": "voice_mlv0fgmm505j",
-		"hash": "a7ef79027e03310a",
-		"bytes": 182348
+		"hash": "1c4b8bcd1ae4e8cc",
+		"bytes": 255501
 	},
 	"prelude_05": {
 		"src": "/voices/prelude_05.mp3",

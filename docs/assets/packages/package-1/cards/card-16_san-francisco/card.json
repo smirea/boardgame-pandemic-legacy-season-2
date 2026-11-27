@@ -17,9 +17,13 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "Player deck back. No text and no printed code.",
-  "sideBSummary": "Blue San Francisco Player card, 37°46'30\"N 122°25'10\"W. Port: the compass has an anchor. Map of the California coast. No search box. Code P1-18b.",
-  "searchBoxes": [],
+  "sideA": {
+    "text": "Player deck back. No printed text."
+  },
+  "sideB": {
+    "text": "SAN FRANCISCO\n37°46'30\"N 122°25'10\"W\n(City map. No search box.)\n(City name and coordinates repeat upside down along the bottom.)\nP1-18b",
+    "searchBoxes": []
+  },
   "states": [],
   "mechanics": {
     "opensDoors": [],

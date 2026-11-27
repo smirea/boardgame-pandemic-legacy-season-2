@@ -17,13 +17,11 @@
     "stopOrPause": "STOP",
     "header": "STOP",
     "trigger": "DRAW THIS CARD AFTER STEP 4 OF THE GAME END IF YOU WIN IN DECEMBER OR LOSE YOUR SECOND GAME IN DECEMBER.",
-    "summary": "Stop. Draw this card after step 4 of Game End if you win in December or lose your second game in December.",
     "text": "STOP\n\nDRAW THIS CARD AFTER STEP 4 OF THE GAME END IF YOU WIN IN DECEMBER OR LOSE YOUR SECOND GAME IN DECEMBER.",
     "footer": ""
   },
   "sideB": {
     "header": "AT LAST",
-    "summary": "The campaign is over, and humanity's fate was in the players' hands. Look at the next two cards, then calculate the score to see what happens to the world.",
     "text": "It's over. The fate of humanity was in your hands.\n\nLook at the following two cards to see what happens next, then calculate your score to determine the ultimate fate of your world.",
     "footer": "",
     "scratchBoxes": []

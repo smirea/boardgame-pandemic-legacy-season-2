@@ -1,4 +1,4 @@
-import { pack } from "@repo/game";
+import { pack, score } from "@repo/game";
 import type { Campaign, CityId, Opening, SealKey } from "@repo/game";
 import { BARK_SCENE } from "./barks.ts";
 import type { SpeakerId } from "./cast.ts";
@@ -114,7 +114,7 @@ export const STORY_SCENES: Record<string, StoryScene> = {
       beat(
         "prelude_04",
         "kai",
-        "Our leadership tried to hide this fact from us, but we all knew. Last week, the leaders and thinkers of the havens gathered for their yearly summit. They did not return—and our main security team was with them. Without our soldiers, the Hollow Men will tear down what we build and steal what we offer.",
+        "Our leadership tried to hide this fact from us, but we all knew. Last week, the leaders and thinkers of the havens gathered for their yearly summit. They did not return—and our main security team was with them. Without our soldiers, the Hollow Men—roving bands of savages bent on our elimination—will expand their attacks, tearing down what we build and steal what we offer.",
         {
           listener: "mara",
           verbatim: true,
@@ -2474,6 +2474,57 @@ const RAID_CARDS: Record<string, { seal: SealKey }> = {
   "12-01": { seal: "package:8" },
 };
 
+const ENDING_CARD_TIERS: Record<string, { delivered: boolean; tiers: { min: number; max: number; index: number }[] }> = {
+  "12-09": {
+    delivered: false,
+    tiers: [
+      { min: 851, max: Infinity, index: 0 },
+      { min: 701, max: 850, index: 1 },
+    ],
+  },
+  "12-10": {
+    delivered: false,
+    tiers: [
+      { min: 551, max: 700, index: 2 },
+      { min: 401, max: 550, index: 3 },
+      { min: -Infinity, max: 400, index: 4 },
+    ],
+  },
+  "12-11": {
+    delivered: true,
+    tiers: [
+      { min: 851, max: Infinity, index: 0 },
+      { min: 701, max: 850, index: 1 },
+    ],
+  },
+  "12-12": {
+    delivered: true,
+    tiers: [
+      { min: 551, max: 700, index: 2 },
+      { min: 401, max: 550, index: 3 },
+      { min: -Infinity, max: 400, index: 4 },
+    ],
+  },
+};
+
+function endingTierScene(id: string, campaign?: Campaign): StoryScene | null {
+  const scene = STORY_SCENES[id];
+  const spec = ENDING_CARD_TIERS[id];
+  if (!scene || !spec) return null;
+  if (!campaign) return scene;
+  if (campaign.sampleDelivered !== spec.delivered) return null;
+  const total = score(campaign).total;
+  const match = spec.tiers.findIndex((band) => total >= band.min && total <= band.max);
+  if (match < 0) return null;
+  const list = ENDING_TIERS[spec.delivered ? "delivered" : "failed"];
+  const tier = list[spec.tiers[match]!.index]!;
+  return {
+    ...scene,
+    subtitle: `${tier.label} · ${id}`,
+    beats: [scene.beats[match]!],
+  };
+}
+
 /** Resolves the voiced narrative scene for a given `Opening` step in `Unboxing.svelte`. */
 export function sceneForOpening(opening: Opening, campaign?: Campaign): StoryScene | null {
   if (opening.from.t === "legacy") {
@@ -2483,6 +2534,7 @@ export function sceneForOpening(opening: Opening, campaign?: Campaign): StorySce
       if (!forced) return null;
     }
     if (id === "03-01" && campaign && !campaign.scratched.includes("03-01:1")) return null;
+    if (id in ENDING_CARD_TIERS) return endingTierScene(id, campaign);
     if (STORY_SCENES[id]) return STORY_SCENES[id]!;
     // Check if any door opened inside this step carries a headline scene (e.g., Door 21 in 06-01).
     for (const seal of opening.seals) {
@@ -2554,6 +2606,11 @@ export function unlockedStoryScenes(campaign: Campaign): StoryScene[] {
           if (campaign.legacyIndex >= 75 && campaign.sampleDelivered) add(id);
         } else if (id === "12-05") {
           if (campaign.legacyIndex >= 74) add(id);
+        } else if (id in ENDING_CARD_TIERS) {
+          if (campaign.legacyIndex >= 78) {
+            const matched = endingTierScene(id, campaign);
+            if (matched && !out.some((entry) => entry.id === matched.id)) out.push(matched);
+          }
         } else {
           add(id);
         }
@@ -2633,3 +2690,108 @@ export const ENDING_TIERS = {
     },
   ],
 } as const;
+
+Object.assign(STORY_SCENES, {
+  "12-09": {
+    id: "12-09",
+    act: "Final Reckoning · Sample Not Delivered",
+    title: "The World Endures Without Us",
+    subtitle: "Ending Score Band · 12-09",
+    setPiece: "finalReckoning",
+    beats: [
+      beat("12_09_851", "chronicler", ENDING_TIERS.failed[0].text, {
+        verbatim: true,
+        setPiece: "finalReckoning",
+        direction:
+          "solemn, noble, bittersweet epilogue; proud quiet grandeur on saving the world, aching sorrow that the Faded will not live to see it",
+      }),
+      beat("12_09_701", "chronicler", ENDING_TIERS.failed[1].text, {
+        verbatim: true,
+        setPiece: "finalReckoning",
+        direction:
+          "weary, steadfast, dignified chronicle; calm somber pride landing firmly on keeping the world going when everyone else gave up",
+      }),
+    ],
+  },
+  "12-10": {
+    id: "12-10",
+    act: "Final Reckoning · Sample Not Delivered",
+    title: "After the Fall",
+    subtitle: "Ending Score Band · 12-10",
+    setPiece: "finalReckoning",
+    beats: [
+      beat("12_10_551", "chronicler", ENDING_TIERS.failed[2].text, {
+        verbatim: true,
+        setPiece: "finalReckoning",
+        direction:
+          "heavy, reverent elegy balancing awe at the impossible with sorrow over failing to deliver the sample",
+      }),
+      beat("12_10_401", "chronicler", ENDING_TIERS.failed[3].text, {
+        verbatim: true,
+        setPiece: "finalReckoning",
+        swing: "setback",
+        direction:
+          "bleak, haunted, gravely measured disaster report; soft desolate finality on 'We will be gone soon'",
+      }),
+      beat("12_10_400", "chronicler", ENDING_TIERS.failed[4].text, {
+        verbatim: true,
+        setPiece: "finalReckoning",
+        swing: "setback",
+        direction:
+          "hushed, devastating epitaph read from a weathered scrap of paper found in an empty ruin; quiet heartbreak on 'We tried. We failed.'",
+      }),
+    ],
+  },
+  "12-11": {
+    id: "12-11",
+    act: "Final Reckoning · Sample Delivered",
+    title: "Light Ahead",
+    subtitle: "Ending Score Band · 12-11",
+    setPiece: "finalReckoning",
+    beats: [
+      beat("12_11_851", "chronicler", ENDING_TIERS.delivered[0].text, {
+        verbatim: true,
+        setPiece: "finalReckoning",
+        swing: "triumph",
+        direction:
+          "radiant, soaring, triumphant finale; warm celebratory swell rising into deep liberation on finally being free from exile on the havens",
+      }),
+      beat("12_11_701", "chronicler", ENDING_TIERS.delivered[1].text, {
+        verbatim: true,
+        setPiece: "finalReckoning",
+        swing: "triumph",
+        direction:
+          "hopeful, reflective, hard-won dawn; warm quiet optimism tempered by respect for the cities that fell",
+      }),
+    ],
+  },
+  "12-12": {
+    id: "12-12",
+    act: "Final Reckoning · Sample Delivered",
+    title: "The Long Rebuild",
+    subtitle: "Ending Score Band · 12-12",
+    setPiece: "finalReckoning",
+    beats: [
+      beat("12_12_551", "chronicler", ENDING_TIERS.delivered[2].text, {
+        verbatim: true,
+        setPiece: "finalReckoning",
+        swing: "triumph",
+        direction:
+          "resilient, proud, gritty triumph lifting sharply on 'But we have a cure!' and closing with steadfast determination",
+      }),
+      beat("12_12_401", "chronicler", ENDING_TIERS.delivered[3].text, {
+        verbatim: true,
+        setPiece: "finalReckoning",
+        direction:
+          "taut, sober, bruised realism; grim honesty about rioting and anarchy holding on to a fragile ember of hope",
+      }),
+      beat("12_12_400", "chronicler", ENDING_TIERS.delivered[4].text, {
+        verbatim: true,
+        setPiece: "finalReckoning",
+        swing: "setback",
+        direction:
+          "hushed, aching epitaph read from a recovered journal in the ruins of North Atlantic Haven; fragile tragic devotion on 'We tried. We tried.'",
+      }),
+    ],
+  },
+} satisfies Record<string, StoryScene>);

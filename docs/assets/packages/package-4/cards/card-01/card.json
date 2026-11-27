@@ -17,12 +17,18 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "This package holds 14 cards and 2 sticker cards. Europe is in the same shape as the rest of the world, but some old military bases still have working aircraft. Supply centers can be given a landing strip, and the havens already have runways that can be put back into use, which would make travel across the growing grid much easier. Read both sides, then keep this card in the reserve. P4-01a.",
-  "sideBSummary": "Open door 64. Paris joins the grid. Put the Paris Player cards in the Player discard pile and the Paris Infection cards in the Game End area. Put every other Player card and Infection card from this package into the reserve. Give the Relocation Unrationed Event to a player, into their hand. P4-01b.",
-  "searchBoxes": [],
+  "sideA": {
+    "text": "THIS PACKAGE INCLUDES:\n\n• 14 cards • 2 sticker cards\n\nRECON REPORT\n\nWe found Europe struggling as much as the rest of the world, but, surprisingly, there are some old military bases with functioning aircraft. We can adjust our supply centers to include a landing strip and the havens already have old runways we could put back in use. This could be tremendous in our efforts to get around an ever-growing grid.\n\nRead both sides of this card\n\nP4-01a then keep it in the reserve."
+  },
+  "sideB": {
+    "text": "RIGHT NOW!\n\nOpen the following door:\n\nYou have connected a new city: Paris.\n\n• Add the Player cards for Paris to the Player discard pile.\n\n• Add the Infection cards for Paris to the Game End area.\n\n• Put the other Player and Infection cards included in this package into the reserve\n\n• Finally, give the \"Relocation\" Unrationed Event card to a player to add to their hand.\n\nP4-01b",
+    "searchBoxes": []
+  },
   "states": [],
   "mechanics": {
-    "opensDoors": ["64"],
+    "opensDoors": [
+      "64"
+    ],
     "destroys": [],
     "rules": [
       "On opening the package, open door 64. The card says door, singular.",

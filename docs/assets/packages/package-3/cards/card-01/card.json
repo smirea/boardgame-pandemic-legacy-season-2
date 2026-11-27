@@ -18,12 +18,19 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "East Asia recon. The package holds 25 cards, 5 sticker cards, and 6 shelter miniatures. The region is living in shelters, afraid of walled-off Utopia. Hollow Men come from Utopia, and a new wave is released every November. A plan to get into Utopia in November needs Hollow Men who will defect. Read both sides, then keep this card in the reserve. Printed code P3-01a.",
-  "sideBSummary": "Open doors 56 and 63 if they are not already open. Jakarta joins the grid. Put Jakarta's Player card on the Player discard pile and Jakarta's Infection card in the Game End area. Put the 4 Hollow Men Gather cards on the Infection discard pile. Put the other Player and Infection cards in the reserve. Give Biodome Prototype to a player, into their hand. Printed code P3-01b.",
-  "searchBoxes": [],
+  "sideA": {
+    "text": "THIS PACKAGE INCLUDES:\n\n• 25 cards • 5 sticker cards\n\n• 6 shelters miniatures\n\nRECON REPORT\n\nWe have now Reconned East Asia.\n\nWe didn't expect this. We thought maybe the world still existed here. Instead we found the people of the region huddled in shelters, living in fear of the walled-off Utopia. The Hollow Men come from there. Every November a new wave is released to terrorize the planet. We have started developing a plan to get into Utopia in November but we need more information. We need to get some Hollow Men to defect to our side to get enough information to make a plan.\n\nRead both sides of this card\n\nP3-01 a then keep it in the reserve."
+  },
+  "sideB": {
+    "text": "RIGHT NOW!\n\nOpen the following doors if you have not done so already:\n\n56 63\n\nYou have connected a new city: Jakarta.\n\n• Add the Player card for Jakarta to the Player discard pile.\n\n• Add the Infection card for Jakarta to the Game End area.\n\n• Put the 4 Hollow Men Gather cards into the Infection discard pile.\n\n• Put the other Player and Infection cards into the reserve.\n\n• Finally, give the \"Biodome Prototype\" Unrationed Event card to a player to add to their hand:\n\nP3-01b",
+    "searchBoxes": []
+  },
   "states": [],
   "mechanics": {
-    "opensDoors": ["56", "63"],
+    "opensDoors": [
+      "56",
+      "63"
+    ],
     "destroys": false,
     "rules": [
       "On opening the package, open doors 56 and 63 if they are not already open.",

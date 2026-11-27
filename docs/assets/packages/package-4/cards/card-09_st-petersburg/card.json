@@ -18,26 +18,28 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "Player deck back. No printed text. Side A of states 2, 3, and 4 is the same back.",
-  "sideBSummary": "St. Petersburg, blue port, 59°56'3\"N 30°20'6\"E. The compass has an anchor. Two covered boxes: SEARCH THE LAND and SEARCH THE SEA. The name and coordinates repeat upside down along the bottom. P4-11b.",
-  "searchBoxes": [
-    {
-      "type": "land",
-      "stateRevealed": 2,
-      "isCompanion": true,
-      "companionName": "Operative",
-      "opensDoors": [],
-      "effectSummary": "While this card is in your hand, you may do the Search action for free. The card does not say to discard it. First revealed in state 2. Also visible in state 4."
-    },
-    {
-      "type": "sea",
-      "stateRevealed": 3,
-      "isCompanion": false,
-      "companionName": null,
-      "opensDoors": [],
-      "effectSummary": "Smugglers based here offer help. Immediately draw a free sea lane from St. Petersburg to another city. One-time, when the box is scratched. First revealed in state 3. Also visible in state 4."
-    }
-  ],
+  "sideA": {
+    "text": "Player deck back. No printed text."
+  },
+  "sideB": {
+    "text": "ST. PETERSBURG\n59°56'3\"N 30°20'6\"E\n\nSEARCH THE LAND:\n[covered]\n\nSEARCH THE SEA:\n[covered]\n\nThe bottom edge repeats ST. PETERSBURG and 59°56'3\"N 30°20'6\"E upside down.\nP4-11b",
+    "searchBoxes": [
+      {
+        "id": "search-land",
+        "label": "SEARCH THE LAND:",
+        "initially": "covered",
+        "revealedInState": 2,
+        "isCompanion": true,
+        "companionName": "Operative"
+      },
+      {
+        "id": "search-sea",
+        "label": "SEARCH THE SEA:",
+        "initially": "covered",
+        "revealedInState": 3
+      }
+    ]
+  },
   "states": [
     {
       "state": 2,
@@ -46,7 +48,8 @@
         "sideA": "state-2-side-a.jpg",
         "sideB": "state-2-side-b.jpg"
       },
-      "summary": "Land only. Companion Operative: you may do the Search action for free if this card is in your hand. SEARCH THE SEA stays covered. P4-11b."
+      "revealedText": "SEARCH THE LAND:\nCompanion:\nOperative\nYou may do the Search action\nfor free if you have this card in\nyour hand.\nSEARCH THE SEA:",
+      "effect": "While this card is in your hand, you may do the Search action for free. The card does not say to discard it. First revealed in state 2. Also visible in state 4."
     },
     {
       "state": 3,
@@ -55,7 +58,8 @@
         "sideA": "state-3-side-a.jpg",
         "sideB": "state-3-side-b.jpg"
       },
-      "summary": "Sea only. Smugglers offer help. Immediately draw a free sea lane from St. Petersburg to another city. SEARCH THE LAND stays covered. P4-11b."
+      "revealedText": "SEARCH THE LAND:\nSEARCH THE SEA:\nSmugglers work from here. They offer to help.\nImmediately draw a free sea lane from\nSt. Petersburg to another city.",
+      "effect": "Smugglers based here offer help. Immediately draw a free sea lane from St. Petersburg to another city. One-time, when the box is scratched. First revealed in state 3. Also visible in state 4."
     },
     {
       "state": 4,
@@ -64,7 +68,8 @@
         "sideA": "state-4-side-a.jpg",
         "sideB": "state-4-side-b.jpg"
       },
-      "summary": "Both boxes scratched. Operative makes Search free while the card is in hand, and a free sea lane is drawn at once from St. Petersburg to another city. P4-11b."
+      "revealedText": "SEARCH THE LAND:\nCompanion:\nOperative\nYou may do the Search action\nfor free if you have this card in\nyour hand.\nSEARCH THE SEA:\nSmugglers work from here. They offer to help.\nImmediately draw a free sea lane from\nSt. Petersburg to another city.",
+      "effect": "While this card is in your hand, you may do the Search action for free. The card does not say to discard it. First revealed in state 2. Also visible in state 4. Smugglers based here offer help. Immediately draw a free sea lane from St. Petersburg to another city. One-time, when the box is scratched. First revealed in state 3. Also visible in state 4."
     }
   ],
   "mechanics": {

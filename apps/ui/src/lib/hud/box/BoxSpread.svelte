@@ -12,6 +12,7 @@
   import type { Glyph } from "#lib/board/hints.ts";
   import { fitZoom } from "#lib/cards/fit.ts";
   import { EVENT_PRINT } from "#lib/cards/playerPrint.ts";
+  import { doorReports, packageReports } from "#lib/cards/print.generated.ts";
   import { jobFigure } from "#lib/characters/figures.ts";
   import { scanUrl, sealScans } from "#lib/scans.svelte.ts";
   import BriefPiece from "../BriefPiece.svelte";
@@ -52,6 +53,21 @@
     })).filter((band) => band.groups.length),
   );
   const scans = $derived(subject?.open ? sealScans(subject.seal) : []);
+  const report = $derived(
+    subject?.open
+      ? (subject.seal.t === "package"
+          ? packageReports[subject.seal.id]
+          : doorReports[subject.seal.id]) ?? null
+      : null,
+  );
+  const reportParagraphs = $derived(
+    report
+      ? report.text
+          .split(/\n{2,}/)
+          .map((p) => p.replace(/\s*\n\s*/g, " ").trim())
+          .filter(Boolean)
+      : [],
+  );
   /** The printed original the pointer or focus rests on, shown large over the spread. */
   let original = $state.raw<{ src: string; title: string } | null>(null);
 
@@ -266,6 +282,20 @@
       {:else}
         <div class="fit" {@attach fitZoom({ min: 0.45 })}>
           <div class="detail">
+            {#if report}
+              <article
+                class="report"
+                {@attach feedback("Printed report", () => ({
+                  seal: subject.key,
+                  title: report.title,
+                }))}
+              >
+                <span class="kicker">{report.title}</span>
+                {#each reportParagraphs as paragraph, idx (idx)}
+                  <p>{paragraph}</p>
+                {/each}
+              </article>
+            {/if}
             {#if subject.items.length}
               <ul class="rows">
                 {#each subject.items as item (item.key)}
@@ -285,7 +315,7 @@
                   </li>
                 {/each}
               </ul>
-            {:else if subject.key !== STORAGE}
+            {:else if !report && subject.key !== STORAGE}
               <p class="quiet">
                 A reference for the board or the player aid, with no rule of its own.
               </p>
@@ -322,7 +352,7 @@
         {#if scans.length}
           <section
             class="originals"
-            class:alone={!subject.items.length && subject.key !== STORAGE}
+            class:alone={!subject.items.length && !report && subject.key !== STORAGE}
             {@attach feedback("Printed originals", () => ({ scans: scans.length }))}
           >
             <h4>The printed originals <span>rest on one to read it</span></h4>
@@ -500,6 +530,24 @@
     display: flex;
     flex-direction: column;
     gap: 0.9rem;
+  }
+
+  .report {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    padding: 0.7rem 0.95rem;
+    border: 1px solid var(--slip-line);
+    border-left: 0.3rem solid #7c5c34;
+    border-radius: 3px;
+    background: rgb(252 246 230 / 0.85);
+    box-shadow: 0 1px 2px rgb(40 26 12 / 0.14);
+  }
+
+  .report p {
+    font-size: 0.9rem;
+    line-height: 1.44;
+    color: var(--paper-ink);
   }
 
   .rows {

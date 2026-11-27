@@ -17,13 +17,11 @@
     "stopOrPause": "STOP",
     "header": "STOP",
     "trigger": "DRAW THIS CARD AND READ THE OTHER SIDE DURING STEP 2 OF THE SETUP OF YOUR FIRST GAME IN DECEMBER.",
-    "summary": "Stop. Draw this card and read the other side during step 2 of setup of your first game in December.",
     "text": "STOP\n\nDRAW THIS CARD AND READ THE OTHER SIDE DURING STEP 2 OF THE SETUP OF YOUR FIRST GAME IN DECEMBER.",
     "footer": ""
   },
   "sideB": {
     "header": "PERIMETER REPORT",
-    "summary": "If the plan is not complete, scratch the box. Destroy this card after resolving it.",
     "text": "If you have not completed the plan, scratch the box below.\n\nDestroy this card after resolving it.",
     "footer": "Destroy this card after resolving it.",
     "scratchBoxes": [
@@ -52,7 +50,9 @@
       "Scratch only if the plan has not been completed"
     ],
     "opensDoors": [],
-    "opensPackages": ["8"],
+    "opensPackages": [
+      "8"
+    ],
     "destroys": [
       "the \"Riot Control\" Unrationed Event card inside Package 8",
       "this card, after resolving it"

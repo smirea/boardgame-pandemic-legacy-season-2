@@ -1,23 +1,23 @@
 {
   "file": "page-03.jpg",
   "printedPageNumber": 3,
-  "headings": ["The World Almost Ended 71 Years Ago"],
+  "headings": [
+    "The World Almost Ended 71 Years Ago"
+  ],
   "ruleStickerSlots": [],
   "sections": [
     {
       "heading": "The World Almost Ended 71 Years Ago",
-      "mechanicsSummary": [
-        "Fiction prologue, not a procedure. No actions, counts to apply in play, or sticker slots.",
-        "A plague killed most people within about a week. Nothing stopped it.",
-        "For three generations the survivors have lived on floating stations called havens and shipped medicine, food, and tools to a shrinking set of mainland cities.",
-        "Distant cities have fallen off the grid. Only a few cities remain on it, and the supplies are both running out and failing to hold the plague back.",
-        "The havens' leaders and their security team did not return from the yearly meeting. Without them, the Hollow Men (hostile mainland bands) are expected to tear down what the havens build and steal what they deliver.",
-        "The remaining haven people start a journal. They expect to save most cities, not every city."
-      ]
+      "text": "INSTRUCTIONS FOR A BETTER LIFE ON THE HAVENS"
+    },
+    {
+      "heading": "The World Almost Ended 71 Years Ago",
+      "text": "The plague came out of nowhere and ravaged the world. Fever, cough, sores, and death-once infected,\nmost died within a week. Nothing could stop it. The world did its best. It wasn't good enough.\nThe last fragments of our people have desperately kept the world from collapsing completely. For three\ngenerations we have lived on the seas, on floating stations they called \"havens.\" Far from the plague,\nwe are able to provide supplies to the mainland-antibiotics, food, medicine, and tools-to keep them\n(and us) from succumbing completely. We keep a network of the largest known cities in the world alive.\nThings have been tough the past few years. Cities far away from the havens have fallen off our grid.\nWe don't know what's happened to them. We don't know why the supplies aren't reaching them.\nWe have only a few cities left on our grid. We are failing.\nThe supplies aren't keeping the plague away like they used to. What's more, they're running out.\nOur leadership tried to hide this fact from us, but we all knew.\nLast week, the leaders and thinkers of the havens gathered together as they do every year to discuss\nthe state of the havens and the state of the world. They did not return. What's worse is that our\nmain security team was with them. Without our soldiers, the Hollow Men-roving bands of savages bent\non our elimination-will expand their attacks, tearing down what we build and stealing what we offer.\nThose of us left met on the havens to discuss what to do next. After hours of debate, we realized\nthat all eyes had turned to a select few to lead. Us.\nNot because we are able to lead but because we are willing.\nWe are starting this journal to record our attempts to keep the world from ending.\nWe know we canỊạt save all the cities but we will do what we can to save most of them.\nIf we fail, we hope that someone, somewhere, finds these notes to know that we may not have\nsucceeded but that we tried."
     }
   ],
   "tables": [],
   "diagramsAndCallouts": [
     "Full-page sketch of masked people on a haven deck, with gulls, a flag, and a radio."
-  ]
+  ],
+  "fullText": "INSTRUCTIONS FOR A BETTER LIFE ON THE HAVENS\nTHE WORLD ALMOST ENDED 71 YEARS AGO\nThe plague came out of nowhere and ravaged the world. Fever, cough, sores, and death-once infected,\nmost died within a week. Nothing could stop it. The world did its best. It wasn't good enough.\nThe last fragments of our people have desperately kept the world from collapsing completely. For three\ngenerations we have lived on the seas, on floating stations they called \"havens.\" Far from the plague,\nwe are able to provide supplies to the mainland-antibiotics, food, medicine, and tools-to keep them\n(and us) from succumbing completely. We keep a network of the largest known cities in the world alive.\nThings have been tough the past few years. Cities far away from the havens have fallen off our grid.\nWe don't know what's happened to them. We don't know why the supplies aren't reaching them.\nWe have only a few cities left on our grid. We are failing.\nThe supplies aren't keeping the plague away like they used to. What's more, they're running out.\nOur leadership tried to hide this fact from us, but we all knew.\nLast week, the leaders and thinkers of the havens gathered together as they do every year to discuss\nthe state of the havens and the state of the world. They did not return. What's worse is that our\nmain security team was with them. Without our soldiers, the Hollow Men-roving bands of savages bent\non our elimination-will expand their attacks, tearing down what we build and stealing what we offer.\nThose of us left met on the havens to discuss what to do next. After hours of debate, we realized\nthat all eyes had turned to a select few to lead. Us.\nNot because we are able to lead but because we are willing.\nWe are starting this journal to record our attempts to keep the world from ending.\nWe know we canỊạt save all the cities but we will do what we can to save most of them.\nIf we fail, we hope that someone, somewhere, finds these notes to know that we may not have\nsucceeded but that we tried."
 }

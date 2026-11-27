@@ -19,88 +19,56 @@
   "ruleStickerSlots": [],
   "sections": [
     {
+      "heading": "Component Overview",
+      "text": "INSTRUCTIONS FOR A BETTER LIFE ON THE HAVENS"
+    },
+    {
+      "heading": "Component Overview",
+      "text": ""
+    },
+    {
       "heading": "Objectives",
-      "mechanicsSummary": [
-        "Each game requires one or more objectives. The number required is printed on the board for that month.",
-        "At least one objective is mandatory. Mandatory objectives are required to win.",
-        "The group does not have to choose the optional objectives before the game starts.",
-        "An objective stays available in later months, even after it has been completed, unless an instruction says to destroy it."
-      ]
+      "text": "MANDATORY OBJECTIVE\nBuild 3 new supply\nIn each game, you will need to\ncomplete one or more objectives to\nwin. The number needed is shown on\nthe board for that month.\nAt least one objective will be mandatory. Mandatory\nobjectives must be completed in order to win. You\ndo not need to decide which other objectives you will\naccomplish at the beginning of any game; you may wait\nto see how the game unfolds.\nUnless you are instructed to destroy an objective, it will\nbe available to complete month after month (even if you\ncompleted it in an earlier month)."
     },
     {
       "heading": "The Dossiers",
-      "mechanicsSummary": [
-        "Some cards carry dossier numbers or letters.",
-        "When told to, open the matching precut door on a dossier and tear it off."
-      ]
+      "text": "As you play, you will find cards that\nhave dossier numbers or letters on\nthem. When you do, open up-and\n34\ntear off using the precut tab-the\ndossier doors matching the numbers or\nen the following door:\nletters on the card."
     },
     {
       "heading": "The Packages",
-      "mechanicsSummary": ["Open a numbered package only when the game says to."]
+      "text": "The game will instruct you as to when to open these."
     },
     {
       "heading": "The Reserve",
-      "mechanicsSummary": [
-        "Box storage for cards, stickers, and pieces that are not in the current game but may be needed during or after one."
-      ]
-    },
-    {
-      "heading": "Rationed and Unrationed Events",
-      "mechanicsSummary": [
-        "At the start of each game the group chooses Rationed Event cards and adds a number of them equal to the current rationing level.",
-        "Rationing starts at 4 for the prologue and for the start of January, then rises and falls. Minimum 0, maximum 10.",
-        "Unrationed Event cards are found later. Each is always in the Player deck, ignoring rationing, until it is used. Using one destroys it."
-      ]
+      "text": "The reserve is the area in the game box where you keep\ncards, stickers, and pieces that aren't an active part of\nthe game but might be needed during or after a game.\nRATIONED AND\nUNRATIONED EVENT\nRATIONED EVEN\nUNRATIONED EVENTS\nAt the beginning of each game, you will\nchoose and add Rationed Event cards to\nthe Player deck equal to your rationing\nlevel. Your rationing level is 4 in the\nprologue and at the start of January,\nbut will go up and down from game to\ngame. The minimum rationing level is O\nand the maximum is 10.\nThere are also Unrationed Event cards that you will\ndiscover later. These are always included in the Player\ndeck, regardless of rationing level, until they are used,\nat which point they are destroyed."
     },
     {
       "heading": "Tracking Tokens",
-      "mechanicsSummary": ["Black tokens mark progress toward the current objectives."]
+      "text": "Use these tokens to track your progress toward\ncompleting objectives each game.\n\nInfrastructure:"
     },
     {
       "heading": "Card Stickers",
-      "mechanicsSummary": [
-        "Some cards have an improvement space. Improvements are applied during the Game End Production step.",
-        "A card holds at most one improvement, and only if it has a space.",
-        "Infection-card improvements and City-card improvements have different shapes so they are not swapped.",
-        "Pictured Infrastructure improvement: that card counts as 3 cards of its color when building a supply center.",
-        "Pictured Well Stocked improvement: if the city already has 2 or more supply cubes when this Infection card is drawn, remove no supply cubes."
-      ]
+      "text": "color focounts as 3 cards of\nCenter action\nSome cards in the game have\nspaces for an improvement.\nWell Stocked:\nThese improvements are\nis card is arawn, do no\nthere are 2 or more Supply cubes in this city wh\nput on as part of the Game\nEnd Production step. Each\ncard can have only 1 improvement, and you can put\nan improvement only on a card that has a space for\nit. Note that Infection card improvements and City\ncard improvements have a different shape to help you\nremember which goes on which card."
     },
     {
       "heading": "Turning Point Cards",
-      "mechanicsSummary": [
-        "Every Turning Point card found is stored in the reserve, then moved to the Game End area at the start of each game.",
-        "At game end, check whether its requirement was met. If yes, follow the card. If no, return it to the reserve for the next game.",
-        "None are in play at the start of the campaign. They appear as the year continues."
-      ]
+      "text": "TURNING POINT\nAll Turning Point cards you find are taken\nfrom the reserve and placed in the Game\nEnd area at the start of each game. These\nare checked at the end of the game to\nsee if their requirement has been met. If\nso, follow the instructions on the card. If\nnot, return the card to the reserve until the next game.\nThere are no turning points at the beginning of the\ncampaign-they are introduced as the year unfolds."
     },
     {
       "heading": "Supply Cubes",
-      "mechanicsSummary": [
-        "Gray cubes. They are what keeps a city from the plague.",
-        "When an Infection card is drawn, move 1 supply cube from that city to the stockpile.",
-        "If the city has no supply cube when the card is drawn, place a plague cube instead."
-      ]
+      "text": "Supplies (represented by gray cubes) are all\nthat stand between the world and extinction.\nWhenever an Infection card is drawn, move\n1 Supply cube from that city to the stockpile.\nIf there are no Supply cubes in the city when the card is\ndrawn, place a Plague cube."
     },
     {
       "heading": "Plague Cubes",
-      "mechanicsSummary": ["Green cubes. No cure or treatment is known."]
+      "text": "There is a plague (represented by green cubes)\nthat has brought the world to the brink. There\nis no known cure or treatment tor this plague."
     },
     {
       "heading": "Supply Centers",
-      "mechanicsSummary": [
-        "Temporary structures built during a game (hospital, depot, and headquarters combined).",
-        "They do not persist between games. The Hollow Men tear them down.",
-        "A city with a supply center may play Produce Supplies cards.",
-        "At the end of a game, each city that has a supply center gains population."
-      ]
+      "text": "Supply centers are temporary structures you build\nin a game. They are combination of mobile hospital,\nsupply depot, and headquarters. Supply centers\ndo not stay from game to game as the Hollow Men\ntear them down almost as fast as you put them up.\nSupply centers allow you to play Produce Supplies cards\nin that city, and at the end of a game, the population of\ncities with supply centers will increase."
     },
     {
       "heading": "Produce Supply Cards",
-      "mechanicsSummary": [
-        "Always shuffled into the Player deck.",
-        "Played at a haven or supply center to produce many supplies in one turn. The action is on page 10."
-      ]
+      "text": "PRODUCE SUPPLIES\nthe folosion, do one of\nThese cards are always shuffled into the\nPlayer deck and help players produce a lot\nof supplies during one turn if they are at a\nhaven or supply center. See Other Actions\non page 10.\n5"
     }
   ],
   "tables": [
@@ -118,5 +86,6 @@
     "One rationed and one unrationed event card side by side.",
     "Two example improvements: Infrastructure (counts as 3 cards of its color for Build Supply Center) and Well Stocked (2 or more supply cubes already present means the draw removes none).",
     "Turning Point card, gray supply cubes, green plague cubes, a supply-center token, and a Produce Supplies card."
-  ]
+  ],
+  "fullText": "INSTRUCTIONS FOR A BETTER LIFE ON THE HAVENS\nCOMPONENT OVERVIEW\n\nOBJECTIVES\nMANDATORY OBJECTIVE\nBuild 3 new supply\nIn each game, you will need to\ncomplete one or more objectives to\nwin. The number needed is shown on\nthe board for that month.\nAt least one objective will be mandatory. Mandatory\nobjectives must be completed in order to win. You\ndo not need to decide which other objectives you will\naccomplish at the beginning of any game; you may wait\nto see how the game unfolds.\nUnless you are instructed to destroy an objective, it will\nbe available to complete month after month (even if you\ncompleted it in an earlier month).\nTHE DOSSIERS\nAs you play, you will find cards that\nhave dossier numbers or letters on\nthem. When you do, open up-and\n34\ntear off using the precut tab-the\ndossier doors matching the numbers or\nen the following door:\nletters on the card.\nTHE PACKAGES\nThe game will instruct you as to when to open these.\nTHE RESERVE\nThe reserve is the area in the game box where you keep\ncards, stickers, and pieces that aren't an active part of\nthe game but might be needed during or after a game.\nRATIONED AND\nUNRATIONED EVENT\nRATIONED EVEN\nUNRATIONED EVENTS\nAt the beginning of each game, you will\nchoose and add Rationed Event cards to\nthe Player deck equal to your rationing\nlevel. Your rationing level is 4 in the\nprologue and at the start of January,\nbut will go up and down from game to\ngame. The minimum rationing level is O\nand the maximum is 10.\nThere are also Unrationed Event cards that you will\ndiscover later. These are always included in the Player\ndeck, regardless of rationing level, until they are used,\nat which point they are destroyed.\nTRACKING TOKENS\nUse these tokens to track your progress toward\ncompleting objectives each game.\n\nInfrastructure:\nCARD STICKERS\ncolor focounts as 3 cards of\nCenter action\nSome cards in the game have\nspaces for an improvement.\nWell Stocked:\nThese improvements are\nis card is arawn, do no\nthere are 2 or more Supply cubes in this city wh\nput on as part of the Game\nEnd Production step. Each\ncard can have only 1 improvement, and you can put\nan improvement only on a card that has a space for\nit. Note that Infection card improvements and City\ncard improvements have a different shape to help you\nremember which goes on which card.\nTURNING POINT CARDS\nTURNING POINT\nAll Turning Point cards you find are taken\nfrom the reserve and placed in the Game\nEnd area at the start of each game. These\nare checked at the end of the game to\nsee if their requirement has been met. If\nso, follow the instructions on the card. If\nnot, return the card to the reserve until the next game.\nThere are no turning points at the beginning of the\ncampaign-they are introduced as the year unfolds.\nSUPPLY CUBES\nSupplies (represented by gray cubes) are all\nthat stand between the world and extinction.\nWhenever an Infection card is drawn, move\n1 Supply cube from that city to the stockpile.\nIf there are no Supply cubes in the city when the card is\ndrawn, place a Plague cube.\nPLAGUE CUBES\nThere is a plague (represented by green cubes)\nthat has brought the world to the brink. There\nis no known cure or treatment tor this plague.\nSUPPLY CENTERS\nSupply centers are temporary structures you build\nin a game. They are combination of mobile hospital,\nsupply depot, and headquarters. Supply centers\ndo not stay from game to game as the Hollow Men\ntear them down almost as fast as you put them up.\nSupply centers allow you to play Produce Supplies cards\nin that city, and at the end of a game, the population of\ncities with supply centers will increase.\nPRODUCE SUPPLY CARDS\nPRODUCE SUPPLIES\nthe folosion, do one of\nThese cards are always shuffled into the\nPlayer deck and help players produce a lot\nof supplies during one turn if they are at a\nhaven or supply center. See Other Actions\non page 10.\n5"
 }

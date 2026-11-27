@@ -18,9 +18,13 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "Infection deck back. Red biohazard on black, with a yellow caution stripe. No text and no printed code.",
-  "sideBSummary": "Hollow Men Gather. Drawing this card is not an Infection card draw. Draw the next Infection card and add a Hollow Men figure to that city instead of infecting it. If that card is another Hollow Men Gather, keep drawing, and add only 1 figure to the first city revealed. The printed code on this scan is P2-21b.",
-  "searchBoxes": [],
+  "sideA": {
+    "text": "Infection deck back. No printed text."
+  },
+  "sideB": {
+    "text": "HOLLOW MEN GATHER\nDrawing this card is not an Infection card draw.\nDraw the next Infection card and add\na Hollow Men figure to it instead of\ninfecting it.\nIf you draw another Hollow Men\nGather card, keep drawing.\n(Add only 1 figure to the\nfirst city you reveal.)\nP2-21b",
+    "searchBoxes": []
+  },
   "states": [],
   "mechanics": {
     "opensDoors": [],

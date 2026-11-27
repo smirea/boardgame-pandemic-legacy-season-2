@@ -17,9 +17,13 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "Player deck back. No text and no printed code.",
-  "sideBSummary": "Blue Denver Player card, 39°44'21\"N 104°59'25\"W. Map of the western United States and Mexico. No search box and no anchor. Code P1-08b.",
-  "searchBoxes": [],
+  "sideA": {
+    "text": "Player deck back. No printed text."
+  },
+  "sideB": {
+    "text": "DENVER\n39°44'21\"N 104°59'25\"W\n(City map. No search box.)\n(City name and coordinates repeat upside down along the bottom.)\nP1-08b",
+    "searchBoxes": []
+  },
   "states": [],
   "mechanics": {
     "opensDoors": [],

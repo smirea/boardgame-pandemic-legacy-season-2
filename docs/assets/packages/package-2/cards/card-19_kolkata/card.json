@@ -18,9 +18,13 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "Player deck back. No printed text.",
-  "sideBSummary": "Kolkata, 22°34'22\"N 88°21'50\"E, code P2-19b. Regional map with a bullseye. The compass carries an anchor, so the city is a port. No search box. The city name and coordinates repeat upside down along the bottom.",
-  "searchBoxes": [],
+  "sideA": {
+    "text": "Player deck back. No printed text."
+  },
+  "sideB": {
+    "text": "KOLKATA\n22°34'22\"N 88°21'50\"E\n(City map. No search box.)\n(City name and coordinates repeat upside down along the bottom.)\nP2-19b",
+    "searchBoxes": []
+  },
   "states": [],
   "mechanics": {
     "opensDoors": [],

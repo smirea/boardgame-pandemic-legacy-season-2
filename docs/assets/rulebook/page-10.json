@@ -32,61 +32,90 @@
   ],
   "sections": [
     {
+      "heading": "On Your Turn",
+      "text": "-MANUAL"
+    },
+    {
+      "heading": "On Your Turn",
+      "text": ""
+    },
+    {
       "heading": "Check for Exposure",
-      "mechanicsSummary": [
-        "If your turn starts in a location that has 1 or more plague cubes, gain 1 exposure.",
-        "Scars and death from exposure are on page 16, not on this page."
-      ]
+      "text": "If you start your turn in a location with 1 or more Plague\ncubes, gain an exposure (see Exposure, Scars, and\nDeath on page 16).\nEXPOSURE\nRULE STICKER F"
     },
     {
       "heading": "Do 4 Actions",
-      "mechanicsSummary": [
-        "After the exposure check, take up to 4 actions plus any number of free actions.",
-        "Actions may be repeated. Each use costs 1 action unless it is free.",
-        "Jobs and abilities can change how an action works.",
-        "Some actions discard a card. Those discards go to the Player discard pile.",
-        "Free actions do not spend one of the 4 actions. They may be taken before, between, or after the other actions, still inside this step.",
-        "Finish one action before starting the next."
-      ]
+      "text": "After checking for exposure, you may do up to 4 actions\nand an unlimited number of free actions each turn.\nSelect any combination of the actions listed below.\nYou may do the same action several times, each time\ncounting as 1 action (unless it's a free action). Your\ncharacter's job and abilities may change how an action is\ndone. Some actions involve discarding a card from your\nhand; all these discards go to the Player discard pile.\nFree actions do not count toward your 4 actions\nper turn. Free actions must be done during the\n\"Do 4 actions\" step of your turn either before, between,\nor after any other actions that you take. You must\ncomplete an action before starting another action."
     },
     {
       "heading": "Movement Actions",
-      "mechanicsSummary": [
-        "Drive / Ferry: move to an adjacent location connected by a line. Costs an action.",
-        "Sail (anchor icon): discard a card and move to the city named on that card, if a sea route can be traced there. Both the origin and the destination have an anchor. Costs an action.",
-        "Charter Boat (anchor icon): discard the City card of the city you are in, then move to any location you can trace a sea route to. Both ends have an anchor. Costs an action.",
-        "Sail and Charter Boat cannot be used over land."
-      ]
+      "text": "RULE STICKER G"
     },
     {
-      "heading": "Other Actions",
-      "mechanicsSummary": [
-        "Make Supplies: take 1 supply cube from the stockpile onto your Character card. No limit on how many cubes a character may hold.",
-        "Produce Supplies: discard a Produce Supplies card while you are in a haven or a supply center.",
-        "Local Production (one side of that card): fill the haven or supply center you are in up to its population. Do not add cubes once it is at or above population.",
-        "System-Wide Production (the other side): fill every haven and supply center on the grid up to its population, then mark one box on the card. You must still be in a haven or supply center. When the last box is marked, destroy the card.",
-        "If the stockpile cannot fill every chosen location, place as many cubes as you can, in any order.",
-        "Deliver Supplies: move any number of supply cubes from your Character card onto your current location.",
-        "Share Knowledge, either direction: give the City card of the city you are both in, or take that city card from the other player. The other player must be in the same city. Both must agree.",
-        "If the receiver would then be over the hand limit (usually 7), they immediately discard a card or play an Event.",
-        "Build Supply Center: discard 5 cards of the color of the city you are in. Place a supply center in that city. It lasts only until the end of this game. If none are left in the pool, move an existing supply center to this city instead. A city holds at most 1 supply center."
-      ]
+      "heading": "Drive / Ferry",
+      "text": "Move to an adjacent location connected\nby a line."
+    },
+    {
+      "heading": "Sail",
+      "text": "Discard a card to move to the city named on\nthe card, provided you can trace a sea route\nto it. (Both locations will have an anchor symbol.)"
+    },
+    {
+      "heading": "Charter Boat",
+      "text": "Discard the City card that matches your current\ncity to move to any location, provided you\ncan trace a sea route to it. (Both locations will have an\nanchor symbol.)\nYou cannot do the Sail and Charter Boat actions\nover land. We hope you understand why.\n10\n\nRULE STICKER H"
+    },
+    {
+      "heading": "Make Supplies",
+      "text": "Take 1 Supply cube from the stockpile and put\nit onto your Character card. You can hold any\nnumber of Supply cubes."
+    },
+    {
+      "heading": "Produce Supplies",
+      "text": "Discard a Produce Supplies card while in a\nhe for action, do one of\nhaven or supply center to do the Produce\npopulation with Supply cube:\n—OR\nSupplies action.\nIf you use its \"Local Production\" ability,\nfill your current haven or supply center to\n...\nits population with Supply cubes. If the\nlocation already has Supply cubes equal to\nor above its population, do not place more.\nIf you use its \"System-Wide Production\" ability, fill\nall havens and supply centers on the grid to their\npopulation, then check a box on the card (you must still\nbe in a haven or supply center). When the last check box\nis filled on the card, destroy the card.\nIf there aren't enough Supply cubes in the stockpile to\nfill locations to their populations, put as many as you can\nin any order you like."
+    },
+    {
+      "heading": "Deliver Supplies",
+      "text": "Put as many Supply cubes as you like from your\nCharacter card into your location."
+    },
+    {
+      "heading": "Share Knowledge",
+      "text": "You can do this action in two ways:\nGive a City card that matches the city you are\nin to another player, or take a City card that matches\nthe city you are in from another player.\nThe other player must also be in the city with you. Both\nof you need to agree to do this.\nIf the player who gets the card now has more than their\nhand limit (usually 7 cards), that player must immediately\ndiscard a card or play an Event card."
+    },
+    {
+      "heading": "Build Supply Center",
+      "text": "Discard 5 cards matching your current city's\ncolor. Take a supply center and place it into\nthat city. It will last for the rest of the game. If there\nare no more available, move an existing supply center\nto your location instead. Each city can have only\n1 supply center."
     }
   ],
   "tables": [
     {
       "name": "Action limits",
       "rows": [
-        { "item": "Actions per turn", "value": 4 },
-        { "item": "Free actions per turn", "value": "unlimited, only during the action step" },
-        { "item": "Plague cubes that trigger exposure at turn start", "value": "1 or more" },
-        { "item": "Usual hand limit", "value": 7 },
+        {
+          "item": "Actions per turn",
+          "value": 4
+        },
+        {
+          "item": "Free actions per turn",
+          "value": "unlimited, only during the action step"
+        },
+        {
+          "item": "Plague cubes that trigger exposure at turn start",
+          "value": "1 or more"
+        },
+        {
+          "item": "Usual hand limit",
+          "value": 7
+        },
         {
           "item": "Cards discarded to build a supply center",
           "value": "5, matching the current city's color"
         },
-        { "item": "Supply centers per city", "value": 1 },
-        { "item": "Cubes taken by Make Supplies", "value": "1 per action, no carry limit" }
+        {
+          "item": "Supply centers per city",
+          "value": 1
+        },
+        {
+          "item": "Cubes taken by Make Supplies",
+          "value": "1 per action, no carry limit"
+        }
       ]
     }
   ],
@@ -95,5 +124,6 @@
     "Produce Supplies card shown beside that action, with Local Production and System-Wide Production and a row of check boxes.",
     "Anchor icons mark Sail and Charter Boat only. Drive / Ferry has no anchor.",
     "Footer: Sail and Charter Boat do not work over land."
-  ]
+  ],
+  "fullText": "-MANUAL\nON YOUR TURN\n\nCHECK FOR EXPOSURE\nIf you start your turn in a location with 1 or more Plague\ncubes, gain an exposure (see Exposure, Scars, and\nDeath on page 16).\nEXPOSURE\nRULE STICKER F\nDO 4 ACTIONS\nAfter checking for exposure, you may do up to 4 actions\nand an unlimited number of free actions each turn.\nSelect any combination of the actions listed below.\nYou may do the same action several times, each time\ncounting as 1 action (unless it's a free action). Your\ncharacter's job and abilities may change how an action is\ndone. Some actions involve discarding a card from your\nhand; all these discards go to the Player discard pile.\nFree actions do not count toward your 4 actions\nper turn. Free actions must be done during the\n\"Do 4 actions\" step of your turn either before, between,\nor after any other actions that you take. You must\ncomplete an action before starting another action.\nMOVEMENT ACTIONS\nRULE STICKER G\nDRIVE / FERRY\nMove to an adjacent location connected\nby a line.\nSAIL\nDiscard a card to move to the city named on\nthe card, provided you can trace a sea route\nto it. (Both locations will have an anchor symbol.)\nCHARTER BOAT\nDiscard the City card that matches your current\ncity to move to any location, provided you\ncan trace a sea route to it. (Both locations will have an\nanchor symbol.)\nYou cannot do the Sail and Charter Boat actions\nover land. We hope you understand why.\n10\n\nRULE STICKER H\nOTHER ACTIONS\nMAKE SUPPLIES\nTake 1 Supply cube from the stockpile and put\nit onto your Character card. You can hold any\nnumber of Supply cubes.\nPRODUCE SUPPLIES\nPRODUCE SUPPLIES\nDiscard a Produce Supplies card while in a\nhe for action, do one of\nhaven or supply center to do the Produce\npopulation with Supply cube:\n—OR\nSupplies action.\nIf you use its \"Local Production\" ability,\nfill your current haven or supply center to\n...\nits population with Supply cubes. If the\nlocation already has Supply cubes equal to\nor above its population, do not place more.\nIf you use its \"System-Wide Production\" ability, fill\nall havens and supply centers on the grid to their\npopulation, then check a box on the card (you must still\nbe in a haven or supply center). When the last check box\nis filled on the card, destroy the card.\nIf there aren't enough Supply cubes in the stockpile to\nfill locations to their populations, put as many as you can\nin any order you like.\nDELIVER SUPPLIES\nPut as many Supply cubes as you like from your\nCharacter card into your location.\nSHARE KNOWLEDGE\nYou can do this action in two ways:\nGive a City card that matches the city you are\nin to another player, or take a City card that matches\nthe city you are in from another player.\nThe other player must also be in the city with you. Both\nof you need to agree to do this.\nIf the player who gets the card now has more than their\nhand limit (usually 7 cards), that player must immediately\ndiscard a card or play an Event card.\nBUILD SUPPLY CENTER\nDiscard 5 cards matching your current city's\ncolor. Take a supply center and place it into\nthat city. It will last for the rest of the game. If there\nare no more available, move an existing supply center\nto your location instead. Each city can have only\n1 supply center."
 }

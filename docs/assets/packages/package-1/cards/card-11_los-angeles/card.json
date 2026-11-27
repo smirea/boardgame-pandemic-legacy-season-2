@@ -17,26 +17,26 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "Player deck back. No text and no printed code.",
-  "sideBSummary": "Yellow Los Angeles Player card, 34°3'8\"N 118°14'37\"W. Port: the compass has an anchor. Two covered boxes, SEARCH THE LAND and SEARCH THE SEA. This is Los Angeles's only Player card. Code P1-13b.",
-  "searchBoxes": [
-    {
-      "type": "land",
-      "stateRevealed": 2,
-      "isCompanion": false,
-      "companionName": null,
-      "opensDoors": [],
-      "effectSummary": "Take 4 Supply cubes from the reserve and add them to the stockpile. Resolved once, when the land box is scratched."
-    },
-    {
-      "type": "sea",
-      "stateRevealed": 3,
-      "isCompanion": false,
-      "companionName": null,
-      "opensDoors": ["60"],
-      "effectSummary": "Open door 60 and add it to the board. If 60 is already open, gain 1 action instead."
-    }
-  ],
+  "sideA": {
+    "text": "Player deck back. No printed text."
+  },
+  "sideB": {
+    "text": "LOS ANGELES\n34°3'8\"N 118°14'37\"W\n\nSEARCH THE LAND:\n[covered]\n\nSEARCH THE SEA:\n[covered]\n\nThe bottom edge repeats LOS ANGELES and 34°3'8\"N 118°14'37\"W upside down.\nP1-13b",
+    "searchBoxes": [
+      {
+        "id": "search-land",
+        "label": "SEARCH THE LAND:",
+        "initially": "covered",
+        "revealedInState": 2
+      },
+      {
+        "id": "search-sea",
+        "label": "SEARCH THE SEA:",
+        "initially": "covered",
+        "revealedInState": 3
+      }
+    ]
+  },
   "states": [
     {
       "state": 2,
@@ -44,7 +44,8 @@
       "images": {
         "sideB": "state-2-side-b.jpg"
       },
-      "summary": "Land only. Old shipping containers still hold supplies. Take 4 Supply cubes from the reserve and add them to the stockpile. The sea box stays covered."
+      "revealedText": "SEARCH THE LAND:\nFound old shipping containers. They contained\nold but surprisingly effective supplies.\nTake 4 Supply cubes from the reserve and add\nthem to the stockpile.\nSEARCH THE SEA:",
+      "effect": "Take 4 Supply cubes from the reserve and add them to the stockpile. Resolved once, when the land box is scratched."
     },
     {
       "state": 3,
@@ -52,7 +53,8 @@
       "images": {
         "sideB": "state-3-side-b.jpg"
       },
-      "summary": "Sea only. A lost haven has been located but not accessed. Open 60 and add it to the board, or gain 1 action if 60 is already open. The land box stays covered."
+      "revealedText": "SEARCH THE LAND:\nSEARCH THE SEA:\nWe have learned the location of a lost haven.\nWe have not yet accessed it.\nOpen 60 and add it to the board. If you have\n, gain 1 action.\nalready opened 60",
+      "effect": "Open door 60 and add it to the board. If 60 is already open, gain 1 action instead."
     },
     {
       "state": 4,
@@ -60,11 +62,14 @@
       "images": {
         "sideB": "state-4-side-b.jpg"
       },
-      "summary": "Both boxes scratched. Land adds 4 Supply cubes from the reserve to the stockpile. Sea opens door 60, or grants 1 action if 60 is already open."
+      "revealedText": "SEARCH THE LAND:\nFound old shipping containers. They contained\nold but surprisingly effective supplies.\nTake 4 Supply cubes from the reserve and add\nthem to the stockpile.\nSEARCH THE SEA:\nWe have learned the location of a lost haven.\nWe have not yet accessed it.\nand add it to the board. If you have\nOpen 60\n, gain 1 action.\nalready opened",
+      "effect": "Take 4 Supply cubes from the reserve and add them to the stockpile. Resolved once, when the land box is scratched. Open door 60 and add it to the board. If 60 is already open, gain 1 action instead."
     }
   ],
   "mechanics": {
-    "opensDoors": ["60"],
+    "opensDoors": [
+      "60"
+    ],
     "destroys": [],
     "rules": [
       "Yellow Player card for Los Angeles. Port: the compass has an anchor.",

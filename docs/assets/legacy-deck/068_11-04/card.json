@@ -17,13 +17,11 @@
     "stopOrPause": "NONE",
     "header": "",
     "trigger": "",
-    "summary": "Objective-card back. No rules text.",
     "text": "",
     "footer": ""
   },
   "sideB": {
     "header": "MANDATORY OBJECTIVE",
-    "summary": "Complete the Plan. Add this card to the objective pool. Destroy it at the end of the game in which you complete the objective.",
     "text": "Complete the Plan.\n\nAdd this card to your pool of objectives. Destroy it at the end of the game in which you complete the objective.",
     "footer": "Add this card to your pool of objectives. Destroy it at the end of the game in which you complete the objective.",
     "scratchBoxes": []
@@ -34,8 +32,12 @@
     "triggers": [],
     "opensDoors": [],
     "opensPackages": [],
-    "destroys": ["this objective card, at the end of the game in which the Plan is completed"],
-    "addsToPool": ["Complete the Plan (mandatory objective)"],
+    "destroys": [
+      "this objective card, at the end of the game in which the Plan is completed"
+    ],
+    "addsToPool": [
+      "Complete the Plan (mandatory objective)"
+    ],
     "rules": [
       "Mandatory objective: Complete the Plan.",
       "Add this card to the pool of objectives.",

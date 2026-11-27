@@ -18,18 +18,22 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "Player deck back. Dark blue sunburst around a haven on the water. No text and no printed code.",
-  "sideBSummary": "Jakarta, red Player card. Coordinates 6°12'32\"S 106°50'44\"E. The compass has an anchor, so the city is a port. One covered SEARCH box fills the map. The city name and coordinates repeat upside down along the bottom. Printed code P3-04b.",
-  "searchBoxes": [
-    {
-      "type": "search",
-      "stateRevealed": 2,
-      "isCompanion": true,
-      "companionName": "Builder",
-      "opensDoors": [],
-      "effectSummary": "Companion Builder. Play this card at any time to place a shelter on one city on the grid."
-    }
-  ],
+  "sideA": {
+    "text": "Player deck back. No printed text."
+  },
+  "sideB": {
+    "text": "JAKARTA\n6°12'32\"S 106°50'44\"E\n\nSEARCH:\n[covered]\n\nThe bottom edge repeats JAKARTA and 6°12'32\"S 106°50'44\"E upside down.\nP3-04b",
+    "searchBoxes": [
+      {
+        "id": "search",
+        "label": "SEARCH:",
+        "initially": "covered",
+        "revealedInState": 2,
+        "isCompanion": true,
+        "companionName": "Builder"
+      }
+    ]
+  },
   "states": [
     {
       "state": 2,
@@ -38,7 +42,8 @@
         "sideA": "state-2-side-a.jpg",
         "sideB": "state-2-side-b.jpg"
       },
-      "summary": "Same Player back. The SEARCH box is scratched. Companion Builder. Play this card at any time to place a shelter on one city on the grid."
+      "revealedText": "SEARCH:\nCompanion:\nBuilder\nPlay this card at any time to\nplace a shelter onto one city\non the grid.",
+      "effect": "Companion Builder. Play this card at any time to place a shelter on one city on the grid."
     }
   ],
   "mechanics": {

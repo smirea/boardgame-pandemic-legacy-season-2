@@ -1,50 +1,122 @@
 {
   "file": "page-02.jpg",
   "printedPageNumber": 2,
-  "headings": ["Pandemic Legacy: Season 2", "Starting Components"],
+  "headings": [
+    "Pandemic Legacy: Season 2",
+    "Starting Components"
+  ],
   "ruleStickerSlots": [],
   "sections": [
     {
+      "heading": "Pandemic Legacy: Season 2",
+      "text": "MANUAL\nPANDEMIC\nLEGACY\nSEASON 2\nMATT LEACOCK AND ROB DAVIAU"
+    },
+    {
       "heading": "Starting Components",
-      "mechanicsSummary": [
-        "Credits Matt Leacock and Rob Daviau.",
-        "The 53 Player cards split into 36 City cards, 5 Epidemic cards, 4 Rationed Event cards, and 8 Produce Supplies cards.",
-        "A pen is required and is not in the box.",
-        "This page is an inventory. It does not describe how the pieces are used."
-      ]
+      "text": "— SÃO PAU »\n8 Reference\n10 Character\n4 Pawns\n82 Legacy\n53 Player cards\ncards\ncards\ncards\n36 City cards, 5 Epidemic cards,\n4 Rationed Event cards,\n8 Produce Supplies cards\nLAGOS\nWASHINGTON\nTRIPOLI\nBuild 3 supply centers.\n4 Haven\n27 Infection cards\n6 Dossiers\n2 Prologue\ncards\nworker cards\n1 Infection\n1 Incident\n3 Tracking\n9 Supply\ntokens\nRate marker\ncenters\nmarker\nDRECTIVES\n36 Supply\n8 Plague\ncubes\ncubes\n999\n2 Sticker sheets\n8 Numbered packages\nThis manual\n1 Board\nYou will need a pen. It is not included in this box.\n2"
     }
   ],
   "tables": [
     {
       "name": "Starting component counts",
       "rows": [
-        { "item": "Character cards", "count": 10 },
-        { "item": "Pawns", "count": 4 },
-        { "item": "Player cards", "count": 53 },
-        { "item": "City cards (within Player cards)", "count": 36 },
-        { "item": "Epidemic cards (within Player cards)", "count": 5 },
-        { "item": "Rationed Event cards (within Player cards)", "count": 4 },
-        { "item": "Produce Supplies cards (within Player cards)", "count": 8 },
-        { "item": "Reference cards", "count": 8 },
-        { "item": "Legacy cards", "count": 82 },
-        { "item": "Infection cards", "count": 27 },
-        { "item": "Haven worker cards", "count": 4 },
-        { "item": "Prologue cards", "count": 2 },
-        { "item": "Dossiers", "count": 6 },
-        { "item": "Infection Rate marker", "count": 1 },
-        { "item": "Incident marker", "count": 1 },
-        { "item": "Supply centers", "count": 9 },
-        { "item": "Tracking tokens", "count": 3 },
-        { "item": "Plague cubes", "count": 8 },
-        { "item": "Supply cubes", "count": 36 },
-        { "item": "Numbered packages", "count": 8 },
-        { "item": "Sticker sheets", "count": 2 },
-        { "item": "Manual", "count": 1 },
-        { "item": "Board", "count": 1 }
+        {
+          "item": "Character cards",
+          "count": 10
+        },
+        {
+          "item": "Pawns",
+          "count": 4
+        },
+        {
+          "item": "Player cards",
+          "count": 53
+        },
+        {
+          "item": "City cards (within Player cards)",
+          "count": 36
+        },
+        {
+          "item": "Epidemic cards (within Player cards)",
+          "count": 5
+        },
+        {
+          "item": "Rationed Event cards (within Player cards)",
+          "count": 4
+        },
+        {
+          "item": "Produce Supplies cards (within Player cards)",
+          "count": 8
+        },
+        {
+          "item": "Reference cards",
+          "count": 8
+        },
+        {
+          "item": "Legacy cards",
+          "count": 82
+        },
+        {
+          "item": "Infection cards",
+          "count": 27
+        },
+        {
+          "item": "Haven worker cards",
+          "count": 4
+        },
+        {
+          "item": "Prologue cards",
+          "count": 2
+        },
+        {
+          "item": "Dossiers",
+          "count": 6
+        },
+        {
+          "item": "Infection Rate marker",
+          "count": 1
+        },
+        {
+          "item": "Incident marker",
+          "count": 1
+        },
+        {
+          "item": "Supply centers",
+          "count": 9
+        },
+        {
+          "item": "Tracking tokens",
+          "count": 3
+        },
+        {
+          "item": "Plague cubes",
+          "count": 8
+        },
+        {
+          "item": "Supply cubes",
+          "count": 36
+        },
+        {
+          "item": "Numbered packages",
+          "count": 8
+        },
+        {
+          "item": "Sticker sheets",
+          "count": 2
+        },
+        {
+          "item": "Manual",
+          "count": 1
+        },
+        {
+          "item": "Board",
+          "count": 1
+        }
       ]
     }
   ],
   "diagramsAndCallouts": [
     "Photo grid of each component with its count. Infection cards pictured include Lagos, Washington, and Tripoli. Player cards pictured include City, Epidemic, Rationed Event, and Produce Supplies. A small board photo shows the supply and incident tracks."
-  ]
+  ],
+  "fullText": "MANUAL\nPANDEMIC\nLEGACY\nSEASON 2\nMATT LEACOCK AND ROB DAVIAU\nSTARTING COMPONENTS\n— SÃO PAU »\n8 Reference\n10 Character\n4 Pawns\n82 Legacy\n53 Player cards\ncards\ncards\ncards\n36 City cards, 5 Epidemic cards,\n4 Rationed Event cards,\n8 Produce Supplies cards\nLAGOS\nWASHINGTON\nTRIPOLI\nBuild 3 supply centers.\n4 Haven\n27 Infection cards\n6 Dossiers\n2 Prologue\ncards\nworker cards\n1 Infection\n1 Incident\n3 Tracking\n9 Supply\ntokens\nRate marker\ncenters\nmarker\nDRECTIVES\n36 Supply\n8 Plague\ncubes\ncubes\n999\n2 Sticker sheets\n8 Numbered packages\nThis manual\n1 Board\nYou will need a pen. It is not included in this box.\n2"
 }

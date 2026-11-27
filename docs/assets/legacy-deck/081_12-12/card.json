@@ -17,13 +17,11 @@
     "stopOrPause": "NONE",
     "header": "DELIVERED: 551-700",
     "trigger": "",
-    "summary": "DELIVERED: 551-700. Despite inexperience, they did the impossible, and the world paid for their leaders' fear, Utopia's malice, and the Hollow Men's savagery. This time they have a cure. The world should recover, with new cities and new countries. Rebuilding will take an unknown time, and they will be part of it. DELIVERED: 401-550. They did not want the front lines this soon. The world is in riot, anarchy, and near collapse. Without Utopia in the east, those cities rose. There is a cure, and it is not clear the world lasts long enough to use it. Some cities will make it, and they hope to rebuild from there.",
     "text": "DELIVERED: 551-700\nDespite our inexperience, we did the impossible. The world has paid the price of our leaders’ fear, Utopia’s malice, and the Hollow Men’s savagery. But we have a cure! We believe that the world will recover in time. There will be new cities and new countries. Who knows how long it will take to rebuild, but we will be part of it.\n\nDELIVERED: 401-550\nWe didn’t want to be back on the front lines so soon, but the world is a disaster. There is rioting, anarchy, near collapse. Without Utopia in the east, those cities have risen up. We have a cure but we’re not sure the world will survive long enough to use it. Some cities will make it. We hope the world can rebuild from there.",
     "footer": ""
   },
   "sideB": {
     "header": "DELIVERED: 400 AND BELOW",
-    "summary": "DELIVERED: 400 AND BELOW. A note left in hope that someone finds it. Mistrust between Faded and normal humans was too much, and they were overwhelmed. There is a cure, and it may be too little, too late. The effort was great and the burden too heavy. They tried. Found in the ruins of North Atlantic Haven.",
     "text": "DELIVERED: 400 AND BELOW\n\"I hope someone finds this note. The mistrust between Faded and normal humans was too much for the world. We were overwhelmed. There is a cure but it may be too little, too late. Our efforts were great but the burden was too heavy. We tried. We tried.\" – Found in ruins of North Atlantic Haven",
     "footer": "",
     "scratchBoxes": []
@@ -45,6 +43,6 @@
       "Score bracket DELIVERED: 401-550, on side A.",
       "Score bracket DELIVERED: 400 AND BELOW, on side B."
     ],
-    "notes": "Green border. The 400-and-below blurb is a quoted note. Unlike the failed-delivery version on 12-10b, this one says there is a cure and it may be too little, too late, and the last line is 'We tried. We tried.' Flavor above is paraphrased. The brackets are exact. 701 and above for a delivered sample is on 12-11, not here."
+    "notes": "Green border. The 400-and-below blurb is a quoted note. Unlike the failed-delivery version on 12-10b, this one says there is a cure and it may be too little, too late, and the last line is 'We tried. We tried.' The brackets are exact. 701 and above for a delivered sample is on 12-11, not here."
   }
 }

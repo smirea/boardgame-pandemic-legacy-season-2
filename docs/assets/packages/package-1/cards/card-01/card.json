@@ -16,12 +16,22 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "Inventory: 20 cards and 1 sticker card. The report says the plague followed COdA in North America, and that back-to-back pandemics broke the world's supply lines. Read both sides, then keep this card in the reserve.",
-  "sideBSummary": "Open doors 66, J, 23, L, and 39 if they are still sealed. Chicago joins the grid. Put Chicago's Player cards in the Player discard and Chicago's Infection cards in the Game End area. Put every other Player card and Infection card from this package in the reserve. Give Decontamination Kit to a player, into their hand.",
-  "searchBoxes": [],
+  "sideA": {
+    "text": "THIS PACKAGE INCLUDES:\n\n• 20 cards • 1 sticker card\n\nRECON REPORT\n\nIt started here, in North America. After COdA, there was chaos. Then the plague hit. The world could not handle back-to-back pandemics. We need to reconnect our supply lines. We need to be on the lookout for any sign of other havens. We need to find more supplies. Perhaps our leaders went here? Too many questions.\n\nRead both sides of this card\n\nP1-01 a then keep it in the reserve."
+  },
+  "sideB": {
+    "text": "RIGHT NOW!\n\nOpen the following doors if you have not done so already:\n\n66 39\n\nYou have connected a new city: Chicago.\n\n• Add the Player cards for Chicago to the Player discard pile.\n\n• Add the Infection cards for Chicago to the Game End area.\n\n• Put the other Player and Infection cards included in this package into the reserve.\n\n• Finally, give the \"Decontamination Kit\" Unrationed Event card to a player to add to their hand.\n\nP1-01b",
+    "searchBoxes": []
+  },
   "states": [],
   "mechanics": {
-    "opensDoors": ["66", "J", "23", "L", "39"],
+    "opensDoors": [
+      "66",
+      "J",
+      "23",
+      "L",
+      "39"
+    ],
     "destroys": [],
     "rules": [
       "On opening the package, open doors 66, J, 23, L, and 39 if they are not already open.",

@@ -18,9 +18,13 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "Player deck back. Dark blue sunburst around a haven on the water. No text and no printed code.",
-  "sideBSummary": "Unrationed Event, Biodome Prototype. Place up to 3 shelters on any cities on the grid. Destroy this card after use. Play at any time. Not an action. Printed code P3-02b.",
-  "searchBoxes": [],
+  "sideA": {
+    "text": "Player deck back. No printed text."
+  },
+  "sideB": {
+    "text": "UNRATIONED EVENT\nBIODOME PROTOTYPE\nPlace up to 3 shelters onto\nany cities on the grid.\nDestroy this card after use.\nPlay at any time. Not an action.\nP3-02b",
+    "searchBoxes": []
+  },
   "states": [],
   "mechanics": {
     "opensDoors": [],

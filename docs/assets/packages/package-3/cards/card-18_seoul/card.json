@@ -18,18 +18,20 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "Player deck back. Dark blue sunburst around a haven on the water. No text and no printed code.",
-  "sideBSummary": "Seoul, red Player card. Coordinates 37°33'57\"N 126°58'41\"E. The compass has an anchor, so the city is a port. One covered SEARCH box fills the map. The city name and coordinates repeat upside down along the bottom. Printed code P3-18b.",
-  "searchBoxes": [
-    {
-      "type": "search",
-      "stateRevealed": 2,
-      "isCompanion": false,
-      "companionName": null,
-      "opensDoors": [],
-      "effectSummary": "Rebels in Seoul want to throw off Utopia. Immediately draw a free sea lane from Seoul to another city."
-    }
-  ],
+  "sideA": {
+    "text": "Player deck back. No printed text."
+  },
+  "sideB": {
+    "text": "SEOUL\n37°33'57\"N 126°58'41\"E\n\nSEARCH:\n[covered]\n\nThe bottom edge repeats SEOUL and 37°33'57\"N 126°58'41\"E upside down.\nP3-18b",
+    "searchBoxes": [
+      {
+        "id": "search",
+        "label": "SEARCH:",
+        "initially": "covered",
+        "revealedInState": 2
+      }
+    ]
+  },
   "states": [
     {
       "state": 2,
@@ -38,7 +40,8 @@
         "sideA": "state-2-side-a.jpg",
         "sideB": "state-2-side-b.jpg"
       },
-      "summary": "Same Player back. The SEARCH box is scratched. Rebels in Seoul want to throw off Utopia. Immediately draw a free sea lane from Seoul to another city."
+      "revealedText": "SEARCH:\nA group of rebels here is eager to throw off the\nshackles of Utopia.\nImmediately draw a free sea lane from Seoul to\nanother city.",
+      "effect": "Rebels in Seoul want to throw off Utopia. Immediately draw a free sea lane from Seoul to another city."
     }
   ],
   "mechanics": {

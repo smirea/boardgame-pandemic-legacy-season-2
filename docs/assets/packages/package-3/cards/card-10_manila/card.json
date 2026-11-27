@@ -18,9 +18,13 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "Player deck back. Dark blue sunburst around a haven on the water. No text and no printed code.",
-  "sideBSummary": "Manila, red Player card. Coordinates 14°35'58\"N 120°59'3\"E. The compass has an anchor, so the city is a port. The map has a target marker and no scratch-off box. The city name and coordinates repeat upside down along the bottom. Printed code P3-10b.",
-  "searchBoxes": [],
+  "sideA": {
+    "text": "Player deck back. No printed text."
+  },
+  "sideB": {
+    "text": "MANILA\n14°35'58\"N 120°59'3\"E\n(City map. No search box.)\n(City name and coordinates repeat upside down along the bottom.)\nP3-10b",
+    "searchBoxes": []
+  },
   "states": [],
   "mechanics": {
     "opensDoors": [],

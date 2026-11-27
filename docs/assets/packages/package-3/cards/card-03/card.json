@@ -18,9 +18,13 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "A plan to get into Utopia still needs a way in. The start of that plan is on the back, and it cannot be started until more is learned. Keep this card in the reserve between games. Printed code P3-03a.",
-  "sideBSummary": "Handwritten checklist. Five red squares labeled A, B, C, D, and E sit beside \"Find a way in.\" Three other questions are still marked Unknown: how to bypass their security, whether to devise a distraction, and what is needed if a cure is found. A red note says more information is required before the plan can start. Printed code P3-03b.",
-  "searchBoxes": [],
+  "sideA": {
+    "text": "AN INCOMPLETE PLAN\nWe're putting together a plan to get into Utopia.\nSo far we know we'll need to find a way in.\nThe beginnings of your plan are on the back of\nthis card. You can't start it until you learn more.\nKeep this card in the reserve between games.\nP3-03a"
+  },
+  "sideB": {
+    "text": "An Incomplete Plan\n• Find a way in\nUnknown\n• How can we bypass their security?\n• Should we devise a distraction?\nUnknown\n• What will we need if we find a cure? Unknown\nWe need more information before we can start.\nP3-03b\nExpecting to collect it soon.",
+    "searchBoxes": []
+  },
   "states": [],
   "mechanics": {
     "opensDoors": [],

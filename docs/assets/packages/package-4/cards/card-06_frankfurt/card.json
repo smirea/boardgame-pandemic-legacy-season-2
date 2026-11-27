@@ -18,18 +18,22 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "Player deck back. No printed text. State 2 side A is the same back.",
-  "sideBSummary": "Frankfurt, blue, 50°6'39\"N 8°40'56\"E. Compass with no anchor. One covered SEARCH box. The name and coordinates repeat upside down along the bottom. P4-07b.",
-  "searchBoxes": [
-    {
-      "type": "search",
-      "stateRevealed": 2,
-      "isCompanion": true,
-      "companionName": "Messenger",
-      "opensDoors": [],
-      "effectSummary": "As a free action, while this card is in your hand, take Supply cubes from an adjacent location and place them into your location. The card does not say to discard it."
-    }
-  ],
+  "sideA": {
+    "text": "Player deck back. No printed text."
+  },
+  "sideB": {
+    "text": "FRANKFURT\n50°6'39\"N 8°40'56\"E\n\nSEARCH:\n[covered]\n\nThe bottom edge repeats FRANKFURT and 50°6'39\"N 8°40'56\"E upside down.\nP4-07b",
+    "searchBoxes": [
+      {
+        "id": "search",
+        "label": "SEARCH:",
+        "initially": "covered",
+        "revealedInState": 2,
+        "isCompanion": true,
+        "companionName": "Messenger"
+      }
+    ]
+  },
   "states": [
     {
       "state": 2,
@@ -38,7 +42,8 @@
         "sideA": "state-2-side-a.jpg",
         "sideB": "state-2-side-b.jpg"
       },
-      "summary": "SEARCH reveals Companion Messenger. As a free action, you may take Supply cubes from an adjacent location and place them into your location if this card is in your hand. P4-07b stays on the scratched face. Side A is still the Player deck back."
+      "revealedText": "SEARCH:\nCompanion:\nMessenger\nAs a free action, you may\ntake Supply cubes from an\nadjacent location and place\nthem into your location if you\nhave this card in your hand.",
+      "effect": "As a free action, while this card is in your hand, take Supply cubes from an adjacent location and place them into your location. The card does not say to discard it."
     }
   ],
   "mechanics": {

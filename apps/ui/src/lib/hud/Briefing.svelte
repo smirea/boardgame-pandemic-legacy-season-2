@@ -1,7 +1,8 @@
 <script lang="ts">
   import { feedback } from "@stefan.inc/feedback-engine/svelte";
   import { briefingSections, pack } from "@repo/game";
-  import type { BriefingEntry, Campaign } from "@repo/game";
+  import type { BriefingEntry, BriefingSource, Campaign } from "@repo/game";
+  import { doorReports, packageReports } from "#lib/cards/print.generated.ts";
   import BriefPiece from "./BriefPiece.svelte";
   import ObjectiveTag from "./ObjectiveTag.svelte";
   import RichText from "./RichText.svelte";
@@ -39,6 +40,18 @@
   const objectives = $derived(
     pack.objectives.filter((objective) => campaign.objectives.includes(objective.id)),
   );
+
+  function reportFor(from: BriefingSource): { title: string; paragraphs: string[] } | null {
+    if (from.t !== "seal") return null;
+    const doc =
+      from.seal.t === "package" ? packageReports[from.seal.id] : doorReports[from.seal.id];
+    if (!doc) return null;
+    const paragraphs = doc.text
+      .split(/\n{2,}/)
+      .map((p) => p.replace(/\s*\n\s*/g, " ").trim())
+      .filter(Boolean);
+    return paragraphs.length ? { title: doc.title, paragraphs } : null;
+  }
 </script>
 
 <div class="briefing" class:passive {@attach feedback("Briefing", () => ({ briefing }))}>
@@ -46,9 +59,18 @@
   <div class="sections">
     {#each sections as section, index (index)}
       {#if section.t === "card"}
+        {@const doc = reportFor(section.from)}
         <section class="card-text">
           <h3>{section.title}</h3>
           {#if section.text}<p><RichText text={section.text} /></p>{/if}
+          {#if doc}
+            <blockquote class="report" {@attach feedback("Printed report", () => ({ title: doc.title }))}>
+              <span class="report-title">{doc.title}</span>
+              {#each doc.paragraphs as paragraph, pIdx (pIdx)}
+                <p>{paragraph}</p>
+              {/each}
+            </blockquote>
+          {/if}
         </section>
       {:else}
         <section>
@@ -150,6 +172,26 @@
 
   p {
     margin: 0;
+  }
+
+  .report {
+    display: flex;
+    flex-direction: column;
+    gap: 0.32rem;
+    margin: 0.45rem 0 0;
+    padding: 0.45rem 0.65rem;
+    border-left: 2px solid #7c5c34;
+    background: rgb(42 32 23 / 0.05);
+    font-size: 0.86em;
+    line-height: 1.42;
+  }
+
+  .report-title {
+    color: var(--paper-muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
 
   .note {

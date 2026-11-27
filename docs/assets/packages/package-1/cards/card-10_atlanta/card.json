@@ -16,9 +16,13 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "Infection deck back. Biohazard symbol. No text and no printed code.",
-  "sideBSummary": "Blue Atlanta Infection card. City name down the left edge, blue southeastern map, green infection mark. No rules text. Code P1-12b.",
-  "searchBoxes": [],
+  "sideA": {
+    "text": "Infection deck back. No printed text."
+  },
+  "sideB": {
+    "text": "ATLANTA\nP1-12b",
+    "searchBoxes": []
+  },
   "states": [],
   "mechanics": {
     "opensDoors": [],
@@ -27,6 +31,8 @@
       "Blue Infection card for Atlanta. One copy.",
       "Goes to the reserve when the package is opened, and to the Game End area when Atlanta joins the grid."
     ],
-    "notes": ["Card id 909. Printed code P1-12b."]
+    "notes": [
+      "Card id 909. Printed code P1-12b."
+    ]
   }
 }

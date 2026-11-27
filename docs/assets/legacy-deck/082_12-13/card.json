@@ -17,13 +17,11 @@
     "stopOrPause": "NONE",
     "header": "CONGRATULATIONS!",
     "trigger": "",
-    "summary": "Congratulations. This is the end of the Legacy deck for Pandemic Legacy: Season 2. Updates and community info are at www.ZManGames.com.",
     "text": "CONGRATULATIONS!\n\nYou have reached the end of the Legacy deck for Pandemic Legacy: Season 2. We hope you enjoyed the experience. For the latest updates and community info, visit www.ZManGames.com.",
     "footer": ""
   },
   "sideB": {
     "header": "WARNING!",
-    "summary": "Warning. This is the end of the Legacy deck. Start from the other side of the deck.",
     "text": "WARNING!\n\nTHIS IS THE END OF THE LEGACY DECK.\nPLEASE START FROM THE OTHER SIDE OF THE DECK.",
     "footer": "",
     "scratchBoxes": []

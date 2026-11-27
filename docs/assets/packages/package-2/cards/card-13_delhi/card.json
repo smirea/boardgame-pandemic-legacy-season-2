@@ -18,18 +18,22 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "Player deck back. No printed text. State 2 side A is the same back.",
-  "sideBSummary": "Delhi, 28°42'15\"N 77°6'9\"E, code P2-13b. Compass has no anchor. One sealed box labeled SEARCH:. The city name and coordinates repeat upside down along the bottom.",
-  "searchBoxes": [
-    {
-      "type": "search",
-      "stateRevealed": 2,
-      "isCompanion": true,
-      "companionName": "Vector Control Technician",
-      "opensDoors": [],
-      "effectSummary": "Companion: Vector Control Technician. You do not get exposed when you begin your turn in an infested city if you have this card in your hand. The protection lasts while the card is held. It does not discard the card, and it does not name plague cubes or leaving a location."
-    }
-  ],
+  "sideA": {
+    "text": "Player deck back. No printed text."
+  },
+  "sideB": {
+    "text": "DELHI\n28°42'15\"N 77°6'9\"E\n\nSEARCH:\n[covered]\n\nThe bottom edge repeats DELHI and 28°42'15\"N 77°6'9\"E upside down.\nP2-13b",
+    "searchBoxes": [
+      {
+        "id": "search",
+        "label": "SEARCH:",
+        "initially": "covered",
+        "revealedInState": 2,
+        "isCompanion": true,
+        "companionName": "Vector Control Technician"
+      }
+    ]
+  },
   "states": [
     {
       "state": 2,
@@ -38,7 +42,8 @@
         "sideA": "state-2-side-a.jpg",
         "sideB": "state-2-side-b.jpg"
       },
-      "summary": "SEARCH is scratched and shows a portrait labeled Companion: Vector Control Technician. While this card is in your hand, you do not get exposed when you begin your turn in an infested city. Code P2-13b is unchanged. Side A is the player back."
+      "revealedText": "SEARCH:\nCompanion:\nVector Control Technician\nYou do not get exposed when\nyou begin your turn in an\ninfested city if you have this\ncard in your hand.",
+      "effect": "Companion: Vector Control Technician. You do not get exposed when you begin your turn in an infested city if you have this card in your hand. The protection lasts while the card is held. It does not discard the card, and it does not name plague cubes or leaving a location."
     }
   ],
   "mechanics": {

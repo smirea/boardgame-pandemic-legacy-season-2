@@ -16,13 +16,19 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "Player deck back. No printed text or code.",
-  "sideBSummary": "Unrationed Event named RENEWAL, code P2-02b. Place a character ability worth 2 or less on a Character card currently in play. The ability may be placed over a scar. Destroy this card after use. Play at any time. Not an action.",
-  "searchBoxes": [],
+  "sideA": {
+    "text": "Player deck back. No printed text."
+  },
+  "sideB": {
+    "text": "UNRATIONED EVENT\nRENEWAL\nPlace a character ability worth\n2 or less on a Character card\ncurrently in play. You may place\nthis ability over a scar.\nDestroy this card after use.\nP2-02b\nPlay at any time. Not an action.",
+    "searchBoxes": []
+  },
   "states": [],
   "mechanics": {
     "opensDoors": [],
-    "destroys": ["this card"],
+    "destroys": [
+      "this card"
+    ],
     "rules": [
       "Play at any time. Not an action.",
       "Place one character ability whose cost is 2 or less onto a Character card that is currently in play.",

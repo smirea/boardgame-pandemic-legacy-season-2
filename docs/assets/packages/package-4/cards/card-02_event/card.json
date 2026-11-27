@@ -17,9 +17,13 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "Player deck back. No printed text and no code.",
-  "sideBSummary": "Unrationed Event, Relocation (P4-02b). Destroy up to 3 copies of one specific city in the Infection discard pile. You may play this card between step 2 and step 3 of an epidemic. Destroy this card after use. Play at any time. Not an action.",
-  "searchBoxes": [],
+  "sideA": {
+    "text": "Player deck back. No printed text."
+  },
+  "sideB": {
+    "text": "UNRATIONED EVENT\nRELOCATION\nDestroy up to 3 copies of one\nspecific city in the Infection\ndiscard pile.\nYou may play this card between\nstep 2 and step 3 of an epidemic.\nDestroy this card after use.\nP4-02b\nPlay at any time. Not an action.",
+    "searchBoxes": []
+  },
   "states": [],
   "mechanics": {
     "opensDoors": [],

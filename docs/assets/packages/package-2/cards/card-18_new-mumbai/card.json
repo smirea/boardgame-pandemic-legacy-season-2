@@ -18,9 +18,13 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "Infection deck back. Red biohazard on a dark field. No printed text.",
-  "sideBSummary": "NEW MUMBAI printed vertically, code P2-18b. Map fragment, green ring, and a dashed white panel. Same face as index 17.",
-  "searchBoxes": [],
+  "sideA": {
+    "text": "Infection deck back. No printed text."
+  },
+  "sideB": {
+    "text": "NEW MUMBAI\nP2-18b",
+    "searchBoxes": []
+  },
   "states": [],
   "mechanics": {
     "opensDoors": [],

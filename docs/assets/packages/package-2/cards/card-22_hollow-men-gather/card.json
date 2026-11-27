@@ -16,9 +16,13 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "Infection deck back. Red biohazard on a dark field. No printed text.",
-  "sideBSummary": "HOLLOW MEN GATHER, code P2-21b. Same rules face as index 21. Drawing this card is not an Infection card draw. Draw onward to the next city card, add 1 Hollow Men figure there instead of infecting, and keep drawing through any further Gather cards. Only the first city revealed gets a figure.",
-  "searchBoxes": [],
+  "sideA": {
+    "text": "Infection deck back. No printed text."
+  },
+  "sideB": {
+    "text": "HOLLOW MEN GATHER\nDrawing this card is not an Infection card draw.\nDraw the next Infection card and add\na Hollow Men figure to it instead of\ninfecting it.\nIf you draw another Hollow Men\nGather card, keep drawing.\n(Add only 1 figure to the\nfirst city you reveal.)\nP2-21b",
+    "searchBoxes": []
+  },
   "states": [],
   "mechanics": {
     "opensDoors": [],

@@ -25,53 +25,12 @@
   ],
   "sections": [
     {
-      "heading": "1. Set Up the Board",
-      "mechanicsSummary": [
-        "Put supply cubes into the stockpile equal to the number on that month's supply track (on the board, directly under the objectives). Extra supply cubes go to the reserve, out of play.",
-        "From the reserve, take cards earned in earlier games that belong on the board. That includes objectives and turning points.",
-        "Turning points go in the Game End area. There are none in the prologue or at the start of January.",
-        "Objective cards go in the Objectives area.",
-        "Put the plague cubes on their printed spot on the board.",
-        "Incident marker starts on the 0 space of the Incident track.",
-        "Infection Rate marker starts on the leftmost 2 of the Infection Rate track.",
-        "Put a tracking token on the 0 space of each track on an Objective card.",
-        "Later games may add other pieces to place.",
-        "Set the supply centers beside the board."
-      ]
+      "heading": "Setup",
+      "text": "-MANUAL"
     },
     {
-      "heading": "2. Read the Legacy Deck",
-      "mechanicsSummary": [
-        "Read Legacy cards one at a time until a PAUSE or STOP card. They give the month's priorities plus any new rules or materials.",
-        "PAUSE: stop drawing until the current game is over.",
-        "STOP: do not draw again until setup of the next month."
-      ]
-    },
-    {
-      "heading": "3. Supply the Grid",
-      "mechanicsSummary": [
-        "Move every supply cube from the stockpile onto grid locations.",
-        "Each location may receive any number, including zero.",
-        "Once the grid is larger than the stockpile, the group chooses which locations are short."
-      ]
-    },
-    {
-      "heading": "4. Infect the Grid",
-      "mechanicsSummary": [
-        "Shuffle the Infection cards and flip 9.",
-        "For each flip, move 1 supply cube from that city back to the stockpile.",
-        "If that city has no supply cube, place a plague cube there and advance the Incident marker 1 space.",
-        "Flipped cards go to the Infection discard pile.",
-        "This whole step is temporary. Rule sticker D replaces it later."
-      ]
-    },
-    {
-      "heading": "6. Prepare the Player Deck and Deal Cards",
-      "mechanicsSummary": [
-        "Step 5 is not on this page. Its slot is rule sticker E on page 9, and the page says to skip it for now.",
-        "6a. As a group, choose which Rationed Event cards enter the Player deck. The number allowed equals the current rationing level: 4 in the prologue and at the start of January.",
-        "Unrationed events, once found, always enter the deck and do not count against the rationing limit."
-      ]
+      "heading": "Setup",
+      "text": "SET UP THE BOARD\nPut as many Supply cubes into the stockpile as the\nnumber shown on the supply track for that month\n(on the board right under objectives). Put any extra\nSupply cubes into the reserve, out of play.\nRULE STICKER B\nLook through the reserve and collect any cards from\nprevious games that go onto the board. This will\ninclude objectives and turning points. Place turning\npoints into the Game End area. (There are no turning\npoints in the prologue or at the start of January.)\nPlace Objective cards into the Objectives area.\nTracking\nRULE STICKER C\nSupply\nPlace the Plague cubes onto their location\non the board. Place the Incident marker on\nthe \"O\" space of the Incident track. Place\nthe Infection Rate marker on the left-most\n\"2\" space of the Infection Rate track.\nPut a Tracking token on the \"O\" space of\nIncident\nany tracks on Objective cards.\nmarker\nIn future games, there may be other\npieces to place.\nPlace the supply centers nearby.\nIncident\nREAD THE LEGACY DECK\nRead the Legacy deck, one card at\na time, until you get to a PAUSE or\nSTOP card. This will give you your\nSTOP\npriorities for the month and any new\nrules or materials. A PAUSE card means\nto stop drawing until the current game is\ncompleted. A STOP card means you don't\ndraw from the deck until the start of the next\ngame month.\nSUPPLY THE GRID\nPut all Supply cubes from the stockpile onto\nthe locations of the grid. You can place any number\nof Supply cubes (including zero) on each location.\nAs the grid grows, there might not be enough\nsupplies in the stockpile to fill all locations. Players will\nhave to decide which locations are in short supply.\n\nINFECT THE GRID\nShuffle the Infection cards and flip over 9 of\nthem. Move 1 Supply cube from the city\nmatching each flipped card back to the\nstockpile. If a card is flipped over and there\nare no Supply cubes in the city, instead place\na Plague cube and move the Incident marker\nforward 1 space on the Incident track. Place\nflipped cards into the Infection discard pile.\nRULE STICKER D will replace this rule.\nSÃO PAULO\nLONDON\nJACKSONVILLE\nCAIRO\nNEW YORK\nSÃO PAULO\ntoken\nOBJECTIVES\nBuild 3 supply centers\ntrack\n* * *\ntrack\n* ***\nSTOC\n15\nPlague cubes\nStockpile\nPREPARE THE PLAYER\nDECK AND DEAL CARDS\nba. As a group, decide which Rationed\nEvent cards to add to the Player deck.\nThe Player deck can have as many Rationed\nEvent cards as your current rationing level\n(4 in the prologue and start of January).\nIn future games you may find rationed and\nunrationed events. Unrationed events always go into\nthe deck and don't count toward rationing."
     }
   ],
   "tables": [
@@ -82,10 +41,22 @@
           "piece": "Stockpile",
           "starts": "Supply cubes equal to the month's supply track; extras to the reserve"
         },
-        { "piece": "Incident marker", "starts": "0" },
-        { "piece": "Infection Rate marker", "starts": "Leftmost space marked 2" },
-        { "piece": "Objective tracking tokens", "starts": "0 on each objective track" },
-        { "piece": "Initial Infection flips", "starts": "9 cards" }
+        {
+          "piece": "Incident marker",
+          "starts": "0"
+        },
+        {
+          "piece": "Infection Rate marker",
+          "starts": "Leftmost space marked 2"
+        },
+        {
+          "piece": "Objective tracking tokens",
+          "starts": "0 on each objective track"
+        },
+        {
+          "piece": "Initial Infection flips",
+          "starts": "9 cards"
+        }
       ]
     }
   ],
@@ -94,5 +65,6 @@
     "Infection-flip illustration: São Paulo, Lagos, Istanbul, London, Cairo, New York, Washington, Jacksonville, and a second São Paulo, with one gray cube being removed.",
     "PAUSE and STOP card backs beside step 2.",
     "Sample rationed event pictured at step 6a (Resilient Population): move 1 or 2 copies of one city from the Infection discard into the Game End area; may be played between steps 2 and 3 of an epidemic; any time; not an action."
-  ]
+  ],
+  "fullText": "-MANUAL\nSETUP\n\nSET UP THE BOARD\nPut as many Supply cubes into the stockpile as the\nnumber shown on the supply track for that month\n(on the board right under objectives). Put any extra\nSupply cubes into the reserve, out of play.\nRULE STICKER B\nLook through the reserve and collect any cards from\nprevious games that go onto the board. This will\ninclude objectives and turning points. Place turning\npoints into the Game End area. (There are no turning\npoints in the prologue or at the start of January.)\nPlace Objective cards into the Objectives area.\nTracking\nRULE STICKER C\nSupply\nPlace the Plague cubes onto their location\non the board. Place the Incident marker on\nthe \"O\" space of the Incident track. Place\nthe Infection Rate marker on the left-most\n\"2\" space of the Infection Rate track.\nPut a Tracking token on the \"O\" space of\nIncident\nany tracks on Objective cards.\nmarker\nIn future games, there may be other\npieces to place.\nPlace the supply centers nearby.\nIncident\nREAD THE LEGACY DECK\nRead the Legacy deck, one card at\na time, until you get to a PAUSE or\nSTOP card. This will give you your\nSTOP\npriorities for the month and any new\nrules or materials. A PAUSE card means\nto stop drawing until the current game is\ncompleted. A STOP card means you don't\ndraw from the deck until the start of the next\ngame month.\nSUPPLY THE GRID\nPut all Supply cubes from the stockpile onto\nthe locations of the grid. You can place any number\nof Supply cubes (including zero) on each location.\nAs the grid grows, there might not be enough\nsupplies in the stockpile to fill all locations. Players will\nhave to decide which locations are in short supply.\n\nINFECT THE GRID\nShuffle the Infection cards and flip over 9 of\nthem. Move 1 Supply cube from the city\nmatching each flipped card back to the\nstockpile. If a card is flipped over and there\nare no Supply cubes in the city, instead place\na Plague cube and move the Incident marker\nforward 1 space on the Incident track. Place\nflipped cards into the Infection discard pile.\nRULE STICKER D will replace this rule.\nSÃO PAULO\nLONDON\nJACKSONVILLE\nCAIRO\nNEW YORK\nSÃO PAULO\ntoken\nOBJECTIVES\nBuild 3 supply centers\ntrack\n* * *\ntrack\n* ***\nSTOC\n15\nPlague cubes\nStockpile\nPREPARE THE PLAYER\nDECK AND DEAL CARDS\nba. As a group, decide which Rationed\nEvent cards to add to the Player deck.\nThe Player deck can have as many Rationed\nEvent cards as your current rationing level\n(4 in the prologue and start of January).\nIn future games you may find rationed and\nunrationed events. Unrationed events always go into\nthe deck and don't count toward rationing."
 }

@@ -17,13 +17,11 @@
     "stopOrPause": "NONE",
     "header": "",
     "trigger": "",
-    "summary": "Rationed Event back. No card code and no rules.",
     "text": "",
     "footer": ""
   },
   "sideB": {
     "header": "RATIONED EVENT",
-    "summary": "Mobile Shelters: build 2 shelters anywhere on the grid for free. Play at any time. Not an action.",
     "text": "MOBILE SHELTERS\n\nBuild 2 shelters anywhere on the grid for free.\n\nPlay at any time. Not an action.",
     "footer": "Play at any time. Not an action.",
     "scratchBoxes": []
@@ -35,7 +33,9 @@
     "opensDoors": [],
     "opensPackages": [],
     "destroys": [],
-    "addsToPool": ["Mobile Shelters (Rationed Event)"],
+    "addsToPool": [
+      "Mobile Shelters (Rationed Event)"
+    ],
     "rules": [
       "Build 2 shelters anywhere on the grid for free.",
       "Play at any time. Not an action."

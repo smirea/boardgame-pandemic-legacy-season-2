@@ -18,9 +18,13 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "Infection deck back. Red biohazard on a dark field. No printed text.",
-  "sideBSummary": "BAGHDAD printed vertically, code P2-06b. Map fragment, green ring, and a dashed white panel. No coordinates and no rules text.",
-  "searchBoxes": [],
+  "sideA": {
+    "text": "Infection deck back. No printed text."
+  },
+  "sideB": {
+    "text": "BAGHDAD\nP2-06b",
+    "searchBoxes": []
+  },
   "states": [],
   "mechanics": {
     "opensDoors": [],

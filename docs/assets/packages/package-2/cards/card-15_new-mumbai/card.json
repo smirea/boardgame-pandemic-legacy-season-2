@@ -18,26 +18,26 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "Player deck back. No printed text. State 2 and state 4 side A are the same back. State 3 side A is a blank black image, not the player back.",
-  "sideBSummary": "New Mumbai, 19°2'43\"N 72°50'55\"E, code P2-15b. The compass carries an anchor, so the city is a port. Two sealed boxes, labeled SEARCH THE LAND: and SEARCH THE SEA:. The city name and coordinates repeat upside down along the bottom.",
-  "searchBoxes": [
-    {
-      "type": "land",
-      "stateRevealed": 2,
-      "isCompanion": false,
-      "companionName": null,
-      "opensDoors": [],
-      "effectSummary": "Gain 1 action. A Hollow Man by the water was drawing a family, mother and children, the father drawn as himself, and was crying. The searchers kept their distance. Immediate. No companion. Also visible when both boxes are open in state 4."
-    },
-    {
-      "type": "sea",
-      "stateRevealed": 3,
-      "isCompanion": false,
-      "companionName": null,
-      "opensDoors": ["65"],
-      "effectSummary": "A lost haven has been found and not yet reached. Open door 65 and add it to the board. If 65 is already open, gain 1 action. Also visible when both boxes are open in state 4."
-    }
-  ],
+  "sideA": {
+    "text": "Player deck back. No printed text."
+  },
+  "sideB": {
+    "text": "NEW MUMBAI\n19°2'43\"N 72°50'55\"E\n\nSEARCH THE LAND:\n[covered]\n\nSEARCH THE SEA:\n[covered]\n\nThe bottom edge repeats NEW MUMBAI and 19°2'43\"N 72°50'55\"E upside down.\nP2-15b",
+    "searchBoxes": [
+      {
+        "id": "search-land",
+        "label": "SEARCH THE LAND:",
+        "initially": "covered",
+        "revealedInState": 2
+      },
+      {
+        "id": "search-sea",
+        "label": "SEARCH THE SEA:",
+        "initially": "covered",
+        "revealedInState": 3
+      }
+    ]
+  },
   "states": [
     {
       "state": 2,
@@ -46,7 +46,8 @@
         "sideA": "state-2-side-a.jpg",
         "sideB": "state-2-side-b.jpg"
       },
-      "summary": "Land box only. A Hollow Man near the water was sketching a family and crying; the searchers kept their distance. Gain 1 action. The sea box stays sealed. Side A is the player back."
+      "revealedText": "SEARCH THE LAND:\nSaw one of the Hollow Men down near the water.\nHe was sketching, drawing pictures of a family.\nMother. Kids. The father was clearly an image of\nhim. He was crying silently. We kept our distance.\nGain 1 action.\nSEARCH THE SEA:",
+      "effect": "Gain 1 action. A Hollow Man by the water was drawing a family, mother and children, the father drawn as himself, and was crying. The searchers kept their distance. Immediate. No companion. Also visible when both boxes are open in state 4."
     },
     {
       "state": 3,
@@ -55,7 +56,8 @@
         "sideA": "state-3-side-a.jpg",
         "sideB": "state-3-side-b.jpg"
       },
-      "summary": "Sea box only. A lost haven is found but not yet accessed. Open 65 and add it to the board. If 65 is already open, gain 1 action. The land box stays sealed. Side A of this state is a blank black file, about 5 KB, not the player back."
+      "revealedText": "SEARCH THE LAND:\nSEARCH THE SEA:\nWe have found a lost haven!\nWe have not yet accessed it.\nOpen 65 and add it to the board. If you have\n, gain 1 action.\nalready opened 65",
+      "effect": "A lost haven has been found and not yet reached. Open door 65 and add it to the board. If 65 is already open, gain 1 action. Also visible when both boxes are open in state 4."
     },
     {
       "state": 4,
@@ -64,11 +66,14 @@
         "sideA": "state-4-side-a.jpg",
         "sideB": "state-4-side-b.jpg"
       },
-      "summary": "Both boxes open: land gives 1 action, and the sea opens door 65 or gives 1 action if 65 is already open. Side A is the player back. Code P2-15b is unchanged."
+      "revealedText": "SEARCH THE LAND:\nSaw one of the Hollow Men down near the water.\nHe was sketching, drawing pictures of a family.\nMother. Kids. The father was clearly an image of\nhim. He was crying silently. We kept our distance.\nGain 1 action.\nSEARCH THE SEA:\nWe have found a lost haven!\nWe have not yet accessed it.\nOpen\nand add it to the board. If you have\n, gain 1 action.\nalready opened 65",
+      "effect": "Gain 1 action. A Hollow Man by the water was drawing a family, mother and children, the father drawn as himself, and was crying. The searchers kept their distance. Immediate. No companion. Also visible when both boxes are open in state 4. A lost haven has been found and not yet reached. Open door 65 and add it to the board. If 65 is already open, gain 1 action. Also visible when both boxes are open in state 4."
     }
   ],
   "mechanics": {
-    "opensDoors": ["65"],
+    "opensDoors": [
+      "65"
+    ],
     "destroys": [],
     "rules": [
       "Black Player card for New Mumbai. Port, marked by the anchor.",

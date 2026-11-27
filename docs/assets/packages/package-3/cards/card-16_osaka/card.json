@@ -18,18 +18,22 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "Player deck back. Dark blue sunburst around a haven on the water. No text and no printed code.",
-  "sideBSummary": "Osaka, red Player card. Coordinates 34°41'38\"N 135°30'8\"E. The compass has an anchor, so the city is a port. One covered SEARCH box fills the map. The city name and coordinates repeat upside down along the bottom. Printed code P3-16b.",
-  "searchBoxes": [
-    {
-      "type": "search",
-      "stateRevealed": 2,
-      "isCompanion": true,
-      "companionName": "Local Resistance",
-      "opensDoors": [],
-      "effectSummary": "Companion Local Resistance. Play this card at any time to remove 1 Hollow Men figure from anywhere on the grid."
-    }
-  ],
+  "sideA": {
+    "text": "Player deck back. No printed text."
+  },
+  "sideB": {
+    "text": "OSAKA\n34°41'38\"N 135°30'8\"E\n\nSEARCH:\n[covered]\n\nThe bottom edge repeats OSAKA and 34°41'38\"N 135°30'8\"E upside down.\nP3-16b",
+    "searchBoxes": [
+      {
+        "id": "search",
+        "label": "SEARCH:",
+        "initially": "covered",
+        "revealedInState": 2,
+        "isCompanion": true,
+        "companionName": "Local Resistance"
+      }
+    ]
+  },
   "states": [
     {
       "state": 2,
@@ -38,7 +42,8 @@
         "sideA": "state-2-side-a.jpg",
         "sideB": "state-2-side-b.jpg"
       },
-      "summary": "Same Player back. The SEARCH box is scratched. Companion Local Resistance. Play this card at any time to remove 1 Hollow Men figure from anywhere on the grid."
+      "revealedText": "SEARCH:\nCompanion:\nLocal Resistance\nPlay this card at any time to\nremove 1 Hollow Men figure\nfrom anywhere on the grid.",
+      "effect": "Companion Local Resistance. Play this card at any time to remove 1 Hollow Men figure from anywhere on the grid."
     }
   ],
   "mechanics": {

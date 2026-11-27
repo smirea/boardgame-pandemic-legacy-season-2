@@ -18,9 +18,13 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "Player deck back. No printed text.",
-  "sideBSummary": "Baghdad, 33°18'46\"N 44°21'41\"E, code P2-04b. Regional map with a bullseye in the center. Compass has no anchor. No search box. The city name and coordinates repeat upside down along the bottom.",
-  "searchBoxes": [],
+  "sideA": {
+    "text": "Player deck back. No printed text."
+  },
+  "sideB": {
+    "text": "BAGHDAD\n33°18'46\"N 44°21'41\"E\n(City map. No search box.)\n(City name and coordinates repeat upside down along the bottom.)\nP2-04b",
+    "searchBoxes": []
+  },
   "states": [],
   "mechanics": {
     "opensDoors": [],
@@ -29,6 +33,8 @@
       "Second black Player card for Baghdad. Not a port. No search.",
       "The bullseye in the map is the player-card upgrade slot. One sticker."
     ],
-    "notes": ["The recon report puts this card on the Player discard pile with P2-03b."]
+    "notes": [
+      "The recon report puts this card on the Player discard pile with P2-03b."
+    ]
   }
 }

@@ -17,18 +17,22 @@
     "sideA": "side-a.jpg",
     "sideB": "side-b.jpg"
   },
-  "sideASummary": "Player deck back. No text and no printed code.",
-  "sideBSummary": "Yellow Mexico City Player card, 19°25'57\"N 99°7'60\"W. One covered SEARCH box. Not a port. This is Mexico City's only Player card. Code P1-15b.",
-  "searchBoxes": [
-    {
-      "type": "land",
-      "stateRevealed": 2,
-      "isCompanion": true,
-      "companionName": "Scout",
-      "opensDoors": [],
-      "effectSummary": "While this card is in your hand, as an action you may discard a City card, including this card, to draw a City card of the same color from the Player discard pile."
-    }
-  ],
+  "sideA": {
+    "text": "Player deck back. No printed text."
+  },
+  "sideB": {
+    "text": "MEXICO CITY\n19°25'57\"N 99°7'60\"W\n\nSEARCH:\n[covered]\n\nThe bottom edge repeats MEXICO CITY and 19°25'57\"N 99°7'60\"W upside down.\nP1-15b",
+    "searchBoxes": [
+      {
+        "id": "search",
+        "label": "SEARCH:",
+        "initially": "covered",
+        "revealedInState": 2,
+        "isCompanion": true,
+        "companionName": "Scout"
+      }
+    ]
+  },
   "states": [
     {
       "state": 2,
@@ -36,7 +40,8 @@
       "images": {
         "sideB": "state-2-side-b.jpg"
       },
-      "summary": "Companion: Scout. As an action, discard a City card (including this card) to draw a City card of the same color from the Player discard pile, if you have this card in your hand."
+      "revealedText": "SEARCH:\nCompanion:\nScout\nAs an action, you can discard\na City card (including this card)\nto draw a City card of the same\ncolor from the Player discard\npile, if you have this card in\nyour hane.",
+      "effect": "While this card is in your hand, as an action you may discard a City card, including this card, to draw a City card of the same color from the Player discard pile."
     }
   ],
   "mechanics": {
