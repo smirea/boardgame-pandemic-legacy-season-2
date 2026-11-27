@@ -166,14 +166,25 @@
 
     {#if reading && character}
       <!-- The whole character, grown out of the seat over the board while the pointer rests on it. -->
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
       <div
         class="big"
         data-testid="character-sheet"
+        onclick={(event) => {
+          if (
+            !(event.target as Element).closest(
+              "button, input, [data-testid='character-journal']",
+            )
+          )
+            onselect();
+        }}
         in:scale={{ start: 0.4, duration: 170, easing: cubicOut }}
         out:scale={{ start: 0.4, duration: 110, easing: cubicIn }}
       >
         <CharacterSheet
           {character}
+          campaign={world.campaign}
           tone={character.dead ? "dead" : "mine"}
           {color}
           side={right ? "right" : "left"}
@@ -363,7 +374,7 @@
     width: min(31rem, 46vw);
     aspect-ratio: 1.2;
     transform-origin: top left;
-    pointer-events: none;
+    pointer-events: auto;
   }
 
   .tr .big,

@@ -17,6 +17,7 @@
   import { feedback } from "@stefan.inc/feedback-engine/svelte";
   import { onMount } from "svelte";
   import Beacon from "#lib/Beacon.svelte";
+  import { jobProfiles } from "#lib/cards/print.generated.ts";
   import { figureUrl } from "#lib/characters/figures.ts";
   import type { FigureKey } from "#lib/characters/personas.ts";
   import { characterVoice } from "#lib/characters/voice.svelte.ts";
@@ -30,12 +31,14 @@
     arrival: Arrival;
     /** Steps the character down into its place among the pieces. */
     onnext: () => void;
+    /** Renames a newly arrived character on creation. */
+    onrename?: (name: string) => void;
     /** Leaving: everything but the figure, which flies, is gone. */
     leaving: boolean;
     element?: HTMLElement;
   };
 
-  let { arrival, onnext, leaving, element = $bindable() }: Props = $props();
+  let { arrival, onnext, onrename, leaving, element = $bindable() }: Props = $props();
 
   const traits = $derived(
     arrival.character
@@ -45,8 +48,22 @@
   const empty = $derived(
     arrival.character ? arrival.character.slots.filter((slot) => slot === null).length : 0,
   );
+  const profile = $derived(jobProfiles[arrival.job] ?? null);
   const stones = $derived(traits.length + empty);
-  const called = $derived(arrival.character?.name ?? arrival.occupation);
+  const initialName = $derived(arrival.character?.name ?? arrival.occupation);
+  let draftName = $state<string | null>(null);
+  const called = $derived(draftName ?? initialName);
+
+  function commitName() {
+    const trimmed = called.trim();
+    if (trimmed && arrival.character && trimmed !== arrival.character.name) onrename?.(trimmed);
+    draftName = null;
+  }
+
+  function advance() {
+    commitName();
+    onnext();
+  }
 
   const still =
     typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -78,8 +95,34 @@
   <p class="kicker"><span>A new character joins the roster</span></p>
 
   <div class="card">
-    <Sheet figure={figureUrl(arrival.figure)} tone="mine" color="#e2c36a" fitted={called}>
-      {#snippet name()}{arrival.character?.name ?? arrival.occupation}{/snippet}
+    <Sheet figure={figureUrl(arrival.figure)} tone="mine" color="#e2c36a" fitted={called || arrival.occupation}>
+      {#snippet name()}
+        {#if arrival.character && onrename}
+          <label class="rename">
+            <input
+              value={called}
+              maxlength="24"
+              aria-label="Name this character"
+              placeholder={arrival.occupation}
+              oninput={(event) => (draftName = event.currentTarget.value)}
+              onblur={commitName}
+              onkeydown={(event) => {
+                if (event.key === "Enter") event.currentTarget.blur();
+                if (event.key === "Escape") {
+                  draftName = null;
+                  event.currentTarget.blur();
+                }
+              }}
+              data-testid="newcomer-name"
+            />
+            <svg class="pen" viewBox="0 0 16 16" aria-hidden="true"
+              ><path d="M11.3 1.7l3 3-8.6 8.6-3.8.8.8-3.8z" /></svg
+            >
+          </label>
+        {:else}
+          {called}
+        {/if}
+      {/snippet}
       {#snippet meta()}
         {#if arrival.character}
           <Exposure
@@ -91,8 +134,12 @@
           canRename={() => false}
           rename={() => {}}
         />
+        {#if profile?.age}<span class="age">Age {profile.age}</span>{/if}
       {/snippet}
       {#snippet arch()}
+        {#if profile?.text}
+          <p class="bio" data-testid="newcomer-bio">{profile.text}</p>
+        {/if}
         {#each traits as trait, index (`${trait.kind}:${trait.name}:${index}`)}
           <TraitPanel
             at={(index + 0.5) / stones}
@@ -112,7 +159,7 @@
     </Sheet>
   </div>
 
-  <button class="next" onclick={onnext} data-testid="newcomer-next">
+  <button class="next" onclick={advance} data-testid="newcomer-next">
     Next<Beacon gap="0.2rem" turns={3} />
   </button>
 </div>
@@ -232,6 +279,68 @@
     font-family: var(--font-display);
     white-space: nowrap;
     animation: rise 600ms ease 900ms both;
+  }
+
+  .rename {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.2em;
+    max-width: 100%;
+    cursor: text;
+    pointer-events: auto;
+  }
+
+  .rename input {
+    field-sizing: content;
+    min-width: 3ch;
+    max-width: 100%;
+    padding: 0;
+    border: 0;
+    border-bottom: 1px dashed rgb(226 195 106 / 0.5);
+    background: none;
+    color: inherit;
+    font: inherit;
+    line-height: inherit;
+    text-shadow: inherit;
+  }
+
+  .rename input:focus {
+    border-bottom-color: #ffe293;
+    outline: none;
+  }
+
+  .rename .pen {
+    flex: none;
+    width: 0.4em;
+    height: 0.4em;
+    fill: #e9cf8e;
+    opacity: 0.75;
+  }
+
+  .age {
+    flex: none;
+    padding: 0.08em 0.5em;
+    border: 1px solid rgb(226 195 106 / 0.42);
+    border-radius: 999px;
+    background: rgb(28 20 10 / 0.8);
+    color: #f3dfb0;
+    font-size: 0.72em;
+    font-weight: 700;
+    text-shadow: none;
+  }
+
+  .bio {
+    flex: none;
+    margin: 0 0 0.4cqh;
+    padding: 1.2cqh 1.8cqw;
+    border-left: 0.45cqw solid rgb(226 195 106 / 0.65);
+    border-radius: 0.8cqh;
+    background: rgb(20 15 10 / 0.82);
+    color: #f1e3c4;
+    font-size: 3.1cqh;
+    font-style: italic;
+    line-height: 1.35;
+    text-shadow: none;
   }
 
   .next {

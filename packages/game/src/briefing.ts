@@ -36,7 +36,7 @@ export const ruleBriefs: Partial<Record<RuleId, string>> = {
   labBreakthroughs:
     "Each lab found gives its breakthrough. Opal: making supplies at a haven or supply center takes 1 more cube. Jade: an Epidemic removes only 1 cube from the city it strikes. Topaz: when a city would lose a cube to an infection, any player may discard a City card of its colour to keep it.",
   carrier:
-    "A new action at Lake Baikal, Take the sample. That character becomes the carrier. The carrier moves only by Drive or Ferry, must discard a City card of the colour of each city it enters, and dies when the game ends.",
+    "A new action at Lake Baikal, Take the sample. That character becomes the carrier. The carrier moves only by Drive or Ferry, must discard a City card of the colour of each city they enter, and dies when the game ends.",
 };
 
 /** The heading each kind of unlock is grouped under, in a briefing and in the playtest lab's status. */

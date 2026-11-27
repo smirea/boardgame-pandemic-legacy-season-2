@@ -15,11 +15,16 @@
 
   let { scene, color, epitaph }: Props = $props();
 
-  const VERDICT = {
-    empty: { title: "Nothing", text: "The box is empty." },
-    scar: { title: "A scar", text: "They carry this one for good." },
-    skull: { title: "Dead", text: "The plague takes them." },
-  } as const;
+  function verdictOf(result: "empty" | "scar" | "skull", name: string) {
+    switch (result) {
+      case "empty":
+        return { title: "Nothing", text: "The box is empty." };
+      case "scar":
+        return { title: "A scar", text: `${name} carries this scar for good.` };
+      case "skull":
+        return { title: "Dead", text: `The plague claims ${name}.` };
+    }
+  }
   const side = $derived(
     document.querySelector(`.place[data-seat="${scene.who.seat}"]`)?.matches(".tr, .br")
       ? "right"
@@ -43,6 +48,7 @@
   {@attach feedback("Fate", () => ({ ...scene, who: scene.who.name }))}
 >
   {#if scene.t === "scratch"}
+    {@const verdict = verdictOf(scene.result, scene.who.name)}
     <div class="stack" in:scale={{ start: 0.85, duration: 380, easing: backOut }}>
       <span class="kicker">Exposed</span>
       <div class="card">
@@ -51,6 +57,7 @@
           tone="mine"
           {color}
           {side}
+          showJournal={false}
           label="Exposed character"
           exposure={{
             boxes: scene.track.map((box) => (box === "hidden" ? "sealed" : box)),
@@ -60,8 +67,8 @@
         />
       </div>
       <p class="verdict" class:shown={scene.stage === "open"} data-testid="fate-verdict">
-        <b>{VERDICT[scene.result].title}</b>
-        <span>{VERDICT[scene.result].text}</span>
+        <b>{verdict.title}</b>
+        <span>{verdict.text}</span>
       </p>
     </div>
   {:else}
@@ -73,6 +80,7 @@
           tone="dead"
           {color}
           {side}
+          showJournal={false}
           label="Fallen character"
         >
           {#snippet base()}<span class="where">Died in {placed(scene.at, scene.month)}</span

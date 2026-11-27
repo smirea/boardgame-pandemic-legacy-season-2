@@ -818,6 +818,7 @@
     return { live: inPlay, discarded: 0, trashed: Math.max(0, total - inPlay) };
   });
   setContext("epidemic-wearing-off", () => campaign.rules.includes("epidemicFromStorage"));
+  setContext("campaign", () => campaign);
   const hoveredTargets = $derived.by(() => {
     const targets = hoveredCards.map((card) => cardTargets(world, snap.phase, card));
     return {

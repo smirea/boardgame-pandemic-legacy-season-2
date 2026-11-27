@@ -224,11 +224,14 @@
         >
           <CharacterSheet
             {character}
+            {campaign}
             tone={holder === player ? "mine" : holder ? "taken" : "free"}
             {color}
             toggle={() => (holder === player ? release(character) : take(character))}
             {canRename}
             rename={renameHaven}
+            onrenameCharacter={(name) =>
+              send({ type: "RENAME_CHARACTER", character: character.id, name })}
           >
             {#snippet over()}
               {#if holder === player && !(character.job && jobFigure(character.job))}

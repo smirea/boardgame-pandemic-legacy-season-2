@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { feedback } from "@stefan.inc/feedback-engine/svelte";
   import type { Snippet } from "svelte";
   import { fitGroup, fitText } from "#lib/cards/fit.ts";
 
@@ -27,6 +28,10 @@
     over?: Snippet;
     /** The whole card as one button, laid under everything that takes clicks of its own. */
     hit?: Snippet;
+    /** Full-card character journal sliding over the abilities arch. */
+    journal?: Snippet;
+    journalOpen?: boolean;
+    onToggleJournal?: () => void;
     /** The text the name is fitted to. */
     fitted: string;
   };
@@ -43,12 +48,15 @@
     base,
     over,
     hit,
+    journal,
+    journalOpen = false,
+    onToggleJournal,
     fitted,
   }: Props = $props();
 </script>
 
 <!-- The card has no face of its own: the figure, the cut under it and the arch of panels stand on the table. -->
-<div class="sheet {tone} {side}" style:--seat={color ?? "#e7dcc6"}>
+<div class="sheet {tone} {side}" class:has-journal={Boolean(journal && onToggleJournal)} style:--seat={color ?? "#e7dcc6"}>
   {@render hit?.()}
   <div class="figure">
     {#key figure}
@@ -61,11 +69,47 @@
     <path class="notch" d="M62 85.6 l2.4 -2.4 l2.4 2.4 l-2.4 2.4z" />
   </svg>
   {#if over}<div class="over">{@render over()}</div>{/if}
+  {#if journal && onToggleJournal}
+    <button
+      type="button"
+      class="journal-toggle"
+      class:open={journalOpen}
+      aria-label={journalOpen ? "Close character journal" : "Open character journal"}
+      aria-expanded={journalOpen}
+      data-testid="journal-toggle"
+      onclick={(event) => {
+        event.stopPropagation();
+        onToggleJournal();
+      }}
+      {@attach feedback("Character journal toggle", () => ({ open: journalOpen }))}
+    >
+      <svg viewBox="0 0 20 20" aria-hidden="true">
+        <path
+          d="M4.2 3.4h9.6a1.4 1.4 0 0 1 1.4 1.4v10.8a1.4 1.4 0 0 1-1.4 1.4H4.2a1 1 0 0 1-1-1V4.4a1 1 0 0 1 1-1zm2.1 0v13.6m2.6-10h3.8m-3.8 3h3.8m-3.8 3h2.6"
+        />
+      </svg>
+    </button>
+  {/if}
   <div class="base">{@render base()}</div>
   <div class="info">
     <div class="name" {@attach fitText(fitted, { across: true, min: 0.45 })}>{@render name()}</div>
     <div class="meta">{@render meta()}</div>
-    <div class="arch" {@attach fitGroup({ max: 0.56, min: 0.26 })}>{@render arch()}</div>
+    <div class="arch-stage">
+      <div class="arch" {@attach fitGroup({ max: 0.56, min: 0.26 })}>{@render arch()}</div>
+      {#if journal}
+        <aside
+          class="journal-drawer"
+          class:open={journalOpen}
+          aria-label="Character journal"
+          aria-hidden={!journalOpen}
+          inert={!journalOpen}
+          data-testid="character-journal"
+          {@attach feedback("Character journal", () => ({ open: journalOpen }))}
+        >
+          {@render journal()}
+        </aside>
+      {/if}
+    </div>
   </div>
 </div>
 
@@ -213,6 +257,59 @@
     font-size: 4.2cqh;
   }
 
+  .has-journal:not(.right) .base {
+    left: 8.6cqw;
+    max-width: 38cqw;
+  }
+
+  .journal-toggle {
+    position: absolute;
+    left: 1.2cqw;
+    bottom: 0.8cqh;
+    z-index: 5;
+    display: grid;
+    place-items: center;
+    width: 6.2cqh;
+    height: 6.2cqh;
+    padding: 0;
+    border: 1px solid rgb(235 220 190 / 0.32);
+    border-radius: 1.2cqh;
+    background: rgb(18 14 10 / 0.88);
+    color: #e7dcc6;
+    cursor: pointer;
+    pointer-events: auto;
+    transition:
+      transform 160ms ease,
+      opacity 160ms ease,
+      border-color 160ms ease,
+      background-color 160ms ease;
+  }
+
+  .journal-toggle svg {
+    width: 62%;
+    height: 62%;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .journal-toggle:hover,
+  .journal-toggle:focus-visible {
+    border-color: var(--seat);
+    background: rgb(32 25 17 / 0.96);
+    color: #fff3d6;
+    outline: none;
+    transform: translateY(-0.3cqh);
+  }
+
+  .journal-toggle.open {
+    border-color: var(--seat);
+    background: color-mix(in srgb, var(--seat) 28%, rgb(20 15 10 / 0.96));
+    color: #fff6df;
+  }
+
   .right .over {
     right: 0;
     left: auto;
@@ -270,6 +367,16 @@
     font-size: 3.9cqh;
   }
 
+  .arch-stage {
+    position: relative;
+    display: flex;
+    flex: 1;
+    align-self: stretch;
+    min-height: 0;
+    margin-top: 2.4cqh;
+    overflow: hidden;
+  }
+
   .arch {
     display: flex;
     flex: 1;
@@ -278,7 +385,6 @@
     gap: 1.3cqh;
     align-self: stretch;
     min-height: 0;
-    margin-top: 2.4cqh;
     text-align: left;
   }
 
@@ -290,5 +396,39 @@
 
   .taken .arch {
     opacity: 0.78;
+  }
+
+  .journal-drawer {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    display: flex;
+    flex-direction: column;
+    gap: 1.6cqh;
+    padding: 2.4cqh 2.8cqw;
+    border: 1px solid color-mix(in srgb, var(--seat) 45%, rgb(235 220 190 / 0.25));
+    border-radius: 1.4cqh;
+    background: linear-gradient(180deg, rgb(26 20 14 / 0.96), rgb(18 13 9 / 0.98));
+    box-shadow:
+      inset 0 0 0 1px rgb(255 244 218 / 0.06),
+      0 1.2cqh 2.8cqh rgb(0 0 0 / 0.65);
+    color: #efe3cb;
+    font-size: 3.1cqh;
+    line-height: 1.38;
+    text-align: left;
+    text-shadow: none;
+    overflow-y: auto;
+    opacity: 0;
+    transform: translateX(-104%);
+    pointer-events: none;
+    transition:
+      transform 240ms cubic-bezier(0.2, 0.9, 0.3, 1),
+      opacity 200ms ease;
+  }
+
+  .journal-drawer.open {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
   }
 </style>

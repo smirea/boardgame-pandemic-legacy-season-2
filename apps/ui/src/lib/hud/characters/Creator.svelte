@@ -4,6 +4,7 @@
   import type { CityId, Command, JobId, PlayerId, PublicState } from "@repo/game";
   import { flip } from "svelte/animate";
   import { fade, fly } from "svelte/transition";
+  import { jobProfiles } from "#lib/cards/print.generated.ts";
   import { figureUrl, jobFigure, UNKNOWN_FIGURE } from "#lib/characters/figures.ts";
   import type { FigureKey } from "#lib/characters/personas.ts";
   import { characterVoice } from "#lib/characters/voice.svelte.ts";
@@ -82,6 +83,7 @@
       })),
   );
   const job = $derived(jobs.find((option) => option.id === draft.job) ?? null);
+  const jobProfile = $derived(job ? (jobProfiles[job.id] ?? null) : null);
   const own = $derived(job ? jobFigure(job.id) : null);
   const fixedHome = $derived(job ? homeOf(job.id) : null);
   const home = $derived(fixedHome ?? draft.home);
@@ -188,9 +190,13 @@
             bind:open={picking}
           />
         </span>
+        {#if jobProfile?.age}<span class="age">Age {jobProfile.age}</span>{/if}
       {/if}
     {/snippet}
     {#snippet arch()}
+      {#if jobProfile?.text}
+        <p class="bio">{jobProfile.text}</p>
+      {/if}
       {#each shownJobs as option, index (option.id)}
         <div
           class="stone"
@@ -286,6 +292,32 @@
   .home {
     display: inline-flex;
     min-width: 0;
+  }
+
+  .age {
+    flex: none;
+    padding: 0.06em 0.45em;
+    border: 1px solid rgb(226 195 106 / 0.4);
+    border-radius: 999px;
+    background: rgb(22 17 11 / 0.8);
+    color: #f3dfb0;
+    font-size: 0.72em;
+    font-weight: 700;
+    text-shadow: none;
+  }
+
+  .bio {
+    flex: none;
+    margin: 0 0 0.4cqh;
+    padding: 1cqh 1.6cqw;
+    border-left: 0.4cqw solid rgb(226 195 106 / 0.6);
+    border-radius: 0.7cqh;
+    background: rgb(20 15 10 / 0.82);
+    color: #f1e3c4;
+    font-size: 2.9cqh;
+    font-style: italic;
+    line-height: 1.32;
+    text-shadow: none;
   }
 
   .stone {

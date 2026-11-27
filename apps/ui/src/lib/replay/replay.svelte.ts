@@ -86,6 +86,8 @@ export function commandLabel(
       return { who: null, text: `Rationing set to ${command.value}` };
     case "RENAME_HAVEN":
       return { who: null, text: `Haven named ${command.name}` };
+    case "RENAME_CHARACTER":
+      return { who: null, text: `Character named ${command.name}` };
     case "BEGIN_CAMPAIGN":
       return { who: null, text: "The campaign begins" };
     case "SEAT": {

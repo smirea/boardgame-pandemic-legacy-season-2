@@ -415,7 +415,7 @@ const specs: { [K in Action["a"]]: Spec<Extract<Action, { a: K }>> } = {
       if (!Number.isInteger(count) || count < 1 || count > ctx.me.supplies)
         return "You do not hold that many cubes";
       if (trait(ctx, "grasping") && ctx.me.supplies - count < 2)
-        return "This character keeps its last 2 cubes";
+        return "This character keeps their last 2 cubes";
       if (!to || to === ctx.here) return ok;
       return trait(ctx, "courier") && neighbours(ctx.campaign, ctx.here).includes(to)
         ? ok

@@ -4091,4 +4091,49 @@ describe("card states, improvements and companion audit", () => {
     expect(gameOf(actor).playerDiscard).not.toContain(unrationed);
     expect(worldOf(actor).campaign.playerCards[unrationed]).toBeUndefined();
   });
+
+  test("characters can be renamed in the lobby or while a briefing is open, never mid-game without one", () => {
+    const actor = createGameActor({ seed: 7 }).start();
+    const haven = pack.cities.find((entry) => entry.kind === "haven" && !entry.lost)!.id;
+    send(actor, { type: "CREATE_CHARACTER", name: "Ada", job: "administrator", home: haven });
+    send(actor, { type: "CREATE_CHARACTER", name: "Ben", job: "farmer", home: haven });
+    const [ada, ben] = Object.values(worldOf(actor).campaign.characters);
+
+    send(actor, { type: "RENAME_CHARACTER", character: ada!.id, name: "  Mara  " });
+    expect(worldOf(actor).campaign.characters[ada!.id]!.name).toBe("Mara");
+    expect(
+      reject(worldOf(actor), phase(actor), {
+        type: "RENAME_CHARACTER",
+        character: ada!.id,
+        name: "   ",
+      }),
+    ).toBe("Names run from 1 to 24 characters");
+
+    send(actor, {
+      type: "START_GAME",
+      seating: [
+        { seat: A, character: ada!.id },
+        { seat: B, character: ben!.id },
+      ],
+    });
+    expect(
+      reject(worldOf(actor), phase(actor), {
+        type: "RENAME_CHARACTER",
+        character: ada!.id,
+        name: "Nope",
+      }),
+    ).toBe("Not available right now");
+
+    const briefed = late((world) => {
+      world.campaign.briefing.push({
+        t: "card",
+        title: "Door 18",
+        text: null,
+        from: { t: "seal", seal: { t: "door", id: "18" } },
+      });
+    });
+    const who = character(worldOf(briefed), A);
+    send(briefed, { type: "RENAME_CHARACTER", character: who.id, name: "Dr. Elena" });
+    expect(worldOf(briefed).campaign.characters[who.id]!.name).toBe("Dr. Elena");
+  });
 });

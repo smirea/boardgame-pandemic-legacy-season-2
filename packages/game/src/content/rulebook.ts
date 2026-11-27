@@ -363,7 +363,7 @@ export const RULEBOOK: RuleChapter[] = [
             `A character has a name, a home haven, a job, ${numbers.characterSlots} slots for abilities and scars, and an exposure track of ${numbers.exposureBoxes} boxes to scratch. Under each box is nothing, a scar or a skull, hidden until scratched. A character holds any number of supply cubes.`,
           ),
           p(
-            "Any living character may be played each game, at its home haven. Characters found during the campaign come with their job and home.",
+            "Any living character may be played each game, at their home haven. Characters found during the campaign come with their job and home.",
           ),
         ],
       },
@@ -371,7 +371,7 @@ export const RULEBOOK: RuleChapter[] = [
         id: "exposure",
         title: "Exposure",
         blocks: [
-          p("When a character is exposed, scratch the leftmost unscratched box on its track."),
+          p("When a character is exposed, scratch the leftmost unscratched box on their track."),
           list([
             "Empty: nothing happens.",
             "Scar: the character takes a scar.",
@@ -398,9 +398,9 @@ export const RULEBOOK: RuleChapter[] = [
           list(
             [
               "Write the place of death. The character is never played again.",
-              "Discard its hand and return its cubes to the stockpile.",
-              "Its player loses the rest of the actions this turn, but still draws and infects.",
-              "The player takes another living character not in play, at its home, or else a haven worker at any haven on the grid.",
+              "Discard their hand and return their cubes to the stockpile.",
+              "Their player loses the rest of their actions this turn, but still draws and infects.",
+              "The player takes another living character not in play, at their home, or else a haven worker at any haven on the grid.",
             ],
             true,
           ),
@@ -411,7 +411,7 @@ export const RULEBOOK: RuleChapter[] = [
         title: "Haven workers",
         blocks: [
           p(
-            "A haven worker starts at a haven and has no job, abilities or scars. When exposed, it discards its hand, loses the rest of its actions and goes back to its haven.",
+            "A haven worker starts at any haven and has no job, abilities or scars. When exposed, they discard their hand, lose any remaining actions, and start their next turn in any haven on the grid.",
           ),
         ],
       },
@@ -514,7 +514,7 @@ export const RULEBOOK: RuleChapter[] = [
       {
         id: "setup-8",
         title: "8. Choose characters",
-        blocks: [p("Each player takes a living character and puts its pawn on its home haven.")],
+        blocks: [p("Each player takes a living character and puts their pawn on their home haven.")],
       },
       {
         id: "setup-9",
@@ -547,10 +547,10 @@ export const RULEBOOK: RuleChapter[] = [
         title: "Check for exposure",
         blocks: [
           p(
-            "A character that starts its turn in a location with any Plague cubes is exposed once.",
+            "A character who starts their turn in a location with any Plague cubes is exposed once.",
           ),
           p(
-            "A character that starts its turn in an infested city is exposed once. With Plague cubes there too, it is still exposed only once.",
+            "A character who starts their turn in an infested city is exposed once. With Plague cubes there too, they are still exposed only once.",
             { sticker: "F" },
           ),
         ],
@@ -695,7 +695,7 @@ export const RULEBOOK: RuleChapter[] = [
           ),
           term(
             "Self-Infect:",
-            `at the Pearl lab (Lake Baikal), use one of the sample’s ${numbers.selfInfectDoses} doses: scratch exposure boxes until the first scar or skull. A skull kills the character. A scar makes the character the carrier, a scar that covers two slots (empty slots first, then abilities). The carrier moves only by Drive or Ferry, discards a City card of the colour of each city it enters, and dies when the game ends.`,
+            `at the Pearl lab (Lake Baikal), use one of the sample’s ${numbers.selfInfectDoses} doses: scratch exposure boxes until the first scar or skull. A skull kills the character. A scar makes the character the carrier, a scar that covers two slots (empty slots first, then abilities). The carrier moves only by Drive or Ferry, discards a City card of the colour of each city they enter, and dies when the game ends.`,
             { sticker: "Q", count: "carrier" },
           ),
         ],

@@ -998,7 +998,15 @@
 
     {#if arrival}
       {#key arrival.key}
-        <Newcomer {arrival} onnext={() => void land()} leaving={landing} bind:element={newcomerEl} />
+        <Newcomer
+          {arrival}
+          onnext={() => void land()}
+          onrename={arrival.character
+            ? (name) => send({ type: "RENAME_CHARACTER", character: arrival.character!.id, name })
+            : undefined}
+          leaving={landing}
+          bind:element={newcomerEl}
+        />
       {/key}
     {/if}
 

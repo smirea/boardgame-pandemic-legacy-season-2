@@ -106,7 +106,14 @@
   <div class="card" {@attach grow}>
     <span class="kicker">{mine ? "Your turn" : `${name}'s turn`}</span>
     {#if character}
-      <CharacterSheet {character} tone="mine" {color} {side} label="Next turn card" />
+      <CharacterSheet
+        {character}
+        tone="mine"
+        {color}
+        {side}
+        showJournal={false}
+        label="Next turn card"
+      />
     {:else}
       <strong>{name}</strong>
     {/if}

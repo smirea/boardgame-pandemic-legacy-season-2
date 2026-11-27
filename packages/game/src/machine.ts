@@ -73,6 +73,7 @@ export type Command =
     }
   | { type: "SET_RATIONING"; value: number }
   | { type: "RENAME_HAVEN"; city: CityId; name: string }
+  | { type: "RENAME_CHARACTER"; character: CharacterId; name: string }
   /** Leaves the prologue, which may be played any number of times, and starts January. */
   | { type: "BEGIN_CAMPAIGN" }
   /** Puts a character or a haven worker in a seat for the next game, or empties the seat. Every player sees the same seats. */
@@ -198,6 +199,13 @@ export function reject(world: World, phase: Phase, command: Command): string | n
       return command.name.trim().length > 0 && command.name.length <= 24
         ? inPhase("lobby")
         : "Names run from 1 to 24 characters";
+    }
+    case "RENAME_CHARACTER": {
+      const character = campaign.characters[command.character];
+      if (!character || character.dead || character.worker) return "Pick a living character";
+      if (command.name.trim().length === 0 || command.name.length > 24)
+        return "Names run from 1 to 24 characters";
+      return phase === "lobby" || campaign.briefing.length > 0 ? null : "Not available right now";
     }
     case "BEGIN_CAMPAIGN":
       return campaign.month === 0 ? inPhase("lobby") : "The campaign has already begun";
@@ -607,6 +615,12 @@ export const gameMachine = setup({
         world.campaign.names[city] = name.trim();
       }),
     ),
+    renameCharacter: assign(
+      change((world, event) => {
+        const { character, name } = event as Of<"RENAME_CHARACTER">;
+        world.campaign.characters[character]!.name = name.trim();
+      }),
+    ),
     beginCampaign: assign(
       change((world) => {
         world.campaign.month = 1;
@@ -862,6 +876,10 @@ export const gameMachine = setup({
     ACK_BRIEFING: { actions: "ackBriefing" },
     BRIEFING_STEP: { guard: { type: "legal", params: "lobby" }, actions: "table" },
     BRIEFING_READY: { guard: { type: "legal", params: "lobby" }, actions: "table" },
+    RENAME_CHARACTER: {
+      guard: { type: "legal", params: "playing.actions" },
+      actions: "renameCharacter",
+    },
   },
   states: {
     lobby: {
@@ -870,6 +888,7 @@ export const gameMachine = setup({
         SET_RATIONING: { guard: { type: "legal", params: "lobby" }, actions: "setRationing" },
         BEGIN_CAMPAIGN: { guard: { type: "legal", params: "lobby" }, actions: "beginCampaign" },
         RENAME_HAVEN: { guard: { type: "legal", params: "lobby" }, actions: "renameHaven" },
+        RENAME_CHARACTER: { guard: { type: "legal", params: "lobby" }, actions: "renameCharacter" },
         SEAT: { guard: { type: "legal", params: "lobby" }, actions: "seat" },
         START_GAME: {
           guard: { type: "legal", params: "lobby" },
