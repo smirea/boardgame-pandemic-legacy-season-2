@@ -4,7 +4,7 @@ import { sealKey } from "./content/types";
 import { documentedEdges } from "./content/world";
 import { gridCityCount, hasEdge } from "./helpers";
 import type { CityId } from "./ids";
-import { applyUnlock, createCharacter, newCampaign, openSeal, readLegacy } from "./legacy";
+import { applyUnlock, createCharacter, newCampaign, openSeal, readCard, readLegacy } from "./legacy";
 import type { Save } from "./machine";
 import type { World } from "./state";
 import { newTable } from "./table";
@@ -112,6 +112,26 @@ export function campaignAt(
     cy!.slots[0] = { kind: "ability", id: "courier" };
   }
   return { v: 1, phase: "lobby", world };
+}
+
+/**
+ * The campaign as it stands when the Legacy deck is read from card `index`: the months before won as `campaignAt`
+ * plays them, the cards of its month before `index` already read, and the reading from `index` to the next halt
+ * waiting on the table to be unpacked. The two Prologue cards are in play from the start and never read.
+ */
+export function readingFrom(index: number): Save {
+  const card = pack.legacyDeck[index];
+  if (!card || card.month === 0) throw new Error(`No Legacy reading starts at card ${index}`);
+  const save = campaignAt(card.month);
+  const { world } = save;
+  const campaign = world.campaign;
+  if (campaign.legacyIndex > index)
+    throw new Error(`Card ${card.id} was read before its month's lobby`);
+  while (campaign.legacyIndex < index) readCard(world, pack.legacyDeck[campaign.legacyIndex]!);
+  campaign.briefing = [];
+  campaign.legacyHalt = null;
+  readLegacy(world, "setup");
+  return save;
 }
 
 /** Our own group's campaign at the September lobby, as the deployed game exported it. */

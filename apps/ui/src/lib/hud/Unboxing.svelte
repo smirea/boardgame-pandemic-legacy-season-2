@@ -21,6 +21,7 @@
   import UnboxPiece, { isRule, scaleOf } from "./UnboxPiece.svelte";
   import { legacyCardOf, piecesOf, STOW_ORDER, type Piece, type Placed } from "./unboxPieces.ts";
   import { assignSides, layoutTable, type Box, type Sized } from "./unboxLayout.ts";
+  import { readingExit } from "./readingExit.ts";
   import { keep } from "./viewState.ts";
   import { onButton, typing } from "#lib/keys.ts";
   import VoteButton from "./VoteButton.svelte";
@@ -513,6 +514,7 @@
   const voters = $derived(multi ? tableVoters(table, (who) => progress.ready.includes(who)) : []);
   const waitingOn = $derived(stillWaiting(voters, player));
 
+  const exit = readingExit();
   let root = $state<HTMLElement>();
   let deckEl = $state<HTMLElement>();
   let sourceEl = $state<HTMLElement>();
@@ -679,7 +681,9 @@
       }
     }
 
-    if (!destroyed) send({ type: "ACK_BRIEFING" });
+    if (destroyed) return;
+    send({ type: "ACK_BRIEFING" });
+    exit?.leave();
   }
 
   const prompt = $derived(
@@ -916,7 +920,7 @@
       <div class="controls">
         {#if allDrawn && !progress.stowing}
           <VoteButton
-            label="Done"
+            label={exit?.label ?? "Done"}
             tally="done"
             {voters}
             on={myReady}

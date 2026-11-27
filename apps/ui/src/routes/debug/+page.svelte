@@ -13,6 +13,11 @@
       text: "The real machine and screen with every seat on this client and no networking, on this browser’s campaign. window.DEBUG reads and replaces the state.",
     },
     {
+      href: "/debug/legacy",
+      name: "Legacy deck",
+      text: "Read the Legacy deck from any card, as the table would: the real game screen unpacks the reading from there to the next Stop or Pause, and its last button comes back here.",
+    },
+    {
       href: "/debug/story-mode",
       name: "Story Mode",
       text: "Play straight through the entire Legacy deck without playing the board game: pick branches at every inflection point, step forward or reverse in time, change past decisions, and watch voiced scenes & set-pieces.",

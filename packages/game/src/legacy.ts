@@ -1,6 +1,7 @@
 import { pack } from "./content/pack";
 import { sealKey } from "./content/types";
 import type {
+  LegacyCardDef,
   AbilityId,
   CityImprovementId,
   EventId,
@@ -385,6 +386,24 @@ export function applyUnlock(world: World, unlock: Unlock, by?: SeatId) {
   }
 }
 
+/** Reads the next Legacy card, the one given, into the briefing, when it applies to the campaign as it stands. */
+export function readCard(world: World, card: LegacyCardDef) {
+  const campaign = world.campaign;
+  campaign.legacyIndex += 1;
+  const applies = !card.when || (card.when === "delivered") === campaign.sampleDelivered;
+  if (!applies) return;
+  campaign.briefing.push({
+    t: "card",
+    title: card.title,
+    text: card.text,
+    from: { t: "legacy", card: card.id },
+  });
+  for (const unlock of card.unlocks) {
+    briefUnlock(campaign, unlock);
+    applyUnlock(world, unlock);
+  }
+}
+
 /** Reads Legacy cards in order until one halts. `won` is only known for cards read at game end. */
 export function readLegacy(world: World, phase: "setup" | "gameEnd", won?: boolean) {
   const campaign = world.campaign;
@@ -398,20 +417,7 @@ export function readLegacy(world: World, phase: "setup" | "gameEnd", won?: boole
   for (;;) {
     const card = pack.legacyDeck[campaign.legacyIndex];
     if (!card || card.month > campaign.month) return;
-    campaign.legacyIndex += 1;
-    const applies = !card.when || (card.when === "delivered") === campaign.sampleDelivered;
-    if (applies) {
-      campaign.briefing.push({
-        t: "card",
-        title: card.title,
-        text: card.text,
-        from: { t: "legacy", card: card.id },
-      });
-      for (const unlock of card.unlocks) {
-        briefUnlock(campaign, unlock);
-        applyUnlock(world, unlock);
-      }
-    }
+    readCard(world, card);
     if (card.halt) {
       campaign.legacyHalt = { kind: card.halt, month: campaign.month };
       return;

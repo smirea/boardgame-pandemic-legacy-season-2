@@ -131,7 +131,7 @@ export {
 } from "./helpers";
 export { freeCharacters, scarCandidates, scarTargets } from "./flow";
 export { botCommand } from "./bot";
-export { campaignAt, scenarios } from "./scenarios";
+export { campaignAt, readingFrom, scenarios } from "./scenarios";
 export { give, showReveals, stackInfection } from "./testkit";
 export type {
   GameNotes,
