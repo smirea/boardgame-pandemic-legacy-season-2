@@ -268,9 +268,8 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* Above the seats and panels on the board, so the bar's slips hang over them. While one is open (the calendar's
-	   year opens on hover alone), the bar rises over the covers too, which never reach the bar itself, and it stays
-	   up until a slip has faded out. */
+  /* Above the seats and panels on the board, so the bar's slips hang over them. While one is open, the bar rises over
+	   the covers too, which never reach the bar itself, and it stays up until a slip has faded out. */
   .frame {
     position: relative;
     z-index: var(--z-bar);
@@ -278,7 +277,7 @@
     container: topbar / inline-size;
   }
 
-  .frame:is(:hover, :has(:global(:focus-visible), :global([data-hover-menu]))) {
+  .frame:has(:global([data-hover-menu])) {
     z-index: var(--z-tooltip);
     transition-delay: 0s;
   }
