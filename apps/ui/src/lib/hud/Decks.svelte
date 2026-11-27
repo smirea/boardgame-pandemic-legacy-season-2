@@ -239,6 +239,7 @@
     <div
       class="tip"
       role="group"
+      data-hover-menu
       aria-label="Player deck"
       data-testid="player-deck-tip"
       transition:fade={{ duration: 140 }}
@@ -293,6 +294,7 @@
     <div
       class="tip wide"
       role="group"
+      data-hover-menu
       aria-label="Infection deck"
       data-testid="infection-deck-tip"
       transition:fade={{ duration: 140 }}

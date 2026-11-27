@@ -143,6 +143,7 @@
       <div
         class="plan-pop"
         role="tooltip"
+        data-hover-menu
         data-testid="plan-card-preview"
         transition:fade={{ duration: 140 }}
       >
@@ -165,7 +166,7 @@
     position: absolute;
     top: calc(100% + 0.5rem);
     left: 50%;
-    z-index: 65;
+    z-index: var(--z-tooltip);
     translate: -50% 0;
     white-space: normal;
     pointer-events: none;

@@ -40,7 +40,7 @@
     position: absolute;
     top: 5.6rem;
     left: 50%;
-    z-index: 50;
+    z-index: calc(var(--z-show) + 7);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -73,7 +73,7 @@
     position: absolute;
     top: 6%;
     left: 50%;
-    z-index: 45;
+    z-index: calc(var(--z-show) + 2);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -117,7 +117,7 @@
   .flash {
     position: absolute;
     inset: 0;
-    z-index: 43;
+    z-index: var(--z-show);
     box-shadow: inset 0 0 10rem 2rem rgb(140 28 18 / 0.6);
     animation: flash 1.6s ease-out forwards;
     pointer-events: none;

@@ -42,7 +42,7 @@
     position: absolute;
     top: 7.6rem;
     left: 50%;
-    z-index: 49;
+    z-index: calc(var(--z-show) + 6);
     display: flex;
     align-items: center;
     gap: 0.7rem;

@@ -351,7 +351,7 @@
     right: var(--side);
     bottom: 0;
     height: var(--bar);
-    z-index: 90;
+    z-index: var(--z-host);
   }
 
   .side {
@@ -360,7 +360,7 @@
     right: 0;
     bottom: 0;
     width: var(--side);
-    z-index: 90;
+    z-index: var(--z-host);
   }
 
   .empty .side {

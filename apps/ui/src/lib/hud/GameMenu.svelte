@@ -169,7 +169,7 @@
     position: absolute;
     top: 0.4rem;
     right: 0.7rem;
-    z-index: 70;
+    z-index: var(--z-menu);
     display: flex;
     flex-direction: column;
     gap: 0.25rem;

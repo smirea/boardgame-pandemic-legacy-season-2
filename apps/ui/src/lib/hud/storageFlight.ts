@@ -32,7 +32,7 @@ export function flyToStorage(world: World, added: { id: CardId; pile: "player" |
       position: "fixed",
       left: `${from.left + from.width / 2}px`,
       top: `${from.top + from.height / 2}px`,
-      zIndex: "95",
+      zIndex: "var(--z-flight)",
       display: "grid",
       placeItems: "center",
       width: pile === "infection" ? "4.8rem" : "3.6rem",

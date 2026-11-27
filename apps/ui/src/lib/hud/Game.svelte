@@ -1615,7 +1615,7 @@
   /* Shares the stage's cell, lying over the bottom of the map between the side columns. */
   .dock-layer {
     position: relative;
-    z-index: 35;
+    z-index: var(--z-dock);
     grid-row: 2;
     grid-column: 1;
     align-self: end;
@@ -1624,12 +1624,17 @@
     pointer-events: none;
   }
 
+  /* A hand card's uses open over it on hover alone, so the hand rises while the pointer or keyboard is on it. */
+  .dock-layer:is(:hover, :has(:global(:focus-visible))) {
+    z-index: var(--z-hover);
+  }
+
   /* The seats sit in the corners, with the Actions panel between them on one side. */
   .column {
     position: absolute;
     top: 0.7rem;
     bottom: 0.7rem;
-    z-index: 30;
+    z-index: var(--z-hud);
     display: flex;
     flex-direction: column;
     gap: 0.6rem;
@@ -1643,12 +1648,12 @@
     pointer-events: auto;
   }
 
-  /* A seat's character sheet or expanded hand opens above the dock, objectives, actions panel, and prompts. */
-  .column:has(:global([data-testid="character-sheet"], [data-testid="corner-full-hand"])) {
-    z-index: 52;
+  /* A seat's character sheet and hand open above the dock, objectives, actions panel, and prompts. */
+  .column:has(:global([data-hover-menu])) {
+    z-index: var(--z-hover);
   }
 
-  .place:has(:global([data-testid="character-sheet"], [data-testid="corner-full-hand"])) {
+  .place:has(:global([data-hover-menu])) {
     z-index: 10;
   }
 
@@ -1676,7 +1681,7 @@
     position: absolute;
     left: 50%;
     top: 56%;
-    z-index: 25;
+    z-index: calc(var(--z-hud) - 5);
     transform: translate(-50%, -50%);
     pointer-events: none;
     filter: drop-shadow(0 1rem 2.4rem rgb(0 0 0 / 0.65));
@@ -1726,8 +1731,12 @@
     position: absolute;
     top: 0.6rem;
     left: calc((var(--high-left, 0px) + 100% - var(--high-right, 0px)) / 2);
-    z-index: 30;
+    z-index: var(--z-hud);
     transform: translateX(-50%);
+  }
+
+  .goals:has(:global([data-hover-menu])) {
+    z-index: var(--z-hover);
   }
 
   .place {
@@ -1773,7 +1782,7 @@
     position: absolute;
     bottom: 1.2rem;
     left: 50%;
-    z-index: 46;
+    z-index: calc(var(--z-show) + 3);
     display: flex;
     align-items: center;
     gap: 0.8rem;
@@ -1815,7 +1824,7 @@
     position: absolute;
     top: calc(28% + 8.2rem);
     left: 50%;
-    z-index: 46;
+    z-index: calc(var(--z-show) + 3);
     padding: 0.35rem 1rem;
     border: 1px solid var(--line);
     border-radius: 2px;
@@ -1837,7 +1846,7 @@
     position: absolute;
     top: 28%;
     left: 50%;
-    z-index: 46;
+    z-index: calc(var(--z-show) + 3);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1868,10 +1877,7 @@
     font-size: 1rem;
   }
 
-  /* The top bar's slips, such as a deck's, hang over the board's panels. */
   .game > :global(:first-child) {
-    position: relative;
-    z-index: 55;
     grid-row: 1;
     grid-column: 1;
   }

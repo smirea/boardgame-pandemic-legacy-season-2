@@ -451,7 +451,7 @@
 <style>
   .ring {
     position: absolute;
-    z-index: 38;
+    z-index: var(--z-ring);
     width: 0;
     height: 0;
   }
@@ -534,7 +534,7 @@
   .tool-capture {
     position: absolute;
     inset: 0;
-    z-index: 45;
+    z-index: var(--z-draw);
     touch-action: none;
   }
 
@@ -560,7 +560,7 @@
 	   labels in one column, values in the next. */
   .hint {
     position: absolute;
-    z-index: 52;
+    z-index: var(--z-hover);
     display: flex;
     flex-direction: column;
     gap: 0.3rem;

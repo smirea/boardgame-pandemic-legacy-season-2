@@ -207,7 +207,7 @@
     position: absolute;
     top: 100%;
     left: -0.4rem;
-    z-index: 6;
+    z-index: var(--z-tooltip);
     padding-top: 0.35rem;
     opacity: 0;
     visibility: hidden;

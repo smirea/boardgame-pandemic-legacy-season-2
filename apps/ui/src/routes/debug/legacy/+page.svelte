@@ -460,7 +460,7 @@
   .popup {
     position: fixed;
     top: 4vh;
-    z-index: 50;
+    z-index: var(--z-tooltip);
     width: min(64rem, 64vw);
     max-height: 92vh;
     overflow: auto;

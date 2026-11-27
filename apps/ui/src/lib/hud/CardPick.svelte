@@ -116,7 +116,7 @@
     bottom: 14rem;
     left: calc(var(--left, 0px) + 1rem);
     right: calc(var(--right, 0px) + 1rem);
-    z-index: 40;
+    z-index: var(--z-pick);
     display: flex;
     flex-direction: column;
     align-items: center;

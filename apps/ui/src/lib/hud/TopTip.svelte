@@ -101,6 +101,7 @@
       class:frame
       style:width={frame ? null : width}
       role="tooltip"
+      data-hover-menu
       data-testid={`${testid}-tip`}
       transition:fade={{ duration: 140 }}
     >
@@ -155,7 +156,7 @@
     position: absolute;
     top: calc(100% + 0.55rem);
     right: 0;
-    z-index: 65;
+    z-index: var(--z-tooltip);
     display: flex;
     flex-direction: column;
     gap: 0.38rem;
