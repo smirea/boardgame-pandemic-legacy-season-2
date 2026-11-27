@@ -973,6 +973,7 @@
       menu = false;
       hotkeysOpen = !hotkeysOpen;
     },
+    fitMap: () => resetView++,
     send,
     toast,
   });
@@ -1121,7 +1122,6 @@
     erasing={tools.tool === "eraser"}
     oneraser={() => tools.toggleEraser()}
     onclear={tools.clear}
-    onreset={() => resetView++}
     peek={covered ? { on: peeking, toggle: () => (peeking = !peeking) } : null}
     onmenu={() => (menu = !menu)}
     onbox={() => (boxOpen = !boxOpen)}

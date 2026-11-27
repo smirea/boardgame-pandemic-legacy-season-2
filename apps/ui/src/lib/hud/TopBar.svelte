@@ -31,7 +31,6 @@
     erasing?: boolean;
     oneraser?: () => void;
     onclear?: () => void;
-    onreset: () => void;
     /** Shown while something covers the board: lifts it off to see the board, and puts it back. */
     peek?: { on: boolean; toggle: () => void } | null;
     onmenu: () => void;
@@ -56,7 +55,6 @@
     erasing = false,
     oneraser,
     onclear,
-    onreset,
     peek = null,
     onmenu,
     onbox,
@@ -201,7 +199,6 @@
         </button>
       {/if}
       <AudioMenu />
-      <button onclick={onreset}>Fit map</button>
       <button onclick={onbox} data-testid="open-box" data-dest="box">Box</button>
       <button onclick={onmenu}>Menu</button>
     </div>

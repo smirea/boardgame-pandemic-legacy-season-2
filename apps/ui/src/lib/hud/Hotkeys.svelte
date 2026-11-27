@@ -12,6 +12,7 @@
       heading: "Map & table",
       rows: [
         { keys: ["W A S D", "Arrows"], label: "Pan the map" },
+        { keys: ["R"], label: "Fit the whole map in view" },
         { keys: ["Hold F", "Drag"], join: "+", label: "Draw on the map (shared live)" },
         { keys: ["E"], label: "Toggle eraser when drawings are on the map" },
         { keys: ["Tab"], label: "Ping the map at your pointer" },

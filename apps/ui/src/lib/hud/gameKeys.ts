@@ -21,14 +21,15 @@ export type KeySource = {
   /** Puts down whatever is half-chosen and closes the Menu. */
   cancel(): void;
   toggleHotkeys(): void;
+  fitMap(): void;
   send(command: Command): void;
   toast(text: string): void;
 };
 
 /**
- * The game's keyboard: Space moves the turn on, Z undoes, F draws, E toggles the eraser, Tab pings the map, ? opens
- * the shortcuts and Escape closes or cancels. Every key is left alone while it belongs to something else: a field
- * being typed in, the feedback editor, a focused button, a dialog.
+ * The game's keyboard: Space moves the turn on, Z undoes, F draws, R fits the whole map in view, E toggles the eraser,
+ * Tab pings the map, ? opens the shortcuts and Escape closes or cancels. Every key is left alone while it belongs to
+ * something else: a field being typed in, the feedback editor, a focused button, a dialog.
  */
 export function createGameKeys(source: KeySource) {
   function escape(event: KeyboardEvent) {
@@ -68,6 +69,11 @@ export function createGameKeys(source: KeySource) {
     const key = event.key.toLowerCase();
     if (key === "f" && !event.repeat && !spectator && !modalOpen()) {
       tools.holdPen();
+      return;
+    }
+    // As the top bar's button it replaced did, R fits the map under a dialog too, so Show board can look at all of it.
+    if (key === "r" && !event.repeat) {
+      source.fitMap();
       return;
     }
     if (key === "e" && !event.repeat && !spectator && tools.hasDrawings && !modalOpen()) {
