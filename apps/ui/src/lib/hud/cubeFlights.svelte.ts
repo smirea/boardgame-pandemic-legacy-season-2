@@ -89,7 +89,7 @@ function cubeGhost(spot: ScreenSpot) {
     top: `${spot.y - size / 2}px`,
     width: `${size}px`,
     height: `${size}px`,
-    zIndex: "95",
+    zIndex: "var(--z-flight)",
     pointerEvents: "none",
     filter: "drop-shadow(0 0.3rem 0.35rem rgb(0 0 0 / 0.45))",
   });

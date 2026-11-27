@@ -155,7 +155,7 @@
         width: `${from.width}px`,
         height: `${from.height}px`,
         margin: "0",
-        zIndex: "90",
+        zIndex: "var(--z-flight)",
         pointerEvents: "none",
         transformOrigin: "0 0",
         fontSize: getComputedStyle(leg.from).fontSize,
@@ -534,7 +534,7 @@
     position: fixed;
     top: 0;
     left: 0;
-    z-index: 80;
+    z-index: var(--z-flight);
     width: 0.95rem;
     height: 0.95rem;
     border: 2px solid #f4fbe2;

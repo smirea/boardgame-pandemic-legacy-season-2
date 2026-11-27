@@ -34,6 +34,10 @@
 
   /** The month in play, or the Prologue when the campaign has not reached January. */
   const current = $derived(months.find((entry) => entry.month === campaign.month) ?? null);
+
+  // The year opens in CSS, on hover or focus; this only marks it as an open hover menu, so the top bar rises.
+  let hovered = $state(false);
+  let focused = $state(false);
 </script>
 
 {#snippet mark(slot: Slot, side: "early" | "late")}
@@ -99,6 +103,13 @@
   class="calendar"
   role="group"
   aria-label="Campaign calendar"
+  onpointerenter={() => (hovered = true)}
+  onpointerleave={() => (hovered = false)}
+  onfocusin={() => (focused = true)}
+  onfocusout={(event) => {
+    const into = event.relatedTarget;
+    if (!(into instanceof Node && event.currentTarget.contains(into))) focused = false;
+  }}
   {@attach feedback("Calendar", () => ({
     month: campaign.month,
     attempt: campaign.attempt,
@@ -132,7 +143,7 @@
       <svg viewBox="0 0 10 10"><path d="M2.5 3.8 5 6.3l2.5-2.5" /></svg>
     </span>
   </button>
-  <div class="year">
+  <div class="year" data-hover-menu={hovered || focused ? "" : undefined}>
     <ol data-testid="calendar-year">
       {#each months as entry (entry.month)}
         {@render month(entry)}
@@ -207,7 +218,7 @@
     position: absolute;
     top: 100%;
     left: -0.4rem;
-    z-index: 6;
+    z-index: var(--z-tooltip);
     padding-top: 0.35rem;
     opacity: 0;
     visibility: hidden;

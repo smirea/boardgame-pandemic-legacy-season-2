@@ -107,6 +107,7 @@
     <div
       class="tip"
       role="group"
+      data-hover-menu
       aria-label="Package 6 contents"
       data-testid="storage-deck-tip"
       transition:fade={{ duration: 140 }}
@@ -224,7 +225,7 @@
     position: absolute;
     top: calc(100% + 0.55rem);
     left: 0;
-    z-index: 65;
+    z-index: var(--z-tooltip);
     display: flex;
     flex-direction: column;
     gap: 0.4rem;

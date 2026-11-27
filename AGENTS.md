@@ -41,6 +41,7 @@
 - Tailwind CSS v4 is wired through `@tailwindcss/vite`.
 - Global styles are imported from `apps/ui/src/routes/layout.css`.
 - Theme values live in `apps/ui/src/routes/theme.css` and are selected with `html[data-theme]`.
+- How the screen stacks is one scale of named layers in `apps/ui/src/routes/layout.css` (`--z-hud`, `--z-dock`, `--z-show`, `--z-hover`, `--z-bar`, `--z-cover`, `--z-flight`, `--z-tooltip` and the rest, bottom to top): a z-index that orders parts of the screen is one of them, never a number; only a component's own sub-layers count from 0. A hover menu carries `data-hover-menu`, and the layer holding it rises while it is open (`:has`): the top bar to `--z-tooltip`, over the covers, a seat or the objectives to `--z-hover`, which the covers still hide. The hand rises to `--z-hover` while the pointer is on it, since its cards' uses open on hover alone.
 - Prefer Svelte component CSS for styling. Use Tailwind only for small inline layout utilities when that is simpler than adding a class.
 - TanStack Query is configured in `apps/ui/src/routes/+layout.svelte`.
 - Imports inside `apps/ui` use the `#lib/*` alias (SvelteKit 3 removed `$lib`), with the file extension for `.ts` files.

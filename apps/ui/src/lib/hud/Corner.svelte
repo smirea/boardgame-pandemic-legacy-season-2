@@ -171,6 +171,7 @@
       <div
         class="big"
         data-testid="character-sheet"
+        data-hover-menu
         onclick={(event) => {
           if (
             !(event.target as Element).closest(

@@ -78,7 +78,7 @@
   .scrim {
     position: absolute;
     inset: 0;
-    z-index: 60;
+    z-index: var(--z-cover);
     display: grid;
     place-items: center;
     padding: 1rem;
@@ -106,19 +106,19 @@
     display: grid;
     place-items: center;
     padding: 1rem;
-    z-index: 64;
+    z-index: calc(var(--z-cover) + 4);
   }
 
   .box {
-    z-index: 70;
+    z-index: calc(var(--z-cover) + 10);
   }
 
   .scar {
-    z-index: 65;
+    z-index: calc(var(--z-cover) + 5);
   }
 
   .undo {
-    z-index: 75;
+    z-index: calc(var(--z-cover) + 15);
     background: rgb(14 9 8 / 0.84);
   }
 
@@ -149,7 +149,7 @@
   /* Stepped aside, the spending sheet stands in the right column and leaves the board free to pan and read. */
   .scrim.upkeep.aside {
     inset: 0.7rem 0.7rem 0.7rem auto;
-    z-index: 30;
+    z-index: var(--z-hud);
     display: flex;
     align-items: flex-start;
     padding: 0;

@@ -48,7 +48,7 @@
     /* Over the foot of the map, clear of the bar the dock shows once a game is over. */
     bottom: 5.6rem;
     left: 50%;
-    z-index: 48;
+    z-index: calc(var(--z-show) + 5);
     display: flex;
     align-items: center;
     gap: 1.1rem;

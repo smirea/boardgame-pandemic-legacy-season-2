@@ -124,7 +124,7 @@
   .interlude {
     position: absolute;
     inset: 0;
-    z-index: 46;
+    z-index: calc(var(--z-show) + 3);
     display: grid;
     place-items: center;
     background: radial-gradient(

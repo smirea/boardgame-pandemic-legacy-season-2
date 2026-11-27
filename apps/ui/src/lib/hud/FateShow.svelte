@@ -97,7 +97,7 @@
   .fate {
     position: absolute;
     inset: 0;
-    z-index: 47;
+    z-index: calc(var(--z-show) + 4);
     display: grid;
     place-items: center;
     background: radial-gradient(ellipse at 50% 46%, rgb(18 13 9 / 0.78), rgb(8 6 4 / 0.9));

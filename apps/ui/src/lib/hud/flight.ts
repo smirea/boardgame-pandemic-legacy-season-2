@@ -30,7 +30,7 @@ export function flyTo(
     width: `${width}px`,
     height: `${height}px`,
     margin: "0",
-    zIndex: "95",
+    zIndex: "var(--z-flight)",
     pointerEvents: "none",
     transform: "none",
     transition: "none",

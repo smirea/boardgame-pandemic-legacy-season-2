@@ -263,14 +263,14 @@
   .epidemic-layer {
     position: absolute;
     inset: 0;
-    z-index: 44;
+    z-index: calc(var(--z-show) + 1);
     pointer-events: none;
   }
 
   .scrim {
     position: absolute;
     inset: 0;
-    z-index: 43;
+    z-index: var(--z-show);
     background: radial-gradient(ellipse at 50% 44%, rgb(40 8 6 / 0.55), rgb(10 4 3 / 0.82));
     pointer-events: none;
   }

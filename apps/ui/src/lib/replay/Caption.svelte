@@ -42,7 +42,7 @@
     position: absolute;
     bottom: 0.8rem;
     left: 50%;
-    z-index: 34;
+    z-index: calc(var(--z-dock) - 1);
     max-width: min(36rem, calc(100% - 35rem));
     padding: 0.4rem 0.9rem 0.45rem 0.8rem;
     border-left: 0.35rem solid var(--who);

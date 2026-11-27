@@ -7,6 +7,31 @@
 @import "@fontsource/barlow-semi-condensed/latin-700.css";
 @import "./theme.css";
 
+/*
+  How the screen's layers stack, bottom to top: every z-index that decides how parts of the screen stack is one of
+  these. A component's own sub-layers (a card's parts, a hovered card in a fan) count from 0 among themselves. The
+  board's HTML pieces (Threlte's zIndexRange) stay under --z-hud. A layer holding an open hover menu (marked
+  [data-hover-menu]) rises while it is open: the top bar's to --z-tooltip, since the covers never reach the bar,
+  and the HUD's to --z-hover, which a cover still hides.
+*/
+:root {
+  --z-hud: 30; /* seats, objectives, the Actions panel and turn desk, the spending sheet stepped aside */
+  --z-dock: 35; /* the hand floating over the foot of the map */
+  --z-ring: 38; /* the ring of actions over a clicked city */
+  --z-pick: 40; /* cards laid out over the table to choose from */
+  --z-draw: 42; /* the pen's and eraser's surface over the board */
+  /* Scenes over the table, each a step up to +7: an Epidemic, the banner, the turn interlude, a fate, the time lapse,
+     the radio, toasts. */
+  --z-show: 43;
+  --z-hover: 52; /* a hover preview over the table: a city's slip, a seat's whole card, a hand card's uses */
+  --z-bar: 55; /* the top bar */
+  --z-cover: 60; /* Scrim: whatever covers the table, those that stand over others a few steps up */
+  --z-menu: 72; /* the Menu, over the Box and under the undo vote */
+  --z-host: 90; /* a page's own layers beside or over the game it hosts (the replay viewer, a debug page's game) */
+  --z-flight: 95; /* what crosses the whole screen: a card to a hand, a piece put away, a cube or marker to its place */
+  --z-tooltip: 100; /* a hover menu over everything */
+}
+
 * {
   box-sizing: border-box;
 }

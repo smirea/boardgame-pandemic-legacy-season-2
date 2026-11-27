@@ -46,7 +46,7 @@
   .strip {
     position: fixed;
     inset: 0 0 auto;
-    z-index: 2000;
+    z-index: calc(var(--z-host) + 1);
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -62,7 +62,7 @@
   .stage {
     position: fixed;
     inset: 0;
-    z-index: 1999;
+    z-index: var(--z-host);
     --game-inset: 2.6rem 0 0 0;
   }
 </style>

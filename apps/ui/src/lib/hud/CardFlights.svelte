@@ -127,7 +127,7 @@
   .flights {
     position: fixed;
     inset: 0;
-    z-index: 70;
+    z-index: var(--z-flight);
     pointer-events: none;
     --card-size: 0.95rem;
   }

@@ -111,7 +111,7 @@
   .arrows {
     position: absolute;
     inset: 0;
-    z-index: 29;
+    z-index: calc(var(--z-hud) - 1);
     width: 100%;
     height: 100%;
     overflow: visible;
@@ -152,7 +152,7 @@
     position: absolute;
     top: 50%;
     left: calc((var(--left, 0px) + 100% - var(--right, 0px)) / 2);
-    z-index: 31;
+    z-index: calc(var(--z-hud) + 1);
     display: flex;
     flex-direction: column;
     align-items: center;
