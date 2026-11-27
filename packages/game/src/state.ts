@@ -223,6 +223,8 @@ export type Decision =
   | { t: "removeHollow"; seat: SeatId; amount: number }
   | { t: "quarantineCard"; seat: SeatId }
   | { t: "giveCard"; seat: SeatId }
+  /** A newly unlocked card (such as a package's Unrationed Event) to give to any player's hand. */
+  | { t: "awardCard"; seat: SeatId; card: CardId }
   /** Any player may discard a card to end the Infect step early. */
   | { t: "brokenLink" }
   /** An Epidemic was drawn and has not struck yet. Held open for Antidote or the player to start the Epidemic. */

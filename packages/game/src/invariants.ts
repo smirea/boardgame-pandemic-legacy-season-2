@@ -35,6 +35,13 @@ export function violations(world: World, cubeTotals: Map<number, number>): strin
     ...game.playerDeck.order,
     ...game.playerDiscard,
     ...Object.values(game.players).flatMap((player) => player.hand),
+    ...game.pending.flatMap((pending) =>
+      pending.t === "awardCard"
+        ? [pending.card]
+        : pending.t === "reveal"
+          ? pending.cards
+          : [],
+    ),
   ];
   if (new Set(everywhere).size !== everywhere.length)
     problems.push("a Player card exists in two places");

@@ -289,8 +289,8 @@ export type Unlock =
       event: EventId;
       mode: "rationed" | "unrationed" | "permanent";
       copies?: number;
-      /** Where each new copy goes in a game under way: the opener's hand or the Player discard pile. */
-      now?: ("hand" | "discard")[];
+      /** Where each new copy goes in a game under way: the opener's hand, any player's hand, or the Player discard pile. */
+      now?: ("hand" | "anyHand" | "discard")[];
     }
   /** Stickers: each unlock adds `copies` of one (1 when left out), and a sticker that is placed is gone. */
   | { t: "ability"; ability: AbilityId; copies?: number }

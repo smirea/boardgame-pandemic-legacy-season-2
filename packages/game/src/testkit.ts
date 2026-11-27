@@ -5,6 +5,7 @@ import type { CardId, CityId, SeatId } from "./ids";
 import type { Command, GameActor, Phase, Save } from "./machine";
 import { paddedTrack } from "./legacy";
 import { createGameActor, phaseOf, reject } from "./machine";
+import { legalDecides } from "./options";
 import { campaignAt } from "./scenarios";
 import type { Game, World } from "./state";
 
@@ -44,7 +45,9 @@ export function showReveals(actor: GameActor) {
     let pending = gameOf(actor).pending[0];
     pending?.t === "reveal" || pending?.t === "search";
   ) {
-    send(actor, { type: "DECIDE", decide: { d: pending.t } });
+    const decide = legalDecides(worldOf(actor)).find((entry) => entry.d === pending.t);
+    if (!decide) throw new Error(`No legal decide for pending ${pending.t}`);
+    send(actor, { type: "DECIDE", decide });
     pending = gameOf(actor).pending[0];
   }
 }

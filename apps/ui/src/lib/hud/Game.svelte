@@ -62,7 +62,7 @@
   import { InfectionShow } from "./infectionShow.svelte.ts";
   import { PopulationShow } from "./populationShow.svelte.ts";
   import { LegacyShow } from "./legacyShow.svelte.ts";
-  import { seatName, seatColor, setNames } from "./labels.svelte.ts";
+  import { cardName, seatName, seatColor, setNames } from "./labels.svelte.ts";
   import { characterTraits } from "./traits.ts";
   import GameMenu from "./GameMenu.svelte";
   import Lobby from "./Lobby.svelte";
@@ -84,6 +84,7 @@
   import UndoVote from "./UndoVote.svelte";
   import Upkeep from "./Upkeep.svelte";
   import RevealShow from "./RevealShow.svelte";
+  import PlayerCard from "./PlayerCard.svelte";
   import type { CityCardCopies } from "./PlayerCard.svelte";
   import { provideViewState } from "./viewState.ts";
   import type { GameUi } from "#lib/studio/scene.ts";
@@ -224,6 +225,13 @@
   const scarVoting = $derived.by(() => {
     const pending = playing ? game?.pending[0] : undefined;
     return pending?.t === "scarVote" ? pending : null;
+  });
+  /** A newly unlocked card waiting to be given to any player's hand, shown over the board once the briefing closes. */
+  const awardingCard = $derived.by(() => {
+    const pending = playing ? game?.pending[0] : undefined;
+    if (pending?.t !== "awardCard" || briefingOpen || recap) return null;
+    const card = campaign.playerCards[pending.card];
+    return card ? { pending, card } : null;
   });
   // A haven the character screen points at, which the camera looks at behind it.
   let focus = $state.raw<{ city: CityId; x: number; y: number } | null>(null);
@@ -1219,6 +1227,21 @@
       />
     {/if}
 
+    {#if awardingCard && !choosing.dockChoice}
+      <aside
+        class="award-card"
+        aria-label={`New card: ${cardName(world, awardingCard.card.id)}`}
+        data-testid="award-card"
+        in:scale={{ start: 0.88, duration: 260, easing: backOut }}
+        {@attach feedback("Awarded card", () => ({
+          card: awardingCard.card.id,
+          chooser: awardingCard.pending.seat,
+        }))}
+      >
+        <PlayerCard card={awardingCard.card} />
+      </aside>
+    {/if}
+
     <Announcements toasts={said.toasts} banner={said.banner} {spectator} />
 
     {#if nextUp && !said.banner}
@@ -1646,6 +1669,17 @@
   .place.bl,
   .place.br {
     margin-top: auto;
+  }
+
+  .award-card {
+    --card-size: clamp(0.8rem, 1.75vh, 1.15rem);
+    position: absolute;
+    left: 50%;
+    top: 56%;
+    z-index: 25;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    filter: drop-shadow(0 1rem 2.4rem rgb(0 0 0 / 0.65));
   }
 
   /* The action list sits in whichever side column has room, beside the seats. */

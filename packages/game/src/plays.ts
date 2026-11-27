@@ -33,7 +33,7 @@ import {
 import type { CardId, CharacterId, CityId, SeatId } from "./ids";
 import { createCharacter } from "./legacy";
 import type { Phase } from "./machine";
-import { startReveal, stepReveal } from "./reveal";
+import { revealDone, revealPick, startReveal, stepReveal } from "./reveal";
 import type { Decision, Game, World } from "./state";
 
 const isGridCity = (onGrid: ReadonlySet<CityId>, city: CityId) =>
@@ -164,6 +164,7 @@ export function checkPlay(
     return "Let the table see what was turned over first";
   if (unresolved === "workerReturn")
     return "Choose which haven the haven worker returns to first";
+  if (unresolved === "awardCard") return "Choose who receives the new card first";
   // A designer ruling: a Gather card and the city it gathers in are one draw, with no Event window between them.
   if (game.gathering) return "Flip the card the Hollow Men gather in first";
   if (unresolved === "epidemicDrawn" && play.e !== "topazExperimentalVaccine")
@@ -613,12 +614,13 @@ export type Decide =
   | { d: "removeHollow"; city: CityId }
   | { d: "quarantineCard"; card: CardId }
   | { d: "giveCard"; card: CardId; to: SeatId }
+  | { d: "awardCard"; to: SeatId }
   | { d: "shield"; seat: SeatId; card: CardId }
   | { d: "brokenLink"; seat: SeatId; card: CardId }
   /** The City card a Soldier discards to leave Hollow Men. Skipping the choice is being exposed instead. */
   | { d: "guard"; seat: SeatId; card: CardId }
-  /** Turns over the next card of a reveal, or puts them all away once every one is face up. */
-  | { d: "reveal" }
+  /** Turns over the next card of a reveal, or puts them all away once every one is face up (with `keep` when Monitor chooses). */
+  | { d: "reveal"; keep?: CardId[] }
   /** The table has seen the search: what it found happens. */
   | { d: "search" }
   | { d: "skip" };
@@ -720,6 +722,8 @@ export function checkDecide(world: World, decide: Decide): string | null {
       if (!player(game, from).hand.includes(decide.card)) return "Pick a card from your hand";
       return decide.to !== from && game.seats.includes(decide.to) ? ok : "Pick another player";
     }
+    case "awardCard":
+      return game.seats.includes(decide.to) ? ok : "Pick a player";
     case "brokenLink":
       return game.players[decide.seat]?.hand.includes(decide.card)
         ? ok
@@ -729,7 +733,28 @@ export function checkDecide(world: World, decide: Decide): string | null {
         guardCards(world, decide.seat).includes(decide.card)
         ? ok
         : "Discard a City card of your location's colour";
-    case "reveal":
+    case "reveal": {
+      const reveal = pending as Extract<Decision, { t: "reveal" }>;
+      if (!revealDone(game, reveal))
+        return decide.keep === undefined ? ok : "Turn over every card first";
+      const { eligible, take } = revealPick(world, reveal);
+      if (take === 0 || eligible.length <= take) {
+        if (decide.keep === undefined) return ok;
+        const same =
+          decide.keep.length === take &&
+          new Set(decide.keep).size === take &&
+          decide.keep.every((id) => eligible.includes(id));
+        return same ? ok : "Those cards cannot be kept";
+      }
+      if (!decide.keep || decide.keep.length !== take)
+        return `Pick ${take} card${take === 1 ? "" : "s"} to keep`;
+      if (
+        new Set(decide.keep).size !== take ||
+        !decide.keep.every((id) => eligible.includes(id))
+      )
+        return "Pick non-Epidemic cards from the ones turned over";
+      return ok;
+    }
     case "search":
       return ok;
     case "shield": {
@@ -759,7 +784,8 @@ export function applyDecide(world: World, decide: Decide) {
     }
     return;
   }
-  if (decide.d === "reveal" && pending?.t === "reveal") return stepReveal(world, pending);
+  if (decide.d === "reveal" && pending?.t === "reveal")
+    return stepReveal(world, pending, decide.keep);
   if (decide.d === "removeHollow" && pending?.t === "removeHollow") {
     game.locations[decide.city]!.hollow -= 1;
     game.pieces.hollow += 1;
@@ -864,6 +890,15 @@ export function applyDecide(world: World, decide: Decide) {
       });
       return;
     }
+    case "awardCard": {
+      const { card } = pending as Extract<Decision, { t: "awardCard" }>;
+      player(game, decide.to).hand.push(card);
+      log(game, {
+        t: "note",
+        text: `${characterOf(world, decide.to).name} took ${cardLabel(campaign, card)}`,
+      });
+      return;
+    }
     case "quarantineCard": {
       game.infectionDiscard.splice(game.infectionDiscard.indexOf(decide.card), 1);
       game.gameEndArea.push(decide.card);
@@ -929,6 +964,8 @@ export function autoResolve(world: World) {
     else if (pending.t === "discard" && player(game, pending.seat).hand.length === 0)
       game.pending.shift();
     else if (pending.t === "giveCard" && player(game, pending.seat).hand.length === 0)
+      game.pending.shift();
+    else if (pending.t === "awardCard" && !(pending.card in world.campaign.playerCards))
       game.pending.shift();
     else if (
       pending.t === "removeHollow" &&

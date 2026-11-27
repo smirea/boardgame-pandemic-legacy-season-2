@@ -561,10 +561,13 @@ export function decideLabel(world: World, decide: Decide): string {
       return `Set aside ${cardName(world, decide.card)}`;
     case "giveCard":
       return `Give ${cardName(world, decide.card)} to ${seatName(world, decide.to)}`;
+    case "awardCard":
+      return `Give to ${seatName(world, decide.to)}`;
     case "shield":
     case "guard":
       return `${seatName(world, decide.seat)} discards ${cardName(world, decide.card)}`;
     case "reveal": {
+      if (decide.keep?.length) return `Keep ${cards(world, decide.keep)}`;
       const pending = world.game?.pending[0];
       return pending?.t === "reveal" && !revealDone(world.game!, pending)
         ? "Turn over the next card"
@@ -594,6 +597,7 @@ const DECISION_TITLES: Record<Decision["t"], string> = {
   removeHollow: "Remove Hollow Men",
   quarantineCard: "Set an Infection card aside until game end",
   giveCard: "Give a card to another player",
+  awardCard: "Choose who receives the new card",
   shield: "Discard a matching card to keep the cube?",
   brokenLink: "Discard any card to stop the rest of this Infect step?",
   guard: "Discard a matching card to slip past the Hollow Men?",
@@ -617,6 +621,8 @@ export function decisionTitle(world: World, pending: Decision): string {
   }
   if (pending.t === "removeHollow")
     return `${seatName(world, pending.seat)}: Remove up to ${pending.amount} Hollow ${pending.amount === 1 ? "Man" : "Men"}, one at a time`;
+  if (pending.t === "awardCard")
+    return `Give ${cardName(world, pending.card)} to a player`;
   if (pending.t === "scar" && !pending.seat)
     return "A scar is owed. Choose who takes it, which scar, and where it goes";
   const who = "seat" in pending && pending.seat ? `${seatName(world, pending.seat)}: ` : "";

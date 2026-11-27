@@ -12,6 +12,8 @@ import {
   isForsaken,
   neighbours,
   pack,
+  revealDone,
+  revealPick,
   score,
   reconned,
   sealKey,
@@ -68,6 +70,8 @@ function pendingLine(world: World, pending: Decision): string {
       return `${who} may set aside an Infection card from the discard pile`;
     case "giveCard":
       return `${who} may give a card from their hand to another player`;
+    case "awardCard":
+      return `${who} must give the new ${cardName(world, pending.card)} card to any player's hand`;
     case "intensify":
       return "An Epidemic just struck and its discard pile is about to be reshuffled onto the deck. A player holding Resilient Population, Inoculation Unit, or Relocation may play it now (or destroy a Lockdown card). Otherwise the active player passes with `do decide:skip`";
     case "epidemicDrawn":
@@ -85,6 +89,11 @@ function pendingLine(world: World, pending: Decision): string {
     case "reveal": {
       const source = pending.by.t === "monitor" ? "Monitor" : "Cautious Approach";
       const shown = pending.cards.map((id) => cardName(world, id)).join(", ") || "none yet";
+      if (revealDone(world.game!, pending)) {
+        const { eligible, take } = revealPick(world, pending);
+        if (take > 0 && eligible.length > take)
+          return `${source} turned over ${shown}. ${who} chooses ${take} non-Epidemic card(s) to keep with \`do decide:reveal:<cards>\``;
+      }
       return `${source} is turning over the top Player cards (${shown}). ${who} turns the next one, then puts them away, with \`do decide:reveal\``;
     }
     case "search":

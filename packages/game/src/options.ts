@@ -30,7 +30,24 @@ import { checkPurchase } from "./legacy";
 import type { Phase } from "./machine";
 import type { Decide, Play } from "./plays";
 import { checkDecide, checkPlay, forecastCards } from "./plays";
+import { revealDone, revealPick } from "./reveal";
 import type { World } from "./state";
+
+function combos<T>(items: readonly T[], size: number): T[][] {
+  if (size === 0) return [[]];
+  if (size > items.length) return [];
+  const out: T[][] = [];
+  const walk = (start: number, picked: T[]) => {
+    if (picked.length === size) return void out.push([...picked]);
+    for (let i = start; i <= items.length - (size - picked.length); i++) {
+      picked.push(items[i]!);
+      walk(i + 1, picked);
+      picked.pop();
+    }
+  };
+  walk(0, []);
+  return out;
+}
 
 function cityCards(world: World, cards: CardId[]) {
   return cards.flatMap((id) => {
@@ -550,6 +567,9 @@ export function legalDecides(world: World): Decide[] {
           for (const to of game.seats)
             if (to !== pending.seat) candidates.push({ d: "giveCard", card, to });
         break;
+      case "awardCard":
+        for (const to of game.seats) candidates.push({ d: "awardCard", to });
+        break;
       case "shield":
         for (const seat of game.seats)
           for (const card of player(game, seat).hand) candidates.push({ d: "shield", seat, card });
@@ -562,9 +582,19 @@ export function legalDecides(world: World): Decide[] {
         for (const card of player(game, pending.seat).hand)
           candidates.push({ d: "guard", seat: pending.seat, card });
         break;
-      case "reveal":
-        candidates.push({ d: "reveal" });
+      case "reveal": {
+        if (!revealDone(game, pending)) {
+          candidates.push({ d: "reveal" });
+          break;
+        }
+        const { eligible, take } = revealPick(world, pending);
+        if (take > 0 && eligible.length > take) {
+          for (const keep of combos(eligible, take)) candidates.push({ d: "reveal", keep });
+        } else {
+          candidates.push({ d: "reveal" });
+        }
         break;
+      }
       case "search":
         candidates.push({ d: "search" });
         break;

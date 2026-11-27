@@ -1781,26 +1781,70 @@ test("Monitor turns over one card per command, and the cards reach a hand or the
       hand + discards,
     );
   }
-  send(actor, { type: "DECIDE", decide: { d: "reveal" } });
+  const eligible = top.filter((id) => worldOf(actor).campaign.playerCards[id]!.kind !== "epidemic");
+  send(actor, { type: "DECIDE", decide: { d: "reveal", keep: eligible.slice(0, 2) } });
   expect(gameOf(actor).pending).toEqual([]);
   expect(gameOf(actor).players[A]!.hand.length + gameOf(actor).playerDiscard.length).toBe(
     hand + discards + 4,
   );
 });
 
-test("Monitor frequencies that keep cards take the newest non-Epidemic discards", () => {
+test("Monitor white-square frequencies let the player choose which revealed non-Epidemic cards to keep", () => {
   const actor = late((world, game) => {
     world.campaign.frequenciesUsed = [];
     game.players[A]!.location = city("lagos");
     game.locations[city("lagos")]!.tower = true;
+    const epidemic = Object.values(world.campaign.playerCards).find(
+      (card) => card.kind === "epidemic",
+    )!.id;
+    const cities = [
+      cityCards(world, "lagos", 1)[0]!,
+      cityCards(world, "cairo", 1)[0]!,
+      cityCards(world, "london", 1)[0]!,
+    ];
+    const picked = new Set([epidemic, ...cities]);
+    for (const seat of game.seats)
+      game.players[seat]!.hand = game.players[seat]!.hand.filter((id) => !picked.has(id));
+    game.playerDiscard = game.playerDiscard.filter((id) => !picked.has(id));
+    game.playerDeck.order = [
+      cities[0]!,
+      epidemic,
+      cities[1]!,
+      cities[2]!,
+      ...game.playerDeck.order.filter((id) => !picked.has(id)),
+    ];
+    game.playerDeck.piles = [
+      {
+        size: game.playerDeck.order.length,
+        epidemics: game.playerDeck.order.filter(
+          (id) => world.campaign.playerCards[id]?.kind === "epidemic",
+        ).length,
+      },
+    ];
   });
-  const top = gameOf(actor)
-    .playerDeck.order.slice(0, 4)
-    .filter((id) => worldOf(actor).campaign.playerCards[id]!.kind !== "epidemic");
+  const [first, epidemic, second, third] = gameOf(actor).playerDeck.order.slice(0, 4) as [
+    CardId,
+    CardId,
+    CardId,
+    CardId,
+  ];
   act(actor, { a: "monitor", frequency: 4 });
-  showReveals(actor);
-  expect(gameOf(actor).players[A]!.hand).toHaveLength(Math.min(2, top.length));
-  expect(top).toEqual(expect.arrayContaining(gameOf(actor).players[A]!.hand));
+  expect(
+    reject(worldOf(actor), phase(actor), { type: "DECIDE", decide: { d: "reveal", keep: [first, second] } }),
+  ).toContain("Turn over");
+  for (let i = 0; i < 4; i++) send(actor, { type: "DECIDE", decide: { d: "reveal" } });
+  expect(
+    reject(worldOf(actor), phase(actor), { type: "DECIDE", decide: { d: "reveal" } }),
+  ).toContain("Pick 2");
+  expect(
+    reject(worldOf(actor), phase(actor), {
+      type: "DECIDE",
+      decide: { d: "reveal", keep: [first, epidemic] },
+    }),
+  ).toContain("non-Epidemic");
+  send(actor, { type: "DECIDE", decide: { d: "reveal", keep: [first, second] } });
+  expect(gameOf(actor).players[A]!.hand).toEqual([first, second]);
+  expect(gameOf(actor).playerDiscard).toEqual(expect.arrayContaining([epidemic, third]));
 });
 
 test("a Broken Link card lets any player discard to end the Infect step", () => {
@@ -3440,6 +3484,67 @@ describe("actions", () => {
     expect(gameOf(actor).playerDiscard).toEqual(
       expect.arrayContaining(cityCards(worldOf(actor), "chicago", 2)),
     );
+  });
+
+  test("recon Unrationed Event rewards let the table choose any player to receive the card, while Portable Antiviral Lab goes straight to the opener and forced openings grant no reward", () => {
+    const actor = january((world, game) => {
+      game.players[A]!.location = city("washington");
+      game.locations[city("washington")]!.center = true;
+      give(world, A, [...cityCards(world, "washington", 2), ...cityCards(world, "london", 1)]);
+      emptyHand(world, B);
+      give(world, B, [
+        ...cityCards(world, "cairo", 2),
+        ...cityCards(world, "lagos", 2),
+        ...cityCards(world, "istanbul", 2),
+        ...cityCards(world, "tripoli", 1),
+      ]);
+    });
+    const cards = [
+      ...cityCards(worldOf(actor), "washington", 2),
+      ...cityCards(worldOf(actor), "london", 1),
+    ];
+    act(actor, { a: "recon", route: "north-america", cards });
+    const reward = Object.values(worldOf(actor).campaign.playerCards).find(
+      (card) => card.kind === "event" && card.event === "decontaminationKit",
+    )!.id;
+    expect(gameOf(actor).pending[0]).toEqual({ t: "awardCard", seat: A, card: reward });
+    expect(gameOf(actor).players[A]!.hand).not.toContain(reward);
+    expect(reject(worldOf(actor), phase(actor), { type: "DECIDE", decide: { d: "skip" } })).toContain(
+      "cannot be skipped",
+    );
+    expect(reject(worldOf(actor), phase(actor), { type: "END_ACTIONS", seat: A })).toContain(
+      "pending choice",
+    );
+    send(actor, { type: "DECIDE", decide: { d: "awardCard", to: B } });
+    expect(gameOf(actor).pending).toEqual([]);
+    expect(gameOf(actor).players[B]!.hand).toContain(reward);
+    expect(gameOf(actor).players[A]!.hand).not.toContain(reward);
+    expect(
+      legalDecides(worldOf(actor)).some((decide) => decide.d === "discard" && decide.seat === B),
+    ).toBe(true);
+
+    const direct = late((world, game) => {
+      game.players[A]!.location = city("lima");
+      world.campaign.opened = world.campaign.opened.filter(
+        (key) => key !== "package:6" && key !== "package:2",
+      );
+      openSeal(world, { t: "package", id: 6 }, false, A);
+    });
+    expect(gameOf(direct).pending).toEqual([]);
+    expect(
+      gameOf(direct).players[A]!.hand.some(
+        (id) =>
+          worldOf(direct).campaign.playerCards[id]?.kind === "event" &&
+          (worldOf(direct).campaign.playerCards[id] as { event?: string }).event ===
+            "portableAntiviralLab",
+      ),
+    ).toBe(true);
+
+    const forced = late((world) => {
+      world.campaign.opened = world.campaign.opened.filter((key) => key !== "package:2");
+      openSeal(world, { t: "package", id: 2 }, true, A);
+    });
+    expect(gameOf(forced).pending).toEqual([]);
   });
 
   test("completing the required objectives wins immediately", () => {

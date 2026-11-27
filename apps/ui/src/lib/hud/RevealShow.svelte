@@ -1,10 +1,11 @@
 <script lang="ts">
   import { feedback } from "@stefan.inc/feedback-engine/svelte";
-  import { pack, revealDone, revealOutcome, searchFind, REVEAL_COUNT } from "@repo/game";
+  import { pack, revealDone, revealOutcome, revealPick, searchFind, REVEAL_COUNT } from "@repo/game";
   import type { CardId, Command, Decision, SeatId, World } from "@repo/game";
   import { untrack } from "svelte";
   import { backOut } from "svelte/easing";
   import { fade, scale } from "svelte/transition";
+  import Beacon from "#lib/Beacon.svelte";
   import { inkOn } from "#lib/color.ts";
   import { searchStory } from "#lib/cards/playerPrint.ts";
   import { sfxCardDraw, sfxCardFlip, sfxScratchBox } from "#lib/audio/sfx.ts";
@@ -39,13 +40,42 @@
 
   const reveal = $derived(pending.t === "reveal" ? pending : null);
   const done = $derived(reveal ? revealDone(game, reveal) : true);
-  const outcome = $derived(reveal && done ? revealOutcome(world, reveal) : null);
+  const pick = $derived(
+    reveal && done ? revealPick(world, reveal) : { eligible: [] as CardId[], take: 0 },
+  );
+  const choosingKeep = $derived(pick.take > 0 && pick.eligible.length > pick.take);
+  const eligibleSet = $derived(new Set(pick.eligible));
+  let picked = $state<CardId[]>([]);
+  let lastRevealKey = "";
+  $effect(() => {
+    const key = reveal
+      ? `${reveal.seat}:${reveal.by.t === "monitor" ? reveal.by.frequency : "cautious"}:${reveal.cards.join(",")}`
+      : "";
+    if (key === lastRevealKey) return;
+    lastRevealKey = key;
+    picked = [];
+  });
+  const ready = $derived(!choosingKeep || picked.length === pick.take);
+  const outcome = $derived(
+    reveal && done ? revealOutcome(world, reveal, choosingKeep ? picked : undefined) : null,
+  );
   /** Face-down places for the cards still to come, so the table sees how many are left to turn. */
   const slots = $derived.by(() => {
     if (!reveal) return [];
     const left = Math.min(REVEAL_COUNT - reveal.cards.length, game.playerDeck.order.length);
     return [...reveal.cards, ...Array.from({ length: left }, () => null)] as (CardId | null)[];
   });
+
+  function togglePick(id: CardId) {
+    if (!mine || !choosingKeep || !eligibleSet.has(id)) return;
+    if (picked.includes(id)) {
+      picked = picked.filter((other) => other !== id);
+    } else if (pick.take === 1) {
+      picked = [id];
+    } else if (picked.length < pick.take) {
+      picked = [...picked, id];
+    }
+  }
 
   const searched = $derived.by(() => {
     if (pending.t !== "search") return null;
@@ -89,25 +119,39 @@
     if (reveal.by.t === "monitor") {
       if (reward && "seal" in reward)
         return "Something answers on this frequency. It is unpacked next.";
+      if (choosingKeep) {
+        if (!mine)
+          return `${who} is choosing ${pick.take === 1 ? "1 card" : `${pick.take} cards`} to keep.`;
+        if (!ready)
+          return pick.take === 1
+            ? "Click 1 card to add to your hand. The rest are discarded."
+            : `Click ${pick.take} cards to add to your hand (${picked.length}/${pick.take}). The rest are discarded.`;
+        return `${who} keeps ${names(outcome.keep)}.`;
+      }
       if (!outcome.keep.length) return "Nothing on this frequency to keep.";
       return `${who} keeps ${names(outcome.keep)}.`;
     }
     return outcome.keep.length ? `${who} keeps ${names(outcome.keep)}.` : "No City cards to keep.";
   });
 
-  const next = $derived(
-    reveal
-      ? done
-        ? outcome?.keep.length
-          ? "Take them and discard the rest"
-          : "Discard them"
-        : `Turn over card ${reveal.cards.length + 1}`
-      : "Continue",
-  );
+  const next = $derived.by(() => {
+    if (!reveal) return "Continue";
+    if (!done) return `Turn over card ${reveal.cards.length + 1}`;
+    if (choosingKeep && !ready) {
+      const left = pick.take - picked.length;
+      return `Pick ${left} ${left === 1 ? "card" : "cards"} to keep`;
+    }
+    if (!outcome?.keep.length) return "Discard them";
+    return outcome.keep.length === 1
+      ? "Take it and discard the rest"
+      : "Take them and discard the rest";
+  });
   const waiting = $derived(
     reveal && !done
       ? `Waiting for ${who} to turn over the next card`
-      : `Waiting for ${who} to continue`,
+      : choosingKeep
+        ? `Waiting for ${who} to pick ${pick.take === 1 ? "a card" : `${pick.take} cards`} to keep`
+        : `Waiting for ${who} to continue`,
   );
 
   const searchScene = $derived(
@@ -289,9 +333,12 @@
       hurrySearch();
       return;
     }
-    if (!mine || busy) return;
+    if (!mine || busy || !ready) return;
     lockBriefly(350);
-    send({ type: "DECIDE", decide: { d: pending.t } });
+    send({
+      type: "DECIDE",
+      decide: reveal && choosingKeep ? { d: "reveal", keep: [...picked] } : { d: pending.t },
+    });
   }
 </script>
 
@@ -332,17 +379,60 @@
       {#each slots as id, index (index)}
         {@const card = id ? world.campaign.playerCards[id] : null}
         {@const kept = id !== null && (outcome?.keep.includes(id) ?? false)}
-        <li class:up={card !== null} class:kept class:dropped={outcome !== null && !kept}>
+        {@const canPick =
+          id !== null &&
+          mine &&
+          choosingKeep &&
+          eligibleSet.has(id) &&
+          (kept || pick.take === 1 || picked.length < pick.take)}
+        {@const showBeacon =
+          id !== null &&
+          mine &&
+          choosingKeep &&
+          eligibleSet.has(id) &&
+          !kept &&
+          (pick.take === 1 || picked.length < pick.take)}
+        {@const dimmed =
+          outcome !== null &&
+          !kept &&
+          (!choosingKeep || !mine || id === null || !eligibleSet.has(id) || ready)}
+        <li
+          class:up={card !== null}
+          class:kept
+          class:pickable={canPick}
+          class:dropped={dimmed}
+          data-card={id ?? undefined}
+          data-picked={kept || undefined}
+        >
           <span class="flip">
             <span class="back" aria-hidden="true"><span>Player</span></span>
             <span class="face">
-              {#if card}<PlayerCard {card} />{/if}
+              {#if card}
+                <PlayerCard
+                  {card}
+                  dimmed={choosingKeep && mine && !eligibleSet.has(id!)}
+                  onclick={canPick ? () => togglePick(id!) : undefined}
+                />
+              {/if}
+              {#if kept && choosingKeep}
+                <span class="tick" aria-label="Picked">✓</span>
+              {:else if showBeacon}
+                <Beacon />
+              {/if}
             </span>
           </span>
           {#if outcome && id}
-            <span class="fate"
-              >{kept ? "To hand" : card?.kind === "epidemic" ? "No effect" : "Discard"}</span
-            >
+            <span class="fate">
+              {#if kept}
+                To hand
+              {:else if card?.kind === "epidemic"}
+                No effect
+              {:else if choosingKeep && !ready}
+                {mine && eligibleSet.has(id) ? "Pick" : "—"}
+              {:else}
+                Discard
+              {/if}
+            </span>
           {/if}
         </li>
       {/each}
@@ -357,12 +447,12 @@
           class="go"
           data-testid="reveal-next"
           autofocus
-          disabled={busy}
+          disabled={busy || !ready}
           onclick={advance}
         >
           {next}
         </button>
-        <span class="key">Space</span>
+        {#if ready}<span class="key">Space</span>{/if}
       {:else}
         <p class="waiting">{waiting}.</p>
       {/if}
@@ -537,6 +627,8 @@
 
   .cards {
     display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 0.9rem;
     margin: 0;
     padding: 0;
@@ -571,7 +663,35 @@
   }
 
   .face {
+    position: relative;
     transform: rotateY(180deg);
+    pointer-events: none;
+  }
+
+  .pickable .face {
+    pointer-events: auto;
+  }
+
+  .pickable:hover {
+    transform: translateY(-0.35rem);
+  }
+
+  .tick {
+    position: absolute;
+    right: -0.5rem;
+    top: -0.5rem;
+    z-index: 4;
+    display: grid;
+    place-items: center;
+    min-width: 1.5rem;
+    height: 1.5rem;
+    padding: 0 0.25rem;
+    border: 2px solid rgb(28 16 4 / 0.7);
+    border-radius: 0.75rem;
+    background: #3f9b6e;
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 700;
     pointer-events: none;
   }
 
@@ -761,6 +881,23 @@
     from {
       opacity: 0;
       transform: translateY(0.3rem);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .reveal {
+      max-height: calc(100dvh - 4rem);
+      overflow-y: auto;
+      padding: 0.85rem 0.9rem;
+      gap: 0.65rem;
+    }
+
+    .cards {
+      gap: 0.65rem;
+    }
+
+    .cards li {
+      --card-size: 0.72rem;
     }
   }
 </style>

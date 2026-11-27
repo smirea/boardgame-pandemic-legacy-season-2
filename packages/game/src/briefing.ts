@@ -230,7 +230,9 @@ function unlockLine(campaign: Campaign, unlock: BriefedUnlock): string | null {
       const where =
         unlock.mode === "rationed"
           ? "It joins the Rationed Events the group picks from at each setup, starting next game."
-          : "It is in the Player deck from the next game on.";
+          : unlock.now?.includes("anyHand")
+            ? "Give it to a player to add to their hand now; if unused, it joins the Player deck from the next game on."
+            : "It is in the Player deck from the next game on.";
       const event = pack.events.find((entry) => entry.id === unlock.event)!;
       const article = mode === "Unrationed" ? "an" : "a";
       return `${event.name}, ${owned ? `another copy of ${article} ${mode} Event` : `${article} ${mode} Event`}. ${where} When played it reads: ${event.text}`;

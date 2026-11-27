@@ -16,7 +16,7 @@ export {
 } from "./actions";
 export type { Decide, Play } from "./plays";
 export { playDetail } from "./plays";
-export { REVEAL_COUNT, revealDone, revealOutcome } from "./reveal";
+export { REVEAL_COUNT, revealDone, revealOutcome, revealPick } from "./reveal";
 export type { Purchase } from "./legacy";
 export type {
   DossierSlot,

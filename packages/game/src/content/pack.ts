@@ -160,13 +160,13 @@ const seals: SealDef[] = [
       { t: "scar", scar: "impatient" },
       { t: "scar", scar: "exhausted" },
     ],
-    [{ t: "event", event: "decontaminationKit", mode: "unrationed", now: ["hand"] }],
+    [{ t: "event", event: "decontaminationKit", mode: "unrationed", now: ["anyHand"] }],
   ),
   sealed(
     pkg(2),
     "Middle East and South Asia",
     [...opens("62", "53", "F", "14"), { t: "gather", cards: 4 }],
-    [{ t: "event", event: "renewal", mode: "unrationed", now: ["hand"] }],
+    [{ t: "event", event: "renewal", mode: "unrationed", now: ["anyHand"] }],
   ),
   sealed(
     pkg(3),
@@ -178,13 +178,13 @@ const seals: SealDef[] = [
       { t: "permanentStructure", structure: "shelter", copies: 5 },
       { t: "infectionImprovement", improvement: "rebirth", copies: 2 },
     ],
-    [{ t: "event", event: "biodomePrototype", mode: "unrationed", now: ["hand"] }],
+    [{ t: "event", event: "biodomePrototype", mode: "unrationed", now: ["anyHand"] }],
   ),
   sealed(
     pkg(4),
     "Europe",
     [...opens("64"), { t: "action", action: "shuttle" }],
-    [{ t: "event", event: "relocation", mode: "unrationed", now: ["hand"] }],
+    [{ t: "event", event: "relocation", mode: "unrationed", now: ["anyHand"] }],
   ),
   sealed(
     pkg(5),
@@ -195,7 +195,7 @@ const seals: SealDef[] = [
       { t: "ability", ability: "outrider" },
       { t: "ability", ability: "foreman" },
     ],
-    [{ t: "event", event: "strategicReserves", mode: "unrationed", now: ["hand"] }],
+    [{ t: "event", event: "strategicReserves", mode: "unrationed", now: ["anyHand"] }],
   ),
   sealed(pkg(6), "Eastern Pacific haven reached", [
     { t: "action", action: "inoculate" },
@@ -218,7 +218,7 @@ const seals: SealDef[] = [
       { t: "action", action: "transmit" },
       { t: "permanentStructure", structure: "tower", copies: 4 },
     ],
-    [{ t: "event", event: "topazExperimentalVaccine", mode: "unrationed", now: ["hand"] }],
+    [{ t: "event", event: "topazExperimentalVaccine", mode: "unrationed", now: ["anyHand"] }],
   ),
   sealed(
     pkg(8),

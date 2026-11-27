@@ -273,7 +273,9 @@ export function applyUnlock(world: World, unlock: Unlock, by?: SeatId) {
       if (!game) return;
       added.forEach((id, index) => {
         const where = unlock.now?.[index];
-        if (where === "hand" && by) game.players[by]!.hand.push(id);
+        if (where === "anyHand")
+          game.pending.push({ t: "awardCard", seat: by ?? game.active, card: id });
+        else if (where === "hand" && by) game.players[by]!.hand.push(id);
         else if (where) game.playerDiscard.push(id);
       });
       return;

@@ -102,6 +102,7 @@ export const ANSWERED_ON_TABLE = new Set<Decision["t"]>([
   "freeEdge",
   "removeHollow",
   "workerReturn",
+  "awardCard",
 ]);
 
 /**
@@ -318,6 +319,24 @@ export function createChoosing(source: ChoosingSource) {
         },
       };
     }
+    if (pending.t === "awardCard") {
+      const runs = new Map<SeatId, () => void>();
+      for (const answer of decides) {
+        if (answer.d === "awardCard") runs.set(answer.to, () => decide(answer));
+      }
+      const { cities, pawns } = seatTargets(title, null, runs);
+      return {
+        cardPick: null,
+        targeting: {
+          label: title,
+          a: null,
+          cities,
+          pawns,
+          held: true,
+          prompt: `Click any lit seat or pawn to add ${cardName(world, pending.card)} to their hand.`,
+        },
+      };
+    }
     const cities = new Map<CityId, () => void>();
     for (const answer of decides) {
       if (answer.d === "freeEdge") cities.set(answer.to, () => decide(answer));
@@ -398,23 +417,12 @@ export function createChoosing(source: ChoosingSource) {
     dockChoice = { title, prompt, a, options };
   }
 
-  /** Lights the given players' pawns and seats; a click on one runs what it was lit for. */
-  function aimSeats(
+  /** Maps seat callbacks onto both pawns and the cities they stand on (with a disambiguator when seats share a city). */
+  function seatTargets(
     label: string,
     a: Action["a"] | null,
-    aimed: Map<SeatId, () => void>,
-    prompt?: string,
-  ) {
-    if (!aimed.size) return;
-    const runs = new Map(
-      [...aimed].map(([seat, run]) => [
-        seat,
-        () => {
-          chosen.seat = seat;
-          run();
-        },
-      ]),
-    );
+    runs: Map<SeatId, () => void>,
+  ): { cities: Map<CityId, () => void>; pawns: Map<SeatId, () => void> } {
     const byCity = new Map<CityId, SeatId[]>();
     for (const seat of runs.keys()) {
       const city = game!.players[seat]!.location;
@@ -438,12 +446,33 @@ export function createChoosing(source: ChoosingSource) {
                 })),
               ),
       );
+    return { cities, pawns: runs };
+  }
+
+  /** Lights the given players' pawns and seats; a click on one runs what it was lit for. */
+  function aimSeats(
+    label: string,
+    a: Action["a"] | null,
+    aimed: Map<SeatId, () => void>,
+    prompt?: string,
+  ) {
+    if (!aimed.size) return;
+    const runs = new Map(
+      [...aimed].map(([seat, run]) => [
+        seat,
+        () => {
+          chosen.seat = seat;
+          run();
+        },
+      ]),
+    );
+    const { cities, pawns } = seatTargets(label, a, runs);
     only();
     targeting = {
       label,
       a,
       cities,
-      pawns: runs,
+      pawns,
       prompt:
         prompt ??
         (runs.size === 1
@@ -1332,7 +1361,7 @@ export function createChoosing(source: ChoosingSource) {
       start(click.a, variants);
     } else if (click.t === "city") clickCity(click.city);
     else if (click.t === "pawn") {
-      const pickPawn = targeting?.pawns?.get(click.seat);
+      const pickPawn = currentTargeting()?.pawns?.get(click.seat);
       if (!pickPawn) return false;
       pickPawn();
     } else if (click.t === "handCard") {
