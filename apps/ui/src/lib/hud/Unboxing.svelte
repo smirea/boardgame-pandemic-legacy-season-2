@@ -81,22 +81,83 @@
       : [],
   );
   for (const entry of untrack(() => arrivals)) landed.add(entry.key);
-  let standing = $state<string | null>(null);
-  $effect(() => {
-    const next = arrivals[0]?.key ?? null;
-    if (next === null || standing === next) return;
-    const timer = setTimeout(() => (standing = next), still ? 0 : 1000);
-    return () => clearTimeout(timer);
-  });
-  const arrival = $derived(arrivals[0]?.key === standing ? (arrivals[0] ?? null) : null);
+
+  /*
+   * Each opening plays as one sequence, and only a press moves it on: the press that draws a card sends what lay in
+   * the middle aside before the card arrives; the press that turns it over turns it, then tears open each package or
+   * door it opens one after another, then lets what came out come out one piece at a time, and leaves it all a moment
+   * to breathe. Only then does a new character stand up, and the story waits for a press of its own, so a set piece
+   * never plays over the reveal. A press while a sequence plays does nothing.
+   */
+  const TURN = 800;
+  const SEAL_GAP = 560;
+  const PIECE_GAP = 140;
+  const PIECE_FLIGHT = 640;
+  const BREATHE = 600;
+  const ASIDE_GAP = 60;
+  /** When each piece of the opening being read comes out, after the press that turned it over. */
+  let plan = new Map<string, number>();
+  let flippedAt = 0;
+  let mainAt = 0;
+  /** The opening whose card has arrived, and the one whose reveal has played out. */
+  let arrived = $state(untrack(() => drawn));
+  let revealed = $state<number | null>(untrack(() => (flipped ? drawn : null)));
+  /** The opening whose story the table asked for, and the one whose story has come in once the table made room. */
+  let asked = $state<number | null>(null);
+  let shown = $state<number | null>(null);
+  let timers: ReturnType<typeof setTimeout>[] = [];
+  const later = (ms: number, run: () => void) => {
+    if (still) run();
+    else timers.push(setTimeout(run, ms));
+  };
+  /** Runs once nothing on the table is moving any more, however slowly this browser drew it there. */
+  function whenStill(run: () => void) {
+    const check = () => {
+      if (destroyed) return;
+      const moving = [...(tableEl?.querySelectorAll<HTMLElement>("[data-piece]") ?? [])].some(
+        (node) => node.getAnimations().some((animation) => animation.playState === "running"),
+      );
+      if (moving) timers.push(setTimeout(check, 100));
+      else run();
+    };
+    check();
+  }
+
+  const story = $derived(current && flipped ? sceneForOpening(current, campaign) : null);
+  const showing = $derived(current !== null && flipped && revealed !== drawn);
+  const arrival = $derived(revealed === drawn ? (arrivals[0] ?? null) : null);
+  const storyWaits = $derived(
+    story !== null &&
+      revealed === drawn &&
+      !arrivals.length &&
+      asked !== drawn &&
+      dismissedStep !== drawn &&
+      !progress.stowing,
+  );
+  const reading = $derived(
+    story !== null && asked === drawn && dismissedStep !== drawn && !progress.stowing,
+  );
   const activeStory = $derived(
-    current && flipped && !progress.stowing && !paused && !arrivals.length && dismissedStep !== drawn
-      ? sceneForOpening(current, campaign)
-      : null,
+    reading && shown === drawn && !paused && !arrivals.length ? story : null,
+  );
+  /** The table steps up out of the way of the story's panel first, and the story comes in after it. */
+  function readOn() {
+    const d = drawn;
+    asked = d;
+    later(650, () => (shown = d));
+  }
+  /** Everything the opening being read has to show has been shown. */
+  const settled = $derived(
+    drawn === 0 ||
+      (arrived === drawn &&
+        !showing &&
+        !arrivals.length &&
+        (story === null || dismissedStep === drawn || !flipped)),
   );
   let storyStage = $state<StoryStage>();
-  let prevDrawn = 0;
-  let prevFlipped = false;
+  let staging = $state(false);
+  let prevDrawn = untrack(() => drawn);
+  let prevFlipped = untrack(() => flipped);
   $effect(() => {
     const d = drawn;
     const f = flipped;
@@ -107,16 +168,42 @@
       peek = null;
     }
     if (d > prevDrawn) {
+      timers.forEach(clearTimeout);
+      timers = [];
       sfxCardDraw();
-    } else if (d === prevDrawn && f && !prevFlipped && cur) {
+      const before = steps[d - 2];
+      const aside = before ? piecesOf(before, d - 2).length : 0;
+      const wait = aside ? (aside - 1) * ASIDE_GAP + 560 : 0;
+      mainAt = performance.now() + (still ? 0 : wait);
+      later(wait + 720, () => (arrived = d));
+    } else if (d < prevDrawn) {
+      arrived = d;
+      revealed = f ? d : null;
+    } else if (f && !prevFlipped && cur) {
+      timers.forEach(clearTimeout);
+      timers = [];
+      flippedAt = performance.now();
       if (cur.from.t === "seal") {
         if (cur.from.seal.t === "package") sfxCrateOpen();
         else sfxDoorTear();
-      } else {
-        sfxCardFlip();
-        if (cur.seals.some((s) => s.t === "door")) setTimeout(() => sfxDoorTear(), 260);
-        else if (cur.seals.some((s) => s.t === "package")) setTimeout(() => sfxCrateOpen(), 260);
-      }
+      } else sfxCardFlip();
+      const rest = piecesOf(cur, d - 1).slice(1);
+      const seals = rest.filter(({ piece }) => piece.t === "seal");
+      const pieces = rest.filter(({ piece }) => piece.t !== "seal");
+      plan = new Map();
+      seals.forEach(({ piece }, i) => {
+        const at = TURN + i * SEAL_GAP;
+        plan.set(piece.key, at);
+        if (piece.t === "seal") later(at, piece.seal.t === "package" ? sfxCrateOpen : sfxDoorTear);
+      });
+      const out = TURN + seals.length * SEAL_GAP + (seals.length ? 200 : 0);
+      pieces.forEach(({ piece }, i) => plan.set(piece.key, out + i * PIECE_GAP));
+      const end = pieces.length
+        ? out + (pieces.length - 1) * PIECE_GAP + PIECE_FLIGHT
+        : seals.length
+          ? TURN + seals.length * SEAL_GAP
+          : TURN;
+      later(end, () => whenStill(() => later(BREATHE, () => (revealed = d))));
     }
     prevDrawn = d;
     prevFlipped = f;
@@ -149,10 +236,18 @@
   let newcomerEl = $state<HTMLElement>();
   let landing = $state(false);
 
+  // A character is stepped down only once it has stood up in full and its Next has come in.
+  const STAND = 1500;
+  let stoodAt = 0;
+  const standing = $derived(arrival?.key ?? null);
+  $effect(() => {
+    if (standing) stoodAt = performance.now();
+  });
+
   /** The character steps down from over the table into its piece, and the reading goes on. */
   async function land() {
     const now = arrival;
-    if (!now || landing) return;
+    if (!now || landing || (!still && performance.now() - stoodAt < STAND)) return;
     landing = true;
     const from = newcomerEl?.querySelector<HTMLElement>(".figure");
     const to = root?.querySelector(`[data-piece="${now.key}"]`);
@@ -227,14 +322,17 @@
   });
 
   // The story's panel stands over the foot of the table while it is read, so the opening steps up above it.
+  // It only grows while a story is read, so a longer line never shuffles the table under it.
   let storyRoom = $state(0);
+  let roomGuess = 250;
+  $effect(() => {
+    if (!reading) storyRoom = 0;
+    else storyRoom = Math.max(untrack(() => storyRoom), roomGuess);
+  });
   $effect(() => {
     const host = root;
     const table = tableEl;
-    if (!activeStory || !host || !table) {
-      storyRoom = 0;
-      return;
-    }
+    if (!activeStory || !host || !table) return;
     let observer: ResizeObserver | null = null;
     const timer = setTimeout(() => {
       const dock = host.querySelector<HTMLElement>(".dialogue-dock");
@@ -246,7 +344,9 @@
           stage.getBoundingClientRect().bottom -
           parseFloat(getComputedStyle(dock).bottom) -
           dock.offsetHeight;
-        storyRoom = Math.max(0, Math.round(table.getBoundingClientRect().bottom - top + 12));
+        const room = Math.max(0, Math.round(table.getBoundingClientRect().bottom - top + 12));
+        roomGuess = room;
+        storyRoom = Math.max(untrack(() => storyRoom), room);
       };
       update();
       observer = new ResizeObserver(update);
@@ -308,7 +408,6 @@
   // card or package bursts out of it one at a time, and a pile fans out at once.
   type Zone = "spot" | "side" | "pile" | "peek";
   let lastZone = new Map<string, Zone>();
-  let asideAt = -Infinity;
   const motion = $derived.by(() => {
     const out = new Map<string, { dur: number; delay: number }>();
     const peeking = new Set(
@@ -335,14 +434,10 @@
     }
     const now = performance.now();
     let aside = 0;
-    let burst = 0;
     for (const [key, zone] of zones) {
-      if (lastZone.get(key) === "spot" && zone !== "spot") {
-        out.set(key, { dur: 820, delay: aside++ * 60 });
-        asideAt = now;
-      }
+      if (lastZone.get(key) === "spot" && zone !== "spot")
+        out.set(key, { dur: 820, delay: aside++ * ASIDE_GAP });
     }
-    const settle = Math.max(0, 360 - (now - asideAt));
     for (const item of items) {
       const key = item.placed.piece.key;
       const zone = zones.get(key);
@@ -351,9 +446,17 @@
       if (!before)
         out.set(
           key,
-          item.main ? { dur: 720, delay: settle } : { dur: 640, delay: 380 + burst++ * 120 },
+          item.main
+            ? { dur: 720, delay: Math.max(0, mainAt - now) }
+            : { dur: PIECE_FLIGHT, delay: Math.max(0, flippedAt + (plan.get(key) ?? 0) - now) },
         );
       else if (zone === "peek" || before === "peek") out.set(key, { dur: 320, delay: 0 });
+      // The card or package being opened holds still until the first piece comes out of it, then makes room.
+      else if (item.main && item.current && plan.size)
+        out.set(key, {
+          dur: 620,
+          delay: Math.max(0, flippedAt + Math.min(...plan.values()) - now),
+        });
       else out.set(key, { dur: 620, delay: 0 });
     }
     lastZone = zones;
@@ -566,6 +669,7 @@
 
   onDestroy(() => {
     destroyed = true;
+    timers.forEach(clearTimeout);
     sizer?.disconnect();
     ondeckout?.(false);
   });
@@ -686,19 +790,33 @@
     exit?.leave();
   }
 
+  const mayDraw = $derived(canDraw && settled);
+  const mayFlip = $derived(needsFlip && arrived === drawn);
+  const finished = $derived(allDrawn && settled);
   const prompt = $derived(
-    canDraw
+    mayDraw
       ? hasLegacy
         ? drawn === 0
           ? "Draw the first card"
           : "Draw the next card"
         : "Open the next one"
-      : needsFlip
+      : mayFlip
         ? current?.from.t === "seal"
           ? "Open it"
           : "Turn it over"
         : null,
   );
+
+  /** What a press does now, the same from Space as from the screen; nothing while a sequence plays. */
+  function press() {
+    if (progress.stowing || paused) return;
+    if (arrival) return void land();
+    if (activeStory) return void storyStage?.next();
+    if (storyWaits) return void readOn();
+    if (needsChart && settled) return void step();
+    if (finished) return void toggleReady();
+    if (mayDraw || mayFlip) step();
+  }
 </script>
 
 <svelte:window
@@ -712,11 +830,7 @@
     // Space on a focused button already presses it.
     if (event.key === " " && !progress.stowing && !paused && !onButton(event)) {
       event.preventDefault();
-      if (arrival) return void land();
-      if (arrivals.length) return;
-      if (activeStory && storyStage?.advance()) return;
-      if (allDrawn) toggleReady();
-      else step();
+      press();
     }
   }}
 />
@@ -729,7 +843,7 @@
   <div
     class="tabletop-unboxing"
     class:stowing={progress.stowing}
-    class:revealing={arrival !== null && !landing}
+    class:revealing={(arrival !== null && !landing) || (activeStory !== null && staging)}
     bind:this={root}
     data-drawn={drawn}
     data-total={steps.length}
@@ -750,10 +864,10 @@
           <button
             class="deck-pile"
             bind:this={deckEl}
-            disabled={!canDraw}
+            disabled={!mayDraw}
             onclick={step}
             data-testid="legacy-draw-deck"
-            aria-label={canDraw ? `Draw from the Legacy deck (${remaining} left)` : "Legacy deck"}
+            aria-label={mayDraw ? `Draw from the Legacy deck (${remaining} left)` : "Legacy deck"}
           >
             <span class="stack" bind:this={sourceEl}>
               {#if nextDeckCard}
@@ -761,11 +875,11 @@
               {:else}
                 <span class="fallback-card">Legacy</span>
               {/if}
-              {#if canDraw}<Beacon gap="0.3rem" turns={4} />{/if}
+              {#if mayDraw}<Beacon gap="0.3rem" turns={4} />{/if}
             </span>
             <span class="count">{canDraw ? `${remaining} to draw` : `${deckCount} in deck`}</span>
           </button>
-        {:else if !hasLegacy && canDraw && !progress.stowing}
+        {:else if !hasLegacy && mayDraw && !progress.stowing}
           {@const next = steps[drawn]}
           <button
             class="seal-trigger"
@@ -831,7 +945,7 @@
 
       {#each items as item (item.placed.piece.key)}
         {@const piece = item.placed.piece}
-        {@const opens = item.current && item.main && needsFlip}
+        {@const opens = item.current && item.main && mayFlip}
         <button
           type="button"
           class="piece {piece.t}"
@@ -859,6 +973,7 @@
             {campaign}
             open={!item.current || flipped}
             live={item.current && item.main}
+            fresh={item.current && showing}
           />
           {#if opens}<Beacon gap="0.25rem" turns={4} />{/if}
         </button>
@@ -890,6 +1005,7 @@
     {#if activeStory}
       <StoryStage
         bind:this={storyStage}
+        bind:staging
         scene={activeStory}
         overlay
         delivered={campaign.sampleDelivered}
@@ -918,7 +1034,7 @@
       </span>
 
       <div class="controls">
-        {#if allDrawn && !progress.stowing}
+        {#if finished && !progress.stowing}
           <VoteButton
             label={exit?.label ?? "Done"}
             tally="done"
@@ -930,16 +1046,20 @@
           {#if progress.ready.length && waitingOn.length}
             <span class="waiting">Waiting for {waitingOn.join(", ")}</span>
           {/if}
-        {:else if needsChart && !activeStory}
+        {:else if needsChart && settled}
           <button class="chart-btn" onclick={step} data-testid="briefing-chart">
             Show on the map<Beacon gap="0.15rem" />
+          </button>
+        {:else if storyWaits && !paused}
+          <button class="chart-btn" onclick={readOn} data-testid="briefing-read-on">
+            Read on<kbd>Space</kbd><Beacon gap="0.15rem" />
           </button>
         {:else if !progress.stowing && prompt && !activeStory}
           <span class="prompt">{prompt}<kbd>Space</kbd></span>
         {/if}
       </div>
 
-      {#if !progress.stowing && allDrawn}
+      {#if !progress.stowing && finished}
         <button class="summary-btn" onclick={() => (full = true)}>Read summary</button>
       {/if}
     </footer>
@@ -1257,7 +1377,8 @@
     font-weight: 600;
   }
 
-  .prompt kbd {
+  .prompt kbd,
+  .chart-btn kbd {
     margin-left: 0.6em;
     padding: 0.05em 0.45em;
     border: 1px solid rgb(244 234 214 / 0.55);

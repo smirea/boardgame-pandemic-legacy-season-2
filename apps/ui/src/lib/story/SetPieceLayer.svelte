@@ -5,7 +5,7 @@
     InfectionCard as InfectionCardData,
     PlayerCard as PlayerCardData,
   } from "@repo/game";
-  import { onDestroy, onMount } from "svelte";
+  import { onDestroy } from "svelte";
   import { cubicOut } from "svelte/easing";
   import { fade, fly, scale } from "svelte/transition";
   import InfectionCard from "#lib/cards/InfectionCard.svelte";
@@ -184,10 +184,6 @@
     phase = 2;
     oncomplete?.();
   }
-
-  onMount(() => {
-    void runChoreography(piece);
-  });
 
   $effect(() => {
     void piece;

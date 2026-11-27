@@ -39,6 +39,8 @@
     ondone?: () => void;
     /** Called when a user explicitly dismisses a standalone scene. */
     onclose?: () => void;
+    /** Whether a set piece stands in the middle of the screen, for what lies there to step back. */
+    staging?: boolean;
   };
 
   let {
@@ -49,6 +51,7 @@
     delivered = true,
     ondone,
     onclose,
+    staging = $bindable(false),
   }: Props = $props();
 
   let index = $state(0);
@@ -84,7 +87,35 @@
     return null;
   });
 
+  /**
+   * A line that is a moment of its own: it brings a set piece, turns the music or plays a sound. The scene never moves
+   * on into one, or out of one, by itself.
+   */
+  const weighty = (entry: StoryScene["beats"][number] | undefined) =>
+    Boolean(entry && (entry.setPiece || entry.swing || entry.cue));
+
+  // A set piece plays out in full and holds a moment before the scene can move past it.
+  let playing = $state<SetPieceId | null>(null);
+  let staged: SetPieceId | null = null;
+  $effect(() => {
+    const piece = activeSetPiece;
+    staging = piece !== null;
+    if (piece && piece !== staged) playing = piece;
+    staged = piece;
+  });
+  let breath: ReturnType<typeof setTimeout> | null = null;
+  function piecePlayed() {
+    if (breath) clearTimeout(breath);
+    breath = setTimeout(() => (playing = null), still ? 0 : 700);
+  }
+  const still =
+    typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // Over the table the card, the package or the door has already sounded as it was turned or opened, and a set piece
+  // sounds itself in time with what it shows.
+  const TABLE_CUES: SfxCue[] = ["cardFlip", "crateOpen", "doorTear", "scratch"];
   function fireCue(cue: SfxCue | undefined) {
+    if (beat.setPiece || (overlay && cue && TABLE_CUES.includes(cue))) return;
     switch (cue) {
       case "cardFlip":
         sfxCardFlip();
@@ -137,6 +168,7 @@
 
   /** Advances to the next beat if one remains; returns true if advanced, false if already on the last beat. */
   export function advance(): boolean {
+    if (playing) return true;
     if (index < scene.beats.length - 1) {
       next();
       return true;
@@ -145,6 +177,7 @@
   }
 
   export function next() {
+    if (playing) return;
     clearTimer();
     voicePlayer.stop();
     if (index < scene.beats.length - 1) {
@@ -186,6 +219,7 @@
 
       const onFinished = () => {
         if (!autoAdvance || currentIndex >= total - 1) return;
+        if (weighty(current) || weighty(scene.beats[currentIndex + 1])) return;
         const pauseMs = 900;
         timer = setTimeout(() => {
           if (index === currentIndex && index < total - 1) index += 1;
@@ -193,7 +227,14 @@
       };
 
       const startedVoice = voicePlayer.play(current.id, onFinished);
-      if (!startedVoice && autoAdvance && currentIndex < total - 1 && !overlay) {
+      if (
+        !startedVoice &&
+        autoAdvance &&
+        currentIndex < total - 1 &&
+        !overlay &&
+        !weighty(current) &&
+        !weighty(scene.beats[currentIndex + 1])
+      ) {
         // Gentle reading fallback when voice is muted or audio hasn't been generated yet.
         const words = current.text.split(/\s+/).length;
         const baseMs = Math.max(4200, words * 210);
@@ -210,6 +251,7 @@
   });
 
   onDestroy(() => {
+    if (breath) clearTimeout(breath);
     clearTimer();
     voicePlayer.stop();
   });
@@ -287,7 +329,12 @@
   <!-- Center stage set-piece (e.g. September 5 Epidemic Cards Masking-Tape Swap) -->
   {#if !bare && activeSetPiece}
     <div class="setpiece-anchor">
-      <SetPieceLayer piece={activeSetPiece} {delivered} compact={overlay} />
+      <SetPieceLayer
+        piece={activeSetPiece}
+        {delivered}
+        compact={overlay}
+        oncomplete={piecePlayed}
+      />
     </div>
   {/if}
 
@@ -374,13 +421,20 @@
                 <button type="button" class="ctrl" onclick={prev}>Back</button>
               {/if}
               {#if !isLast}
-                <button type="button" class="ctrl primary" onclick={next} data-testid="story-next">
+                <button
+                  type="button"
+                  class="ctrl primary"
+                  onclick={next}
+                  disabled={playing !== null}
+                  data-testid="story-next"
+                >
                   Next ›
                 </button>
               {:else if ondone || onclose}
                 <button
                   type="button"
                   class="ctrl primary"
+                  disabled={playing !== null}
                   onclick={() => (ondone ? ondone() : onclose?.())}
                   data-testid="story-finish"
                 >
@@ -837,6 +891,11 @@
   .ctrl.on {
     border-color: color-mix(in srgb, var(--accent) 60%, transparent);
     color: var(--accent);
+  }
+
+  .ctrl:disabled {
+    opacity: 0.45;
+    cursor: default;
   }
 
   .ctrl.primary {

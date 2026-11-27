@@ -42,9 +42,11 @@
     open: boolean;
     /** Still to be turned over, so a Legacy card keeps its face down side under it. */
     live: boolean;
+    /** Coming out of the opening being read, so a door tears open as it arrives. */
+    fresh?: boolean;
   };
 
-  let { piece, campaign, open, live }: Props = $props();
+  let { piece, campaign, open, live, fresh = false }: Props = $props();
 
   const label = $derived(
     piece.t === "card"
@@ -78,7 +80,7 @@
       {#if piece.seal.t === "package"}
         <Crate id={piece.seal.id} {open} />
       {:else}
-        <DossierDoor id={piece.seal.id} {open} tearing={open && live} />
+        <DossierDoor id={piece.seal.id} {open} tearing={open && (live || fresh)} />
       {/if}
     </span>
   {:else if piece.t === "note"}
