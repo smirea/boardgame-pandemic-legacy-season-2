@@ -8,9 +8,9 @@ export const HEADS: Record<string, { x: number; y: number; size: number; aspect:
 		"aspect": 0.667
 	},
 	"survivor-1": {
-		"x": 0.628,
-		"y": 0.142,
-		"size": 0.544,
+		"x": 0.622,
+		"y": 0.143,
+		"size": 0.538,
 		"aspect": 0.667
 	},
 	"survivor-2": {
@@ -20,27 +20,27 @@ export const HEADS: Record<string, { x: number; y: number; size: number; aspect:
 		"aspect": 0.667
 	},
 	"survivor-3": {
-		"x": 0.657,
-		"y": 0.178,
-		"size": 0.579,
+		"x": 0.68,
+		"y": 0.185,
+		"size": 0.575,
 		"aspect": 0.667
 	},
 	"survivor-4": {
-		"x": 0.633,
-		"y": 0.173,
-		"size": 0.482,
+		"x": 0.638,
+		"y": 0.176,
+		"size": 0.461,
 		"aspect": 0.667
 	},
 	"survivor-5": {
-		"x": 0.617,
-		"y": 0.159,
-		"size": 0.504,
+		"x": 0.599,
+		"y": 0.154,
+		"size": 0.498,
 		"aspect": 0.667
 	},
 	"survivor-6": {
-		"x": 0.7,
-		"y": 0.171,
-		"size": 0.545,
+		"x": 0.707,
+		"y": 0.17,
+		"size": 0.567,
 		"aspect": 0.667
 	},
 	"survivor-7": {
@@ -59,42 +59,42 @@ export const HEADS: Record<string, { x: number; y: number; size: number; aspect:
 		"x": 0.64,
 		"y": 0.165,
 		"size": 0.48,
-		"aspect": 0.681
+		"aspect": 0.667
 	},
 	"survivor-10": {
-		"x": 0.646,
-		"y": 0.163,
-		"size": 0.482,
+		"x": 0.641,
+		"y": 0.161,
+		"size": 0.499,
 		"aspect": 0.667
 	},
 	"survivor-11": {
-		"x": 0.732,
-		"y": 0.141,
-		"size": 0.463,
+		"x": 0.717,
+		"y": 0.157,
+		"size": 0.432,
 		"aspect": 0.667
 	},
 	"survivor-12": {
 		"x": 0.625,
-		"y": 0.163,
-		"size": 0.462,
+		"y": 0.164,
+		"size": 0.463,
 		"aspect": 0.667
 	},
 	"survivor-13": {
-		"x": 0.716,
+		"x": 0.704,
 		"y": 0.157,
-		"size": 0.556,
+		"size": 0.537,
 		"aspect": 0.667
 	},
 	"survivor-14": {
-		"x": 0.596,
-		"y": 0.098,
-		"size": 0.461,
+		"x": 0.525,
+		"y": 0.162,
+		"size": 0.5,
 		"aspect": 0.667
 	},
 	"survivor-15": {
-		"x": 0.547,
-		"y": 0.223,
-		"size": 0.585,
+		"x": 0.55,
+		"y": 0.219,
+		"size": 0.579,
 		"aspect": 0.667
 	},
 	"immunologist": {
