@@ -744,7 +744,7 @@ export const RULEBOOK: RuleChapter[] = [
         title: "Event cards",
         blocks: [
           p(
-            "Playing an Event is not an action. Any player may play one at any time, except while a drawn card is resolving; once an Epidemic is under way, an Event may be played between its steps. The player who plays it decides how it is used. A Rationed Event goes to the Player discard pile; an Unrationed Event is destroyed. No Event may be played once the game is over.",
+            "Playing an Event is not an action. Any player may play one at any time, except between drawing and resolving a card or between the 2 drawn Player cards. During an Epidemic, only TOPAZ Experimental Vaccine may be played before Step 1, and only Resilient Population, Inoculation Unit, or Relocation may be played between Step 2 (Infect) and Step 3 (Intensify). The player who plays it decides how it is used. A Rationed Event goes to the Player discard pile; an Unrationed Event is destroyed. No Event may be played once the game is over.",
           ),
         ],
       },

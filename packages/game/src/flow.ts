@@ -317,8 +317,8 @@ export function expose(world: World, seat: SeatId) {
   if (character.worker) {
     game.playerDiscard.push(...current.hand.splice(0));
     if (game.active === seat) game.actionsLeft = 0;
-    current.location = character.home;
     log(game, { t: "exposure", seat, result: "worker" });
+    game.pending.unshift({ t: "workerReturn", seat });
     return;
   }
   // The Prologue card: characters cannot get exposed.
@@ -430,7 +430,12 @@ export function movePawn(world: World, seat: SeatId, to: CityId, by: string): bo
       return false;
     }
     expose(world, seat);
-    if (characterOf(world, seat).dead || current.location !== from) return false;
+    if (
+      characterOf(world, seat).dead ||
+      current.location !== from ||
+      game.pending.some((pending) => pending.t === "workerReturn" && pending.seat === seat)
+    )
+      return false;
   }
   return arrive(world, seat, to, by);
 }
@@ -724,7 +729,6 @@ export function drawPlayerCard(world: World) {
   const { campaign, game } = world as { campaign: World["campaign"]; game: Game };
   const id = drawPiled(game.playerDeck, (card) => campaign.playerCards[card]!.kind === "epidemic");
   game.drawsLeft -= 1;
-  // An Event played between the two draws can empty the deck. A draw that cannot be made loses the game.
   if (!id) return setOutcome(world, false, "The Player deck ran out");
   log(game, { t: "draw", seat: game.active, card: id });
   if (campaign.playerCards[id]!.kind === "epidemic") {

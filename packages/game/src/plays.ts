@@ -74,6 +74,9 @@ export type Play =
 
 const ok = null;
 
+/** Events whose printed text permits playing them between Step 2 (Infect) and Step 3 (Intensify) of an Epidemic. */
+const EPIDEMIC_INTENSIFY_EVENTS = new Set<Play["e"]>(["resilience", "massInoculation", "exile"]);
+
 /** The Utopia Infection cards in the discard pile, which Riot Control and the Informant set aside. */
 const utopiaDiscards = (world: World) =>
   world.game!.infectionDiscard.filter((id) => {
@@ -150,8 +153,8 @@ export function checkPlay(
   if (!owner?.hand.includes(card) || !held) return "You do not hold that card";
   const id = held.kind === "event" ? held.event : held.kind === "city" ? held.companion : null;
   if (id !== play.e) return "That card does not do that";
-  // No Event may be played between drawing a card and resolving it, except one whose text names that window.
-  // An Epidemic that has been started is the table's exception: any Event may be played between its steps.
+  // No Event may be played between drawing a card and resolving it, or between the two Player draws,
+  // except cards whose printed text explicitly permits an Epidemic step window.
   const unresolved = game.pending[0]?.t;
   if (unresolved === "shield" || unresolved === "cordon")
     return "Resolve the card that was just drawn first";
@@ -159,10 +162,18 @@ export function checkPlay(
   if (unresolved === "scarVote") return "Choose who takes the scar first";
   if (unresolved === "reveal" || unresolved === "search")
     return "Let the table see what was turned over first";
+  if (unresolved === "workerReturn")
+    return "Choose which haven the haven worker returns to first";
   // A designer ruling: a Gather card and the city it gathers in are one draw, with no Event window between them.
   if (game.gathering) return "Flip the card the Hollow Men gather in first";
   if (unresolved === "epidemicDrawn" && play.e !== "antidote")
-    return "The Epidemic must strike first";
+    return "Only TOPAZ Experimental Vaccine can be played before an Epidemic strikes";
+  if (unresolved === "epidemicInfect")
+    return "Finish Step 2 of the Epidemic before playing Events";
+  if (unresolved === "intensify" && !EPIDEMIC_INTENSIFY_EVENTS.has(play.e))
+    return "Only Resilient Population, Inoculation Unit, or Relocation may be played between Step 2 and Step 3 of an Epidemic";
+  if (phase === "playing.draw" && game.drawsLeft === 1 && !unresolved)
+    return "Draw your second Player card before playing Events";
   const onGrid = grid(campaign);
   const onMap = (city: CityId) => campaign.locations[city]?.revealed === true;
   const here = owner.location;
@@ -595,6 +606,7 @@ export type Decide =
   /** `seat` names the character when the group is choosing who takes the scar. */
   | { d: "scar"; scar: ScarId; target: number | "job"; seat?: SeatId }
   | { d: "replace"; character: CharacterId | null }
+  | { d: "workerReturn"; to: CityId }
   | { d: "retrieve"; card: CardId }
   | { d: "freeEdge"; to: CityId }
   /** One Hollow Man at a time: the choice stays open while some of its amount is left, until it is skipped. */
@@ -676,6 +688,10 @@ export function checkDecide(world: World, decide: Decide): string | null {
         ? ok
         : "That character is not free";
     }
+    case "workerReturn":
+      return cityDef(decide.to).kind === "haven" && grid(campaign).has(decide.to)
+        ? ok
+        : "Pick a haven on the grid";
     case "retrieve": {
       const card = campaign.playerCards[decide.card];
       return game.playerDiscard.includes(decide.card) && card && card.kind !== "epidemic"
@@ -807,6 +823,17 @@ export function applyDecide(world: World, decide: Decide) {
         }).id;
       current.character = next;
       current.location = campaign.characters[next]!.home;
+      if (decide.character === null) game.pending.unshift({ t: "workerReturn", seat });
+      return;
+    }
+    case "workerReturn": {
+      const current = player(game, seat);
+      current.location = decide.to;
+      characterOf(world, seat).home = decide.to;
+      log(game, {
+        t: "note",
+        text: `${characterOf(world, seat).name} returned to ${cityDef(decide.to).name}`,
+      });
       return;
     }
     case "retrieve": {

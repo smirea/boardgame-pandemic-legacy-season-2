@@ -1522,7 +1522,7 @@
                 : choosing.targeting.skip
                   ? { label: choosing.targeting.skip, ready: true }
                   : null,
-              held: Boolean(choosing.targeting.skip),
+              held: Boolean(choosing.targeting.held || choosing.targeting.skip),
             }
           : null}
         onaimconfirm={() => choosing.step({ t: "aimConfirm" })}

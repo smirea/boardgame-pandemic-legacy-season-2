@@ -216,6 +216,8 @@ export type Decision =
    */
   | { t: "scarVote"; votes: Partial<Record<PlayerId, SeatId>>; not: SeatId[] }
   | { t: "replace"; seat: SeatId }
+  /** A haven worker (exposed or newly stepping in) chooses which haven on the grid to go to. */
+  | { t: "workerReturn"; seat: SeatId }
   | { t: "retrieve"; seat: SeatId; filter: "any" | "city" }
   | { t: "freeEdge"; seat: SeatId; kind: "land" | "sea"; ignoreRedLines: boolean }
   | { t: "removeHollow"; seat: SeatId; amount: number }

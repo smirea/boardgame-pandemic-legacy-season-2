@@ -549,6 +549,8 @@ export function decideLabel(world: World, decide: Decide): string {
       return decide.character
         ? `Continue as ${world.campaign.characters[decide.character]!.name}`
         : "Continue as a haven worker";
+    case "workerReturn":
+      return `Start in ${cityName(decide.to)}`;
     case "retrieve":
       return `Take ${cardName(world, decide.card)}`;
     case "freeEdge":
@@ -586,6 +588,7 @@ const DECISION_TITLES: Record<Decision["t"], string> = {
   discard: "Discard a card",
   scar: "A scar: choose it and where it goes",
   replace: "Choose who steps in",
+  workerReturn: "Choose a haven on the grid",
   retrieve: "Take a card from the discard pile",
   freeEdge: "Draw a free route from here",
   removeHollow: "Remove Hollow Men",
@@ -666,7 +669,7 @@ export function logLine(
     case "exposure":
       return {
         tone: entry.result === "empty" ? "" : "bad",
-        text: `${who(entry.seat)} is exposed: ${{ empty: "nothing", scar: "a scar", skull: "death", worker: "sent home with an empty hand" }[entry.result]}`,
+        text: `${who(entry.seat)} is exposed: ${{ empty: "nothing", scar: "a scar", skull: "death", worker: "dropped their hand and lost remaining actions" }[entry.result]}`,
       };
     case "connected":
       return { tone: "good", text: `${cityName(entry.city)} joins the grid` };

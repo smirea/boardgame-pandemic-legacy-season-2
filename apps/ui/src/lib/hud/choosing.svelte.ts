@@ -63,7 +63,8 @@ export type Targeting = {
   pawn?: SeatId;
   recons?: ReadonlySet<string>;
   prompt?: string;
-  /** A choice the game waits on cannot be put down, only answered or skipped with this. */
+  /** A choice the game waits on cannot be put down, only answered (or skipped when `skip` is set). */
+  held?: boolean;
   skip?: string;
   multi?: {
     picked: ReadonlyMap<CityId, number>;
@@ -100,6 +101,7 @@ export const ANSWERED_ON_TABLE = new Set<Decision["t"]>([
   "quarantineCard",
   "freeEdge",
   "removeHollow",
+  "workerReturn",
 ]);
 
 /**
@@ -320,6 +322,7 @@ export function createChoosing(source: ChoosingSource) {
     for (const answer of decides) {
       if (answer.d === "freeEdge") cities.set(answer.to, () => decide(answer));
       if (answer.d === "removeHollow") cities.set(answer.city, () => decide(answer));
+      if (answer.d === "workerReturn") cities.set(answer.to, () => decide(answer));
     }
     const from = game!.players[pending.seat]!.location;
     const line = pending.t === "freeEdge" && pending.kind === "sea" ? "sea lane" : "supply line";
@@ -329,15 +332,20 @@ export function createChoosing(source: ChoosingSource) {
         label: title,
         a: null,
         cities,
+        held: true,
         prompt:
-          pending.t === "freeEdge"
-            ? cities.size
-              ? `Click a lit city to draw a free ${line} to it from ${cityName(from)}.`
-              : `No ${line} can be drawn from ${cityName(from)}.`
-            : cities.size
-              ? "Click a lit city to take one Hollow Man off it."
-              : "No Hollow Men stand on the board.",
-        skip: pending.t === "freeEdge" ? `Draw no ${line}` : "Remove no more",
+          pending.t === "workerReturn"
+            ? "Click any lit haven on the grid to start your next turn there."
+            : pending.t === "freeEdge"
+              ? cities.size
+                ? `Click a lit city to draw a free ${line} to it from ${cityName(from)}.`
+                : `No ${line} can be drawn from ${cityName(from)}.`
+              : cities.size
+                ? "Click a lit city to take one Hollow Man off it."
+                : "No Hollow Men stand on the board.",
+        ...(pending.t === "workerReturn"
+          ? {}
+          : { skip: pending.t === "freeEdge" ? `Draw no ${line}` : "Remove no more" }),
       },
     };
   });

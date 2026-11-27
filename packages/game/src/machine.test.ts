@@ -882,7 +882,7 @@ describe("jobs with free actions", () => {
 });
 
 describe("exposure and the carrier", () => {
-  test("an exposed haven worker drops their hand and goes home", () => {
+  test("an exposed haven worker drops their hand, loses actions, and chooses any haven on the grid", () => {
     const actor = late((world, game) => {
       Object.assign(character(world, B), { worker: true, exposureTrack: [], job: null });
       game.players[B]!.location = city("cairo");
@@ -893,11 +893,22 @@ describe("exposure and the carrier", () => {
     }, "playing.infect");
     send(actor, { type: "INFECT" });
     passTurn(actor);
-    expect(gameOf(actor).players[B]).toMatchObject({
-      hand: [],
-      location: character(worldOf(actor), B).home,
-    });
+    expect(gameOf(actor).players[B]!.hand).toEqual([]);
     expect(gameOf(actor).actionsLeft).toBe(0);
+    expect(gameOf(actor).pending).toEqual([{ t: "workerReturn", seat: B }]);
+    expect(
+      reject(worldOf(actor), phase(actor), { type: "DECIDE", decide: { d: "skip" } }),
+    ).not.toBeNull();
+    expect(
+      reject(worldOf(actor), phase(actor), {
+        type: "DECIDE",
+        decide: { d: "workerReturn", to: city("london") },
+      }),
+    ).toContain("haven");
+    const chosen = city("haven-south-atlantic");
+    send(actor, { type: "DECIDE", decide: { d: "workerReturn", to: chosen } });
+    expect(gameOf(actor).pending).toEqual([]);
+    expect(gameOf(actor).players[B]!.location).toBe(chosen);
   });
 
   test("taking the sample scars the carrier, who then walks, pays to enter cities, and wins on arrival", () => {
@@ -1067,33 +1078,73 @@ describe("events and companions", () => {
     expect(gameOf(held).epidemics).toBe(0);
   });
 
-  test("once an Epidemic has started, any Event may be played between its steps", () => {
-    let card = "" as CardId;
+  test("strict Event windows apply during an Epidemic and between the two Player draws", () => {
+    let airliftCard = "" as CardId;
+    let resilienceCard = "" as CardId;
+    let relocationCard = "" as CardId;
     const actor = late((world, game) => {
-      card = conjure(world, B, { kind: "event", event: "airlift" });
+      airliftCard = conjure(world, B, { kind: "event", event: "airlift" });
+      resilienceCard = conjure(world, B, { kind: "event", event: "resilience" });
+      relocationCard = conjure(world, B, { kind: "event", event: "exile" });
       const epidemic = Object.values(world.campaign.playerCards).find(
         (entry) => entry.kind === "epidemic",
       )!.id;
-      game.playerDeck.order = [epidemic, ...game.playerDeck.order.filter((id) => id !== epidemic)];
+      const nonEpidemic = game.playerDeck.order.find(
+        (id) => world.campaign.playerCards[id]?.kind !== "epidemic",
+      )!;
+      game.playerDeck.order = [
+        epidemic,
+        nonEpidemic,
+        ...game.playerDeck.order.filter((id) => id !== epidemic && id !== nonEpidemic),
+      ];
       game.playerDeck.piles = [{ size: game.playerDeck.order.length, epidemics: 10 }];
       game.drawsLeft = 2;
     }, "playing.draw");
     const airlift = (): Command => ({
       type: "PLAY",
       seat: B,
-      card,
+      card: airliftCard,
       play: { e: "airlift", pawn: A, to: city("lagos") },
     });
+    // Before drawing the first card, normal Events are legal.
+    expect(reject(worldOf(actor), phase(actor), airlift())).toBeNull();
+    // Draw card 1 (Epidemic): epidemicDrawn allows only TOPAZ Experimental Vaccine.
     send(actor, { type: "DRAW" });
+    expect(gameOf(actor).pending).toEqual([{ t: "epidemicDrawn" }]);
     expect(reject(worldOf(actor), phase(actor), airlift())).not.toBeNull();
+    // After Step 1 (Increase): epidemicInfect allows no Events.
     send(actor, { type: "DECIDE", decide: { d: "skip" } });
     expect(gameOf(actor).pending).toEqual([{ t: "epidemicInfect" }]);
-    expect(reject(worldOf(actor), phase(actor), airlift())).toBeNull();
+    expect(reject(worldOf(actor), phase(actor), airlift())).not.toBeNull();
+    // After Step 2 (Infect): intensify blocks Airlift, allows Resilient Population / Inoculation Unit / Relocation.
     send(actor, { type: "DECIDE", decide: { d: "skip" } });
     expect(gameOf(actor).pending).toEqual([{ t: "intensify" }]);
-    send(actor, airlift());
-    expect(gameOf(actor).players[A]!.location).toBe(city("lagos"));
-    expect(gameOf(actor).pending).toEqual([{ t: "intensify" }]);
+    const struck = gameOf(actor).infectionDiscard.at(-1)!;
+    expect(reject(worldOf(actor), phase(actor), airlift())).not.toBeNull();
+    expect(
+      reject(worldOf(actor), phase(actor), {
+        type: "PLAY",
+        seat: B,
+        card: resilienceCard,
+        play: { e: "resilience", cards: [struck] },
+      }),
+    ).toBeNull();
+    expect(
+      reject(worldOf(actor), phase(actor), {
+        type: "PLAY",
+        seat: B,
+        card: relocationCard,
+        play: { e: "exile", cards: [struck] },
+      }),
+    ).toBeNull();
+    // After Step 3 (Intensify): still between the 2 Player draws (drawsLeft === 1), so no Events allowed.
+    send(actor, { type: "DECIDE", decide: { d: "skip" } });
+    expect(gameOf(actor).pending).toEqual([]);
+    expect(gameOf(actor).drawsLeft).toBe(1);
+    expect(reject(worldOf(actor), phase(actor), airlift())).toContain("second Player card");
+    // After drawing the second card, Events are legal again.
+    send(actor, { type: "DRAW" });
+    expect(reject(worldOf(actor), phase(actor), airlift())).toBeNull();
   });
 
   test("a turn stays with its player after the last Infection card until they end it", () => {

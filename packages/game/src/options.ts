@@ -517,6 +517,10 @@ export function legalDecides(world: World): Decide[] {
         for (const character of freeCharacters(world))
           candidates.push({ d: "replace", character: character.id });
         break;
+      case "workerReturn":
+        for (const city of grid(campaign))
+          if (cityDef(city).kind === "haven") candidates.push({ d: "workerReturn", to: city });
+        break;
       case "retrieve":
         for (const card of game.playerDiscard) candidates.push({ d: "retrieve", card });
         break;

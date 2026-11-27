@@ -56,6 +56,8 @@ function pendingLine(world: World, pending: Decision): string {
       return `${who} must take a scar (the group picks the character when no one is named)`;
     case "replace":
       return `${who} lost their character and must pick a replacement`;
+    case "workerReturn":
+      return `${who} is a haven worker and must choose any haven on the grid to start their next turn in`;
     case "retrieve":
       return `${who} may take a ${pending.filter === "city" ? "City " : ""}card from the Player discard pile`;
     case "freeEdge":
@@ -67,7 +69,7 @@ function pendingLine(world: World, pending: Decision): string {
     case "giveCard":
       return `${who} may give a card from their hand to another player`;
     case "intensify":
-      return "An Epidemic just struck and its discard pile is about to be reshuffled onto the deck. A player holding Resilient Population or Inoculation Unit may play it now. Otherwise the active player passes with `do decide:skip`";
+      return "An Epidemic just struck and its discard pile is about to be reshuffled onto the deck. A player holding Resilient Population, Inoculation Unit, or Relocation may play it now (or destroy a Lockdown card). Otherwise the active player passes with `do decide:skip`";
     case "epidemicDrawn":
       return "An Epidemic was just drawn and has not struck yet. A player holding TOPAZ Experimental Vaccine may play it now to discard the Epidemic with no effect. Otherwise advance Step 1 (Increase) with `do decide:skip`";
     case "epidemicInfect":
@@ -202,7 +204,7 @@ export function renderLog(world: World, entry: LogEntry): string {
     case "incident":
       return `incident in ${city(entry.city)} (total ${entry.total})`;
     case "exposure":
-      return `${seat(entry.seat)} was exposed: ${{ empty: "a blank box, nothing happens", scar: "a scar", skull: "death", worker: "sent home with an empty hand (a haven worker has no exposure track)" }[entry.result]}`;
+      return `${seat(entry.seat)} was exposed: ${{ empty: "a blank box, nothing happens", scar: "a scar", skull: "death", worker: "dropped their hand, lost remaining actions, and chooses any haven on the grid (a haven worker has no exposure track)" }[entry.result]}`;
     case "death":
       return `${seat(entry.seat)}'s character died in ${city(entry.at)}`;
     case "scar":
