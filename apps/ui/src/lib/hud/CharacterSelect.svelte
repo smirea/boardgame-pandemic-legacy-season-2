@@ -110,6 +110,8 @@
   const count = $derived(shown.length + (canMake ? 1 : 0));
 
   // Cards keep one shape and grow to fill the table: the column count is whichever makes them largest.
+  // The row is exactly that many cards wide, and every size is rounded down from the stage's fractional width: a
+  // row a fraction of a pixel too wide wraps its last card under the others, off the screen.
   const RATIO = 1.2;
   const GAP = 12;
   let stage = $state<HTMLElement>();
@@ -117,23 +119,27 @@
   $effect(() => {
     const element = stage;
     if (!element) return;
-    const observer = new ResizeObserver(
-      () => (room = { width: element.clientWidth, height: element.clientHeight }),
-    );
+    const observer = new ResizeObserver(([entry]) => {
+      const { width, height } = entry!.contentRect;
+      room = { width, height };
+    });
     observer.observe(element);
     return () => observer.disconnect();
   });
-  const cardHeight = $derived.by(() => {
+  const grid = $derived.by(() => {
+    let cols = 1;
     let best = 0;
-    for (let cols = 1; cols <= Math.max(1, count); cols++) {
-      const rows = Math.ceil(count / cols);
+    for (let tried = 1; tried <= Math.max(1, count); tried++) {
+      const rows = Math.ceil(count / tried);
       const height = Math.min(
         (room.height - GAP * (rows - 1)) / rows,
-        (room.width - GAP * (cols - 1)) / cols / RATIO,
+        (room.width - GAP * (tried - 1)) / tried / RATIO,
       );
-      best = Math.max(best, height);
+      if (height > best) [cols, best] = [tried, height];
     }
-    return Math.floor(best);
+    const height = Math.max(0, Math.floor(best));
+    const width = Math.floor(height * RATIO);
+    return { height, width, row: cols * width + (cols - 1) * GAP };
   });
 
   // While a haven is being picked, the other cards step aside and the map behind finds it beside the blank card.
@@ -203,8 +209,9 @@
   <div class="stage" bind:this={stage}>
     <div
       class="cards"
-      style:--card-h={`${cardHeight}px`}
-      style:--ratio={RATIO}
+      style:--card-h={`${grid.height}px`}
+      style:--card-w={`${grid.width}px`}
+      style:--row={`${grid.row}px`}
       style:--gap={`${GAP}px`}
     >
       {#each shown as character, index (character.id)}
@@ -385,12 +392,14 @@
     align-content: center;
     justify-content: center;
     gap: var(--gap);
+    width: var(--row);
     height: 100%;
+    margin-inline: auto;
   }
 
   .slot {
     flex: none;
-    width: calc(var(--card-h) * var(--ratio));
+    width: var(--card-w);
     height: var(--card-h);
     transition: opacity 260ms ease;
   }
