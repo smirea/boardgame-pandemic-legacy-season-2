@@ -56,8 +56,14 @@ export function campaignAt(
   seed = 12,
   {
     unexplored = [],
+    explore = [],
     cast = CAST,
-  }: { unexplored?: SealKey[]; cast?: [name: string, job: JobId][] } = {},
+  }: {
+    unexplored?: SealKey[];
+    /** Seals the group opened on its own at the start of a month, before its Legacy cards are read. */
+    explore?: { month: number; seal: Seal }[];
+    cast?: [name: string, job: JobId][];
+  } = {},
 ): Save {
   const world: World = { campaign: newCampaign(seed), game: null, table: newTable() };
   const campaign = world.campaign;
@@ -70,6 +76,9 @@ export function campaignAt(
 
   for (let played = 1; played < month; played++) {
     campaign.month = played;
+    for (const early of explore)
+      if (early.month === played && !campaign.opened.includes(sealKey(early.seal)))
+        openSeal(world, early.seal, false);
     readLegacy(world, "setup");
     for (const found of EXPLORED[played] ?? []) {
       if ("lab" in found) applyUnlock(world, { t: "lab", city: found.lab });
@@ -114,19 +123,101 @@ export function campaignAt(
   return { v: 1, phase: "lobby", world };
 }
 
+/** How the campaign answered what the Legacy deck asks of it before a reading. */
+export type ReadingChoices = {
+  /**
+   * Whether each seal a card asks about had been opened by then. Opened, the group opened it itself at the start of
+   * the month the deck first asks; sealed, the explorers the schedule sends never open it, and the deck forces it.
+   */
+  explored?: Partial<Record<SealKey, boolean>>;
+  delivered?: boolean;
+};
+
+/**
+ * What the Legacy deck asks of the campaign, month by month: whether a package or door is still sealed (a perimeter
+ * report forces it, a scratch-off box waits on it), and in December whether the sample was delivered. `open` is
+ * what the schedule `campaignAt` plays gives, and `fixed` says the deck itself has opened the seal by then, so it
+ * cannot be left sealed.
+ */
+export type LegacyQuestion =
+  | { t: "sealed"; month: number; seal: Seal; cards: string[]; open: boolean; fixed: boolean }
+  | { t: "delivered"; month: number; cards: string[] };
+
+let questions: LegacyQuestion[] | null = null;
+export function legacyQuestions(): LegacyQuestion[] {
+  if (questions) return questions;
+  const found: LegacyQuestion[] = [];
+  for (const card of pack.legacyDeck) {
+    for (const unlock of card.unlocks) {
+      const seal =
+        unlock.t === "perimeter" ? unlock.seal : unlock.t === "scratch" ? unlock.unlessOpen : null;
+      if (!seal) continue;
+      const key = sealKey(seal);
+      const same = found.find(
+        (question) =>
+          question.t === "sealed" && question.month === card.month && sealKey(question.seal) === key,
+      );
+      if (same) {
+        same.cards.push(card.id);
+        continue;
+      }
+      const openBy = (unexplored: SealKey[]) =>
+        campaignAt(card.month, 12, { unexplored }).world.campaign.opened.includes(key);
+      found.push({
+        t: "sealed",
+        month: card.month,
+        seal,
+        cards: [card.id],
+        open: openBy([]),
+        fixed: openBy([key]),
+      });
+    }
+    if (card.when) {
+      const same = found.find(
+        (question) => question.t === "delivered" && question.month === card.month,
+      );
+      if (same) same.cards.push(card.id);
+      else found.push({ t: "delivered", month: card.month, cards: [card.id] });
+    }
+  }
+  questions = found;
+  return found;
+}
+
+const sealOf = (key: SealKey): Seal => {
+  const [t, id] = key.split(":") as ["package" | "door", string];
+  return t === "package" ? { t, id: Number(id) } : { t, id };
+};
+
 /**
  * The campaign as it stands when the Legacy deck is read from card `index`: the months before won as `campaignAt`
  * plays them, the cards of its month before `index` already read, and the reading from `index` to the next halt
  * waiting on the table to be unpacked. The two Prologue cards are in play from the start and never read.
  */
-export function readingFrom(index: number): Save {
+export function readingFrom(index: number, choices: ReadingChoices = {}): Save {
   const card = pack.legacyDeck[index];
   if (!card || card.month === 0) throw new Error(`No Legacy reading starts at card ${index}`);
-  const save = campaignAt(card.month);
+  const answers = Object.entries(choices.explored ?? {}) as [SealKey, boolean][];
+  const firstAsked = new Map(
+    legacyQuestions().flatMap((question) =>
+      question.t === "sealed" ? [[sealKey(question.seal), question.month] as const] : [],
+    ),
+  );
+  const explore = answers.flatMap(([key, open]) =>
+    open ? [{ month: firstAsked.get(key) ?? 1, seal: sealOf(key) }] : [],
+  );
+  const save = campaignAt(card.month, 12, {
+    unexplored: answers.flatMap(([key, open]) => (open ? [] : [key])),
+    explore,
+  });
   const { world } = save;
   const campaign = world.campaign;
   if (campaign.legacyIndex > index)
     throw new Error(`Card ${card.id} was read before its month's lobby`);
+  for (const early of explore)
+    if (early.month === card.month && !campaign.opened.includes(sealKey(early.seal)))
+      openSeal(world, early.seal, false);
+  campaign.sampleDelivered = choices.delivered ?? false;
   while (campaign.legacyIndex < index) readCard(world, pack.legacyDeck[campaign.legacyIndex]!);
   campaign.briefing = [];
   campaign.legacyHalt = null;
