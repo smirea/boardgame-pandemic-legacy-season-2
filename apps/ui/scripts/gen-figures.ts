@@ -29,45 +29,45 @@ const SAFE =
 /** Who each figure is. The survivors are the portraits anyone may wear; the rest belong to an occupation. */
 export const FIGURES: Record<string, string> = {
   "survivor-0":
-    "A wiry woman in her sixties with a close-cropped white buzz cut and deep laugh lines, in a patched teal fisherman smock under a knitted grey shawl. She holds a basket of salted fish on her hip with both arms and is chuckling. Warm, sharp-tongued grandmother of the docks.",
+    "A weathered pale glacial blue-grey Faded coastal scout in their thirties under a patched muted sea-slate hooded coat with brass dust goggles pushed onto the hood and a muted olive cloth wrap pulled up over nose and mouth. Dark tousled hair, guarded unsmiling eyes, carrying a canvas field satchel.",
   "survivor-1":
-    "A broad-shouldered young man with a shaved head, a thick neck and a small gold nose ring, in a sleeveless rust-red quilted vest over bare arms tattooed with simple wave lines. Arms folded across his chest, chin up, smirking. Cocky, unflappable bruiser.",
+    "A broad-shouldered pale glacial blue-grey Faded harbor bosun in his late thirties with a close brown buzz cut and stubble, in a weathered rust-terracotta coat over a dark charcoal knit, a heavy coil of mooring rope slung over his right shoulder. Stoic, unsmiling, square-jawed grit.",
   "survivor-2":
-    "A lanky teenage girl with a wild mop of copper curls tied back with wire, freckles, in an oversized olive army jacket with rolled sleeves. A crowbar slung over one shoulder, the other hand on her hip, head tilted with a crooked grin. Daring scavenger.",
+    "A lanky pale glacial blue-grey Faded young woman with a wild mop of copper curls tied back with wire and slate-blue freckles, in an oversized weathered olive field jacket with rolled sleeves. A crowbar slung over one shoulder, the other hand on her hip, tilted head with a playful toothy grin.",
   "survivor-3":
-    "A tall, gaunt man in his forties with long straight black hair loose to the shoulders and hollow cheeks, wrapped in a heavy charcoal wool poncho. His hands are hidden under the poncho, shoulders hunched, watching the viewer sidelong. Guarded and mysterious.",
+    "A tall, gaunt pale glacial blue-grey Faded man in his forties with long straight black hair loose to the shoulders and hollow cheeks, wrapped in a heavy muted charcoal wool fringed poncho. Guarded, solemn, unsmiling sidelong gaze.",
   "survivor-4":
-    "A stocky middle-aged woman with a grey-streaked brown bob, in denim coveralls with the top half tied around her waist over a sleeveless white undershirt, grease smudges on her arms. Wiping her hands on a rag, a big wrench sticking out of a pocket. Practical mechanic, impatient to get back to work.",
+    "A stocky middle-aged pale glacial blue-grey Faded hull mechanic with grey-streaked brown hair tied back in a dusty rust bandana, in weathered dark navy coveralls with rolled sleeves and grease smudges. Resting a heavy pipe wrench across one shoulder with a fierce, unsmiling stare.",
   "survivor-5":
-    "A young South Asian man with a neat side-parted haircut and a thin moustache, in a burgundy wool peacoat over a cream cable-knit sweater. He holds a brass sextant against his chest and looks off to one side with a determined gaze. Proud navigator, a visionary.",
+    "A weathered pale glacial blue-grey Faded sea navigator in his early thirties with windswept chestnut hair, light stubble, and three pale dots on his temple, in a weathered muted burgundy peacoat over a cream cable-knit sweater. Holding a brass sextant and leather chart tube with a subtle, confident smile.",
   "survivor-6":
-    "A plump, round-faced East Asian woman in her thirties with a high bun stuck through with pencils, in a quilted moss-green down jacket under a canvas apron full of pockets. One hand on the strap of a first-aid satchel, the other open, palm up, reassuring someone. Gentle field medic with tired eyes and a kind smile.",
+    "A lean pale glacial blue-grey Faded field medic woman in her thirties with dark wavy hair under a weathered slate kerchief, in a dusty moss-olive quilted jacket under a stained canvas apron tucked with bandages and glass vials, leather satchel over her shoulder. Tired, steady, solemn unsmiling eyes.",
   "survivor-7":
-    "An elderly Indigenous woman with long silver hair in two braids wrapped in red cloth, deep-set eyes, in a heavy blanket coat woven with geometric patterns. Both weathered hands rest on top of a tall carved walking staff in front of her. Wise, stern elder everyone listens to.",
+    "An elderly pale glacial blue-grey Faded helmswoman with silver-streaked braids threaded with pale sea-glass beads and vertical ochre cheek markings, in a patched earth-brown wool storm coat. Gloved weathered hands resting on an aged brass-capped oak boathook, stern dignified unsmiling gaze.",
   "survivor-8":
-    "A muscular woman in her twenties with a shaved undercut and a single top braid, in a black sleeveless judo-style jacket tied with a frayed belt, one forearm bandaged. One wrapped fist raised in front of her chest, leaning in. Fierce and defiant fighter.",
+    "An agile pale glacial blue-grey Faded courier woman in her twenties with lush wavy dark auburn hair swept into a windblown ponytail, stitched dull-ochre cloth face mask over nose and mouth, brass goggles at her throat, dark charcoal runner's vest and dusty khaki pack. Fierce, focused, unsmiling eyes.",
   "survivor-9":
-    "A heavy-set old man with a huge white walrus moustache, bushy eyebrows and red-veined cheeks, clean chin, in a navy knit fisherman cap and a sea-green oilskin jacket. He holds a battered storm lantern up at shoulder height. Grim, stoic old sailor.",
+    "A heavy-set elderly pale glacial blue-grey Faded sailor with a huge snow-white walrus moustache and bushy eyebrows, in a dark navy knit cap and a weathered dark pine sea-green oilskin coat. Holding an unlit aged iron storm lantern up at shoulder height with a grim, stoic scowl.",
   "survivor-10":
-    "A skinny Black man in his thirties with short twists and a pencil-thin goatee, in a short-sleeved orange work shirt with a blank name patch and a tool belt. He holds a soldering iron and a coil of copper wire, glancing up with a sardonic half-smile. Wry tinkerer.",
+    "A lean pale glacial blue-grey Faded Black tinkerer in his thirties with short jet-black twists under a patched olive utility cap and a neat goatee, in a weathered burnt-orange utility jacket with a harness relay box. Holding pliers and a coil of copper wire with a wry, sardonic half-smile.",
   "survivor-11":
-    "A small, wiry teenage boy with a shaggy blond bowl cut, in a too-big grey hooded sweatshirt with a messenger bag across his body. Leaning forward mid-stride, one arm swinging, looking back over his shoulder. Nervous, quick runner.",
+    "A lean pale glacial blue-grey Faded young sea courier in his early twenties with tousled dusty sandy-blonde windswept hair, in a weathered muted slate-grey hooded waxed anorak with brass goggles at his throat and a canvas satchel. Alert, watchful, unsmiling gaze.",
   "survivor-12":
-    "A Middle-Eastern woman in her fifties in a patterned olive headscarf, a strong nose and kohl-lined eyes, in a long camel-coloured coat. She holds up an open ledger and points into it with a pencil. Calm, exacting quartermaster who keeps the count.",
+    "A stern pale glacial blue-grey Faded quartermaster woman in her late forties with silver-streaked chestnut curls wrapped in a muted dusty-olive headscarf, in a weathered camel coat. Holding a worn leather manifest ledger and a dull brass pencil with a calm, exacting unsmiling expression.",
   "survivor-13":
-    "A sharp-featured man in his thirties with slicked-back hair and a pencil moustache, in a scavenged pinstripe waistcoat over a collarless shirt, a pocket-watch chain. One hand on his hip, the other holding up a small coin between two fingers, one eyebrow raised. Shrewd bargainer.",
+    "A sharp-featured pale glacial blue-grey Faded salvage broker in his thirties with slicked-back dark mahogany wavy hair and a thin trimmed moustache, in a weathered umber leather dock coat over a dusty burgundy pinstripe waistcoat with a pocket-watch chain, holding an aged brass flare pistol with a sly crooked smirk.",
   "survivor-14":
-    "A huge, bald Pacific Islander man with a full black beard and wave tattoos across his shoulders, in a sleeveless canvas work vest. A heavy coil of rope over one shoulder, the other hand giving a thumbs-up, laughing. Big, warm, jovial dockworker.",
+    "A towering bald pale glacial blue-grey Faded rigger with a full dark brown beard and faded slate maritime compass-and-rope forearm tattoos, in a weathered slate-olive patched canvas vest over dark umber rolled sleeves. Heavy iron chain and grappling hook over one shoulder, stoic rock-steady unsmiling gaze.",
   "survivor-15":
-    "A slender androgynous person in their twenties with bleached white hair shaved on one side, pale grey eyes and many small earrings, in a long deep-purple robe-like coat. Hands clasped at the chest around a string of wooden beads, head slightly bowed, eyes on the viewer. Enigmatic, serene mystic.",
+    "A slender androgynous pale glacial blue-grey Faded mystic in their twenties with bleached ash-white hair swept over one side and shaved on the other, pale slate eyes and many small antique-gold earrings, in a muted dusty deep-plum robe with dull gold trim. Hands clasped around wooden beads, serene unsmiling stillness.",
   immunologist:
-    "A Latina woman in her forties with short curly black hair, in a pale-blue surgical gown and a cloth cap, rubber gloves pulled up to the elbows. She holds a syringe upright and flicks it with a finger to clear a bubble. Brilliant, intense immunologist.",
+    "A 37-year-old Argentine male mainlander field immunologist from Buenos Aires (natural warm olive-tan skin, not Faded) with dark wavy hair in two loose shoulder braids and light stubble, wearing a weathered stained white lab coat over an olive field shirt and grey gloves, holding a metal specimen canister and glass vial. Focused, intense, driven.",
   "vector-control":
-    "A rangy red-haired man in his thirties with a ginger stubble beard, in a bright orange coverall unzipped to the waist with the sleeves tied around it over a sweat-stained grey tank top. A metal pump-sprayer tank on his back, its spray wand in one hand. Determined, no-nonsense pest controller.",
+    "A 42-year-old rugged bearded mainlander pest-control specialist from Wellington (natural sun-weathered skin, not Faded) in a patterned dark maroon bandana, heavy dark charcoal field jacket and leather work gloves, with a battered metal pump-sprayer tank on his back and brass spray wand in hand. Grim, no-nonsense grit.",
   scientist:
-    "A heavyset older East Asian man, bald with a grey fringe of hair and clean-shaven, in a moss-green knitted cardigan over a collared shirt and a bow tie. He holds a small chalk slate covered in abstract chalk marks (no legible text) and a stub of chalk, gazing upward, lost in thought. Absent-minded scientist.",
+    "A 35-year-old female mainlander field scientist from Johannesburg (natural warm skin, not Faded) with tousled dark brown wavy hair, wearing a stained weathered white lab coat over a muted rose-rust knit sweater, clutching a worn leather field notebook and a glass Erlenmeyer flask with pipette. Sharp, intense, resourceful.",
   "haven-worker":
-    "An anonymous haven worker of unknown gender under the deep hood of a grey-green rubber rain cape, the face completely hidden in shadow and a wrapped dark cloth, no goggles. Carrying a wooden supply crate against the chest with both arms. Faceless, steady, dependable.",
+    "A pale glacial blue-grey Faded haven supply worker in a weathered charcoal knit beanie, clear protective dust goggles, muted olive cloth wrap pulled up over nose and mouth, and patched brown canvas work coat, carrying a stenciled wooden supply crate against the chest in heavy gloves. Steady, anonymous, dependable.",
   unknown:
     "A generic placeholder person for a character not yet made: a plain figure in a long coat, standing square to the viewer, arms relaxed, no distinguishing features and no accessories. Render the whole figure as ONE flat solid near-black (#14110e) silhouette with no interior detail at all.",
 };
@@ -142,9 +142,19 @@ for path in CommandLine.arguments.dropFirst() {
 
 type Found = { x?: number; y?: number; w?: number; h?: number; aspect: number };
 
+// Fallback crop boxes when Vision cannot detect a face (cloth masks, goggles, wild hair/ponytail skewing top-of-body).
+const HEAD_FALLBACKS: Record<string, { x: number; y: number; size: number }> = {
+  "survivor-0": { x: 0.61, y: 0.165, size: 0.5 },
+  "survivor-2": { x: 0.52, y: 0.155, size: 0.5 },
+  "survivor-7": { x: 0.58, y: 0.17, size: 0.5 },
+  "survivor-8": { x: 0.68, y: 0.175, size: 0.48 },
+  "survivor-9": { x: 0.64, y: 0.165, size: 0.48 },
+  "haven-worker": { x: 0.58, y: 0.175, size: 0.5 },
+};
+
 /**
  * The square a portrait is cut from, in fractions of the figure's width and height. A face Vision cannot find (a
- * hood, a mask) is taken to be where the top of the body is.
+ * hood, a mask) falls back to a calibrated box or the top of the body.
  */
 async function heads(keys: string[], work: string) {
   const script = join(work, "detect.swift");
@@ -172,6 +182,9 @@ async function heads(keys: string[], work: string) {
       // A face box covers brow to chin; a portrait shows the whole head and a little of the shoulders.
       const size = Math.max(found.w, found.h / found.aspect) * 2.1;
       box = { x: found.x, y: found.y - 0.16 * found.h, size };
+    } else if (HEAD_FALLBACKS[key]) {
+      box = HEAD_FALLBACKS[key];
+      console.log(`no face found in ${key}: used calibrated head box`);
     } else {
       const top = await topOfBody(files[index]!);
       box = { x: top.x, y: top.y + 0.24 * found.aspect, size: 0.5 };
