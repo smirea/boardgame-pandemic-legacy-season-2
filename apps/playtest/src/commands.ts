@@ -279,7 +279,7 @@ function purchaseText(purchase: Purchase): string {
 
 /**
  * A choice that takes several targets, written as one key with the targets joined by `+`, such as
- * `play:safeHouses.241:cairo+lagos+london`. Built from the single-target options it combines.
+ * `play:biodomePrototype.241:cairo+lagos+london`. Built from the single-target options it combines.
  */
 export function composite(options: Option[], key: string): Command | null {
   const cut = key.lastIndexOf(":");
@@ -460,10 +460,10 @@ export function heldUnplayable(state: PublicState, seat: SeatId): string[] {
     if (companion && !pack.companions.find((entry) => entry.id === companion)?.spent) return [];
     // These take cubes from the reserve or the stockpile, or wait for their moment, which is the usual reason they cannot be played.
     const samples: Partial<Record<string, Play>> = {
-      handout: { e: "handout", cities: [anywhere] },
-      stockUp: { e: "stockUp" },
-      antidote: { e: "antidote" },
-      surplus: { e: "surplus" },
+      teamBravo: { e: "teamBravo", cities: [anywhere] },
+      strategicReserves: { e: "strategicReserves" },
+      topazExperimentalVaccine: { e: "topazExperimentalVaccine" },
+      portableAntiviralLab: { e: "portableAntiviralLab" },
     };
     const sample = held.kind === "event" ? (samples[held.event] ?? null) : null;
     const reason = sample ? reject(world, phase, { type: "PLAY", seat, card, play: sample }) : null;

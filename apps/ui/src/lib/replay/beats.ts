@@ -59,12 +59,12 @@ function aimedAt(state: PublicState, command: Command | null): CityId[] {
     const play = command.play;
     if ("city" in play) return [play.city];
     if (play.e === "airlift") return [play.to];
-    if (play.e === "openWaters") {
+    if (play.e === "expeditionaryVoyage") {
       const from = state.world.game?.players[state.world.game.active]?.location;
       return from ? [from, play.to] : [play.to];
     }
-    if (play.e === "safeHouses" || play.e === "handout" || play.e === "cleanse") return play.cities;
-    if (play.e === "spreadOut") return [play.from, ...play.to];
+    if (play.e === "biodomePrototype" || play.e === "teamBravo" || play.e === "drasticMeasures") return play.cities;
+    if (play.e === "dispersal") return [play.from, ...play.to];
     return [];
   }
   if (command?.type !== "ACTION") return [];

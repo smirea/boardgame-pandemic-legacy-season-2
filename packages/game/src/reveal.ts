@@ -25,7 +25,7 @@ export function revealOutcome(world: World, reveal: Reveal): { keep: CardId[]; d
   const { campaign } = world;
   const kind = (id: CardId) => campaign.playerCards[id]?.kind;
   let keep: CardId[];
-  if (reveal.by.t === "scavenge") keep = reveal.cards.filter((id) => kind(id) === "city");
+  if (reveal.by.t === "cautiousApproach") keep = reveal.cards.filter((id) => kind(id) === "city");
   else {
     const reward = pack.frequencies[reveal.by.frequency];
     // Only what this Monitor revealed may be kept, never an older discard.
@@ -60,7 +60,7 @@ export function stepReveal(world: World, reveal: Reveal) {
     cards: [...reveal.cards],
     kept: keep,
   });
-  if (reveal.by.t === "scavenge") return;
+  if (reveal.by.t === "cautiousApproach") return;
   const reward = pack.frequencies[reveal.by.frequency];
   if (reward && "seal" in reward) openSeal(world, reward.seal, false, reveal.seat);
 }

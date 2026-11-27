@@ -178,17 +178,21 @@ export function characterAt(world: World, seat: SeatId, seq: number): Character 
 export const characterOf = (world: World, seat: SeatId): Character =>
   world.campaign.characters[player(world.game!, seat).character]!;
 
-type Trait = JobId | AbilityId | CompanionId | ScarId;
+type Trait = JobId | AbilityId | ScarId;
 
-/** Whether a job, ability, scar, or held companion currently applies to the seat's character. */
+/** Whether a job, ability, or scar currently applies to the seat's character. */
 export function has(world: World, seat: SeatId, trait: Trait): boolean {
   const character = characterOf(world, seat);
   if (character.job === trait && !character.jobScar) return true;
   if (character.jobScar === trait) return true;
-  if (character.slots.some((slot) => slot?.id === trait)) return true;
+  return character.slots.some((slot) => slot?.id === trait);
+}
+
+/** Whether the seat currently holds a City card carrying this companion. */
+export function hasCompanion(world: World, seat: SeatId, companion: CompanionId): boolean {
   return player(world.game!, seat).hand.some((id) => {
     const card = world.campaign.playerCards[id];
-    return card?.kind === "city" && card.companion === trait;
+    return card?.kind === "city" && card.companion === companion;
   });
 }
 
@@ -196,7 +200,7 @@ export function handLimit(world: World, seat: SeatId): number {
   return (
     pack.numbers.handLimit +
     (has(world, seat, "recordKeeper") ? 1 : 0) -
-    (has(world, seat, "smallHand") ? 1 : 0)
+    (has(world, seat, "insomniac") ? 1 : 0)
   );
 }
 
@@ -279,7 +283,7 @@ export function cardValue(
   if (card.improvement === "wild") return 1;
   if (card.improvement === "redWild" && color === "red") return 1;
   if (cityDef(card.city).color !== color) return 0;
-  if (purpose === "recon" && card.companion === "doubleAgent") return 2;
+  if (purpose === "recon" && card.companion === "spies") return 2;
   if (purpose === "build" && card.improvement === "double") return 2;
   if (purpose === "build" && card.improvement === "triple") return 3;
   return 1;

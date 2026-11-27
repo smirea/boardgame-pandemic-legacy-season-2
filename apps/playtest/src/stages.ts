@@ -430,8 +430,8 @@ const november: Stage = {
     [
       "You are Pike, at Shanghai, with the Facilitator ability, holding 3 black cards. Pike is one exposure from death, and dying is on your list.",
       "Your first turn: Facilitate to take the black card from the Scientist. Recon at Shanghai with 4 black cards (the black Plan step). Drive to Osaka, which is infested, and end your turn there.",
-      "Pike dies at the start of your next turn. A choice appears: nobody is free, so the seat becomes a haven worker at the North Atlantic haven.",
-      "As the haven worker: go to New York, which has plague, and end a turn there. The worker is exposed at the start of the next turn. Say so in chat: that is the signal for the red recon.",
+      "Pike dies at the start of your next turn. A choice appears: nobody is free, so the seat becomes a haven worker and picks a haven on the grid (choose the North Atlantic haven).",
+      "As the haven worker: go to New York, which has plague, and end a turn there. The worker is exposed at the start of the next turn and chooses any haven on the grid. Say so in chat: that is the signal for the red recon.",
     ],
   ],
 };
@@ -490,21 +490,21 @@ const searches: Stage = {
   seats: [
     [
       "You are Gale, at Denver, holding the Denver, Mexico City, Lima, Santiago and Bogotá cards.",
-      "Turn 1: Search at Denver. The Lineman joins your hand. Drive to Los Angeles, then Mexico City. Search at Mexico City. The Builder joins your hand.",
-      "Turn 2: Make supplies once. Establish a supply line from Mexico City to Denver. With the Lineman it costs 1 cube, not 2. Drive to Los Angeles, then Farwater.",
-      "Turn 3: drive to Lima and Search there. The Tracker joins your hand: from now on your searches cost no action. You are now one card over the hand limit: discard the Denver card. Drive to Bogotá and Search there. It should cost no action. Then Build a supply center at Bogotá with 4 yellow cards (Mexico City, Lima, Santiago, Bogotá). With the Builder it takes 4 cards, not 5.",
+      "Turn 1: Search at Denver. The Logistics Expert joins your hand. Drive to Los Angeles, then Mexico City. Search at Mexico City. The Engineer joins your hand.",
+      "Turn 2: Make supplies once. Establish a supply line from Mexico City to Denver. With the Logistics Expert it costs 1 cube, not 2. Drive to Los Angeles, then Farwater.",
+      "Turn 3: drive to Lima and Search there. The Operative joins your hand: from now on your searches cost no action. You are now one card over the hand limit: discard the Denver card. Drive to Bogotá and Search there. It should cost no action. Then Build a supply center at Bogotá with 4 yellow cards (Mexico City, Lima, Santiago, Bogotá). With the Engineer it takes 4 cards, not 5.",
       "Whenever you are over the hand limit, discard what you drew. Never discard a City card that carries a companion, or a yellow card.",
     ],
     [
       "You are Moss, at Dar es Salaam, which is infested. Moss is one exposure from a scar.",
-      "At the start of your first turn Moss is exposed and a scar choice appears. Take the scar named **Injured** (supply lines cost 1 more cube), in any empty slot.",
-      "Turn 1: Search at Dar es Salaam. The Field Surgeon joins your hand. End your turn still in Dar es Salaam.",
-      "Turn 2: you start in an infested city again. With the Field Surgeon in hand you should not be exposed. `report` it if you are. Then drive to Johannesburg, Shuttle to Northwatch, drive to London, drive to St. Petersburg.",
-      "Turn 3: Search at St. Petersburg with its first box. The Rigger joins your hand. Make supplies once. Build a tower there. With the Rigger it costs 1 cube, not 2.",
+      "At the start of your first turn Moss is exposed and a scar choice appears. Take the scar named **Exhausted** (supply lines cost 1 more cube), in any empty slot.",
+      "Turn 1: Search at Dar es Salaam. The Vector Control Technician joins your hand. End your turn still in Dar es Salaam.",
+      "Turn 2: you start in an infested city again. With the Vector Control Technician in hand you should not be exposed. `report` it if you are. Then drive to Johannesburg, Shuttle to Northwatch, drive to London, drive to St. Petersburg.",
+      "Turn 3: Search at St. Petersburg with its first box. The Technician joins your hand. Make supplies once. Build a tower there. With the Technician it costs 1 cube, not 2.",
     ],
     [
       "You are Tarn, at Shanghai, which is infested, with the Lookout ability. Tarn is one exposure from a scar.",
-      "At the start of your first turn Tarn is exposed and a scar choice appears. Take the scar named **Burdened** (hand limit 1 lower). Put it in an empty slot, not on the Lookout: a scar covers what is in its slot.",
+      "At the start of your first turn Tarn is exposed and a scar choice appears. Take the scar named **Insomniac** (hand limit 1 lower). Put it in an empty slot, not on the Lookout: a scar covers what is in its slot.",
       "Turn 1: Search at Shanghai. Drive to Osaka. Search at Osaka. It gives a free sea lane: answer the choice by picking Seoul. Drive to Seoul.",
       "Turn 2: use the Lookout. The Seoul card is in the discard pile, not your hand: Search at Seoul with it. Then drive to Ho Chi Minh City, Kolkata, Jakarta.",
       "Turn 3: Search at Jakarta.",

@@ -4,7 +4,7 @@ October first lost on turn 19. The Player deck ran out. Centers 2/3, Hollow Men 
 
 ## Party
 
-Gale (char-1), Laborer, home Northwatch, exposure 1/7, blank box, no ability. Moss (char-2), Radio Operator, Helmsman, scar Injured (supply lines cost 1 more cube), exposure 3/7. Tarn (char-3), Instructor, Lookout, scar Burdened (hand limit -1), Record Keeper (+1, so the hand is 7), Courier, exposure 3/7. Vector Control Expert (char-8) is on the roster and unplayed: Build Shelter needs no card and works in any location.
+Gale (char-1), Laborer, home Northwatch, exposure 1/7, blank box, no ability. Moss (char-2), Radio Operator, Helmsman, scar Exhausted (supply lines cost 1 more cube), exposure 3/7. Tarn (char-3), Instructor, Lookout, scar Insomniac (hand limit -1), Record Keeper (+1, so the hand is 7), Courier, exposure 3/7. Vector Control Expert (char-8) is on the roster and unplayed: Build Shelter needs no card and works in any location.
 
 ## Board
 
@@ -16,7 +16,7 @@ Wellington is on the grid with the Topaz lab. Other labs: Buenos Aires, Johannes
 
 ## How to play it
 
-Search does not spend the city card. Lineman: lines cost 1 fewer cube (base 2). Builder: centers need 1 fewer card (base 5). Tracker: searches cost no action. Laborer stacks with Builder: 3 cards plus 2 cubes, or 4 cards and no cubes.
+Search does not spend the city card. Logistics Expert: lines cost 1 fewer cube (base 2). Engineer: centers need 1 fewer card (base 5). Operative: searches cost no action. Laborer stacks with Engineer: 3 cards plus 2 cubes, or 4 cards and no cubes.
 
 Broadcast from a tower moves a Hollow Man of that colour into a neighbour. Two broadcasts in one turn walked Cairo to Tripoli to Midsea.
 
@@ -24,7 +24,7 @@ Gather cards start in the infection discard and join on an epidemic. A deck with
 
 Shield: discard a city card of the hit colour to keep the cube. The choice closes while you `listen`, and `skip` then fails. Decide at once.
 
-Stock Up and Supply Drop have no play key when the reserve is empty. Inoculate is free. Stored infection cards return on an epidemic.
+Strategic Reserves and Hidden Stockpile have no play key when the reserve is empty. Inoculate is free. Stored infection cards return on an epidemic.
 
 Leaving a Hollow Man location exposes you. Do not have Moss draw supply lines. Helmsman makes Moss's first drive free.
 

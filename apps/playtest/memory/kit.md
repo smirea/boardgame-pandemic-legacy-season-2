@@ -4,13 +4,13 @@ October first lost on turn 19. The Player deck ran out. Incidents 2/8. Centers 2
 
 ## Who is alive
 
-Tarn (char-3), mine. Instructor, home Southreach. Exposure 3/7. Lookout is in the first slot. Burdened is in an empty slot and cuts the hand limit to 6. Do not cover Lookout. A scar covers whatever is in its slot.
+Tarn (char-3), mine. Instructor, home Southreach. Exposure 3/7. Lookout is in the first slot. Insomniac is in an empty slot and cuts the hand limit to 6. Do not cover Lookout. A scar covers whatever is in its slot.
 
 Record Keeper on Tarn was named by Vex and may not have been saved. Check the slots before counting on a hand of 7. Courier was not bought unless the last unit landed after the lab died.
 
-Gale (char-1). Laborer. Exposure 1/7. Holds Lineman, Builder, and Tracker when those companions are in hand. Lines cost 1 cube with Lineman. Searches cost no action with Tracker. A center with Laborer and Builder was reported as 4 cards. I did not see both discounts stack.
+Gale (char-1). Laborer. Exposure 1/7. Holds Logistics Expert, Engineer, and Operative when those companions are in hand. Lines cost 1 cube with Logistics Expert. Searches cost no action with Operative. A center with Laborer and Engineer was reported as 4 cards. I did not see both discounts stack.
 
-Moss (char-2). Radio Operator, Helmsman, Injured. Exposure 3/7. First Drive or Ferry is free. Transfer with Moss is free at any distance. Injured makes lines cost 1 more. Field Surgeon, while held, blocks exposure from infested cities. Rigger, while held, makes a tower cost 1 cube.
+Moss (char-2). Radio Operator, Helmsman, Exhausted. Exposure 3/7. First Drive or Ferry is free. Transfer with Moss is free at any distance. Exhausted makes lines cost 1 more. Vector Control Technician, while held, blocks exposure from infested cities. Technician, while held, makes a tower cost 1 cube.
 
 ## Board that sticks
 
@@ -36,11 +36,11 @@ A free sea lane from a search is a choice. Seoul was the only offer, and the lan
 
 Do not end a turn in an infested city or a plague city. The next exposure is box 4. The Seoul one was blank.
 
-Quiet Night skips the infect step only if played before the first flip.
+One Quiet Night skips the infect step only if played before the first flip.
 
 Shield puts the lost cube back. Pay only when the city is at 0. A city that still has cubes is not worth a search card.
 
-Supply Drop needs cubes in the reserve. A full stockpile and an empty reserve offered no play key.
+Hidden Stockpile needs cubes in the reserve. A full stockpile and an empty reserve offered no play key.
 
 Monitor discards 4 deck cards and puts one of them in your hand. The log calls that gift discarded too. It shortens the game.
 

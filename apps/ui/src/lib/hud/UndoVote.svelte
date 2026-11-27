@@ -36,11 +36,11 @@
   };
 
   const PLAY_SHAME_TEXT: Partial<Record<Play["e"], string>> = {
-    forecast:
+    extendedForecast:
       "They already peeked at the top of the Infection deck. Un-seeing the future requires unanimous absolution.",
-    scavenge:
+    cautiousApproach:
       "They already drew 4 cards off the Player deck and saw what came up. Putting them back requires unanimous absolution.",
-    encore:
+    itWorkedTheFirstTime:
       "They already replayed a card that leaked secret information. Rewinding the encore requires unanimous absolution.",
   };
 

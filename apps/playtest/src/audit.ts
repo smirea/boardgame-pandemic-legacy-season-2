@@ -358,7 +358,7 @@ export function universe(world: World): { key: string; live: boolean }[] {
       "quarantineCard",
       "giveCard",
       "shield",
-      "cordon",
+      "brokenLink",
       "guard",
       "reveal",
       "search",

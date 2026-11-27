@@ -1397,16 +1397,16 @@ export function createChoosing(source: ChoosingSource) {
   };
   /** Events that take several targets at once: they are picked on the map or from the cards, and confirmed together. */
   const SEVERAL: Partial<Record<EventId, Several>> = {
-    safeHouses: { field: "cities", verb: "Place shelters", max: 3, repeat: 1 },
+    biodomePrototype: { field: "cities", verb: "Place shelters", max: 3, repeat: 1 },
     mobileShelters: { field: "cities", verb: "Place shelters", max: 2, repeat: 1 },
-    handout: { field: "cities", verb: "Place cubes", max: 2, repeat: 2 },
-    cleanse: { field: "cities", verb: "Remove Plague cubes", max: 2, repeat: 2 },
-    spreadOut: { field: "to", verb: "Move cubes", max: 3, repeat: 3 },
-    massInoculation: { field: "cards", verb: "Store cards", max: 3, repeat: 1 },
-    exile: { field: "cards", verb: "Destroy cards", max: 3, repeat: 1 },
-    resilience: { field: "cards", verb: "Remove cards", max: 2, repeat: 1 },
+    teamBravo: { field: "cities", verb: "Place cubes", max: 2, repeat: 2 },
+    drasticMeasures: { field: "cities", verb: "Remove Plague cubes", max: 2, repeat: 2 },
+    dispersal: { field: "to", verb: "Move cubes", max: 3, repeat: 3 },
+    inoculationUnit: { field: "cards", verb: "Store cards", max: 3, repeat: 1 },
+    relocation: { field: "cards", verb: "Destroy cards", max: 3, repeat: 1 },
+    resilientPopulation: { field: "cards", verb: "Remove cards", max: 2, repeat: 1 },
     // Cards not picked keep their order below the ones picked.
-    forecast: { field: "order", verb: "Put back, top first", max: 8, repeat: 1 },
+    extendedForecast: { field: "order", verb: "Put back, top first", max: 8, repeat: 1 },
   };
 
   /** How an event is sent once aimed: plainly, or as the event It Worked the First Time took from the discard pile. */
@@ -1540,7 +1540,7 @@ export function createChoosing(source: ChoosingSource) {
   }
 
   /** One card from each of two hands. */
-  function pickSwap(aim: Aim, candidates: Extract<Play, { e: "cardSwap" }>[]) {
+  function pickSwap(aim: Aim, candidates: Extract<Play, { e: "dataTransfer" }>[]) {
     const holders = new Map<CardId, SeatId>();
     for (const play of candidates) {
       holders.set(play.cardA, play.a);
@@ -1587,7 +1587,7 @@ export function createChoosing(source: ChoosingSource) {
   }
 
   /** A character on the table, then the ability, then the slot it covers. */
-  function pickMentor(aim: Aim, candidates: Extract<Play, { e: "mentor" }>[]) {
+  function pickMentor(aim: Aim, candidates: Extract<Play, { e: "renewal" }>[]) {
     const bySeat = new Map<SeatId, typeof candidates>();
     for (const play of candidates) bySeat.set(play.seat, [...(bySeat.get(play.seat) ?? []), play]);
     const slots = (subset: typeof candidates) =>
@@ -1667,16 +1667,16 @@ export function createChoosing(source: ChoosingSource) {
   function aimPlays(aim: Aim, candidates: Play[]) {
     if (!candidates.length) return;
     const event = candidates[0]!.e;
-    if (event === "encore") return encoreOf(aim, candidates as Extract<Play, { e: "encore" }>[]);
+    if (event === "itWorkedTheFirstTime") return encoreOf(aim, candidates as Extract<Play, { e: "itWorkedTheFirstTime" }>[]);
     const several = SEVERAL[event as EventId];
     if (several?.field === "to") {
       const froms = [
-        ...new Set(candidates.map((play) => (play.e === "spreadOut" ? play.from : null))),
+        ...new Set(candidates.map((play) => (play.e === "dispersal" ? play.from : null))),
       ].filter((from): from is CityId => from !== null);
       const from = (city: CityId) =>
         pickSeveralCities(
           aim,
-          candidates.filter((play) => play.e === "spreadOut" && play.from === city),
+          candidates.filter((play) => play.e === "dispersal" && play.from === city),
           several,
         );
       if (froms.length === 1) return from(froms[0]!);
@@ -1691,9 +1691,9 @@ export function createChoosing(source: ChoosingSource) {
     if (several?.field === "cities") return pickSeveralCities(aim, candidates, several);
     if (several) return pickSeveralCards(aim, candidates, several);
     if (candidates.length === 1) return sendPlay(aim, candidates[0]!);
-    if (event === "cardSwap")
-      return pickSwap(aim, candidates as Extract<Play, { e: "cardSwap" }>[]);
-    if (event === "mentor") return pickMentor(aim, candidates as Extract<Play, { e: "mentor" }>[]);
+    if (event === "dataTransfer")
+      return pickSwap(aim, candidates as Extract<Play, { e: "dataTransfer" }>[]);
+    if (event === "renewal") return pickMentor(aim, candidates as Extract<Play, { e: "renewal" }>[]);
     if (event === "airlift") {
       const moves = new Map<SeatId, Map<CityId, () => void>>();
       for (const play of candidates) {
@@ -1731,14 +1731,14 @@ export function createChoosing(source: ChoosingSource) {
   }
 
   /** It Worked the First Time takes an event from the discard pile, then aims it the way that event is aimed. */
-  function encoreOf(aim: Aim, candidates: Extract<Play, { e: "encore" }>[]) {
+  function encoreOf(aim: Aim, candidates: Extract<Play, { e: "itWorkedTheFirstTime" }>[]) {
     const targets = [...new Set(candidates.map((play) => play.card))];
     const aimTarget = (target: CardId) =>
       aimPlays(
         {
           ...aim,
           title: `${cardName(world, aim.card)}: ${cardName(world, target)}`,
-          wrap: (played) => aim.wrap({ e: "encore", card: target, played }),
+          wrap: (played) => aim.wrap({ e: "itWorkedTheFirstTime", card: target, played }),
         },
         candidates.flatMap((play) => (play.card === target ? [play.played] : [])),
       );

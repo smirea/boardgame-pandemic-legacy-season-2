@@ -808,7 +808,7 @@ const HELP = `Commands (run as: ./play <you> <command>):
   events <card> <card> ...         pick Rationed Events (lead)
   rename <haven-id> <name>         name a haven (lobby)
   A choice with several targets takes them joined by +, for example
-    do play:safeHouses.241:cairo+lagos+london
+    do play:biodomePrototype.241:cairo+lagos+london
   raw '<json>'        send a command that options does not list
 UI harness only: look · click <number|text> · tap <city-id> · choose <number> <entry> · type <number> <text> · key <key> · shot`;
 

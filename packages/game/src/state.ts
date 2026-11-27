@@ -224,7 +224,7 @@ export type Decision =
   | { t: "quarantineCard"; seat: SeatId }
   | { t: "giveCard"; seat: SeatId }
   /** Any player may discard a card to end the Infect step early. */
-  | { t: "cordon" }
+  | { t: "brokenLink" }
   /** An Epidemic was drawn and has not struck yet. Held open for Antidote or the player to start the Epidemic. */
   | { t: "epidemicDrawn" }
   /** Step 1 (Increase) is done; waiting for Step 2 (draw the bottom or stored Infection card). */
@@ -243,7 +243,7 @@ export type Decision =
   /** A search box was scratched open. Its result happens once its player has shown it to the table. */
   | { t: "search"; seat: SeatId; card: CardId; box: number };
 
-export type RevealSource = { t: "monitor"; frequency: number } | { t: "scavenge" };
+export type RevealSource = { t: "monitor"; frequency: number } | { t: "cautiousApproach" };
 
 export type LogEntry = { seq: number } & (
   | { t: "turn"; seat: SeatId }

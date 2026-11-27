@@ -74,8 +74,8 @@ function pendingLine(world: World, pending: Decision): string {
       return "An Epidemic was just drawn and has not struck yet. A player holding TOPAZ Experimental Vaccine may play it now to discard the Epidemic with no effect. Otherwise advance Step 1 (Increase) with `do decide:skip`";
     case "epidemicInfect":
       return "Epidemic Step 1 (Increase) is done. Advance Step 2 (draw the bottom Infection card) with `do decide:skip`";
-    case "cordon":
-      return "Cordon: any player may discard a card to end this Infect step now, or the active player skips";
+    case "brokenLink":
+      return "Broken Link: any player may discard a card to end this Infect step now, or the active player skips";
     case "scarVote":
       return "The Legacy deck owes a scar: everyone votes for the character who takes it (`scar-vote:<seat>`), then that character chooses the scar";
     case "guard":

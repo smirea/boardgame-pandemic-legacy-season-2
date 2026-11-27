@@ -687,7 +687,7 @@
             { "kind": "ability", "id": "architect" },
             { "kind": "ability", "id": "facilitator" },
             { "kind": "ability", "id": "coordinator" },
-            { "kind": "scar", "id": "reconExtraCard" }
+            { "kind": "scar", "id": "xenophobia" }
           ],
           "exposureTrack": ["empty", "scar", "empty", "skull", "empty", "empty", "empty"],
           "exposure": 3,
@@ -706,8 +706,8 @@
           "home": "haven-mediterranean",
           "portrait": 3,
           "slots": [
-            { "kind": "scar", "id": "plagueShy" },
-            { "kind": "scar", "id": "wary" },
+            { "kind": "scar", "id": "bacillophobic" },
+            { "kind": "scar", "id": "overcautious" },
             { "kind": "ability", "id": "supplier" },
             { "kind": "ability", "id": "outrider" }
           ],
@@ -775,7 +775,7 @@
           "search": [
             {
               "scope": "land",
-              "result": { "t": "companion", "companion": "purifier" },
+              "result": { "t": "companion", "companion": "containmentSpecialist" },
               "scratched": false
             },
             {
@@ -963,11 +963,11 @@
           "search": [
             {
               "scope": "land",
-              "result": { "t": "companion", "companion": "fieldSurgeon" },
+              "result": { "t": "companion", "companion": "vectorControlTechnician" },
               "scratched": true
             }
           ],
-          "companion": "fieldSurgeon"
+          "companion": "vectorControlTechnician"
         },
         "denver#19": {
           "id": "denver#19",
@@ -977,11 +977,11 @@
           "search": [
             {
               "scope": "land",
-              "result": { "t": "companion", "companion": "lineman" },
+              "result": { "t": "companion", "companion": "logisticsExpert" },
               "scratched": true
             }
           ],
-          "companion": "lineman"
+          "companion": "logisticsExpert"
         },
         "denver#20": {
           "id": "denver#20",
@@ -999,11 +999,11 @@
           "search": [
             {
               "scope": "land",
-              "result": { "t": "companion", "companion": "porter" },
+              "result": { "t": "companion", "companion": "messenger" },
               "scratched": true
             }
           ],
-          "companion": "porter"
+          "companion": "messenger"
         },
         "frankfurt#22": {
           "id": "frankfurt#22",
@@ -1122,7 +1122,7 @@
           "search": [
             {
               "scope": "land",
-              "result": { "t": "companion", "companion": "rigger" },
+              "result": { "t": "companion", "companion": "technician" },
               "scratched": false
             }
           ],
@@ -1176,7 +1176,7 @@
           "search": [
             {
               "scope": "land",
-              "result": { "t": "companion", "companion": "medic" },
+              "result": { "t": "companion", "companion": "herbalist" },
               "scratched": true
             },
             {
@@ -1189,7 +1189,7 @@
               "scratched": true
             }
           ],
-          "companion": "medic"
+          "companion": "herbalist"
         },
         "london#41": {
           "id": "london#41",
@@ -1250,11 +1250,11 @@
           "search": [
             {
               "scope": "land",
-              "result": { "t": "companion", "companion": "trader" },
+              "result": { "t": "companion", "companion": "scout" },
               "scratched": true
             }
           ],
-          "companion": "trader"
+          "companion": "scout"
         },
         "moscow#47": {
           "id": "moscow#47",
@@ -1331,11 +1331,11 @@
           "search": [
             {
               "scope": "land",
-              "result": { "t": "companion", "companion": "builder" },
+              "result": { "t": "companion", "companion": "engineer" },
               "scratched": true
             }
           ],
-          "companion": "builder"
+          "companion": "engineer"
         },
         "paris#55": {
           "id": "paris#55",
@@ -1446,7 +1446,7 @@
           "search": [
             {
               "scope": "land",
-              "result": { "t": "companion", "companion": "tracker" },
+              "result": { "t": "companion", "companion": "operative" },
               "scratched": false
             },
             { "scope": "sea", "result": { "t": "freeEdge", "kind": "sea" }, "scratched": false }
@@ -1536,93 +1536,93 @@
         "antidote#76": {
           "id": "antidote#76",
           "kind": "event",
-          "event": "antidote",
+          "event": "topazExperimentalVaccine",
           "mode": "unrationed"
         },
-        "cache#77": { "id": "cache#77", "kind": "event", "event": "cache", "mode": "rationed" },
+        "cache#77": { "id": "cache#77", "kind": "event", "event": "hiddenStockpile", "mode": "rationed" },
         "cardSwap#78": {
           "id": "cardSwap#78",
           "kind": "event",
-          "event": "cardSwap",
+          "event": "dataTransfer",
           "mode": "rationed"
         },
         "cleanse#79": {
           "id": "cleanse#79",
           "kind": "event",
-          "event": "cleanse",
+          "event": "drasticMeasures",
           "mode": "rationed"
         },
-        "encore#80": { "id": "encore#80", "kind": "event", "event": "encore", "mode": "rationed" },
+        "encore#80": { "id": "encore#80", "kind": "event", "event": "itWorkedTheFirstTime", "mode": "rationed" },
         "forecast#81": {
           "id": "forecast#81",
           "kind": "event",
-          "event": "forecast",
+          "event": "extendedForecast",
           "mode": "rationed"
         },
         "handout#82": {
           "id": "handout#82",
           "kind": "event",
-          "event": "handout",
+          "event": "teamBravo",
           "mode": "rationed"
         },
         "massInoculation#83": {
           "id": "massInoculation#83",
           "kind": "event",
-          "event": "massInoculation",
+          "event": "inoculationUnit",
           "mode": "rationed"
         },
         "mentor#84": {
           "id": "mentor#84",
           "kind": "event",
-          "event": "mentor",
+          "event": "renewal",
           "mode": "unrationed"
         },
         "openWaters#85": {
           "id": "openWaters#85",
           "kind": "event",
-          "event": "openWaters",
+          "event": "expeditionaryVoyage",
           "mode": "rationed"
         },
         "quietNight#86": {
           "id": "quietNight#86",
           "kind": "event",
-          "event": "quietNight",
+          "event": "oneQuietNight",
           "mode": "rationed"
         },
         "resilience#87": {
           "id": "resilience#87",
           "kind": "event",
-          "event": "resilience",
+          "event": "resilientPopulation",
           "mode": "rationed"
         },
         "secondWind#88": {
           "id": "secondWind#88",
           "kind": "event",
-          "event": "secondWind",
+          "event": "extendedTime",
           "mode": "rationed"
         },
         "spreadOut#89": {
           "id": "spreadOut#89",
           "kind": "event",
-          "event": "spreadOut",
+          "event": "dispersal",
           "mode": "rationed"
         },
         "surplus#92": {
           "id": "surplus#92",
           "kind": "event",
-          "event": "surplus",
+          "event": "portableAntiviralLab",
           "mode": "permanent"
         },
         "surplus#93": {
           "id": "surplus#93",
           "kind": "event",
-          "event": "surplus",
+          "event": "portableAntiviralLab",
           "mode": "permanent"
         },
         "surplus#94": {
           "id": "surplus#94",
           "kind": "event",
-          "event": "surplus",
+          "event": "portableAntiviralLab",
           "mode": "permanent"
         },
         "produce#95": { "id": "produce#95", "kind": "produce", "boxesLeft": 1 },
@@ -1644,7 +1644,7 @@
         "scavenge#176": {
           "id": "scavenge#176",
           "kind": "event",
-          "event": "scavenge",
+          "event": "cautiousApproach",
           "mode": "rationed"
         }
       },
@@ -1722,13 +1722,13 @@
           "id": "denver#125",
           "kind": "city",
           "city": "denver",
-          "improvement": "cordon"
+          "improvement": "brokenLink"
         },
         "denver#126": {
           "id": "denver#126",
           "kind": "city",
           "city": "denver",
-          "improvement": "cordon"
+          "improvement": "brokenLink"
         },
         "frankfurt#127": {
           "id": "frankfurt#127",
@@ -2004,21 +2004,21 @@
       "turningPoints": ["losingStreak"],
       "abilitiesForSale": ["lookout", "scout", "navigator"],
       "cityImprovementsForSale": ["double", "double", "double"],
-      "infectionImprovementsForSale": ["cordon", "lockdown"],
+      "infectionImprovementsForSale": ["brokenLink", "lockdown"],
       "permanentForSale": ["tower", "center"],
       "scars": [
-        "buildExtraCard",
-        "haunted",
-        "grasping",
-        "oddHand",
-        "rattled",
-        "smallHand",
-        "frail",
-        "lineExtraCube",
-        "searchDiscard",
-        "laneExtraCube",
-        "wasteful",
-        "portBound",
+        "fastidious",
+        "regretful",
+        "hoarder",
+        "obsessed",
+        "demoralized",
+        "insomniac",
+        "weak",
+        "exhausted",
+        "impatient",
+        "disoriented",
+        "embezzler",
+        "missingTheSea",
         "susceptible",
         "fearOfNeedles",
         "fearOfFlying"

@@ -500,36 +500,36 @@ export function sharedCost(world: World, variants: Action[]): Rich | null {
 }
 
 export function playTarget(play: Play): CityId | null {
-  if (play.e === "encore") return playTarget(play.played);
+  if (play.e === "itWorkedTheFirstTime") return playTarget(play.played);
   if ("city" in play) return play.city;
   if (play.e === "airlift") return play.to;
-  if (play.e === "openWaters") return play.to;
+  if (play.e === "expeditionaryVoyage") return play.to;
   if (
-    play.e === "safeHouses" ||
+    play.e === "biodomePrototype" ||
     play.e === "mobileShelters" ||
-    play.e === "handout" ||
-    play.e === "cleanse"
+    play.e === "teamBravo" ||
+    play.e === "drasticMeasures"
   )
     return play.cities[0]!;
-  if (play.e === "spreadOut") return play.to[0]!;
+  if (play.e === "dispersal") return play.to[0]!;
   return null;
 }
 
 /** The choice a play needs before its city, such as which pawn to airlift. Empty when there is none. */
 export function playGroup(world: World, play: Play): string {
   if (play.e === "airlift") return seatName(world, play.pawn);
-  if (play.e === "spreadOut") return `from ${cityName(play.from)}`;
-  if (play.e === "resilience" || play.e === "massInoculation" || play.e === "exile")
+  if (play.e === "dispersal") return `from ${cityName(play.from)}`;
+  if (play.e === "resilientPopulation" || play.e === "inoculationUnit" || play.e === "relocation")
     return cards(world, play.cards);
-  if (play.e === "encore") {
+  if (play.e === "itWorkedTheFirstTime") {
     const then = playGroup(world, play.played);
     return then ? `${cardName(world, play.card)}: ${then}` : cardName(world, play.card);
   }
-  if (play.e === "mentor") {
+  if (play.e === "renewal") {
     const ability = pack.abilities.find((entry) => entry.id === play.ability)!;
     return `${seatName(world, play.seat)}: ${ability.name} in slot ${play.slot + 1}`;
   }
-  if (play.e === "cardSwap")
+  if (play.e === "dataTransfer")
     return `${seatName(world, play.a)}: ${cardName(world, play.cardA)} ↔ ${seatName(world, play.b)}: ${cardName(world, play.cardB)}`;
   return "";
 }
@@ -543,7 +543,7 @@ export function decideLabel(world: World, decide: Decide): string {
       const who = decide.seat ? `${seatName(world, decide.seat)}: ` : "";
       return `${who}${scar.name} (${scar.text}) ${decide.target === "job" ? "over the job" : `in slot ${decide.target + 1}`}`;
     }
-    case "cordon":
+    case "brokenLink":
       return `${seatName(world, decide.seat)} discards ${cardName(world, decide.card)}`;
     case "replace":
       return decide.character
@@ -595,7 +595,7 @@ const DECISION_TITLES: Record<Decision["t"], string> = {
   quarantineCard: "Set an Infection card aside until game end",
   giveCard: "Give a card to another player",
   shield: "Discard a matching card to keep the cube?",
-  cordon: "Discard any card to stop the rest of this Infect step?",
+  brokenLink: "Discard any card to stop the rest of this Infect step?",
   guard: "Discard a matching card to slip past the Hollow Men?",
   scarVote: "A scar is owed: vote for the character who takes it",
   epidemicDrawn:

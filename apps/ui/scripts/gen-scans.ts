@@ -109,10 +109,10 @@ for (const id of pack.dossier.packages) {
 
 const events: Record<string, Scan> = {};
 const BASE_EVENTS: Record<string, string> = {
-  resilience: "event-01_resilient-population",
+  resilientPopulation: "event-01_resilient-population",
   airlift: "event-02_airlift",
-  handout: "event-03_team-bravo",
-  quietNight: "event-04_one-quiet-night",
+  teamBravo: "event-03_team-bravo",
+  oneQuietNight: "event-04_one-quiet-night",
 };
 for (const event of pack.startingEvents) {
   const file = BASE_EVENTS[event];
@@ -314,7 +314,7 @@ const INFECTION_IMPROVEMENT_SCANS: Record<string, string> = {
   wellStocked: "base/upgrades/infection-card/well-stocked.jpg",
   lockdown: "base/upgrades/infection-card/lockdown.jpg",
   rebirth: "packages/package-3/stickers/sticker-01_rebirth.jpg",
-  cordon: "dossiers/folder-4/door-42/item-01_broken-link.jpg",
+  brokenLink: "dossiers/folder-4/door-42/item-01_broken-link.jpg",
 };
 const infectionImprovements: Record<string, Scan> = {};
 for (const improvement of pack.infectionImprovements) {

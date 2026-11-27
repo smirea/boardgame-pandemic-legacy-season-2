@@ -4,9 +4,9 @@ October first (tour) lost when the Player deck ran out on turn 19. Centers 2/3, 
 
 ## People
 
-Moss (char-2), me, Radio Operator, home Midsea, exposure 3/7. Helmsman in slot 1. Injured in slot 2: supply lines cost 1 more cube. Do not cover either.
+Moss (char-2), me, Radio Operator, home Midsea, exposure 3/7. Helmsman in slot 1. Exhausted in slot 2: supply lines cost 1 more cube. Do not cover either.
 Gale (char-1), Laborer, exposure 1/7, no scar. Built the London center.
-Tarn (char-3), Instructor, Lookout, Burdened (hand -1), Record Keeper (hand +1) in slot 2, Courier in slot 3. Exposure 3/7. Courier delivers to an adjacent city.
+Tarn (char-3), Instructor, Lookout, Insomniac (hand -1), Record Keeper (hand +1) in slot 2, Courier in slot 3. Exposure 3/7. Courier delivers to an adjacent city.
 Administrator and Farmer were still open at the start of October. Do not create a character unless the brief says so.
 
 ## Board that carries
@@ -19,16 +19,16 @@ Setup logged a Hollow Man on Kolkata. It was never on the board (issue 11). Trus
 
 ## Rules that change a turn
 
-Do not end a turn on a plague city. Infested still exposes you at the start of a turn even with no plague, unless a shelter is there or you hold Field Surgeon. That companion worked: the second turn in Dar es Salaam did not expose me.
-Rigger, while held, makes a tower cost 1 cube instead of 2. Injured does not change towers.
+Do not end a turn on a plague city. Infested still exposes you at the start of a turn even with no plague, unless a shelter is there or you hold Vector Control Technician. That companion worked: the second turn in Dar es Salaam did not expose me.
+Technician, while held, makes a tower cost 1 cube instead of 2. Exhausted does not change towers.
 Helmsman: the first Drive or Ferry of the turn costs no action. Shuttle still costs one.
 Search does not spend the city card. A companion can put you over 7. Discard a city card you have already searched. Never discard a companion. The discard is `decide:discard:<seat>:<card>` and it locks every action until you do it.
 Share only the card of the city you are both standing in. `share:<card>:<seat>:true` gives it.
 Radio Operator transfer is free at any distance. `give=false` takes. `give=true` gives. Read the key. The old one is not the other direction.
 Shield: discard a city card of the hit city's colour to keep the cube. If I have no card of that colour, `options decide` shows only skip. `decide:skip` closes the choice for the whole table, even when I am not the active player. If the city is at 0 and someone else might pay, `say` and `listen`. Do not skip. If every infection card of that city is already in the discard, the shield prevents nothing until the infection deck reshuffles.
 System produce fills every haven and every supply center, havens with no infection cards included. One cube on a city stops one hit. Population does not cap a delivery. It caps produce.
-Quiet Night skips the next infect step. Played after the draw and before any flip, that is the current player's infect.
-Reserve was 0 all game. Supply Drop had no play key. Stock Up could not move cubes. Do not count on either while the reserve is empty.
+One Quiet Night skips the next infect step. Played after the draw and before any flip, that is the current player's infect.
+Reserve was 0 all game. Hidden Stockpile had no play key. Strategic Reserves could not move cubes. Do not count on either while the reserve is empty.
 No apostrophe or quote in `say`, `why`, or `report`.
 
 ## How to spend

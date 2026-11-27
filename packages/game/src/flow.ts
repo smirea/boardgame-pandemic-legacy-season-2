@@ -8,6 +8,7 @@ import {
   cityDef,
   grid,
   has,
+  hasCompanion,
   hasRule,
   isForsaken,
   log,
@@ -294,11 +295,12 @@ export function beginTurn(world: World) {
   log(game, { t: "turn", seat });
   const here = game.locations[current.location]!;
   const lost =
-    (has(world, seat, "portBound") && !cityDef(current.location).port ? 1 : 0) +
-    (has(world, seat, "plagueShy") && here.plague > 0 ? 1 : 0);
+    (has(world, seat, "missingTheSea") && !cityDef(current.location).port ? 1 : 0) +
+    (has(world, seat, "bacillophobic") && here.plague > 0 ? 1 : 0);
   game.actionsLeft = Math.max(0, game.actionsLeft - lost);
   const infested =
-    campaign.locations[current.location]!.infested && !has(world, seat, "fieldSurgeon");
+    campaign.locations[current.location]!.infested &&
+    !hasCompanion(world, seat, "vectorControlTechnician");
   if ((here.plague > 0 || infested) && !here.shelter) {
     expose(world, seat);
     if (infested && has(world, seat, "susceptible") && !characterOf(world, seat).dead)
@@ -338,7 +340,7 @@ export function settleCarried(world: World) {
   const game = world.game!;
   for (const seat of game.seats) {
     const carrier = player(game, seat);
-    if (carrier.supplies <= CARRY_LIMIT || !has(world, seat, "frail")) continue;
+    if (carrier.supplies <= CARRY_LIMIT || !has(world, seat, "weak")) continue;
     game.stockpile += carrier.supplies - CARRY_LIMIT;
     carrier.supplies = CARRY_LIMIT;
   }
@@ -449,7 +451,7 @@ export function arrive(world: World, seat: SeatId, to: CityId, by: string): bool
   current.location = to;
   log(game, { t: "move", seat, from, to, by });
   if (
-    has(world, seat, "haunted") &&
+    has(world, seat, "regretful") &&
     cityDef(from).kind === "city" &&
     leaving.supplies === 0 &&
     current.hand.length > 0
@@ -647,12 +649,12 @@ export function infectStep(world: World) {
   const anyCards = game.seats.some((seat) => player(game, seat).hand.length > 0);
   if (
     card?.kind === "city" &&
-    card.improvement === "cordon" &&
+    card.improvement === "brokenLink" &&
     game.infectionsLeft > 0 &&
     anyCards &&
     !isOver(world)
   )
-    game.pending.push({ t: "cordon" });
+    game.pending.push({ t: "brokenLink" });
 }
 
 /** Step 1 of an Epidemic: advance the infection rate and apply Demoralized, then wait for Step 2 (Infect). */
@@ -662,7 +664,7 @@ export function epidemicIncrease(world: World) {
   game.rateIndex = Math.min(game.rateIndex + 1, numbers.infectionRates.length - 1);
   for (const seat of game.seats) {
     const shaken = player(game, seat);
-    if (!has(world, seat, "rattled") || shaken.supplies === 0) continue;
+    if (!has(world, seat, "demoralized") || shaken.supplies === 0) continue;
     game.stockpile += shaken.supplies;
     shaken.supplies = 0;
     log(game, {
@@ -748,7 +750,7 @@ export function startInfectStep(world: World) {
 export function endTurn(world: World) {
   const game = world.game!;
   const ending = player(game, game.active);
-  if (has(world, game.active, "oddHand") && ending.hand.length > 0 && ending.hand.length % 2 === 0)
+  if (has(world, game.active, "obsessed") && ending.hand.length > 0 && ending.hand.length % 2 === 0)
     game.pending.push({ t: "discard", seat: game.active, count: 1 });
   game.active = nextSeat(game);
   beginTurn(world);

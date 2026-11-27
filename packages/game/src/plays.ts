@@ -42,32 +42,32 @@ const isGridCity = (onGrid: ReadonlySet<CityId>, city: CityId) =>
 /** Event and companion cards, playable by anyone at any time during a game. */
 export type Play =
   | { e: "airlift"; pawn: SeatId; to: CityId }
-  | { e: "quietNight" }
-  | { e: "resilience"; cards: CardId[] }
-  | { e: "handout"; cities: CityId[] }
-  | { e: "cardSwap"; a: SeatId; cardA: CardId; b: SeatId; cardB: CardId }
-  | { e: "spreadOut"; from: CityId; to: CityId[] }
-  | { e: "cleanse"; cities: CityId[] }
+  | { e: "oneQuietNight" }
+  | { e: "resilientPopulation"; cards: CardId[] }
+  | { e: "teamBravo"; cities: CityId[] }
+  | { e: "dataTransfer"; a: SeatId; cardA: CardId; b: SeatId; cardB: CardId }
+  | { e: "dispersal"; from: CityId; to: CityId[] }
+  | { e: "drasticMeasures"; cities: CityId[] }
   /** The top Infection cards, top first, in the order they go back. */
-  | { e: "forecast"; order: CardId[] }
-  | { e: "cache"; city: CityId }
+  | { e: "extendedForecast"; order: CardId[] }
+  | { e: "hiddenStockpile"; city: CityId }
   /** Takes a Rationed Event from the discard pile and plays it at once, as `played`. */
-  | { e: "encore"; card: CardId; played: Play }
-  | { e: "secondWind" }
-  | { e: "massInoculation"; cards: CardId[] }
-  | { e: "openWaters"; to: CityId }
-  | { e: "scavenge" }
-  | { e: "safeHouses"; cities: CityId[] }
-  | { e: "purge"; city: CityId }
-  | { e: "stockUp" }
-  | { e: "exile"; cards: CardId[] }
-  | { e: "antidote" }
-  | { e: "mentor"; seat: SeatId; ability: AbilityId; slot: number }
-  | { e: "surplus" }
-  | { e: "medic" }
-  | { e: "purifier"; city: CityId }
-  | { e: "shelterWright"; city: CityId }
-  | { e: "marksman"; city: CityId }
+  | { e: "itWorkedTheFirstTime"; card: CardId; played: Play }
+  | { e: "extendedTime" }
+  | { e: "inoculationUnit"; cards: CardId[] }
+  | { e: "expeditionaryVoyage"; to: CityId }
+  | { e: "cautiousApproach" }
+  | { e: "biodomePrototype"; cities: CityId[] }
+  | { e: "decontaminationKit"; city: CityId }
+  | { e: "strategicReserves" }
+  | { e: "relocation"; cards: CardId[] }
+  | { e: "topazExperimentalVaccine" }
+  | { e: "renewal"; seat: SeatId; ability: AbilityId; slot: number }
+  | { e: "portableAntiviralLab" }
+  | { e: "herbalist" }
+  | { e: "containmentSpecialist"; city: CityId }
+  | { e: "builder"; city: CityId }
+  | { e: "localResistance"; city: CityId }
   | { e: "riotControl" }
   | { e: "informant" }
   | { e: "mobileShelters"; cities: CityId[] };
@@ -75,7 +75,7 @@ export type Play =
 const ok = null;
 
 /** Events whose printed text permits playing them between Step 2 (Infect) and Step 3 (Intensify) of an Epidemic. */
-const EPIDEMIC_INTENSIFY_EVENTS = new Set<Play["e"]>(["resilience", "massInoculation", "exile"]);
+const EPIDEMIC_INTENSIFY_EVENTS = new Set<Play["e"]>(["resilientPopulation", "inoculationUnit", "relocation"]);
 
 /** The Utopia Infection cards in the discard pile, which Riot Control and the Informant set aside. */
 const utopiaDiscards = (world: World) =>
@@ -104,8 +104,8 @@ function tally<T>(items: readonly T[]): Map<T, number> {
 
 /** Whether playing this card reveals hidden deck information, so undoing it requires a consensus vote. */
 export function playReveals(play: Play): boolean {
-  if (play.e === "forecast" || play.e === "scavenge") return true;
-  if (play.e === "encore") return playReveals(play.played);
+  if (play.e === "extendedForecast" || play.e === "cautiousApproach") return true;
+  if (play.e === "itWorkedTheFirstTime") return playReveals(play.played);
   return false;
 }
 
@@ -156,7 +156,7 @@ export function checkPlay(
   // No Event may be played between drawing a card and resolving it, or between the two Player draws,
   // except cards whose printed text explicitly permits an Epidemic step window.
   const unresolved = game.pending[0]?.t;
-  if (unresolved === "shield" || unresolved === "cordon")
+  if (unresolved === "shield" || unresolved === "brokenLink")
     return "Resolve the card that was just drawn first";
   if (unresolved === "guard") return "Choose how the Soldier gets past the Hollow Men first";
   if (unresolved === "scarVote") return "Choose who takes the scar first";
@@ -166,7 +166,7 @@ export function checkPlay(
     return "Choose which haven the haven worker returns to first";
   // A designer ruling: a Gather card and the city it gathers in are one draw, with no Event window between them.
   if (game.gathering) return "Flip the card the Hollow Men gather in first";
-  if (unresolved === "epidemicDrawn" && play.e !== "antidote")
+  if (unresolved === "epidemicDrawn" && play.e !== "topazExperimentalVaccine")
     return "Only TOPAZ Experimental Vaccine can be played before an Epidemic strikes";
   if (unresolved === "epidemicInfect")
     return "Finish Step 2 of the Epidemic before playing Events";
@@ -187,20 +187,20 @@ export function checkPlay(
         return "Pick a pawn and a different location";
       return characterOf(world, play.pawn).carrier ? "The carrier cannot be moved" : ok;
     }
-    case "quietNight":
+    case "oneQuietNight":
       return game.skipInfection ? "The next Infect step is already skipped" : ok;
-    case "resilience":
+    case "resilientPopulation":
       return sameCityDiscards(world, play.cards, 2)
         ? ok
         : "Pick 1 or 2 discarded Infection cards of one city";
-    case "handout":
+    case "teamBravo":
       if (play.cities.length < 1 || play.cities.length > HANDOUT)
         return `Pick 1 to ${HANDOUT} locations`;
       if (!play.cities.every(onMap)) return "Pick locations on the map";
       return game.stockpile >= play.cities.length
         ? ok
         : "The stockpile does not hold that many cubes";
-    case "spreadOut": {
+    case "dispersal": {
       const from = game.locations[play.from];
       if (cityDef(play.from).kind !== "haven" || !onGrid.has(play.from) || !from)
         return "Pick a haven on the grid";
@@ -209,7 +209,7 @@ export function checkPlay(
         return "Pick other locations on the grid";
       return from.supplies >= play.to.length ? ok : "The haven does not hold that many cubes";
     }
-    case "cleanse": {
+    case "drasticMeasures": {
       if (play.cities.length < 1 || play.cities.length > CLEANSE)
         return `Remove 1 to ${CLEANSE} Plague cubes`;
       const counts = tally(play.cities);
@@ -219,7 +219,7 @@ export function checkPlay(
         ? ok
         : "Pick Plague cubes on the grid";
     }
-    case "forecast": {
+    case "extendedForecast": {
       const top = forecastCards(game);
       if (top.length === 0) return "The Infection deck is empty";
       const same = play.order.length === top.length && new Set(play.order).size === top.length;
@@ -227,17 +227,17 @@ export function checkPlay(
         ? ok
         : "Put back exactly the top Infection cards";
     }
-    case "cache": {
+    case "hiddenStockpile": {
       if (game.reserve === 0) return "The reserve is empty";
       const pawned = game.seats.some((other) => player(game, other).location === play.city);
       return pawned ? ok : "Pick a location with a pawn";
     }
-    case "encore": {
+    case "itWorkedTheFirstTime": {
       const target = campaign.playerCards[play.card];
       return game.playerDiscard.includes(play.card) &&
         target?.kind === "event" &&
         target.mode === "rationed" &&
-        target.event !== "encore"
+        target.event !== "itWorkedTheFirstTime"
         ? checkPlay(
             {
               ...world,
@@ -261,9 +261,9 @@ export function checkPlay(
           )
         : "Pick another Rationed Event from the Player discard pile";
     }
-    case "secondWind":
+    case "extendedTime":
       return phase === "playing.actions" ? ok : "Extended Time is played during the action step";
-    case "massInoculation": {
+    case "inoculationUnit": {
       if (!campaign.rules.includes("storage")) return "Package 6 is not open yet";
       const cards = play.cards;
       if (
@@ -278,11 +278,11 @@ export function checkPlay(
         ? ok
         : "Storage is full";
     }
-    case "scavenge":
+    case "cautiousApproach":
       return game.playerDeck.order.length >= 4 ? ok : "Fewer than 4 Player cards are left";
-    case "openWaters":
+    case "expeditionaryVoyage":
       return checkEdge(campaign, player(game, game.active).location, play.to, "sea", true);
-    case "safeHouses": {
+    case "biodomePrototype": {
       const onGrid = grid(campaign);
       const fresh = play.cities.every(
         (city) => game.locations[city] && !game.locations[city].shelter && isGridCity(onGrid, city),
@@ -296,20 +296,20 @@ export function checkPlay(
         ? ok
         : "Pick up to 3 cities on the grid without a shelter";
     }
-    case "purge":
-    case "purifier":
+    case "decontaminationKit":
+    case "containmentSpecialist":
       return onGrid.has(play.city) && (game.locations[play.city]?.plague ?? 0) > 0
         ? ok
         : "Pick a location on the grid with Plague cubes";
-    case "stockUp":
+    case "strategicReserves":
       return game.reserve > 0 ? ok : "The reserve is empty, so there is nothing to move";
-    case "exile":
+    case "relocation":
       return sameCityDiscards(world, play.cards, EXILE)
         ? ok
         : `Pick 1 to ${EXILE} discarded Infection cards of one city`;
-    case "antidote":
+    case "topazExperimentalVaccine":
       return unresolved === "epidemicDrawn" ? ok : "Play it when an Epidemic is drawn";
-    case "mentor": {
+    case "renewal": {
       if (!game.players[play.seat]) return "Pick a character in this game";
       const character = characterOf(world, play.seat);
       const ability = pack.abilities.find((entry) => entry.id === play.ability);
@@ -323,7 +323,7 @@ export function checkPlay(
       const coverable = slot === null || (slot.kind === "scar" && slot.id !== "carrier");
       return coverable ? ok : "Pick an empty slot or a scar";
     }
-    case "cardSwap": {
+    case "dataTransfer": {
       const first = game.players[play.a];
       const second = game.players[play.b];
       return first &&
@@ -336,7 +336,7 @@ export function checkPlay(
         ? ok
         : "Pick one card from each of two players";
     }
-    case "surplus":
+    case "portableAntiviralLab":
       if (
         phase !== "playing.actions" ||
         seat !== game.active ||
@@ -346,16 +346,16 @@ export function checkPlay(
       return game.stockpile > 0 || (has(world, seat, "immunologist") && game.reserve > 0)
         ? ok
         : "No cubes left to take";
-    case "medic":
+    case "herbalist":
       return game.locations[here]!.plague > 0 ? ok : "No Plague cubes in your location";
-    case "shelterWright":
+    case "builder":
       return game.locations[play.city] &&
         !game.locations[play.city].shelter &&
         isGridCity(onGrid, play.city) &&
         game.pieces.shelter > 0
         ? ok
         : "Pick a city on the grid without a shelter";
-    case "marksman":
+    case "localResistance":
       return onGrid.has(play.city) && (game.locations[play.city]?.hollow ?? 0) > 0
         ? ok
         : "Pick a location on the grid with Hollow Men";
@@ -401,32 +401,32 @@ export function playDetail(world: World, play: Play): string {
   switch (play.e) {
     case "airlift":
       return `${who(play.pawn)} to ${cityDef(play.to).name}`;
-    case "cardSwap":
+    case "dataTransfer":
       return `${who(play.a)} gives ${card(play.cardA)}, ${who(play.b)} gives ${card(play.cardB)}`;
-    case "resilience":
-    case "massInoculation":
-    case "exile":
+    case "resilientPopulation":
+    case "inoculationUnit":
+    case "relocation":
       return play.cards.map(card).join(", ");
-    case "encore": {
+    case "itWorkedTheFirstTime": {
       const then = playDetail(world, play.played);
       return then ? `${card(play.card)}: ${then}` : card(play.card);
     }
-    case "openWaters":
+    case "expeditionaryVoyage":
       return `${cityDef(world.game!.players[world.game!.active]!.location).name} to ${cityDef(play.to).name}`;
-    case "safeHouses":
+    case "biodomePrototype":
     case "mobileShelters":
-    case "handout":
-    case "cleanse":
+    case "teamBravo":
+    case "drasticMeasures":
       return cityTally(play.cities);
-    case "spreadOut":
+    case "dispersal":
       return `${cityDef(play.from).name} to ${cityTally(play.to)}`;
-    case "mentor":
+    case "renewal":
       return `${who(play.seat)} learns ${pack.abilities.find((entry) => entry.id === play.ability)!.name}`;
-    case "cache":
-    case "purge":
-    case "purifier":
-    case "shelterWright":
-    case "marksman":
+    case "hiddenStockpile":
+    case "decontaminationKit":
+    case "containmentSpecialist":
+    case "builder":
+    case "localResistance":
       return cityDef(play.city).name;
     default:
       return "";
@@ -459,7 +459,7 @@ function resolvePlay(world: World, seat: SeatId, card: CardId, play: Play) {
     case "airlift":
       movePawn(world, play.pawn, play.to, "airlift");
       return;
-    case "quietNight":
+    case "oneQuietNight":
       // Played before the first flip of an Infect step, it skips that step. Any other time it waits for the next one.
       if (
         game.infectionsLeft > 0 &&
@@ -468,7 +468,7 @@ function resolvePlay(world: World, seat: SeatId, card: CardId, play: Play) {
         game.infectionsLeft = 0;
       else game.skipInfection = true;
       return;
-    case "resilience":
+    case "resilientPopulation":
       for (const target of play.cards) {
         game.infectionDiscard.splice(game.infectionDiscard.indexOf(target), 1);
         game.gameEndArea.push(target);
@@ -478,38 +478,38 @@ function resolvePlay(world: World, seat: SeatId, card: CardId, play: Play) {
         intensify(world);
       }
       return;
-    case "handout":
+    case "teamBravo":
       for (const city of play.cities) {
         game.stockpile -= 1;
         game.locations[city]!.supplies += 1;
       }
       return;
-    case "spreadOut":
+    case "dispersal":
       for (const city of play.to) {
         game.locations[play.from]!.supplies -= 1;
         game.locations[city]!.supplies += 1;
       }
       return;
-    case "cleanse":
+    case "drasticMeasures":
       for (const city of play.cities) removePlague(game, city, 1);
       return;
-    case "forecast":
+    case "extendedForecast":
       restackTop(game.infectionDeck, play.order);
       return;
-    case "cache": {
+    case "hiddenStockpile": {
       const amount = Math.min(CACHE, game.reserve);
       game.reserve -= amount;
       game.locations[play.city]!.supplies += amount;
       return;
     }
-    case "encore":
+    case "itWorkedTheFirstTime":
       game.playerDiscard.splice(game.playerDiscard.indexOf(play.card), 1);
       owner.hand.push(play.card);
       return resolvePlay(world, seat, play.card, play.played);
-    case "secondWind":
+    case "extendedTime":
       game.actionsLeft += SECOND_WIND;
       return;
-    case "massInoculation":
+    case "inoculationUnit":
       for (const target of play.cards) {
         game.infectionDiscard.splice(game.infectionDiscard.indexOf(target), 1);
         campaign.stored.infection.push(target);
@@ -519,26 +519,26 @@ function resolvePlay(world: World, seat: SeatId, card: CardId, play: Play) {
         intensify(world);
       }
       return;
-    case "exile":
+    case "relocation":
       for (const target of play.cards) {
         game.infectionDiscard.splice(game.infectionDiscard.indexOf(target), 1);
         delete campaign.infectionCards[target];
       }
       return;
-    case "antidote":
+    case "topazExperimentalVaccine":
       game.pending.shift();
       log(game, { t: "note", text: "The Epidemic was discarded with no effect" });
       return;
-    case "mentor": {
+    case "renewal": {
       const character = characterOf(world, play.seat);
       campaign.abilitiesForSale.splice(campaign.abilitiesForSale.indexOf(play.ability), 1);
       character.slots[play.slot] = { kind: "ability", id: play.ability };
       return;
     }
-    case "scavenge":
-      startReveal(game, game.active, { t: "scavenge" });
+    case "cautiousApproach":
+      startReveal(game, game.active, { t: "cautiousApproach" });
       return;
-    case "openWaters":
+    case "expeditionaryVoyage":
       addEdge(world, player(game, game.active).location, play.to, "sea", true);
       return;
     case "riotControl":
@@ -549,30 +549,30 @@ function resolvePlay(world: World, seat: SeatId, card: CardId, play: Play) {
       }
       return;
     case "mobileShelters":
-    case "safeHouses":
+    case "biodomePrototype":
       for (const city of play.cities) {
         game.locations[city]!.shelter = true;
         game.pieces.shelter -= 1;
         log(game, { t: "structure", city, structure: "shelter" });
       }
       return;
-    case "purge":
-    case "purifier":
+    case "decontaminationKit":
+    case "containmentSpecialist":
       removePlague(game, play.city, pack.numbers.maxPlaguePerCity);
       return;
-    case "stockUp": {
+    case "strategicReserves": {
       const amount = Math.min(STOCK_UP, game.reserve);
       game.reserve -= amount;
       game.stockpile += amount;
       return;
     }
-    case "cardSwap":
+    case "dataTransfer":
       removeFromHand(game, play.a, play.cardA);
       removeFromHand(game, play.b, play.cardB);
       player(game, play.a).hand.push(play.cardB);
       player(game, play.b).hand.push(play.cardA);
       return;
-    case "surplus": {
+    case "portableAntiviralLab": {
       let remaining = SURPLUS;
       if (has(world, seat, "immunologist") && game.reserve > 0) {
         const fromReserve = Math.min(remaining, game.reserve);
@@ -585,15 +585,15 @@ function resolvePlay(world: World, seat: SeatId, card: CardId, play: Play) {
       owner.supplies += fromStockpile;
       return;
     }
-    case "medic":
+    case "herbalist":
       removePlague(game, owner.location, 1);
       return;
-    case "shelterWright":
+    case "builder":
       game.locations[play.city]!.shelter = true;
       game.pieces.shelter -= 1;
       log(game, { t: "structure", city: play.city, structure: "shelter" });
       return;
-    case "marksman":
+    case "localResistance":
       game.locations[play.city]!.hollow -= 1;
       game.pieces.hollow += 1;
       return;
@@ -614,7 +614,7 @@ export type Decide =
   | { d: "quarantineCard"; card: CardId }
   | { d: "giveCard"; card: CardId; to: SeatId }
   | { d: "shield"; seat: SeatId; card: CardId }
-  | { d: "cordon"; seat: SeatId; card: CardId }
+  | { d: "brokenLink"; seat: SeatId; card: CardId }
   /** The City card a Soldier discards to leave Hollow Men. Skipping the choice is being exposed instead. */
   | { d: "guard"; seat: SeatId; card: CardId }
   /** Turns over the next card of a reveal, or puts them all away once every one is face up. */
@@ -629,7 +629,7 @@ const PASSED: Partial<Record<string, string>> = {
   removeHollow: "no Hollow Men removed",
   quarantineCard: "no Infection card quarantined",
   giveCard: "no card given",
-  cordon: "Broken Link was not used",
+  brokenLink: "Broken Link was not used",
 };
 
 const OPTIONAL = new Set([
@@ -639,7 +639,7 @@ const OPTIONAL = new Set([
   "quarantineCard",
   "giveCard",
   "shield",
-  "cordon",
+  "brokenLink",
   "guard",
   "intensify",
   "epidemicInfect",
@@ -720,7 +720,7 @@ export function checkDecide(world: World, decide: Decide): string | null {
       if (!player(game, from).hand.includes(decide.card)) return "Pick a card from your hand";
       return decide.to !== from && game.seats.includes(decide.to) ? ok : "Pick another player";
     }
-    case "cordon":
+    case "brokenLink":
       return game.players[decide.seat]?.hand.includes(decide.card)
         ? ok
         : "Discard a card from a hand";
@@ -875,7 +875,7 @@ export function applyDecide(world: World, decide: Decide) {
         });
       return;
     }
-    case "cordon":
+    case "brokenLink":
       discardFromHand(game, decide.seat, decide.card);
       game.infectionsLeft = 0;
       log(game, {

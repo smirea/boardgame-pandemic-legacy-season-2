@@ -17,7 +17,7 @@ export type EventPrint = {
 };
 
 export const EVENT_PRINT: Record<EventId, EventPrint> = {
-  resilience: {
+  resilientPopulation: {
     mode: "rationed",
     banner: "Rationed Event",
     rules: [
@@ -32,61 +32,61 @@ export const EVENT_PRINT: Record<EventId, EventPrint> = {
     rules: ["Move any 1 pawn to any location."],
     timing: "Free · any time",
   },
-  handout: {
+  teamBravo: {
     mode: "rationed",
     banner: "Rationed Event",
     rules: ["Place up to 2 Supply cubes from the stockpile on any location(s)."],
     timing: "Free · any time",
   },
-  quietNight: {
+  oneQuietNight: {
     mode: "rationed",
     banner: "Rationed Event",
     rules: ["Skip the next Infect Cities step."],
     timing: "Free · any time",
   },
-  cardSwap: {
+  dataTransfer: {
     mode: "rationed",
     banner: "Rationed Event",
     rules: ["Any two players swap 1 Player card from their hands."],
     timing: "Free · any time",
   },
-  spreadOut: {
+  dispersal: {
     mode: "rationed",
     banner: "Rationed Event",
     rules: ["Move 3 Supply cubes from one haven onto any grid location(s)."],
     timing: "Free · any time",
   },
-  cleanse: {
+  drasticMeasures: {
     mode: "rationed",
     banner: "Rationed Event",
     rules: ["Remove up to 2 Plague cubes from the grid."],
     timing: "Free · any time",
   },
-  forecast: {
+  extendedForecast: {
     mode: "rationed",
     banner: "Rationed Event",
     rules: ["Look at and reorder the top 8 Infection cards."],
     timing: "Free · any time",
   },
-  cache: {
+  hiddenStockpile: {
     mode: "rationed",
     banner: "Rationed Event",
     rules: ["Add up to 6 Supply cubes from the reserve to any location with a pawn."],
     timing: "Free · any time",
   },
-  encore: {
+  itWorkedTheFirstTime: {
     mode: "rationed",
     banner: "Rationed Event",
     rules: ["Take 1 Rationed Event from the discard pile and play it now."],
     timing: "Free · any time",
   },
-  secondWind: {
+  extendedTime: {
     mode: "rationed",
     banner: "Rationed Event",
     rules: ["The current player gains 3 actions."],
     timing: "Free · Actions step",
   },
-  massInoculation: {
+  inoculationUnit: {
     mode: "rationed",
     banner: "Rationed Event",
     rules: [
@@ -95,7 +95,7 @@ export const EVENT_PRINT: Record<EventId, EventPrint> = {
     ],
     timing: "Free · any time",
   },
-  openWaters: {
+  expeditionaryVoyage: {
     mode: "rationed",
     banner: "Rationed Event",
     rules: [
@@ -103,7 +103,7 @@ export const EVENT_PRINT: Record<EventId, EventPrint> = {
     ],
     timing: "Free · any time",
   },
-  scavenge: {
+  cautiousApproach: {
     mode: "rationed",
     banner: "Rationed Event",
     rules: [
@@ -117,28 +117,28 @@ export const EVENT_PRINT: Record<EventId, EventPrint> = {
     rules: ["Build 2 shelters anywhere on the grid for free."],
     timing: "Free · any time",
   },
-  purge: {
+  decontaminationKit: {
     mode: "unrationed",
     banner: "Unrationed Event",
     rules: ["Remove all Plague cubes from 1 location on the grid."],
     destroy: "Destroy after use",
     timing: "Free · any time",
   },
-  mentor: {
+  renewal: {
     mode: "unrationed",
     banner: "Unrationed Event",
     rules: ["Add an ability costing ≤2 to any in-play Character (may cover a scar)."],
     destroy: "Destroy after use",
     timing: "Free · any time",
   },
-  safeHouses: {
+  biodomePrototype: {
     mode: "unrationed",
     banner: "Unrationed Event",
     rules: ["Place up to 3 shelters on any cities on the grid."],
     destroy: "Destroy after use",
     timing: "Free · any time",
   },
-  exile: {
+  relocation: {
     mode: "unrationed",
     banner: "Unrationed Event",
     rules: [
@@ -148,14 +148,14 @@ export const EVENT_PRINT: Record<EventId, EventPrint> = {
     destroy: "Destroy after use",
     timing: "Free · any time",
   },
-  stockUp: {
+  strategicReserves: {
     mode: "unrationed",
     banner: "Unrationed Event",
     rules: ["Move up to 8 Supply cubes from the reserve to the stockpile for this game."],
     destroy: "Destroy after use",
     timing: "Free · any time",
   },
-  antidote: {
+  topazExperimentalVaccine: {
     mode: "unrationed",
     banner: "Unrationed Event",
     rules: ["Discard 1 Epidemic card without effect."],
@@ -169,7 +169,7 @@ export const EVENT_PRINT: Record<EventId, EventPrint> = {
     destroy: "Destroy after use",
     timing: "Free · any time",
   },
-  surplus: {
+  portableAntiviralLab: {
     mode: "permanent",
     banner: "Player Card",
     rules: [
@@ -365,55 +365,55 @@ export type CompanionPrint = {
 };
 
 export const COMPANION_PRINT: Record<CompanionId, CompanionPrint> = {
-  builder: {
+  engineer: {
     reuse: "in-hand",
     text: "In hand: 1 fewer card to Build Supply Center (may include this card).",
   },
-  lineman: {
+  logisticsExpert: {
     reuse: "in-hand",
     text: "In hand: 1 fewer Supply cube to Establish Supply Lines.",
   },
-  rigger: {
+  technician: {
     reuse: "in-hand",
     text: "In hand: 1 fewer Supply cube to Build Satellite Tower.",
   },
-  tracker: {
+  operative: {
     reuse: "in-hand",
     text: "In hand: Search is a free action.",
   },
-  fieldSurgeon: {
+  vectorControlTechnician: {
     reuse: "in-hand",
     text: "In hand: no exposure when starting a turn in an infested city.",
   },
-  trader: {
+  scout: {
     reuse: "in-hand",
     text: "Action (in hand): discard a City card (or this) for a same-color City card from Player discard.",
   },
-  porter: {
+  messenger: {
     reuse: "in-hand",
     text: "Free action (in hand): move Supply cubes from an adjacent location into yours.",
   },
-  medic: {
+  herbalist: {
     reuse: "discard",
     text: "Play any time (discard): remove 1 Plague cube from your location.",
   },
-  purifier: {
+  containmentSpecialist: {
     reuse: "discard",
     text: "Play any time (discard): remove all Plague cubes from 1 location on the grid.",
   },
-  shelterWright: {
+  builder: {
     reuse: "discard",
     text: "Play any time (discard): place a shelter on 1 city on the grid.",
   },
-  marksman: {
+  localResistance: {
     reuse: "discard",
     text: "Play any time (discard): remove 1 Hollow Men figure from anywhere on the grid.",
   },
-  quartermaster: {
+  structuralEngineer: {
     reuse: "in-hand",
     text: "In hand: discard any color City card (or this) for Build Shelter.",
   },
-  doubleAgent: {
+  spies: {
     reuse: "discard",
     text: "Counts as 2 unique red cards for Recon.",
     cards: ["A", "B"],
@@ -440,7 +440,7 @@ export const INFECTION_IMPROVEMENT_PRINT: Record<
     name: "Rebirth",
     text: "If the city is recovering (pop 6+), this card will not infect it. Hollow Men Gather still takes effect.",
   },
-  cordon: {
+  brokenLink: {
     name: "Broken Link",
     text: "After discarding this card, any player may discard a Player card to stop drawing Infection cards this turn. (Not setup or epidemics.)",
   },

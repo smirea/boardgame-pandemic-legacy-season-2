@@ -230,7 +230,7 @@
   // Pending decisions where the player picks a card directly from hand (cordon, shield, guard, giveCard).
   const pendingHandKind = $derived(
     pending &&
-      (pending.t === "cordon" ||
+      (pending.t === "brokenLink" ||
         pending.t === "shield" ||
         pending.t === "guard" ||
         pending.t === "giveCard")
@@ -253,7 +253,7 @@
       ...new Set(
         decides
           .filter(
-            (decide): decide is Extract<Decide, { d: "cordon" | "shield" | "guard" }> =>
+            (decide): decide is Extract<Decide, { d: "brokenLink" | "shield" | "guard" }> =>
               decide.d === pendingHandKind && owns(decide.seat),
           )
           .map((decide) => decide.seat),
@@ -264,7 +264,7 @@
     const map = new Map<CardId, Decide[]>();
     if (!pendingHandKind || !owns(seat)) return map;
     for (const decide of decides) {
-      if (decide.d === "cordon" || decide.d === "shield" || decide.d === "guard") {
+      if (decide.d === "brokenLink" || decide.d === "shield" || decide.d === "guard") {
         if (decide.d === pendingHandKind && decide.seat === seat)
           map.set(decide.card, [...(map.get(decide.card) ?? []), decide]);
       } else if (decide.d === "giveCard" && pending?.t === "giveCard" && pending.seat === seat) {
@@ -303,7 +303,7 @@
       if (decide.d === "discard" || answeredOnTable) return false;
       if (
         decide.d === "shield" ||
-        decide.d === "cordon" ||
+        decide.d === "brokenLink" ||
         decide.d === "guard" ||
         decide.d === "giveCard"
       )

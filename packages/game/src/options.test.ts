@@ -21,7 +21,7 @@ test("Charter Boat offers every held copy of the current port so players can kee
     game.players[A]!.location = city("lagos");
     const [first, second] = cityCards(world, "lagos", 2);
     const firstCard = world.campaign.playerCards[first!]!;
-    if (firstCard.kind === "city") firstCard.companion = "medic";
+    if (firstCard.kind === "city") firstCard.companion = "herbalist";
     give(world, A, [first!, second!]);
   });
   const world = worldOf(actor);

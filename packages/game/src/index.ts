@@ -110,6 +110,7 @@ export {
   groundRevealed,
   handLimit,
   has,
+  hasCompanion,
   hasCityImprovementSlot,
   hasInfectionImprovementSlot,
   isForsaken,

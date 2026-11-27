@@ -1,5 +1,5 @@
 import { pack } from "./content/pack";
-import type { ActionId, CityDef, EdgeKind, RuleId, SearchResult } from "./content/types";
+import type { ActionId, CityDef, CompanionId, EdgeKind, RuleId, SearchResult } from "./content/types";
 import { startReveal } from "./reveal";
 import {
   bump,
@@ -21,6 +21,7 @@ import {
   discardFromHand,
   grid,
   has,
+  hasCompanion,
   hasEdge,
   hasRule,
   isCandidate,
@@ -96,6 +97,8 @@ type Ctx = {
 type Spec<A> = {
   /** Actions granted by a job or ability are available without a campaign unlock. */
   trait?: Parameters<typeof has>[2];
+  /** Actions granted while holding a City card with this companion. */
+  companion?: CompanionId;
   /** Actions that a campaign rule switches on, with no action sticker of their own. */
   rule?: RuleId;
   free?: boolean;
@@ -127,6 +130,7 @@ const distinct = (ids: CardId[]) => new Set(ids).size === ids.length;
 const useOnce = (ctx: Ctx, key: string) => ctx.me.used.push(key);
 const unused = (ctx: Ctx, key: string) => !ctx.me.used.includes(key);
 const trait = (ctx: Ctx, id: Parameters<typeof has>[2]) => has(ctx.world, ctx.seat, id);
+const companion = (ctx: Ctx, id: CompanionId) => hasCompanion(ctx.world, ctx.seat, id);
 
 function spendCubes(ctx: Ctx, amount: number) {
   ctx.me.supplies -= amount;
@@ -156,8 +160,8 @@ function centerCost(ctx: Ctx, laborer: boolean) {
   return (
     (laborer ? numbers.costs.center - 1 : numbers.costs.center) -
     (trait(ctx, "architect") ? 1 : 0) -
-    (trait(ctx, "builder") ? 1 : 0) +
-    (trait(ctx, "buildExtraCard") ? 1 : 0)
+    (companion(ctx, "engineer") ? 1 : 0) +
+    (trait(ctx, "fastidious") ? 1 : 0)
   );
 }
 
@@ -166,12 +170,12 @@ function edgeCost(ctx: Ctx, kind: EdgeKind) {
     return Math.max(
       0,
       numbers.costs.line +
-        (trait(ctx, "lineExtraCube") ? 1 : 0) -
-        (trait(ctx, "lineman") ? 1 : 0) -
+        (trait(ctx, "exhausted") ? 1 : 0) -
+        (companion(ctx, "logisticsExpert") ? 1 : 0) -
         (trait(ctx, "foreman") ? 1 : 0),
     );
   if (trait(ctx, "navigator") && unused(ctx, "navigator")) return 0;
-  return numbers.costs.lane + (trait(ctx, "laneExtraCube") ? 1 : 0);
+  return numbers.costs.lane + (trait(ctx, "disoriented") ? 1 : 0);
 }
 
 export function checkEdge(
@@ -291,7 +295,7 @@ export function finishSearch(world: World, seat: SeatId, card: CardId, box: numb
   const held = ctx.campaign.playerCards[card]!;
   if (held.kind !== "city") return;
   resolveSearch(ctx, held.search[box]!.result, card);
-  if (trait(ctx, "searchDiscard") && ctx.me.hand.includes(card))
+  if (trait(ctx, "impatient") && ctx.me.hand.includes(card))
     discardFromHand(ctx.game, ctx.seat, card);
 }
 
@@ -364,7 +368,7 @@ const specs: { [K in Action["a"]]: Spec<Extract<Action, { a: K }>> } = {
         ctx.game[source] -= 1;
         ctx.me.supplies += 1;
       }
-      if (trait(ctx, "wasteful") && ctx.game.stockpile > 0) {
+      if (trait(ctx, "embezzler") && ctx.game.stockpile > 0) {
         ctx.game.stockpile -= 1;
         ctx.game.reserve += 1;
       }
@@ -414,7 +418,7 @@ const specs: { [K in Action["a"]]: Spec<Extract<Action, { a: K }>> } = {
     check(ctx, { count, to }) {
       if (!Number.isInteger(count) || count < 1 || count > ctx.me.supplies)
         return "You do not hold that many cubes";
-      if (trait(ctx, "grasping") && ctx.me.supplies - count < 2)
+      if (trait(ctx, "hoarder") && ctx.me.supplies - count < 2)
         return "This character keeps their last 2 cubes";
       if (!to || to === ctx.here) return ok;
       return trait(ctx, "courier") && neighbours(ctx.campaign, ctx.here).includes(to)
@@ -502,13 +506,13 @@ const specs: { [K in Action["a"]]: Spec<Extract<Action, { a: K }>> } = {
         return "The city needs a supply center";
       const needed = Math.max(
         1,
-        route.count + (trait(ctx, "reconExtraCard") ? 1 : 0) - (trait(ctx, "outrider") ? 1 : 0),
+        route.count + (trait(ctx, "xenophobia") ? 1 : 0) - (trait(ctx, "outrider") ? 1 : 0),
       );
       const values = cards.map((card) =>
         cityCard(ctx, card) ? cardValue(ctx.campaign, card, route.color, "recon") : 0,
       );
       const total = values.reduce((sum, value) => sum + value, 0);
-      // Every card counts, and none is spare: the Double Agent counts as two.
+      // Every card counts, and none is spare: Spies counts as two.
       if (
         !distinct(cards) ||
         values.includes(0) ||
@@ -564,7 +568,7 @@ const specs: { [K in Action["a"]]: Spec<Extract<Action, { a: K }>> } = {
   },
   search: {
     reveals: true,
-    cost: (ctx) => (trait(ctx, "tracker") ? 0 : 1),
+    cost: (ctx) => (companion(ctx, "operative") ? 0 : 1),
     check(ctx, { card, box }) {
       const held =
         cityCard(ctx, card) ?? (trait(ctx, "lookout") ? cityCard(ctx, card, "discard") : null);
@@ -618,11 +622,11 @@ const specs: { [K in Action["a"]]: Spec<Extract<Action, { a: K }>> } = {
       if (ctx.game.pieces.tower === 0 && !(moveFrom && ctx.game.locations[moveFrom]?.tower))
         return "Every tower is placed: pick one to move";
       if (ctx.game.pieces.tower > 0 && moveFrom) return "A tower is still in the box";
-      const cost = Math.max(0, numbers.costs.tower - (trait(ctx, "rigger") ? 1 : 0));
+      const cost = Math.max(0, numbers.costs.tower - (companion(ctx, "technician") ? 1 : 0));
       return ctx.me.supplies >= cost ? ok : `Needs ${cost} cubes on your character`;
     },
     apply(ctx, { moveFrom }) {
-      spendCubes(ctx, Math.max(0, numbers.costs.tower - (trait(ctx, "rigger") ? 1 : 0)));
+      spendCubes(ctx, Math.max(0, numbers.costs.tower - (companion(ctx, "technician") ? 1 : 0)));
       if (moveFrom) ctx.game.locations[moveFrom]!.tower = false;
       else ctx.game.pieces.tower -= 1;
       ctx.loc.tower = true;
@@ -686,7 +690,7 @@ const specs: { [K in Action["a"]]: Spec<Extract<Action, { a: K }>> } = {
       const held = card ? cityCard(ctx, card) : null;
       return ctx.def.kind === "city" &&
         held &&
-        (trait(ctx, "quartermaster") || isColor(held, ctx.def.color))
+        (companion(ctx, "structuralEngineer") || isColor(held, ctx.def.color))
         ? ok
         : "Discard a City card of this city's colour";
     },
@@ -748,7 +752,7 @@ const specs: { [K in Action["a"]]: Spec<Extract<Action, { a: K }>> } = {
     },
   },
   trade: {
-    trait: "trader",
+    companion: "scout",
     check(ctx, { card, take }) {
       const paid = cityCard(ctx, card);
       const wanted = cityCard(ctx, take, "discard");
@@ -765,7 +769,7 @@ const specs: { [K in Action["a"]]: Spec<Extract<Action, { a: K }>> } = {
     },
   },
   carry: {
-    trait: "porter",
+    companion: "messenger",
     free: true,
     check(ctx, { from, count }) {
       if (!neighbours(ctx.campaign, ctx.here).includes(from)) return "Pick an adjacent location";
@@ -1091,7 +1095,7 @@ const MOVES = new Set<ActionId>(["sail", "charter", "captainSail", "shuttle", "r
 function staysToStock(world: World, seat: SeatId): boolean {
   const me = player(world.game!, seat);
   return (
-    has(world, seat, "wary") &&
+    has(world, seat, "overcautious") &&
     cityDef(me.location).kind === "haven" &&
     world.game!.locations[me.location]!.supplies === 0 &&
     me.supplies > 0
@@ -1102,6 +1106,7 @@ function staysToStock(world: World, seat: SeatId): boolean {
 export function hasAction(world: World, seat: SeatId, id: ActionId): boolean {
   const spec = specs[id] as unknown as AnySpec;
   if (spec.trait) return has(world, seat, spec.trait);
+  if (spec.companion) return hasCompanion(world, seat, spec.companion);
   if (spec.rule) return hasRule(world.campaign, spec.rule);
   return world.campaign.actions.includes(id);
 }

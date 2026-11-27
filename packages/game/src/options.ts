@@ -371,86 +371,86 @@ function playsOf(world: World, card: CardId, id: EventId | CompanionId): Play[] 
     case "airlift":
       for (const pawn of game.seats) for (const to of onMap) plays.push({ e: "airlift", pawn, to });
       break;
-    case "resilience":
+    case "resilientPopulation":
       for (const [index, target] of game.infectionDiscard.entries()) {
-        plays.push({ e: "resilience", cards: [target] });
+        plays.push({ e: "resilientPopulation", cards: [target] });
         for (const second of game.infectionDiscard.slice(index + 1))
-          plays.push({ e: "resilience", cards: [target, second] });
+          plays.push({ e: "resilientPopulation", cards: [target, second] });
       }
       break;
-    case "handout":
-      for (const city of onMap) plays.push({ e: "handout", cities: [city] });
+    case "teamBravo":
+      for (const city of onMap) plays.push({ e: "teamBravo", cities: [city] });
       break;
-    case "spreadOut":
+    case "dispersal":
       for (const from of onGrid)
         if (isHaven(from) && game.locations[from]!.supplies > 0)
-          for (const to of onGrid) plays.push({ e: "spreadOut", from, to: [to] });
+          for (const to of onGrid) plays.push({ e: "dispersal", from, to: [to] });
       break;
-    case "cleanse":
-      for (const city of onGrid) plays.push({ e: "cleanse", cities: [city] });
+    case "drasticMeasures":
+      for (const city of onGrid) plays.push({ e: "drasticMeasures", cities: [city] });
       break;
-    case "forecast":
-      plays.push({ e: "forecast", order: forecastCards(game) });
+    case "extendedForecast":
+      plays.push({ e: "extendedForecast", order: forecastCards(game) });
       break;
-    case "cache":
+    case "hiddenStockpile":
       for (const city of new Set(game.seats.map((other) => player(game, other).location)))
-        plays.push({ e: "cache", city });
+        plays.push({ e: "hiddenStockpile", city });
       break;
-    case "encore":
+    case "itWorkedTheFirstTime":
       for (const target of game.playerDiscard) {
         const event = campaign.playerCards[target]!;
-        if (event.kind !== "event" || event.mode !== "rationed" || event.event === "encore")
+        if (event.kind !== "event" || event.mode !== "rationed" || event.event === "itWorkedTheFirstTime")
           continue;
         for (const played of playsOf(world, target, event.event))
-          plays.push({ e: "encore", card: target, played });
+          plays.push({ e: "itWorkedTheFirstTime", card: target, played });
       }
       break;
-    case "massInoculation":
+    case "inoculationUnit":
       for (const target of game.infectionDiscard)
-        plays.push({ e: "massInoculation", cards: [target] });
+        plays.push({ e: "inoculationUnit", cards: [target] });
       break;
-    case "exile":
-      for (const target of game.infectionDiscard) plays.push({ e: "exile", cards: [target] });
+    case "relocation":
+      for (const target of game.infectionDiscard) plays.push({ e: "relocation", cards: [target] });
       break;
-    case "mentor":
+    case "renewal":
       for (const other of game.seats)
         for (const ability of new Set(campaign.abilitiesForSale))
           characterOf(world, other).slots.forEach((_, slot) =>
-            plays.push({ e: "mentor", seat: other, ability, slot }),
+            plays.push({ e: "renewal", seat: other, ability, slot }),
           );
       break;
-    case "openWaters":
+    case "expeditionaryVoyage":
       for (const edge of pack.candidateEdges)
         if (edge.kind === "sea")
-          plays.push({ e: "openWaters", to: edge.a }, { e: "openWaters", to: edge.b });
+          plays.push({ e: "expeditionaryVoyage", to: edge.a }, { e: "expeditionaryVoyage", to: edge.b });
       break;
-    case "safeHouses":
+    case "biodomePrototype":
     case "mobileShelters":
       for (const city of onGrid) plays.push({ e: id, cities: [city] });
       break;
-    case "purge":
-    case "purifier":
-    case "shelterWright":
-    case "marksman":
+    case "decontaminationKit":
+    case "containmentSpecialist":
+    case "builder":
+    case "localResistance":
       for (const city of allCities) plays.push({ e: id, city });
       break;
-    case "cardSwap":
+    case "dataTransfer":
       for (const [index, a] of game.seats.entries()) {
         for (const b of game.seats.slice(index + 1)) {
           for (const cardA of player(game, a).hand)
             for (const cardB of player(game, b).hand)
               if (cardA !== card && cardB !== card)
-                plays.push({ e: "cardSwap", a, cardA, b, cardB });
+                plays.push({ e: "dataTransfer", a, cardA, b, cardB });
         }
       }
       break;
-    case "quietNight":
-    case "secondWind":
-    case "scavenge":
-    case "stockUp":
-    case "antidote":
-    case "surplus":
-    case "medic":
+    case "oneQuietNight":
+    case "extendedTime":
+    case "cautiousApproach":
+    case "strategicReserves":
+    case "topazExperimentalVaccine":
+    case "portableAntiviralLab":
+    case "herbalist":
     case "riotControl":
     case "informant":
       plays.push({ e: id });
@@ -477,10 +477,10 @@ export function legalPlays(
       for (const play of plays) {
         if (checkPlay(world, seat, card, play, phase) !== null) continue;
         const repeated =
-          play.e === "openWaters" &&
+          play.e === "expeditionaryVoyage" &&
           result.some(
             (other) =>
-              other.card === card && other.play.e === "openWaters" && other.play.to === play.to,
+              other.card === card && other.play.e === "expeditionaryVoyage" && other.play.to === play.to,
           );
         if (!repeated) result.push({ seat, card, play });
       }
@@ -554,9 +554,9 @@ export function legalDecides(world: World): Decide[] {
         for (const seat of game.seats)
           for (const card of player(game, seat).hand) candidates.push({ d: "shield", seat, card });
         break;
-      case "cordon":
+      case "brokenLink":
         for (const seat of game.seats)
-          for (const card of player(game, seat).hand) candidates.push({ d: "cordon", seat, card });
+          for (const card of player(game, seat).hand) candidates.push({ d: "brokenLink", seat, card });
         break;
       case "guard":
         for (const card of player(game, pending.seat).hand)
@@ -627,57 +627,57 @@ export function cardTargets(
       if (entry.card !== card) continue;
       const play = entry.play;
       switch (play.e) {
-        case "secondWind":
-        case "scavenge":
+        case "extendedTime":
+        case "cautiousApproach":
           seats.add(world.game!.active);
           break;
         case "riotControl":
         case "informant":
           cities.add("utopia" as CityId);
           break;
-        case "surplus":
+        case "portableAntiviralLab":
           seats.add(entry.seat);
           break;
-        case "medic":
+        case "herbalist":
           cities.add(world.game!.players[entry.seat]!.location);
           break;
         case "airlift":
           seats.add(play.pawn);
           break;
-        case "cardSwap":
+        case "dataTransfer":
           seats.add(play.a);
           seats.add(play.b);
           break;
-        case "cache":
-        case "purge":
-        case "purifier":
-        case "shelterWright":
-        case "marksman":
+        case "hiddenStockpile":
+        case "decontaminationKit":
+        case "containmentSpecialist":
+        case "builder":
+        case "localResistance":
           cities.add(play.city);
           break;
-        case "safeHouses":
+        case "biodomePrototype":
         case "mobileShelters":
-        case "handout":
-        case "cleanse":
+        case "teamBravo":
+        case "drasticMeasures":
           for (const city of play.cities) cities.add(city);
           break;
-        case "spreadOut":
+        case "dispersal":
           cities.add(play.from);
           for (const city of play.to) cities.add(city);
           break;
-        case "openWaters":
+        case "expeditionaryVoyage":
           cities.add(world.game!.players[world.game!.active]!.location);
           cities.add(play.to);
           break;
-        case "mentor":
+        case "renewal":
           seats.add(play.seat);
           break;
-        case "antidote":
+        case "topazExperimentalVaccine":
           seats.add(entry.seat);
           break;
-        case "resilience":
-        case "massInoculation":
-        case "exile":
+        case "resilientPopulation":
+        case "inoculationUnit":
+        case "relocation":
           for (const id of play.cards) {
             const infection = world.campaign.infectionCards[id];
             if (infection?.kind === "city") cities.add(infection.city);

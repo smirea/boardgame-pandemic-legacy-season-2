@@ -84,7 +84,7 @@ Each costs 1 action unless `options` shows another cost. `options` is the truth 
 - `search:<card>:<box>`: unlocks with the first region you reveal and stays unlocked. Holding a city's card while standing in that city, scratch one of the card's search boxes. Only some City cards have boxes. A card that has them shows `(2 search boxes)` after its name, and `options` then lists the search. Finds range from supplies to new places to nothing.
 - `buildShelter`, `buildTower`, and others appear in `options` as the year unlocks them. The Legacy briefing at the start of a game says what is new.
 
-A choice that takes several targets is one key with the targets joined by `+`: `do play:safeHouses.241:cairo+lagos+london` places three shelters with one Biodome Prototype card. `options` lists the single targets.
+A choice that takes several targets is one key with the targets joined by `+`: `do play:biodomePrototype.241:cairo+lagos+london` places three shelters with one Biodome Prototype card. `options` lists the single targets.
 
 Event cards and companions in your hand are played with `play:...` keys at any time, even on another player's turn. They cost no action. A Rationed Event goes to the discard pile and returns to the reserve for later games. The lead picks as many as the rationing level at setup, which can be none. An Unrationed Event is in every deck until someone plays it: playing it destroys it for good.
 

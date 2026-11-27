@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { checkEdge } from "./actions";
+import { checkEdge, hasAction } from "./actions";
 import type { Action } from "./actions";
 import { botCommand } from "./bot";
 import { pack } from "./content/pack";
@@ -204,7 +204,7 @@ describe("building", () => {
       character(world, A).slots[1] = { kind: "ability", id: "architect" };
       game.players[A]!.location = city("london");
       give(world, A, cityCards(world, "london", 3));
-      conjure(world, A, { kind: "companion", companion: "builder" });
+      conjure(world, A, { kind: "companion", companion: "engineer" });
     });
     act(discounted, { a: "buildCenter", cards: gameOf(discounted).players[A]!.hand.slice(0, 3) });
     expect(gameOf(discounted).locations[city("london")]!.center).toBe(true);
@@ -352,9 +352,9 @@ describe("exploring", () => {
     ).toBe(5);
     expect(gameOf(searching({ t: "stockpile", amount: 4 })).stockpile).toBe(24);
     expect(gameOf(searching({ t: "actions", amount: 2 })).actionsLeft).toBe(5);
-    const found = searching({ t: "companion", companion: "medic" });
+    const found = searching({ t: "companion", companion: "herbalist" });
     const searched = worldOf(found).campaign.playerCards[gameOf(found).players[A]!.hand[0]!];
-    expect(searched).toMatchObject({ kind: "city", city: "denver", companion: "medic" });
+    expect(searched).toMatchObject({ kind: "city", city: "denver", companion: "herbalist" });
     expect(worldOf(searching({ t: "infest" })).campaign.locations[city("denver")]!.infested).toBe(
       true,
     );
@@ -386,13 +386,13 @@ describe("exploring", () => {
     expect(gameOf(giving).players[A]!.hand).not.toContain(tokyo);
   });
 
-  test("the Double Agent counts as two red cards for Recon, with no card to spare", () => {
+  test("Spies counts as two red cards for Recon, with no card to spare", () => {
     const actor = late((world, game) => {
       world.campaign.opened = world.campaign.opened.filter((key) => key !== "door:59");
       game.players[A]!.location = city("jakarta");
       game.locations[city("jakarta")]!.center = true;
       const [tokyo] = cityCards(world, "tokyo");
-      (world.campaign.playerCards[tokyo!] as { companion: unknown }).companion = "doubleAgent";
+      (world.campaign.playerCards[tokyo!] as { companion: unknown }).companion = "spies";
       give(world, A, [tokyo!, ...cityCards(world, "manila")]);
     });
     const [tokyo] = cityCards(worldOf(actor), "tokyo");
@@ -420,11 +420,11 @@ describe("exploring", () => {
     expect(gameOf(actor).locations[city("london")]!.shelter).toBe(false);
   });
 
-  test("the Quartermaster builds a shelter with a City card of any colour", () => {
+  test("the Structural Engineer builds a shelter with a City card of any colour", () => {
     const actor = late((world, game) => {
       game.players[A]!.location = city("cairo");
       const [tokyo] = cityCards(world, "tokyo");
-      (world.campaign.playerCards[tokyo!] as { companion: unknown }).companion = "quartermaster";
+      (world.campaign.playerCards[tokyo!] as { companion: unknown }).companion = "structuralEngineer";
       give(world, A, [tokyo!, ...cityCards(world, "london")]);
     });
     const [london] = cityCards(worldOf(actor), "london");
@@ -541,7 +541,7 @@ describe("exploring", () => {
     );
     act(outrider, { a: "recon", route: "hidden:plan-blue", cards: [london, newYork] });
     const scarred = at(
-      (world) => void (character(world, A).slots[1] = { kind: "scar", id: "reconExtraCard" }),
+      (world) => void (character(world, A).slots[1] = { kind: "scar", id: "xenophobia" }),
     );
     expect(
       refuses(scarred, {
@@ -740,10 +740,10 @@ describe("Hollow Men and forsaken cities", () => {
     act(actor, { a: "drive", to: city("istanbul") }, B);
   });
 
-  test("a Field Surgeon companion shrugs off an infested city", () => {
+  test("a Vector Control Technician companion shrugs off an infested city", () => {
     const actor = late((world, game) => {
       game.players[B]!.location = city("delhi");
-      conjure(world, B, { kind: "companion", companion: "fieldSurgeon" });
+      conjure(world, B, { kind: "companion", companion: "vectorControlTechnician" });
       stackInfection(world, ["lagos"]);
       game.infectionsLeft = 1;
     }, "playing.infect");
@@ -873,9 +873,9 @@ describe("jobs with free actions", () => {
     expect(gameOf(actor).players[A]!.hand).toEqual([tripoli]);
   });
 
-  test("the Record Keeper holds one more card and a Burdened scar one fewer", () => {
+  test("the Record Keeper holds one more card and an Insomniac scar one fewer", () => {
     const world = worldOf(
-      late((inner) => void (character(inner, C).slots[0] = { kind: "scar", id: "smallHand" })),
+      late((inner) => void (character(inner, C).slots[0] = { kind: "scar", id: "insomniac" })),
     );
     expect([handLimit(world, A), handLimit(world, B), handLimit(world, C)]).toEqual([7, 8, 6]);
   });
@@ -969,49 +969,49 @@ describe("events and companions", () => {
       expect(Object.values(after.game!.players).map((player) => player.location)).not.toEqual(
         Object.values(before.game!.players).map((player) => player.location),
       ),
-    quietNight: (_, after) => expect(after.game!.skipInfection).toBe(true),
-    resilience: (_, after) => expect(after.game!.gameEndArea).toHaveLength(1),
-    handout: (before, after) => expect(after.game!.stockpile).toBe(before.game!.stockpile - 1),
-    spreadOut: (before, after) =>
+    oneQuietNight: (_, after) => expect(after.game!.skipInfection).toBe(true),
+    resilientPopulation: (_, after) => expect(after.game!.gameEndArea).toHaveLength(1),
+    teamBravo: (before, after) => expect(after.game!.stockpile).toBe(before.game!.stockpile - 1),
+    dispersal: (before, after) =>
       expect(after.game!.locations[city("haven-north-atlantic")]!.supplies).toBe(
         before.game!.locations[city("haven-north-atlantic")]!.supplies - 1,
       ),
-    cleanse: (_, after) => expect(after.game!.locations[city("cairo")]!.plague).toBe(1),
-    forecast: (_, after) =>
+    drasticMeasures: (_, after) => expect(after.game!.locations[city("cairo")]!.plague).toBe(1),
+    extendedForecast: (_, after) =>
       expect(
         after.game!.infectionDeck.strata.slice(0, 8).every((layer) => layer.length === 1),
       ).toBe(true),
-    cache: (before, after) => expect(after.game!.reserve).toBe(before.game!.reserve - 6),
+    hiddenStockpile: (before, after) => expect(after.game!.reserve).toBe(before.game!.reserve - 6),
     // The event taken back is played at once, so both cards end in the discard pile and neither in a hand.
-    encore: (before, after) =>
+    itWorkedTheFirstTime: (before, after) =>
       expect(after.game!.playerDiscard.length).toBe(before.game!.playerDiscard.length + 1),
-    secondWind: (_, after) => expect(after.game!.actionsLeft).toBe(7),
-    massInoculation: (before, after) =>
+    extendedTime: (_, after) => expect(after.game!.actionsLeft).toBe(7),
+    inoculationUnit: (before, after) =>
       expect(after.campaign.stored.infection).toHaveLength(
         before.campaign.stored.infection.length + 1,
       ),
-    exile: (before, after) =>
+    relocation: (before, after) =>
       expect(Object.keys(after.campaign.infectionCards)).toHaveLength(
         Object.keys(before.campaign.infectionCards).length - 1,
       ),
-    antidote: (_, after) => expect(after.game!.pending).toEqual([]),
-    mentor: (_, after) => expect(after.campaign.abilitiesForSale).not.toContain("scout"),
-    scavenge: (before, after) =>
+    topazExperimentalVaccine: (_, after) => expect(after.game!.pending).toEqual([]),
+    renewal: (_, after) => expect(after.campaign.abilitiesForSale).not.toContain("scout"),
+    cautiousApproach: (before, after) =>
       expect(after.game!.playerDeck.order.length).toBe(before.game!.playerDeck.order.length - 4),
-    openWaters: (before, after) =>
+    expeditionaryVoyage: (before, after) =>
       expect(after.campaign.edges.length).toBe(before.campaign.edges.length + 1),
-    safeHouses: (before, after) =>
+    biodomePrototype: (before, after) =>
       expect(after.game!.pieces.shelter).toBe(before.game!.pieces.shelter - 1),
-    purge: (_, after) => expect(after.game!.locations[city("cairo")]!.plague).toBe(0),
-    stockUp: (before, after) => expect(after.game!.stockpile).toBe(before.game!.stockpile + 8),
-    cardSwap: (before, after) =>
+    decontaminationKit: (_, after) => expect(after.game!.locations[city("cairo")]!.plague).toBe(0),
+    strategicReserves: (before, after) => expect(after.game!.stockpile).toBe(before.game!.stockpile + 8),
+    dataTransfer: (before, after) =>
       expect(after.game!.players[B]!.hand).not.toEqual(before.game!.players[B]!.hand),
-    surplus: (_, after) => expect(after.game!.players[A]!.supplies).toBe(3),
-    medic: (_, after) => expect(after.game!.locations[city("cairo")]!.plague).toBe(1),
-    purifier: (_, after) => expect(after.game!.locations[city("cairo")]!.plague).toBe(0),
-    shelterWright: (before, after) =>
+    portableAntiviralLab: (_, after) => expect(after.game!.players[A]!.supplies).toBe(3),
+    herbalist: (_, after) => expect(after.game!.locations[city("cairo")]!.plague).toBe(1),
+    containmentSpecialist: (_, after) => expect(after.game!.locations[city("cairo")]!.plague).toBe(0),
+    builder: (before, after) =>
       expect(after.game!.pieces.shelter).toBe(before.game!.pieces.shelter - 1),
-    marksman: (_, after) => expect(after.game!.locations[city("lagos")]!.hollow).toBe(0),
+    localResistance: (_, after) => expect(after.game!.locations[city("lagos")]!.hollow).toBe(0),
     riotControl: (before, after) =>
       expect(after.game!.gameEndArea).toHaveLength(before.game!.gameEndArea.length + 1),
     informant: (before, after) =>
@@ -1021,31 +1021,31 @@ describe("events and companions", () => {
   };
 
   const setup: Partial<Record<EventId, (world: World) => void>> = {
-    spreadOut: (world) => void (world.game!.locations[city("haven-north-atlantic")]!.supplies = 3),
-    encore: (world) => {
+    dispersal: (world) => void (world.game!.locations[city("haven-north-atlantic")]!.supplies = 3),
+    itWorkedTheFirstTime: (world) => {
       const spent = conjure(world, B, { kind: "event", event: "airlift" });
       removeFromHand(world.game!, B, spent);
       world.game!.playerDiscard.push(spent);
     },
-    openWaters: (world) => {
+    expeditionaryVoyage: (world) => {
       const port = pack.candidateEdges.find(
         (edge) =>
           edge.kind === "sea" && checkEdge(world.campaign, edge.a, edge.b, "sea", true) === null,
       )!;
       world.game!.players[A]!.location = port.a;
     },
-    antidote: (world) => void world.game!.pending.push({ t: "epidemicDrawn" }),
-    mentor: (world) => {
+    topazExperimentalVaccine: (world) => void world.game!.pending.push({ t: "epidemicDrawn" }),
+    renewal: (world) => {
       world.campaign.abilitiesForSale = ["scout"];
       character(world, A).slots[3] = null;
     },
-    surplus: (world) => void world.game!.players[A]!.used.push("madeSupplies"),
+    portableAntiviralLab: (world) => void world.game!.players[A]!.used.push("madeSupplies"),
   };
 
   test("a drawn Epidemic steps through Increase, Infect, and Intensify, pausing for TOPAZ Experimental Vaccine before Increase", () => {
     const drawing = (antidote: boolean) =>
       late((world, game) => {
-        if (antidote) conjure(world, B, { kind: "event", event: "antidote" });
+        if (antidote) conjure(world, B, { kind: "event", event: "topazExperimentalVaccine" });
         const epidemic = Object.values(world.campaign.playerCards).find(
           (card) => card.kind === "epidemic",
         )!.id;
@@ -1073,7 +1073,7 @@ describe("events and companions", () => {
     expect(gameOf(held).pending).toEqual([{ t: "epidemicDrawn" }]);
     expect(gameOf(held).epidemics).toBe(0);
     const antidote = gameOf(held).players[B]!.hand.at(-1)!;
-    send(held, { type: "PLAY", seat: B, card: antidote, play: { e: "antidote" } });
+    send(held, { type: "PLAY", seat: B, card: antidote, play: { e: "topazExperimentalVaccine" } });
     expect(gameOf(held).pending).toEqual([]);
     expect(gameOf(held).epidemics).toBe(0);
   });
@@ -1084,8 +1084,8 @@ describe("events and companions", () => {
     let relocationCard = "" as CardId;
     const actor = late((world, game) => {
       airliftCard = conjure(world, B, { kind: "event", event: "airlift" });
-      resilienceCard = conjure(world, B, { kind: "event", event: "resilience" });
-      relocationCard = conjure(world, B, { kind: "event", event: "exile" });
+      resilienceCard = conjure(world, B, { kind: "event", event: "resilientPopulation" });
+      relocationCard = conjure(world, B, { kind: "event", event: "relocation" });
       const epidemic = Object.values(world.campaign.playerCards).find(
         (entry) => entry.kind === "epidemic",
       )!.id;
@@ -1126,7 +1126,7 @@ describe("events and companions", () => {
         type: "PLAY",
         seat: B,
         card: resilienceCard,
-        play: { e: "resilience", cards: [struck] },
+        play: { e: "resilientPopulation", cards: [struck] },
       }),
     ).toBeNull();
     expect(
@@ -1134,7 +1134,7 @@ describe("events and companions", () => {
         type: "PLAY",
         seat: B,
         card: relocationCard,
-        play: { e: "exile", cards: [struck] },
+        play: { e: "relocation", cards: [struck] },
       }),
     ).toBeNull();
     // After Step 3 (Intensify): still between the 2 Player draws (drawsLeft === 1), so no Events allowed.
@@ -1179,10 +1179,10 @@ describe("events and companions", () => {
   test("Surplus is played by the active player after they Make Supplies that turn", () => {
     let card = "" as CardId;
     const actor = late((world) => {
-      card = conjure(world, A, { kind: "event", event: "surplus" });
+      card = conjure(world, A, { kind: "event", event: "portableAntiviralLab" });
       world.campaign.rules = world.campaign.rules.filter((rule) => rule !== "labBreakthroughs");
     });
-    const play = { type: "PLAY", seat: A, card, play: { e: "surplus" } } as const;
+    const play = { type: "PLAY", seat: A, card, play: { e: "portableAntiviralLab" } } as const;
     expect(reject(worldOf(actor), phase(actor), play)).toBe(
       "Play it after you Make Supplies this turn",
     );
@@ -1228,7 +1228,7 @@ describe("events and companions", () => {
 
   test("the Porter and the Trader work while their City card is held, and leave with it", () => {
     const actor = late((world) => {
-      conjure(world, A, { kind: "companion", companion: "porter" });
+      conjure(world, A, { kind: "companion", companion: "messenger" });
       const here = world.game!.players[A]!.location;
       world.game!.locations[neighbours(world.campaign, here)[0]!]!.supplies = 2;
     });
@@ -1243,7 +1243,7 @@ describe("events and companions", () => {
     );
 
     const trading = late((world) => {
-      conjure(world, A, { kind: "companion", companion: "trader" });
+      conjure(world, A, { kind: "companion", companion: "scout" });
       give(world, A, cityCards(world, "cairo", 1));
       world.game!.playerDiscard.push(...cityCards(world, "tripoli", 1));
     });
@@ -1253,7 +1253,7 @@ describe("events and companions", () => {
     expect(gameOf(trading).players[A]!.hand).toContain(tripoli);
 
     const dropped = late((world) => {
-      const card = conjure(world, A, { kind: "companion", companion: "porter" });
+      const card = conjure(world, A, { kind: "companion", companion: "messenger" });
       removeFromHand(world.game!, A, card);
       world.game!.playerDiscard.push(card);
     });
@@ -1262,16 +1262,16 @@ describe("events and companions", () => {
 
   test("an Unrationed Event is destroyed after use, and companions lower costs while held", () => {
     const actor = late((world) => {
-      const id = conjure(world, A, { kind: "event", event: "stockUp" });
+      const id = conjure(world, A, { kind: "event", event: "strategicReserves" });
       (world.campaign.playerCards[id] as { mode: string }).mode = "unrationed";
     });
     const card = gameOf(actor).players[A]!.hand[0]!;
-    send(actor, { type: "PLAY", seat: A, card, play: { e: "stockUp" } });
+    send(actor, { type: "PLAY", seat: A, card, play: { e: "strategicReserves" } });
     expect(worldOf(actor).campaign.playerCards[card]).toBeUndefined();
 
     const cheap = late((world, game) => {
-      conjure(world, A, { kind: "companion", companion: "rigger" });
-      conjure(world, A, { kind: "companion", companion: "tracker" });
+      conjure(world, A, { kind: "companion", companion: "technician" });
+      conjure(world, A, { kind: "companion", companion: "operative" });
       game.players[A]!.location = city("lagos");
       game.players[A]!.supplies = 1;
     });
@@ -1637,7 +1637,7 @@ describe("game end and the campaign", () => {
   test("playing a non-revealing event during actions keeps undo and restores the card and cubes immediately", () => {
     const actor = late((world, game) => {
       const stockUp = Object.values(world.campaign.playerCards).find(
-        (card) => card.kind === "event" && card.event === "stockUp",
+        (card) => card.kind === "event" && card.event === "strategicReserves",
       )!.id;
       game.reserve = 10;
       game.stockpile = 2;
@@ -1657,7 +1657,7 @@ describe("game end and the campaign", () => {
       supplies: gameOf(actor).players[A]!.supplies,
     };
 
-    send(actor, { type: "PLAY", seat: A, card: stockUp, play: { e: "stockUp" } });
+    send(actor, { type: "PLAY", seat: A, card: stockUp, play: { e: "strategicReserves" } });
     expect(publicState(actor.getSnapshot()).canUndo).toBe(true);
     expect(gameOf(actor).stockpile).toBe(beforeEvent.stockpile + 8);
     expect(gameOf(actor).reserve).toBe(beforeEvent.reserve - 8);
@@ -1681,7 +1681,7 @@ describe("game end and the campaign", () => {
   test("undoing a revealing event played during actions requires unanimous table consensus", () => {
     const actor = late((world, game) => {
       const forecast = Object.values(world.campaign.playerCards).find(
-        (card) => card.kind === "event" && card.event === "forecast",
+        (card) => card.kind === "event" && card.event === "extendedForecast",
       )!.id;
       give(world, A, [forecast]);
       // Ensure at least 2 cards in infection deck to reorder visibly.
@@ -1699,7 +1699,7 @@ describe("game end and the campaign", () => {
       type: "PLAY",
       seat: A,
       card: forecast,
-      play: { e: "forecast", order: reversed },
+      play: { e: "extendedForecast", order: reversed },
     });
     expect(publicState(actor.getSnapshot()).canUndo).toBe(true);
     expect(gameOf(actor).infectionDeck.order.slice(0, 8)).toEqual(reversed);
@@ -1708,7 +1708,7 @@ describe("game end and the campaign", () => {
     send(actor, { type: "UNDO", by: ann });
     expect(worldOf(actor).table.undoVote).toMatchObject({
       seat: A,
-      subject: { kind: "play", play: "forecast" },
+      subject: { kind: "play", play: "extendedForecast" },
       by: ann,
       votes: {},
     });
@@ -1803,20 +1803,20 @@ test("Monitor frequencies that keep cards take the newest non-Epidemic discards"
   expect(top).toEqual(expect.arrayContaining(gameOf(actor).players[A]!.hand));
 });
 
-test("a Cordon card lets any player discard to end the Infect step", () => {
+test("a Broken Link card lets any player discard to end the Infect step", () => {
   const actor = late((world, game) => {
     const [cairo] = infectionCards(world, "cairo");
-    (world.campaign.infectionCards[cairo!] as { improvement: string }).improvement = "cordon";
+    (world.campaign.infectionCards[cairo!] as { improvement: string }).improvement = "brokenLink";
     world.campaign.rules = world.campaign.rules.filter((rule) => rule !== "labBreakthroughs");
     stackInfection(world, ["cairo", "lagos"]);
     give(world, C, cityCards(world, "tokyo"));
     game.infectionsLeft = 2;
   }, "playing.infect");
   send(actor, { type: "INFECT" });
-  expect(gameOf(actor).pending[0]).toEqual({ t: "cordon" });
+  expect(gameOf(actor).pending[0]).toEqual({ t: "brokenLink" });
   send(actor, {
     type: "DECIDE",
-    decide: { d: "cordon", seat: C, card: gameOf(actor).players[C]!.hand[0]! },
+    decide: { d: "brokenLink", seat: C, card: gameOf(actor).players[C]!.hand[0]! },
   });
   expect(gameOf(actor).locations[city("lagos")]!.supplies).toBe(2);
   expect(reject(worldOf(actor), phase(actor), { type: "INFECT" })).not.toBeNull();
@@ -1890,8 +1890,8 @@ test("a scar owed from a forced opening goes to the character everyone at the ta
   expect(gameOf(table).pending[0]?.t).toBe("scarVote");
   send(table, { type: "SCAR_VOTE", player: ann, seat: B });
   expect(gameOf(table).pending[0]).toEqual({ t: "scar", seat: B, at: null });
-  send(table, { type: "DECIDE", decide: { d: "scar", scar: "smallHand", target: 2 } });
-  expect(character(worldOf(table), B).slots[2]).toEqual({ kind: "scar", id: "smallHand" });
+  send(table, { type: "DECIDE", decide: { d: "scar", scar: "insomniac", target: 2 } });
+  expect(character(worldOf(table), B).slots[2]).toEqual({ kind: "scar", id: "insomniac" });
   expect(worldOf(table).campaign.owedScars).toBe(0);
 });
 
@@ -2128,7 +2128,7 @@ describe("the remaining abilities and the Jade lab", () => {
       return character(world, A).exposure;
     };
     expect(exposures("susceptible")).toBe(2);
-    expect(exposures("wary")).toBe(1);
+    expect(exposures("overcautious")).toBe(1);
     const needles = scarred("fearOfNeedles", (world) => {
       world.game!.players[A]!.location = city("cairo");
       world.game!.playerDiscard.push(...cityCards(world, "cairo"));
@@ -2227,10 +2227,10 @@ const inInfectStep = (edit?: (world: World) => void) =>
 test("One Quiet Night played before the first flip skips the Infect step it is played in", () => {
   let card = "" as CardId;
   const actor = inInfectStep(
-    (world) => (card = conjure(world, B, { kind: "event", event: "quietNight" })),
+    (world) => (card = conjure(world, B, { kind: "event", event: "oneQuietNight" })),
   );
   const cubes = gameOf(actor).locations[city("cairo")]!.supplies;
-  send(actor, { type: "PLAY", seat: B, card, play: { e: "quietNight" } });
+  send(actor, { type: "PLAY", seat: B, card, play: { e: "oneQuietNight" } });
   expect(reject(worldOf(actor), phase(actor), { type: "INFECT" })).not.toBeNull();
   passTurn(actor);
   expect(phase(actor)).toBe("playing.actions");
@@ -2242,11 +2242,11 @@ test("One Quiet Night played before the first flip skips the Infect step it is p
 test("One Quiet Night played after a flip leaves this step alone and skips the next one", () => {
   let card = "" as CardId;
   const actor = inInfectStep(
-    (world) => (card = conjure(world, B, { kind: "event", event: "quietNight" })),
+    (world) => (card = conjure(world, B, { kind: "event", event: "oneQuietNight" })),
   );
   send(actor, { type: "INFECT" });
   const left = gameOf(actor).infectionsLeft;
-  send(actor, { type: "PLAY", seat: B, card, play: { e: "quietNight" } });
+  send(actor, { type: "PLAY", seat: B, card, play: { e: "oneQuietNight" } });
   expect(phase(actor)).toBe("playing.infect");
   expect(gameOf(actor).infectionsLeft).toBe(left);
   expect(gameOf(actor).skipInfection).toBe(true);
@@ -2259,9 +2259,9 @@ test("Extended Time is refused once the action step is over, and the card stays 
       game.actionsLeft = 0;
       game.drawsLeft = at === "playing.draw" ? 2 : 0;
       game.infectionsLeft = at === "playing.infect" ? 2 : 0;
-      card = conjure(world, A, { kind: "event", event: "secondWind" });
+      card = conjure(world, A, { kind: "event", event: "extendedTime" });
     }, at);
-    const command = { type: "PLAY", seat: A, card, play: { e: "secondWind" } } as const;
+    const command = { type: "PLAY", seat: A, card, play: { e: "extendedTime" } } as const;
     expect(reject(worldOf(actor), phase(actor), command)).toContain("action step");
     actor.send(command);
     expect(gameOf(actor).players[A]!.hand).toContain(card);
@@ -2330,7 +2330,7 @@ test("the first pawn at the eastern Pacific haven opens Package 6: 15 new cubes,
     world.campaign.opened = world.campaign.opened.filter((key) => key !== "package:6");
     world.campaign.playerCards = Object.fromEntries(
       Object.entries(world.campaign.playerCards).filter(
-        ([, card]) => card.kind !== "event" || card.event !== "surplus",
+        ([, card]) => card.kind !== "event" || card.event !== "portableAntiviralLab",
       ),
     );
     game.players[A]!.location = city("lima");
@@ -2342,7 +2342,7 @@ test("the first pawn at the eastern Pacific haven opens Package 6: 15 new cubes,
   const labs = (ids: CardId[]) =>
     ids.filter((id) => {
       const card = worldOf(actor).campaign.playerCards[id];
-      return card?.kind === "event" && card.event === "surplus";
+      return card?.kind === "event" && card.event === "portableAntiviralLab";
     });
   expect(worldOf(actor).campaign.opened).toContain("package:6");
   expect(gameOf(actor).stockpile).toBe(before.stockpile + 15);
@@ -2554,10 +2554,10 @@ test("Data Transfer offers every pair of cards, not only the first in each hand"
   const actor = late((world) => {
     give(world, A, cityCards(world, "cairo", 2));
     give(world, B, [...cityCards(world, "lagos", 2), ...cityCards(world, "london")]);
-    conjure(world, A, { kind: "event", event: "cardSwap" });
+    conjure(world, A, { kind: "event", event: "dataTransfer" });
   });
   const swaps = legalPlays(worldOf(actor), "playing.actions").filter(
-    (option) => option.play.e === "cardSwap",
+    (option) => option.play.e === "dataTransfer",
   );
   expect(swaps).toHaveLength(2 * 3);
 });
@@ -2565,7 +2565,7 @@ test("Data Transfer offers every pair of cards, not only the first in each hand"
 test("an Epidemic waits for a Resilient Population holder before the discard pile is reshuffled", () => {
   let card = "" as CardId;
   const actor = late((world, game) => {
-    card = conjure(world, B, { kind: "event", event: "resilience" });
+    card = conjure(world, B, { kind: "event", event: "resilientPopulation" });
     const epidemic = Object.values(world.campaign.playerCards).find(
       (entry) => entry.kind === "epidemic",
     )!.id;
@@ -2581,7 +2581,7 @@ test("an Epidemic waits for a Resilient Population holder before the discard pil
   const struck = gameOf(actor).infectionDiscard.at(-1)!;
   expect(gameOf(actor).pending[0]).toEqual({ t: "intensify" });
   expect(reject(worldOf(actor), phase(actor), { type: "DRAW" })).not.toBeNull();
-  send(actor, { type: "PLAY", seat: B, card, play: { e: "resilience", cards: [struck] } });
+  send(actor, { type: "PLAY", seat: B, card, play: { e: "resilientPopulation", cards: [struck] } });
   expect(gameOf(actor).pending).toEqual([]);
   expect(gameOf(actor).infectionDiscard).toEqual([]);
   expect(gameOf(actor).gameEndArea).toContain(struck);
@@ -2590,7 +2590,7 @@ test("an Epidemic waits for a Resilient Population holder before the discard pil
 
 test("passing on that pause reshuffles the discard pile onto the deck", () => {
   const actor = late((world, game) => {
-    conjure(world, B, { kind: "event", event: "resilience" });
+    conjure(world, B, { kind: "event", event: "resilientPopulation" });
     game.infectionDiscard = game.infectionDeck.order.splice(0, 3);
     game.infectionDeck.strata = [game.infectionDeck.order.toSorted()];
     game.pending = [{ t: "intensify" }];
@@ -2661,7 +2661,7 @@ test("a supply center build offers each set of cards that wastes none, so the pl
 
 test("Resilient Population can set aside two discarded Infection cards of one city", () => {
   const actor = late((world, game) => {
-    conjure(world, A, { kind: "event", event: "resilience" });
+    conjure(world, A, { kind: "event", event: "resilientPopulation" });
     const wanted = infectionCards(world, "cairo", 2);
     game.infectionDeck.order = game.infectionDeck.order.filter((card) => !wanted.includes(card));
     game.infectionDeck.strata = [game.infectionDeck.order.toSorted()];
@@ -2670,9 +2670,9 @@ test("Resilient Population can set aside two discarded Infection cards of one ci
   const world = worldOf(actor);
   const cairo = infectionCards(world, "cairo", 2);
   const pairs = legalPlays(world, "playing.actions").filter(
-    (option) => option.play.e === "resilience" && option.play.cards.length === 2,
+    (option) => option.play.e === "resilientPopulation" && option.play.cards.length === 2,
   );
-  expect(pairs.map((option) => (option.play.e === "resilience" ? option.play.cards : []))).toEqual([
+  expect(pairs.map((option) => (option.play.e === "resilientPopulation" ? option.play.cards : []))).toEqual([
     cairo,
   ]);
   send(actor, { type: "PLAY", ...pairs[0]! });
@@ -2727,7 +2727,7 @@ test("a Courier may deliver any number of cubes to a neighbouring city", () => {
 test("Open Waters charts a free lane from the active player's port, each port offered once", () => {
   let card = "" as CardId;
   const actor = late((world) => {
-    card = conjure(world, B, { kind: "event", event: "openWaters" });
+    card = conjure(world, B, { kind: "event", event: "expeditionaryVoyage" });
     const port = pack.candidateEdges.find(
       (edge) =>
         edge.kind === "sea" && checkEdge(world.campaign, edge.a, edge.b, "sea", true) === null,
@@ -2736,11 +2736,11 @@ test("Open Waters charts a free lane from the active player's port, each port of
   });
   const here = gameOf(actor).players[A]!.location;
   const targets = legalPlays(worldOf(actor), "playing.actions").flatMap((option) =>
-    option.play.e === "openWaters" ? [option.play.to] : [],
+    option.play.e === "expeditionaryVoyage" ? [option.play.to] : [],
   );
   expect(targets.length).toBeGreaterThan(0);
   expect(new Set(targets).size).toBe(targets.length);
-  send(actor, { type: "PLAY", seat: B, card, play: { e: "openWaters", to: targets[0]! } });
+  send(actor, { type: "PLAY", seat: B, card, play: { e: "expeditionaryVoyage", to: targets[0]! } });
   expect(hasEdge(worldOf(actor).campaign, here, targets[0]!)).toBe(true);
 });
 
@@ -2929,18 +2929,18 @@ describe("drawing connections: what a line may not cross", () => {
 
 test("a character cannot take a scar it already carries", () => {
   const actor = late((world, game) => {
-    world.campaign.scars = ["smallHand", "reconExtraCard"];
-    character(world, A).slots[0] = { kind: "scar", id: "smallHand" };
+    world.campaign.scars = ["insomniac", "xenophobia"];
+    character(world, A).slots[0] = { kind: "scar", id: "insomniac" };
     game.pending = [{ t: "scar", seat: A, at: null }];
   });
   expect(
     reject(worldOf(actor), phase(actor), {
       type: "DECIDE",
-      decide: { d: "scar", scar: "smallHand", target: 1 },
+      decide: { d: "scar", scar: "insomniac", target: 1 },
     }),
   ).toBe("This character already carries that scar");
-  send(actor, { type: "DECIDE", decide: { d: "scar", scar: "reconExtraCard", target: 1 } });
-  expect(character(worldOf(actor), A).slots[1]).toEqual({ kind: "scar", id: "reconExtraCard" });
+  send(actor, { type: "DECIDE", decide: { d: "scar", scar: "xenophobia", target: 1 } });
+  expect(character(worldOf(actor), A).slots[1]).toEqual({ kind: "scar", id: "xenophobia" });
 });
 
 const epidemicOnTop = (world: World, game: World["game"] & object) => {
@@ -2975,13 +2975,13 @@ test("a draw that cannot be made loses the game", () => {
 
 test("Cautious Approach and Monitor need 4 Player cards left to reveal", () => {
   const actor = late((world, game) => {
-    conjure(world, A, { kind: "event", event: "scavenge" });
+    conjure(world, A, { kind: "event", event: "cautiousApproach" });
     game.locations[game.players[A]!.location]!.tower = true;
     game.playerDeck.order = game.playerDeck.order.slice(0, 3);
     game.playerDeck.piles = [{ size: 3, epidemics: 0 }];
   });
   expect(
-    legalPlays(worldOf(actor), "playing.actions").some((option) => option.play.e === "scavenge"),
+    legalPlays(worldOf(actor), "playing.actions").some((option) => option.play.e === "cautiousApproach"),
   ).toBe(false);
   expect(refuses(actor, { a: "monitor", frequency: 0 })).toBe("Fewer than 4 Player cards are left");
 });
@@ -3019,12 +3019,12 @@ test("an Epidemic waits before the reshuffle when a Lockdown card is in the disc
 
 test("no other Event may be played while a drawn card is still being resolved", () => {
   const actor = late((world, game) => {
-    conjure(world, A, { kind: "event", event: "stockUp" });
+    conjure(world, A, { kind: "event", event: "strategicReserves" });
     game.pending = [{ t: "shield", city: city("cairo"), color: "black" }];
   });
   const card = gameOf(actor).players[A]!.hand.at(-1)!;
   expect(
-    reject(worldOf(actor), phase(actor), { type: "PLAY", seat: A, card, play: { e: "stockUp" } }),
+    reject(worldOf(actor), phase(actor), { type: "PLAY", seat: A, card, play: { e: "strategicReserves" } }),
   ).toBe("Resolve the card that was just drawn first");
 });
 
@@ -3035,9 +3035,9 @@ test("the Carrier scar covers another scar only when no empty slot or ability is
     game.players[A]!.location = pack.sampleFrom;
     Object.assign(character(world, A), { exposureTrack: ["scar", "empty", "skull"], exposure: 0 });
     character(world, A).slots = [
-      { kind: "scar", id: "smallHand" },
-      { kind: "scar", id: "reconExtraCard" },
-      { kind: "scar", id: "lineExtraCube" },
+      { kind: "scar", id: "insomniac" },
+      { kind: "scar", id: "xenophobia" },
+      { kind: "scar", id: "exhausted" },
       null,
     ];
   });
@@ -3332,9 +3332,9 @@ describe("infection", () => {
       game.infectionDeck.order.unshift(id);
       game.infectionDeck.strata[0]!.push(id);
       game.infectionsLeft = 1;
-      quiet = conjure(world, B, { kind: "event", event: "quietNight" });
+      quiet = conjure(world, B, { kind: "event", event: "oneQuietNight" });
     }, "playing.infect");
-    const play = { type: "PLAY", seat: B, card: quiet, play: { e: "quietNight" } } as const;
+    const play = { type: "PLAY", seat: B, card: quiet, play: { e: "oneQuietNight" } } as const;
     expect(reject(worldOf(actor), "playing.infect", play)).toBeNull();
     send(actor, { type: "INFECT" });
     expect(gameOf(actor)).toMatchObject({ gathering: true, infectionsLeft: 1 });
@@ -3692,7 +3692,7 @@ test("a prologue game leaves no permanent mark on the campaign", () => {
 test("Resilient Population refuses the same card twice", () => {
   const actor = january((world, game) => {
     const id = "resilience#901" as CardId;
-    world.campaign.playerCards[id] = { id, kind: "event", event: "resilience", mode: "rationed" };
+    world.campaign.playerCards[id] = { id, kind: "event", event: "resilientPopulation", mode: "rationed" };
     game.players[A]!.hand.push(id);
     game.infectionDiscard = game.infectionDeck.order.splice(0, 2);
     game.infectionDeck.strata = [game.infectionDeck.order.toSorted()];
@@ -3702,7 +3702,7 @@ test("Resilient Population refuses the same card twice", () => {
     type: "PLAY",
     seat: A,
     card: "resilience#901" as CardId,
-    play: { e: "resilience", cards },
+    play: { e: "resilientPopulation", cards },
   });
   expect(reject(worldOf(actor), "playing.actions", play([target, target]))).not.toBeNull();
   send(actor, play([target]));
@@ -3753,11 +3753,11 @@ test("an objective completed in a lost early attempt starts the late attempt com
 
 test("a scar placed over the job switches the job off and still applies", () => {
   const actor = january((world, game) => {
-    world.campaign.scars = ["smallHand"];
+    world.campaign.scars = ["insomniac"];
     game.pending = [{ t: "scar", seat: A, at: null }];
     game.stockpile = 4;
   });
-  send(actor, { type: "DECIDE", decide: { d: "scar", scar: "smallHand", target: "job" } });
+  send(actor, { type: "DECIDE", decide: { d: "scar", scar: "insomniac", target: "job" } });
   expect(handLimit(worldOf(actor), A)).toBe(6);
   act(actor, { a: "makeSupplies" });
   act(actor, { a: "deliver", count: 1 });
@@ -3814,11 +3814,11 @@ describe("scars and the sticker pool", () => {
 
   test("a scar a character takes leaves the pool, and a sticker that is bought leaves the shop", () => {
     const actor = late((world, game) => {
-      world.campaign.scars = ["smallHand", "frail"];
+      world.campaign.scars = ["insomniac", "weak"];
       game.pending = [{ t: "scar", seat: A, at: null }];
     });
-    send(actor, { type: "DECIDE", decide: { d: "scar", scar: "smallHand", target: 1 } });
-    expect(worldOf(actor).campaign.scars).toEqual(["frail"]);
+    send(actor, { type: "DECIDE", decide: { d: "scar", scar: "insomniac", target: 1 } });
+    expect(worldOf(actor).campaign.scars).toEqual(["weak"]);
 
     const shop = late((world) => {
       world.campaign.month = 10;
@@ -3839,9 +3839,9 @@ describe("scars and the sticker pool", () => {
     ).toBe("That ability is not available yet");
   });
 
-  test("Wasteful: Make Supplies also moves a cube from the stockpile to the reserve", () => {
+  test("Embezzler: Make Supplies also moves a cube from the stockpile to the reserve", () => {
     const actor = late((world) => {
-      scarred(world, A, "wasteful");
+      scarred(world, A, "embezzler");
       world.campaign.rules = world.campaign.rules.filter((rule) => rule !== "labBreakthroughs");
     });
     const before = gameOf(actor);
@@ -3850,10 +3850,10 @@ describe("scars and the sticker pool", () => {
     expect(gameOf(actor).reserve).toBe(before.reserve + 1);
   });
 
-  test("Landsick and Squeamish each cost an action at the start of a turn", () => {
+  test("Missing the Sea and Bacillophobic each cost an action at the start of a turn", () => {
     const actor = nextTurn((world, game) => {
-      scarred(world, B, "portBound");
-      character(world, B).slots[2] = { kind: "scar", id: "plagueShy" };
+      scarred(world, B, "missingTheSea");
+      character(world, B).slots[2] = { kind: "scar", id: "bacillophobic" };
       game.players[B]!.location = city("chicago");
       game.locations[city("chicago")]!.plague = 1;
     });
@@ -3861,17 +3861,17 @@ describe("scars and the sticker pool", () => {
     expect(gameOf(actor).actionsLeft).toBe(pack.numbers.actionsPerTurn - 2);
   });
 
-  test("Fixated: a turn that ends on an even hand costs a card", () => {
+  test("Obsessed: a turn that ends on an even hand costs a card", () => {
     const actor = nextTurn((world) => {
-      scarred(world, A, "oddHand");
+      scarred(world, A, "obsessed");
       give(world, A, cityCards(world, "london", 2));
     });
     expect(gameOf(actor).pending).toContainEqual({ t: "discard", seat: A, count: 1 });
   });
 
-  test("Rattled: an Epidemic sends the cubes a character carries back to the stockpile", () => {
+  test("Demoralized: an Epidemic sends the cubes a character carries back to the stockpile", () => {
     const actor = late((world, game) => {
-      scarred(world, B, "rattled");
+      scarred(world, B, "demoralized");
       game.players[B]!.supplies = 3;
       const epidemic = Object.values(world.campaign.playerCards).find(
         (card) => card.kind === "epidemic",
@@ -3888,9 +3888,9 @@ describe("scars and the sticker pool", () => {
     expect(gameOf(actor).players[B]!.supplies).toBe(0);
   });
 
-  test("Frail: a character carries at most 3 cubes, and the rest go back to the stockpile", () => {
+  test("Weak: a character carries at most 3 cubes, and the rest go back to the stockpile", () => {
     const actor = late((world, game) => {
-      scarred(world, A, "frail");
+      scarred(world, A, "weak");
       game.players[A]!.supplies = 3;
     });
     const stockpile = gameOf(actor).stockpile;
@@ -3899,9 +3899,9 @@ describe("scars and the sticker pool", () => {
     expect(gameOf(actor).stockpile).toBe(stockpile);
   });
 
-  test("Haunted: leaving a city that holds no cubes costs a card", () => {
+  test("Regretful: leaving a city that holds no cubes costs a card", () => {
     const actor = late((world, game) => {
-      scarred(world, A, "haunted");
+      scarred(world, A, "regretful");
       game.players[A]!.location = city("new-york");
       game.locations[city("new-york")]!.supplies = 0;
       give(world, A, cityCards(world, "london", 1));
@@ -3910,18 +3910,18 @@ describe("scars and the sticker pool", () => {
     expect(gameOf(actor).pending).toEqual([{ t: "discard", seat: A, count: 1 }]);
   });
 
-  test("Grasping: the last 2 cubes a character carries cannot be delivered", () => {
+  test("Hoarder: the last 2 cubes a character carries cannot be delivered", () => {
     const actor = late((world, game) => {
-      scarred(world, A, "grasping");
+      scarred(world, A, "hoarder");
       game.players[A]!.supplies = 3;
     });
     expect(refuses(actor, { a: "deliver", count: 2 })).toContain("last 2");
     expect(refuses(actor, { a: "deliver", count: 1 })).toBeNull();
   });
 
-  test("Exacting: a supply center needs 1 more card", () => {
+  test("Fastidious: a supply center needs 1 more card", () => {
     const actor = late((world, game) => {
-      scarred(world, A, "buildExtraCard");
+      scarred(world, A, "fastidious");
       game.players[A]!.location = city("chicago");
       give(world, A, [...cityCards(world, "new-york", 4), ...cityCards(world, "washington", 2)]);
     });
@@ -3930,9 +3930,9 @@ describe("scars and the sticker pool", () => {
     expect(refuses(actor, { a: "buildCenter", cards: hand })).toBeNull();
   });
 
-  test("Wary: a character carrying cubes will not leave a haven that holds none", () => {
+  test("Overcautious: a character carrying cubes will not leave a haven that holds none", () => {
     const actor = late((world, game) => {
-      scarred(world, A, "wary");
+      scarred(world, A, "overcautious");
       const haven = city("haven-north-atlantic");
       game.players[A]!.location = haven;
       game.players[A]!.supplies = 1;
@@ -3943,9 +3943,9 @@ describe("scars and the sticker pool", () => {
     expect(refuses(actor, { a: "drive", to: city("new-york") })).toBeNull();
   });
 
-  test("Careless: the City card that was searched is discarded", () => {
+  test("Impatient: the City card that was searched is discarded", () => {
     const actor = late((world, game) => {
-      scarred(world, A, "searchDiscard");
+      scarred(world, A, "impatient");
       game.players[A]!.location = city("chicago");
       give(world, A, cityCards(world, "chicago", 1));
     });
@@ -3995,9 +3995,9 @@ describe("card states, improvements and companion audit", () => {
     ).toBe("Utopia cannot be improved");
   });
 
-  test("Exacting exposes the 6-card buildCenter option in legalActions", () => {
+  test("Fastidious exposes the 6-card buildCenter option in legalActions", () => {
     const actor = late((world, game) => {
-      character(world, A).slots[3] = { kind: "scar", id: "buildExtraCard" };
+      character(world, A).slots[3] = { kind: "scar", id: "fastidious" };
       game.players[A]!.location = city("chicago");
       give(world, A, [...cityCards(world, "new-york", 4), ...cityCards(world, "washington", 2)]);
     });
@@ -4012,7 +4012,7 @@ describe("card states, improvements and companion audit", () => {
     let discardedEvent = "" as CardId;
     const actor = late((world, game) => {
       emptyHand(world, A);
-      eventCard = conjure(world, B, { kind: "event", event: "scavenge" });
+      eventCard = conjure(world, B, { kind: "event", event: "cautiousApproach" });
       keptCity = cityCards(world, "london", 1)[0]!;
       const secondCity = cityCards(world, "paris", 1)[0]!;
       const thirdCity = cityCards(world, "cairo", 1)[0]!;
@@ -4026,7 +4026,7 @@ describe("card states, improvements and companion audit", () => {
       ];
       game.playerDeck.piles = [{ size: game.playerDeck.order.length, epidemics: 0 }];
     });
-    send(actor, { type: "PLAY", seat: B, card: eventCard, play: { e: "scavenge" } });
+    send(actor, { type: "PLAY", seat: B, card: eventCard, play: { e: "cautiousApproach" } });
     showReveals(actor);
     expect(gameOf(actor).players[A]!.hand).toContain(keptCity);
     expect(gameOf(actor).players[B]!.hand).not.toContain(keptCity);
@@ -4036,7 +4036,7 @@ describe("card states, improvements and companion audit", () => {
   test("Portable Antiviral Lab only plays in actions and lets the Immunologist draw from reserve first", () => {
     let surplusCard = "" as CardId;
     const inDraw = late((world, game) => {
-      surplusCard = conjure(world, A, { kind: "event", event: "surplus" });
+      surplusCard = conjure(world, A, { kind: "event", event: "portableAntiviralLab" });
       game.players[A]!.used.push("madeSupplies");
       game.drawsLeft = 2;
     }, "playing.draw");
@@ -4045,7 +4045,7 @@ describe("card states, improvements and companion audit", () => {
         type: "PLAY",
         seat: A,
         card: surplusCard,
-        play: { e: "surplus" },
+        play: { e: "portableAntiviralLab" },
       }),
     ).toBe("Play it after you Make Supplies this turn");
 
@@ -4053,21 +4053,21 @@ describe("card states, improvements and companion audit", () => {
     const imm = late((world, game) => {
       character(world, A).job = "immunologist";
       character(world, A).jobScar = null;
-      labCard = conjure(world, A, { kind: "event", event: "surplus" });
+      labCard = conjure(world, A, { kind: "event", event: "portableAntiviralLab" });
       game.players[A]!.used.push("madeSupplies");
       game.reserve = 2;
       game.stockpile = 5;
       game.players[A]!.supplies = 0;
     });
-    send(imm, { type: "PLAY", seat: A, card: labCard, play: { e: "surplus" } });
+    send(imm, { type: "PLAY", seat: A, card: labCard, play: { e: "portableAntiviralLab" } });
     expect(gameOf(imm).players[A]!.supplies).toBe(3);
     expect(gameOf(imm).reserve).toBe(0);
     expect(gameOf(imm).stockpile).toBe(4);
   });
 
-  test("Careless searching Moscow as the last card in hand clears the empty giveCard decision", () => {
+  test("Impatient searching Moscow as the last card in hand clears the empty giveCard decision", () => {
     const actor = late((world, game) => {
-      character(world, A).slots[3] = { kind: "scar", id: "searchDiscard" };
+      character(world, A).slots[3] = { kind: "scar", id: "impatient" };
       game.players[A]!.location = city("moscow");
       give(world, A, cityCards(world, "moscow", 1));
     });
@@ -4078,14 +4078,14 @@ describe("card states, improvements and companion audit", () => {
     expect(gameOf(actor).pending).toEqual([]);
   });
 
-  test("Purge, Purifier and Marksman refuse cities off the grid", () => {
+  test("Decontamination Kit, Containment Specialist, and Local Resistance refuse cities off the grid", () => {
     let purgeCard = "" as CardId;
     let purifierCard = "" as CardId;
     let marksmanCard = "" as CardId;
     const actor = late((world, game) => {
-      purgeCard = conjure(world, A, { kind: "event", event: "purge" });
-      purifierCard = conjure(world, A, { kind: "companion", companion: "purifier" });
-      marksmanCard = conjure(world, A, { kind: "companion", companion: "marksman" });
+      purgeCard = conjure(world, A, { kind: "event", event: "decontaminationKit" });
+      purifierCard = conjure(world, A, { kind: "companion", companion: "containmentSpecialist" });
+      marksmanCard = conjure(world, A, { kind: "companion", companion: "localResistance" });
       world.campaign.edges = world.campaign.edges.filter(
         (edge) => edge.a !== city("santiago") && edge.b !== city("santiago"),
       );
@@ -4097,7 +4097,7 @@ describe("card states, improvements and companion audit", () => {
         type: "PLAY",
         seat: A,
         card: purgeCard,
-        play: { e: "purge", city: city("santiago") },
+        play: { e: "decontaminationKit", city: city("santiago") },
       }),
     ).toBe("Pick a location on the grid with Plague cubes");
     expect(
@@ -4105,7 +4105,7 @@ describe("card states, improvements and companion audit", () => {
         type: "PLAY",
         seat: A,
         card: purifierCard,
-        play: { e: "purifier", city: city("santiago") },
+        play: { e: "containmentSpecialist", city: city("santiago") },
       }),
     ).toBe("Pick a location on the grid with Plague cubes");
     expect(
@@ -4113,7 +4113,7 @@ describe("card states, improvements and companion audit", () => {
         type: "PLAY",
         seat: A,
         card: marksmanCard,
-        play: { e: "marksman", city: city("santiago") },
+        play: { e: "localResistance", city: city("santiago") },
       }),
     ).toBe("Pick a location on the grid with Hollow Men");
   });
@@ -4124,12 +4124,12 @@ describe("card states, improvements and companion audit", () => {
     const actor = late((world, game) => {
       game.players[A]!.location = city("london");
       game.locations[city("london")]!.plague = 2;
-      healer = conjure(world, A, { kind: "companion", companion: "medic" });
-      unrationed = conjure(world, A, { kind: "event", event: "purge" });
+      healer = conjure(world, A, { kind: "companion", companion: "herbalist" });
+      unrationed = conjure(world, A, { kind: "event", event: "decontaminationKit" });
       const eventCard = world.campaign.playerCards[unrationed];
       if (eventCard?.kind === "event") eventCard.mode = "unrationed";
     });
-    send(actor, { type: "PLAY", seat: A, card: healer, play: { e: "medic" } });
+    send(actor, { type: "PLAY", seat: A, card: healer, play: { e: "herbalist" } });
     expect(gameOf(actor).playerDiscard).toContain(healer);
     expect(worldOf(actor).campaign.playerCards[healer]).toBeDefined();
 
@@ -4137,7 +4137,7 @@ describe("card states, improvements and companion audit", () => {
       type: "PLAY",
       seat: A,
       card: unrationed,
-      play: { e: "purge", city: city("london") },
+      play: { e: "decontaminationKit", city: city("london") },
     });
     expect(gameOf(actor).playerDiscard).not.toContain(unrationed);
     expect(worldOf(actor).campaign.playerCards[unrationed]).toBeUndefined();
@@ -4186,5 +4186,44 @@ describe("card states, improvements and companion audit", () => {
     const who = character(worldOf(briefed), A);
     send(briefed, { type: "RENAME_CHARACTER", character: who.id, name: "Dr. Elena" });
     expect(worldOf(briefed).campaign.characters[who.id]!.name).toBe("Dr. Elena");
+  });
+
+  test("the Scout ability and Scout companion stay isolated from each other", () => {
+    const withAbilityOnly = late((world, game) => {
+      character(world, A).slots[1] = { kind: "ability", id: "scout" };
+      game.players[A]!.hand = game.players[A]!.hand.filter(
+        (id) =>
+          !(
+            world.campaign.playerCards[id]?.kind === "city" &&
+            world.campaign.playerCards[id]?.companion === "scout"
+          ),
+      );
+    });
+    expect(hasAction(worldOf(withAbilityOnly), A, "trade")).toBe(false);
+
+    const withCompanionOnly = late((world, game) => {
+      world.campaign.opened = world.campaign.opened.filter((key) => key !== "door:59");
+      character(world, A).slots = character(world, A).slots.map((slot) =>
+        slot?.id === "scout" ? null : slot,
+      );
+      conjure(world, A, { kind: "companion", companion: "scout" });
+      game.players[A]!.location = city("jakarta");
+      game.locations[city("jakarta")]!.center = false;
+      give(world, A, [...cityCards(world, "jakarta"), ...cityCards(world, "tokyo")]);
+    });
+    expect(hasAction(worldOf(withCompanionOnly), A, "trade")).toBe(true);
+    expect(
+      refuses(withCompanionOnly, {
+        a: "recon",
+        route: "coral-sea",
+        cards: gameOf(withCompanionOnly).players[A]!.hand.filter((id) => {
+          const card = worldOf(withCompanionOnly).campaign.playerCards[id];
+          return (
+            card?.kind === "city" &&
+            (card.city === city("jakarta") || card.city === city("tokyo"))
+          );
+        }),
+      }),
+    ).toContain("supply center");
   });
 });

@@ -330,12 +330,12 @@
       viewing = pending.seat;
       return;
     }
-    if (pending?.t === "cordon" || pending?.t === "shield" || pending?.t === "guard") {
+    if (pending?.t === "brokenLink" || pending?.t === "shield" || pending?.t === "guard") {
       const seatsWithCards = [
         ...new Set(
           decides
             .filter(
-              (decide): decide is Extract<Decide, { d: "cordon" | "shield" | "guard" }> =>
+              (decide): decide is Extract<Decide, { d: "brokenLink" | "shield" | "guard" }> =>
                 decide.d === pending.t && owns(decide.seat),
             )
             .map((decide) => decide.seat),
