@@ -1,6 +1,8 @@
 import type { Action } from "./actions";
+import { pack } from "./content/pack";
+import { sealKey } from "./content/types";
 import type { CardId, CityId, SeatId } from "./ids";
-import type { Command, GameActor, Phase } from "./machine";
+import type { Command, GameActor, Phase, Save } from "./machine";
 import { paddedTrack } from "./legacy";
 import { createGameActor, phaseOf, reject } from "./machine";
 import { campaignAt } from "./scenarios";
@@ -136,8 +138,9 @@ export function stackInfection(world: World, cities: string[]) {
 export function late(
   edit?: (world: World, game: Game) => void,
   at: Phase = "playing.actions",
+  lobby: Save = campaignAt(12),
 ): GameActor {
-  const actor = createGameActor({ seed: 21, save: campaignAt(12) }).start();
+  const actor = createGameActor({ seed: 21, save: lobby }).start();
   const seats = [A, B, C];
   actor.send({
     type: "START_GAME",
@@ -161,4 +164,41 @@ export function late(
       entry.exposureTrack = paddedTrack(["empty", "scar", "empty", "scar", "empty", "skull"]);
   edit?.(world, game);
   return createGameActor({ seed: 1, save: { v: 1, phase: at, world } }).start();
+}
+
+/**
+ * A game on its first action step with seat A standing in `city`, holding its card with the `scope` search box still
+ * covered, so searching it plays as the table would see it. It is the first month the city is on the map with what the
+ * box opens still sealed (a perimeter report forces some seals open in time), and December when no month has both.
+ */
+export function searchAt(at: CityId, scope: "land" | "sea"): { save: Save; card: CardId; box: number } {
+  const def = pack.searches[at]?.find((entry) => entry.scope === scope);
+  if (!def) throw new Error(`${at} has no ${scope} search box`);
+  const seals = def.result.t === "discover" ? def.result.seals : [];
+  const unexplored = seals.map(sealKey);
+  const lobby =
+    Array.from({ length: 12 }, (_, index) => campaignAt(index + 1, 12, { unexplored })).find(
+      ({ world }) =>
+        world.campaign.locations[at]?.revealed &&
+        seals.every((seal) => !world.campaign.opened.includes(sealKey(seal))),
+    ) ?? campaignAt(12, 12, { unexplored });
+  let held: { card: CardId; box: number } | null = null;
+  const actor = late(
+    (world, game) => {
+      const card = Object.values(world.campaign.playerCards).find(
+        (entry) => entry.kind === "city" && entry.city === at && entry.search.length > 0,
+      );
+      if (!card || card.kind !== "city") throw new Error(`No searchable ${at} card`);
+      const box = card.search.findIndex((entry) => entry.scope === scope);
+      card.search[box]!.scratched = false;
+      card.companion = null;
+      game.players[A]!.location = at;
+      give(world, A, [card.id]);
+      held = { card: card.id, box };
+    },
+    "playing.actions",
+    lobby,
+  );
+  const world = structuredClone(worldOf(actor)) as World;
+  return { save: { v: 1, phase: "playing.actions", world }, ...held! };
 }

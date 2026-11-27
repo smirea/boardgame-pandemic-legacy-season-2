@@ -12,12 +12,9 @@
   import { onDestroy } from "svelte";
   import { fade } from "svelte/transition";
   import LegacyCard from "#lib/cards/LegacyCard.svelte";
-  import CloseButton from "#lib/hud/CloseButton.svelte";
-  import Crash from "#lib/hud/Crash.svelte";
+  import GameOverlay from "#lib/debug/GameOverlay.svelte";
   import Crate from "#lib/hud/Crate.svelte";
   import DossierDoor from "#lib/hud/DossierDoor.svelte";
-  import Game from "#lib/hud/Game.svelte";
-  import { setReadingExit } from "#lib/hud/readingExit.ts";
   import { GameSession } from "#lib/session/session.svelte.ts";
   import Reveal from "./Reveal.svelte";
 
@@ -37,9 +34,21 @@
     "December",
   ];
 
-  // The Prologue's two cards are in play from the start and never read, so the deck is read from January on.
+  // The Prologue's two cards are in play from the start and never read, so the deck is read from January on. Only
+  // the cards that are read show: an Event, an Epidemic, an objective, a turning point, the Frequency Scanner and the
+  // Plan are pieces the reading hands the table, and every reading starts on a Stop or a Pause.
+  const PIECES = new Set<LegacyCardDef["kind"]>([
+    "event",
+    "epidemic",
+    "objective",
+    "turningPoint",
+    "scanner",
+    "plan",
+  ]);
   const deck = pack.legacyDeck.flatMap((card, index) =>
-    card.month > 0 ? [{ card, index, starts: Boolean(pack.legacyDeck[index - 1]?.halt) }] : [],
+    card.month > 0 && !PIECES.has(card.kind)
+      ? [{ card, index, starts: Boolean(pack.legacyDeck[index - 1]?.halt) }]
+      : [],
   );
   const questions = legacyQuestions();
   const months = [...new Set(deck.map((entry) => entry.card.month))].map((month) => ({
@@ -134,8 +143,6 @@
     remember();
   }
 
-  setReadingExit({ label: "Back to the deck", leave });
-
   const asked = params.get("card");
   const askedIndex = pack.legacyDeck.findIndex((card) => card.id === asked);
   if (askedIndex > 0 && pack.legacyDeck[askedIndex]!.month > 0) start(askedIndex);
@@ -191,21 +198,13 @@
 />
 
 {#if open && current}
-  <div class="strip" {@attach feedback("Legacy deck reading", () => ({ from: current.id }))}>
-    <span>Reading the Legacy deck from <b>{current.id}</b> {current.title}</span>
-    <CloseButton label="Back to the deck" onclick={leave} />
-  </div>
   {#key open}
-    <div class="stage">
-      {#if open.session.state}
-        <svelte:boundary>
-          <Game session={open.session} />
-          {#snippet failed(error)}
-            <Crash {error} session={open!.session} />
-          {/snippet}
-        </svelte:boundary>
-      {/if}
-    </div>
+    <GameOverlay
+      session={open.session}
+      title={`Reading the Legacy deck from ${current.id} ${current.title}`}
+      back="Back to the deck"
+      onclose={leave}
+    />
   {/key}
 {:else}
   <main {@attach feedback("Legacy deck", () => ({ cards: deck.length, explored, delivered }))}>
@@ -315,30 +314,6 @@
 {/if}
 
 <style>
-  .strip {
-    position: fixed;
-    inset: 0 0 auto;
-    z-index: 2000;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    height: 2.6rem;
-    padding: 0 0.5rem 0 1rem;
-    border-bottom: 1px solid var(--line-strong);
-    background: #0d0b09;
-    color: var(--ink);
-    font-size: 0.85rem;
-  }
-
-  .strip b {
-    font-weight: 700;
-  }
-
-  /* The game sits under the strip, filling the rest of the screen. */
-  .stage {
-    --game-inset: 2.6rem 0 0 0;
-  }
-
   main {
     min-height: 100vh;
     padding: 3rem max(1.5rem, calc(50vw - 40rem));

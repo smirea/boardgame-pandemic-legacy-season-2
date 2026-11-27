@@ -133,7 +133,7 @@ export { freeCharacters, scarCandidates, scarTargets } from "./flow";
 export { botCommand } from "./bot";
 export { campaignAt, legacyQuestions, readingFrom, scenarios } from "./scenarios";
 export type { LegacyQuestion, ReadingChoices } from "./scenarios";
-export { give, showReveals, stackInfection } from "./testkit";
+export { give, searchAt, showReveals, stackInfection } from "./testkit";
 export type {
   GameNotes,
   GameRecord,

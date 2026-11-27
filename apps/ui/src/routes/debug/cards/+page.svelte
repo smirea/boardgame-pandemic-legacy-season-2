@@ -8,9 +8,12 @@
     hasInfectionImprovementSlot,
     pack,
     paddedTrack,
+    searchAt,
     searchCardCompanion,
   } from "@repo/game";
   import type {
+    CityId,
+    SeatId,
     Character,
     CityImprovementId,
     ExposureBox,
@@ -31,6 +34,9 @@
   import type { CardScan } from "#lib/scans.svelte.ts";
   import CharacterSheet from "#lib/hud/characters/CharacterSheet.svelte";
   import PlayerCard, { HAND_CARD_SIZE } from "#lib/hud/PlayerCard.svelte";
+  import GameOverlay from "#lib/debug/GameOverlay.svelte";
+  import { GameSession } from "#lib/session/session.svelte.ts";
+  import { onDestroy } from "svelte";
   import DebugCardStage from "./DebugCardStage.svelte";
   import type { CardControl, UpgradeControl } from "./DebugCardStage.svelte";
 
@@ -169,6 +175,33 @@
     return "Card state";
   }
 
+  // A search played as the table sees it: a real game with a character standing in the city, holding its card
+  // with the box covered and whatever it opens still sealed, and the search made as the game opens. The box
+  // scratched, its story, and the doors it opens unpacked all play as they would in a game.
+  let animating = $state.raw<{ title: string; session: GameSession } | null>(null);
+  let searching: ReturnType<typeof setTimeout> | null = null;
+  let scrolled = 0;
+  function animate(city: CityId, scope: "land" | "sea") {
+    stopAnimating();
+    scrolled = scrollY;
+    const { save, card, box } = searchAt(city, scope);
+    const session = new GameSession({ mode: "solo", secret: "", save, player: "cards-debug" });
+    animating = { title: `${cityDef(city).name}: the ${scope} search`, session };
+    searching = setTimeout(
+      () => session.send({ type: "ACTION", seat: "seat-1" as SeatId, action: { a: "search", card, box } }),
+      1200,
+    );
+  }
+  function stopAnimating() {
+    if (searching) clearTimeout(searching);
+    if (!animating) return;
+    animating.session.close();
+    animating = null;
+    // The page comes back where it was left.
+    requestAnimationFrame(() => scrollTo(0, scrolled));
+  }
+  onDestroy(stopAnimating);
+
   function playerControls(card: PlayerCardData): CardControl[] {
     if (card.kind === "city" && card.search.length > 0) {
       return card.search.map((box) => {
@@ -191,6 +224,11 @@
           onclick: () => {
             box.scratched = !box.scratched;
             card.companion = searchCardCompanion(card.search);
+          },
+          also: {
+            id: single ? "animate" : `animate-${box.scope}`,
+            label: "Animate",
+            onclick: () => animate(card.city, box.scope),
           },
         };
       });
@@ -299,6 +337,7 @@
 </svelte:head>
 
 <main
+  class:away={animating !== null}
   style:--card-size={`${size}rem`}
   {@attach feedback("Card debug page", () => ({
     playerCards: shownPlayerCards.length,
@@ -420,7 +459,23 @@
   {/each}
 </main>
 
+{#if animating}
+  {#key animating}
+    <GameOverlay
+      session={animating.session}
+      title={animating.title}
+      back="Back to the cards"
+      onclose={stopAnimating}
+    />
+  {/key}
+{/if}
+
 <style>
+  /* While a search plays, the cards step off the screen, so nothing of theirs stands over the game. */
+  main.away {
+    display: none;
+  }
+
   /* A character's sheet takes its size from where it stands. Here that is the scan's height, at the lobby's shape. */
   .sheet {
     flex: none;

@@ -10,6 +10,8 @@
     active?: boolean;
     disabled?: boolean;
     onclick: () => void;
+    /** A second button joined to this one, such as playing a search as the game would. */
+    also?: { id: string; label: string; onclick: () => void };
   };
 
   export type UpgradeControl = {
@@ -121,16 +123,29 @@
           <span class="group-label">{controlsLabel}</span>
           <div class="btns">
             {#each controls as ctrl (ctrl.id)}
-              <button
-                type="button"
-                class:on={Boolean(ctrl.active)}
-                aria-pressed={ctrl.active !== undefined ? ctrl.active : undefined}
-                disabled={ctrl.disabled}
-                data-control={ctrl.id}
-                onclick={ctrl.onclick}
-              >
-                {ctrl.label}
-              </button>
+              <span class="pair">
+                <button
+                  type="button"
+                  class:on={Boolean(ctrl.active)}
+                  aria-pressed={ctrl.active !== undefined ? ctrl.active : undefined}
+                  disabled={ctrl.disabled}
+                  data-control={ctrl.id}
+                  onclick={ctrl.onclick}
+                >
+                  {ctrl.label}
+                </button>
+                {#if ctrl.also}
+                  <button
+                    type="button"
+                    class="also"
+                    data-control={ctrl.also.id}
+                    aria-label={`${ctrl.also.label}: ${ctrl.label}`}
+                    onclick={ctrl.also.onclick}
+                  >
+                    {ctrl.also.label}
+                  </button>
+                {/if}
+              </span>
             {/each}
           </div>
         </div>
@@ -403,6 +418,27 @@
   .btns button.remove:hover:not(:disabled) {
     border-color: #e87e72;
     background: rgb(184 46 32 / 0.34);
+  }
+
+  .pair {
+    display: flex;
+  }
+
+  .pair button:first-child {
+    flex: 1;
+  }
+
+  .pair button:has(+ .also) {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .btns button.also {
+    margin-left: -1px;
+    border-color: rgb(226 190 86 / 0.55);
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    color: #ffe3a0;
   }
 
   .btns button:disabled {
